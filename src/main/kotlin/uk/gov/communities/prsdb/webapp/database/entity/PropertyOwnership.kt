@@ -203,6 +203,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     fun isSolelyOwnedBy(landlord: Landlord): Boolean = ownershipLinks.singleOrNull()?.landlord?.id == landlord.id
 
+    fun updateCorrespondenceEmail(email: String) {
+        correspondenceEmail = email
+    }
+
     fun removeLandlord(landlord: Landlord) {
         ownershipLinks.removeIf { it.landlord.id == landlord.id }
     }

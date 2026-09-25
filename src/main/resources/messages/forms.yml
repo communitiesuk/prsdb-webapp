@@ -619,6 +619,9 @@ checkPropertyAnswers:
       agentEmail:
         label: Letting agent or property manager’s email address
 update:
+  correspondenceEmail:
+    summaryName: You updated who the council should contact for this property
+    emailAddress: Email address
   email:
     title: Update your email address
     body: We’ll use this to send you information and updates.

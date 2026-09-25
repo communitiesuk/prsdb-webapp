@@ -19,6 +19,7 @@ class PropertyRegistrationCorrespondenceEmailSinglePageTests : IntegrationTestWi
         val correspondenceEmailPage = navigator.skipToPropertyRegistrationCorrespondenceEmailPage()
 
         assertThat(correspondenceEmailPage.form.whichEmailRadios).containsText("alex.surname@example.com")
+        assertThat(correspondenceEmailPage.form.submitButton).containsText("Save and continue")
     }
 
     @Test

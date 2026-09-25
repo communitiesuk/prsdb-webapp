@@ -1673,6 +1673,80 @@ class PropertyOwnershipServiceTests {
     }
 
     @Nested
+    inner class UpdateCorrespondenceEmail {
+        @Test
+        fun `updateCorrespondenceEmail saves the new email without changing other property details`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val originalAddress = propertyOwnership.correspondenceAddress
+            val originalFurnishedStatus = propertyOwnership.furnishedStatus
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateCorrespondenceEmail(
+                propertyOwnership.id,
+                "updated@example.com",
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals("updated@example.com", propertyOwnership.correspondenceEmail)
+            assertSame(originalAddress, propertyOwnership.correspondenceAddress)
+            assertEquals(originalFurnishedStatus, propertyOwnership.furnishedStatus)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail rejects a stale update without changing or saving the property`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val originalEmail = propertyOwnership.correspondenceEmail
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updateCorrespondenceEmail(
+                    propertyOwnership.id,
+                    "updated@example.com",
+                    propertyOwnership.getMostRecentlyUpdated().minusSeconds(60),
+                )
+            }
+
+            assertEquals(originalEmail, propertyOwnership.correspondenceEmail)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail rejects a missing active property`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(null)
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.updateCorrespondenceEmail(
+                        propertyOwnership.id,
+                        "updated@example.com",
+                        propertyOwnership.getMostRecentlyUpdated(),
+                    )
+                }
+
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail accepts the existing email address`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val originalEmail = propertyOwnership.correspondenceEmail
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateCorrespondenceEmail(
+                propertyOwnership.id,
+                originalEmail,
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals(originalEmail, propertyOwnership.correspondenceEmail)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+    }
+
+    @Nested
     inner class UpdateFurnishedStatus {
         @Test
         fun `updateFurnishedStatus updates the property's furnished status`() {
