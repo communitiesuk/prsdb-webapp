@@ -63,7 +63,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
     @BeforeEach
-    fun enabledFeatureFlags() {
+    fun enabledFeatureFlag() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 

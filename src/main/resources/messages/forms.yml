@@ -565,7 +565,6 @@ checkPropertyAnswers:
     type: Property type
     bedrooms: Number of bedrooms
     licensingType: Licensing type
-    noLicensing: None
     noLicensingRequired: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
