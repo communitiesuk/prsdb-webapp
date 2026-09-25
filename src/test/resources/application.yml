@@ -45,6 +45,11 @@ plausible:
   api-key: test-api-key
   transaction-event-start-date: 2099-01-01
 
+gov-uk-pay:
+  base-url: https://gov-uk-pay.test
+  api-key: test-api-key
+  annual-payment-amount-in-pence: 2000
+
 cloudwatch-metrics:
   ecs:
     namespace: AWS/ECS
