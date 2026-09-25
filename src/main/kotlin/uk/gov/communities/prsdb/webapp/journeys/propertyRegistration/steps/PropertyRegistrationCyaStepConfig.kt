@@ -119,14 +119,7 @@ class PropertyRegistrationCyaStepConfig(
             ) +
             complianceContent +
             getDelegationContent(state) +
-            mapOf(
-                "showLettingAgentDelegationUnoccupiedPanel" to
-                    (
-                        !isOccupied &&
-                            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
-                                ?.whoProvides == null
-                    ),
-            )
+            getDelegationPanelContent(state, isOccupied)
     }
 
     private fun getBaseContent(
@@ -188,6 +181,19 @@ class PropertyRegistrationCyaStepConfig(
             ?.whoProvides
             ?.let { getLettingAgentDelegationSummaryContent(state, it) }
             ?: emptyMap()
+
+    private fun getDelegationPanelContent(
+        state: PropertyRegistrationJourneyState,
+        isOccupied: Boolean,
+    ): Map<String, Any?> =
+        mapOf(
+            "showLettingAgentDelegationUnoccupiedPanel" to
+                (
+                    !isOccupied &&
+                        state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
+                            ?.whoProvides == null
+                ),
+        )
 
     private fun getTenancyDetails(state: PropertyRegistrationJourneyState) =
         occupancyDetailsHelper.getCheckYourAnswersSummaryList(
