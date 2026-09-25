@@ -184,6 +184,7 @@ class MockLandlordData {
             markedJointLandlord: Boolean = false,
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
+            renewalDate: LocalDate = LocalDate.of(2027, 1, 1),
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -210,6 +211,7 @@ class MockLandlordData {
                     markedJointLandlord = markedJointLandlord,
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
+                    renewalDate = renewalDate,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)

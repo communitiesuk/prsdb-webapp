@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.time.LocalDate
+import java.time.MonthDay
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -94,6 +96,30 @@ class NftDataFakerTests {
         assertEquals(first, second)
     }
 
+    @Test
+    fun `generateRenewalDate returns next year's anniversary when this year's has passed`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(3, 10))
+
+        // Assert
+        assertEquals(LocalDate.of(2026, 3, 10), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `generateRenewalDate returns this year's anniversary when it is still to come`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(9, 1))
+
+        // Assert
+        assertEquals(LocalDate.of(2025, 9, 1), renewalDate.toLocalDate())
+    }
+
     private fun generateFakerSample(): List<String> =
         List(FAKER_SAMPLE_SIZE) {
             listOf(
@@ -112,5 +138,6 @@ class NftDataFakerTests {
         private const val SAMPLE_SIZE = 10_000
         private const val FAKER_SAMPLE_SIZE = 500
         private val FIXED_REFERENCE: Instant = Instant.parse("2025-01-01T00:00:00Z")
+        private val MIDYEAR_REFERENCE: Instant = Instant.parse("2025-06-15T12:00:00Z")
     }
 }

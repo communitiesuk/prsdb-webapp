@@ -55,6 +55,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -65,6 +67,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.MonthDay
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
@@ -143,6 +146,11 @@ class PropertyOwnershipServiceTests {
                 license = license,
                 correspondenceEmail = landlord.email,
                 correspondenceAddress = landlordAddress,
+                renewalDate =
+                    RenewalDateHelper.getRenewalDate(
+                        MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
+                        LocalDate.now(DateTimeHelper.UK_ZONE),
+                    ),
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -166,7 +174,8 @@ class PropertyOwnershipServiceTests {
             isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyBuildType,
             customPropertyType = customPropertyType,
             address = address,
@@ -223,6 +232,11 @@ class PropertyOwnershipServiceTests {
                 license = null,
                 correspondenceEmail = landlord.email,
                 correspondenceAddress = landlord.address,
+                renewalDate =
+                    RenewalDateHelper.getRenewalDate(
+                        MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
+                        LocalDate.now(DateTimeHelper.UK_ZONE),
+                    ),
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -245,7 +259,8 @@ class PropertyOwnershipServiceTests {
             isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyBuildType,
             customPropertyType = customPropertyType,
             address = address,
@@ -285,7 +300,8 @@ class PropertyOwnershipServiceTests {
             isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyBuildType,
             customPropertyType = "End terrace",
             address = address,
@@ -322,7 +338,8 @@ class PropertyOwnershipServiceTests {
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyBuildType,
             customPropertyType = "End terrace",
             address = address,
@@ -338,6 +355,54 @@ class PropertyOwnershipServiceTests {
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertEquals(null, propertyOwnershipCaptor.value.lastOccupiedDate)
+    }
+
+    @Test
+    fun `createPropertyOwnership sets the renewal date from the given anniversary`() {
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val anniversary = MonthDay.of(3, 15)
+        val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = anniversary,
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = address,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+        )
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedRenewalDate =
+            RenewalDateHelper.getRenewalDate(anniversary, LocalDate.now(DateTimeHelper.UK_ZONE))
+        assertEquals(expectedRenewalDate, propertyOwnershipCaptor.value.renewalDate)
+    }
+
+    @Test
+    fun `getPropertyRenewalDate returns the property's stored renewal date`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 7, renewalDate = LocalDate.of(2027, 2, 1))
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(7)).thenReturn(propertyOwnership)
+
+        assertEquals(LocalDate.of(2027, 2, 1), propertyOwnershipService.getPropertyRenewalDate(7))
     }
 
     @Nested

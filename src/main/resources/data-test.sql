@@ -331,24 +331,24 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 address_id, created_date, last_modified_date,
                                 property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
-                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id)
-VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001),
-       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001) ON CONFLICT DO NOTHING;
+                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, '2027-01-01'),
+       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, '2027-01-01'),
+       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01'),
+       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, '2027-01-01') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -397,12 +397,12 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
-                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id)
+                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
        9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
        np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
-       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001
+       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001, DATE '2027-01-01'
 FROM new_properties np
 ON CONFLICT DO NOTHING;
 
