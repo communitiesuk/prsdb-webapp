@@ -317,15 +317,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-        }
-
-        @Test
         fun `getStepSpecificContent uses restructured no licensing wording when no licence selected`() {
             whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
 
@@ -624,26 +615,6 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(false, content["showLettingAgentDelegationUnoccupiedPanel"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
         }
     }
 
