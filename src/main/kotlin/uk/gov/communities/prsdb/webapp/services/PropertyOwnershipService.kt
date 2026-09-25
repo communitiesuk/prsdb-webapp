@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -48,6 +49,7 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
+    private val addressService: AddressService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
@@ -72,9 +74,14 @@ class PropertyOwnershipService(
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        correspondenceEmail: String? = null,
+        correspondenceAddressModel: AddressDataModel? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val registeringLandlord = landlords.first()
+        // TODO PDJB-1733: Remove the flag-off correspondence defaults.
+        val correspondenceAddress =
+            correspondenceAddressModel?.let { addressService.createAddressSnapshot(it) } ?: registeringLandlord.address
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -88,10 +95,8 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                // TODO PDJB-1593: Use journey correspondence address and email when the flag is on; keep landlord defaults when off.
-                // TODO PDJB-1733: Remove the flag-off correspondence defaults.
-                correspondenceEmail = registeringLandlord.email,
-                correspondenceAddress = registeringLandlord.address,
+                correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
+                correspondenceAddress = correspondenceAddress,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
