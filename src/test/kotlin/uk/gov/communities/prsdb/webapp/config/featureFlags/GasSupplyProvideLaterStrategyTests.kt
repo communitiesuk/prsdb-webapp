@@ -14,7 +14,11 @@ class GasSupplyProvideLaterStrategyTests : FeatureFlagTest() {
     fun `when feature is disabled ifEnabledOrElse resolves the disabled branch`() {
         featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
 
-        val result = strategy.ifEnabledOrElse(ifEnabled = { "enabled" }, ifDisabled = { "disabled" })
+        val result =
+            strategy.ifEnabledOrElse {
+                ifEnabled { "enabled" }
+                ifDisabled { "disabled" }
+            }
 
         assertEquals("disabled", result)
     }
@@ -23,7 +27,11 @@ class GasSupplyProvideLaterStrategyTests : FeatureFlagTest() {
     fun `when feature is enabled ifEnabledOrElse resolves the enabled branch`() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
 
-        val result = strategy.ifEnabledOrElse(ifEnabled = { "enabled" }, ifDisabled = { "disabled" })
+        val result =
+            strategy.ifEnabledOrElse {
+                ifEnabled { "enabled" }
+                ifDisabled { "disabled" }
+            }
 
         assertEquals("enabled", result)
     }

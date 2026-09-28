@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
@@ -36,6 +38,7 @@ class LandlordController(
     private val propertyComplianceService: PropertyComplianceService,
     private val usersIncompletePropertyService: UsersIncompletePropertyService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -69,12 +72,16 @@ class LandlordController(
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
 
-        model.addAttribute(
-            "privacyNoticeUrl",
-            LANDLORD_PRIVACY_NOTICE_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
-        )
-        model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
-        model.addAttribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
+        val showUsefulLinksSection = !featureFlagManager.checkFeature(LANDLORD_DASHBOARD_UPDATE)
+        model.addAttribute("showUsefulLinksSection", showUsefulLinksSection)
+        if (showUsefulLinksSection) {
+            model.addAttribute(
+                "privacyNoticeUrl",
+                LANDLORD_PRIVACY_NOTICE_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
+            )
+            model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
+            model.addAttribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
+        }
 
         return "landlordDashboard"
     }

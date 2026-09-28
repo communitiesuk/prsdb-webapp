@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -118,7 +119,7 @@ class PropertyRegistrationCyaStepConfig(
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
         return getBaseContent(
             state = state,
-            submitButtonText = "forms.buttons.completeRegistration",
+            submitButtonText = getRestructuredSubmitButtonText(),
             warningTextKey = "forms.checkPropertyAnswers.warning",
             insetText = false,
             propertyDetails = getRestructuredPropertyDetailsSummaryList(state),
@@ -161,6 +162,13 @@ class PropertyRegistrationCyaStepConfig(
         "tenancyDetails" to tenancyDetails,
     )
 
+    private fun getRestructuredSubmitButtonText(): String =
+        if (featureFlagManager.checkFeature(PAYMENTS)) {
+            "forms.buttons.submitAndPay"
+        } else {
+            "forms.buttons.completeRegistration"
+        }
+
     private fun getRestructuredBaseContent(
         state: PropertyRegistrationJourneyState,
         licensingDetails: List<SummaryListRowViewModel>,
@@ -168,7 +176,7 @@ class PropertyRegistrationCyaStepConfig(
         occupancyDetails: List<SummaryListRowViewModel>,
     ) = getBaseContent(
         state,
-        "forms.buttons.completeRegistration",
+        getRestructuredSubmitButtonText(),
         "forms.checkPropertyAnswers.warning",
         false,
         getRestructuredPropertyDetailsSummaryList(state),

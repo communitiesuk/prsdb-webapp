@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -59,13 +60,23 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the renters rights bill link goes to an external page`(page: Page) {
+    fun `the useful information section is hidden when the dashboard update flag is enabled`() {
+        featureFlagManager.enableFeature(LANDLORD_DASHBOARD_UPDATE)
+        val dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.rentersRightsBillLink).isHidden()
+        assertThat(dashboard.privacyNoticeLink).isHidden()
+    }
+
+    @Test
+    fun `the renters rights bill link goes to an external page when the dashboard update flag is disabled`() {
+        featureFlagManager.disableFeature(LANDLORD_DASHBOARD_UPDATE)
         val dashboard = navigator.goToLandlordDashboard()
         assertThat(dashboard.rentersRightsBillLink).hasAttribute("href", RENTERS_RIGHTS_BILL_URL)
     }
 
     @Test
-    fun `the privacy notice link goes to the privacy notice page`(page: Page) {
+    fun `the privacy notice link goes to the privacy notice page when the dashboard update flag is disabled`(page: Page) {
+        featureFlagManager.disableFeature(LANDLORD_DASHBOARD_UPDATE)
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.privacyNoticeLink.clickAndWait()
         assertPageIs(page, LandlordPrivacyNoticePage::class)

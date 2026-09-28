@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
@@ -110,6 +111,8 @@ class CheckAnswersPagePropertyRegistration(
 
     val epcHeading =
         Heading(page.locator("h3", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
+
+    val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h4")
 
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,

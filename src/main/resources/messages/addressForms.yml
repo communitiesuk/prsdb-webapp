@@ -98,7 +98,7 @@ manualAddress:
       intro: 'By continuing, you confirm this address is:'
       bullet:
         one: in England or Wales
-        two: not a PO box
+        two: not a PO Box
   fieldSetHint: This should be an address within England
   addressLineOne:
     label: Address line 1

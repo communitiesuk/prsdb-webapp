@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
@@ -20,6 +21,7 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
 
     @Test
     fun `the back link is shown when navigated to from the dashboard and returns to the dashboard`(page: Page) {
+        featureFlagManager.disableFeature(LANDLORD_DASHBOARD_UPDATE)
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.privacyNoticeLink.clickAndWait()
         val privacyNoticePage = assertPageIs(page, LandlordPrivacyNoticePage::class)
