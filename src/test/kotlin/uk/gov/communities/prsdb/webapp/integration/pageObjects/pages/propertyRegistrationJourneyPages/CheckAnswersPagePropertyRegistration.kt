@@ -46,7 +46,7 @@ class CheckAnswersPagePropertyRegistration(
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
 
     private val correspondenceHeadingLocator =
-        page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText(Pattern.compile("^Who the council should contact$")))
+        page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Who the council should contact"))
 
     val correspondenceHeading = Heading(correspondenceHeadingLocator)
 

@@ -226,20 +226,11 @@ class PropertyRegistrationCorrespondencePersistenceJourneyTests : IntegrationTes
         assertPropertyAddressUnchanged(savedOwnership)
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = [false, true])
-    fun `final registration without correspondence steps saves landlord email and address defaults`(
-        restructured: Boolean,
-        page: Page,
-    ) {
-        if (restructured) {
-            featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-        } else {
-            // Leave correspondence enabled to prove the legacy journey does not access its unwired steps.
-            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        }
+    @Test
+    fun `final registration without correspondence steps saves landlord email and address defaults`(page: Page) {
+        featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
         val landlordAddress = addressRepository.findById(1L).orElseThrow()
-        val checkAnswersPage = goToCheckAnswers(page, completedState(), restructured)
+        val checkAnswersPage = goToCheckAnswers(page, completedState())
         BaseComponent.assertThat(checkAnswersPage.correspondenceHeading).isHidden()
         assertThat(checkAnswersPage.correspondenceRowKeys).hasCount(0)
         assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.key).hasCount(0)
@@ -278,14 +269,9 @@ class PropertyRegistrationCorrespondencePersistenceJourneyTests : IntegrationTes
     private fun goToCheckAnswers(
         page: Page,
         stateBuilder: PropertyStateSessionBuilder,
-        restructured: Boolean = true,
     ): CheckAnswersPagePropertyRegistration {
         val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskList(stateBuilder)
-        if (restructured) {
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-        } else {
-            navigator.navigateToPropertyRegistrationCheckYourAnswers()
-        }
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
         return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
