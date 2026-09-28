@@ -34,7 +34,8 @@
     <dd th:if="${actions != null and !actions.isEmpty()}" class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <ul class="govuk-summary-list__actions-list">
             <li th:each="action: ${actions}" class="govuk-summary-list__actions-list-item">
-                <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">
+                <a class="govuk-link" th:href="@{${action.url}}">
+                    <span th:text="#{${action.text}}">forms.links.remove</span>
                     <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
                 </a>
             </li>
