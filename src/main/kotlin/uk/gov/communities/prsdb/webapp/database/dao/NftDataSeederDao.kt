@@ -86,8 +86,8 @@ class NftDataSeederDao(
             """
             INSERT INTO landlord 
             (id, created_date, last_modified_date, individual_subject_identifier, individual_name, individual_email, individual_phone_number, individual_address_id, individual_date_of_birth, 
-             registration_number_id, individual_is_verified, individual_country_of_residence, individual_is_active, individual_has_accepted_privacy_notice, landlord_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
+             registration_number_id, individual_is_verified, anniversary_day, anniversary_month, individual_country_of_residence, individual_is_active, individual_has_accepted_privacy_notice, landlord_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
             """
         return connection.prepareStatement(query)
     }
@@ -104,8 +104,8 @@ class NftDataSeederDao(
              organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
              organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone,
              organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email,
-             organisation_registrant_phone_number)
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             organisation_registrant_phone_number, anniversary_day, anniversary_month)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -146,8 +146,8 @@ class NftDataSeederDao(
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
              license_id, property_build_type, address_id, num_bedrooms,
-             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, is_active) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }
