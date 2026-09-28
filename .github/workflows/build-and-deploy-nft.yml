@@ -5,8 +5,13 @@ on:
       - nft
 
 jobs:
+  simulator-contract-test:
+    name: One Login simulator contract test
+    uses: ./.github/workflows/one-login-simulator-contract-test.yml
+
   build-and-deploy-integration:
     name: Build and deploy
+    needs: simulator-contract-test
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: "nft"

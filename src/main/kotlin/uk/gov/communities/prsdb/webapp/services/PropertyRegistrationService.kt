@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -38,6 +40,7 @@ class PropertyRegistrationService(
     private val propertyComplianceService: PropertyComplianceService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
     fun registerProperty(
@@ -143,7 +146,17 @@ class PropertyRegistrationService(
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
 
-        sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails, isDelegatedToLettingAgent)
+        sendConfirmationEmails(
+            landlord,
+            propertyOwnership,
+            jointLandlordEmails,
+            isDelegatedToLettingAgent,
+            licenseProvideLater = licenseProvideLater,
+            gasSafetyCertProvideLater = gasSafetyCertProvideLater ?: false,
+            electricalSafetyCertProvideLater = electricalSafetyCertProvideLater ?: false,
+            epcProvideLater = epcProvideLater ?: false,
+            tenancyProvideLater = tenancyProvideLater ?: false,
+        )
     }
 
     private fun createPropertyOwnershipAndRelatedEntities(
@@ -207,9 +220,13 @@ class PropertyRegistrationService(
     private fun sendConfirmationEmails(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
-        addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
         isDelegatedToLettingAgent: Boolean,
+        licenseProvideLater: Boolean,
+        gasSafetyCertProvideLater: Boolean,
+        electricalSafetyCertProvideLater: Boolean,
+        epcProvideLater: Boolean,
+        tenancyProvideLater: Boolean,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -218,11 +235,17 @@ class PropertyRegistrationService(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
-                addressModel.singleLineAddress,
+                propertyOwnership.address.toMultiLineAddress(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
                 isDelegatedToLettingAgent,
+                isPdjb939PhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO),
+                licenseProvideLater = licenseProvideLater,
+                gasSafetyCertProvideLater = gasSafetyCertProvideLater,
+                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
+                epcProvideLater = epcProvideLater,
+                tenancyProvideLater = tenancyProvideLater,
             ),
         )
 

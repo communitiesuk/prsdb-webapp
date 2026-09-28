@@ -51,6 +51,19 @@ epc:
   base-url: ${EPC_REGISTER_BASE_URL}
   certificate-base-url: ${EPC_CERTIFICATE_BASE_URL}
 
+nft-seed:
+  system-operators: ${NFT_SEED_SYSTEM_OPERATORS:150}
+  local-council-users: ${NFT_SEED_LOCAL_COUNCIL_USERS:3000}
+  landlords: ${NFT_SEED_LANDLORDS:2820000}
+  properties: ${NFT_SEED_PROPERTIES:4700000}
+  batch-size: ${NFT_SEED_BATCH_SIZE:10000}
+  random-seed: ${NFT_SEED_RANDOM_SEED:239}
+  # Blank means "now". Set to an ISO date (e.g. 2026-01-01) to make a run fully reproducible.
+  reference-date: ${NFT_SEED_REFERENCE_DATE:}
+  # Number of fictional addresses to generate before seeding. 0 uses the addresses already in the database (the real
+  # NGD data loaded by NgdAddressLoader), which is what deployed NFT does.
+  generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:0}
+
 server:
   error:
     path: /error
@@ -96,6 +109,11 @@ plausible:
   # far-future default keeps the total-transactions metric on the legacy Flow-event counting method.
   transaction-event-start-date: ${PLAUSIBLE_TRANSACTION_EVENT_START_DATE:2099-01-01}
 
+gov-uk-pay:
+  base-url: https://publicapi.payments.service.gov.uk
+  api-key: ${GOV_UK_PAY_API_KEY}
+  annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
+
 cloudwatch-metrics:
   ecs:
     namespace: ${CLOUDWATCH_ECS_NAMESPACE:AWS/ECS}
@@ -132,6 +150,9 @@ features:
     - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-939-property-registration-phase-two"
+      enabled: false
+      expiry-date: "2026-12-31"
     - name: "pdjb-1053-dashboard-nav-link"
       enabled: true
       expiry-date: "2026-12-31"
@@ -145,6 +166,9 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
 

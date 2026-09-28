@@ -161,6 +161,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
@@ -247,6 +248,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -700,6 +702,24 @@ class Navigator(
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
+    fun goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
+        val taskListPage =
+            goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun goToRestructuredPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+        val taskListPage =
+            goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder
@@ -751,6 +771,14 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(PropertyTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCorrespondenceEmailPage(): CorrespondenceEmailFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCorrespondenceEmailAddress().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CorrespondenceEmailStep.ROUTE_SEGMENT)
+        return createValidPage(page, CorrespondenceEmailFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {

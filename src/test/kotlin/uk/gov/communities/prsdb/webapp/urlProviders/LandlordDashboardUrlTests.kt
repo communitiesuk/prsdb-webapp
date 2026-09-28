@@ -178,6 +178,7 @@ class LandlordDashboardUrlTests(
                 propertyComplianceService = mock(),
                 lettingAgentAccessService = mock(),
                 delegateToLettingAgentEmailService = mock(),
+                featureFlagManager = mock(),
             )
 
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)

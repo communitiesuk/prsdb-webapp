@@ -28,8 +28,8 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "c8853acc-ae51-4037-884f-7c9d02dc3766",
-    "prod_id": "46eaaf61-72fa-4fdb-a537-9e82e675b8df",
+    "test_id": "3f121222-95c4-41c4-bd40-d923058c6f21",
+    "prod_id": "a20ab90c-451c-4f2e-be56-1a4d69ec5339",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"

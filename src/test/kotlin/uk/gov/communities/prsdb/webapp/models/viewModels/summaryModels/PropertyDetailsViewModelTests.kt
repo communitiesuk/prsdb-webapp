@@ -1,13 +1,16 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -565,4 +568,67 @@ class PropertyDetailsViewModelTests {
         viewModel.propertyDetailsSection.single {
             it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
         }
+
+    @Test
+    fun `correspondenceSection is null when showCorrespondenceSection is false`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = false,
+            )
+
+        assertNull(viewModel.correspondenceSection)
+    }
+
+    @Test
+    fun `correspondenceSection shows saved contact details when enabled`() {
+        val propertyOwnership =
+            createPropertyOwnership(
+                correspondenceEmail = "contact@example.com",
+                correspondenceAddress = createAddress("Flat 2, 25 Contact Road, Bristol, BS1 2AB"),
+            )
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = true,
+            )
+
+        val section = viewModel.correspondenceSection
+        assertNotNull(section)
+        assertEquals(2, section!!.size)
+
+        val emailRow = section[0]
+        assertEquals("propertyDetails.propertyRecord.correspondence.emailAddress", emailRow.fieldHeading)
+        assertEquals("contact@example.com", emailRow.fieldValue)
+        assertFalse(emailRow.hasActions)
+
+        val addressRow = section[1]
+        assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
+        assertEquals(listOf("Flat 2", "25 Contact Road", "Bristol", "BS1 2AB"), addressRow.fieldValue)
+        assertTrue(addressRow.hasActions)
+        val action = addressRow.actions.single()
+        val expectedUrl =
+            LandlordUpdateCorrespondenceAddressController
+                .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id)
+        assertEquals(expectedUrl, action.url)
+    }
+
+    @Test
+    fun `correspondenceSection rows have no change actions in the local council view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = true,
+            )
+
+        val section = viewModel.correspondenceSection
+        assertNotNull(section)
+        assertTrue(section!!.none { it.hasActions })
+    }
 }

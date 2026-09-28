@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -167,7 +168,14 @@ class PropertyRegistrationTaskListStepConfig(
                 "registerProperty.taskList.submitYourRegistration.heading",
                 "submit-your-registration",
                 listOf(
-                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
+                    TaskListItemViewModel.fromStep(
+                        if (featureFlagManager.checkFeature(PAYMENTS)) {
+                            "registerProperty.taskList.checkAndSubmit.checkAnswersWithPayment"
+                        } else {
+                            "registerProperty.taskList.checkAndSubmit.checkAnswers"
+                        },
+                        state.cyaStep,
+                    ),
                 ),
             ),
         )
