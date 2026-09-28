@@ -27,6 +27,7 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 import java.util.Locale
 import java.util.Random
 import java.util.UUID
@@ -105,6 +106,8 @@ object NftDataFaker {
         }
 
     fun generateDateOfBirth(): Date = Date.valueOf(faker.timeAndDate().birthday(18, 120))
+
+    fun generateRenewalDate(anniversary: MonthDay): Date = Date.valueOf(RenewalDateHelper.getRenewalDate(anniversary, referenceDate()))
 
     fun generateIncompletePropertyCreatedDate(
         landlordCreatedDate: Timestamp,
