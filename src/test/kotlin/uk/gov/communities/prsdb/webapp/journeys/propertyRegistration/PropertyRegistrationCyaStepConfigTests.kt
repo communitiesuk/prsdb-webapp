@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
@@ -186,6 +187,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockFeatureFlagManager,
             )
         lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
         lenient().`when`(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         lenient().`when`(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         lenient().`when`(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Test Street", localCouncilId = 1))
@@ -299,6 +301,24 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `getStepSpecificContent uses complete registration button when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
+        }
+
+        @Test
+        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
+        }
+
+        @Test
+        fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -650,6 +670,16 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertNull(content["tenancyUnoccupiedBodyTextKey"])
+        }
+
+        @Test
+        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
         }
     }
 }

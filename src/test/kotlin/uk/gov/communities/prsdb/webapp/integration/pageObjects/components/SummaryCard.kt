@@ -5,12 +5,15 @@ import com.microsoft.playwright.Page
 
 open class SummaryCard(
     locator: Locator,
+    headingLevel: String = "h2",
 ) : BaseComponent(locator) {
-    constructor(page: Page, index: Int = 0) : this(page.locator(DEFAULT_SELECTOR).nth(index))
+    constructor(page: Page, index: Int = 0, headingLevel: String = "h2") :
+        this(page.locator(DEFAULT_SELECTOR).nth(index), headingLevel)
 
-    constructor(page: Page, title: String) : this(page.locator(DEFAULT_SELECTOR, Page.LocatorOptions().setHasText(title)))
+    constructor(page: Page, title: String, headingLevel: String = "h2") :
+        this(page.locator(DEFAULT_SELECTOR, Page.LocatorOptions().setHasText(title)), headingLevel)
 
-    val title = Heading(locator.locator("h2.govuk-summary-card__title"))
+    val title = Heading(locator.locator("$headingLevel.govuk-summary-card__title"))
 
     fun getAction(text: String) = SummaryCardAction(locator, text)
 
