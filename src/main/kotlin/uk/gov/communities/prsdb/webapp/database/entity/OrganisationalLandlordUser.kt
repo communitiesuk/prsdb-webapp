@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -9,6 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
 @Entity
 @Table(
@@ -34,16 +36,22 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     @Column(nullable = false)
     lateinit var email: String
 
+    @Enumerated
+    @Column(name = "role", nullable = false)
+    lateinit var role: OrganisationalLandlordUserRole
+
     constructor(
         organisationalLandlord: OrganisationalLandlord,
         baseUser: PrsdbUser,
         name: String,
         email: String,
+        role: OrganisationalLandlordUserRole,
     ) : this() {
         this.organisationalLandlord = organisationalLandlord
         this.baseUser = baseUser
         this.name = name
         this.email = email
+        this.role = role
         organisationalLandlord.addOrganisationalLandlordUser(this)
     }
 }

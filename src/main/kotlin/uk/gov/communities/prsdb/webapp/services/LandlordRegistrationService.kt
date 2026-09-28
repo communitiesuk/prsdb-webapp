@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -121,6 +122,8 @@ class LandlordRegistrationService(
             baseUser,
             organisationRegistrantName,
             organisationRegistrantEmail,
+            // TODO: PDJB-1754 - determine if the registrant should always be an admin or if this should be configurable
+            role = OrganisationalLandlordUserRole.ADMIN,
         )
 
         if (!organisationHasCompanyNumber) {

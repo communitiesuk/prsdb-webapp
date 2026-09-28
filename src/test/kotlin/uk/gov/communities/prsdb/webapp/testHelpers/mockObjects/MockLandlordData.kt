@@ -4,6 +4,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -94,6 +95,7 @@ class MockLandlordData {
             registrantDateOfBirth: LocalDate = LocalDate.of(1990, 1, 1),
             registrantEmail: String = "registrant@example.com",
             registrantPhoneNumber: String = "07123456780",
+            registrantRole: OrganisationalLandlordUserRole = OrganisationalLandlordUserRole.ADMIN,
             isCompany: Boolean = true,
             isCharity: Boolean = false,
             isTrust: Boolean = false,
@@ -142,6 +144,7 @@ class MockLandlordData {
                 baseUser = baseUser,
                 name = registrantName,
                 email = registrantEmail,
+                role = registrantRole,
             )
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
