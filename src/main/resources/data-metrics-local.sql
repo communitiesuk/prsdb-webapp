@@ -83,7 +83,7 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
 SELECT 1200 + i, true, 1, 1, 2, 1200 + i, 1200 + i,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
-       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true, 'email@example.com', 1001, DATE '2027-01-01'
+       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true, 'email@example.com', 1001, current_date + 365
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -172,7 +172,7 @@ WITH p AS (
                  END)::int) AS created
     FROM generate_series(1, 100) AS s(i)
 )
-SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 1600 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 1001, DATE '2027-01-01'
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 1600 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 1001, current_date + 365
 FROM p
 ON CONFLICT DO NOTHING;
 
@@ -235,8 +235,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (2201, true, 1, 1, 2, 2201, 2201, TIMESTAMPTZ '2029-12-03 09:00:00+00', NULL, NULL, 1, 2, true, true, 'email@example.com', 1001, '2027-01-01'),
-       (2202, true, 1, 1, 2, 2202, 2202, TIMESTAMPTZ '2031-02-03 09:00:00+00', NULL, NULL, 1, 2, true, true, 'email@example.com', 1001, '2027-01-01')
+VALUES (2201, true, 1, 1, 2, 2201, 2201, TIMESTAMPTZ '2029-12-03 09:00:00+00', NULL, NULL, 1, 2, true, true, 'email@example.com', 1001, current_date + 365),
+       (2202, true, 1, 1, 2, 2202, 2202, TIMESTAMPTZ '2031-02-03 09:00:00+00', NULL, NULL, 1, 2, true, true, 'email@example.com', 1001, current_date + 365)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
