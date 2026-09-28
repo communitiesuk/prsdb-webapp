@@ -296,6 +296,18 @@ VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
 INSERT INTO organisational_landlord_user (organisation_landlord_id, subject_identifier, name, email, created_date)
 VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', '07/23/26');
 
+INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
+                                               inviting_organisation_name, access_level, invitation_expired_email_sent, is_hidden)
+VALUES ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222a', 'pending-org-invite-a@example.com', 36,
+        'Local Organisation Landlord', 'admin', false, false),
+       ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222b', 'pending-org-invite-b@example.com', 36,
+        'Local Organisation Landlord', 'basic', false, false),
+       ('08/25/26', '08/25/26', '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
+        'Local Organisation Landlord', 'admin', false, false);
+
+SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),
+              (SELECT MAX(id) FROM organisational_landlord_invitation));
+
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO license (id, license_type, license_number)
