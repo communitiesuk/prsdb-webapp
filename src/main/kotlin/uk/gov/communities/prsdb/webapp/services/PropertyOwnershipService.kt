@@ -81,7 +81,7 @@ class PropertyOwnershipService(
         val registeringLandlord = landlords.first()
         // TODO PDJB-1733: Remove the flag-off correspondence defaults.
         val correspondenceAddress =
-            correspondenceAddressModel?.let { addressService.createAddressSnapshot(it) } ?: registeringLandlord.address
+            correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(

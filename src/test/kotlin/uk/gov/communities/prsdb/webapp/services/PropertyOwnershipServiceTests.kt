@@ -128,7 +128,7 @@ class PropertyOwnershipServiceTests {
         val correspondenceAddress = MockLandlordData.createAddress("12 Contact Road, EG1 2AC")
         val correspondenceModel = AddressDataModel.fromAddress(correspondenceAddress)
         val correspondenceEmail = "chosen@example.com"
-        whenever(mockAddressService.createAddressSnapshot(correspondenceModel)).thenReturn(correspondenceAddress)
+        whenever(mockAddressService.findOrCreateAddress(correspondenceModel)).thenReturn(correspondenceAddress)
         val numberOfBedrooms = 1
         val billsIncludedList = "Electricity, Water"
         val customBillsIncluded = "Internet"
@@ -195,7 +195,7 @@ class PropertyOwnershipServiceTests {
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
         assertSame(correspondenceAddress, propertyOwnershipCaptor.value.correspondenceAddress)
-        verify(mockAddressService).createAddressSnapshot(correspondenceModel)
+        verify(mockAddressService).findOrCreateAddress(correspondenceModel)
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
     }
 
