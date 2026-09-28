@@ -574,6 +574,7 @@ checkPropertyAnswers:
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
     heading: Ownership and landlords
+  # TODO PDJB-1307: Move these messages out of forms.yml
   correspondence:
     emailAddress: Email address
     postalAddress: Postal address

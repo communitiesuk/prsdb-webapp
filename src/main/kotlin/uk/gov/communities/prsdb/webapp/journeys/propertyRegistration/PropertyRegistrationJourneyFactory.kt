@@ -145,6 +145,10 @@ class PropertyRegistrationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
+            val correspondenceEnabled =
+                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+                    featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
@@ -165,9 +169,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 CorrespondenceEmailStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS) &&
-                        featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-                    ) {
+                    if (correspondenceEnabled) {
                         fromTask(journey.correspondenceTask, journey) {
                             checkAnswerStep(task.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
                         }
@@ -177,9 +179,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
-                    if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS) &&
-                        featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-                    ) {
+                    if (correspondenceEnabled) {
                         checkAnswerTask(journey.correspondenceTask.addressTask, CorrespondenceAddressTask.ROUTE_SEGMENT)
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
