@@ -1,20 +1,19 @@
 package uk.gov.communities.prsdb.webapp.clients
 
-import org.json.JSONException
-import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.body
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 
 @PrsdbWebService
@@ -32,7 +31,6 @@ class GovUkPayClient(
                     .accept(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
-                    .throwGovUkPayExceptionOnError()
                     .body<GovUkPayCreatePaymentResponse>()
             }
 
@@ -51,7 +49,6 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/capture", paymentId)
                 .retrieve()
-                .throwGovUkPayExceptionOnError()
                 .toBodilessEntity()
         }
     }
@@ -62,7 +59,6 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/cancel", paymentId)
                 .retrieve()
-                .throwGovUkPayExceptionOnError()
                 .toBodilessEntity()
         }
     }
@@ -74,7 +70,6 @@ class GovUkPayClient(
                 .uri("/v1/payments/{paymentId}", paymentId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .throwGovUkPayExceptionOnError()
                 .body<GovUkPayPayment>()
         } ?: throw GovUkPayException("GOV.UK Pay get payment response for payment $paymentId had no body")
 
@@ -103,26 +98,18 @@ class GovUkPayClient(
     private fun <T> send(request: () -> T): T =
         try {
             request()
+        } catch (exception: RestClientResponseException) {
+            val errorResponse = exception.govUkPayErrorResponseOrNull()
+            throw GovUkPayException(exception.statusCode, errorResponse?.code, errorResponse?.description)
         } catch (exception: RestClientException) {
             throw GovUkPayException("GOV.UK Pay request failed: ${exception.message}", exception)
         }
 
-    private fun RestClient.ResponseSpec.throwGovUkPayExceptionOnError(): RestClient.ResponseSpec =
-        onStatus({ it.isError }) { _, response -> throw toGovUkPayException(response) }
-
-    private fun toGovUkPayException(response: ClientHttpResponse): GovUkPayException {
-        val errorBody = parseJsonOrNull(response.body.readAllBytes().toString(Charsets.UTF_8))
-        return GovUkPayException(
-            httpStatus = response.statusCode,
-            errorCode = errorBody?.optString("code", null),
-            errorDescription = errorBody?.optString("description", null),
-        )
-    }
-
-    private fun parseJsonOrNull(body: String): JSONObject? =
+    // Error responses from outside GOV.UK Pay (e.g. a gateway error page) may not be JSON
+    private fun RestClientResponseException.govUkPayErrorResponseOrNull(): GovUkPayErrorResponse? =
         try {
-            JSONObject(body)
-        } catch (exception: JSONException) {
+            getResponseBodyAs(GovUkPayErrorResponse::class.java)
+        } catch (exception: RestClientException) {
             null
         }
 }
