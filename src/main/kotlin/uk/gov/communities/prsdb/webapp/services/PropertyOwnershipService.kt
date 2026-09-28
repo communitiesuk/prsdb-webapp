@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -58,7 +60,8 @@ class PropertyOwnershipService(
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        landlords: MutableSet<Landlord>,
+        registeringLandlord: Landlord,
+        anniversary: MonthDay,
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
@@ -78,7 +81,8 @@ class PropertyOwnershipService(
         correspondenceAddressModel: AddressDataModel? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
-        val registeringLandlord = landlords.first()
+
+        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
         // TODO PDJB-1733: Remove the flag-off correspondence defaults.
         val correspondenceAddress =
             correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
@@ -90,13 +94,14 @@ class PropertyOwnershipService(
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
-                landlords = landlords,
+                landlords = mutableSetOf(registeringLandlord),
                 propertyBuildType = propertyBuildType,
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
                 correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
                 correspondenceAddress = correspondenceAddress,
+                renewalDate = renewalDate,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
@@ -141,6 +146,8 @@ class PropertyOwnershipService(
             )
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
+
+    fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
