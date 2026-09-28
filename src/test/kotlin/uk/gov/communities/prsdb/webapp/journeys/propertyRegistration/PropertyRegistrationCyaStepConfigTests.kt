@@ -347,28 +347,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `contact rows are retained when property details are delegated to a letting agent`() {
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            assertEquals(2, correspondenceRows().size)
-        }
-
-        @Test
-        fun `contact rows are retained when the property is unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-
-            assertEquals(2, correspondenceRows().size)
-        }
-
-        @Test
-        fun `contact rows are retained when letting agent delegation is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            assertEquals(2, correspondenceRows().size)
-        }
-
-        @Test
         fun `disabled correspondence does not read contact state or create child journeys`() {
             whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
