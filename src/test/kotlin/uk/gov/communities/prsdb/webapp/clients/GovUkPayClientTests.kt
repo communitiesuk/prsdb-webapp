@@ -30,7 +30,6 @@ import org.springframework.web.client.RestClient
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLanguage
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -66,7 +65,6 @@ class GovUkPayClientTests {
                         "description": "$DESCRIPTION",
                         "return_url": "$RETURN_URL",
                         "email": "$EMAIL",
-                        "language": "en",
                         "delayed_capture": true
                     }
                     """,
@@ -75,7 +73,7 @@ class GovUkPayClientTests {
             ).andRespond(createdResponse())
 
         // Act
-        govUkPayClient.createPayment(createPaymentRequest(email = EMAIL, language = GovUkPayLanguage.EN))
+        govUkPayClient.createPayment(createPaymentRequest(email = EMAIL))
 
         // Assert
         mockServer.verify()
@@ -410,17 +408,14 @@ class GovUkPayClientTests {
         mockServer.verify()
     }
 
-    private fun createPaymentRequest(
-        email: String? = null,
-        language: GovUkPayLanguage? = null,
-    ) = GovUkPayCreatePaymentRequest(
-        amount = AMOUNT,
-        reference = REFERENCE,
-        description = DESCRIPTION,
-        returnUrl = RETURN_URL,
-        email = email,
-        language = language,
-    )
+    private fun createPaymentRequest(email: String? = null) =
+        GovUkPayCreatePaymentRequest(
+            amount = AMOUNT,
+            reference = REFERENCE,
+            description = DESCRIPTION,
+            returnUrl = RETURN_URL,
+            email = email,
+        )
 
     private fun createdResponse(includeNextUrl: Boolean = true) =
         withStatus(HttpStatus.CREATED)

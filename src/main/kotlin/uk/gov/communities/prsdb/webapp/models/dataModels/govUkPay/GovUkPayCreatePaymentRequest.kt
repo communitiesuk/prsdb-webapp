@@ -10,7 +10,6 @@ data class GovUkPayCreatePaymentRequest(
     val description: String,
     @get:JsonProperty("return_url") val returnUrl: String,
     val email: String? = null,
-    val language: GovUkPayLanguage? = null,
 ) {
     // Payments are always deferred so the service can capture or cancel them once it knows the outcome
     @get:JsonProperty("delayed_capture")
