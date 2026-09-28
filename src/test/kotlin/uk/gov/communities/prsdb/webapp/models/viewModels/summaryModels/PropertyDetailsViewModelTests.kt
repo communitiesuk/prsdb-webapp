@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -612,7 +612,12 @@ class PropertyDetailsViewModelTests {
         val addressRow = section[1]
         assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
         assertEquals(listOf("Flat 2", "25 Contact Road", "Bristol", "BS1 2AB"), addressRow.fieldValue)
-        assertFalse(addressRow.hasActions)
+        assertTrue(addressRow.hasActions)
+        val action = addressRow.actions.single()
+        val expectedUrl =
+            LandlordUpdateCorrespondenceAddressController
+                .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id)
+        assertEquals(expectedUrl, action.url)
     }
 
     @Test

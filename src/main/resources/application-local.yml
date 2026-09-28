@@ -102,6 +102,8 @@ plausible:
 
 gov-uk-pay:
   base-url: http://localhost:${server.port}/local/gov-uk-pay
+  api-key: local-gov-uk-pay-api-key
+  annual-payment-amount-in-pence: 2000
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com

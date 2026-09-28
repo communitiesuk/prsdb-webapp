@@ -19,8 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Corre
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceEmail.UpdateCorrespondenceEmailJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateCorrespondenceEmailController::class)
-class UpdateCorrespondenceEmailControllerTests(
+@WebMvcTest(LandlordUpdateCorrespondenceEmailController::class)
+class LandlordUpdateCorrespondenceEmailControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -37,7 +37,7 @@ class UpdateCorrespondenceEmailControllerTests(
 
     override val propertyOwnershipId = 1L
     override val updateStepRoute =
-        UpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(propertyOwnershipId) +
+        LandlordUpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(propertyOwnershipId) +
             "/${CorrespondenceEmailStep.ROUTE_SEGMENT}"
     override val formContent = "correspondenceEmailOption=ACCOUNT_EMAIL" // pragma: allowlist secret
 

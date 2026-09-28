@@ -23,6 +23,7 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
     @Test
     fun `submitting check your answers routes to the payment summary step when payments is enabled`(page: Page) {
         val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments()
+        assertThat(checkAnswersPage.submitButton).containsText("Submit and pay")
 
         checkAnswersPage.confirm()
 
@@ -36,6 +37,7 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
 
         val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPage()
         assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
+        assertThat(checkAnswersPage.submitButton).containsText("Complete registration")
 
         checkAnswersPage.confirm()
 

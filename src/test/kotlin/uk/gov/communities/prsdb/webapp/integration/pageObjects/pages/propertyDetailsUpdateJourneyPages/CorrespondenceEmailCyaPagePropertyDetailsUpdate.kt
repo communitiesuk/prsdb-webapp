@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.UpdateCorrespondenceEmailController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -13,7 +13,7 @@ class CorrespondenceEmailCyaPagePropertyDetailsUpdate(
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        UpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        LandlordUpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT}",
     ) {
     val form = Form(page)

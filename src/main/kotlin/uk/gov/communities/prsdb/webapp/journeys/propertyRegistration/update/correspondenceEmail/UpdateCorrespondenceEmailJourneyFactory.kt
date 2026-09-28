@@ -89,7 +89,7 @@ class UpdateCorrespondenceEmailJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(
+    fun initialiseJourneyState(
         seed: Any?,
         currentLastModifiedDate: java.time.Instant,
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)

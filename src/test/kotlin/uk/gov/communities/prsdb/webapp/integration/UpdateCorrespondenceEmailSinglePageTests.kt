@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.controllers.UpdateCorrespondenceEmailController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -82,7 +82,7 @@ class UpdateCorrespondenceEmailSinglePageTests : IntegrationTestWithImmutableDat
     fun `the update route is unavailable when the correspondence flag is disabled`(page: Page) {
         featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
         navigator.navigate(
-            UpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(1) +
+            LandlordUpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(1) +
                 "/${CorrespondenceEmailStep.ROUTE_SEGMENT}",
         )
 

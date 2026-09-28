@@ -7,25 +7,25 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateCorrespondenceEmailController.Companion.UPDATE_CORRESPONDENCE_EMAIL_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController.Companion.UPDATE_CORRESPONDENCE_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceEmail.UpdateCorrespondenceEmailJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceAddress.UpdateCorrespondenceAddressJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_CORRESPONDENCE_EMAIL_ROUTE)
+@RequestMapping(UPDATE_CORRESPONDENCE_ADDRESS_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateCorrespondenceEmailController(
-    private val journeyFactory: UpdateCorrespondenceEmailJourneyFactory,
+class LandlordUpdateCorrespondenceAddressController(
+    private val journeyFactory: UpdateCorrespondenceAddressJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{*stepPath}")
@@ -59,9 +59,11 @@ class UpdateCorrespondenceEmailController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(propertyOwnershipId)
+            },
             initialiseJourney = {
-                journeyFactory.initializeJourneyState(
+                journeyFactory.initialiseJourneyState(
                     Pair(propertyOwnershipId, principal),
                     propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
                 )
@@ -70,10 +72,13 @@ class UpdateCorrespondenceEmailController(
         )
 
     companion object {
-        const val UPDATE_CORRESPONDENCE_EMAIL_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-correspondence-email"
+        const val UPDATE_CORRESPONDENCE_ADDRESS_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-correspondence-address"
 
-        fun getUpdateCorrespondenceEmailRoute(propertyOwnershipId: Long): String =
-            UriTemplate(UPDATE_CORRESPONDENCE_EMAIL_ROUTE).expand(propertyOwnershipId).toASCIIString()
+        fun getUpdateCorrespondenceAddressRoute(propertyOwnershipId: Long): String =
+            UPDATE_CORRESPONDENCE_ADDRESS_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+
+        fun getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnershipId: Long): String =
+            getUpdateCorrespondenceAddressRoute(propertyOwnershipId) + "/${LookupAddressStep.ROUTE_SEGMENT}"
     }
 }
