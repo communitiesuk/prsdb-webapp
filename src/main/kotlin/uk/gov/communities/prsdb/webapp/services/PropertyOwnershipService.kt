@@ -49,8 +49,8 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
-    private val addressService: AddressService,
     private val featureFlagManager: FeatureFlagManager,
+    private val addressService: AddressService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -448,6 +448,18 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateCorrespondenceAddress(
+        id: Long,
+        address: AddressDataModel,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.correspondenceAddress = addressService.findOrCreateAddress(address)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
