@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayCreatePaymentResponse(
-    @JsonProperty("payment_id") val paymentId: String? = null,
-    @JsonProperty("_links") val links: GovUkPayLinks? = null,
+    @JsonProperty("payment_id") val paymentId: String,
+    @JsonProperty("_links") val links: GovUkPayLinks,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayLinks(
-    @JsonProperty("next_url") val nextUrl: GovUkPayLink? = null,
+    @JsonProperty("next_url") val nextUrl: GovUkPayLink,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayLink(
-    val href: String? = null,
+    val href: String,
 )

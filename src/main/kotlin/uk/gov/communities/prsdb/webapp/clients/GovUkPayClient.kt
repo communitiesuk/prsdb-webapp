@@ -33,15 +33,9 @@ class GovUkPayClient(
                     .body(request)
                     .retrieve()
                     .body<GovUkPayCreatePaymentResponse>()
-            }
+            } ?: throw GovUkPayException("GOV.UK Pay create payment response had no body")
 
-        val paymentId =
-            response?.paymentId
-                ?: throw GovUkPayException("GOV.UK Pay create payment response did not include a payment_id")
-        val nextUrl =
-            response?.links?.nextUrl?.href
-                ?: throw GovUkPayException("GOV.UK Pay create payment response for payment $paymentId did not include a next_url")
-        return GovUkPayCreatedPayment(paymentId = paymentId, nextUrl = nextUrl)
+        return GovUkPayCreatedPayment(paymentId = response.paymentId, nextUrl = response.links.nextUrl.href)
     }
 
     fun capturePayment(paymentId: String) {
