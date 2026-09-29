@@ -120,6 +120,17 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
+    fun prepareOrganisationalLandlordInvitationStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO organisational_landlord_invitation
+            (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
+             inviting_organisation_name, access_level, invitation_expired_email_sent, is_hidden)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
     fun prepareOrganisationGoverningBodyMemberStatement(): PreparedStatement {
         val query =
             """

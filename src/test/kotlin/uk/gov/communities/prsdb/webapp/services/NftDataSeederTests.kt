@@ -203,6 +203,24 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase creates one organisational landlord invitation per organisation landlord`() {
+        newSeeder().seedDatabase()
+
+        val invitationCount =
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM organisational_landlord_invitation",
+                Long::class.java,
+            )!!
+
+        assertTrue(invitationCount > 0, "Expected organisational landlord invitations to be seeded")
+        assertEquals(
+            organisationLandlordRepository.count(),
+            invitationCount,
+            "Expected one invitation per organisation landlord",
+        )
+    }
+
+    @Test
     fun `seedDatabase only gives non-company organisations governing body members`() {
         newSeeder().seedDatabase()
 
