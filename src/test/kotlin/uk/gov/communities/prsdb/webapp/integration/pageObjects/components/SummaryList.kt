@@ -85,13 +85,6 @@ open class SummaryList(
                     Locator.LocatorOptions().setHasText(text),
                 ),
             )
-
-        fun getActionLink(index: Int) = SummaryListRowActionLink(locator.locator(".govuk-link").nth(index))
-
-        fun getAllActionLinks(): List<SummaryListRowActionLink> {
-            val count = locator.locator(".govuk-link").count()
-            return (0 until count).map { getActionLink(it) }
-        }
     }
 
     class SummaryListRowActionLink(
