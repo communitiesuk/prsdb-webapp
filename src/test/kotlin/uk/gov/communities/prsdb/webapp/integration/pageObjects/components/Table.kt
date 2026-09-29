@@ -21,6 +21,11 @@ open class Table(
         colIndex: Int,
     ) = rows.getByIndex(rowIndex).getClickableCell(colIndex)
 
+    fun getVisuallyHiddenText(
+        rowIndex: Int,
+        colIndex: Int,
+    ) = rows.getByIndex(rowIndex).getVisuallyHiddenText(colIndex)
+
     class TableRows(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator("tbody tr")) {
@@ -35,6 +40,8 @@ open class Table(
         fun getCell(colIndex: Int) = TableCell.atColIndex(locator, colIndex)
 
         fun getClickableCell(colIndex: Int) = ClickableTableCell.atColIndex(locator, colIndex)
+
+        fun getVisuallyHiddenText(colIndex: Int): Locator = locator.locator("td").nth(colIndex).locator(".govuk-visually-hidden")
 
         companion object {
             fun atIndex(
