@@ -49,6 +49,8 @@ open class Table(
     ) : BaseComponent(locator) {
         fun getCell(colIndex: Int): TableCell = TableCell.headerAtColIndex(locator, colIndex)
 
+        fun getVisuallyHiddenText(colIndex: Int): Locator = locator.locator("th").nth(colIndex).locator(".govuk-visually-hidden")
+
         companion object {
             fun default(parentLocator: Locator): HeaderRow = HeaderRow(parentLocator.locator("thead tr"))
         }

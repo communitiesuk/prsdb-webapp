@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
@@ -33,6 +32,6 @@ class CheckGasCertUploadsFormPagePropertyRegistration(
         page: Page,
     ) : Table(page) {
         val actionsHeader = headerRow.getCell(2)
-        val actionsHeaderVisuallyHiddenText: Locator = locator.locator("thead th").nth(2).locator(".govuk-visually-hidden")
+        val actionsHeaderVisuallyHiddenText = headerRow.getVisuallyHiddenText(2)
     }
 }

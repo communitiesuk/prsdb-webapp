@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -9,9 +10,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.ACCOUNT_STATUS_COL_INDEX
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.ACTIONS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.LOCAL_COUNCIL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -43,6 +46,14 @@ class ManageLocalCouncilAdminsTests : IntegrationTest() {
             assertThat(pagination.previousLink).isVisible()
             assertThat(pagination.getPageNumberLink(1)).isVisible()
             assertEquals("2", pagination.currentPageNumberLinkText)
+        }
+
+        @Test
+        fun `the actions column header text is visually hidden but the header cell is not`() {
+            val manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
+
+            assertThat(manageAdminPage.table.headerRow.getVisuallyHiddenText(ACTIONS_COL_INDEX)).hasText("Actions")
+            assertThat(manageAdminPage.table.headerRow.getCell(ACTIONS_COL_INDEX)).not().hasClass(Pattern.compile("govuk-visually-hidden"))
         }
 
         @Test
