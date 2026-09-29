@@ -576,7 +576,7 @@ class NftDataSeeder(
         organisationalLandlordInvitationStmt.setString(4, details.registrantEmail)
         organisationalLandlordInvitationStmt.setLong(5, coreDetails.id)
         organisationalLandlordInvitationStmt.setString(6, details.name)
-        organisationalLandlordInvitationStmt.setString(7, "ADMIN")
+        organisationalLandlordInvitationStmt.setShort(7, 0)
         organisationalLandlordInvitationStmt.setBoolean(8, false)
         organisationalLandlordInvitationStmt.setBoolean(9, false)
         organisationalLandlordInvitationStmt.addBatch()
