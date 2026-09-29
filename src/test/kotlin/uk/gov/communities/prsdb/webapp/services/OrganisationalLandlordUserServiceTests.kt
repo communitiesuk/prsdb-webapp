@@ -53,4 +53,15 @@ class OrganisationalLandlordUserServiceTests {
         assertEquals(email, saved.email)
         assertEquals(result, saved)
     }
+
+    @Test
+    fun `removeUserFromOrganisation removes the organisation membership without touching pending invitations`() {
+        val baseUserId = "user-123"
+        val orgUser = OrganisationalLandlordUser(mockOrganisationLandlord, PrsdbUser(baseUserId), "Alice Registrant", "alice@example.com")
+        whenever(mockOrganisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(listOf(orgUser))
+
+        organisationalLandlordUserService.removeUserFromOrganisation(baseUserId)
+
+        verify(mockOrganisationalLandlordUserRepository).deleteAll(listOf(orgUser))
+    }
 }

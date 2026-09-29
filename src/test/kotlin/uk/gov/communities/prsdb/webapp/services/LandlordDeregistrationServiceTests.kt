@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUse
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
@@ -40,6 +41,9 @@ class LandlordDeregistrationServiceTests {
 
     @Mock
     private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
+
+    @Mock
+    private lateinit var mockOrganisationalLandlordInvitationRepository: OrganisationalLandlordInvitationRepository
 
     @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
@@ -168,6 +172,16 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
         verify(mockOrganisationGoverningBodyMemberRepository).deleteByOrganisationalLandlord(orgLandlord)
+    }
+
+    @Test
+    fun `deregisterOrganisationalLandlord deletes pending invitations for the organisation`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord()
+        whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(emptyList())
+
+        landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
+
+        verify(mockOrganisationalLandlordInvitationRepository).deleteByOrganisationLandlord(orgLandlord)
     }
 
     @Test

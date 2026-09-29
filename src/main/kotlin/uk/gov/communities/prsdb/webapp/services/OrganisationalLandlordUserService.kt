@@ -21,4 +21,12 @@ class OrganisationalLandlordUserService(
         organisationalLandlordUserRepository.save(
             OrganisationalLandlordUser(organisationalLandlord, baseUser, name, email),
         )
+
+    @Transactional
+    fun removeUserFromOrganisation(baseUserId: String) {
+        val organisationLandlordUsers = organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)
+        if (organisationLandlordUsers.isNotEmpty()) {
+            organisationalLandlordUserRepository.deleteAll(organisationLandlordUsers)
+        }
+    }
 }
