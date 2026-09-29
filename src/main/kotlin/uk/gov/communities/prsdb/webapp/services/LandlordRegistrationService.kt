@@ -122,7 +122,6 @@ class LandlordRegistrationService(
             baseUser,
             organisationRegistrantName,
             organisationRegistrantEmail,
-            // TODO: PDJB-1754 - determine if the registrant should always be an admin or if this should be configurable
             role = OrganisationalLandlordUserRole.ADMIN,
         )
 

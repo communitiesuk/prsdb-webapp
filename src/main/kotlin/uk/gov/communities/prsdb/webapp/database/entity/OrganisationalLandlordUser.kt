@@ -36,8 +36,7 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     @Column(nullable = false)
     lateinit var email: String
 
-    @Enumerated
-    @Column(name = "role", nullable = false)
+    @Column(nullable = false)
     lateinit var role: OrganisationalLandlordUserRole
 
     constructor(
