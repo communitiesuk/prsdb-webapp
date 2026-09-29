@@ -10,8 +10,8 @@
             </h1>
         </header>
         <section>
-            <table th:replace="~{fragments/tables/table :: table(
-                            ${ { 'common.userManagement.username', 'manageLocalCouncilAdminUsers.table.heading.localCouncil', 'common.userManagement.accountStatus', '' } },
+            <table th:replace="~{fragments/tables/actionsTable :: actionsTable(
+                            ${ { 'common.userManagement.username', 'manageLocalCouncilAdminUsers.table.heading.localCouncil', 'common.userManagement.accountStatus', 'common.userManagement.actions' } },
                             ~{::tbody},
                             null
                         )}
