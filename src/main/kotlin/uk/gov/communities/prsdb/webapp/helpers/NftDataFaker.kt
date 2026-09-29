@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -156,16 +157,18 @@ object NftDataFaker {
     fun generateCoreDetailsForLandlords(landlordIds: List<Int>): List<CoreLandlordDetails> =
         landlordIds.map { id ->
             val landlordType = generateLandlordType()
+            val subjectId = generateSubjectIdentifier()
+            val createdDate = generateCreatedDate()
             val organisationDetails =
                 if (landlordType == LandlordType.ORGANISATION) {
-                    generateOrganisationLandlordDetails(generateOrganisationCategory())
+                    generateOrganisationLandlordDetails(generateOrganisationCategory(), subjectId, createdDate)
                 } else {
                     null
                 }
             CoreLandlordDetails(
                 id = id.toLong(),
-                subjectId = generateSubjectIdentifier(),
-                createdDate = generateCreatedDate(),
+                subjectId = subjectId,
+                createdDate = createdDate,
                 landlordType = landlordType,
                 organisationDetails = organisationDetails,
             )
@@ -204,7 +207,11 @@ object NftDataFaker {
             else -> OrganisationCategory.UNINCORPORATED
         }
 
-    fun generateOrganisationLandlordDetails(category: OrganisationCategory): OrganisationLandlordDetails {
+    fun generateOrganisationLandlordDetails(
+        category: OrganisationCategory,
+        subjectId: String,
+        createdDate: Timestamp,
+    ): OrganisationLandlordDetails {
         val name = faker.company().name()
         val isCompany = category == OrganisationCategory.COMPANY
         val isTrust = category == OrganisationCategory.TRUST
@@ -231,6 +238,7 @@ object NftDataFaker {
         val leadTrusteePhone = if (isTrust) generatePhoneNumber() else null
 
         val registrantName = generateName()
+        val registrantEmail = generateEmail(registrantName)
         val mainContactName = generateName()
 
         return OrganisationLandlordDetails(
@@ -252,12 +260,65 @@ object NftDataFaker {
             mainContactPhone = generatePhoneNumber(),
             registrantName = registrantName,
             registrantDateOfBirth = generateDateOfBirth(),
-            registrantEmail = generateEmail(registrantName),
+            registrantEmail = registrantEmail,
             registrantPhoneNumber = generatePhoneNumber(),
             // Per the real registration journey, only organisations without a company number need governing body
             // members (see LandlordRegistrationService.registerOrganisationLandlord).
             hasGoverningBody = !isCompany,
+            users = generateOrganisationalLandlordUsers(subjectId, registrantName, registrantEmail, createdDate),
         )
+    }
+
+    fun generateOrganisationalLandlordUsers(
+        registrantSubjectId: String,
+        registrantName: String,
+        registrantEmail: String,
+        orgCreatedDate: Timestamp,
+    ): List<OrganisationalLandlordUserDetails> {
+        val registrant =
+            OrganisationalLandlordUserDetails(
+                subjectId = registrantSubjectId,
+                createdDate = orgCreatedDate,
+                name = registrantName,
+                email = registrantEmail,
+                role = OrganisationalLandlordUserRole.ADMIN,
+            )
+
+        // Assumption: roughly half of seeded organisations have no additional users beyond the registrant, a third
+        // have one or two, and the remainder have three to five. This is a rough estimate not backed by real-world
+        // data, documented here as agreed, and can be adjusted if a more accurate ratio becomes available.
+        val numOfExtraUsers =
+            when (faker.random().nextDouble()) {
+                // 50%
+                in 0.0..0.50 -> 0
+                // 35%
+                in 0.50..0.85 -> faker.random().nextInt(1, 2)
+                // 15%
+                else -> faker.random().nextInt(3, 5)
+            }
+
+        val extraUsers =
+            (1..numOfExtraUsers).map {
+                val name = generateName()
+                val role =
+                    if (generateBoolean(probabilityTrue = 0.8)) {
+                        OrganisationalLandlordUserRole.EDITOR
+                    } else {
+                        OrganisationalLandlordUserRole.ADMIN
+                    }
+                // Extra users are always freshly generated people, distinct from the registrant and main contact, so
+                // that each has its own subject identifier and satisfies the organisational landlord user's unique
+                // constraint on (organisation_landlord_id, subject_identifier).
+                OrganisationalLandlordUserDetails(
+                    subjectId = generateSubjectIdentifier(),
+                    createdDate = generateCreatedDate(after = orgCreatedDate),
+                    name = name,
+                    email = generateEmail(name),
+                    role = role,
+                )
+            }
+
+        return listOf(registrant) + extraUsers
     }
 
     fun generateGoverningBodyMembers(hasLeadTrustee: Boolean): List<GoverningBodyMemberDetails> {
@@ -622,6 +683,15 @@ object NftDataFaker {
         val registrantEmail: String,
         val registrantPhoneNumber: String,
         val hasGoverningBody: Boolean,
+        val users: List<OrganisationalLandlordUserDetails>,
+    )
+
+    data class OrganisationalLandlordUserDetails(
+        val subjectId: String,
+        val createdDate: Timestamp,
+        val name: String,
+        val email: String,
+        val role: OrganisationalLandlordUserRole,
     )
 
     data class GoverningBodyMemberDetails(
