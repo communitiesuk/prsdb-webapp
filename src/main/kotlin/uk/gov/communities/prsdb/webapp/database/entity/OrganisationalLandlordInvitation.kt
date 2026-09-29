@@ -32,9 +32,9 @@ class OrganisationalLandlordInvitation(
     lateinit var invitingOrganisationName: String
         private set
 
+    // TODO PDJB-1755: Update with enum class name when available e.g.
+    //  lateinit var role: OrganisationalLandlordUserRole
     @Column(nullable = false)
-    // TODO PDJB-1755: Update with enum class name when available e.g. 
-    //  lateinit var role: OrganisationalLandlordUserRole 
     var role: Short = 0
         private set
 
