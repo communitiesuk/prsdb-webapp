@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreate
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 
+// API reference: https://docs.payments.service.gov.uk/api_reference/
 @PrsdbWebService
 class GovUkPayClient(
     @Qualifier("gov-uk-pay-client") private val client: RestClient,
@@ -74,6 +75,7 @@ class GovUkPayClient(
         } ?: throw GovUkPayException("GOV.UK Pay get payment response for payment $paymentId had no body")
 
     // GOV.UK Pay rejects rate-limited requests without acting on them, so retrying after a 429 is safe for every endpoint
+    // Rate limits: https://docs.payments.service.gov.uk/api_reference/#rate-limits
     private fun <T> sendWithRateLimitRetries(request: () -> T): T {
         for (delayMs in rateLimitRetryDelaysMs) {
             try {
