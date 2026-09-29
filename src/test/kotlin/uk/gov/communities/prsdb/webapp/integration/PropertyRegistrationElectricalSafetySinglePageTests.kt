@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import java.util.regex.Pattern
 
 class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
@@ -29,6 +31,22 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertThat(
                 hasElectricalCertPage.form.getErrorMessage(),
             ).containsText("Select which electrical safety certificate you have")
+        }
+    }
+
+    @Nested
+    inner class CheckElectricalCertUploadsStep {
+        @Test
+        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            val checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+
+            assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
+            assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
         }
     }
 

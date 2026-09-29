@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import java.util.regex.Pattern
 
 class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
@@ -157,6 +158,22 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             val gasSafetyIssueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
             gasSafetyIssueDatePage.submitDate(day, month, year)
             assertThat(gasSafetyIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class CheckGasCertUploadsStep {
+        @Test
+        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            val checkUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+            assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
+            assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
         }
     }
 
