@@ -33,7 +33,7 @@ class OrganisationalLandlordInvitation(
         private set
 
     @Column(nullable = false)
-    lateinit var role: String
+    var role: Short = 0
         private set
 
     @Column(nullable = false)
@@ -48,7 +48,7 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        role: String,
+        role: Short,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
@@ -63,7 +63,7 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        role: String,
+        role: Short,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail

@@ -299,11 +299,11 @@ VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@e
 INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
                                                inviting_organisation_name, role, invitation_expired_email_sent, is_hidden)
 VALUES ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222a', 'pending-org-invite-a@example.com', 36,
-        'Local Organisation Landlord', 'Admin', false, false),
+        'Local Organisation Landlord', 0, false, false),
        ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222b', 'pending-org-invite-b@example.com', 36,
-        'Local Organisation Landlord', 'Editor', false, false),
+        'Local Organisation Landlord', 1, false, false),
        ('08/25/26', '08/25/26', '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
-        'Local Organisation Landlord', 'Admin', false, false);
+        'Local Organisation Landlord', 0, false, false);
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),
               (SELECT MAX(id) FROM organisational_landlord_invitation));
