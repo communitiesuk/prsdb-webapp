@@ -133,6 +133,7 @@ class GovUkPayClientTests {
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.httpStatus?.value())
         assertEquals("P0102", exception.errorCode)
         assertEquals("Invalid attribute value: amount", exception.errorDescription)
+        assertEquals("GOV.UK Pay request failed with HTTP status 422: P0102 - Invalid attribute value: amount", exception.message)
         mockServer.verify()
     }
 
@@ -217,6 +218,7 @@ class GovUkPayClientTests {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.httpStatus?.value())
         assertNull(exception.errorCode)
         assertNull(exception.errorDescription)
+        assertEquals("GOV.UK Pay request failed with HTTP status 500", exception.message)
         mockServer.verify()
     }
 

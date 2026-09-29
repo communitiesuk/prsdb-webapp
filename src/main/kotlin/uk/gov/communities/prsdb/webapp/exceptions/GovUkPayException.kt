@@ -11,7 +11,7 @@ class GovUkPayException : PrsdbWebException {
         httpStatus: HttpStatusCode,
         errorCode: String?,
         errorDescription: String?,
-    ) : super("GOV.UK Pay request failed with HTTP status ${httpStatus.value()}: $errorCode - $errorDescription") {
+    ) : super(httpErrorMessage(httpStatus, errorCode, errorDescription)) {
         this.httpStatus = httpStatus
         this.errorCode = errorCode
         this.errorDescription = errorDescription
@@ -27,5 +27,17 @@ class GovUkPayException : PrsdbWebException {
         httpStatus = null
         errorCode = null
         errorDescription = null
+    }
+
+    companion object {
+        private fun httpErrorMessage(
+            httpStatus: HttpStatusCode,
+            errorCode: String?,
+            errorDescription: String?,
+        ): String {
+            val message = "GOV.UK Pay request failed with HTTP status ${httpStatus.value()}"
+            val errorDetails = listOfNotNull(errorCode, errorDescription).joinToString(" - ")
+            return if (errorDetails.isEmpty()) message else "$message: $errorDetails"
+        }
     }
 }
