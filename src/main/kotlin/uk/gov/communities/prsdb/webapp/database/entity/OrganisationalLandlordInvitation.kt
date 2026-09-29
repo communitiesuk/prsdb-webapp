@@ -33,7 +33,7 @@ class OrganisationalLandlordInvitation(
         private set
 
     @Column(nullable = false)
-    lateinit var accessLevel: String
+    lateinit var role: String
         private set
 
     @Column(nullable = false)
@@ -48,13 +48,13 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        accessLevel: String,
+        role: String,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
         this.organisationLandlord = organisationLandlord
         this.invitingOrganisationName = invitingOrganisationName
-        this.accessLevel = accessLevel
+        this.role = role
     }
 
     constructor(
@@ -63,13 +63,13 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        accessLevel: String,
+        role: String,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail
         this.organisationLandlord = organisationLandlord
         this.invitingOrganisationName = invitingOrganisationName
-        this.accessLevel = accessLevel
+        this.role = role
     }
 
     fun markAsExpiredEmailSent() {

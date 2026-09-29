@@ -6,7 +6,7 @@ CREATE TABLE organisational_landlord_invitation (
     invited_email                VARCHAR(255) NOT NULL,
     organisation_landlord_id     BIGINT NOT NULL,
     inviting_organisation_name   VARCHAR(255) NOT NULL,
-    access_level                 VARCHAR(255) NOT NULL,
+    role                         VARCHAR(255) NOT NULL,
     invitation_expired_email_sent BOOLEAN NOT NULL DEFAULT FALSE,
     is_hidden                    BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_organisational_landlord_invitation_organisation_landlord
