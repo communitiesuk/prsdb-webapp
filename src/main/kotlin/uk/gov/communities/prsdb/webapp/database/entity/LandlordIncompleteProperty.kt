@@ -21,9 +21,9 @@ import java.io.Serializable
         ),
     ],
 )
-class LandlordIncompleteProperties() {
+class LandlordIncompleteProperty() {
     @EmbeddedId
-    lateinit var id: LandlordIncompletePropertiesId
+    lateinit var id: LandlordIncompletePropertyId
         private set
 
     @MapsId("userId")
@@ -41,12 +41,12 @@ class LandlordIncompleteProperties() {
     constructor(user: PrsdbUser, savedJourneyState: SavedJourneyState) : this() {
         this.user = user
         this.savedJourneyState = savedJourneyState
-        this.id = LandlordIncompletePropertiesId(user.id, savedJourneyState.id)
+        this.id = LandlordIncompletePropertyId(user.id, savedJourneyState.id)
     }
 }
 
 @Embeddable
-data class LandlordIncompletePropertiesId(
+data class LandlordIncompletePropertyId(
     @Column(name = "user_id")
     var userId: String = "",
     @Column(name = "saved_journey_state_id")

@@ -17,7 +17,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -45,9 +45,9 @@ class UsersIncompletePropertyServiceTests {
         val userId = "user-123"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = userId)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
-        val expectedNewEntry = LandlordIncompleteProperties(prsdbUser, savedJourneyState)
+        val expectedNewEntry = LandlordIncompleteProperty(prsdbUser, savedJourneyState)
 
-        val captor = argumentCaptor<LandlordIncompleteProperties>()
+        val captor = argumentCaptor<LandlordIncompleteProperty>()
 
         // Act
         usersIncompletePropertyService.addIncompletePropertyForUser(savedJourneyState)
@@ -65,7 +65,7 @@ class UsersIncompletePropertyServiceTests {
         val principalName = "user-123"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = principalName)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
-        val lip = LandlordIncompleteProperties(prsdbUser, savedJourneyState)
+        val lip = LandlordIncompleteProperty(prsdbUser, savedJourneyState)
         val pageRequest =
             PageRequest.of(0, MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE, Sort.by("savedJourneyState.createdDate"))
         setMockPrincipal(principalName)
@@ -84,7 +84,7 @@ class UsersIncompletePropertyServiceTests {
         val requestingUserId = "org-user-1"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = requestingUserId)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
-        val lip = LandlordIncompleteProperties(prsdbUser, savedJourneyState)
+        val lip = LandlordIncompleteProperty(prsdbUser, savedJourneyState)
         val pageRequest =
             PageRequest.of(0, MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE, Sort.by("savedJourneyState.createdDate"))
         setMockPrincipal(requestingUserId)
