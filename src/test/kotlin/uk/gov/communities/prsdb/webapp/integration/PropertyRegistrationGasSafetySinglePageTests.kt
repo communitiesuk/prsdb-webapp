@@ -203,6 +203,17 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
+        fun `Uploaded cert - issue date change link is not wrapped in an actions list`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.firstActionLink).isVisible()
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.actionsList).hasCount(0)
+        }
+
+        @Test
         fun `No gas supply - gas supply change link navigates to has gas supply page`(page: Page) {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(

@@ -75,6 +75,8 @@ open class SummaryList(
     ) : BaseComponent(parentLocator.locator(".govuk-summary-list__actions")) {
         val firstActionLink = Link(locator.locator(".govuk-link").first())
         val firstActionLinkVisuallyHiddenText: Locator = locator.locator(".govuk-link").first().locator(".govuk-visually-hidden")
+        val actionsList: Locator = locator.locator(".govuk-summary-list__actions-list")
+        val actionsListItems: Locator = locator.locator(".govuk-summary-list__actions-list-item")
 
         fun getActionLink(text: String) =
             SummaryListRowActionLink(
