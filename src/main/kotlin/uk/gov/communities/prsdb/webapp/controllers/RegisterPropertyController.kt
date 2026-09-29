@@ -126,6 +126,8 @@ class RegisterPropertyController(
 
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
+        model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
+
         val provideMissingDetails =
             hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
 

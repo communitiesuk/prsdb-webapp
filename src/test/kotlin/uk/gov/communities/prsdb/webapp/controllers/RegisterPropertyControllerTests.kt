@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toJavaLocalDate
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
@@ -164,7 +166,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation shows the provide missing details block when phase two is enabled`() {
+    fun `getConfirmation hides the before pbjb-1742 what you need to do next section when phase two is enabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -193,6 +195,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            .andExpect(MockMvcResultMatchers.model().attribute("propertyRegistrationPhaseTwoEnabled", true))
             .andExpect(
                 MockMvcResultMatchers.model().attribute(
                     "provideMissingDetailsViewModel",
@@ -205,6 +208,7 @@ class RegisterPropertyControllerTests(
                     ),
                 ),
             ).andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
+            .andExpect(MockMvcResultMatchers.content().string(not(containsString("What you need to do next"))))
     }
 
     // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
