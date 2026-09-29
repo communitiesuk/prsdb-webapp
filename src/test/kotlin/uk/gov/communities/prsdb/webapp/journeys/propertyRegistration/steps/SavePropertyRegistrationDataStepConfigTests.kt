@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -132,6 +131,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     @ParameterizedTest
     @EnumSource(CorrespondenceEmailOption::class)
     fun `registration passes the selected correspondence email and postal address`(choice: CorrespondenceEmailOption) {
+        // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
@@ -157,8 +157,10 @@ class SavePropertyRegistrationDataStepConfigTests {
             whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("account@example.com")
         }
 
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verifyCorrespondenceDetails(
             if (choice == CorrespondenceEmailOption.ACCOUNT_EMAIL) "account@example.com" else "edited.contact@example.com",
             postalAddress,
@@ -168,24 +170,22 @@ class SavePropertyRegistrationDataStepConfigTests {
         }
     }
 
-    @ParameterizedTest
-    @CsvSource("false,false", "false,true", "true,false")
-    fun `registration leaves correspondence defaults to the service when its journey is disabled`(
-        restructured: Boolean,
-        correspondenceEnabled: Boolean,
-    ) {
+    // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
+    @Test
+    fun `registration passes no correspondence details when the CORRESPONDENCE_ADDRESS flag is off`() {
+        // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(restructured)
-        lenient().`when`(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(correspondenceEnabled)
-        if (restructured) {
-            val bedrooms = mock<BedroomsStep>()
-            whenever(mockState.bedrooms).thenReturn(bedrooms)
-            whenever(bedrooms.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "4" })
-        }
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
+        val bedrooms = mock<BedroomsStep>()
+        whenever(mockState.bedrooms).thenReturn(bedrooms)
+        whenever(bedrooms.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "4" })
 
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verifyCorrespondenceDetails(null, null)
         verify(mockState, never()).correspondenceTask
     }

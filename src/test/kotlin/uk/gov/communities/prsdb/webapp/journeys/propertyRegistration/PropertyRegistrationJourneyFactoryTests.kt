@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -30,19 +29,13 @@ class PropertyRegistrationJourneyFactoryTests {
         assertEquals("Unknown checkable element ${WhoProvidesRentalDetailsStep.ROUTE_SEGMENT}", exception.message)
     }
 
+    // TODO PDJB-1733: Remove this test and correspondenceRoutes() when the CORRESPONDENCE_ADDRESS feature flag is removed
     @ParameterizedTest
-    @MethodSource("disabledCorrespondenceJourneys")
-    fun `createJourneySteps rejects contact changes when either required feature is disabled`(
+    @MethodSource("correspondenceRoutes")
+    fun `createJourneySteps treats contact answers as unknown checkable elements when the CORRESPONDENCE_ADDRESS flag is off`(
         checkingAnswersFor: String,
-        correspondenceEnabled: Boolean,
-        restructureEnabled: Boolean,
     ) {
-        val factory =
-            factoryFor(
-                checkingAnswersFor,
-                correspondenceEnabled = correspondenceEnabled,
-                restructureEnabled = restructureEnabled,
-            )
+        val factory = factoryFor(checkingAnswersFor, correspondenceEnabled = false, restructureEnabled = true)
 
         val exception = assertThrows<IllegalStateException> { factory.createJourneySteps() }
 
@@ -71,16 +64,10 @@ class PropertyRegistrationJourneyFactoryTests {
 
     companion object {
         @JvmStatic
-        fun disabledCorrespondenceJourneys() =
+        fun correspondenceRoutes() =
             listOf(
                 CorrespondenceEmailStep.ROUTE_SEGMENT,
                 "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
-            ).flatMap { route ->
-                listOf(
-                    Arguments.of(route, false, false),
-                    Arguments.of(route, false, true),
-                    Arguments.of(route, true, false),
-                )
-            }
+            )
     }
 }

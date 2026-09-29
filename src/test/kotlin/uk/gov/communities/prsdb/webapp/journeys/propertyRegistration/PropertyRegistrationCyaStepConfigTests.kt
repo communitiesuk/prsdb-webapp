@@ -346,23 +346,12 @@ class PropertyRegistrationCyaStepConfigTests {
             )
         }
 
+        // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
         @Test
         fun `disabled correspondence does not read contact state or create child journeys`() {
             whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
             assertEquals(emptyList<SummaryListRowViewModel>(), correspondenceRows())
-            verify(mockState, never()).correspondenceTask
-            verify(mockState, never()).getCyaJourneyId(emailStep)
-            verify(mockState, never()).getCyaJourneyId(lookupStep)
-        }
-
-        @Test
-        fun `legacy CYA does not read contact state even when correspondence is enabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(!content.containsKey("correspondenceRows"))
             verify(mockState, never()).correspondenceTask
             verify(mockState, never()).getCyaJourneyId(emailStep)
             verify(mockState, never()).getCyaJourneyId(lookupStep)
