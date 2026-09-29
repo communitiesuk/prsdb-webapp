@@ -12,12 +12,14 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
@@ -50,6 +52,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @WebMvcTest(RegisterPropertyController::class)
+@Import(MessageSourceConfig::class)
 class RegisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -240,6 +243,7 @@ class RegisterPropertyControllerTests(
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
+            .andExpect(MockMvcResultMatchers.content().string(containsString("What you need to do next")))
     }
 
     @Test
