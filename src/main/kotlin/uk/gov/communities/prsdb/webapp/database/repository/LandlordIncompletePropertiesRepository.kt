@@ -4,16 +4,16 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertiesId
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertyId
 import java.time.Instant
 
-interface LandlordIncompletePropertiesRepository : JpaRepository<LandlordIncompleteProperties, LandlordIncompletePropertiesId> {
+interface LandlordIncompletePropertiesRepository : JpaRepository<LandlordIncompleteProperty, LandlordIncompletePropertyId> {
     @Suppress("ktlint:standard:function-naming")
     fun findBySavedJourneyState_CreatedDateBefore(
         cutoffDate: Instant,
         pageRequest: PageRequest,
-    ): List<LandlordIncompleteProperties>
+    ): List<LandlordIncompleteProperty>
 
     @Suppress("ktlint:standard:function-naming")
     fun countBySavedJourneyState_CreatedDateBefore(cutoffDate: Instant): Long
@@ -22,7 +22,7 @@ interface LandlordIncompletePropertiesRepository : JpaRepository<LandlordIncompl
     fun findByUser_Id(
         userId: String,
         pageable: Pageable,
-    ): Page<LandlordIncompleteProperties>
+    ): Page<LandlordIncompleteProperty>
 
     @Suppress("ktlint:standard:function-naming")
     fun countByUser_Id(userId: String): Long
