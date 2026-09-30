@@ -157,7 +157,7 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: false
@@ -171,6 +171,9 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: false
+      expiry-date: "2026-11-01"
 
 ---
 
