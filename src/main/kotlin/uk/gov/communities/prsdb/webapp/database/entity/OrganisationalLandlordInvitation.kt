@@ -7,8 +7,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import java.util.UUID
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import java.util.UUID
 
 @Entity
 class OrganisationalLandlordInvitation(
