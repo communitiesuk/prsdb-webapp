@@ -11,7 +11,7 @@
         </header>
         <section>
             <table th:replace="~{fragments/tables/actionsTable :: actionsTable(
-                            ${ { 'common.userManagement.username', 'manageLocalCouncilUsers.table.accessLevelHeading', 'common.userManagement.accountStatus', 'common.userManagement.actions' } },
+                            ${ { 'common.userManagement.username', 'manageLocalCouncilUsers.table.accessLevelHeading', 'common.userManagement.accountStatus', 'common.table.actions' } },
                             ~{::tbody},
                             null
                         )}

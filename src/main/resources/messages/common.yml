@@ -15,4 +15,5 @@ userManagement:
   accountStatus: Account status
   'accountStatus.pending': PENDING
   'accountStatus.active': ACTIVE
+table:
   actions: Actions

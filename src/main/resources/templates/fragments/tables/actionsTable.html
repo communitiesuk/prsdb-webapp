@@ -5,7 +5,7 @@
     <tr class="govuk-table__row">
         <th scope="col" class="govuk-table__header" th:each="heading: ${theadFields}"
             th:with="headingText=${!#strings.isEmpty(heading)} ? #{${heading}}">
-            <span th:classappend="${headingText == 'Actions'} ? 'govuk-visually-hidden'" th:text="${headingText}"></span>
+            <span th:classappend="${heading == 'common.table.actions'} ? 'govuk-visually-hidden'" th:text="${headingText}"></span>
         </th>
     </tr>
     </thead>
