@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilUserPage
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.ACTIONS_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -77,6 +79,14 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
             val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
             managePage.returnToDashboardButton.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
+        }
+
+        @Test
+        fun `the actions column header text is visually hidden but the header cell is not`() {
+            val managePage = navigator.goToManageLocalCouncilUsers(localCouncilId)
+
+            assertThat(managePage.table.headerRow.getVisuallyHiddenText(ACTIONS_COL_INDEX)).hasText("Actions")
+            assertThat(managePage.table.headerRow.getCell(ACTIONS_COL_INDEX)).not().hasClass(Pattern.compile("govuk-visually-hidden"))
         }
     }
 
