@@ -450,6 +450,18 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateCorrespondenceEmail(
+        id: Long,
+        email: String,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.correspondenceEmail = email
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updateFurnishedStatus(
         id: Long,
         furnishedStatus: FurnishedStatus,

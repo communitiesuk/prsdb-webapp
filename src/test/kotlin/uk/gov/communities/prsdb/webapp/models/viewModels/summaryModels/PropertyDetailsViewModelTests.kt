@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -604,7 +603,11 @@ class PropertyDetailsViewModelTests {
         val emailRow = section[0]
         assertEquals("propertyDetails.propertyRecord.correspondence.emailAddress", emailRow.fieldHeading)
         assertEquals("contact@example.com", emailRow.fieldValue)
-        assertFalse(emailRow.hasActions)
+        assertTrue(emailRow.hasActions)
+        assertEquals(
+            "/landlord/property-details/${propertyOwnership.id}/update-correspondence-email/correspondence-email",
+            emailRow.actions.single().url,
+        )
 
         val addressRow = section[1]
         assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
