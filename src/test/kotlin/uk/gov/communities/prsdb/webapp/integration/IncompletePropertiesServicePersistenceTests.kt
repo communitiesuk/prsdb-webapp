@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertiesId
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertyId
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -42,7 +42,7 @@ class IncompletePropertiesServicePersistenceTests : IntegrationTestWithMutableDa
         assertEquals(1L, deletedCount)
         assertFalse(
             landlordIncompletePropertiesRepository.existsById(
-                LandlordIncompletePropertiesId(USER_ID, SAVED_JOURNEY_STATE_ID),
+                LandlordIncompletePropertyId(USER_ID, SAVED_JOURNEY_STATE_ID),
             ),
             "Incomplete property was not deleted",
         )
