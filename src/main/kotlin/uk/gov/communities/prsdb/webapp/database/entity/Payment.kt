@@ -6,6 +6,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import java.time.Instant
+import java.time.LocalDate
 
 @Entity
 class Payment() : ModifiableAuditableEntity() {
@@ -22,7 +23,7 @@ class Payment() : ModifiableAuditableEntity() {
     lateinit var paymentCreatedAt: Instant
 
     @Column(nullable = false)
-    lateinit var forPeriodEnding: Instant
+    lateinit var forPeriodEnding: LocalDate
 
     @Column(nullable = false)
     lateinit var status: PaymentStatus
@@ -48,7 +49,7 @@ class Payment() : ModifiableAuditableEntity() {
         amountInPence: Int,
         reference: String,
         paymentCreatedAt: Instant,
-        forPeriodEnding: Instant,
+        forPeriodEnding: LocalDate,
         status: PaymentStatus,
         journey: LandlordIncompleteProperty,
         payingUser: PrsdbUser,

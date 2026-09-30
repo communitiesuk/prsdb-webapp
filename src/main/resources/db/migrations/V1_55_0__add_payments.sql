@@ -1,12 +1,12 @@
 CREATE TABLE payment
 (
     payment_id                                            VARCHAR(255)                NOT NULL,
-    last_modified_date                                    TIMESTAMP WITHOUT TIME ZONE,
-    created_date                                          TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_modified_date                                    TIMESTAMPTZ(6),
+    created_date                                          TIMESTAMPTZ(6)              NOT NULL,
     amount_in_pence                                       INTEGER                     NOT NULL,
     reference                                             VARCHAR(255)                NOT NULL,
-    payment_created_at                                    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    for_period_ending                                     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    payment_created_at                                    TIMESTAMPTZ(6)              NOT NULL,
+    for_period_ending                                     DATE                        NOT NULL,
     status                                                SMALLINT                    NOT NULL,
     paying_user_id                                        VARCHAR(255),
     associated_property_id                                BIGINT,
