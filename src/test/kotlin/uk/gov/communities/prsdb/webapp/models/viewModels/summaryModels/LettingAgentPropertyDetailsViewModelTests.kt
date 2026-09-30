@@ -1,0 +1,432 @@
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createPropertyCompliance
+import java.time.LocalDate
+import java.util.UUID
+
+class LettingAgentPropertyDetailsViewModelTests {
+    private val mockMessageSource = MockMessageSource()
+
+    private val tokenForActionLink: UUID = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+
+    // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date,
+    // which is what starts the 28-day provide-later deadline.
+    private val occupiedAtRegistrationDate = LocalDate.of(2025, 1, 1)
+    private val occupiedAtRegistrationInstant =
+        occupiedAtRegistrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
+
+    private fun validCompliance(propertyOwnership: PropertyOwnership) = createPropertyCompliance(propertyOwnership = propertyOwnership)
+
+    private fun missingCompliance(propertyOwnership: PropertyOwnership) =
+        createPropertyCompliance(propertyOwnership = propertyOwnership, gasSafetyCertIssueDate = null)
+
+    private fun provideLaterCompliance(propertyOwnership: PropertyOwnership) =
+        validCompliance(propertyOwnership).apply { gasSafetyCertProvideLater = true }
+
+    private fun expiredCompliance(propertyOwnership: PropertyOwnership) =
+        createPropertyCompliance(
+            propertyOwnership = propertyOwnership,
+            electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+        )
+
+    @Test
+    fun `the provide-details inset is shown when licensing details are outstanding and there is a deadline`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = true,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        assertTrue(viewModel.showProvideDetailsInset)
+        assertEquals(1, viewModel.licensingSection.size)
+    }
+
+    @Test
+    fun `the provide-details inset is shown when tenancy details are outstanding and there is a deadline`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        assertTrue(viewModel.showProvideDetailsInset)
+        assertEquals(1, viewModel.tenancySection.size)
+    }
+
+    @Test
+    fun `the provide-details inset is shown when compliance is provide-later and there is a deadline`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, provideLaterCompliance(propertyOwnership), mockMessageSource)
+
+        assertTrue(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when compliance is missing but not provide-later`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, missingCompliance(propertyOwnership), mockMessageSource)
+
+        assertFalse(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when compliance is expired but not provide-later`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, expiredCompliance(propertyOwnership), mockMessageSource)
+
+        assertFalse(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when details are outstanding but there is no deadline`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
+                licenseProvideLater = true,
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        assertFalse(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when all details and compliance are provided`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        assertFalse(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `constructing the view model throws when the property is not occupied`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        assertThrows<IllegalStateException> {
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+        }
+    }
+
+    @Test
+    fun `the licensing section shows the licensing type and number rows when licensing details are provided`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"))
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.licensingInformation.licensingType",
+                "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+            ),
+            viewModel.licensingSection.map { it.fieldHeading },
+        )
+    }
+
+    @Test
+    fun `the households row has a change link to the letting-agent update-households-and-tenants journey`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val householdsRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName"
+            }
+        assertEquals(
+            LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(tokenForActionLink) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
+            householdsRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `the households row has no change link when no token is supplied`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val householdsRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName"
+            }
+        assertTrue(householdsRow.actions.isEmpty())
+    }
+
+    @Test
+    fun `the tenants row has no change link`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val tenantsRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople"
+            }
+        assertFalse(tenantsRow.hasActions)
+    }
+
+    @Test
+    fun `the rent-includes-bills row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val rentIncludesBillsRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"
+            }
+        val actionUrl = rentIncludesBillsRow.actions.singleOrNull()?.url
+        assertTrue(actionUrl != null && actionUrl.contains(tokenForActionLink.toString()))
+        assertTrue(actionUrl!!.endsWith("/rent-includes-bills"))
+    }
+
+    @Test
+    fun `the rent-includes-bills row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val rentIncludesBillsRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"
+            }
+        assertTrue(rentIncludesBillsRow.actions.isEmpty())
+    }
+
+    @Test
+    fun `the tenancy provide-later row has a change link to the letting-agent update-tenancy-details journey`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(tenancyProvideLater = true)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val tenancyRow = viewModel.tenancySection.single()
+        assertEquals(
+            LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(tokenForActionLink) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
+            tenancyRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `the rent-frequency row has a change link to the letting-agent update-rent-frequency-and-amount journey`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertEquals(
+            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(tokenForActionLink) +
+                "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            rentFrequencyRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `the rent-frequency row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertTrue(rentFrequencyRow.actions.isEmpty())
+    }
+
+    @Test
+    fun `the licensing type row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val licensingTypeRow =
+            viewModel.licensingSection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType"
+            }
+        val actionUrl = licensingTypeRow.actions.singleOrNull()?.url
+        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl!!.endsWith("/licensing-type"))
+    }
+
+    @Test
+    fun `the licensing provide-later row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = true)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val actionUrl =
+            viewModel.licensingSection
+                .single()
+                .actions
+                .singleOrNull()
+                ?.url
+        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl!!.endsWith("/licensing-type"))
+    }
+
+    @Test
+    fun `the licensing type row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val licensingTypeRow =
+            viewModel.licensingSection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType"
+            }
+        assertTrue(licensingTypeRow.actions.isEmpty())
+    }
+
+    @Test
+    fun `the furnished status row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        val actionUrl = furnishedStatusRow.actions.singleOrNull()?.url
+        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl!!.endsWith("/property-furnished"))
+    }
+
+    @Test
+    fun `the furnished status row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        assertTrue(furnishedStatusRow.actions.isEmpty())
+    }
+}

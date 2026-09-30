@@ -69,11 +69,7 @@ class EnterPasswordStepConfig(
     }
 
     private fun getInvitation(state: LettingAgentInvitationJourneyState) =
-        lettingAgentAccessService.getInvitationByToken(
-            state.invitationToken
-                ?.let(UUID::fromString)
-                ?: throw PrsdbWebException("Invitation token was not found in journey state"),
-        )
+        lettingAgentAccessService.getInvitationByToken(UUID.fromString(state.invitationToken))
 }
 
 @JourneyFrameworkComponent

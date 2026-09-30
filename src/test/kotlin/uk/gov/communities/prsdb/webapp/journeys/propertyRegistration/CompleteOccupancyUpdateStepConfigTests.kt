@@ -10,11 +10,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
@@ -41,9 +40,6 @@ class CompleteOccupancyUpdateStepConfigTests {
 
     @Mock
     private lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
-
-    @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     private lateinit var mockState: UpdateOccupancyJourneyState
@@ -74,7 +70,6 @@ class CompleteOccupancyUpdateStepConfigTests {
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
                 lettingAgentAccessService = mockLettingAgentAccessService,
                 delegateToLettingAgentEmailService = mockDelegateToLettingAgentEmailService,
-                featureFlagManager = mockFeatureFlagManager,
             )
     }
 
@@ -102,8 +97,7 @@ class CompleteOccupancyUpdateStepConfigTests {
     @Test
     fun `afterStepIsReached sends the standard update email and does not remove a delegation when becoming occupied`() {
         stubStateWithOccupancy(occupied = true)
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId))
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(propertyId))
             .thenReturn(mockLettingAgentAccess)
 
         stepConfig.afterStepIsReached(mockState)
@@ -120,14 +114,20 @@ class CompleteOccupancyUpdateStepConfigTests {
     @Test
     fun `afterStepIsReached removes delegation and emails landlords and agent when becoming unoccupied with a delegation`() {
         stubStateWithOccupancy(occupied = false)
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId))
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(propertyId))
             .thenReturn(mockLettingAgentAccess)
         whenever(mockLettingAgentAccess.invitedEmail).thenReturn(lettingAgentEmail)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(mockPropertyOwnership)
 
         stepConfig.afterStepIsReached(mockState)
 
+        val inOrder = inOrder(mockPropertyOwnershipService)
+        inOrder.verify(mockPropertyOwnershipService).getLettingAgentAccess(propertyId)
+        inOrder.verify(mockPropertyOwnershipService).updateIsOccupied(
+            id = propertyId,
+            isOccupied = false,
+            initialLastModifiedDate = initialLastModifiedDate,
+        )
         verify(mockLettingAgentAccessService).deleteDelegationByPropertyOwnershipId(propertyId)
         verify(mockPropertyUpdateEmailService).sendUpdateWithLettingAgentRemovedEmails(
             eq(propertyId),
@@ -142,8 +142,7 @@ class CompleteOccupancyUpdateStepConfigTests {
     @Test
     fun `afterStepIsReached sends standard email and removes no delegation when becoming unoccupied with no delegation`() {
         stubStateWithOccupancy(occupied = false)
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId)).thenReturn(null)
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(propertyId)).thenReturn(null)
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -157,9 +156,9 @@ class CompleteOccupancyUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends standard email and removes no delegation when becoming unoccupied with the flag disabled`() {
+    fun `afterStepIsReached sends standard email and removes no delegation when the feature is disabled`() {
         stubStateWithOccupancy(occupied = false)
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(propertyId)).thenReturn(null)
 
         stepConfig.afterStepIsReached(mockState)
 

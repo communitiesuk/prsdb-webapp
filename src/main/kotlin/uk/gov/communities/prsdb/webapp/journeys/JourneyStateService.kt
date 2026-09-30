@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Clock
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.web.context.request.RequestContextHolder
@@ -122,8 +123,8 @@ class JourneyStateService(
         journeyStateMetadataStore += metadata.copy(lastUpdated = Clock.System.now())
     }
 
-    fun deleteState() {
-        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyId }
+    fun deleteState(journeyIdToDelete: String = journeyId) {
+        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyIdToDelete }
 
         dependentJourneys.forEach {
             session.removeAttribute(it.journeyId)
@@ -131,11 +132,19 @@ class JourneyStateService(
             journeyStateMetadataStore -= it.journeyId
         }
 
-        session.removeAttribute(journeyId)
+        session.removeAttribute(journeyIdToDelete)
 
-        persistenceService.deleteJourneyStateData(journeyId)
+        persistenceService.deleteJourneyStateData(journeyIdToDelete)
 
-        journeyStateMetadataStore -= journeyId
+        journeyStateMetadataStore -= journeyIdToDelete
+    }
+
+    fun getStoredStringValueOrNull(
+        journeyId: String,
+        key: String,
+    ): String? {
+        val storedValue = objectToStringKeyedMap(session.getAttribute(journeyId))?.get(key) as? String ?: return null
+        return runCatching { Json.decodeFromString<String>(storedValue) }.getOrNull()
     }
 
     fun initialiseJourneyWithId(

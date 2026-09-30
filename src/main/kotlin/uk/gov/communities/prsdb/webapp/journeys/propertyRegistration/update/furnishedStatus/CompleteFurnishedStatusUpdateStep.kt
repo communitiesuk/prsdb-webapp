@@ -11,10 +11,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class CompleteFurnishedStatusUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateFurnishedStatusJourneyState>() {
     override fun mode(state: UpdateFurnishedStatusJourneyState): Complete = Complete.COMPLETE
 
@@ -29,6 +31,10 @@ class CompleteFurnishedStatusUpdateStepConfig(
             state.deleteJourney()
             throw ex
         }
+        propertyUpdateEmailService.sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            state.propertyId,
+            listOf("Whether the property is furnished"),
+        )
     }
 
     override fun resolveNextDestination(

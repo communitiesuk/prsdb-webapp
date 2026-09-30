@@ -451,7 +451,7 @@ class PropertyDetailsBeforePdjb939ViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals(
-            "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+            "forms.checkPropertyAnswers.propertyDetails.noLicensing.old",
             propertyRecordDeclaredNoLicense.fieldValue,
         )
 
@@ -466,7 +466,7 @@ class PropertyDetailsBeforePdjb939ViewModelTests {
             viewModelNullLicense.beforePdjb939LicensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
-        assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing", propertyRecordNullLicense.fieldValue)
+        assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing.old", propertyRecordNullLicense.fieldValue)
     }
 
     @Test

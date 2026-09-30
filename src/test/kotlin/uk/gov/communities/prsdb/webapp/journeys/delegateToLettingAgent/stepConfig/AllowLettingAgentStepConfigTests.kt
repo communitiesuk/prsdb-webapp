@@ -137,8 +137,7 @@ class AllowLettingAgentStepConfigTests {
         val stepConfig = createStepConfig()
 
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
-            .thenReturn(null)
+        whenever(mockPropertyOwnershipService.hasLettingAgent(PROPERTY_OWNERSHIP_ID)).thenReturn(false)
 
         assertTrue(stepConfig.beforeAttemptingToReachStep(mockJourneyState))
     }
@@ -148,8 +147,7 @@ class AllowLettingAgentStepConfigTests {
         val stepConfig = createStepConfig()
 
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess())
+        whenever(mockPropertyOwnershipService.hasLettingAgent(PROPERTY_OWNERSHIP_ID)).thenReturn(true)
 
         assertFalse(stepConfig.beforeAttemptingToReachStep(mockJourneyState))
     }

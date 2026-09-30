@@ -5,6 +5,9 @@ import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
@@ -25,6 +28,8 @@ interface GasSafetyState : JourneyState {
 }
 
 interface GasSafetyDetailState : JourneyState {
+    val beforePdjb1022HasGasSupplyStep: BeforePdjb1022HasGasSupplyStep
+    val beforePdjb1022HasGasCertStep: BeforePdjb1022HasGasCertStep
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep
     val gasCertIssueDateStep: GasCertIssueDateStep
@@ -38,6 +43,15 @@ interface GasSafetyDetailState : JourneyState {
 
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long?
+
+    // Unified accessors: resolve to the old (letting agent flag-off) or new (letting agent flag-on) step pair, so downstream
+    // consumers (CYA rows, save-step persistence, missing-compliance check) don't need to know which
+    // pair is active. See GasSafetyDetailsTask for the concrete implementation.
+    val gasSupplyOutcome: GasSupplyOutcome?
+    val gasSupplyOutcomeStep: JourneyStep.RequestableStep<*, *, *>
+    val gasCertOutcome: GasCertOutcome?
+    val gasCertOutcomeStep: JourneyStep.RequestableStep<*, *, *>
 
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->
@@ -60,4 +74,16 @@ interface GasSafetyDetailState : JourneyState {
     var highestAssignedGasMemberId: Int?
 
     fun getNextGasUploadMemberId(): Int = highestAssignedGasMemberId?.let { it + 1 } ?: 1
+}
+
+enum class GasSupplyOutcome {
+    HAS_SUPPLY,
+    NO_SUPPLY,
+    PROVIDE_LATER,
+}
+
+enum class GasCertOutcome {
+    HAS_CERTIFICATE,
+    NO_CERTIFICATE,
+    PROVIDE_LATER,
 }

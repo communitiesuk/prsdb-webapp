@@ -35,6 +35,7 @@ interface ElectricalSafetyDetailState : JourneyState {
 
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long?
 
     fun getElectricalCertificateExpiryDateIfReachable() =
         electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->

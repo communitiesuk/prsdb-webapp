@@ -117,6 +117,52 @@ You will need to include the following profiles:
 
 If you need to use notify, also add the `use-notify` profile.
 
+#### Seeding NFT (load test) data locally
+
+`NftDataSeeder` generates a realistic set of landlords, organisations, properties and property registrations for
+performance/load testing. It runs as a one-off task (not a web server) via `NftDataSeedingTaskApplicationRunner`,
+which calls `exitProcess()` once seeding completes — this is expected behaviour, not a crash.
+
+**Run configuration:** use (or copy) the `local-nft-seeder` Run Configuration in IntelliJ
+(`.run/local-nft-seeder.run.xml`). It activates the profiles `local`, `web-server-deactivated`,
+`nft-data-seeder`, and automatically runs `local_resources_up` (starts local Postgres/Redis via Docker) and
+`flywayClean-local-except-address` (resets the schema, preserving the address/local council reference data) before
+each run.
+
+To run from the CLI instead:
+
+```bash
+./gradlew flywayClean flywayMigrate   # reset the schema first
+SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bootRun
+```
+
+**Configuration** (`nft-seed.*` in `application.yml`, overridable via env vars, with smaller defaults for `local` in
+`application-local.yml`):
+
+| Property                    | Env var                        | `local` default | Purpose                                                                                                   |
+|------------------------------|---------------------------------|------------------|-------------------------------------------------------------------------------------------------------------|
+| `nft-seed.system-operators`   | `NFT_SEED_SYSTEM_OPERATORS`     | 5                | Number of system operator users to create.                                                                  |
+| `nft-seed.local-council-users`| `NFT_SEED_LOCAL_COUNCIL_USERS`  | 10               | Number of local council users to create.                                                                    |
+| `nft-seed.landlords`          | `NFT_SEED_LANDLORDS`            | 30               | Total number of landlords to create (individual + organisation, ~95%/5% split).                             |
+| `nft-seed.properties`         | `NFT_SEED_PROPERTIES`           | 45               | Total number of properties/property registrations to create.                                               |
+| `nft-seed.batch-size`         | `NFT_SEED_BATCH_SIZE`           | 10               | Batch size for bulk inserts.                                                                                 |
+| `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
+| `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
+| `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 500              | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+
+To test at a larger, more realistic scale locally (e.g. to catch batching/performance issues that don't show up at
+the small `local` defaults), override the scale-related env vars before running, e.g.:
+
+```bash
+export NFT_SEED_LANDLORDS=500
+export NFT_SEED_PROPERTIES=800
+export NFT_SEED_GENERATED_ADDRESSES=2000
+```
+
+A regression test suite covering these checks (`NftDataSeederTests`, under `src/test/.../services/`) runs the
+seeder directly against a testcontainer database at a small scale, so it doesn't need Docker profile activation and
+doesn't hit the `exitProcess()` behaviour described above.
+
 ### Scripts
 
 Utility scripts are in the `scripts/` directory.
@@ -355,8 +401,8 @@ The following steps of this guide will refer to the `main` -> `test` workflow, t
 ### Cadence
 
 At least once a sprint we aim to release changes into the Test environment. This process happens automatically when
-changes are merged to the `test` branch. Merges into `test` should be made as normal (not squash) merges to ensure a
-common git history between `main` and `test`.
+changes are merged to the `test` branch. Merges into `test`, `nft` and `production` must use normal (not squash) merges
+to keep a common git history. PRs into `main` still use the merge queue and squash merges.
 
 ### Release infra before webapp
 
@@ -369,6 +415,8 @@ The normal process is simply to raise a PR merging `main` into `test`, name the 
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
 Use the same release number between the webapp repo and infra repo.
+
+Normal code releases do not need a separate release branch unless the PR has [merge conflicts](#merge-conflicts).
 
 Go and find the release tracking Jira ticket:
 
@@ -393,6 +441,19 @@ In the rare case that there are changes on `main` that we do not want to release
 - Merge the new branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+#### Merge conflicts
+
+If a release PR has merge conflicts, resolve them on a separate branch rather than on the source branch:
+
+- Create a branch from `test`, e.g. `release/main-to-test-52`
+- Merge `main` into the branch and resolve the conflicts
+- Raise a replacement PR from the branch into `test`, keeping the release title and notes. Update the link on the
+  release ticket and close the original PR
+- Merge the PR using a **normal merge, not squash**
+
+There is no need to merge the resolution back into `main`, because the normal merge into `test` keeps the history
+needed for the next release.
 
 #### Hotfixes
 
@@ -434,10 +495,9 @@ not exist yet, create that release and associate the flag as part of the `main` 
 To make a feature release (the example uses `test`; other environments follow the same steps):
 
 - **Make the change on `main` first.** Raise a normal PR that edits _only_ the target environment's flag file, as a
-  standalone commit with no code changes, and merge it to `main`. This keeps `main` the single source of truth so the
-  next code release stays consistent. The change is inert for test/nft/production until it is released — it only takes
-  effect immediately on integration (which deploys `main`). Use one commit per environment so each cherry-pick stays
-  environment-specific.
+  standalone config change, and merge it through the usual queue and squash process. The change is inert for
+  test/nft/production until it is released — it only takes effect immediately on integration (which deploys `main`).
+  Use a separate PR per environment so each config change can be cherry-picked separately.
 - Create a branch from the **target environment branch** (not `main`), e.g. `release/feature-test-3` for the 3rd feature
   release to `test`.
 - Cherry-pick _only_ the flag commit from `main` onto the new branch. Because the branch is based on `test`, the diff
@@ -447,6 +507,9 @@ To make a feature release (the example uses `test`; other environments follow th
   description, state which flag(s)/release(s) change and link the `main` PR.
 - Merge with a normal merge (not a squash commit), as with other merges into environment branches. No merge back into
   `main` is needed — the change already originated there.
+
+Feature releases can cause conflicts in a later code release, for example if old flags have since been removed.
+If this happens, follow the steps under [Merge conflicts](#merge-conflicts).
 
 Each environment is released independently; there is no required ordering, so a flag can be feature-released straight to
 production if it were neceesary (subject to the prod approval checks in [Feature flag releases](#feature-flag-releases) below).

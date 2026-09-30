@@ -29,7 +29,7 @@ class AllowLettingAgentStepConfig(
     override fun mode(state: DelegateToLettingAgentJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun beforeAttemptingToReachStep(state: DelegateToLettingAgentJourneyState): Boolean =
-        lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId) == null
+        !propertyOwnershipService.hasLettingAgent(state.propertyOwnershipId)
 
     override fun enrichSubmittedDataBeforeValidation(
         state: DelegateToLettingAgentJourneyState,

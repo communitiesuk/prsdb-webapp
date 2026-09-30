@@ -12,11 +12,9 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -39,12 +37,8 @@ class LandlordDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
-    private val featureFlagManager: FeatureFlagManager,
     private val messageSource: MessageSource,
 ) {
-    private val orgLandlordsEnabled: Boolean
-        get() = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
-
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
@@ -52,12 +46,6 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                if (!orgLandlordsEnabled) {
-                    throw ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Organisation landlords are not currently available",
-                    )
-                }
                 getOrgLandlordDetails(landlord, model)
             }
 
@@ -75,19 +63,13 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val isOrgLandlordRegistrationEnabled = orgLandlordsEnabled
-        val landlordViewModel =
-            LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
 
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
 
-        return if (isOrgLandlordRegistrationEnabled) {
-            "individualLandlordDetailsView"
-        } else {
-            "individualLandlordDetailsViewBeforePdjb1492"
-        }
+        return "individualLandlordDetailsView"
     }
 
     private fun getOrgLandlordDetails(
@@ -143,9 +125,6 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                if (!orgLandlordsEnabled) {
-                    throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
-                }
                 getLocalCouncilOrgLandlordDetails(landlord, model)
             }
 

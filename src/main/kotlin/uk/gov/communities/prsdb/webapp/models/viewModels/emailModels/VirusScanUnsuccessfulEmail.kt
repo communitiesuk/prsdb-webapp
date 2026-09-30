@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import java.net.URI
 
+// TODO PDJB-1701: Remove recipientName and landlordDashboardUrl once Notify template V3 is live
 data class VirusScanUnsuccessfulEmail(
     val certificateType: String,
     val recipientName: String,

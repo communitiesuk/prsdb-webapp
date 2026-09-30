@@ -17,11 +17,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedr
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedrooms.UpdateBedroomsJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
 class CompleteBedroomsUpdateStepConfigTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateBedroomsJourneyState
@@ -44,6 +48,7 @@ class CompleteBedroomsUpdateStepConfigTests {
         stepConfig =
             CompleteBedroomsUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
     }
 
@@ -64,6 +69,10 @@ class CompleteBedroomsUpdateStepConfigTests {
             id = propertyId,
             numberOfBedrooms = numberOfBedrooms,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+        verify(mockPropertyUpdateEmailService).sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            propertyId,
+            listOf("The number of bedrooms"),
         )
     }
 

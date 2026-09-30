@@ -39,4 +39,5 @@ class ElectricalSafetyTask(
 interface ElectricalSafetyDependencies {
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long? get() = null
 }

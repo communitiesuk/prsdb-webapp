@@ -3,10 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
@@ -24,11 +22,6 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
-
-    @BeforeEach
-    fun setup() {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
 
     @Test
     fun `Companies House change link opens the is-registered-company update page`(page: Page) {

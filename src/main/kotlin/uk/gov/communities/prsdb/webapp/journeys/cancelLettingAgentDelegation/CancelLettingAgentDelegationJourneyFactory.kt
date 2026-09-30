@@ -19,12 +19,12 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.ste
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
 class CancelLettingAgentDelegationJourneyFactory(
     private val stateFactory: ObjectFactory<CancelLettingAgentDelegationJourney>,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
@@ -60,11 +60,12 @@ class CancelLettingAgentDelegationJourneyFactory(
     }
 
     private fun getInitializedState(propertyOwnershipId: Long): CancelLettingAgentDelegationJourney {
-        lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
-            ?: throw ResponseStatusException(
+        if (!propertyOwnershipService.hasLettingAgent(propertyOwnershipId)) {
+            throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "No letting agent delegation found for property ownership $propertyOwnershipId",
             )
+        }
 
         val state = stateFactory.getObject()
         state.initialiseFromPropertyOwnershipId(propertyOwnershipId)

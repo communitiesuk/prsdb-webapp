@@ -1,21 +1,48 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import java.security.Principal
+import java.time.Instant
+import java.util.UUID
 
 abstract class AbstractPropertyOwnershipUpdateJourneyState(
-    journeyStateService: JourneyStateService,
+    private val journeyStateService: JourneyStateService,
     private val updateJourneyName: String,
 ) : AbstractJourneyState(journeyStateService) {
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
+    fun discardIfLastModifiedDateChanged(
+        seed: Any?,
+        currentLastModifiedDate: Instant,
+    ) {
+        val journeyId = generateJourneyId(seed)
+        val storedLastModifiedDate = getStoredLastModifiedDateOrNull(journeyId)
+        if (storedLastModifiedDate != null && storedLastModifiedDate != currentLastModifiedDate.toString()) {
+            journeyStateService.deleteState(journeyId)
+        }
+    }
+
+    private fun getStoredLastModifiedDateOrNull(journeyId: String): String? =
+        journeyStateService.getStoredStringValueOrNull(journeyId, LAST_MODIFIED_DATE_KEY)
+
+    fun initialiseOrRestoreStateReinitialisingIfOutdated(
+        seed: Any?,
+        currentLastModifiedDate: Instant,
+    ): String {
+        discardIfLastModifiedDateChanged(seed, currentLastModifiedDate)
+        return initializeOrRestoreState(seed)
+    }
+
     override fun generateJourneyId(seed: Any?): String {
         val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
-
-        return super.generateJourneyId(
-            ownershipUserPair?.let {
-                generateSeedForPropertyOwnershipAndUser(it.first, it.second, updateJourneyName)
-            },
-        )
+        val token: UUID? = convertSeedToTokenOrNull(seed)
+        val seedString =
+            when {
+                ownershipUserPair != null ->
+                    generateSeedForPropertyOwnershipAndUser(ownershipUserPair.first, ownershipUserPair.second, updateJourneyName)
+                token != null -> generateSeedForToken(token, updateJourneyName)
+                else -> null
+            }
+        return super.generateJourneyId(seedString)
     }
 
     private fun convertSeedToOwnershipUserPairOrNull(seed: Any?): Pair<Long, Principal>? =
@@ -27,11 +54,20 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
             }
         }
 
+    private fun convertSeedToTokenOrNull(seed: Any?): UUID? = seed as? UUID
+
     companion object {
+        const val LAST_MODIFIED_DATE_KEY = "lastModifiedDate"
+
         fun generateSeedForPropertyOwnershipAndUser(
             ownershipId: Long,
             user: Principal,
             updateJourneyName: String,
         ): String = "Update $updateJourneyName for property $ownershipId by user ${user.name}"
+
+        fun generateSeedForToken(
+            token: UUID,
+            updateJourneyName: String,
+        ): String = "Update $updateJourneyName with token $token"
     }
 }

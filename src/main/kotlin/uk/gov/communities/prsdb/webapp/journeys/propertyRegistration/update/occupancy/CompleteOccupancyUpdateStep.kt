@@ -3,8 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occ
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -23,12 +22,12 @@ class CompleteOccupancyUpdateStepConfig(
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
-    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractInternalStepConfig<Complete, UpdateOccupancyJourneyState>() {
     override fun mode(state: UpdateOccupancyJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateOccupancyJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(state.propertyId)
         try {
             propertyOwnershipService.updateIsOccupied(
                 id = state.propertyId,
@@ -39,16 +38,15 @@ class CompleteOccupancyUpdateStepConfig(
             state.deleteJourney()
             throw ex
         }
-        sendEmails(state, isOccupied)
+        sendEmails(state, isOccupied, lettingAgentAccess)
     }
 
     private fun sendEmails(
         state: UpdateOccupancyJourneyState,
         isOccupied: Boolean,
+        lettingAgentAccess: LettingAgentAccess?,
     ) {
-        val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyId)
-
-        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) && !isOccupied && lettingAgentAccess != null) {
+        if (!isOccupied && lettingAgentAccess != null) {
             removeLettingAgentDelegationAndSendEmails(state.propertyId, lettingAgentAccess.invitedEmail)
         } else {
             propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("Whether the property is occupied by tenants"))
