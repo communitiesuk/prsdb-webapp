@@ -20,7 +20,7 @@ class MockGovUkPayControllerTests {
 
     @BeforeEach
     fun setup() {
-        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080")).build()
+        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080", objectMapper)).build()
     }
 
     private fun createBody(
