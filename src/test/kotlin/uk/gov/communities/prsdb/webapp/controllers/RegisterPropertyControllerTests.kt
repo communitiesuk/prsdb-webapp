@@ -169,7 +169,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation hides the what you need to do next section when phase two is enabled`() {
+    fun `getConfirmation hides the what you need to do next section`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -198,6 +198,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            // TODO: PDJB-1742: Remove this assertion when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
             .andExpect(MockMvcResultMatchers.model().attribute("propertyRegistrationPhaseTwoEnabled", true))
             .andExpect(
                 MockMvcResultMatchers.model().attribute(
@@ -217,7 +218,7 @@ class RegisterPropertyControllerTests(
     // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation uses the before pdjb-939 compliance block when phase two is disabled`() {
+    fun `getConfirmation uses compliance block when phase two is disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
