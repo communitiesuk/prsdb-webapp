@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.ste
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(REMOVE_LETTING_AGENT_ROUTE)
 class CancelLettingAgentDelegationController(

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
@@ -37,7 +37,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getAllRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
+    fun `getAllRolesForSubjectId returns ROLE_INDIVIDUAL_LANDLORD for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val landlord = MockLandlordData.createIndividualLandlord(baseUser)
@@ -49,7 +49,7 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals(ROLE_LANDLORD, roles[0])
+        Assertions.assertEquals(ROLE_INDIVIDUAL_LANDLORD, roles[0])
     }
 
     @Test
@@ -105,7 +105,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
+    fun `getLandlordRolesForSubjectId returns ROLE_INDIVIDUAL_LANDLORD for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val landlord = MockLandlordData.createIndividualLandlord(baseUser)
@@ -117,18 +117,18 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertEquals(1, roles.size)
-        Assertions.assertEquals(ROLE_LANDLORD, roles[0])
+        Assertions.assertEquals(ROLE_INDIVIDUAL_LANDLORD, roles[0])
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for an organisation landlord user`() {
+    fun `getLandlordRolesForSubjectId returns ROLE_INDIVIDUAL_LANDLORD for an organisation landlord user`() {
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val organisationalLandlord = OrganisationalLandlord()
         whenever(userToLandlordService.getLandlordForBaseUserIdOrNull(baseUser.id)).thenReturn(organisationalLandlord)
 
         val roles = userRolesService.getLandlordRolesForSubjectId(baseUser.id)
 
-        Assertions.assertEquals(listOf(ROLE_LANDLORD), roles)
+        Assertions.assertEquals(listOf(ROLE_INDIVIDUAL_LANDLORD), roles)
     }
 
     @Test

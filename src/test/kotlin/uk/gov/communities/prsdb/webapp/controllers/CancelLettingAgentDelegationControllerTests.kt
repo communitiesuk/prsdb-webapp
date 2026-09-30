@@ -81,7 +81,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 
@@ -91,7 +91,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -104,7 +104,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -115,7 +115,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -130,7 +130,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when property ownership does not match`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -166,7 +166,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 
@@ -179,7 +179,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns the step's model and view for an authorised landlord`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -195,7 +195,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for an unknown step name`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -209,7 +209,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
         whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
@@ -226,7 +226,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 when no letting agent was removed in this session`() {
         mockAuthorizedProperty()
         whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
@@ -238,7 +238,7 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 

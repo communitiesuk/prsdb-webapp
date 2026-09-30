@@ -21,7 +21,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_OCCUPANCY_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class UpdateOccupancyController(
     private val journeyFactory: UpdateOccupancyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
