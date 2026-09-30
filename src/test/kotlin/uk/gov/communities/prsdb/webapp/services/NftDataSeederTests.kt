@@ -215,7 +215,8 @@ class NftDataSeederTests(
 
             val subjectIds = users.map { it.baseUser.id }
             assertEquals(subjectIds.size, subjectIds.distinct().size) {
-                "Expected all organisational landlord users for organisation landlord ${organisationLandlord.id} to have distinct subject identifiers"
+                "Expected all organisational landlord users for organisation landlord ${organisationLandlord.id} " +
+                    "to have distinct subject identifiers"
             }
 
             users.forEach { user -> assertTrue(prsdbUserRepository.existsById(user.baseUser.id)) }
