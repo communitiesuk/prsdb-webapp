@@ -18,7 +18,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
@@ -225,11 +225,11 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = userWithoutEmail,
                         savedJourneyState = savedJourneyState1,
                     ),
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),
@@ -323,11 +323,11 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = userWithoutEmail,
                         savedJourneyState = savedJourneyState1,
                     ),
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),
@@ -400,11 +400,11 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user1,
                         savedJourneyState = savedJourneyState1,
                     ),
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),
@@ -433,7 +433,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0))
             .thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user1,
                         savedJourneyState = savedJourneyState1,
                     ),
@@ -443,7 +443,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 1))
             .thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),

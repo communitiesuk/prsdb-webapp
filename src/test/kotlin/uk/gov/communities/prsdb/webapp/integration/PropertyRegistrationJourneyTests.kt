@@ -37,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
@@ -282,7 +282,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -2676,7 +2676,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
