@@ -1,4 +1,4 @@
-<a th:fragment="summaryRowActionLink(action, heading)" class="govuk-link" th:href="@{${action.url}}">
+<a th:fragment="summaryRowActionLink(action, heading, optionalHeadingParam)" class="govuk-link" th:href="@{${action.url}}">
     <span th:text="#{${action.text}}">forms.links.change</span>
-    <span class="govuk-visually-hidden" th:text="#{${heading}}">fieldHeading</span>
+    <span class="govuk-visually-hidden" th:text="#{${heading}(${optionalHeadingParam})}">fieldHeading</span>
 </a>

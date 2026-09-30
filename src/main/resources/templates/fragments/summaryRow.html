@@ -33,11 +33,11 @@
     </dd>
     <dd th:if="${actions != null and !actions.isEmpty()}" class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <th:block th:if="${actions.size() == 1}">
-            <a th:replace="~{fragments/summaryRowActionLink :: summaryRowActionLink(${actions[0]}, ${heading})}"></a>
+            <a th:replace="~{fragments/summaryRowActionLink :: summaryRowActionLink(${actions[0]}, ${heading}, ${optionalHeadingParam})}"></a>
         </th:block>
         <ul th:if="${actions.size() > 1}" class="govuk-summary-list__actions-list">
             <li th:each="action: ${actions}" class="govuk-summary-list__actions-list-item">
-                <a th:replace="~{fragments/summaryRowActionLink :: summaryRowActionLink(${action}, ${heading})}"></a>
+                <a th:replace="~{fragments/summaryRowActionLink :: summaryRowActionLink(${action}, ${heading}, ${optionalHeadingParam})}"></a>
             </li>
         </ul>
     </dd>
