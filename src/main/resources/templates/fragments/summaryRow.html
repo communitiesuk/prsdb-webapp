@@ -1,5 +1,6 @@
 <div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction, tagColour, optionalValueParam, anyRowHasActions)" class="govuk-summary-list__row"
-     th:classappend="${withoutBottomBorder} ? 'govuk-summary-list__row--no-border' : ''">
+     th:classappend="${withoutBottomBorder} ? 'govuk-summary-list__row--no-border' : ''"
+     th:attrappend="class=(${actions == null or actions.isEmpty()} and ${anyRowHasActions}) ? ' govuk-summary-list__row--no-actions'">
     <dt class="govuk-summary-list__key" th:text="#{${heading}(${optionalHeadingParam})}">
     </dt>
     <dd th:if="${values != null}" class="govuk-summary-list__value" >
@@ -41,5 +42,4 @@
             </li>
         </ul>
     </dd>
-    <span th:if="${(actions == null or actions.isEmpty()) and anyRowHasActions}" class="govuk-summary-list__actions"></span>
 </div>
