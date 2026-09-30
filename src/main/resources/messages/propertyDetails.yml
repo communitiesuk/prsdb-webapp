@@ -15,6 +15,18 @@ lettingAgentPanel:
     heading: Your letting agent or property manager can provide details for this property record
     body: They can keep this property’s licensing, compliance certificates and tenancy details up to date.
     link: Remove your letting agent or property manager
+lettingAgentView:
+  title: Property details
+  caption: Provide details for a landlord’s rental property
+  provideDetailsInset: Provide all details before <strong>{0}</strong> to keep this property registered.
+  licensing:
+    heading: Property licensing
+  tenancy:
+    heading: Tenancy details
+  complianceCertificates:
+    heading: Compliance certificates
+  feedback:
+    body: Once you have completed one or more of the actions on this page, please click here to provide feedback about your experience
 landlordDetails:
   heading: Landlords
   registeredLandlords:
@@ -160,6 +172,10 @@ propertyRecord:
   ownership:
     heading: Ownership
     ownershipType: How do you own this property?
+  correspondence:
+    heading: Who the council should contact
+    emailAddress: Contact email address
+    address: Contact address
   occupation:
     heading: Occupied by tenants
     isOccupied: Is this property occupied by tenants?
@@ -247,3 +263,8 @@ resendInvitation:
     title: Success
     heading: New invitation email sent to {0}
     body: They have 28 days to accept this invitation.
+updateSuccessBanner:
+  title: Success
+  compliance: Compliance certificates updated.
+  tenancyDetails: Tenancy details updated.
+  licensing: Property licensing updated.

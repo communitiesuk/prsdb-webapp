@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -50,6 +51,16 @@ class GasSafetyViewModelFactory(
                     }
 
                     in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
+                        if (status == ComplianceCertStatus.PROVIDE_LATER &&
+                            featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+                        ) {
+                            addRow(
+                                key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                                value = getMissingCertValue(status, propertyCompliance),
+                            )
+                            return@apply
+                        }
+
                         addRow(
                             key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
                             value = "commonText.yes",
@@ -87,7 +98,9 @@ class GasSafetyViewModelFactory(
                     )
                 }
 
-                val visibleUploads = propertyCompliance.gasSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
+                val (uploadsDeletedByVirusScan, visibleUploads) =
+                    propertyCompliance.gasSafetyFileUploads.partition { it.status == FileUploadStatus.DELETED }
+
                 if (visibleUploads.isNotEmpty()) {
                     addFileUploadRows(
                         visibleUploads = visibleUploads,
@@ -101,6 +114,11 @@ class GasSafetyViewModelFactory(
                         noUploadMessageKey = "",
                         fallbackFileName = "gas_safety_certificate",
                         uploadService = uploadService,
+                    )
+                } else if (uploadsDeletedByVirusScan.isNotEmpty()) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.gasSafety.yourCertificate",
+                        value = "propertyCompliance.uploadedFile.virusScanFailed",
                     )
                 }
             }.toList()

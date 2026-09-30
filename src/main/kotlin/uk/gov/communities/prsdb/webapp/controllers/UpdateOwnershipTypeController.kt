@@ -58,7 +58,12 @@ class UpdateOwnershipTypeController(
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            initialiseJourney = {
+                journeyFactory.initializeJourneyState(
+                    Pair(propertyOwnershipId, principal),
+                    propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
+                )
+            },
             dispatch = dispatch,
         )
 

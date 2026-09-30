@@ -45,6 +45,11 @@ plausible:
   api-key: test-api-key
   transaction-event-start-date: 2099-01-01
 
+gov-uk-pay:
+  base-url: https://gov-uk-pay.test
+  api-key: test-api-key
+  annual-payment-amount-in-pence: 2000
+
 cloudwatch-metrics:
   ecs:
     namespace: AWS/ECS
@@ -81,10 +86,10 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-03-30"
-    - name: "pdjb-1097-organisation-landlord-registration"
+    - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
       expiry-date: "2026-12-31"
-    - name: "pdjb-939-property-registration-restructure-and-skipping"
+    - name: "pdjb-939-property-registration-phase-two"
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1053-dashboard-nav-link"
@@ -95,4 +100,13 @@ features:
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1040-correspondence-address"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1009-payments"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-926-landlord-dashboard-update"
+      enabled: false
       expiry-date: "2026-12-31"

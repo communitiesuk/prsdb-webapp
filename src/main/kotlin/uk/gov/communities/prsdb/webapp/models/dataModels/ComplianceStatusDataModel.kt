@@ -35,6 +35,9 @@ data class ComplianceStatusDataModel(
     val isAllValid: Boolean
         get() = certStatuses.all { it in ComplianceCertStatus.VALID_STATUSES }
 
+    val isAnyProvideLater: Boolean
+        get() = certStatuses.any { it == ComplianceCertStatus.PROVIDE_LATER }
+
     val displayAnyMissingOrFaulty: Boolean
         get() = isOccupied && certStatuses.any { it in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES }
 

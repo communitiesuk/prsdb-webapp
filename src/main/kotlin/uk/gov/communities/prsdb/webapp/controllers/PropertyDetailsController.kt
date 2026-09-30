@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -33,11 +34,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -54,7 +55,6 @@ class PropertyDetailsController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
-    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -68,13 +68,20 @@ class PropertyDetailsController(
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
         val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
-        val (propertyDetails, viewName) = getPropertyDetailsViewModelAndView(propertyOwnership, provideLaterEnabled, isLandlordView = true)
+        val (propertyDetails, viewName) =
+            getPropertyDetailsViewModelAndView(
+                propertyOwnership,
+                provideLaterEnabled,
+                showCorrespondenceSection,
+                isLandlordView = true,
+            )
 
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
@@ -101,7 +108,7 @@ class PropertyDetailsController(
         modelAndView.addObject("isLandlordView", true)
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             modelAndView.addObject("showLettingAgentPanel", true)
-            val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
+            val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
             modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
             modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
             if (propertyOwnership.isOccupied) {
@@ -184,8 +191,15 @@ class PropertyDetailsController(
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
         val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
-        val (propertyDetails, viewName) = getPropertyDetailsViewModelAndView(propertyOwnership, provideLaterEnabled, isLandlordView = false)
+        val (propertyDetails, viewName) =
+            getPropertyDetailsViewModelAndView(
+                propertyOwnership,
+                provideLaterEnabled,
+                showCorrespondenceSection,
+                isLandlordView = false,
+            )
 
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
@@ -214,7 +228,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
@@ -255,11 +269,17 @@ class PropertyDetailsController(
     private fun getPropertyDetailsViewModelAndView(
         propertyOwnership: PropertyOwnership,
         provideLaterEnabled: Boolean,
+        showCorrespondenceSection: Boolean,
         isLandlordView: Boolean,
     ): Pair<PropertyDetailsViewModelBase, String> =
         if (provideLaterEnabled) {
             Pair(
-                PropertyDetailsViewModel(propertyOwnership, isLandlordView, messageSource),
+                PropertyDetailsViewModel(
+                    propertyOwnership,
+                    isLandlordView,
+                    messageSource,
+                    showCorrespondenceSection,
+                ),
                 PROPERTY_DETAILS_VIEW,
             )
         } else {

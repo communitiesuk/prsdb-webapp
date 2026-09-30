@@ -2,13 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
@@ -43,11 +41,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
     @Autowired
     lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
-
-    @BeforeEach
-    fun disableOrganisationLandlordRegistrationFlag() {
-        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
@@ -113,6 +106,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val phoneNumPage = assertPageIs(page, PhoneNumberFormPageAcceptJointLandlordInvitation::class)
             phoneNumPage.submitPhoneNumber("07123456789")
 
+            val landlordTypePage = assertPageIs(page, LandlordTypeFormPageAcceptJointLandlordInvitation::class)
+            landlordTypePage.submitIndividual()
+
             val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageAcceptJointLandlordInvitation::class)
             countryOfResidencePage.submitUk()
 
@@ -149,7 +145,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         fun `User with a valid token can accept the invitation, register as an organisation landlord and reach a confirmation page`(
             page: Page,
         ) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
             val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
             whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 

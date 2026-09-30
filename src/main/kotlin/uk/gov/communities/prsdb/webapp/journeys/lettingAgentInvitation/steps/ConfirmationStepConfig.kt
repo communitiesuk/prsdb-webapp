@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import java.util.UUID
 
 @JourneyFrameworkComponent
 class ConfirmationStepConfig(
@@ -16,9 +17,8 @@ class ConfirmationStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: LettingAgentInvitationJourneyState): Map<String, Any?> {
-        val token = requireNotNull(state.invitationToken) { "Invitation token is missing from the journey state" }
-        // The letting agent returns to their property using the same invitation link that was emailed to them.
-        val updateLink = absoluteUrlProvider.buildLettingAgentInvitationUri(token).toString()
+        val updateLink =
+            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(UUID.fromString(state.invitationToken)).toString()
         return mapOf(
             "summaryListRows" to
                 listOf(

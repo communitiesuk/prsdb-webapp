@@ -61,6 +61,16 @@ confirmation:
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
       completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they’ve provided this information.
+  provideMissingDetails:
+    heading: Providing missing details
+    paragraph:
+        one: 'You still need to provide the:'
+        two: To keep the property registered, provide these details before {0}.
+    licensingDetails: licensing details
+    gasSafetyCertificate: gas safety certificate
+    electricalSafetyCertificate: electrical safety certificate
+    epc: energy performance certificate (EPC)
+    tenancyDetails: tenancy details
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
@@ -84,6 +94,7 @@ taskList:
     heading: About your property
     propertyDetails: Property details
     ownershipAndLandlords: Ownership and landlords
+    correspondence: Who the council should contact
     occupied: Tell us if your property’s occupied
   rentedOut:
     heading: How your property’s rented out
@@ -97,9 +108,11 @@ taskList:
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
+    headingWithPayment: Submit and pay
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers
+    checkAnswersWithPayment: Submit and pay
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
 checkAnswers:
@@ -179,6 +192,28 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+correspondenceEmail:
+  heading: Where should the council send emails?
+  hint: This is the email address the council will use if they need to contact someone about the property
+  radios:
+    error:
+      missing: Select which email address the council should send emails to
+    option:
+      accountEmail:
+        label: The email address from my account
+      differentEmail:
+        label: A different email address (must belong to you or another landlord)
+        input:
+          label: Email address
+          error:
+            missing: Enter an email address
+            invalidFormat: Enter an email address in the correct format, like name@example.com
+paymentOutcome:
+  # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
+  fieldSetHeading: TODO PDJB-993 payment outcome internal step
+  radios:
+    error:
+      missing: Select a payment outcome
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'

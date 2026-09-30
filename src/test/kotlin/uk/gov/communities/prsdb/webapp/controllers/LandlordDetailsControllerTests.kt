@@ -11,8 +11,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -34,9 +32,6 @@ class LandlordDetailsControllerTests(
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
 
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
     @Nested
     inner class GetUserLandlordDetailsTests {
         @Test
@@ -56,28 +51,9 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getUserLandlordDetails returns 200 for a valid request from a landlord`() {
+        fun `getUserLandlordDetails returns 200 with the current view for a valid request from a landlord`() {
             val landlord = MockLandlordData.createIndividualLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                    landlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
-                ),
-            ).thenReturn(emptyList())
-
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
-                status { isOk() }
-                model { attributeExists("landlord") }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getUserLandlordDetails returns the redesigned view when the org landlord flag is enabled`() {
-            val landlord = MockLandlordData.createIndividualLandlord()
-            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
                     landlord,
@@ -88,25 +64,7 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
                 view { name("individualLandlordDetailsView") }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getUserLandlordDetails returns the old view when the org landlord flag is disabled`() {
-            val landlord = MockLandlordData.createIndividualLandlord()
-            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(false)
-            whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                    landlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
-                ),
-            ).thenReturn(emptyList())
-
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
-                status { isOk() }
-                view { name("individualLandlordDetailsViewBeforePdjb1492") }
+                model { attributeExists("landlord") }
             }
         }
 
@@ -115,7 +73,6 @@ class LandlordDetailsControllerTests(
         fun `getUserLandlordDetails returns the org details view with shell attributes for an organisation landlord`() {
             val orgLandlord = MockLandlordData.createOrgLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
                     orgLandlord,
@@ -141,18 +98,6 @@ class LandlordDetailsControllerTests(
                         "backUrl",
                     )
                 }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getUserLandlordDetails returns 404 for an organisation landlord when the org landlord flag is disabled`() {
-            val orgLandlord = MockLandlordData.createOrgLandlord()
-            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(false)
-
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
-                status { isNotFound() }
             }
         }
     }
@@ -192,7 +137,19 @@ class LandlordDetailsControllerTests(
         fun `getLandlordDetails returns 200 for a valid request from an LC user`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
+                view { name("localCouncilLandlordDetailsView") }
                 model { attributeExists("landlord") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails returns 404 when the landlord does not exist`() {
+            val unknownLandlordId = landlord.id + 1
+            whenever(landlordService.retrieveLandlordById(unknownLandlordId)).thenReturn(null)
+
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(unknownLandlordId)).andExpect {
+                status { isNotFound() }
             }
         }
 
@@ -224,8 +181,6 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getLandlordDetails returns the LC org details view for an organisation landlord`() {
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
-
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
@@ -241,21 +196,9 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `getLandlordDetails returns the LC org details view for an LC admin`() {
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
-
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getLandlordDetails returns 404 for an organisation landlord when the org landlord flag is disabled`() {
-            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(false)
-
-            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
-                status { isNotFound() }
             }
         }
     }

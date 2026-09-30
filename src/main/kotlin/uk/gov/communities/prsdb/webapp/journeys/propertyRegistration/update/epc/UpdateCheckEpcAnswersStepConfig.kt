@@ -32,6 +32,7 @@ class UpdateCheckEpcAnswersStepConfig(
             "exemptionReasonRows" to factory.createExemptionReasonRows(),
             "nonEpcRows" to factory.createNonEpcRows(),
             "insetTextKey" to factory.getInsetTextKey(),
+            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "submitButton" to "transactionSubmitButton",
         )
     }

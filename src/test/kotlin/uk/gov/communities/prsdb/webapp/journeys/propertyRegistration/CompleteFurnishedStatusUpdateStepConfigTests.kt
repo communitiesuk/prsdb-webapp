@@ -18,11 +18,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
 class CompleteFurnishedStatusUpdateStepConfigTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateFurnishedStatusJourneyState
@@ -45,6 +49,7 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
         stepConfig =
             CompleteFurnishedStatusUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
     }
 
@@ -65,6 +70,10 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
             id = propertyId,
             furnishedStatus = furnishedStatus,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+        verify(mockPropertyUpdateEmailService).sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            propertyId,
+            listOf("Whether the property is furnished"),
         )
     }
 

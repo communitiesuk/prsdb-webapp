@@ -10,6 +10,6 @@
         <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'exemptionReason', #{${fieldSetHeading}}, null)}">
             <th:block th:replace="~{fragments/forms/radios :: radios(null, 'exemptionReason', null, ${radioOptions})}"></th:block>
         </th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
     </th:block>
 </html>

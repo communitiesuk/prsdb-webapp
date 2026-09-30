@@ -12,6 +12,7 @@ buttons:
   confirm: Confirm
   confirmAndContinue: Confirm and continue
   completeRegistration: Complete registration
+  submitAndPay: Submit and pay
   useThisAddress: Use this address
   submit: Submit
   confirmAndSubmitUpdate: Confirm and submit update
@@ -555,7 +556,7 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
-  warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
+  warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
   aboutYourProperty:
     heading: About your property
   propertyDetails:
@@ -566,9 +567,9 @@ checkPropertyAnswers:
     bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
-    noLicensing: None
-    restructureAndSkipping:
-      noLicensing: This property does not need a licence
+    noLicensing:
+      old: None
+      restructureAndSkipping: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -588,7 +589,6 @@ checkPropertyAnswers:
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later
-    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
     unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
     bedrooms: Number of bedrooms
@@ -608,6 +608,7 @@ checkPropertyAnswers:
     heading: How your property’s rented out
     subheading: Who will provide these details
     bodyText: "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:"
+    unoccupiedBodyText: When your property becomes occupied, you can choose for your letting agent or property manager to provide this section for you. They can also keep these details up to date.
     values:
       landlord:
         label: I will provide these details
@@ -620,6 +621,9 @@ checkPropertyAnswers:
         label: Letting agent or property manager’s email address
 update:
   email:
+    title: Update your email address
+    body: We’ll use this to send you information and updates.
+    insetText: This will not change any email addresses we show to councils on your property registrations. Check your registrations are correct after making this update.
     fieldSetHeading: What is your updated email address?
   name:
     fieldSetHeading: Update your full name
@@ -673,6 +677,9 @@ update:
       summaryName: You updated the tenancy and rent details for this property
     notOccupied:
       summaryName: You have updated whether the property is occupied by tenants
+  checkCorrespondenceAddress:
+    summaryName: You updated who the council should contact for this property
+    postalAddress: Postal address
   warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.

@@ -6,6 +6,7 @@
 <!--/*@thymesVar id="detailSummary" type="java.lang.String"*/-->
 <!--/*@thymesVar id="detailMainText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="detailAdditionalContent" type="java.util.Map"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <form id="form-content" th:remove="tag">
@@ -20,6 +21,6 @@
             <th:block th:replace="~{fragments/hmoDetailContent :: hmoDetailContent(${detailAdditionalContent})}"></th:block>
         </div>
     </details>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{'forms.buttons.saveAndContinue'})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </form>
 </html>

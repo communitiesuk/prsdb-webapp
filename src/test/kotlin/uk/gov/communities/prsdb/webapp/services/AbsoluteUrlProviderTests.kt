@@ -3,8 +3,9 @@ package uk.gov.communities.prsdb.webapp.services
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import java.util.UUID
 
 class AbsoluteUrlProviderTests {
     @Test
@@ -53,14 +54,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
-    fun `buildLettingAgentInvitationUri prepends https when configured base URL has no scheme`() {
+    fun `buildLettingAgentPropertyDetailsUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd1111a")
 
-        val uri = provider.buildLettingAgentInvitationUri("token-abc")
+        val uri = provider.buildLettingAgentPropertyDetailsUri(token)
 
         assertThat(
             uri.toString(),
-        ).isEqualTo("https://example.test/landlord/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT?token=token-abc")
+        ).isEqualTo("https://example.test/landlord/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/$token")
     }
 
     private fun createProvider(

@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ElectricalUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -23,7 +22,6 @@ class UploadElectricalCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-    private val userToLandlordService: UserToLandlordService,
 ) : AbstractRequestableStepConfig<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = ElectricalUploadCertificateFormModel::class
 
@@ -56,18 +54,11 @@ class UploadElectricalCertStepConfig(
             state.getElectricalCertificateTypeAsCertificateType()
                 ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
-            virusScanCallbackService.saveEmailForJourney(
-                state.journeyId,
-                fileUploadId,
-                certificateType,
-                landlordId,
-            )
-            virusScanCallbackService.saveEmailToMonitoringTeam(
-                state.journeyId,
-                fileUploadId,
-                certificateType,
-                landlordId,
+            virusScanCallbackService.saveVirusScanFailureEmail(
+                journeyId = state.journeyId,
+                fileUploadId = fileUploadId,
+                certificateType = certificateType,
+                propertyOwnershipId = state.propertyOwnershipId,
             )
 
             val formModel = getFormModelFromState(state)

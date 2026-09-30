@@ -6,21 +6,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CsrfFilter
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
-import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -29,38 +24,16 @@ class LettingAgentSecurityConfig {
     @Order(2)
     fun lettingAgentSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher("/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/**")
+            .securityMatcher(LETTING_AGENT_ROUTES_PATTERN)
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(LETTING_AGENT_INVITATION_ROUTE)
-                    .anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1659: Remove when validate token step is replaced by an interceptor
-                        "$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${SetPasswordStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${ConfirmationStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${EnterPasswordStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1659: Remove when store access set step becomes an internal step
-                        "$LETTING_AGENT_INVITATION_ROUTE/${StoreAccessStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT",
-                    ).anonymous()
+                    // Letting agent routes are only available to anonymous users (as login is not implemented for letting agents)
+                    // Restricting which letting agent routes are available is handled by the LettingAgentAccessInterceptor and its config.
                     .anyRequest()
-                    .authenticated()
-            }.headers { headers ->
+                    .anonymous()
+            }.addFilterBefore(MultipartFormDataFilter(HttpSessionCsrfTokenRepository()), CsrfFilter::class.java)
+            .headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->
                         csp
@@ -72,5 +45,11 @@ class LettingAgentSecurityConfig {
             }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
+    }
+
+    companion object {
+        const val LETTING_AGENT_ROUTES_PREFIX = "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/"
+
+        const val LETTING_AGENT_ROUTES_PATTERN = "$LETTING_AGENT_ROUTES_PREFIX**"
     }
 }

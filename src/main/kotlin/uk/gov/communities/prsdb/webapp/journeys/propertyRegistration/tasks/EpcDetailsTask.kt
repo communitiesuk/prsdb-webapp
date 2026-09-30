@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
@@ -92,7 +91,7 @@ class EpcDetailsTask(
                 nextStep { journey.epcLookupByUprnStep }
             }
             step(journey.epcLookupByUprnStep) {
-                parents { journey.startEpcStep.always() }
+                parents { journey.startEpcStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
                         EpcLookupByUprnMode.EPC_FOUND -> journey.checkUprnMatchedEpcStep
