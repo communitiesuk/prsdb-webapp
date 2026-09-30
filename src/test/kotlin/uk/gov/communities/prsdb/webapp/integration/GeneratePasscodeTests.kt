@@ -68,7 +68,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
 
     @Test
     fun `exceeding maximum passcode limit redirects to error page`(page: Page) {
-        whenever(passcodeRepository.count()).thenReturn(1000L)
+        whenever(passcodeRepository.count()).thenReturn(2000L)
         navigator.navigate(GENERATE_PASSCODE_URL)
 
         val errorPage = assertPageIs(page, PasscodeLimitExceededPage::class)
@@ -80,7 +80,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
         val generatePasscodePage = navigator.goToGeneratePasscodePage()
         assert(generatePasscodePage.banner.passcode.isNotEmpty()) { "Initial passcode should be generated" }
 
-        whenever(passcodeRepository.count()).thenReturn(1000L)
+        whenever(passcodeRepository.count()).thenReturn(2000L)
         generatePasscodePage.generateAnotherButton.clickAndWait()
 
         val errorPage = assertPageIs(page, PasscodeLimitExceededPage::class)
