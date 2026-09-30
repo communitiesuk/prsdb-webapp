@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-
     @Test
     fun `Invitees can successfully accept an invitation to join an organisation`(page: Page) {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
