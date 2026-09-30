@@ -264,18 +264,21 @@ class NftDataSeeder(
                     generateLandlordsToSeed(landlordIdRange.toList(), maxProperties = numOfProperties - propertyRegistrationsAdded())
 
                 landlordsToSeed.forEach {
-                    orgUsersAdded +=
-                        addLandlordToBatch(
-                            prsdbUserStmt,
-                            registrationNumberStmt,
-                            individualLandlordStmt,
-                            organisationLandlordStmt,
-                            organisationalLandlordUserStmt,
-                            organisationGoverningBodyMemberStmt,
-                            it.details,
-                            it.anniversary,
-                            registrationNumberId = (++registrationNumbersAdded).toLong(),
-                        )
+                    addLandlordToBatch(
+                        prsdbUserStmt,
+                        registrationNumberStmt,
+                        individualLandlordStmt,
+                        organisationLandlordStmt,
+                        organisationalLandlordUserStmt,
+                        organisationGoverningBodyMemberStmt,
+                        it.details,
+                        it.anniversary,
+                        registrationNumberId = (++registrationNumbersAdded).toLong(),
+                    )
+
+                    orgUsersAdded += it.details.organisationDetails
+                        ?.users
+                        ?.size ?: 0
                 }
 
                 prsdbUserStmt.executeBatch()
@@ -465,7 +468,7 @@ class NftDataSeeder(
         coreDetails: CoreLandlordDetails,
         anniversary: MonthDay?,
         registrationNumberId: Long,
-    ): Int {
+    ) {
         prsdbUserStmt.setString(1, coreDetails.subjectId)
         prsdbUserStmt.setTimestamp(2, coreDetails.createdDate)
         prsdbUserStmt.addBatch()
@@ -476,12 +479,12 @@ class NftDataSeeder(
         registrationNumberStmt.setInt(4, RegistrationNumberType.LANDLORD.ordinal)
         registrationNumberStmt.addBatch()
 
-        return when (coreDetails.landlordType) {
+        when (coreDetails.landlordType) {
             LandlordType.INDIVIDUAL -> {
                 addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, registrationNumberId)
-                0
             }
-            LandlordType.ORGANISATION ->
+
+            LandlordType.ORGANISATION -> {
                 addOrganisationLandlordToBatch(
                     prsdbUserStmt,
                     organisationLandlordStmt,
@@ -491,6 +494,7 @@ class NftDataSeeder(
                     anniversary,
                     registrationNumberId,
                 )
+            }
         }
     }
 
@@ -527,7 +531,7 @@ class NftDataSeeder(
         coreDetails: CoreLandlordDetails,
         anniversary: MonthDay?,
         registrationNumberId: Long,
-    ): Int {
+    ) {
         val details =
             requireNotNull(coreDetails.organisationDetails) {
                 "Organisation landlords must have organisation details generated for them"
@@ -593,8 +597,6 @@ class NftDataSeeder(
                 organisationGoverningBodyMemberStmt.addBatch()
             }
         }
-
-        return details.users.size
     }
 
     private fun generateLandlordsToSeed(

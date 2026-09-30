@@ -195,17 +195,23 @@ object NftDataFaker {
         UNINCORPORATED,
     }
 
-    fun generateOrganisationCategory(): OrganisationCategory =
-        when (faker.random().nextDouble()) {
-            // 40%
-            in 0.0..0.40 -> OrganisationCategory.COMPANY
-            // 20%
-            in 0.40..0.60 -> OrganisationCategory.CHARITY
-            // 10%
-            in 0.60..0.70 -> OrganisationCategory.TRUST
-            // 30%
-            else -> OrganisationCategory.UNINCORPORATED
-        }
+    fun generateOrganisationCategory(): OrganisationCategory {
+        val randomDouble = faker.random().nextDouble()
+        return when
+            {
+                // 40%
+                randomDouble < 0.40 -> OrganisationCategory.COMPANY
+
+                // 20%
+                randomDouble < 0.60 -> OrganisationCategory.CHARITY
+
+                // 10%
+                randomDouble < 0.70 -> OrganisationCategory.TRUST
+
+                // 30%
+                else -> OrganisationCategory.UNINCORPORATED
+            }
+    }
 
     fun generateOrganisationLandlordDetails(
         category: OrganisationCategory,
@@ -223,12 +229,19 @@ object NftDataFaker {
         val hasCharityRegistration = isCharity && generateBoolean(probabilityTrue = 0.8)
         val charityRegisteredWith =
             when {
-                !isCharity -> null
-                hasCharityRegistration ->
+                !isCharity -> {
+                    null
+                }
+
+                hasCharityRegistration -> {
                     pickOne(
                         listOf(CharityRegulator.ENGLAND_AND_WALES, CharityRegulator.NORTHERN_IRELAND, CharityRegulator.SCOTLAND),
                     )
-                else -> CharityRegulator.NONE
+                }
+
+                else -> {
+                    CharityRegulator.NONE
+                }
             }
         val charityNumber = if (hasCharityRegistration) faker.regexify("[0-9]{6,8}") else null
 
@@ -287,12 +300,16 @@ object NftDataFaker {
         // Assumption: roughly half of seeded organisations have no additional users beyond the registrant, a third
         // have one or two, and the remainder have three to five. This is a rough estimate not backed by real-world
         // data, documented here as agreed, and can be adjusted if a more accurate ratio becomes available.
+        val randomDouble = faker.random().nextDouble()
+
         val numOfExtraUsers =
-            when (faker.random().nextDouble()) {
+            when {
                 // 50%
-                in 0.0..0.50 -> 0
+                randomDouble < 0.50 -> 0
+
                 // 35%
-                in 0.50..0.85 -> faker.random().nextInt(1, 2)
+                randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+
                 // 15%
                 else -> faker.random().nextInt(3, 5)
             }
@@ -338,23 +355,26 @@ object NftDataFaker {
         }
     }
 
-    fun generateNumberOfPropertiesForLandlord(): Int =
-        when (faker.random().nextDouble()) {
+    fun generateNumberOfPropertiesForLandlord(): Int {
+        val randomDouble = faker.random().nextDouble()
+
+        return when {
             // 30%
-            in 0.0..0.30 -> 0
+            randomDouble < 0.30 -> 0
 
             // 31.5%
-            in 0.30..0.615 -> 1
+            randomDouble < 0.615 -> 1
 
             // 26.6%
-            in 0.615..0.881 -> faker.random().nextInt(2, 4)
+            randomDouble < 0.881 -> faker.random().nextInt(2, 4)
 
             // 11.8%
-            in 0.881..0.999 -> faker.random().nextInt(5, 10)
+            randomDouble < 0.999 -> faker.random().nextInt(5, 10)
 
             // 0.1%
             else -> faker.random().nextInt(10, 50)
         }
+    }
 
     fun generateLicenceTypeAndNumber(): Pair<LicensingType, String> {
         val licenceType = faker.options().option(*LicensingType.licencedEntries.toTypedArray())
@@ -562,11 +582,46 @@ object NftDataFaker {
      */
     private val fakeStreetNames =
         listOf(
-            "Fictional", "Imaginary", "Invented", "Pretend", "Notional", "Hypothetical", "Sample", "Example",
-            "Placeholder", "Specimen", "Mockingbird", "Phantom", "Mirage", "Chimera", "Folly", "Whimsy",
-            "Fable", "Legend", "Myth", "Parable", "Riddle", "Rumour", "Daydream", "Reverie",
-            "Foxglove", "Bramble", "Thistle", "Hawthorn", "Willow", "Alder", "Juniper", "Larkspur",
-            "Kestrel", "Heron", "Otter", "Badger", "Marten", "Pipit", "Curlew", "Redshank",
+            "Fictional",
+            "Imaginary",
+            "Invented",
+            "Pretend",
+            "Notional",
+            "Hypothetical",
+            "Sample",
+            "Example",
+            "Placeholder",
+            "Specimen",
+            "Mockingbird",
+            "Phantom",
+            "Mirage",
+            "Chimera",
+            "Folly",
+            "Whimsy",
+            "Fable",
+            "Legend",
+            "Myth",
+            "Parable",
+            "Riddle",
+            "Rumour",
+            "Daydream",
+            "Reverie",
+            "Foxglove",
+            "Bramble",
+            "Thistle",
+            "Hawthorn",
+            "Willow",
+            "Alder",
+            "Juniper",
+            "Larkspur",
+            "Kestrel",
+            "Heron",
+            "Otter",
+            "Badger",
+            "Marten",
+            "Pipit",
+            "Curlew",
+            "Redshank",
         )
 
     private val fakeStreetTypes =
@@ -574,8 +629,18 @@ object NftDataFaker {
 
     private val fakeTownNames =
         listOf(
-            "Testerton", "Fakenham Parva", "Mockbury", "Sampleford", "Dummerton", "Stubbington Magna",
-            "Placeholder Green", "Exampleside", "Notreal Heath", "Pretendwick", "Fictionbury", "Imagineley",
+            "Testerton",
+            "Fakenham Parva",
+            "Mockbury",
+            "Sampleford",
+            "Dummerton",
+            "Stubbington Magna",
+            "Placeholder Green",
+            "Exampleside",
+            "Notreal Heath",
+            "Pretendwick",
+            "Fictionbury",
+            "Imagineley",
         )
 
     private val fakePostcodeLetters = ('A'..'Z').filterNot { it in "CIKMOV" }

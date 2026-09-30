@@ -206,7 +206,7 @@ class NftDataSeederTests(
                 "Expected at least one organisational landlord user for organisation landlord ${organisationLandlord.id}"
             }
 
-            val registrant = users.minByOrNull { it.createdDate }
+            val registrant = users.firstOrNull()
             assertEquals(OrganisationalLandlordUserRole.ADMIN, registrant?.role) {
                 "Expected the first (registrant) user for organisation landlord ${organisationLandlord.id} to be an admin"
             }

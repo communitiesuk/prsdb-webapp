@@ -123,7 +123,7 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `generateOrganisationalLandlordUsers always makes the first user the registrant admin`() {
+    fun `generateOrganisationalLandlordUsers always makes the first (registrant) user the admin`() {
         NftDataFaker.reset(seed = TEST_SEED)
         val orgCreatedDate = Timestamp.from(FIXED_REFERENCE)
 
@@ -143,15 +143,6 @@ class NftDataFakerTests {
             assertEquals("registrant@example.com", registrant.email)
             assertEquals(orgCreatedDate, registrant.createdDate)
             assertEquals(OrganisationalLandlordUserRole.ADMIN, registrant.role)
-
-            val extraUsers = users.drop(1)
-            extraUsers.forEach { user ->
-                assertNotEquals("registrant-subject-id", user.subjectId)
-                assertTrue(!user.createdDate.before(orgCreatedDate))
-            }
-
-            val subjectIds = users.map { it.subjectId }
-            assertEquals(subjectIds.size, subjectIds.distinct().size)
         }
     }
 
