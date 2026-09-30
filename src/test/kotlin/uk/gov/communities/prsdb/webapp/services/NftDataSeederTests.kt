@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.queryForList
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
@@ -245,6 +246,14 @@ class NftDataSeederTests(
             invitationCount,
             "Expected one invitation per organisation landlord",
         )
+
+        val invitationRoles =
+            jdbcTemplate.queryForList<Int>(
+                "SELECT role FROM organisational_landlord_invitation",
+            )
+        assertTrue(invitationRoles.all { it == OrganisationalLandlordUserRole.ADMIN.ordinal }) {
+            "Expected all organisational landlord invitations to have the ADMIN role"
+        }
     }
 
     @Test

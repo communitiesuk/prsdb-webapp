@@ -8,6 +8,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import java.util.UUID
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
 @Entity
 class OrganisationalLandlordInvitation(
@@ -32,10 +33,8 @@ class OrganisationalLandlordInvitation(
     lateinit var invitingOrganisationName: String
         private set
 
-    // TODO PDJB-1755: Update with enum class name when available e.g.
-    //  lateinit var role: OrganisationalLandlordUserRole
     @Column(nullable = false)
-    var role: Short = 0
+    lateinit var role: OrganisationalLandlordUserRole
         private set
 
     @Column(nullable = false)
@@ -50,7 +49,7 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        role: Short,
+        role: OrganisationalLandlordUserRole,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
@@ -65,7 +64,7 @@ class OrganisationalLandlordInvitation(
         invitedEmail: String,
         organisationLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
-        role: Short,
+        role: OrganisationalLandlordUserRole,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail

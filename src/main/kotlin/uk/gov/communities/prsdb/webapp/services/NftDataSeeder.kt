@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -598,7 +599,7 @@ class NftDataSeeder(
         organisationalLandlordInvitationStmt.setString(4, details.registrantEmail)
         organisationalLandlordInvitationStmt.setLong(5, coreDetails.id)
         organisationalLandlordInvitationStmt.setString(6, details.name)
-        organisationalLandlordInvitationStmt.setShort(7, 0)
+        organisationalLandlordInvitationStmt.setInt(7, OrganisationalLandlordUserRole.ADMIN.ordinal)
         organisationalLandlordInvitationStmt.setBoolean(8, false)
         organisationalLandlordInvitationStmt.setBoolean(9, false)
         organisationalLandlordInvitationStmt.addBatch()
