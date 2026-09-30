@@ -1120,7 +1120,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     propertyOwnershipCaptor.value.registrationNumber,
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
