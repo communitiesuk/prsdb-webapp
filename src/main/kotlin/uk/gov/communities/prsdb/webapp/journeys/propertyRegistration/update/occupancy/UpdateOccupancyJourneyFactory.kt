@@ -18,14 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -226,14 +220,7 @@ class UpdateOccupancyJourneyFactory(
 class UpdateOccupancyJourney(
     // Occupancy task
     override val occupied: OccupiedStep,
-    // Nested households and tenants task
-    override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val bedrooms: BedroomsStep,
-    // Nested rent includes bills task
-    override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val furnishedStatus: FurnishedStatusStep,
-    // Nested rent frequency and amount task
-    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
+    // Finish check-your-answers step
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
@@ -267,8 +254,6 @@ class UpdateOccupancyJourney(
     override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
-
-    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
 }
 
 interface UpdateOccupancyJourneyState :

@@ -203,41 +203,41 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
-                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    configureStep(journey.tenancyDetailsTask.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.propertyDetailsTask.bedrooms, BedroomsStep.ROUTE_SEGMENT)
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.rentIncludesBillsTask) {
+                    fromTask(journey.tenancyDetailsTask.rentIncludesBillsTask) {
                         checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.tenancyDetailsTask.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
                 }
 
                 RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
+                    configureStep(journey.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -669,13 +669,6 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
-    // Legacy steps and tasks that should be removed when the legacy structure is retired
-    override val bedrooms = propertyDetailsTask.bedrooms
-    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
-    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
-    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
-    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
-
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
@@ -746,6 +739,7 @@ interface PropertyRegistrationJourneyState :
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
+    val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 
     // TODO PDJB-1022: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
     //  once the feature flag is removed and the letting agent journey is fully implemented

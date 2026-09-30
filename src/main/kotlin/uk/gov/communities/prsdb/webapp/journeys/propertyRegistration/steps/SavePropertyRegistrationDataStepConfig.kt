@@ -60,8 +60,8 @@ class SavePropertyRegistrationDataStepConfig(
             } else {
                 null
             }
-        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatedToLettingAgent
-        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
+        val shouldRequireTenancyDetails = isOccupied && !state.tenancyDetailsTask.provideTenancyDetailsLater && !isDelegatedToLettingAgent
+        val billsIncludedDataModel = state.tenancyDetailsTask.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
             jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
@@ -88,7 +88,7 @@ class SavePropertyRegistrationDataStepConfig(
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (shouldRequireTenancyDetails) {
-                    state.householdsAndTenantsTask.households.formModel
+                    state.tenancyDetailsTask.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
                 } else {
@@ -96,34 +96,34 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             numberOfPeople =
                 if (shouldRequireTenancyDetails) {
-                    state.householdsAndTenantsTask.tenants.formModel
+                    state.tenancyDetailsTask.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
                 } else {
                     0
                 },
             numBedrooms =
-                state.bedrooms.formModel
+                state.propertyDetailsTask.bedrooms.formModel
                     .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                     .toInt(),
             billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
-            furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,
+            furnishedStatus = if (shouldRequireTenancyDetails) state.tenancyDetailsTask.furnishedStatus.formModel.furnishedStatus else null,
             rentFrequency =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
                 } else {
                     null
                 },
             customRentFrequency =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
                 } else {
                     null
                 },
             rentAmount =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
                     null
@@ -133,10 +133,19 @@ class SavePropertyRegistrationDataStepConfig(
             markedJointLandlord = markedJointLandlord,
             hasGasSupply =
                 when (state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome) {
-                    GasSupplyOutcome.HAS_SUPPLY -> true
-                    GasSupplyOutcome.NO_SUPPLY -> false
-                    GasSupplyOutcome.PROVIDE_LATER -> null
-                    null ->
+                    GasSupplyOutcome.HAS_SUPPLY -> {
+                        true
+                    }
+
+                    GasSupplyOutcome.NO_SUPPLY -> {
+                        false
+                    }
+
+                    GasSupplyOutcome.PROVIDE_LATER -> {
+                        null
+                    }
+
+                    null -> {
                         if (isDelegatedToLettingAgent) {
                             null
                         } else {
@@ -144,6 +153,7 @@ class SavePropertyRegistrationDataStepConfig(
                                 "gasSupplyOutcome must be answered before registration unless it is delegated to a letting agent",
                             )
                         }
+                    }
                 },
             gasSafetyCertIssueDate =
                 state.gasSafetyTask.gasSafetyDetailsTask
@@ -170,8 +180,12 @@ class SavePropertyRegistrationDataStepConfig(
                 state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.energyRating,
+            epcExpiryDate =
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?.expiryDateAsJavaLocalDate,
+            epcEnergyRating =
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?.energyRating,
             tenancyStartedBeforeEpcExpiry =
                 state.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
@@ -189,7 +203,7 @@ class SavePropertyRegistrationDataStepConfig(
             licenseProvideLater =
                 isDelegatedToLettingAgent ||
                     state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
-            tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
+            tenancyProvideLater = isDelegatedToLettingAgent || state.tenancyDetailsTask.provideTenancyDetailsLater,
             isDelegatedToLettingAgent = isDelegatedToLettingAgent,
         )
     }

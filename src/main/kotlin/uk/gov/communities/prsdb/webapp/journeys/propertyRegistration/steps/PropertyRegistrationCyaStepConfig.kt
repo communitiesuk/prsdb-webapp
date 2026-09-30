@@ -253,8 +253,8 @@ class PropertyRegistrationCyaStepConfig(
     private fun getBedroomsRow(state: PropertyRegistrationJourneyState) =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.bedrooms",
-            state.bedrooms.formModel.numberOfBedrooms,
-            Destination.VisitableStep(state.bedrooms, state.getCyaJourneyId(state.bedrooms)),
+            state.propertyDetailsTask.bedrooms.formModel.numberOfBedrooms,
+            Destination.VisitableStep(state.propertyDetailsTask.bedrooms, state.getCyaJourneyId(state.propertyDetailsTask.bedrooms)),
         )
 
     private fun getAddressRows(
