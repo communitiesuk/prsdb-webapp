@@ -114,8 +114,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO organisational_landlord_user 
-            (created_date, organisation_landlord_id, subject_identifier, name, email) 
-            VALUES (?, ?, ?, ?, ?)
+            (created_date, organisation_landlord_id, subject_identifier, name, email, role) 
+            VALUES (?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }

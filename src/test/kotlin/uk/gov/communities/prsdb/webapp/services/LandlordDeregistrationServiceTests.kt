@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
@@ -188,7 +189,7 @@ class LandlordDeregistrationServiceTests {
     fun `deregisterOrganisationalLandlord deletes organisational landlord users`() {
         val orgLandlord = MockLandlordData.createOrgLandlord()
         val baseUser = MockLandlordData.createPrsdbUser()
-        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com")
+        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD))
 
@@ -211,7 +212,7 @@ class LandlordDeregistrationServiceTests {
     fun `deregisterOrganisationalLandlord deletes base user if they have no other roles`() {
         val orgLandlord = MockLandlordData.createOrgLandlord()
         val baseUser = MockLandlordData.createPrsdbUser()
-        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com")
+        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD))
 
@@ -224,7 +225,7 @@ class LandlordDeregistrationServiceTests {
     fun `deregisterOrganisationalLandlord does not delete base user if they have other roles`() {
         val orgLandlord = MockLandlordData.createOrgLandlord()
         val baseUser = MockLandlordData.createPrsdbUser()
-        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com")
+        val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
