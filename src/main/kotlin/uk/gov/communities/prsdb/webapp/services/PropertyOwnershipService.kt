@@ -77,10 +77,18 @@ class PropertyOwnershipService(
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        // TODO PDJB-1733: Make correspondenceEmail and correspondenceAddressModel non-nullable - they are only null when the
+        //  CORRESPONDENCE_ADDRESS flag is off
+        correspondenceEmail: String? = null,
+        correspondenceAddressModel: AddressDataModel? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
         val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
+        // TODO PDJB-1733: Remove the registering landlord's address and email fallbacks (here and on correspondenceEmail below).
+        //  These are the CORRESPONDENCE_ADDRESS flag-off defaults, used when no correspondence details are passed in.
+        val correspondenceAddress =
+            correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -94,10 +102,8 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                // TODO PDJB-1593: Use journey correspondence address and email when the flag is on; keep landlord defaults when off.
-                // TODO PDJB-1733: Remove the flag-off correspondence defaults.
-                correspondenceEmail = registeringLandlord.email,
-                correspondenceAddress = registeringLandlord.address,
+                correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
+                correspondenceAddress = correspondenceAddress,
                 renewalDate = renewalDate,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
