@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.CheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.EmailAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 
@@ -73,7 +73,6 @@ class AcceptInvitationJourney(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     AcceptInvitationJourneyState {
-
     override fun generateJourneyId(seed: Any?): String {
         return super<AbstractJourneyState>.generateJourneyId(
             "Accept invitation journey at time ${System.currentTimeMillis()}",
