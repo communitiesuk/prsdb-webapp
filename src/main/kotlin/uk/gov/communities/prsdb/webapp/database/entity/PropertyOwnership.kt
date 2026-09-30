@@ -64,7 +64,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(name = "correspondence_email", nullable = false)
     lateinit var correspondenceEmail: String
-        private set
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "correspondence_address_id", nullable = false)
@@ -201,10 +200,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         get() = billsIncludedList != null
 
     fun isSolelyOwnedBy(landlord: Landlord): Boolean = ownershipLinks.singleOrNull()?.landlord?.id == landlord.id
-
-    fun updateCorrespondenceEmail(email: String) {
-        correspondenceEmail = email
-    }
 
     fun removeLandlord(landlord: Landlord) {
         ownershipLinks.removeIf { it.landlord.id == landlord.id }

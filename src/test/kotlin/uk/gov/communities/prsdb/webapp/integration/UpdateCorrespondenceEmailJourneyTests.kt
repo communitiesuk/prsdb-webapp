@@ -133,7 +133,7 @@ class UpdateCorrespondenceEmailJourneyTests : IntegrationTestWithMutableData("da
         val cyaPage = assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments)
         val staleCyaUrl = page.url()
         val propertyOwnership = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!
-        propertyOwnership.updateCorrespondenceEmail("newer@example.com")
+        propertyOwnership.correspondenceEmail = "newer@example.com"
         propertyOwnershipRepository.saveAndFlush(propertyOwnership)
 
         cyaPage.confirm()

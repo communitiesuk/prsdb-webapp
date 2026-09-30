@@ -444,7 +444,7 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.updateCorrespondenceEmail(email)
+        propertyOwnership.correspondenceEmail = email
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

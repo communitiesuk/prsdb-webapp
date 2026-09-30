@@ -1698,7 +1698,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateCorrespondenceEmail rejects a stale update without changing or saving the property`() {
+        fun `updateCorrespondenceEmail throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
             val originalEmail = propertyOwnership.correspondenceEmail
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
