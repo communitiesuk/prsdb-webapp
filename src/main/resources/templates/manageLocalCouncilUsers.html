@@ -28,10 +28,10 @@
                     <td class="govuk-table__cell">
                         <a th:href="@{${user.pending ? cancelInvitationBaseUrl + user.id : editUserBaseUrl + user.id}}"
                            class="govuk-link"
-                           th:text="#{forms.links.change}"
                            th:if="(${currentUserId} != ${user.id}) or ${user.pending} or ${userCanEditTheirOwnAccount}"
                         >
-                            manageLocalCouncilUsers.table.change
+                            <span th:text="#{forms.links.change}">forms.links.change</span>
+                            <span class="govuk-visually-hidden" th:text="${user.userNameOrEmail}">userNameOrEmail</span>
                         </a>
                     </td>
                 </tr>

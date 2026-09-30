@@ -26,9 +26,9 @@
                     <td class="govuk-table__cell">
                         <a th:href="@{${user.pending ? cancelInvitationPathSegment + '/' + user.id : editUserPathSegment + '/' + user.id}}"
                            class="govuk-link"
-                           th:text="#{forms.links.change}"
                         >
-                            forms.links.change
+                            <span th:text="#{forms.links.change}">forms.links.change</span>
+                            <span class="govuk-visually-hidden" th:text="${user.userNameOrEmail}">userNameOrEmail</span>
                         </a>
                     </td>
                 </tr>
