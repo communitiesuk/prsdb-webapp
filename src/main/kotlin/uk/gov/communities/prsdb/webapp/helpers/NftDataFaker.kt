@@ -197,20 +197,19 @@ object NftDataFaker {
 
     fun generateOrganisationCategory(): OrganisationCategory {
         val randomDouble = faker.random().nextDouble()
-        return when
-            {
-                // 40%
-                randomDouble < 0.40 -> OrganisationCategory.COMPANY
+        return when {
+            // 40%
+            randomDouble < 0.40 -> OrganisationCategory.COMPANY
 
-                // 20%
-                randomDouble < 0.60 -> OrganisationCategory.CHARITY
+            // 20%
+            randomDouble < 0.60 -> OrganisationCategory.CHARITY
 
-                // 10%
-                randomDouble < 0.70 -> OrganisationCategory.TRUST
+            // 10%
+            randomDouble < 0.70 -> OrganisationCategory.TRUST
 
-                // 30%
-                else -> OrganisationCategory.UNINCORPORATED
-            }
+            // 30%
+            else -> OrganisationCategory.UNINCORPORATED
+        }
     }
 
     fun generateOrganisationLandlordDetails(
