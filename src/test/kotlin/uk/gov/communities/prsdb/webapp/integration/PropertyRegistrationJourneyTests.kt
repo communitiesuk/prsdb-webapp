@@ -37,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
@@ -282,7 +282,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -349,11 +349,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
-            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
 
             val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
-            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+            correspondenceSelectPage.selectAddressAndSubmit("2 Fake Way")
 
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
@@ -607,6 +607,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertTrue(propertyOwnershipCaptor.value.isOccupied)
+            assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+            // The looked-up correspondence address should reuse the existing "2 Fake Way" address row
+            assertEquals(2L, propertyOwnershipCaptor.value.correspondenceAddress.id)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
             assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
@@ -835,6 +838,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertFalse(propertyOwnershipCaptor.value.isOccupied)
+            assertEquals("differentemail@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+            assertEquals(
+                "1 Fictional Road, Fictional Town, FA1 1AA",
+                propertyOwnershipCaptor.value.correspondenceAddress.singleLineAddress,
+            )
+            assertNull(propertyOwnershipCaptor.value.correspondenceAddress.uprn)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
@@ -1111,7 +1120,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     propertyOwnershipCaptor.value.registrationNumber,
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -2339,6 +2348,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
                 assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
             }
+
+            @Test
+            fun `registering a property saves the landlord's email and address as the correspondence details`(page: Page) {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswersOccupied()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+                checkAnswersPage.confirm()
+
+                val confirmMissingCompliancePage =
+                    assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+                confirmMissingCompliancePage.form.radios.selectValue("true")
+                confirmMissingCompliancePage.form.submit()
+
+                completePropertyRegistrationPaymentSuccessfully(page)
+
+                val propertyOwnershipCaptor = captor<PropertyOwnership>()
+                verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+                assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+                assertEquals(1L, propertyOwnershipCaptor.value.correspondenceAddress.id)
+            }
         }
     }
 
@@ -2676,7 +2710,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")

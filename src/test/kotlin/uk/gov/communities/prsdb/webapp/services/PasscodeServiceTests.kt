@@ -79,35 +79,35 @@ class PasscodeServiceTests {
 
     @Test
     fun `generatePasscode throws PasscodeLimitExceededException when limit is reached`() {
-        whenever(mockPasscodeRepository.count()).thenReturn(1000L)
+        whenever(mockPasscodeRepository.count()).thenReturn(2000L)
 
         val exception =
             assertThrows(PasscodeLimitExceededException::class.java) {
                 passcodeService.generatePasscode()
             }
 
-        assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
+        assertEquals("Maximum number of passcodes (2000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
     }
 
     @Test
     fun `generatePasscode throws PasscodeLimitExceededException when limit is exceeded`() {
-        whenever(mockPasscodeRepository.count()).thenReturn(1001L)
+        whenever(mockPasscodeRepository.count()).thenReturn(2001L)
 
         val exception =
             assertThrows(PasscodeLimitExceededException::class.java) {
                 passcodeService.generatePasscode()
             }
 
-        assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
+        assertEquals("Maximum number of passcodes (2000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
         verify(mockPasscodeRepository, never()).save(any(Passcode::class.java))
     }
 
     @Test
     fun `generatePasscode succeeds when count is just below limit`() {
-        whenever(mockPasscodeRepository.count()).thenReturn(999L)
+        whenever(mockPasscodeRepository.count()).thenReturn(1999L)
         whenever(mockPasscodeRepository.existsByPasscode(anyString())).thenReturn(false)
         whenever(mockPasscodeRepository.save(any(Passcode::class.java))).thenReturn(mockPasscode)
 
@@ -146,14 +146,14 @@ class PasscodeServiceTests {
 
     @Test
     fun `generateAndStorePasscode throws PasscodeLimitExceededException when limit is reached`() {
-        whenever(mockPasscodeRepository.count()).thenReturn(1000L)
+        whenever(mockPasscodeRepository.count()).thenReturn(2000L)
 
         val exception =
             assertThrows(PasscodeLimitExceededException::class.java) {
                 passcodeService.generateAndStorePasscode()
             }
 
-        assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
+        assertEquals("Maximum number of passcodes (2000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
         verify(mockPasscodeRepository, times(0)).save(any(Passcode::class.java))
     }
@@ -161,14 +161,14 @@ class PasscodeServiceTests {
     @Test
     fun `getOrGeneratePasscode throws PasscodeLimitExceededException when limit is reached and no cached passcode exists`() {
         whenever(mockSession.getAttribute(LAST_GENERATED_PASSCODE)).thenReturn(null)
-        whenever(mockPasscodeRepository.count()).thenReturn(1000L)
+        whenever(mockPasscodeRepository.count()).thenReturn(2000L)
 
         val exception =
             assertThrows(PasscodeLimitExceededException::class.java) {
                 passcodeService.getOrGeneratePasscode()
             }
 
-        assertEquals("Maximum number of passcodes (1000) has been reached", exception.message)
+        assertEquals("Maximum number of passcodes (2000) has been reached", exception.message)
         verify(mockPasscodeRepository).count()
     }
 
@@ -176,7 +176,7 @@ class PasscodeServiceTests {
     fun `getOrGeneratePasscode returns cached passcode when limit is reached but passcode exists in session`() {
         val cachedPasscode = "ABC123"
         whenever(mockSession.getAttribute(LAST_GENERATED_PASSCODE)).thenReturn(cachedPasscode)
-        whenever(mockPasscodeRepository.count()).thenReturn(1000L)
+        whenever(mockPasscodeRepository.count()).thenReturn(2000L)
 
         val result = passcodeService.getOrGeneratePasscode()
 

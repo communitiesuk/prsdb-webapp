@@ -64,7 +64,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(name = "correspondence_email", nullable = false)
     lateinit var correspondenceEmail: String
-        private set
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "correspondence_address_id", nullable = false)
@@ -90,6 +89,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
+
+    @OneToMany(mappedBy = "associatedProperty", orphanRemoval = true)
+    val payments: MutableSet<Payment> = mutableSetOf()
 
     var numBedrooms: Int? = null
 

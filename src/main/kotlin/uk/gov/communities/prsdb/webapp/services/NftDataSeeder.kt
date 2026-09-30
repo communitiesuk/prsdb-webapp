@@ -245,6 +245,7 @@ class NftDataSeeder(
 
         try {
             var registrationNumbersAdded = 0
+            var orgUsersAdded = 0
 
             var licencesAdded = 0
             var propertyOwnershipsAdded = 0
@@ -274,6 +275,10 @@ class NftDataSeeder(
                         it.anniversary,
                         registrationNumberId = (++registrationNumbersAdded).toLong(),
                     )
+
+                    orgUsersAdded += it.details.organisationDetails
+                        ?.users
+                        ?.size ?: 0
                 }
 
                 prsdbUserStmt.executeBatch()
@@ -285,7 +290,7 @@ class NftDataSeeder(
                 registrationNumberGenerator.forgetUsedValues()
                 landlordAddressGenerator.forgetUsedValues()
 
-                log("Seeded ${landlordIdRange.last} landlords")
+                log("Seeded ${landlordIdRange.last} landlords and $orgUsersAdded organisational landlord users")
 
                 landlordsToSeed.forEach { landlord ->
                     landlord.properties.forEach { property ->
@@ -475,9 +480,13 @@ class NftDataSeeder(
         registrationNumberStmt.addBatch()
 
         when (coreDetails.landlordType) {
-            LandlordType.INDIVIDUAL -> addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, registrationNumberId)
-            LandlordType.ORGANISATION ->
+            LandlordType.INDIVIDUAL -> {
+                addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, registrationNumberId)
+            }
+
+            LandlordType.ORGANISATION -> {
                 addOrganisationLandlordToBatch(
+                    prsdbUserStmt,
                     organisationLandlordStmt,
                     organisationalLandlordUserStmt,
                     organisationGoverningBodyMemberStmt,
@@ -485,6 +494,7 @@ class NftDataSeeder(
                     anniversary,
                     registrationNumberId,
                 )
+            }
         }
     }
 
@@ -514,6 +524,7 @@ class NftDataSeeder(
     }
 
     private fun addOrganisationLandlordToBatch(
+        prsdbUserStmt: PreparedStatement,
         organisationLandlordStmt: PreparedStatement,
         organisationalLandlordUserStmt: PreparedStatement,
         organisationGoverningBodyMemberStmt: PreparedStatement,
@@ -556,12 +567,23 @@ class NftDataSeeder(
         organisationLandlordStmt.setIntOrNull(28, anniversary?.monthValue)
         organisationLandlordStmt.addBatch()
 
-        organisationalLandlordUserStmt.setTimestamp(1, coreDetails.createdDate)
-        organisationalLandlordUserStmt.setLong(2, coreDetails.id)
-        organisationalLandlordUserStmt.setString(3, coreDetails.subjectId)
-        organisationalLandlordUserStmt.setString(4, details.registrantName)
-        organisationalLandlordUserStmt.setString(5, details.registrantEmail)
-        organisationalLandlordUserStmt.addBatch()
+        details.users.forEachIndexed { index, user ->
+            // The registrant (index 0) already has a prsdb_user row added by addLandlordToBatch; only extra
+            // organisational landlord users need their own.
+            if (index > 0) {
+                prsdbUserStmt.setString(1, user.subjectId)
+                prsdbUserStmt.setTimestamp(2, user.createdDate)
+                prsdbUserStmt.addBatch()
+            }
+
+            organisationalLandlordUserStmt.setTimestamp(1, user.createdDate)
+            organisationalLandlordUserStmt.setLong(2, coreDetails.id)
+            organisationalLandlordUserStmt.setString(3, user.subjectId)
+            organisationalLandlordUserStmt.setString(4, user.name)
+            organisationalLandlordUserStmt.setString(5, user.email)
+            organisationalLandlordUserStmt.setInt(6, user.role.ordinal)
+            organisationalLandlordUserStmt.addBatch()
+        }
 
         if (details.hasGoverningBody) {
             NftDataFaker.generateGoverningBodyMembers(hasLeadTrustee = details.isTrust).forEach { member ->

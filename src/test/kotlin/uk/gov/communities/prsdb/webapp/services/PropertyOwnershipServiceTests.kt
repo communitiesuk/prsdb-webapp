@@ -111,7 +111,7 @@ class PropertyOwnershipServiceTests {
 
     @ParameterizedTest
     @EnumSource(LandlordType::class)
-    fun `createPropertyOwnership creates a property ownership`(landlordType: LandlordType) {
+    fun `createPropertyOwnership creates a property ownership with supplied correspondence details`(landlordType: LandlordType) {
         // Arrange
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
@@ -128,6 +128,10 @@ class PropertyOwnershipServiceTests {
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val license = License()
+        val correspondenceAddress = MockLandlordData.createAddress("12 Contact Road, EG1 2AC")
+        val correspondenceModel = AddressDataModel.fromAddress(correspondenceAddress)
+        val correspondenceEmail = "chosen@example.com"
+        whenever(mockAddressService.findOrCreateAddress(correspondenceModel)).thenReturn(correspondenceAddress)
         val numberOfBedrooms = 1
         val billsIncludedList = "Electricity, Water"
         val customBillsIncluded = "Internet"
@@ -148,8 +152,8 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                correspondenceEmail = landlord.email,
-                correspondenceAddress = landlordAddress,
+                correspondenceEmail = correspondenceEmail,
+                correspondenceAddress = correspondenceAddress,
                 renewalDate =
                     RenewalDateHelper.getRenewalDate(
                         MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
@@ -184,6 +188,8 @@ class PropertyOwnershipServiceTests {
             customPropertyType = customPropertyType,
             address = address,
             license = license,
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceModel,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
@@ -196,10 +202,9 @@ class PropertyOwnershipServiceTests {
         // Assert
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertTrue(
-            ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value),
-        )
-        assertSame(landlordAddress, propertyOwnershipCaptor.value.correspondenceAddress)
+        assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
+        assertSame(correspondenceAddress, propertyOwnershipCaptor.value.correspondenceAddress)
+        verify(mockAddressService).findOrCreateAddress(correspondenceModel)
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
     }
 
@@ -283,6 +288,50 @@ class PropertyOwnershipServiceTests {
             ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value),
         )
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
+    }
+
+    // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
+    @Test
+    fun `createPropertyOwnership uses the landlord contact details when the CORRESPONDENCE_ADDRESS flag is off`() {
+        // Arrange
+        val landlordAddress = MockLandlordData.createAddress("10 Landlord Road, EG1 1AB")
+        val landlord = MockLandlordData.createIndividualLandlord(address = landlordAddress)
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+
+        // Act
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
+            numberOfHouseholds = 1,
+            numberOfPeople = 2,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            numBedrooms = 1,
+            billsIncludedList = "Electricity, Water",
+            customBillsIncluded = "Internet",
+            furnishedStatus = FurnishedStatus.FURNISHED,
+            rentFrequency = RentFrequency.OTHER,
+            customRentFrequency = "Fortnightly",
+            rentAmount = 123.toBigDecimal(),
+            correspondenceEmail = null,
+            correspondenceAddressModel = null,
+        )
+
+        // Assert
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(landlord.email, propertyOwnershipCaptor.value.correspondenceEmail)
+        assertSame(landlordAddress, propertyOwnershipCaptor.value.correspondenceAddress)
+        verifyNoInteractions(mockAddressService)
     }
 
     @Test
@@ -1738,6 +1787,80 @@ class PropertyOwnershipServiceTests {
                 "The property ownership record has been updated since this update session started.",
                 exception.message,
             )
+        }
+    }
+
+    @Nested
+    inner class UpdateCorrespondenceEmail {
+        @Test
+        fun `updateCorrespondenceEmail saves the new email without changing other property details`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val originalAddress = propertyOwnership.correspondenceAddress
+            val originalFurnishedStatus = propertyOwnership.furnishedStatus
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateCorrespondenceEmail(
+                propertyOwnership.id,
+                "updated@example.com",
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals("updated@example.com", propertyOwnership.correspondenceEmail)
+            assertSame(originalAddress, propertyOwnership.correspondenceAddress)
+            assertEquals(originalFurnishedStatus, propertyOwnership.furnishedStatus)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val originalEmail = propertyOwnership.correspondenceEmail
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updateCorrespondenceEmail(
+                    propertyOwnership.id,
+                    "updated@example.com",
+                    propertyOwnership.getMostRecentlyUpdated().minusSeconds(60),
+                )
+            }
+
+            assertEquals(originalEmail, propertyOwnership.correspondenceEmail)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail rejects a missing active property`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(null)
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.updateCorrespondenceEmail(
+                        propertyOwnership.id,
+                        "updated@example.com",
+                        propertyOwnership.getMostRecentlyUpdated(),
+                    )
+                }
+
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateCorrespondenceEmail accepts the existing email address`() {
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val originalEmail = propertyOwnership.correspondenceEmail
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateCorrespondenceEmail(
+                propertyOwnership.id,
+                originalEmail,
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals(originalEmail, propertyOwnership.correspondenceEmail)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
     }
 

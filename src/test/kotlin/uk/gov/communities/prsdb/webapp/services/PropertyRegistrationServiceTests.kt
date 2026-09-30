@@ -186,6 +186,8 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty creates the property ownership if all property fields are populated`() {
         // Arrange
+        val correspondenceEmail = "chosen.contact@example.com"
+        val correspondenceAddressModel = AddressDataModel.fromManualAddressData("12 Contact Road", "Leeds", "LS1 1AA")
         val ownershipType = OwnershipType.FREEHOLD
         val isOccupied = true
         val numberOfHouseholds = 1
@@ -233,6 +235,8 @@ class PropertyRegistrationServiceTests {
         whenever(mockLicenseService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                correspondenceEmail = correspondenceEmail,
+                correspondenceAddressModel = correspondenceAddressModel,
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
                 numberOfHouseholds = numberOfHouseholds,
@@ -262,6 +266,8 @@ class PropertyRegistrationServiceTests {
             propertyType = propertyType,
             licenseType = licenceType,
             licenceNumber = licenceNumber,
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceAddressModel,
             ownershipType = ownershipType,
             isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
@@ -278,6 +284,8 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockPropertyOwnershipService).createPropertyOwnership(
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceAddressModel,
             ownershipType = ownershipType,
             isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
@@ -350,6 +358,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -442,6 +452,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -1151,6 +1163,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1199,6 +1213,8 @@ class PropertyRegistrationServiceTests {
             markedJointLandlord = eq(true),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = anyOrNull(),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
         )
     }
 
@@ -1242,6 +1258,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = any(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1290,6 +1308,8 @@ class PropertyRegistrationServiceTests {
             markedJointLandlord = any(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
         )
     }
 
@@ -1328,6 +1348,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
@@ -1393,6 +1415,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))

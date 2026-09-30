@@ -35,7 +35,8 @@
                 registerProperty.confirmation.useInAdverts
             </p>
 
-            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent}">
+            <!--/* TODO: PDJB-1742: Remove this entire block when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag */-->
+            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !propertyRegistrationPhaseTwoEnabled}">
                 <h2 class="govuk-heading-m"
                     th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
                     registerProperty.confirmation.whatYouNeedToDoNext.heading

@@ -20,7 +20,7 @@ class PasscodeService(
 ) {
     companion object {
         private const val PASSCODE_LENGTH = 6
-        private const val MAX_PASSCODES = 1000
+        private const val MAX_PASSCODES = 2000
     }
 
     @Transactional
