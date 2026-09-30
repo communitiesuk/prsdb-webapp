@@ -28,6 +28,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailCyaPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceLookupAddressFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceManualAddressFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceNoAddressFoundFormPagePropertyDetailsUpdate
@@ -265,6 +267,62 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 assertThat(updatedCheckAnswersPage.summaryList.postalAddressRow.value).containsText("1 PRSDB Square")
                 assertThat(updatedCheckAnswersPage.summaryList.postalAddressRow.value).containsText("EG1 2AA")
+            }
+        }
+
+        @Nested
+        inner class CorrespondenceEmailUpdates {
+            @BeforeEach
+            fun enableCorrespondenceAddressFlag() {
+                featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
+            }
+
+            @Test
+            fun `A property's correspondence email can be updated to the landlord's account email`(page: Page) {
+                navigator
+                    .goToPropertyDetailsLandlordView(propertyOwnershipId)
+                    .propertyDetailsSummaryList.contactEmailAddressRow
+                    .clickFirstActionLinkAndWait()
+                val emailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyDetailsUpdate::class, urlArguments)
+
+                assertThat(emailPage.form.fieldsetHeading).containsText("Where should the council send emails?")
+                assertThat(emailPage.form.sectionHeader).isHidden()
+                assertThat(emailPage.form.submitButton).hasText("Continue")
+                emailPage.submitAccountEmail()
+                val checkAnswersPage =
+                    assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments)
+
+                assertThat(checkAnswersPage.summaryHeading).hasText("You updated who the council should contact for this property")
+                assertThat(checkAnswersPage.summaryList.emailRow.value).hasText("alex.surname@example.com")
+                assertThat(checkAnswersPage.form.submitButton).hasText("Confirm and submit update")
+
+                checkAnswersPage.confirm()
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+                assertEquals(
+                    "alex.surname@example.com",
+                    propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
+                )
+            }
+
+            @Test
+            fun `A property's correspondence email can be updated to a different email address`(page: Page) {
+                navigator
+                    .goToPropertyDetailsLandlordView(propertyOwnershipId)
+                    .propertyDetailsSummaryList.contactEmailAddressRow
+                    .clickFirstActionLinkAndWait()
+                val emailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyDetailsUpdate::class, urlArguments)
+
+                emailPage.submitDifferentEmail("updated@example.com")
+                val checkAnswersPage =
+                    assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments)
+                assertThat(checkAnswersPage.summaryList.emailRow.value).hasText("updated@example.com")
+
+                checkAnswersPage.confirm()
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+                assertEquals(
+                    "updated@example.com",
+                    propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
+                )
             }
         }
 

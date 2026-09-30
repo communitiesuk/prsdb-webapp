@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
@@ -14,7 +13,6 @@ abstract class CorrespondenceEmailFormBasePage(
 ) : BasePage(page, urlSegment) {
     val form = CorrespondenceEmailForm(page)
     val errorSummary = ErrorSummary(page)
-    val backLink = BackLink.default(page)
 
     fun submitAccountEmail() {
         form.whichEmailRadios.selectValue(CorrespondenceEmailOption.ACCOUNT_EMAIL)
@@ -31,7 +29,6 @@ abstract class CorrespondenceEmailFormBasePage(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val whichEmailRadios = Radios(locator)
-        val selectedEmailOptions = locator.locator("input[name='correspondenceEmailOption']:checked")
         val differentEmailInput = TextInput.emailByFieldName(locator, "differentEmailAddress")
     }
 }

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -20,7 +19,6 @@ class CorrespondenceEmailCyaPagePropertyDetailsUpdate(
     val heading = page.locator("h1")
     val summaryHeading = page.locator("#summary-name")
     val summaryList = CorrespondenceEmailSummaryList(page)
-    val backLink = BackLink.default(page)
 
     fun confirm() = form.submit()
 
