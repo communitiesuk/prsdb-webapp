@@ -96,7 +96,7 @@ class GovUkPayClient(
             request()
         } catch (exception: RestClientResponseException) {
             val errorResponse = exception.govUkPayErrorResponseOrNull()
-            throw GovUkPayException(exception.statusCode, errorResponse?.code, errorResponse?.description)
+            throw GovUkPayException(exception.statusCode, errorResponse?.code, errorResponse?.description, exception)
         } catch (exception: RestClientException) {
             throw GovUkPayException("GOV.UK Pay request failed: ${exception.message}", exception)
         }

@@ -11,7 +11,8 @@ class GovUkPayException : PrsdbWebException {
         httpStatus: HttpStatusCode,
         errorCode: String?,
         errorDescription: String?,
-    ) : super(httpErrorMessage(httpStatus, errorCode, errorDescription)) {
+        cause: Throwable,
+    ) : super(httpErrorMessage(httpStatus, errorCode, errorDescription), cause) {
         this.httpStatus = httpStatus
         this.errorCode = errorCode
         this.errorDescription = errorDescription

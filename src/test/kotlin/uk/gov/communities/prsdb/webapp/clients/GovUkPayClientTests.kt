@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -27,6 +26,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientResponseException
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
@@ -40,13 +40,15 @@ import java.time.LocalDate
 
 class GovUkPayClientTests {
     private lateinit var mockServer: MockRestServiceServer
+    private lateinit var restClient: RestClient
     private lateinit var govUkPayClient: GovUkPayClient
 
     @BeforeEach
     fun setUp() {
         val builder = RestClient.builder().baseUrl(BASE_URL)
         mockServer = MockRestServiceServer.bindTo(builder).build()
-        govUkPayClient = GovUkPayClient(builder.build(), listOf(0L, 0L))
+        restClient = builder.build()
+        govUkPayClient = GovUkPayClient(restClient, RATE_LIMIT_RETRY_DELAYS_MS)
     }
 
     @Test
@@ -134,6 +136,7 @@ class GovUkPayClientTests {
         assertEquals("P0102", exception.errorCode)
         assertEquals("Invalid attribute value: amount", exception.errorDescription)
         assertEquals("GOV.UK Pay request failed with HTTP status 422: P0102 - Invalid attribute value: amount", exception.message)
+        assertInstanceOf(RestClientResponseException::class.java, exception.cause)
         mockServer.verify()
     }
 
@@ -219,6 +222,8 @@ class GovUkPayClientTests {
         assertNull(exception.errorCode)
         assertNull(exception.errorDescription)
         assertEquals("GOV.UK Pay request failed with HTTP status 500", exception.message)
+        val cause = assertInstanceOf(RestClientResponseException::class.java, exception.cause)
+        assertEquals("Internal Server Error", cause.responseBodyAsString)
         mockServer.verify()
     }
 
@@ -375,10 +380,10 @@ class GovUkPayClientTests {
     }
 
     @Test
-    fun `getPayment throws GovUkPayException after three consecutive 429 responses`() {
+    fun `getPayment throws GovUkPayException once the configured rate limit retries are exhausted`() {
         // Arrange
         mockServer
-            .expect(ExpectedCount.times(3), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .expect(ExpectedCount.times(RATE_LIMIT_RETRY_DELAYS_MS.size + 1), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
             .andRespond(errorResponse(HttpStatus.TOO_MANY_REQUESTS, "P0900", "Too many requests"))
 
         // Act
@@ -391,22 +396,18 @@ class GovUkPayClientTests {
     }
 
     @Test
-    fun `getPayment wraps an interrupt while waiting to retry a 429 response in GovUkPayException and keeps the thread interrupted`() {
+    fun `getPayment does not retry a 429 response when no rate limit retry delays are configured`() {
         // Arrange
+        val clientWithoutRetries = GovUkPayClient(restClient, emptyList())
         mockServer
-            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .expect(ExpectedCount.once(), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
             .andRespond(errorResponse(HttpStatus.TOO_MANY_REQUESTS, "P0900", "Too many requests"))
-        Thread.currentThread().interrupt()
 
         // Act
-        // runCatching and Thread.interrupted() ensure the interrupt flag is always cleared so it cannot leak into other tests
-        val thrown = runCatching { govUkPayClient.getPayment(PAYMENT_ID) }.exceptionOrNull()
-        val threadWasLeftInterrupted = Thread.interrupted()
+        val exception = assertThrows(GovUkPayException::class.java) { clientWithoutRetries.getPayment(PAYMENT_ID) }
 
         // Assert
-        val exception = assertInstanceOf(GovUkPayException::class.java, thrown)
-        assertInstanceOf(InterruptedException::class.java, exception.cause)
-        assertTrue(threadWasLeftInterrupted)
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), exception.httpStatus?.value())
         mockServer.verify()
     }
 
@@ -496,6 +497,9 @@ class GovUkPayClientTests {
                 Arguments.of(HttpStatus.NOT_FOUND, "P0500"),
                 Arguments.of(HttpStatus.CONFLICT, "P0502"),
             )
+
+        // Zero delays keep the tests fast; the number of delays is the number of times a 429 response is retried
+        private val RATE_LIMIT_RETRY_DELAYS_MS = listOf(0L, 0L)
 
         private const val BASE_URL = "https://gov-uk-pay.test"
         private const val PAYMENT_ID = "hu20sqlact5260q2nanm0q8u93"
