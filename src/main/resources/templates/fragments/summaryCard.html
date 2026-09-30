@@ -1,11 +1,25 @@
 <div th:fragment="summaryCard(title, cardNumber, actions, summaryList)"
-     th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${title}, ${cardNumber}, ${actions}, ${summaryList}, ~{})}">
+     th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${title}, ${cardNumber}, ${actions}, ${summaryList}, 'h2', ~{})}">
 </div>
-<div th:fragment="summaryCardWithAdditionalContent(title, cardNumber, actions, summaryList, additionalContent)" class="govuk-summary-card">
+<div th:fragment="summaryCardWithHeadingLevel(title, cardNumber, actions, summaryList, headingLevel)"
+     th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${title}, ${cardNumber}, ${actions}, ${summaryList}, ${headingLevel}, ~{})}">
+</div>
+<div th:fragment="summaryCardWithAdditionalContent(title, cardNumber, actions, summaryList, additionalContent)"
+     th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${title}, ${cardNumber}, ${actions}, ${summaryList}, 'h2', ${additionalContent})}">
+</div>
+<div th:fragment="summaryCardWithHeadingLevelAndAdditionalContent(title, cardNumber, actions, summaryList, headingLevel, additionalContent)" class="govuk-summary-card">
     <div class="govuk-summary-card__title-wrapper">
-        <h2 class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
-            Title of the summary card
-        </h2>
+        <th:block th:switch="${headingLevel}">
+            <h3 th:case="'h3'" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
+                Title of the summary card
+            </h3>
+            <h4 th:case="'h4'" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
+                Title of the summary card
+            </h4>
+            <h2 th:case="*" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
+                Title of the summary card
+            </h2>
+        </th:block>
         <ul th:unless="${actions == null or #lists.isEmpty(actions)}" class="govuk-summary-card__actions">
             <li class="govuk-summary-card__action"  th:each="action: ${actions}">
                 <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}"

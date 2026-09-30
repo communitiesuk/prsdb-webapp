@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -81,8 +82,11 @@ class PropertyRegistrationService(
         licenseProvideLater: Boolean = false,
         tenancyProvideLater: Boolean? = null,
         isDelegatedToLettingAgent: Boolean = false,
+        correspondenceEmail: String? = null,
+        correspondenceAddressModel: AddressDataModel? = null,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
+        val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
         val propertyOwnership =
             createPropertyOwnershipAndRelatedEntities(
@@ -104,11 +108,14 @@ class PropertyRegistrationService(
                 customPropertyType,
                 markedJointLandlord,
                 tenancyProvideLater,
-                mutableSetOf(landlord),
+                landlord,
+                anniversary,
                 licenseProvideLater = licenseProvideLater,
+                correspondenceEmail = correspondenceEmail,
+                correspondenceAddressModel = correspondenceAddressModel,
             )
 
-        landlord.setAnniversaryIfAbsent(MonthDay.from(propertyOwnership.registrationDate))
+        landlord.setAnniversaryIfAbsent(anniversary)
 
         if (lettingAgentEmail != null) {
             val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
@@ -178,8 +185,11 @@ class PropertyRegistrationService(
         customPropertyType: String?,
         markedJointLandlord: Boolean,
         tenancyProvideLater: Boolean?,
-        landlords: MutableSet<Landlord>,
+        registeringLandlord: Landlord,
+        anniversary: MonthDay,
         licenseProvideLater: Boolean = false,
+        correspondenceEmail: String?,
+        correspondenceAddressModel: AddressDataModel?,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -206,7 +216,8 @@ class PropertyRegistrationService(
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            landlords = landlords,
+            registeringLandlord = registeringLandlord,
+            anniversary = anniversary,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,
@@ -214,6 +225,8 @@ class PropertyRegistrationService(
             address = address,
             license = license,
             licenseProvideLater = licenseProvideLater,
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceAddressModel,
         )
     }
 

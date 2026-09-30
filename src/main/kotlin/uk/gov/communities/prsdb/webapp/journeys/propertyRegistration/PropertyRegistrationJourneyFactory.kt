@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -79,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -102,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
@@ -110,10 +113,18 @@ import java.security.Principal
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val featureFlagManager: FeatureFlagManager,
+    private val userToLandlordService: UserToLandlordService,
     private val paymentsStrategy: PaymentsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            // TODO: PDJB-1738: Use the current organisational sub-user's email rather than the organisation's email
+            // when setting the initial loggedInLandlordEmailAtStartOfJourney snapshot.
+            state.loggedInLandlordEmailAtStartOfJourney = userToLandlordService.getCurrentLandlordForUser().email
+            state.isStateInitialized = true
+        }
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
@@ -134,6 +145,10 @@ class PropertyRegistrationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
+            val correspondenceEnabled =
+                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+                    featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
@@ -148,6 +163,24 @@ class PropertyRegistrationJourneyFactory(
                         fromTask(journey.whoProvidesDetailsTask) {
                             checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                         }
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
+                CorrespondenceEmailStep.ROUTE_SEGMENT -> {
+                    if (correspondenceEnabled) {
+                        fromTask(journey.correspondenceTask, journey) {
+                            checkAnswerStep(task.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
+                        }
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
+                "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
+                    if (correspondenceEnabled) {
+                        checkAnswerTask(journey.correspondenceTask.addressTask, CorrespondenceAddressTask.ROUTE_SEGMENT)
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                     }
@@ -567,6 +600,7 @@ class PropertyRegistrationJourneyFactory(
                 section {
                     withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
                     task(journey.correspondenceTask) {
+                        withDependencies { journey }
                         parents { journey.ownershipAndLandlordsTask.isComplete() }
                         nextStep { journey.occupied }
                         saveProgress()
@@ -869,10 +903,13 @@ class PropertyRegistrationJourney(
     override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
     override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
     journeyStateService: JourneyStateService,
-    private val userToLandlordService: UserToLandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
+    override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+
+    override var loggedInLandlordEmailAtStartOfJourney: String by
+        delegateProvider.requiredImmutableDelegate("loggedInLandlordEmailAtStartOfJourney")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
     // Hoists the who-provides answer onto the base journey state so the occupancy-change routing can read it
@@ -930,10 +967,6 @@ class PropertyRegistrationJourney(
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
-    override val loggedInLandlordEmail: String?
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        get() = userToLandlordService.getCurrentLandlordForUser().email
-
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
@@ -947,8 +980,17 @@ interface PropertyRegistrationJourneyState :
     EpcDependencies,
     LicensingDependencies,
     WhoProvidesDetailsDependencies,
+    CorrespondenceDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
+    var isStateInitialized: Boolean
+    override var loggedInLandlordEmailAtStartOfJourney: String
+
+    // This journey keeps a snapshot of the current landlord's email at start-of-journey so the
+    // shared joint-landlord invite task can reject self-invites without depending on later edits.
+    override val loggedInLandlordEmail: String?
+        get() = loggedInLandlordEmailAtStartOfJourney
+
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 

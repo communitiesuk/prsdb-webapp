@@ -10,6 +10,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -47,8 +48,10 @@ class LandlordUserEmailServiceTests {
         val user1 = MockLandlordData.createPrsdbUser("org-user-1")
         val user2 = MockLandlordData.createPrsdbUser("org-user-2")
         val organisation = MockLandlordData.createOrgLandlord()
-        val orgUser1 = createOrganisationalLandlordUser(organisation, user1, "org.user.one@example.com")
-        val orgUser2 = createOrganisationalLandlordUser(organisation, user2, "org.user.two@example.com")
+        val orgUser1 =
+            createOrganisationalLandlordUser(organisation, user1, "org.user.one@example.com", OrganisationalLandlordUserRole.ADMIN)
+        val orgUser2 =
+            createOrganisationalLandlordUser(organisation, user2, "org.user.two@example.com", OrganisationalLandlordUserRole.ADMIN)
 
         whenever(individualLandlordRepository.findByBaseUser_IdIn(listOf(user1.id, user2.id))).thenReturn(emptyList())
         whenever(organisationalLandlordUserRepository.findByBaseUser_IdIn(listOf(user1.id, user2.id)))
@@ -69,7 +72,12 @@ class LandlordUserEmailServiceTests {
         val requestedIds = listOf(individualUser.id, organisationUser.id)
         val landlord = MockLandlordData.createIndividualLandlord(baseUser = individualUser, email = "individual@example.com")
         val orgUser =
-            createOrganisationalLandlordUser(MockLandlordData.createOrgLandlord(), organisationUser, "org.user@example.com")
+            createOrganisationalLandlordUser(
+                MockLandlordData.createOrgLandlord(),
+                organisationUser,
+                "org.user@example.com",
+                OrganisationalLandlordUserRole.ADMIN,
+            )
 
         whenever(individualLandlordRepository.findByBaseUser_IdIn(requestedIds)).thenReturn(listOf(landlord))
         whenever(organisationalLandlordUserRepository.findByBaseUser_IdIn(requestedIds)).thenReturn(listOf(orgUser))
@@ -112,10 +120,12 @@ class LandlordUserEmailServiceTests {
         organisationalLandlord: OrganisationalLandlord,
         baseUser: PrsdbUser,
         email: String,
+        role: OrganisationalLandlordUserRole,
     ) = OrganisationalLandlordUser(
         organisationalLandlord = organisationalLandlord,
         baseUser = baseUser,
         name = "Organisation user",
         email = email,
+        role = role,
     )
 }

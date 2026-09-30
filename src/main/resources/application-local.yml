@@ -102,6 +102,8 @@ plausible:
 
 gov-uk-pay:
   base-url: http://localhost:${server.port}/local/gov-uk-pay
+  api-key: local-gov-uk-pay-api-key
+  annual-payment-amount-in-pence: 2000
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
@@ -139,6 +141,9 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: true
+      expiry-date: "2026-11-01"
 
 ---
 

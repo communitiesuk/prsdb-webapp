@@ -12,6 +12,7 @@ buttons:
   confirm: Confirm
   confirmAndContinue: Confirm and continue
   completeRegistration: Complete registration
+  submitAndPay: Submit and pay
   useThisAddress: Use this address
   submit: Submit
   confirmAndSubmitUpdate: Confirm and submit update
@@ -573,6 +574,10 @@ checkPropertyAnswers:
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
     heading: Ownership and landlords
+  # TODO PDJB-1307: Move these messages out of forms.yml
+  correspondence:
+    emailAddress: Email address
+    postalAddress: Postal address
   occupancy:
     heading: Tell us if your property’s occupied
     question: Is this property occupied by tenants?
@@ -676,6 +681,9 @@ update:
       summaryName: You updated the tenancy and rent details for this property
     notOccupied:
       summaryName: You have updated whether the property is occupied by tenants
+  checkCorrespondenceAddress:
+    summaryName: You updated who the council should contact for this property
+    postalAddress: Postal address
   warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.

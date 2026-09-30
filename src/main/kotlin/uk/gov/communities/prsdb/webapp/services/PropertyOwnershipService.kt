@@ -28,7 +28,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -36,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -49,6 +52,7 @@ class PropertyOwnershipService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val featureFlagManager: FeatureFlagManager,
+    private val addressService: AddressService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -56,7 +60,8 @@ class PropertyOwnershipService(
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        landlords: MutableSet<Landlord>,
+        registeringLandlord: Landlord,
+        anniversary: MonthDay,
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
@@ -72,9 +77,18 @@ class PropertyOwnershipService(
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        // TODO PDJB-1733: Make correspondenceEmail and correspondenceAddressModel non-nullable - they are only null when the
+        //  CORRESPONDENCE_ADDRESS flag is off
+        correspondenceEmail: String? = null,
+        correspondenceAddressModel: AddressDataModel? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
-        val registeringLandlord = landlords.first()
+
+        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
+        // TODO PDJB-1733: Remove the registering landlord's address and email fallbacks (here and on correspondenceEmail below).
+        //  These are the CORRESPONDENCE_ADDRESS flag-off defaults, used when no correspondence details are passed in.
+        val correspondenceAddress =
+            correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -83,15 +97,14 @@ class PropertyOwnershipService(
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
-                landlords = landlords,
+                landlords = mutableSetOf(registeringLandlord),
                 propertyBuildType = propertyBuildType,
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                // TODO PDJB-1593: Use journey correspondence address and email when the flag is on; keep landlord defaults when off.
-                // TODO PDJB-1733: Remove the flag-off correspondence defaults.
-                correspondenceEmail = registeringLandlord.email,
-                correspondenceAddress = registeringLandlord.address,
+                correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
+                correspondenceAddress = correspondenceAddress,
+                renewalDate = renewalDate,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
@@ -136,6 +149,8 @@ class PropertyOwnershipService(
             )
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
+
+    fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
@@ -443,6 +458,18 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateCorrespondenceAddress(
+        id: Long,
+        address: AddressDataModel,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.correspondenceAddress = addressService.findOrCreateAddress(address)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

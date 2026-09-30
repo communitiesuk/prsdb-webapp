@@ -1,7 +1,11 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import java.sql.Timestamp
 import java.time.Instant
+import java.time.LocalDate
+import java.time.MonthDay
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -94,6 +98,77 @@ class NftDataFakerTests {
         assertEquals(first, second)
     }
 
+    @Test
+    fun `generateRenewalDate returns next year's anniversary when this year's has passed`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(3, 10))
+
+        // Assert
+        assertEquals(LocalDate.of(2026, 3, 10), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `generateRenewalDate returns this year's anniversary when it is still to come`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(9, 1))
+
+        // Assert
+        assertEquals(LocalDate.of(2025, 9, 1), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `generateOrganisationalLandlordUsers always makes the first (registrant) user the admin`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+        val orgCreatedDate = Timestamp.from(FIXED_REFERENCE)
+
+        repeat(SAMPLE_SIZE / 100) {
+            val users =
+                NftDataFaker.generateOrganisationalLandlordUsers(
+                    registrantSubjectId = "registrant-subject-id",
+                    registrantName = "Registrant Name",
+                    registrantEmail = "registrant@example.com",
+                    orgCreatedDate = orgCreatedDate,
+                )
+
+            assertTrue(users.isNotEmpty())
+            val registrant = users.first()
+            assertEquals("registrant-subject-id", registrant.subjectId)
+            assertEquals("Registrant Name", registrant.name)
+            assertEquals("registrant@example.com", registrant.email)
+            assertEquals(orgCreatedDate, registrant.createdDate)
+            assertEquals(OrganisationalLandlordUserRole.ADMIN, registrant.role)
+        }
+    }
+
+    @Test
+    fun `generateOrganisationalLandlordUsers sample contains organisations with and without extra users, and both roles`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+        val orgCreatedDate = Timestamp.from(FIXED_REFERENCE)
+
+        val samples =
+            List(SAMPLE_SIZE / 100) {
+                NftDataFaker.generateOrganisationalLandlordUsers(
+                    registrantSubjectId = "registrant-subject-id-$it",
+                    registrantName = "Registrant Name",
+                    registrantEmail = "registrant@example.com",
+                    orgCreatedDate = orgCreatedDate,
+                )
+            }
+
+        assertTrue(samples.any { it.size == 1 }, "Expected at least one organisation with no extra users")
+        assertTrue(samples.any { it.size > 1 }, "Expected at least one organisation with extra users")
+        assertTrue(
+            samples.flatMap { it.drop(1) }.any { it.role == OrganisationalLandlordUserRole.EDITOR },
+            "Expected at least one extra user with the EDITOR role",
+        )
+    }
+
     private fun generateFakerSample(): List<String> =
         List(FAKER_SAMPLE_SIZE) {
             listOf(
@@ -112,5 +187,6 @@ class NftDataFakerTests {
         private const val SAMPLE_SIZE = 10_000
         private const val FAKER_SAMPLE_SIZE = 500
         private val FIXED_REFERENCE: Instant = Instant.parse("2025-01-01T00:00:00Z")
+        private val MIDYEAR_REFERENCE: Instant = Instant.parse("2025-06-15T12:00:00Z")
     }
 }

@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
@@ -43,6 +44,14 @@ class CheckAnswersPagePropertyRegistration(
 
     val propertyDetailsHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
+
+    private val correspondenceHeadingLocator =
+        page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Who the council should contact"))
+
+    val correspondenceHeading = Heading(correspondenceHeadingLocator)
+
+    val correspondenceRowKeys =
+        correspondenceHeadingLocator.locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
 
     val occupancyHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
@@ -111,10 +120,15 @@ class CheckAnswersPagePropertyRegistration(
     val epcHeading =
         Heading(page.locator("h3", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
 
+    val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h4")
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
+        val propertyAddressRow = getRow(Pattern.compile("^Address$"))
         val ownershipRow = getRow("How do you own this property?")
+        val correspondenceEmailRow = getRow(Pattern.compile("^Email address$"))
+        val correspondencePostalAddressRow = getRow(Pattern.compile("^Postal address$"))
 
         // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredOwnershipRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
         val beforePropertyRegistrationRestructuredOwnershipRow = getRow("Ownership type")
