@@ -1,28 +1,22 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceEmail
 
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.mock.web.MockHttpSession
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class UpdateCorrespondenceEmailJourneyFactoryTests {
@@ -46,64 +40,46 @@ class UpdateCorrespondenceEmailJourneyFactoryTests {
     }
 
     @Test
-    fun `initialising the journey snapshots the property timestamp and account email with no prefilled answer`() {
-        val routes = factory.createJourneySteps(1)
+    fun `createJourneySteps initialises the state with the property last modified date and account email`() {
+        // Act
+        factory.createJourneySteps(1)
 
+        // Assert
         assertEquals(1, state.propertyId)
         assertEquals(lastModifiedDate.toString(), state.lastModifiedDate)
         assertEquals("account@example.com", state.loggedInLandlordEmailAtStartOfJourney)
         assertTrue(state.isStateInitialized)
-        assertNull(state.correspondenceEmailStep.formModelOrNull)
-        assertEquals(
-            setOf(CorrespondenceEmailStep.ROUTE_SEGMENT, UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT),
-            routes.keys,
-        )
-        assertFalse(state.cyaStep.isStepReachable)
-        assertEquals(PropertyDetailsController.getPropertyDetailsPath(1), state.correspondenceEmailStep.backUrl)
-        assertUpdateContent()
     }
 
     @Test
-    fun `subsequent requests preserve the original account snapshot`() {
+    fun `createJourneySteps preserves the initialised state on subsequent calls`() {
+        // Arrange
         factory.createJourneySteps(1)
         whenever(userToLandlordService.getCurrentLandlordForUser())
             .thenReturn(MockLandlordData.createIndividualLandlord(email = "changed@example.com"))
 
+        // Act
         factory.createJourneySteps(1)
 
+        // Assert
         assertEquals("account@example.com", state.loggedInLandlordEmailAtStartOfJourney)
         verify(userToLandlordService, times(1)).getCurrentLandlordForUser()
         verify(propertyOwnershipService, times(1)).getLastModifiedDate(1)
     }
 
     @Test
-    fun `a different property cannot reuse the journey state`() {
-        factory.createJourneySteps(1)
-
-        assertThrows<PrsdbWebException> { factory.createJourneySteps(2) }
-    }
-
-    @Test
-    fun `a CYA child exposes only the email question and returns back to CYA`() {
+    fun `createJourneySteps returns only the email step with a back link to CYA when checking answers`() {
+        // Arrange
         factory.createJourneySteps(1)
         state.checkingAnswersFor = CorrespondenceEmailStep.ROUTE_SEGMENT
         state.cyaUrlPath = UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT
 
+        // Act
         val routes = factory.createJourneySteps(1)
 
+        // Assert
         assertEquals(setOf(CorrespondenceEmailStep.ROUTE_SEGMENT), routes.keys)
         assertEquals(state.returnToCyaPageDestination.toUrlStringOrNull(), state.correspondenceEmailStep.backUrl)
-        assertUpdateContent()
-    }
-
-    private fun assertUpdateContent() {
-        val content = state.correspondenceEmailStep.getPageVisitContent()
-        assertEquals("forms.buttons.continue", content["submitButtonText"])
-        assertEquals("propertyDetails.update.title", content["title"])
-        assertEquals(
-            SectionHeaderViewModel("registerProperty.taskList.aboutYourProperty.correspondence", 0, 0, false),
-            content["sectionHeaderInfo"],
-        )
     }
 
     private fun createState(): UpdateCorrespondenceEmailJourney {

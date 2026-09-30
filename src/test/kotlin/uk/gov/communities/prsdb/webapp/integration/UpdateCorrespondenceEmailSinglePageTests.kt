@@ -29,7 +29,7 @@ class UpdateCorrespondenceEmailSinglePageTests : IntegrationTestWithImmutableDat
         val emailPage = startJourney(page)
 
         assertThat(emailPage.form.fieldsetHeading).containsText("Where should the council send emails?")
-        assertThat(emailPage.form.sectionHeader).containsText("Who the council should contact")
+        assertThat(emailPage.form.sectionHeader).isHidden()
         assertThat(emailPage.form.whichEmailRadios).containsText("alex.surname@example.com")
         assertThat(emailPage.form.submitButton).hasText("Continue")
         assertThat(emailPage.form.selectedEmailOptions).hasCount(0)

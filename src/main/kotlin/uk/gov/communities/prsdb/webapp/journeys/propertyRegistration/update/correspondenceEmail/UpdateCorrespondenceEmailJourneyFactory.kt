@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CorrespondenceEmailState
@@ -17,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Corre
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -43,49 +43,67 @@ class UpdateCorrespondenceEmailJourneyFactory(
         }
 
         val returnUrl = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, returnUrl)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, returnUrl)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateCorrespondenceEmailJourney,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
-            configureStep(journey.correspondenceEmailStep) {
-                withAdditionalContentProperties {
-                    mapOf(
-                        "submitButtonText" to "forms.buttons.continue",
-                        "sectionHeaderInfo" to
-                            SectionHeaderViewModel(
-                                sectionNameKey = "registerProperty.taskList.aboutYourProperty.correspondence",
-                                sectionNumber = 0,
-                                totalSections = 0,
-                                useNumbering = false,
-                            ),
-                    )
+            step(journey.correspondenceEmailStep) {
+                initialStep()
+                routeSegment(CorrespondenceEmailStep.ROUTE_SEGMENT)
+                backUrl { returnUrl }
+                nextStep { journey.cyaStep }
+            }
+            step(journey.cyaStep) {
+                routeSegment(UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT)
+                parents { journey.correspondenceEmailStep.isComplete() }
+                nextUrl { returnUrl }
+            }
+            replaceButtons()
+        }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateCorrespondenceEmailJourney,
+        checkingAnswersFor: String,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
+            configure {
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                CorrespondenceEmailStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
                 }
             }
-            if (state.checkingAnswersFor == null) {
-                step(journey.correspondenceEmailStep) {
-                    initialStep()
-                    routeSegment(CorrespondenceEmailStep.ROUTE_SEGMENT)
-                    backUrl { returnUrl }
-                    nextStep { journey.cyaStep }
-                }
-                step(journey.cyaStep) {
-                    routeSegment(UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT)
-                    parents { journey.correspondenceEmailStep.isComplete() }
-                    nextUrl { returnUrl }
-                }
-            } else {
-                check(state.checkingAnswersFor == CorrespondenceEmailStep.ROUTE_SEGMENT) {
-                    "Unknown checkable element ${state.checkingAnswersFor}"
-                }
-                checkAnswerStep(journey.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT) {
-                    backDestination { journey.returnToCyaPageDestination }
-                }
-                step(journey.finishCyaStep) {
-                    parents { journey.correspondenceEmailStep.isComplete() }
-                    nextDestination { Destination.Nowhere() }
-                }
+            step(journey.finishCyaStep) {
+                parents { journey.correspondenceEmailStep.isComplete() }
+                nextDestination { Destination.Nowhere() }
             }
+            replaceButtons()
+        }
+
+    private fun JourneyBuilder<UpdateCorrespondenceEmailJourney>.replaceButtons() {
+        configureStep(journey.correspondenceEmailStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
     }
 
@@ -118,6 +136,7 @@ interface UpdateCorrespondenceEmailJourneyState :
     CheckYourAnswersJourneyState,
     CorrespondenceEmailState {
     override val cyaStep: UpdateCorrespondenceEmailCyaStep
+    override val loggedInLandlordEmailAtStartOfJourney: String
     val propertyId: Long
     val lastModifiedDate: String
 }

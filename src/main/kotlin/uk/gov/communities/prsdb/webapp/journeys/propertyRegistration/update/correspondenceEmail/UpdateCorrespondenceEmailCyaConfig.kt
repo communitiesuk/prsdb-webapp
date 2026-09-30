@@ -1,14 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceEmail
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
@@ -19,8 +15,10 @@ class UpdateCorrespondenceEmailCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateCorrespondenceEmailJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateCorrespondenceEmailJourneyState): Map<String, Any> =
-        mapOf(
+    override fun getStepSpecificContent(state: UpdateCorrespondenceEmailJourneyState): Map<String, Any> {
+        val email =
+            state.correspondenceEmailStep.formModel.getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
+        return mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "insetText" to true,
@@ -30,7 +28,7 @@ class UpdateCorrespondenceEmailCyaConfig(
                 listOf(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         fieldHeading = "forms.update.correspondenceEmail.emailAddress",
-                        fieldValue = getCorrespondenceEmail(state),
+                        fieldValue = email,
                         destination =
                             Destination.VisitableStep(
                                 state.correspondenceEmailStep,
@@ -39,12 +37,15 @@ class UpdateCorrespondenceEmailCyaConfig(
                     ),
                 ),
         )
+    }
 
     override fun afterStepDataIsAdded(state: UpdateCorrespondenceEmailJourneyState) {
+        val email =
+            state.correspondenceEmailStep.formModel.getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
         try {
             propertyOwnershipService.updateCorrespondenceEmail(
                 id = state.propertyId,
-                email = getCorrespondenceEmail(state),
+                email = email,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate),
             )
         } catch (ex: UpdateConflictException) {
@@ -55,17 +56,6 @@ class UpdateCorrespondenceEmailCyaConfig(
             state.propertyId,
             listOf("The email address the council should contact"),
         )
-    }
-
-    private fun getCorrespondenceEmail(state: UpdateCorrespondenceEmailJourneyState): String {
-        val formModel = state.correspondenceEmailStep.formModel
-        return when (formModel.notNullValue(CorrespondenceEmailFormModel::correspondenceEmailOption)) {
-            CorrespondenceEmailOption.ACCOUNT_EMAIL ->
-                state.loggedInLandlordEmailAtStartOfJourney
-                    ?: throw PrsdbWebException("Account email is missing from the correspondence email update journey")
-
-            CorrespondenceEmailOption.DIFFERENT_EMAIL -> formModel.differentEmailAddress
-        }
     }
 }
 

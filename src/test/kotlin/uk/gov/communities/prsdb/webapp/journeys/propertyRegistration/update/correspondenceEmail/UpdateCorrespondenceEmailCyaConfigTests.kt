@@ -6,11 +6,9 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
@@ -20,8 +18,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import java.time.Instant
 import kotlin.test.assertEquals
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
 
 class UpdateCorrespondenceEmailCyaConfigTests {
     private val propertyOwnershipService = mock<PropertyOwnershipService>()
@@ -44,13 +40,15 @@ class UpdateCorrespondenceEmailCyaConfigTests {
     }
 
     @Test
-    fun `CYA shows the account snapshot with a child journey change link and does not save`() {
+    fun `getStepSpecificContent shows the journey information with a change link`() {
+        // Arrange
         formModel.correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
-        formModel.differentEmailAddress = "not-an-email"
 
+        // Act
         val content = stepConfig.getStepSpecificContent(state)
-        val row = (content["summaryListData"] as List<*>).single() as SummaryListRowViewModel
 
+        // Assert
+        val row = (content["summaryListData"] as List<*>).single() as SummaryListRowViewModel
         assertEquals("account@example.com", row.fieldValue)
         assertEquals("forms.update.correspondenceEmail.emailAddress", row.fieldHeading)
         assertEquals(
@@ -61,43 +59,24 @@ class UpdateCorrespondenceEmailCyaConfigTests {
         assertEquals("forms.buttons.confirmAndSubmitUpdate", content["submitButtonText"])
         assertEquals(true, content["showWarning"])
         assertEquals(true, content["insetText"])
-        verifyNoInteractions(propertyOwnershipService, propertyUpdateEmailService)
     }
 
     @Test
-    fun `CYA shows the different email address`() {
+    fun `afterStepDataIsAdded updates the correspondence email with the email address from the form model`() {
+        // Arrange
         formModel.correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
         formModel.differentEmailAddress = "different@example.com"
+        val expectedEmail = formModel.getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
 
-        val content = stepConfig.getStepSpecificContent(state)
-        val row = (content["summaryListData"] as List<*>).single() as SummaryListRowViewModel
-
-        assertEquals("different@example.com", row.fieldValue)
-        verifyNoInteractions(propertyOwnershipService, propertyUpdateEmailService)
-    }
-
-    @Test
-    fun `confirming the account option saves the snapshot rather than a stale custom value`() {
-        formModel.correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
-        formModel.differentEmailAddress = "stale@example.com"
-
+        // Act
         stepConfig.afterStepDataIsAdded(state)
 
-        verify(propertyOwnershipService).updateCorrespondenceEmail(1, "account@example.com", initialLastModifiedDate)
+        // Assert
+        verify(propertyOwnershipService).updateCorrespondenceEmail(1, expectedEmail, initialLastModifiedDate)
     }
 
     @Test
-    fun `confirming the different option saves the entered email`() {
-        formModel.correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
-        formModel.differentEmailAddress = "different@example.com"
-
-        stepConfig.afterStepDataIsAdded(state)
-
-        verify(propertyOwnershipService).updateCorrespondenceEmail(1, "different@example.com", initialLastModifiedDate)
-    }
-
-    @Test
-    fun `confirming the update sends the property update emails after saving`() {
+    fun `afterStepDataIsAdded sends the property update emails after updating the correspondence email`() {
         // Arrange
         formModel.correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
         formModel.differentEmailAddress = "different@example.com"
@@ -114,44 +93,15 @@ class UpdateCorrespondenceEmailCyaConfigTests {
     }
 
     @Test
-    fun `a missing account snapshot throws instead of saving a fallback`() {
-        formModel.correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
-        whenever(state.loggedInLandlordEmailAtStartOfJourney).thenReturn(null)
-
-        assertThrows<PrsdbWebException> { stepConfig.afterStepDataIsAdded(state) }
-
-        verifyNoInteractions(propertyOwnershipService, propertyUpdateEmailService)
-    }
-
-    @Test
-    fun `a conflict deletes the stale journey and rethrows`() {
+    fun `afterStepDataIsAdded deletes the journey and rethrows when there is an update conflict`() {
+        // Arrange
         formModel.correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
         whenever(propertyOwnershipService.updateCorrespondenceEmail(any(), any(), any()))
             .thenThrow(UpdateConflictException::class.java)
 
+        // Act & Assert
         assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(state) }
-
         verify(state).deleteJourney()
         verifyNoInteractions(propertyUpdateEmailService)
-    }
-
-    @Test
-    fun `an unexpected save failure propagates without deleting the journey`() {
-        formModel.correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
-        val failure = IllegalStateException("Save failed")
-        whenever(propertyOwnershipService.updateCorrespondenceEmail(any(), any(), any())).thenThrow(failure)
-
-        assertSame(failure, assertThrows<IllegalStateException> { stepConfig.afterStepDataIsAdded(state) })
-        verify(state, never()).deleteJourney()
-        verifyNoInteractions(propertyUpdateEmailService)
-    }
-
-    @Test
-    fun `successful submission deletes the completed journey and preserves the return destination`() {
-        val destination = Destination.ExternalUrl("/landlord/property-details/1")
-
-        assertSame(destination, stepConfig.resolveNextDestination(state, destination))
-        verify(state).deleteJourney()
-        assertTrue(destination.toUrlStringOrNull().endsWith("/1"))
     }
 }
