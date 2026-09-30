@@ -169,7 +169,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation hides the before pbjb-1742 what you need to do next section when phase two is enabled`() {
+    fun `getConfirmation hides the what you need to do next section when phase two is enabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
