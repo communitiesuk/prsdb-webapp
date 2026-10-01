@@ -113,6 +113,7 @@ gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
+  gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
 
 cloudwatch-metrics:
   ecs:

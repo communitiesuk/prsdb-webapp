@@ -49,6 +49,7 @@ gov-uk-pay:
   base-url: https://gov-uk-pay.test
   api-key: test-api-key
   annual-payment-amount-in-pence: 2000
+  gratis-period-end-date: 2020-01-01
 
 cloudwatch-metrics:
   ecs:
