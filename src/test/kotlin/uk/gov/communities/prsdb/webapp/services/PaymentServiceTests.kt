@@ -6,10 +6,21 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import java.time.Instant
 import java.time.LocalDate
 
 class PaymentServiceTests {
-    private val paymentService = PaymentService(annualFeeInPence = 2000)
+    private val mockGovUkPayClient: GovUkPayClient = mock()
+    private val paymentService = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = 2000)
 
     @ParameterizedTest
     @MethodSource("provideWorkedExamples")
@@ -20,7 +31,7 @@ class PaymentServiceTests {
         expectedFeeInPence: Int,
     ) {
         // Arrange
-        val paymentServiceWithPolicyFee = PaymentService(annualFeeInPence)
+        val paymentServiceWithPolicyFee = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = annualFeeInPence)
 
         // Act
         val fee = paymentServiceWithPolicyFee.calculateProRatedFeeInPence(renewalDate, today)
@@ -234,7 +245,55 @@ class PaymentServiceTests {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideGovUkPayStatusesAndExpectedOutcomes")
+    fun `getPaymentStatus maps the GovUkPay payment status to a payment check outcome`(
+        status: GovUkPayPaymentStatus,
+        expectedOutcome: PaymentCheckOutcome,
+    ) {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(status))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedOutcome), paymentStatusCheck)
+    }
+
+    @Test
+    fun `getPaymentStatus requests the payment with the given payment ID`() {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(GovUkPayPaymentStatus.CAPTURABLE))
+
+        // Act
+        paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
+    }
+
+    private fun createGovUkPayPayment(status: GovUkPayPaymentStatus) =
+        GovUkPayPayment(
+            paymentId = PAYMENT_ID,
+            amount = 2000,
+            reference = "reference",
+            description = "description",
+            createdDate = Instant.parse("2026-10-01T09:00:00Z"),
+            state = GovUkPayPaymentState(status = status, finished = status in FINISHED_GOV_UK_PAY_STATUSES),
+        )
+
     companion object {
+        private const val PAYMENT_ID = "payment-id"
+
+        private val FINISHED_GOV_UK_PAY_STATUSES =
+            setOf(
+                GovUkPayPaymentStatus.SUCCESS,
+                GovUkPayPaymentStatus.FAILED,
+                GovUkPayPaymentStatus.CANCELLED,
+                GovUkPayPaymentStatus.ERROR,
+            )
+
         @JvmStatic
         fun provideWorkedExamples() =
             listOf(
@@ -244,6 +303,19 @@ class PaymentServiceTests {
                 Arguments.of(6500, LocalDate.of(2027, 1, 31), LocalDate.of(2028, 1, 31), 1371),
                 // c = 366, g = 143, d = 366 -> 3960.38
                 Arguments.of(6500, LocalDate.of(2027, 6, 25), LocalDate.of(2028, 6, 25), 3960),
+            )
+
+        @JvmStatic
+        fun provideGovUkPayStatusesAndExpectedOutcomes() =
+            listOf(
+                Arguments.of(GovUkPayPaymentStatus.CREATED, PaymentCheckOutcome.IN_PROGRESS),
+                Arguments.of(GovUkPayPaymentStatus.STARTED, PaymentCheckOutcome.IN_PROGRESS),
+                Arguments.of(GovUkPayPaymentStatus.SUBMITTED, PaymentCheckOutcome.IN_PROGRESS),
+                Arguments.of(GovUkPayPaymentStatus.CAPTURABLE, PaymentCheckOutcome.CAPTURABLE),
+                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentCheckOutcome.CAPTURED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentCheckOutcome.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentCheckOutcome.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentCheckOutcome.FAILED),
             )
     }
 }

@@ -2,8 +2,12 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.GRATIS_PERIOD_END_DATE
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import java.time.LocalDate
 import java.time.Month
 import java.time.Year
@@ -11,8 +15,29 @@ import java.time.temporal.ChronoUnit
 
 @PrsdbWebService
 class PaymentService(
+    private val govUkPayClient: GovUkPayClient,
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
 ) {
+    fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
+        val state = govUkPayClient.getPayment(paymentId).state
+
+        val outcome =
+            when (state.status) {
+                GovUkPayPaymentStatus.CREATED,
+                GovUkPayPaymentStatus.STARTED,
+                GovUkPayPaymentStatus.SUBMITTED,
+                -> PaymentCheckOutcome.IN_PROGRESS
+                GovUkPayPaymentStatus.CAPTURABLE -> PaymentCheckOutcome.CAPTURABLE
+                GovUkPayPaymentStatus.SUCCESS -> PaymentCheckOutcome.CAPTURED
+                GovUkPayPaymentStatus.FAILED,
+                GovUkPayPaymentStatus.CANCELLED,
+                GovUkPayPaymentStatus.ERROR,
+                -> PaymentCheckOutcome.FAILED
+            }
+
+        return PaymentStatusCheckDataModel(paymentId, outcome)
+    }
+
     fun calculateProRatedFeeInPence(
         renewalDate: LocalDate,
         today: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
