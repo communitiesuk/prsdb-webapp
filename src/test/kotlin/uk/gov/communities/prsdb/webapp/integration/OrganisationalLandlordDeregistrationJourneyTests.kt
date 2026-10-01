@@ -23,7 +23,7 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        val originalOrgInvitationCount =
+        val beforeDeregistrationOrgInvitationCount =
             jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM organisational_landlord_invitation WHERE organisation_landlord_id = 36",
                 Int::class.java,
@@ -49,16 +49,16 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
                 "SELECT count(*) FROM organisational_landlord_user WHERE organisation_landlord_id = 36",
                 Int::class.java,
             )
-        val updatedOrgInvitationCount =
+        val afterDeregistrationOrgInvitationCount =
             jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM organisational_landlord_invitation WHERE organisation_landlord_id = 36",
                 Int::class.java,
             )
 
-        assertEquals(3, originalOrgInvitationCount)
+        assertEquals(3, beforeDeregistrationOrgInvitationCount)
         assertEquals(0, landlordCount)
         assertEquals(0, orgLandlordUserCount)
-        assertEquals(0, updatedOrgInvitationCount)
+        assertEquals(0, afterDeregistrationOrgInvitationCount)
 
         // Check they can no longer access the landlord dashboard
         val landlordDashboard = navigator.goToLandlordDashboard()
