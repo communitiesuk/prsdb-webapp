@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent("acceptInvitationCheckAnswersStepConfig")
@@ -27,6 +28,6 @@ final class CheckAnswersStep(
     stepConfig: CheckAnswersStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, AcceptInvitationJourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "check-your-answers"
+        const val ROUTE_SEGMENT = AbstractCheckYourAnswersStep.ROUTE_SEGMENT
     }
 }
