@@ -289,7 +289,7 @@ object NftDataFaker {
     ): List<OrganisationalLandlordInvitationDetails> {
         val existingEmails = users.map { it.email }.toSet()
         val randomDouble = faker.random().nextDouble()
-        val numOfPartners =
+        val numberOfInvitations =
             when {
                 // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
                 randomDouble < 0.60 -> 0
@@ -297,14 +297,14 @@ object NftDataFaker {
                 else -> faker.random().nextInt(2, 4)
             }
 
-        if (numOfPartners == 0) {
+        if (numberOfInvitations == 0) {
             return emptyList()
         }
 
         val invitations = mutableListOf<OrganisationalLandlordInvitationDetails>()
         val emailsUsed = existingEmails.toMutableSet()
 
-        repeat(numOfPartners) {
+        repeat(numberOfInvitations) {
             var email = generateEmail(generateName())
             while (email in emailsUsed) {
                 email = generateEmail(generateName())
