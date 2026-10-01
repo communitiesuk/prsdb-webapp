@@ -47,7 +47,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getUpdateStep returns 403 for a non-trust organisation landlord`() {
         val nonTrustOrg = OrganisationalLandlord()
         nonTrustOrg.isTrust = false

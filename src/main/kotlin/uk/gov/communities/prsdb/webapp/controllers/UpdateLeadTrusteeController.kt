@@ -18,15 +18,17 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.leadTrustee.UpdateLeadTrusteeJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_LEAD_TRUSTEE_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateLeadTrusteeController(
     private val journeyFactory: UpdateLeadTrusteeJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -52,6 +54,7 @@ class UpdateLeadTrusteeController(
         if (landlord !is OrganisationalLandlord || !landlord.isTrust) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only organisation landlord trusts can update their lead trustee")
         }
+        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(

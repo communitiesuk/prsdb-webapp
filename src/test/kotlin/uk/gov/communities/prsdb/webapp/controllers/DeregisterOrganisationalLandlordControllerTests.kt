@@ -1,21 +1,26 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController.Companion.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(DeregisterOrganisationalLandlordController::class)
@@ -33,6 +38,9 @@ class DeregisterOrganisationalLandlordControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var mockOrganisationalLandlordUserService: OrganisationalLandlordUserService
 
     @Test
     fun `getJourneyStep returns a redirect for an unauthenticated user`() {
@@ -54,8 +62,9 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -71,8 +80,9 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -85,8 +95,9 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
         val journeyId = "test-journey-id"
 
         whenever(organisationalLandlordDeregistrationJourneyFactory.createJourneySteps())
@@ -165,6 +176,30 @@ class DeregisterOrganisationalLandlordControllerTests(
             .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"], value = "user")
+    fun `getJourneyStep returns 403 for an org editor`() {
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
+    fun `getJourneyStep returns 403 when the user is not an admin of the organisation`() {
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(mockOrganisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(any()))
+            .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
+
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { isForbidden() }
             }
     }
 }

@@ -7,6 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_EDITOR
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -28,7 +30,7 @@ class DashboardUrlProvider(
                 ?: return null
 
         return when {
-            authorities.contains(ROLE_INDIVIDUAL_LANDLORD) -> LANDLORD_DASHBOARD_URL
+            authorities.any { it in setOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_ORG_ADMIN, ROLE_ORG_EDITOR) } -> LANDLORD_DASHBOARD_URL
             authorities.contains(ROLE_LOCAL_COUNCIL_USER) || authorities.contains(ROLE_LOCAL_COUNCIL_ADMIN) ->
                 LOCAL_COUNCIL_DASHBOARD_URL
             authorities.contains(ROLE_SYSTEM_OPERATOR) -> SYSTEM_OPERATOR_DASHBOARD_URL

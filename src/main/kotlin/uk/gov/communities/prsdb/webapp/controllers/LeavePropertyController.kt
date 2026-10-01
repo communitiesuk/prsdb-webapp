@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.http.HttpStatus
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourn
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
 
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfAnyLandlord
 @PrsdbController
 @RequestMapping(LEAVE_PROPERTY_ROUTE)
 class LeavePropertyController(

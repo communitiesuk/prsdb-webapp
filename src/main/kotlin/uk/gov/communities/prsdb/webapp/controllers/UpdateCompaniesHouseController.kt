@@ -18,15 +18,17 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.UpdateCompaniesHouseJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_COMPANIES_HOUSE_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateCompaniesHouseController(
     private val journeyFactory: UpdateCompaniesHouseJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -55,6 +57,7 @@ class UpdateCompaniesHouseController(
                 "Only organisation landlords can update their Companies House details",
             )
         }
+        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(

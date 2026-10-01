@@ -6,6 +6,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -83,8 +85,12 @@ class LandlordDeregistrationService(
     }
 
     private fun deleteBaseUserIfNoOtherRoles(baseUserId: String) {
-        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_INDIVIDUAL_LANDLORD }) {
+        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it in landlordDomainRoles }) {
             prsdbUserRepository.deleteById(baseUserId)
         }
+    }
+
+    companion object {
+        private val landlordDomainRoles = setOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_ORG_ADMIN, ROLE_ORG_EDITOR)
     }
 }

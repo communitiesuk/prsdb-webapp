@@ -83,6 +83,26 @@ class LandlordControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    fun `index returns a redirect for an org admin`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"])
+    fun `index returns a redirect for an org editor`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
     fun `landlordDashboard returns a redirect for unauthenticated user`() {
         mvc
             .get(LANDLORD_DASHBOARD_URL)

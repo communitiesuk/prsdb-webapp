@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -8,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
@@ -24,7 +24,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_CORRESPONDENCE_EMAIL_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfAnyLandlord
 class LandlordUpdateCorrespondenceEmailController(
     private val journeyFactory: UpdateCorrespondenceEmailJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
