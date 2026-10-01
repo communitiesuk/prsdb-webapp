@@ -77,6 +77,10 @@ class NftDataSeeder(
                     seedGeneratedAddressData()
                     eligibleAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = false)
                     remainingAvailableAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = true)
+                    check(numOfProperties <= remainingAvailableAddressCount) {
+                        "not enough addresses to seed $numOfProperties properties: only $remainingAvailableAddressCount addresses are available. " +
+                            "Reduce the NFT seed property count or add more generated addresses."
+                    }
                     seedSystemOperatorData()
                     seedLocalCouncilData()
                     seedLandlordData()
@@ -729,6 +733,7 @@ class NftDataSeeder(
         }
 
         val address = incompletePropertyAddressGenerator.next()
+        remainingAvailableAddressCount--
 
         savedJourneyStateStmt.setLong(1, savedJourneyStateId)
         savedJourneyStateStmt.setTimestamp(2, createdDate)
