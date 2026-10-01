@@ -39,7 +39,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.contains("Cannot start yet"))
         }
 
         @Test
@@ -62,7 +62,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.contains("Cannot start yet"))
         }
     }
 

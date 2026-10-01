@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
@@ -130,7 +132,7 @@ class PropertyRegistrationCyaStepConfig(
         tenancyDetails: List<SummaryListRowViewModel>,
     ) = mapOf<String, Any?>(
         "title" to "registerProperty.title",
-        "submitButtonText" to "forms.buttons.completeRegistration",
+        "submitButtonText" to getSubmitButtonText(),
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
         "propertyName" to
             state.propertyDetailsTask.addressTask
@@ -141,7 +143,34 @@ class PropertyRegistrationCyaStepConfig(
         "occupancyDetails" to occupancyDetails,
         "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
         "tenancyDetails" to tenancyDetails,
+        "correspondenceRows" to
+            if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)) getCorrespondenceRows(state) else emptyList(),
     )
+
+    private fun getSubmitButtonText(): String =
+        if (featureFlagManager.checkFeature(PAYMENTS)) {
+            "forms.buttons.submitAndPay"
+        } else {
+            "forms.buttons.completeRegistration"
+        }
+
+    private fun getCorrespondenceRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
+        val emailStep = state.correspondenceTask.correspondenceEmailStep
+        val email = emailStep.formModel.getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
+        val addressTask = state.correspondenceTask.addressTask
+        return listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.correspondence.emailAddress",
+                email,
+                Destination.VisitableStep(emailStep, state.getCyaJourneyId(emailStep)),
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.correspondence.postalAddress",
+                addressTask.getAddress().toMultiLineAddress().split("\n"),
+                Destination.VisitableStep(addressTask.lookupAddressStep, state.getCyaJourneyId(addressTask.lookupAddressStep)),
+            ),
+        )
+    }
 
     private fun getContentSections(
         state: PropertyRegistrationJourneyState,

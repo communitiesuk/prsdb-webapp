@@ -12,11 +12,13 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -26,6 +28,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
@@ -87,7 +92,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             var checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.ownershipRow.actions.firstActionLink
@@ -125,7 +130,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
             val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
@@ -157,7 +162,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withLandlordProvidesRentalDetails()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
@@ -179,7 +184,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                             AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
                         ).withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             val headings = checkAnswersPage.sectionHeadings
@@ -188,6 +193,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     "About your property",
                     "Property details",
                     "Ownership and landlords",
+                    "Who the council should contact",
                     "Tell us if your property’s occupied",
                     "How your property’s rented out",
                     "Who will provide these details",
@@ -230,7 +236,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
@@ -247,7 +253,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withCompliantEpc()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
@@ -264,7 +270,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withLandlordProvidesRentalDetails()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             val headings = checkAnswersPage.sectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
@@ -284,12 +290,20 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
+        }
+
+        @Test
+        fun `CYA page renders EPC summary card title as h4 to preserve heading hierarchy`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart()
+
+            BaseComponent.assertThat(checkAnswersPage.epcCard.title).isVisible()
+            assertThat(page.locator("main h4.govuk-summary-card__title")).hasCount(1)
         }
 
         @Test
@@ -302,7 +316,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withLandlordProvidesRentalDetails()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isHidden()
@@ -317,7 +331,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
@@ -354,7 +368,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
@@ -401,7 +415,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswersWithSelectiveLicence()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
             val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
@@ -438,7 +452,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withCheckedJointLandlords(mutableListOf("email@address.com")),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
@@ -636,6 +650,96 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
             billsIncludedPage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class CorrespondenceCheckAnswers {
+        @Test
+        fun `council contact details are shown between ownership and occupancy`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
+
+            assertEquals(
+                listOf(
+                    "About your property",
+                    "Property details",
+                    "Ownership and landlords",
+                    "Who the council should contact",
+                    "Tell us if your property’s occupied",
+                ),
+                checkAnswersPage.sectionHeadings.take(5),
+            )
+            assertThat(checkAnswersPage.correspondenceRowKeys).hasText(arrayOf("Email address", "Postal address"))
+            assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.value).hasText("alex.surname@example.com")
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
+        }
+
+        @Test
+        fun `the email change link starts a CYA sub-journey that returns to the CYA with the new email`(page: Page) {
+            var checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
+
+            checkAnswersPage.summaryList.correspondenceEmailRow.clickFirstActionLinkAndWait()
+            val emailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            emailPage.submitDifferentEmail("council.contact@example.com")
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.value).hasText("council.contact@example.com")
+        }
+
+        @Test
+        fun `the postal address change link starts a CYA sub-journey that only changes the postal address`(page: Page) {
+            var checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
+
+            checkAnswersPage.summaryList.correspondencePostalAddressRow.clickFirstActionLinkAndWait()
+            val lookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            lookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
+            val selectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            selectPage.selectAddressAndSubmit("2 Fake Way")
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("2 Fake Way", "FA1 1AB"))
+            assertThat(
+                checkAnswersPage.summaryList.propertyAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
+        }
+
+        @Test
+        fun `The back link on the correspondence email page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
+
+            checkAnswersPage.summaryList.correspondenceEmailRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            BackLink.default(page).clickAndWait()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `when the correspondence address feature is disabled, the council contact section is not displayed`(page: Page) {
+            featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
+
+            val checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
+
+            BaseComponent.assertThat(checkAnswersPage.correspondenceHeading).isHidden()
+            assertThat(checkAnswersPage.correspondenceRowKeys).hasCount(0)
+        }
+
+        private fun goToCheckAnswersWithCorrespondence(page: Page): CheckAnswersPagePropertyRegistration {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withCompletedCorrespondence(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }
 

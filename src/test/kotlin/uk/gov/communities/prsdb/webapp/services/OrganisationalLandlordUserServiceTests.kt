@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -31,6 +32,7 @@ class OrganisationalLandlordUserServiceTests {
         val baseUser = PrsdbUser("user-123")
         val name = "Alice Registrant"
         val email = "alice@example.com"
+        val role = OrganisationalLandlordUserRole.EDITOR
 
         whenever(mockOrganisationalLandlordUserRepository.save(any<OrganisationalLandlordUser>()))
             .thenAnswer { it.arguments[0] }
@@ -41,6 +43,7 @@ class OrganisationalLandlordUserServiceTests {
                 baseUser,
                 name,
                 email,
+                role,
             )
 
         val captor = captor<OrganisationalLandlordUser>()
@@ -51,6 +54,7 @@ class OrganisationalLandlordUserServiceTests {
         assertEquals(baseUser, saved.baseUser)
         assertEquals(name, saved.name)
         assertEquals(email, saved.email)
+        assertEquals(role, saved.role)
         assertEquals(result, saved)
     }
 }

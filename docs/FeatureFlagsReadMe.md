@@ -91,6 +91,43 @@ You can define a service which calls different versions of a function depending 
 To use your feature flagged service, pass in the interface - it will automatically call the correct
 implementation based on the feature flag value.
 
+### Branching on a flag inline (`FeatureFlagStrategy`)
+
+When you want to pick a value or run a branch inline based on a flag (rather than swapping a whole service
+implementation), extend `FeatureFlagStrategy` (`config/featureFlags/FeatureFlagStrategy.kt`). Define an interface
+annotated with an interface-level `@PrsdbFlip`, and provide two beans - one extending `EnabledFeatureFlagStrategy`, one
+extending `DisabledFeatureFlagStrategy` (mark the disabled one `@Primary`):
+
+```kotlin
+@PrsdbFlip(name = PAYMENTS, alterBean = "payments-property-registration-flag-on")
+interface PaymentsPropertyRegistrationStrategy : FeatureFlagStrategy
+
+@Primary
+@PrsdbWebService("payments-property-registration-flag-off")
+class PaymentsPropertyRegistrationStrategyImplFlagOff :
+    DisabledFeatureFlagStrategy(), PaymentsPropertyRegistrationStrategy
+
+@PrsdbWebService("payments-property-registration-flag-on")
+class PaymentsPropertyRegistrationStrategyImplFlagOn :
+    EnabledFeatureFlagStrategy(), PaymentsPropertyRegistrationStrategy
+```
+
+Callers branch through the injected strategy. `EnabledFeatureFlagStrategy` runs the `ifEnabled` branch,
+`DisabledFeatureFlagStrategy` runs the `ifDisabled` branch, and a bare `ifEnabled { }` is a no-op when disabled:
+
+```kotlin
+// Pick a value depending on the flag
+val headingKey = paymentsStrategy.ifEnabledOrElse {
+    ifEnabled { "registerProperty.taskList.submitYourRegistration.headingWithPayment" }
+    ifDisabled { "registerProperty.taskList.submitYourRegistration.heading" }
+}
+
+// Run some code only when the flag is enabled
+paymentsStrategy.ifEnabled {
+    step(journey.paymentSummaryStep) { /* ... */ }
+}
+```
+
 ## Feature flagged endpoints
 
 To make an endpoint available only when a feature is enabled, annotate it with `@AvailableWhenFeatureEnabled("flag-name")`

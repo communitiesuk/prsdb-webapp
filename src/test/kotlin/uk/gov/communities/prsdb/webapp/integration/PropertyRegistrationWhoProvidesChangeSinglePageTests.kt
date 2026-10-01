@@ -35,7 +35,7 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
                     .withLandlordProvidesRentalDetails()
                     .withBedrooms(),
             )
-        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
@@ -50,7 +50,7 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
                         AllowLettingAgentEmailFormModel().apply { emailAddress = LETTING_AGENT_EMAIL },
                     ).withBedrooms(),
             )
-        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 

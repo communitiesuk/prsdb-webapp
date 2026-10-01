@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
@@ -221,6 +222,38 @@ class PropertyRegistrationTaskListStepConfigTests {
                     "registerProperty.taskList.aboutYourProperty.occupied",
                 ),
                 aboutSection.tasks.map { it.nameKey },
+            )
+        }
+    }
+
+    @Nested
+    inner class SubmitYourRegistrationTaskListItemTests {
+        @BeforeEach
+        fun stubState() {
+            this@PropertyRegistrationTaskListStepConfigTests.stubState()
+        }
+
+        @Test
+        fun `getTaskListViewModel labels the submit task as check and submit when PAYMENTS is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
+            val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
+
+            assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
+            assertEquals(
+                listOf("registerProperty.taskList.checkAndSubmit.checkAnswers"),
+                submitSection.tasks.map { it.nameKey },
+            )
+        }
+
+        @Test
+        fun `getTaskListViewModel labels the submit task submit and pay when PAYMENTS is enabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+            val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
+
+            assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
+            assertEquals(
+                listOf("registerProperty.taskList.checkAndSubmit.checkAnswersWithPayment"),
+                submitSection.tasks.map { it.nameKey },
             )
         }
     }
