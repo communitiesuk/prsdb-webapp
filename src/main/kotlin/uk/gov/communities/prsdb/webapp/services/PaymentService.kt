@@ -38,10 +38,10 @@ class PaymentService(
         returnUrl: String,
         email: String,
     ): String {
-        val userId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
         val incompleteProperty =
-            checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId)) {
-                "No incomplete property found for journey $journeyId and user $userId"
+            checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
+                "No incomplete property found for journey $journeyId and user $baseUserId"
             }
 
         val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
