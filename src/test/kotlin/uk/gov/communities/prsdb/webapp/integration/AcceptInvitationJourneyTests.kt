@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
-import kotlin.test.assertTrue
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -14,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.TokenValidity
+import kotlin.test.assertTrue
 
 class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @BeforeEach
