@@ -12,8 +12,12 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.CheckAnsw
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.TokenValidity
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 
 @PrsdbWebService
@@ -24,13 +28,29 @@ class AcceptInvitationJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepStep { journey.joinOrganisationStep }
+            unreachableStepStep { journey.validateTokenStep }
             configure {
                 withAdditionalContentProperty { "title" to "acceptInvitation.title" }
             }
+            step(journey.validateTokenStep) {
+                routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
+                initialStep()
+                nextStep { outcome ->
+                    when (outcome) {
+                        TokenValidity.VALID -> journey.joinOrganisationStep
+                        TokenValidity.INVALID -> journey.invalidLinkStep
+                    }
+                }
+            }
+            step(journey.invalidLinkStep) {
+                routeSegment(InvalidLinkStep.ROUTE_SEGMENT)
+                parents { journey.validateTokenStep.hasOutcome(TokenValidity.INVALID) }
+                backDestination { Destination.Nowhere() }
+                nextDestination { Destination.Nowhere() }
+            }
             step(journey.joinOrganisationStep) {
                 routeSegment(JoinOrganisationStep.ROUTE_SEGMENT)
-                initialStep()
+                parents { journey.validateTokenStep.hasOutcome(TokenValidity.VALID) }
                 nextStep { journey.fullNameStep }
             }
             step(journey.fullNameStep) {
@@ -65,6 +85,8 @@ class AcceptInvitationJourneyFactory(
 
 @JourneyFrameworkComponent("acceptInvitationJourney")
 class AcceptInvitationJourney(
+    override val validateTokenStep: ValidateTokenStep,
+    override val invalidLinkStep: InvalidLinkStep,
     override val joinOrganisationStep: JoinOrganisationStep,
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
@@ -81,6 +103,8 @@ class AcceptInvitationJourney(
 }
 
 interface AcceptInvitationJourneyState : JourneyState {
+    val validateTokenStep: ValidateTokenStep
+    val invalidLinkStep: InvalidLinkStep
     val joinOrganisationStep: JoinOrganisationStep
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep

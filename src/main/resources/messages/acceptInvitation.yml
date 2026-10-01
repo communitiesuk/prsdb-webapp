@@ -1,0 +1,9 @@
+title: Join your organisation
+validateToken:
+  fieldSetHeading: Validate token (TODO PDJB-1822)
+  radios:
+    option:
+      valid: "Yes, token is valid"
+      invalid: "No, token is invalid"
+    error:
+      missing: "Select whether the token is valid or not"

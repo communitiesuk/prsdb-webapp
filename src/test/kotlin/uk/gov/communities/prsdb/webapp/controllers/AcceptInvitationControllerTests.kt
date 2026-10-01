@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
 
 @WebMvcTest(AcceptInvitationController::class)
 @WithMockUser(roles = ["LANDLORD"])
@@ -54,7 +55,7 @@ class AcceptInvitationControllerTests(
             val expectedRedirectUrl =
                 JourneyStateService
                     .urlWithJourneyState(
-                        "$ACCEPT_INVITATION_ROUTE/${JoinOrganisationStep.ROUTE_SEGMENT}",
+                        "$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
                         journeyId,
                     )
 
