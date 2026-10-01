@@ -21,16 +21,16 @@ class ValidateTokenStepConfig :
     override fun getStepSpecificContent(state: AcceptInvitationJourneyState): Map<String, Any?> =
         mapOf(
             "fieldName" to "tokenValidity",
-            "fieldSetHeading" to "acceptInvitation.validateToken.fieldSetHeading",
+            "fieldSetHeading" to "acceptOrganisationInvitation.validateToken.fieldSetHeading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = TokenValidity.VALID,
-                        labelMsgKey = "acceptInvitation.validateToken.radios.option.valid",
+                        labelMsgKey = "acceptOrganisationInvitation.validateToken.radios.option.valid",
                     ),
                     RadiosButtonViewModel(
                         value = TokenValidity.INVALID,
-                        labelMsgKey = "acceptInvitation.validateToken.radios.option.invalid",
+                        labelMsgKey = "acceptOrganisationInvitation.validateToken.radios.option.invalid",
                     ),
                 ),
         )

@@ -12,7 +12,7 @@ class TokenValidityFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "acceptInvitation.validateToken.radios.error.missing",
+                messageKey = "acceptOrganisationInvitation.validateToken.radios.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],

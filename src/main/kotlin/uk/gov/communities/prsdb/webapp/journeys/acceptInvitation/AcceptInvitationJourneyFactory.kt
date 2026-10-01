@@ -30,7 +30,7 @@ class AcceptInvitationJourneyFactory(
         return journey(state) {
             unreachableStepStep { journey.validateTokenStep }
             configure {
-                withAdditionalContentProperty { "title" to "acceptInvitation.title" }
+                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
             }
             step(journey.validateTokenStep) {
                 routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
