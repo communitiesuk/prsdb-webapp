@@ -54,7 +54,7 @@ class UpdateOrganisationMainContactControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -66,7 +66,7 @@ class UpdateOrganisationMainContactControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 200 for an organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationalLandlord())
         whenever(
@@ -107,7 +107,7 @@ class UpdateOrganisationMainContactControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -121,7 +121,7 @@ class UpdateOrganisationMainContactControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 200 for an organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationalLandlord())
         whenever(

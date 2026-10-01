@@ -52,7 +52,7 @@ class LandlordUpdateCorrespondenceEmailControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `GET is unavailable when the correspondence feature is disabled`() {
         whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
@@ -60,7 +60,7 @@ class LandlordUpdateCorrespondenceEmailControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `POST is unavailable when the correspondence feature is disabled`() {
         whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
