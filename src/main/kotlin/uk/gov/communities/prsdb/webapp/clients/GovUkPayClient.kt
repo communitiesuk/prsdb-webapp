@@ -16,7 +16,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreate
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 
-// API reference: https://docs.payments.service.gov.uk/api_reference/
+/**
+ * API reference: https://docs.payments.service.gov.uk/api_reference/
+ *
+ * Locally, requests are served by [uk.gov.communities.prsdb.webapp.local.api.controllers.MockGovUkPayController].
+ */
 @PrsdbWebService
 class GovUkPayClient(
     @Qualifier("gov-uk-pay-client") private val client: RestClient,
