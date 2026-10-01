@@ -9,7 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
@@ -35,7 +35,7 @@ class DashboardUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is enabled returns the landlord dashboard for a landlord`() {
         featureFlagManager.enableFeature(DASHBOARD_NAV_LINK)
-        setAuthenticatedRoles(ROLE_LANDLORD)
+        setAuthenticatedRoles(ROLE_INDIVIDUAL_LANDLORD)
 
         assertEquals(LANDLORD_DASHBOARD_URL, dashboardUrlProvider.getDashboardUrlForCurrentUser())
     }
@@ -82,7 +82,7 @@ class DashboardUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is disabled returns null even for a landlord`() {
         featureFlagManager.disableFeature(DASHBOARD_NAV_LINK)
-        setAuthenticatedRoles(ROLE_LANDLORD)
+        setAuthenticatedRoles(ROLE_INDIVIDUAL_LANDLORD)
 
         assertNull(dashboardUrlProvider.getDashboardUrlForCurrentUser())
     }

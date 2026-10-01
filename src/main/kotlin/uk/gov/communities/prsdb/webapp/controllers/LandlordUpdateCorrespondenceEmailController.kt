@@ -24,7 +24,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_CORRESPONDENCE_EMAIL_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class LandlordUpdateCorrespondenceEmailController(
     private val journeyFactory: UpdateCorrespondenceEmailJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

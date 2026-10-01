@@ -16,7 +16,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
@@ -67,7 +67,7 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterIndividualLandlord deletes the user from the landlord table, prsdb_user table if not a different type of user`() {
         val baseUserId = "one-login-user"
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
@@ -77,7 +77,9 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterIndividualLandlord deletes the user from the landlord table, not prsdb_user table if a different type of user`() {
         val baseUserId = "one-login-user"
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
+        whenever(
+            mockUserRolesService.getAllRolesForSubjectId(baseUserId),
+        ).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
@@ -92,7 +94,7 @@ class LandlordDeregistrationServiceTests {
         val soleProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 10L)
 
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
@@ -110,7 +112,7 @@ class LandlordDeregistrationServiceTests {
         jointProperty.addLandlord(coLandlord)
 
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
@@ -129,7 +131,7 @@ class LandlordDeregistrationServiceTests {
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord), id = 20L)
 
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
@@ -191,7 +193,7 @@ class LandlordDeregistrationServiceTests {
         val baseUser = MockLandlordData.createPrsdbUser()
         val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
@@ -214,7 +216,7 @@ class LandlordDeregistrationServiceTests {
         val baseUser = MockLandlordData.createPrsdbUser()
         val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD))
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
@@ -227,7 +229,9 @@ class LandlordDeregistrationServiceTests {
         val baseUser = MockLandlordData.createPrsdbUser()
         val olu = OrganisationalLandlordUser(orgLandlord, baseUser, "User", "user@example.com", OrganisationalLandlordUserRole.EDITOR)
         whenever(mockOrganisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)).thenReturn(listOf(olu))
-        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUser.id)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
+        whenever(
+            mockUserRolesService.getAllRolesForSubjectId(baseUser.id),
+        ).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 

@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.st
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @PrsdbController
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @RequestMapping(CANCEL_JOINT_LANDLORD_INVITATION_ROUTE)
 class CancelJointLandlordInvitationController(
     private val journeyFactory: CancelJointLandlordInvitationJourneyFactory,

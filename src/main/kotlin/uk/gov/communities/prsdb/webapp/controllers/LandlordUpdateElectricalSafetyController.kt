@@ -34,7 +34,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_ELECTRICAL_SAFETY_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class LandlordUpdateElectricalSafetyController(
     private val journeyFactory: UpdateElectricalSafetyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

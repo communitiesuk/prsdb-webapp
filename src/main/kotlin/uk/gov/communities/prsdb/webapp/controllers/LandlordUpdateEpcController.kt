@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_EPC_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class LandlordUpdateEpcController(
     private val journeyFactory: UpdateEpcJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
