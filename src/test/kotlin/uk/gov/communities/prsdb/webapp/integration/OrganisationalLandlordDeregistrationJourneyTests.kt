@@ -23,6 +23,12 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
+        val originalOrgInvitationCount =
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM organisational_landlord_invitation WHERE organisation_landlord_id = 36",
+                Int::class.java,
+            )
+
         val detailsPage = navigator.goToOrgLandlordDetails()
         detailsPage.deleteOrganisationLink.clickAndWait()
         val areYouSurePage = assertPageIs(page, AreYouSureFormPageOrganisationalLandlordDeregistration::class)
@@ -43,15 +49,16 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
                 "SELECT count(*) FROM organisational_landlord_user WHERE organisation_landlord_id = 36",
                 Int::class.java,
             )
-        val orgInvitationCount =
+        val updatedOrgInvitationCount =
             jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM organisational_landlord_invitation WHERE organisation_landlord_id = 36",
                 Int::class.java,
             )
 
+        assertEquals(3, originalOrgInvitationCount)
         assertEquals(0, landlordCount)
         assertEquals(0, orgLandlordUserCount)
-        assertEquals(0, orgInvitationCount)
+        assertEquals(0, updatedOrgInvitationCount)
 
         // Check they can no longer access the landlord dashboard
         val landlordDashboard = navigator.goToLandlordDashboard()
