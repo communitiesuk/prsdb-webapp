@@ -231,28 +231,32 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase creates one organisational landlord invitation per organisation landlord`() {
+    fun `seedDatabase creates organisational landlord invitations for each organisation landlord and defaults them to admin`() {
         newSeeder().seedDatabase()
 
-        val invitationCount =
-            jdbcTemplate.queryForObject(
-                "SELECT count(*) FROM organisational_landlord_invitation",
-                Long::class.java,
-            )!!
+        val organisationLandlordIds =
+            organisationLandlordRepository
+                .findAll()
+                .map { it.id }
+                .toSet()
 
-        assertTrue(invitationCount > 0, "Expected organisational landlord invitations to be seeded")
-        assertEquals(
-            organisationLandlordRepository.count(),
-            invitationCount,
-            "Expected one invitation per organisation landlord",
-        )
+        val invitedOrganisationLandlordIds =
+            jdbcTemplate.queryForList<Long>(
+                "SELECT DISTINCT organisation_landlord_id FROM organisational_landlord_invitation",
+            )
+                .toSet()
+
+        assertTrue(invitedOrganisationLandlordIds.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
+        assertEquals(organisationLandlordIds, invitedOrganisationLandlordIds) {
+            "Expected each organisation landlord to have at least one invitation"
+        }
 
         val invitationRoles =
             jdbcTemplate.queryForList<Int>(
                 "SELECT role FROM organisational_landlord_invitation",
             )
         assertTrue(invitationRoles.all { it == OrganisationalLandlordUserRole.ADMIN.ordinal }) {
-            "Expected all organisational landlord invitations to have the ADMIN role"
+            "Expected all organisational landlord invitations to default to the ADMIN role"
         }
     }
 
