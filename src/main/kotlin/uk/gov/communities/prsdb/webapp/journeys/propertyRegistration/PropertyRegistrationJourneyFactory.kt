@@ -741,7 +741,7 @@ interface PropertyRegistrationJourneyState :
     var backUrlKey: Int?
     val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 
-    // TODO PDJB-1022: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
+    // TODO PDJB-1617: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
     //  once the feature flag is removed and the letting agent journey is fully implemented
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
