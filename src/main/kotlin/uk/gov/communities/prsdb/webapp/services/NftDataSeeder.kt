@@ -78,7 +78,8 @@ class NftDataSeeder(
                     eligibleAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = false)
                     remainingAvailableAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = true)
                     check(numOfProperties <= remainingAvailableAddressCount) {
-                        "not enough addresses to seed $numOfProperties properties: only $remainingAvailableAddressCount addresses are available. " +
+                        "not enough addresses to seed $numOfProperties properties: " +
+                            "only $remainingAvailableAddressCount addresses are available. " +
                             "Reduce the NFT seed property count or add more generated addresses."
                     }
                     seedSystemOperatorData()
