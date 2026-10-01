@@ -122,7 +122,11 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationPropertyType() = PropertyStateSessionBuilder().withLookupAddress().withSelectedAddress()
 
         fun beforePropertyRegistrationCorrespondenceEmailAddress() =
-            beforePropertyRegistrationPropertyType().withPropertyType().withBedrooms().withOwnershipType().withHasNoJointLandlords()
+            beforePropertyRegistrationPropertyType()
+                .withPropertyType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
 
         fun beforePropertyRegistrationOwnershipType() =
             beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
@@ -171,6 +175,8 @@ class PropertyStateSessionBuilder(
                 .withNoTenants()
                 .withBedrooms()
                 .withOccupancyStatus(true)
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withCheckEpcAnswersComplete()
                 .withLandlordProvidesRentalDetails()
 
