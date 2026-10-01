@@ -1,9 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
@@ -26,20 +23,4 @@ class OrganisationalLandlordUserService(
         organisationalLandlordUserRepository.save(
             OrganisationalLandlordUser(organisationalLandlord, baseUser, name, email, role),
         )
-
-    fun getCurrentUsersRoleForOrgOrNull(organisationalLandlord: OrganisationalLandlord): OrganisationalLandlordUserRole? {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        return organisationalLandlordUserRepository
-            .findByBaseUser_IdAndOrganisationalLandlord_Id(baseUserId, organisationalLandlord.id)
-            ?.role
-    }
-
-    fun throwIfCurrentUserIsNotAdminOfOrg(organisationalLandlord: OrganisationalLandlord) {
-        if (getCurrentUsersRoleForOrgOrNull(organisationalLandlord) != OrganisationalLandlordUserRole.ADMIN) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "The current user is not an admin of this organisation",
-            )
-        }
-    }
 }

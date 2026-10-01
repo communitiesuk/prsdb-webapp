@@ -16,9 +16,4 @@ interface OrganisationalLandlordUserRepository : JpaRepository<OrganisationalLan
         baseUserId: String,
         organisationalLandlordId: Long,
     ): Boolean
-
-    fun findByBaseUser_IdAndOrganisationalLandlord_Id(
-        baseUserId: String,
-        organisationalLandlordId: Long,
-    ): OrganisationalLandlordUser?
 }

@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
@@ -29,31 +28,19 @@ class DeregisterOrganisationalLandlordController(
     private val organisationalLandlordDeregistrationJourneyFactory: OrganisationalLandlordDeregistrationJourneyFactory,
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @PreAuthorize("hasRole('ORG_ADMIN')")
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
-    ): ModelAndView {
-        checkUserIsAdminOfOrganisation()
-        return dispatchJourneyStep(stepPath) { getStepModelAndView() }
-    }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('ORG_ADMIN')")
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-    ): ModelAndView {
-        checkUserIsAdminOfOrganisation()
-        return dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
-    }
-
-    private fun checkUserIsAdminOfOrganisation() {
-        val organisationalLandlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
-        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(organisationalLandlord)
-    }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
         stepPath: String,
