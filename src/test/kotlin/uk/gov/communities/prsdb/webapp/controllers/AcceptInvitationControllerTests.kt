@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrgan
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
 
 @WebMvcTest(AcceptInvitationController::class)
-@WithMockUser(roles = ["LANDLORD"])
 class AcceptInvitationControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -49,7 +48,17 @@ class AcceptInvitationControllerTests(
     @Nested
     inner class StartJourney {
         @Test
-        fun `startJourney initializes journey state and redirects to join organisation step`() {
+        fun `startJourney redirects unauthenticated users to login`() {
+            mvc
+                .get(ACCEPT_INVITATION_ROUTE)
+                .andExpect {
+                    status { is3xxRedirection() }
+                }
+        }
+
+        @Test
+        @WithMockUser(value = "user")
+        fun `startJourney initializes journey state and redirects to join organisation step for authenticated user without landlord role`() {
             whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
 
             val expectedRedirectUrl =
@@ -66,24 +75,13 @@ class AcceptInvitationControllerTests(
                     redirectedUrl(expectedRedirectUrl)
                 }
         }
-
-        @Test
-        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `startJourney allows access without landlord role`() {
-            whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
-
-            mvc
-                .get(ACCEPT_INVITATION_ROUTE)
-                .andExpect {
-                    status { is3xxRedirection() }
-                }
-        }
     }
 
     @Nested
     inner class GetJourneyStep {
         @Test
-        fun `getJourneyStep returns step view`() {
+        @WithMockUser(value = "user")
+        fun `getJourneyStep returns step view for authenticated user without landlord role`() {
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(JoinOrganisationStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
@@ -95,7 +93,10 @@ class AcceptInvitationControllerTests(
                 }
         }
 
+        // TODO: add controller coverage for unauthenticated access to the validate-token step once that permission is allowed.
+        // TODO: add controller coverage for unauthenticated access to the invalid-link step once that permission is allowed.
         @Test
+        @WithMockUser(value = "user")
         fun `getJourneyStep returns 404 when step is not found`() {
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
@@ -107,6 +108,7 @@ class AcceptInvitationControllerTests(
         }
 
         @Test
+        @WithMockUser(value = "user")
         fun `getJourneyStep redirects to start route when NoSuchJourneyException is thrown`() {
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
@@ -122,7 +124,8 @@ class AcceptInvitationControllerTests(
     @Nested
     inner class PostJourneyData {
         @Test
-        fun `postJourneyData submits data and redirects`() {
+        @WithMockUser(value = "user")
+        fun `postJourneyData submits data and redirects for authenticated user without landlord role`() {
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(JoinOrganisationStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.postStepModelAndView(org.mockito.kotlin.any())).thenReturn(placeholderModelAndView)
