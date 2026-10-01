@@ -79,6 +79,7 @@ class LandlordControllerTests(
             .get("/$LANDLORD_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
             }
     }
 
@@ -89,6 +90,7 @@ class LandlordControllerTests(
             .get("/$LANDLORD_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
             }
     }
 
@@ -99,6 +101,7 @@ class LandlordControllerTests(
             .get("/$LANDLORD_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
             }
     }
 
