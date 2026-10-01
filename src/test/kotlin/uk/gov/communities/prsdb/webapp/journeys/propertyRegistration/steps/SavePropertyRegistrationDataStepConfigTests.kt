@@ -49,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -90,6 +91,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockPropertyDetailsTask: PropertyDetailsTask
+
+    @Mock
+    private lateinit var mockTenancyDetailsTask: TenancyDetailsTask
 
     @Mock
     private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
@@ -479,15 +483,17 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = false })
 
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
+
         val mockBedroomsStep = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockState.propertyDetailsTask.bedrooms).thenReturn(mockBedroomsStep)
         whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
 
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
-        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockState.tenancyDetailsTask.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
-        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         whenever(mockAddressTask.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
@@ -694,7 +700,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         whenever(mockState.occupied.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
-        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
+        whenever(mockState.tenancyDetailsTask.provideTenancyDetailsLater).thenReturn(true)
         setupStateForComplianceDataWithNullValues()
 
         // Act
@@ -783,15 +789,17 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(occupancyFormModel)
 
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
+
         val mockBedroomsStep = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockState.propertyDetailsTask.bedrooms).thenReturn(mockBedroomsStep)
         whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
 
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
-        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockState.tenancyDetailsTask.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
-        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         whenever(mockAddressTask.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
@@ -949,20 +957,20 @@ class SavePropertyRegistrationDataStepConfigTests {
         val mockHouseholdsAndTenantsTask = mock<HouseholdsAndTenantsTask>()
         val mockHouseholdStep = mock<HouseholdStep>()
         val mockTenantsStep = mock<TenantsStep>()
-        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        whenever(mockState.tenancyDetailsTask.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
         whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
         whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         whenever(mockHouseholdStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "1" })
         whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "2" })
 
         val mockFurnishedStatusStep = mock<FurnishedStatusStep>()
-        whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
+        whenever(mockState.tenancyDetailsTask.furnishedStatus).thenReturn(mockFurnishedStatusStep)
         whenever(mockFurnishedStatusStep.formModel).thenReturn(FurnishedStatusFormModel())
 
         val mockRentFrequencyAndAmountTask = mock<RentFrequencyAndAmountTask>()
         val mockRentFrequencyStep = mock<RentFrequencyStep>()
         val mockRentAmountStep = mock<RentAmountStep>()
-        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+        whenever(mockState.tenancyDetailsTask.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
         whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         whenever(mockRentFrequencyStep.formModel).thenReturn(RentFrequencyFormModel())
