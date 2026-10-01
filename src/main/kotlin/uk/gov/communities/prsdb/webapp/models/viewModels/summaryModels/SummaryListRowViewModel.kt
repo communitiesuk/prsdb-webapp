@@ -122,7 +122,7 @@ data class SummaryListRowActionsInputWithDestination(
 
 data class SummaryListRowActionsViewModel(
     val text: String,
-    val url: String,
+    val url: String?,
 )
 
 data class SingleLineFormattableViewModel(
