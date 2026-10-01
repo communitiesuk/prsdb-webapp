@@ -317,8 +317,8 @@ object NftDataFaker {
                 OrganisationalLandlordInvitationDetails(
                     invitedEmail = email,
                     role = role,
-                    invitationExpiredEmailSent = false,
-                    isHidden = false,
+                    invitationExpiredEmailSent = generateBoolean(probabilityTrue = 0.05),
+                    isHidden = generateBoolean(probabilityTrue = 0.1),
                 )
         }
 
@@ -496,10 +496,10 @@ object NftDataFaker {
         val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
 
         val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
-
-        val gasSafetyCertficateMissing = generateBoolean(probabilityTrue = 0.1)
+        
+        val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
-            if (!gasSafetyCertficateMissing) {
+            if (!gasCertificateSafetyMissing) {
                 generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
             } else {
                 null
