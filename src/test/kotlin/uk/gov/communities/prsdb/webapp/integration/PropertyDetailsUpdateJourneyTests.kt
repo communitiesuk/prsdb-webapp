@@ -20,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckCorrespondenceAddressAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.BillsIncludedFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckCorrespondenceAddressAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate
@@ -248,73 +248,73 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
     }
 
-        @Nested
-        inner class ResumingAbandonedUpdateAfterCompletingAnother {
-            @Test
-            fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
-                page: Page,
-            ) {
-                val newNumberOfBedrooms = 4
+    @Nested
+    inner class ResumingAbandonedUpdateAfterCompletingAnother {
+        @Test
+        fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
+            page: Page,
+        ) {
+            val newNumberOfBedrooms = 4
 
-                // Start (but abandon) a bedrooms update - this stores the property's current last-modified date in the session
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+            // Start (but abandon) a bedrooms update - this stores the property's current last-modified date in the session
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
+
+            // Complete a different update (ownership type) on the same property, bumping its last-modified date
+            propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
+            val updateOwnershipTypePage =
+                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+            // Re-enter the abandoned bedrooms update via the change link and submit it
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+            val updateNumberOfBedroomsPage =
                 assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
+            updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
 
-                // Complete a different update (ownership type) on the same property, bumping its last-modified date
-                propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-                val updateOwnershipTypePage =
-                    assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-                updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
-                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-
-                // Re-enter the abandoned bedrooms update via the change link and submit it
-                propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
-                val updateNumberOfBedroomsPage =
-                    assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
-                updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
-
-                // The update completes without an update-conflict error and the change is applied
-                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                    .containsText(newNumberOfBedrooms.toString())
-            }
-
-            @Test
-            fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
-                // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
-                // step the second step is reachable and its URL is stored in the session
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
-                val numberOfHouseholdsPage =
-                    assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
-                numberOfHouseholdsPage.submitNumberOfHouseholds(1)
-                assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
-                val numberOfPeopleStepUrl = page.url().substringBefore("?")
-
-                // Complete a different update (ownership type) on the same property, bumping its last-modified date
-                propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-                val updateOwnershipTypePage =
-                    assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-                updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
-                assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-
-                // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the
-                // property has changed, the stale journey is discarded and restarted, so the number-of-people step is no
-                // longer reachable and we are redirected out to the property details page - the earlier progress is gone.
-                page.navigate(numberOfPeopleStepUrl)
-                assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-            }
+            // The update completes without an update-conflict error and the change is applied
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .containsText(newNumberOfBedrooms.toString())
         }
 
-        @Nested
-        inner class LicenceUpdates {
-            // Property 1 is licensing-provide-later, so the standard layout shows a "Provide this later" row rather than an
-            // editable "Licensing type" row. These update-an-existing-licence tests use property 7, which has a real licence.
-            private val propertyOwnershipId = 7L
-            private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+        @Test
+        fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
+            // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
+            // step the second step is reachable and its URL is stored in the session
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+            val numberOfHouseholdsPage =
+                assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
+            numberOfHouseholdsPage.submitNumberOfHouseholds(1)
+            assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
+            val numberOfPeopleStepUrl = page.url().substringBefore("?")
+
+            // Complete a different update (ownership type) on the same property, bumping its last-modified date
+            propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
+            val updateOwnershipTypePage =
+                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+            // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the
+            // property has changed, the stale journey is discarded and restarted, so the number-of-people step is no
+            // longer reachable and we are redirected out to the property details page - the earlier progress is gone.
+            page.navigate(numberOfPeopleStepUrl)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        }
+    }
+
+    @Nested
+    inner class LicenceUpdates {
+        // Property 1 is licensing-provide-later, so the standard layout shows a "Provide this later" row rather than an
+        // editable "Licensing type" row. These update-an-existing-licence tests use property 7, which has a real licence.
+        private val propertyOwnershipId = 7L
+        private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
         @Test
         fun `A property can have its licensing updated to a selective licence`(page: Page) {
