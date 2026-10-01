@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
@@ -25,6 +26,6 @@ final class InvalidLinkStep(
     stepConfig: InvalidLinkStepConfig,
 ) : RequestableStep<Nothing, NoInputFormModel, AcceptInvitationJourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "invalid-link"
+        const val ROUTE_SEGMENT = INVALID_LINK_PAGE_PATH_SEGMENT
     }
 }
