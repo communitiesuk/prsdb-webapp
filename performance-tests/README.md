@@ -40,7 +40,7 @@ If you run the webapp locally on a non-default port (git worktrees are assigned 
 
 ## Running the simulations
 
-Run every simulation in the module, in alphabetical order:
+Run every simulation in the module:
 
 ```bash
 ./gradlew :performance-tests:gatlingRun --all
