@@ -233,6 +233,7 @@ class NftDataSeeder(
 
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
+        val ownershipPaymentStmt = nftDataSeederDao.prepareOwnedPropertyPaymentStatement()
         val landlordMembershipStmt = nftDataSeederDao.prepareLandlordshipMembersStatement()
         val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
         val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
@@ -302,6 +303,7 @@ class NftDataSeeder(
                             addPropertyOwnershipToBatch(
                                 registrationNumberStmt,
                                 propertyOwnershipStmt,
+                                ownershipPaymentStmt,
                                 landlordMembershipStmt,
                                 licenceStmt,
                                 scenario.isOccupied,
@@ -342,6 +344,7 @@ class NftDataSeeder(
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
+                            ownershipPaymentStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
                             propertyOwnershipAddressGenerator.forgetUsedValues()
@@ -369,6 +372,7 @@ class NftDataSeeder(
             registrationNumberStmt.executeBatch()
             licenceStmt.executeBatch()
             propertyOwnershipStmt.executeBatch()
+            ownershipPaymentStmt.executeBatch()
             landlordMembershipStmt.executeBatch()
             fileUploadStmt.executeBatch()
             propertyComplianceStmt.executeBatch()
@@ -389,6 +393,7 @@ class NftDataSeeder(
 
             licenceStmt.close()
             propertyOwnershipStmt.close()
+            ownershipPaymentStmt.close()
             landlordMembershipStmt.close()
             fileUploadStmt.close()
             gasSafetyFileUploadsStmt.close()
@@ -621,6 +626,7 @@ class NftDataSeeder(
     private fun addPropertyOwnershipToBatch(
         registrationNumberStmt: PreparedStatement,
         propertyOwnershipStmt: PreparedStatement,
+        paymentStmt: PreparedStatement,
         membershipStmt: PreparedStatement,
         licenceStmt: PreparedStatement,
         isOccupied: Boolean,
@@ -658,6 +664,7 @@ class NftDataSeeder(
         val standardAndCustomBillsIncluded = if (hasTenancyDetails) NftDataFaker.generateStandardAndCustomBillsIncluded() else null
         val furnishedStatus = if (hasTenancyDetails) NftDataFaker.generateFurnishedStatus() else null
         val rentDetails = if (hasTenancyDetails) NftDataFaker.generateRentDetails() else null
+        val renewalDate = NftDataFaker.generateRenewalDate(landlordAnniversary)
 
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
@@ -683,8 +690,19 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
-        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(landlordAnniversary))
+        propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.addBatch()
+
+        paymentStmt.setString(1, NftDataFaker.generatePaymentId())
+        paymentStmt.setTimestamp(2, createdDate)
+        paymentStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        paymentStmt.setInt(4, NftDataFaker.generatePaymentAmount())
+        paymentStmt.setString(5, NftDataFaker.generatePaymentReference())
+        paymentStmt.setTimestamp(6, NftDataFaker.generatePaymentCreated(createdDate))
+        paymentStmt.setDate(7, renewalDate)
+        paymentStmt.setString(8, landlordDetails.subjectId)
+        paymentStmt.setLong(9, propertyOwnershipId)
+        paymentStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
         membershipStmt.setLong(2, propertyOwnershipId)
