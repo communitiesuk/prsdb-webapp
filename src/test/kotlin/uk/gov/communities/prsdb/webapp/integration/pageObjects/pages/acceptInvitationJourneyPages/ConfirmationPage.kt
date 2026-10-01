@@ -2,10 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvi
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController.Companion.ACCEPT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ConfirmationStep
-
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 
 class ConfirmationPage(
     page: Page,
