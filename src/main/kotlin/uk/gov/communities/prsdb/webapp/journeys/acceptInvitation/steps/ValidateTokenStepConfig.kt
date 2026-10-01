@@ -26,11 +26,11 @@ class ValidateTokenStepConfig :
                 listOf(
                     RadiosButtonViewModel(
                         value = TokenValidity.VALID,
-                        labelMsgKey = "acceptInvitation.validateToken.radios.option.valid"
+                        labelMsgKey = "acceptInvitation.validateToken.radios.option.valid",
                     ),
                     RadiosButtonViewModel(
                         value = TokenValidity.INVALID,
-                        labelMsgKey = "acceptInvitation.validateToken.radios.option.invalid"
+                        labelMsgKey = "acceptInvitation.validateToken.radios.option.invalid",
                     ),
                 ),
         )
