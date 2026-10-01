@@ -11,6 +11,8 @@ enum class PaymentStatus {
     ;
 
     companion object {
+        val IN_PROGRESS_STATUSES = listOf(CREATED, CAPTURABLE)
+
         fun fromGovUKPayStatus(status: GovUkPayPaymentStatus): PaymentStatus =
             when (status) {
                 GovUkPayPaymentStatus.CREATED -> CREATED

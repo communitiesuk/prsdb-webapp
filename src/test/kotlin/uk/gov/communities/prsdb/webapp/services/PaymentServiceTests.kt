@@ -435,7 +435,7 @@ class PaymentServiceTests {
         whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
-            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus, finished = false))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
         stubGovUkPayCreatePayment()
 
         // Act
@@ -462,7 +462,7 @@ class PaymentServiceTests {
         whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
-            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus, finished = true))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
         stubGovUkPayCreatePayment()
 
         // Act
@@ -530,23 +530,33 @@ class PaymentServiceTests {
     private fun createGovUkPayPayment(
         paymentId: String,
         status: GovUkPayPaymentStatus,
-        finished: Boolean,
     ) = GovUkPayPayment(
         paymentId = paymentId,
         amount = 1000,
         reference = "existing-reference",
         description = "Register your rental property",
         createdDate = Instant.now(),
-        state = GovUkPayPaymentState(status = status, finished = finished),
+        state = GovUkPayPaymentState(status = status, finished = status in finishedGovUkPayStatuses),
     )
 
     companion object {
         private val inProgressPaymentStatuses = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
 
+        private val finishedGovUkPayStatuses =
+            listOf(
+                GovUkPayPaymentStatus.SUCCESS,
+                GovUkPayPaymentStatus.FAILED,
+                GovUkPayPaymentStatus.ERROR,
+                GovUkPayPaymentStatus.CANCELLED,
+            )
+
         @JvmStatic
         fun provideUnfinishedInProgressPaymentStatuses() =
             listOf(
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.CREATED),
                 Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.STARTED),
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.SUBMITTED),
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.CAPTURABLE),
                 Arguments.of(PaymentStatus.CAPTURABLE, GovUkPayPaymentStatus.CAPTURABLE),
             )
 
