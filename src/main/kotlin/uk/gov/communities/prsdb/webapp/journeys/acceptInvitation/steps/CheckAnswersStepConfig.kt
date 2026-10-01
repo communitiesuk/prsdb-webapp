@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 @JourneyFrameworkComponent("acceptInvitationCheckAnswersStepConfig")
 class CheckAnswersStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptInvitationJourneyState>() {
+    // TODO PDJB-1774: This should inherit from AbstractCheckYourAnswersStepConfig rather than the generic requestable base class.
     override val formModelClass = NoInputFormModel::class
 
     // TODO PDJB-1774: Invitees can check their answers
