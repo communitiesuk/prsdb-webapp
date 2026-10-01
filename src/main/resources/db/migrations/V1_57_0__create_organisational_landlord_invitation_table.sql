@@ -10,7 +10,7 @@ CREATE TABLE organisational_landlord_invitation (
     invitation_expired_email_sent BOOLEAN NOT NULL DEFAULT FALSE,
     is_hidden                    BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_organisational_landlord_invitation_organisation_landlord
-        FOREIGN KEY (organisation_landlord_id) REFERENCES landlord(id)
+        FOREIGN KEY (organisation_landlord_id) REFERENCES landlord(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_organisational_landlord_invitation_organisation_landlord
