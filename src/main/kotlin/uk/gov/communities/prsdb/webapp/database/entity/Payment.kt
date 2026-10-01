@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 import java.time.Instant
 import java.time.LocalDate
 
@@ -51,8 +52,7 @@ class Payment() : ModifiableAuditableEntity() {
         paymentCreatedAt: Instant,
         forPeriodEnding: LocalDate,
         status: PaymentStatus,
-        journey: LandlordIncompleteProperty,
-        payingUser: PrsdbUser,
+        incompleteProperty: LandlordIncompleteProperty,
     ) : this() {
         this.paymentId = paymentId
         this.amountInPence = amountInPence
@@ -60,7 +60,24 @@ class Payment() : ModifiableAuditableEntity() {
         this.paymentCreatedAt = paymentCreatedAt
         this.forPeriodEnding = forPeriodEnding
         this.status = status
-        associatedIncompleteProperty = journey
-        this.payingUser = payingUser
+        associatedIncompleteProperty = incompleteProperty
+        this.payingUser = incompleteProperty.user
+    }
+
+    companion object {
+        fun fromGovUkPay(
+            payment: GovUkPayPayment,
+            periodEnding: LocalDate,
+            incompleteProperty: LandlordIncompleteProperty,
+        ): Payment =
+            Payment(
+                payment.paymentId,
+                payment.amount,
+                payment.reference,
+                payment.createdDate,
+                periodEnding,
+                PaymentStatus.fromGovUKPayStatus(payment.state.status),
+                incompleteProperty,
+            )
     }
 }
