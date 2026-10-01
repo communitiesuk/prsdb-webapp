@@ -246,23 +246,22 @@ class NftDataSeederTests(
             )
                 .toSet()
 
-        if (invitedOrganisationLandlordIds.isNotEmpty()) {
-            assertTrue(invitedOrganisationLandlordIds.all { it in organisationLandlordIds }) {
-                "Expected each organisational landlord invitation to reference a real organisation landlord"
-            }
+        assertTrue(invitedOrganisationLandlordIds.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
+        assertTrue(invitedOrganisationLandlordIds.all { it in organisationLandlordIds }) {
+            "Expected each organisational landlord invitation to reference a real organisation landlord"
         }
 
         val invitationRoles =
             jdbcTemplate.queryForList<Int>(
                 "SELECT role FROM organisational_landlord_invitation",
             )
-        assertTrue(
-            invitationRoles.all {
-                it == OrganisationalLandlordUserRole.ADMIN.ordinal ||
-                    it == OrganisationalLandlordUserRole.EDITOR.ordinal
-            },
-        ) {
-            "Expected all organisational landlord invitations to use valid organisational landlord roles"
+
+        assertTrue(invitationRoles.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
+        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.ADMIN.ordinal)) {
+            "Expected at least one organisational landlord invitation to have the ADMIN role"
+        }
+        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.EDITOR.ordinal)) {
+            "Expected at least one organisational landlord invitation to have the EDITOR role"
         }
     }
 
