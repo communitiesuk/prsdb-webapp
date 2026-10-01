@@ -95,11 +95,11 @@ class GlobalModelAttributes(
         }
 
         val navLinks = mutableListOf<NavigationLinkViewModel>()
-        dashboardUrlProvider.getDashboardUrlForCurrentUser()?.let {
-            navLinks.add(NavigationLinkViewModel(it, "navLink.dashboard.title", uri == it))
+        dashboardUrlProvider.getDashboardUrlForCurrentUser()?.let { dashboardUrl ->
+            navLinks.add(NavigationLinkViewModel(dashboardUrl, "navLink.dashboard.title", uri == dashboardUrl))
         }
-        teamMembersUrlProvider.getTeamMembersUrlForCurrentUser()?.let {
-            navLinks.add(NavigationLinkViewModel(it, "navLink.manageTeamMembers.title", uri == it))
+        teamMembersUrlProvider.getTeamMembersUrlForCurrentUser()?.let { teamMembersUrl ->
+            navLinks.add(NavigationLinkViewModel(teamMembersUrl, "navLink.manageTeamMembers.title", uri == teamMembersUrl))
         }
         if (navLinks.isNotEmpty()) {
             model.addAttribute("navLinks", navLinks)

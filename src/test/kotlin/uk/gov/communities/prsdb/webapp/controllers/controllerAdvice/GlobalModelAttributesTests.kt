@@ -301,6 +301,7 @@ class GlobalModelAttributesTests {
 
     @Test
     fun `addGlobalModelAttributes adds a manage team members nav link after the dashboard link for an organisation user`() {
+        // Arrange
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
         whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
@@ -310,8 +311,10 @@ class GlobalModelAttributesTests {
         val request = MockHttpServletRequest()
         request.requestURI = "/landlord/team-members"
 
+        // Act
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
+        // Assert
         @Suppress("UNCHECKED_CAST")
         val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
         assertEquals(2, navLinks.size)
