@@ -5,20 +5,16 @@
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
 
-        <th:block th:if="${inviteTeamMemberUrl != null}">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${inviteTeamMemberUrl}, #{teamMembers.inviteButton})}">
-                teamMembers.inviteButton
-            </a>
-        </th:block>
+        <!--/* TODO PDJB-1760: add the "Invite a team member" button for admins, linking to the invite team member journey */-->
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('administrators', #{teamMembers.administrators.tab(${teamMembers.adminRows.size()})})}"></li>
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('editors', #{teamMembers.editors.tab(${teamMembers.editorRows.size()})})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${administratorsTabId}, #{teamMembers.administrators.tab(${teamMembers.adminRows.size()})})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${editorsTabId}, #{teamMembers.editors.tab(${teamMembers.editorRows.size()})})}"></li>
                 <!--/* TODO PDJB-1757: add the Invitations tab */-->
             </ul>
 
-            <div id="administrators-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('administrators', ~{::#administrators-panel/content()})}">
+            <div id="administrators-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${administratorsTabId}, ~{::#administrators-panel/content()})}">
                 <h2 class="govuk-heading-m" th:text="#{teamMembers.administrators.heading}">teamMembers.administrators.heading</h2>
                 <p class="govuk-body" th:text="#{teamMembers.administrators.description}">teamMembers.administrators.description</p>
                 <ul class="govuk-list govuk-list--bullet">
@@ -30,7 +26,7 @@
                 <dl th:replace="~{fragments/summaryList :: summaryList(${teamMembers.adminRows})}"></dl>
             </div>
 
-            <div id="editors-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('editors', ~{::#editors-panel/content()})}">
+            <div id="editors-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${editorsTabId}, ~{::#editors-panel/content()})}">
                 <h2 class="govuk-heading-m" th:text="#{teamMembers.editors.heading}">teamMembers.editors.heading</h2>
                 <p class="govuk-body" th:text="#{teamMembers.editors.description}">teamMembers.editors.description</p>
                 <th:block th:if="${!#lists.isEmpty(teamMembers.editorRows)}">

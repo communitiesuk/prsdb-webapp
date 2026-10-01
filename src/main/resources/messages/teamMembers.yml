@@ -1,8 +1,6 @@
 title: Team members
 heading: Team members
-inviteButton: Invite a team member
 currentUserName: '{0,,name} (You)'
-notAvailable: Not available
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators

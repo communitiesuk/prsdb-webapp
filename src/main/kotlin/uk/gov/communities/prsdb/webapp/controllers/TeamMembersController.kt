@@ -41,11 +41,8 @@ class TeamMembersController(
                 principal.name,
             )
         model.addAttribute("teamMembers", teamMembers)
-
-        if (teamMembers.canManageTeamMembers) {
-            // TODO PDJB-1760: link to the invite team member journey
-            model.addAttribute("inviteTeamMemberUrl", "#")
-        }
+        model.addAttribute("administratorsTabId", ADMINISTRATORS_FRAGMENT)
+        model.addAttribute("editorsTabId", EDITORS_FRAGMENT)
 
         return "teamMembers"
     }
@@ -53,5 +50,7 @@ class TeamMembersController(
     companion object {
         const val TEAM_MEMBERS_PATH_SEGMENT = "team-members"
         const val TEAM_MEMBERS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$TEAM_MEMBERS_PATH_SEGMENT"
+        const val ADMINISTRATORS_FRAGMENT = "administrators"
+        const val EDITORS_FRAGMENT = "editors"
     }
 }
