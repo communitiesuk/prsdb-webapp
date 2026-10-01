@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropert
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 
 interface PaymentRepository : JpaRepository<Payment, String> {
-    fun findAllByAssociatedIncompletePropertyAndStatus(
+    fun findAllByAssociatedIncompletePropertyAndStatusIn(
         associatedIncompleteProperty: LandlordIncompleteProperty,
-        status: PaymentStatus,
+        statuses: Collection<PaymentStatus>,
     ): List<Payment>
 }

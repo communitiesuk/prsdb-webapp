@@ -53,8 +53,8 @@ class PaymentService(
         }
 
         paymentRepository
-            .findAllByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED)
-            .forEach { cancelPayment(it) }
+            .findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE))
+            .forEach { cancelPaymentIfUnfinished(it) }
 
         val reference = UUID.randomUUID().toString()
         val createdPayment =
@@ -76,18 +76,17 @@ class PaymentService(
                 paymentCreatedAt = Instant.now(),
                 forPeriodEnding = renewalDate,
                 status = PaymentStatus.CREATED,
-                journey = incompleteProperty,
-                payingUser = incompleteProperty.user,
+                incompleteProperty = incompleteProperty,
             ),
         )
 
         return createdPayment.nextUrl
     }
 
-    private fun cancelPayment(payment: Payment) {
+    private fun cancelPaymentIfUnfinished(payment: Payment) {
         val govUkPayState = govUkPayClient.getPayment(payment.paymentId).state
         if (govUkPayState.finished) {
-            payment.status = PaymentStatus.fromGovUkPayStatusWhenCancelling(govUkPayState.status)
+            payment.status = PaymentStatus.fromGovUKPayStatus(govUkPayState.status)
         } else {
             govUkPayClient.cancelPayment(payment.paymentId)
             payment.status = PaymentStatus.CANCELLED

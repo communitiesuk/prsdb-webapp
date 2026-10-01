@@ -422,16 +422,20 @@ class PaymentServiceTests {
         verify(mockPaymentRepository, never()).save(any<Payment>())
     }
 
-    @Test
-    fun `createPropertyRegistrationPayment cancels an unfinished in-progress payment before creating a new one`() {
+    @ParameterizedTest
+    @MethodSource("provideUnfinishedInProgressPaymentStatuses")
+    fun `createPropertyRegistrationPayment cancels an unfinished in-progress payment before creating a new one`(
+        paymentStatus: PaymentStatus,
+        govUkPayStatus: GovUkPayPaymentStatus,
+    ) {
         // Arrange
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
-        val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED))
+        val existingPayment = createExistingPayment(incompleteProperty, paymentStatus)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
-            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.STARTED, finished = false))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus, finished = false))
         stubGovUkPayCreatePayment()
 
         // Act
@@ -455,7 +459,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus, finished = true))
@@ -510,17 +514,18 @@ class PaymentServiceTests {
         SecurityContextHolder.setContext(context)
     }
 
-    private fun createExistingPayment(incompleteProperty: LandlordIncompleteProperty) =
-        Payment(
-            paymentId = "existing-payment-id",
-            amountInPence = 1000,
-            reference = "existing-reference",
-            paymentCreatedAt = Instant.now(),
-            forPeriodEnding = LocalDate.of(2027, 3, 1),
-            status = PaymentStatus.CREATED,
-            journey = incompleteProperty,
-            payingUser = incompleteProperty.user,
-        )
+    private fun createExistingPayment(
+        incompleteProperty: LandlordIncompleteProperty,
+        status: PaymentStatus = PaymentStatus.CREATED,
+    ) = Payment(
+        paymentId = "existing-payment-id",
+        amountInPence = 1000,
+        reference = "existing-reference",
+        paymentCreatedAt = Instant.now(),
+        forPeriodEnding = LocalDate.of(2027, 3, 1),
+        status = status,
+        incompleteProperty = incompleteProperty,
+    )
 
     private fun createGovUkPayPayment(
         paymentId: String,
@@ -536,6 +541,15 @@ class PaymentServiceTests {
     )
 
     companion object {
+        private val inProgressPaymentStatuses = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
+
+        @JvmStatic
+        fun provideUnfinishedInProgressPaymentStatuses() =
+            listOf(
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.STARTED),
+                Arguments.of(PaymentStatus.CAPTURABLE, GovUkPayPaymentStatus.CAPTURABLE),
+            )
+
         @JvmStatic
         fun provideWorkedExamples() =
             listOf(
