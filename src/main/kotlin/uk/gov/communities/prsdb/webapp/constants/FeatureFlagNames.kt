@@ -30,6 +30,8 @@ const val LANDLORD_DASHBOARD_UPDATE = "pdjb-926-landlord-dashboard-update"
 
 const val MULTI_USER_ORGANISATIONS = "pdjb-1210-multi-user-organisations"
 
+const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -43,4 +45,5 @@ val featureFlagNames =
         PROPERTY_REGISTRATION_PHASE_TWO,
         LANDLORD_DASHBOARD_UPDATE,
         MULTI_USER_ORGANISATIONS,
+        GATLING_POST_ENDPOINT,
     )
