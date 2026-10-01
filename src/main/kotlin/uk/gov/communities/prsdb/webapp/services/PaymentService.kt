@@ -20,14 +20,16 @@ class PaymentService(
         require(renewalDate.isAfter(today)) { "Renewal date $renewalDate must be after today ($today)" }
 
         val chargeableDays = ChronoUnit.DAYS.between(today, renewalDate)
-        val gratisDays =
-            if (today.isAfter(GRATIS_PERIOD_END_DATE)) 0L else ChronoUnit.DAYS.between(today, GRATIS_PERIOD_END_DATE.plusDays(1))
+        val gratisDays = calculateGratisDays(today)
         val daysInYear = if (chargeablePeriodIncludesLeapDay(today, renewalDate)) 366L else 365L
 
         val proRatedFeeInPence = annualFeeInPence * (chargeableDays - gratisDays) / daysInYear
 
         return proRatedFeeInPence.coerceAtLeast(0L).toInt()
     }
+
+    private fun calculateGratisDays(today: LocalDate): Long =
+        if (today.isAfter(GRATIS_PERIOD_END_DATE)) 0L else ChronoUnit.DAYS.between(today, GRATIS_PERIOD_END_DATE.plusDays(1))
 
     private fun chargeablePeriodIncludesLeapDay(
         today: LocalDate,
