@@ -272,4 +272,4 @@ nft-seed:
   landlords: ${NFT_SEED_LANDLORDS:30}
   properties: ${NFT_SEED_PROPERTIES:45}
   batch-size: ${NFT_SEED_BATCH_SIZE:10}
-  generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:500}
+  generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:1000}

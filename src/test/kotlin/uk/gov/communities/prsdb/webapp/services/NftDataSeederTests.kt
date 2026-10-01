@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.queryForList
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
@@ -227,6 +228,41 @@ class NftDataSeederTests(
 
         assertTrue(sawOrganisationWithExtraUsers, "Expected at least one organisation landlord to have extra users beyond the registrant")
         assertTrue(sawEditorRole, "Expected at least one organisational landlord user with the EDITOR role")
+    }
+
+    @Test
+    fun `seedDatabase creates valid organisational landlord invitations for seeded organisations`() {
+        newSeeder().seedDatabase()
+
+        val organisationLandlordIds =
+            organisationLandlordRepository
+                .findAll()
+                .map { it.id }
+                .toSet()
+
+        val invitedOrganisationLandlordIds =
+            jdbcTemplate.queryForList<Long>(
+                "SELECT DISTINCT organisation_landlord_id FROM organisational_landlord_invitation",
+            )
+                .toSet()
+
+        assertTrue(invitedOrganisationLandlordIds.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
+        assertTrue(invitedOrganisationLandlordIds.all { it in organisationLandlordIds }) {
+            "Expected each organisational landlord invitation to reference a real organisation landlord"
+        }
+
+        val invitationRoles =
+            jdbcTemplate.queryForList<Int>(
+                "SELECT role FROM organisational_landlord_invitation",
+            )
+
+        assertTrue(invitationRoles.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
+        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.ADMIN.ordinal)) {
+            "Expected at least one organisational landlord invitation to have the ADMIN role"
+        }
+        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.EDITOR.ordinal)) {
+            "Expected at least one organisational landlord invitation to have the EDITOR role"
+        }
     }
 
     @Test
