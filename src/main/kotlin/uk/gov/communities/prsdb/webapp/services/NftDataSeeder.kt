@@ -599,10 +599,9 @@ class NftDataSeeder(
             organisationalLandlordInvitationStmt.setObject(3, NftDataFaker.generateInvitationToken())
             organisationalLandlordInvitationStmt.setString(4, invitation.invitedEmail)
             organisationalLandlordInvitationStmt.setLong(5, coreDetails.id)
-            organisationalLandlordInvitationStmt.setString(6, details.name)
-            organisationalLandlordInvitationStmt.setInt(7, invitation.role.ordinal)
-            organisationalLandlordInvitationStmt.setBoolean(8, invitation.invitationExpiredEmailSent)
-            organisationalLandlordInvitationStmt.setBoolean(9, invitation.isHidden)
+            organisationalLandlordInvitationStmt.setInt(6, invitation.role.ordinal)
+            organisationalLandlordInvitationStmt.setBoolean(7, invitation.invitationExpiredEmailSent)
+            organisationalLandlordInvitationStmt.setBoolean(8, invitation.isHidden)
             organisationalLandlordInvitationStmt.addBatch()
         }
 

@@ -30,10 +30,6 @@ class OrganisationalLandlordInvitation(
         private set
 
     @Column(nullable = false)
-    lateinit var invitingOrganisationName: String
-        private set
-
-    @Column(nullable = false)
     lateinit var role: OrganisationalLandlordUserRole
         private set
 
@@ -48,13 +44,11 @@ class OrganisationalLandlordInvitation(
         token: UUID,
         invitedEmail: String,
         organisationalLandlord: OrganisationalLandlord,
-        invitingOrganisationName: String,
         role: OrganisationalLandlordUserRole,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
         this.organisationalLandlord = organisationalLandlord
-        this.invitingOrganisationName = invitingOrganisationName
         this.role = role
     }
 
@@ -63,13 +57,11 @@ class OrganisationalLandlordInvitation(
         token: UUID,
         invitedEmail: String,
         organisationalLandlord: OrganisationalLandlord,
-        invitingOrganisationName: String,
         role: OrganisationalLandlordUserRole,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail
         this.organisationalLandlord = organisationalLandlord
-        this.invitingOrganisationName = invitingOrganisationName
         this.role = role
     }
 

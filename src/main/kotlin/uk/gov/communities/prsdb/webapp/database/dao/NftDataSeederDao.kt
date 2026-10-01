@@ -125,8 +125,8 @@ class NftDataSeederDao(
             """
             INSERT INTO organisational_landlord_invitation
             (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
-             inviting_organisation_name, role, invitation_expired_email_sent, is_hidden)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             role, invitation_expired_email_sent, is_hidden)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
