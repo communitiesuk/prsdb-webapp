@@ -258,6 +258,6 @@ class OccupancyDetailsHelperTests {
         assertEquals(1, rows.size)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow", rows[0].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
-        assertEquals(true, rows[0].actions[0].url.contains("journeyId=journey-123"))
+        assertEquals(true, rows[0].actions[0].url?.contains("journeyId=journey-123"))
     }
 }
