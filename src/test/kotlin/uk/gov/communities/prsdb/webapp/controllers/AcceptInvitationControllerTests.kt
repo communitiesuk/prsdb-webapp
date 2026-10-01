@@ -66,6 +66,18 @@ class AcceptInvitationControllerTests(
                     redirectedUrl(expectedRedirectUrl)
                 }
         }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `startJourney allows access without landlord role`() {
+            whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
+
+            mvc
+                .get(ACCEPT_INVITATION_ROUTE)
+                .andExpect {
+                    status { is3xxRedirection() }
+                }
+        }
     }
 
     @Nested
