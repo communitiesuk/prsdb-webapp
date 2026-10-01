@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.stepConfi
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(DELEGATE_TO_LETTING_AGENT_ROUTE)
 class DelegateToLettingAgentController(

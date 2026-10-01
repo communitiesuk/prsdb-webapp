@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
-@PreAuthorize("hasAnyRole('LANDLORD')")
+@PreAuthorize("hasAnyRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(

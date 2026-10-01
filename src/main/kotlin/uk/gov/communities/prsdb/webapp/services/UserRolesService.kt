@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
@@ -22,7 +22,7 @@ class UserRolesService(
         val roles = mutableListOf<String>()
 
         if (userToLandlordService.getLandlordForBaseUserIdOrNull(subjectId) != null) {
-            roles.add(ROLE_LANDLORD)
+            roles.add(ROLE_INDIVIDUAL_LANDLORD)
         }
 
         return roles
@@ -53,7 +53,7 @@ class UserRolesService(
 
     fun getHasLandlordUserRole(subjectId: String): Boolean {
         val roles = getLandlordRolesForSubjectId(subjectId)
-        return roles.contains(ROLE_LANDLORD)
+        return roles.contains(ROLE_INDIVIDUAL_LANDLORD)
     }
 
     fun getHasLocalCouncilRole(subjectId: String): Boolean {

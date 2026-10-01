@@ -57,7 +57,7 @@ class LandlordUpdateEpcControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep initializes a missing journey with the property and landlord`() {
         whenever(
             journeyFactory.createJourneySteps(

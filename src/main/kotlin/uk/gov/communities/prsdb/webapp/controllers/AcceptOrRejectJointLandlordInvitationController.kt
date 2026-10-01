@@ -74,7 +74,7 @@ class AcceptOrRejectJointLandlordInvitationController(
             getRedirect = { ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE") },
         )
 
-    @PreAuthorize("hasRole('LANDLORD')")
+    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
     @GetMapping("/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): ModelAndView {
         val (propertyAddress, propertyOwnershipId) =
