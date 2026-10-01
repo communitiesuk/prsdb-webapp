@@ -58,7 +58,7 @@ class AcceptInvitationControllerTests(
 
         @Test
         @WithMockUser(value = "user")
-        fun `startJourney initializes journey state and redirects to join organisation step for authenticated user without landlord role`() {
+        fun `startJourney initializes state and redirects for authenticated user without landlord role`() {
             whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
 
             val expectedRedirectUrl =
