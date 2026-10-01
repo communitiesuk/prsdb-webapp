@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
@@ -88,25 +87,13 @@ class PaymentService(
     private fun cancelPayment(payment: Payment) {
         val govUkPayState = govUkPayClient.getPayment(payment.paymentId).state
         if (govUkPayState.finished) {
-            payment.status = govUkPayState.status.toFinishedPaymentStatus()
+            payment.status = PaymentStatus.fromGovUkPayStatusWhenCancelling(govUkPayState.status)
         } else {
             govUkPayClient.cancelPayment(payment.paymentId)
             payment.status = PaymentStatus.CANCELLED
         }
         paymentRepository.save(payment)
     }
-
-    private fun GovUkPayPaymentStatus.toFinishedPaymentStatus(): PaymentStatus =
-        when (this) {
-            GovUkPayPaymentStatus.SUCCESS -> PaymentStatus.SUCCEEDED
-            GovUkPayPaymentStatus.FAILED, GovUkPayPaymentStatus.ERROR -> PaymentStatus.FAILED
-            GovUkPayPaymentStatus.CANCELLED -> PaymentStatus.CANCELLED
-            GovUkPayPaymentStatus.CREATED,
-            GovUkPayPaymentStatus.STARTED,
-            GovUkPayPaymentStatus.SUBMITTED,
-            GovUkPayPaymentStatus.CAPTURABLE,
-            -> throw IllegalStateException("GOV.UK Pay status $this is not a finished status")
-        }
 
     fun calculateProRatedFeeInPence(
         renewalDate: LocalDate,
