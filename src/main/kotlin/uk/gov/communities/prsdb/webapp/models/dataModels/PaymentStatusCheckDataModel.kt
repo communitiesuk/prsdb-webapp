@@ -1,16 +1,16 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 
 data class PaymentStatusCheckDataModel(
     val paymentId: String,
-    val outcome: PaymentCheckOutcome,
+    val status: PaymentStatus,
 ) {
-    fun isInProgress() = outcome == PaymentCheckOutcome.IN_PROGRESS
+    fun isInProgress() = status == PaymentStatus.CREATED
 
-    fun isCapturable() = outcome == PaymentCheckOutcome.CAPTURABLE
+    fun isCapturable() = status == PaymentStatus.CAPTURABLE
 
-    fun isCaptured() = outcome == PaymentCheckOutcome.CAPTURED
+    fun isCaptured() = status == PaymentStatus.SUCCEEDED
 
-    fun isFailed() = outcome == PaymentCheckOutcome.FAILED
+    fun isFailedOrCancelled() = status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED
 }

@@ -3,20 +3,20 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 
 class PaymentStatusCheckDataModelTests {
     @ParameterizedTest
-    @EnumSource(PaymentCheckOutcome::class)
-    fun `helper methods return true only for the matching outcome`(outcome: PaymentCheckOutcome) {
+    @EnumSource(PaymentStatus::class)
+    fun `helper methods return true only for the matching status`(status: PaymentStatus) {
         // Act
-        val paymentStatusCheck = PaymentStatusCheckDataModel(PAYMENT_ID, outcome)
+        val paymentStatusCheck = PaymentStatusCheckDataModel(PAYMENT_ID, status)
 
         // Assert
-        assertEquals(outcome == PaymentCheckOutcome.IN_PROGRESS, paymentStatusCheck.isInProgress())
-        assertEquals(outcome == PaymentCheckOutcome.CAPTURABLE, paymentStatusCheck.isCapturable())
-        assertEquals(outcome == PaymentCheckOutcome.CAPTURED, paymentStatusCheck.isCaptured())
-        assertEquals(outcome == PaymentCheckOutcome.FAILED, paymentStatusCheck.isFailed())
+        assertEquals(status == PaymentStatus.CREATED, paymentStatusCheck.isInProgress())
+        assertEquals(status == PaymentStatus.CAPTURABLE, paymentStatusCheck.isCapturable())
+        assertEquals(status == PaymentStatus.SUCCEEDED, paymentStatusCheck.isCaptured())
+        assertEquals(status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED, paymentStatusCheck.isFailedOrCancelled())
     }
 
     companion object {

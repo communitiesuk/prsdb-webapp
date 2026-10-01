@@ -13,7 +13,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
-import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -251,18 +251,18 @@ class PaymentServiceTests {
 
     @ParameterizedTest
     @MethodSource("provideGovUkPayStatusesAndExpectedOutcomes")
-    fun `getPaymentStatus maps the GovUkPay payment status to a payment check outcome`(
-        status: GovUkPayPaymentStatus,
-        expectedOutcome: PaymentCheckOutcome,
+    fun `getPaymentStatus maps the GovUkPay payment status to a payment status`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
     ) {
         // Arrange
-        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(status))
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(govUkPayStatus))
 
         // Act
         val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
 
         // Assert
-        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedOutcome), paymentStatusCheck)
+        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedStatus), paymentStatusCheck)
     }
 
     @Test
@@ -339,14 +339,14 @@ class PaymentServiceTests {
         @JvmStatic
         fun provideGovUkPayStatusesAndExpectedOutcomes() =
             listOf(
-                Arguments.of(GovUkPayPaymentStatus.CREATED, PaymentCheckOutcome.IN_PROGRESS),
-                Arguments.of(GovUkPayPaymentStatus.STARTED, PaymentCheckOutcome.IN_PROGRESS),
-                Arguments.of(GovUkPayPaymentStatus.SUBMITTED, PaymentCheckOutcome.IN_PROGRESS),
-                Arguments.of(GovUkPayPaymentStatus.CAPTURABLE, PaymentCheckOutcome.CAPTURABLE),
-                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentCheckOutcome.CAPTURED),
-                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentCheckOutcome.FAILED),
-                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentCheckOutcome.FAILED),
-                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentCheckOutcome.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CREATED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.STARTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.SUBMITTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.CAPTURABLE, PaymentStatus.CAPTURABLE),
+                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentStatus.SUCCEEDED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
             )
     }
 }
