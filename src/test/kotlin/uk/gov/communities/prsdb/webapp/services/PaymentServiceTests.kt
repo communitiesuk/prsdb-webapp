@@ -1,16 +1,20 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentCheckOutcome
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
@@ -271,6 +275,33 @@ class PaymentServiceTests {
 
         // Assert
         verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = HttpStatus::class, names = ["NOT_FOUND", "INTERNAL_SERVER_ERROR"])
+    fun `getPaymentStatus propagates GovUkPayException for HTTP errors`(httpStatus: HttpStatus) {
+        // Arrange
+        val govUkPayException = GovUkPayException(httpStatus, "P0000", "Error", RuntimeException())
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(govUkPayException)
+
+        // Act
+        val thrownException = assertThrows<GovUkPayException> { paymentService.getPaymentStatus(PAYMENT_ID) }
+
+        // Assert
+        assertSame(govUkPayException, thrownException)
+    }
+
+    @Test
+    fun `getPaymentStatus propagates GovUkPayException when the request fails without an HTTP status`() {
+        // Arrange
+        val govUkPayException = GovUkPayException("GovUkPay request failed: connection refused")
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(govUkPayException)
+
+        // Act
+        val thrownException = assertThrows<GovUkPayException> { paymentService.getPaymentStatus(PAYMENT_ID) }
+
+        // Assert
+        assertSame(govUkPayException, thrownException)
     }
 
     private fun createGovUkPayPayment(status: GovUkPayPaymentStatus) =
