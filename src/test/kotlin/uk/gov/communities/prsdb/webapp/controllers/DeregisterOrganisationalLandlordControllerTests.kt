@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController.Companion.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
@@ -22,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistra
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(DeregisterOrganisationalLandlordController::class)
 class DeregisterOrganisationalLandlordControllerTests(
@@ -64,7 +64,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
-        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -82,7 +82,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
-        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -97,7 +97,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
-        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
         val journeyId = "test-journey-id"
 
         whenever(organisationalLandlordDeregistrationJourneyFactory.createJourneySteps())
@@ -192,7 +192,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 403 when the user is not an admin of the organisation`() {
-        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(userToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
         whenever(mockOrganisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(any()))
             .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
 

@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @ExtendWith(MockitoExtension::class)
 class OrganisationalLandlordUserServiceTests {
@@ -115,5 +116,43 @@ class OrganisationalLandlordUserServiceTests {
                 organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(mockOrganisationLandlord)
             }
         Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+    }
+
+    @Test
+    fun `getCurrentUsersRoleForOrgOrNull returns ADMIN when the current user is an admin of the org`() {
+        setAuthenticatedUser("user-123")
+        whenever(mockOrganisationLandlord.id).thenReturn(1L)
+        val orgUser = MockLandlordData.createOrganisationalLandlordUser(role = OrganisationalLandlordUserRole.ADMIN)
+        whenever(mockOrganisationalLandlordUserRepository.findByBaseUser_IdAndOrganisationalLandlord_Id("user-123", 1L))
+            .thenReturn(orgUser)
+
+        assertEquals(
+            OrganisationalLandlordUserRole.ADMIN,
+            organisationalLandlordUserService.getCurrentUsersRoleForOrgOrNull(mockOrganisationLandlord),
+        )
+    }
+
+    @Test
+    fun `getCurrentUsersRoleForOrgOrNull returns EDITOR when the current user is an editor of the org`() {
+        setAuthenticatedUser("user-123")
+        whenever(mockOrganisationLandlord.id).thenReturn(1L)
+        val orgUser = MockLandlordData.createOrganisationalLandlordUser(role = OrganisationalLandlordUserRole.EDITOR)
+        whenever(mockOrganisationalLandlordUserRepository.findByBaseUser_IdAndOrganisationalLandlord_Id("user-123", 1L))
+            .thenReturn(orgUser)
+
+        assertEquals(
+            OrganisationalLandlordUserRole.EDITOR,
+            organisationalLandlordUserService.getCurrentUsersRoleForOrgOrNull(mockOrganisationLandlord),
+        )
+    }
+
+    @Test
+    fun `getCurrentUsersRoleForOrgOrNull returns null when the current user is not a member of the org`() {
+        setAuthenticatedUser("user-123")
+        whenever(mockOrganisationLandlord.id).thenReturn(1L)
+        whenever(mockOrganisationalLandlordUserRepository.findByBaseUser_IdAndOrganisationalLandlord_Id("user-123", 1L))
+            .thenReturn(null)
+
+        assertNull(organisationalLandlordUserService.getCurrentUsersRoleForOrgOrNull(mockOrganisationLandlord))
     }
 }
