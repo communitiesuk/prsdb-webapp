@@ -3,17 +3,14 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 
@@ -23,7 +20,6 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     protected abstract val updateStepRoute: String
     protected abstract val stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
     protected abstract val userToLandlordService: UserToLandlordService
-    protected abstract val organisationalLandlordUserService: OrganisationalLandlordUserService
 
     protected abstract fun stubCreateJourneySteps()
 
@@ -124,18 +120,6 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_EDITOR"], value = "user")
     fun `getUpdateStep returns 403 for an org editor`() {
-        mvc.get(updateStepRoute).andExpect {
-            status { isForbidden() }
-        }
-    }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
-    fun `getUpdateStep returns 403 when the user is not an admin of the organisation`() {
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(validOrganisationLandlord())
-        whenever(organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(any()))
-            .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
-
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }
         }

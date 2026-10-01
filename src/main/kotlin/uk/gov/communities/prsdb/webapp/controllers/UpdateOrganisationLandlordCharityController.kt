@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationCharity.UpdateOrganisationCharityJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
@@ -28,7 +27,6 @@ import java.security.Principal
 class UpdateOrganisationLandlordCharityController(
     private val journeyFactory: UpdateOrganisationCharityJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -57,7 +55,6 @@ class UpdateOrganisationLandlordCharityController(
                 "Only organisation landlords can update their charity registration details",
             )
         }
-        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(

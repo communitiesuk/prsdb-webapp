@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationMainContact.UpdateOrganisationMainContactJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
@@ -28,7 +27,6 @@ import java.security.Principal
 class UpdateOrganisationMainContactController(
     private val journeyFactory: UpdateOrganisationMainContactJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -57,7 +55,6 @@ class UpdateOrganisationMainContactController(
                 "Only organisation landlords can update their main contact",
             )
         }
-        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(

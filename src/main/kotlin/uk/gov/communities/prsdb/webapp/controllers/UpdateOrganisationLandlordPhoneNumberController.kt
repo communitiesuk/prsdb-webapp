@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationPhoneNumber.UpdateOrganisationPhoneNumberJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
@@ -28,7 +27,6 @@ import java.security.Principal
 class UpdateOrganisationLandlordPhoneNumberController(
     private val journeyFactory: UpdateOrganisationPhoneNumberJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -54,7 +52,6 @@ class UpdateOrganisationLandlordPhoneNumberController(
         if (landlord !is OrganisationalLandlord) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only organisation landlords can update their organisation phone number")
         }
-        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(
