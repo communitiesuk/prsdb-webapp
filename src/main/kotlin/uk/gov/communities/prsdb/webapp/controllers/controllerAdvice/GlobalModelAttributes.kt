@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
+import uk.gov.communities.prsdb.webapp.services.TeamMembersUrlProvider
 import java.util.Locale
 
 @PrsdbControllerAdvice
@@ -37,6 +38,7 @@ class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
     private val dashboardUrlProvider: DashboardUrlProvider,
+    private val teamMembersUrlProvider: TeamMembersUrlProvider,
     private val featureFlagOverrideService: FeatureFlagOverrideService,
 ) {
     @Value("\${plausible.site-id}")
@@ -92,12 +94,15 @@ class GlobalModelAttributes(
             model.addAttribute("showServiceNavigation", true)
         }
 
-        val dashboardUrl = dashboardUrlProvider.getDashboardUrlForCurrentUser()
-        if (dashboardUrl != null) {
-            model.addAttribute(
-                "navLinks",
-                listOf(NavigationLinkViewModel(dashboardUrl, "navLink.dashboard.title", uri == dashboardUrl)),
-            )
+        val navLinks = mutableListOf<NavigationLinkViewModel>()
+        dashboardUrlProvider.getDashboardUrlForCurrentUser()?.let {
+            navLinks.add(NavigationLinkViewModel(it, "navLink.dashboard.title", uri == it))
+        }
+        teamMembersUrlProvider.getTeamMembersUrlForCurrentUser()?.let {
+            navLinks.add(NavigationLinkViewModel(it, "navLink.manageTeamMembers.title", uri == it))
+        }
+        if (navLinks.isNotEmpty()) {
+            model.addAttribute("navLinks", navLinks)
         }
     }
 

@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
+import uk.gov.communities.prsdb.webapp.services.TeamMembersUrlProvider
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -45,6 +46,9 @@ class GlobalModelAttributesTests {
     private lateinit var dashboardUrlProvider: DashboardUrlProvider
 
     @Mock
+    private lateinit var teamMembersUrlProvider: TeamMembersUrlProvider
+
+    @Mock
     private lateinit var featureFlagOverrideService: FeatureFlagOverrideService
 
     private val defaultServiceName = "Register your rental property"
@@ -52,7 +56,13 @@ class GlobalModelAttributesTests {
 
     private fun createGlobalModelAttributes(): GlobalModelAttributes {
         val globalModelAttributes =
-            GlobalModelAttributes(backUrlStorageService, messageSource, dashboardUrlProvider, featureFlagOverrideService)
+            GlobalModelAttributes(
+                backUrlStorageService,
+                messageSource,
+                dashboardUrlProvider,
+                teamMembersUrlProvider,
+                featureFlagOverrideService,
+            )
         ReflectionTestUtils.setField(globalModelAttributes, "plausibleSiteId", "test-site-id")
         return globalModelAttributes
     }
@@ -290,6 +300,28 @@ class GlobalModelAttributesTests {
     }
 
     @Test
+    fun `addGlobalModelAttributes adds a manage team members nav link after the dashboard link for an organisation user`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
+        whenever(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser()).thenReturn("/landlord/team-members")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/team-members"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(2, navLinks.size)
+        assertFalse(navLinks[0].isActive)
+        assertEquals("/landlord/team-members", navLinks[1].href)
+        assertEquals("navLink.manageTeamMembers.title", navLinks[1].messageProperty)
+        assertTrue(navLinks[1].isActive)
+    }
+
+    @Test
     fun `addGlobalModelAttributes does no page setup work for the healthcheck route`() {
         val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
@@ -300,6 +332,7 @@ class GlobalModelAttributesTests {
 
         verify(backUrlStorageService, never()).storeCurrentUrlReturningKey()
         verify(dashboardUrlProvider, never()).getDashboardUrlForCurrentUser()
+        verify(teamMembersUrlProvider, never()).getTeamMembersUrlForCurrentUser()
         verifyNoInteractions(messageSource)
         assertTrue(model.asMap().isEmpty())
     }
