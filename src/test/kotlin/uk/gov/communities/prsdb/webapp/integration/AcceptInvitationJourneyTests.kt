@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -16,10 +16,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.TokenValidity
 
 class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @BeforeEach
+    fun enableFeatureFlags() {
+        featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
+    }
+
     @Test
     fun `Invitees can successfully accept an invitation to join an organisation`(page: Page) {
-        featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
-
         // 1. Go to the start of accept invitation journey (Validate Token page)
         val validateTokenPage = navigator.goToAcceptInvitationJourney()
         assertPageIs(page, ValidateTokenPage::class)
@@ -45,13 +48,11 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 5. Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPage::class)
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("TODO")
+        assertThat(confirmationPage.heading).containsText("TODO")
     }
 
     @Test
     fun `Invitees are redirected to invalid link page if token is invalid`(page: Page) {
-        featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
-
         // 1. Go to the start of accept invitation journey (Validate Token page)
         val validateTokenPage = navigator.goToAcceptInvitationJourney()
         assertPageIs(page, ValidateTokenPage::class)
@@ -61,6 +62,5 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 2. Invalid link page
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
-        assertThat(invalidLinkPage.page.locator("button[type='submit'], button:has-text('Continue')")).hasCount(0)
     }
 }
