@@ -153,7 +153,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
+            whenever(userRolesService.getUserHasAnyLandlordRole("user")).thenReturn(true)
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
@@ -168,7 +168,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
+            whenever(userRolesService.getUserHasAnyLandlordRole("user")).thenReturn(true)
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")

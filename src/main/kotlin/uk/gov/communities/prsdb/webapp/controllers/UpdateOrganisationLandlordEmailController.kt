@@ -18,15 +18,17 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationEmail.UpdateOrganisationEmailJourneyFactory
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_ORG_EMAIL_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateOrganisationLandlordEmailController(
     private val journeyFactory: UpdateOrganisationEmailJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -52,6 +54,7 @@ class UpdateOrganisationLandlordEmailController(
         if (landlord !is OrganisationalLandlord) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only organisation landlords can update their organisation email")
         }
+        organisationalLandlordUserService.throwIfCurrentUserIsNotAdminOfOrg(landlord)
     }
 
     private fun dispatchJourneyStep(

@@ -65,7 +65,7 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getJourneyStep redirects to dashboard for landlord on privacy notice step`() {
-        whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(true)
+        whenever(userRolesService.getUserHasAnyLandlordRole(any())).thenReturn(true)
 
         mvc
             .get("$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
@@ -78,7 +78,7 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getJourneyStep returns privacy notice step for authenticated user on it`() {
-        whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(false)
+        whenever(userRolesService.getUserHasAnyLandlordRole(any())).thenReturn(false)
 
         val journeyId = "test-journey-id"
         whenever(landlordRegistrationJourneyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
