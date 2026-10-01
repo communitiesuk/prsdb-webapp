@@ -194,7 +194,6 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockPropertyDetailsTask.propertyTypeStep).thenReturn(mockPropertyTypeStep)
         lenient().`when`(mockPropertyTypeStep.formModel).thenReturn(mockPropertyTypeFormModel)
         lenient().`when`(mockPropertyDetailsTask.bedrooms).thenReturn(mockBedroomsStep)
-        lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockBedroomsFormModel)
         lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
         lenient().`when`(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
@@ -217,7 +216,6 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockLicensingDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
         lenient().`when`(mockOccupancyDetailsHelper.getOccupancySummaryList(any())).thenReturn(emptyList())
         lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any())).thenReturn(emptyList())
-        lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         lenient().`when`(mockState.licensingTask).thenReturn(mockLicensingTask)
         lenient().`when`(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
@@ -232,7 +230,7 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
     }
 
-    // TODO PDJB-1022: Remove this inner class once the feature flag is removed and the letting agent journey is fully implemented
+    // TODO PDJB-1617: Remove this inner class once the feature flag is removed and the letting agent journey is fully implemented
     @Nested
     inner class ContentBeforePdjb1022 {
         @BeforeEach

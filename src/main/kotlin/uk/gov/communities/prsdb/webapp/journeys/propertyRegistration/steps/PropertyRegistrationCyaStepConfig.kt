@@ -32,13 +32,13 @@ class PropertyRegistrationCyaStepConfig(
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        // TODO PDJB-1022: Remove this check once the feature flag is removed and the letting agent journey is fully implemented
+        // TODO PDJB-1617: Remove this check once the feature flag is removed and the letting agent journey is fully implemented
         val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         if (!isLettingAgentEnabled) {
             return getContentBeforePdjb1022(state)
         }
 
-        // TODO PDJB-1022: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
+        // TODO PDJB-1617: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
         return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
             getDelegatedToLettingAgentContent(state)
         } else {
@@ -46,7 +46,7 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    // TODO PDJB-1022: Remove this method once the feature flag is removed and the letting agent journey is fully implemented
+    // TODO PDJB-1617: Remove this method once the feature flag is removed and the letting agent journey is fully implemented
     private fun getContentBeforePdjb1022(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val licensingDetails = getLicensingDetailsForState(state, isOccupied)
@@ -132,7 +132,6 @@ class PropertyRegistrationCyaStepConfig(
         "title" to "registerProperty.title",
         "submitButtonText" to "forms.buttons.completeRegistration",
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
-        "insetText" to false,
         "propertyName" to
             state.propertyDetailsTask.addressTask
                 .getAddress()
