@@ -5,8 +5,10 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController.Co
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ConfirmationStep
 
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+
 class ConfirmationPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${ConfirmationStep.ROUTE_SEGMENT}") {
-    val heading = page.locator("h1")
+    val heading = Heading(page.locator("h1"))
 }

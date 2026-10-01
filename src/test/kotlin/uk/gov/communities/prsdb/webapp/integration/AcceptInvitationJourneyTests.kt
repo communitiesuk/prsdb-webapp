@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.test.assertTrue
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
@@ -48,7 +49,7 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 5. Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPage::class)
-        assertThat(confirmationPage.heading).containsText("TODO")
+        assertTrue(confirmationPage.heading.getText().contains("TODO"))
     }
 
     @Test
@@ -62,5 +63,6 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 2. Invalid link page
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
+        assertTrue(invalidLinkPage.heading.getText().contains("TODO"))
     }
 }
