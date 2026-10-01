@@ -16,7 +16,7 @@ class ConfirmationStepConfig :
     override fun getStepSpecificContent(state: AcceptInvitationJourneyState): Map<String, Any?> =
         mapOf("todoComment" to "Invitation accepted (TODO PDJB-1775)")
 
-    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/todoConfirmation"
+    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/todoNoButton"
 
     override fun mode(state: AcceptInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
