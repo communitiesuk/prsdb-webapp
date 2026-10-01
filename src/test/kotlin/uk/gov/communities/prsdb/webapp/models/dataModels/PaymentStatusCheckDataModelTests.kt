@@ -13,9 +13,10 @@ class PaymentStatusCheckDataModelTests {
         val paymentStatusCheck = PaymentStatusCheckDataModel(PAYMENT_ID, status)
 
         // Assert
-        assertEquals(status == PaymentStatus.CREATED, paymentStatusCheck.isInProgress())
+        assertEquals(status == PaymentStatus.CREATED, paymentStatusCheck.isCreated())
         assertEquals(status == PaymentStatus.CAPTURABLE, paymentStatusCheck.isCapturable())
-        assertEquals(status == PaymentStatus.SUCCEEDED, paymentStatusCheck.isCaptured())
+        assertEquals(status == PaymentStatus.CREATED || status == PaymentStatus.CAPTURABLE, paymentStatusCheck.isInProgress())
+        assertEquals(status == PaymentStatus.SUCCEEDED, paymentStatusCheck.isSucceeded())
         assertEquals(status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED, paymentStatusCheck.isFailedOrCancelled())
     }
 

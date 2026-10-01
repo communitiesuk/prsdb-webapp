@@ -6,11 +6,13 @@ data class PaymentStatusCheckDataModel(
     val paymentId: String,
     val status: PaymentStatus,
 ) {
-    fun isInProgress() = status == PaymentStatus.CREATED
+    fun isCreated() = status == PaymentStatus.CREATED
 
     fun isCapturable() = status == PaymentStatus.CAPTURABLE
 
-    fun isCaptured() = status == PaymentStatus.SUCCEEDED
+    fun isInProgress() = isCreated() || isCapturable()
+
+    fun isSucceeded() = status == PaymentStatus.SUCCEEDED
 
     fun isFailedOrCancelled() = status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED
 }
