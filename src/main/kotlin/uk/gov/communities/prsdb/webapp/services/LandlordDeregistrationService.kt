@@ -49,7 +49,7 @@ class LandlordDeregistrationService(
 
         organisationGoverningBodyMemberRepository.deleteByOrganisationalLandlord(orgLandlord)
 
-        organisationalLandlordInvitationRepository.deleteByOrganisationLandlord(orgLandlord)
+        organisationalLandlordInvitationRepository.deleteByOrganisationalLandlord(orgLandlord)
 
         val orgLandlordUsers = organisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)
         val baseUserIds = orgLandlordUsers.map { it.baseUser.id }

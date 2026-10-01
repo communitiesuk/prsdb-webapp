@@ -26,7 +26,7 @@ class OrganisationalLandlordInvitation(
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "organisation_landlord_id", nullable = false)
-    lateinit var organisationLandlord: OrganisationalLandlord
+    lateinit var organisationalLandlord: OrganisationalLandlord
         private set
 
     @Column(nullable = false)
@@ -47,13 +47,13 @@ class OrganisationalLandlordInvitation(
     constructor(
         token: UUID,
         invitedEmail: String,
-        organisationLandlord: OrganisationalLandlord,
+        organisationalLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
         role: OrganisationalLandlordUserRole,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
-        this.organisationLandlord = organisationLandlord
+        this.organisationalLandlord = organisationalLandlord
         this.invitingOrganisationName = invitingOrganisationName
         this.role = role
     }
@@ -62,13 +62,13 @@ class OrganisationalLandlordInvitation(
         id: Long,
         token: UUID,
         invitedEmail: String,
-        organisationLandlord: OrganisationalLandlord,
+        organisationalLandlord: OrganisationalLandlord,
         invitingOrganisationName: String,
         role: OrganisationalLandlordUserRole,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail
-        this.organisationLandlord = organisationLandlord
+        this.organisationalLandlord = organisationalLandlord
         this.invitingOrganisationName = invitingOrganisationName
         this.role = role
     }

@@ -182,7 +182,7 @@ class LandlordDeregistrationServiceTests {
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
-        verify(mockOrganisationalLandlordInvitationRepository).deleteByOrganisationLandlord(orgLandlord)
+        verify(mockOrganisationalLandlordInvitationRepository).deleteByOrganisationalLandlord(orgLandlord)
     }
 
     @Test
