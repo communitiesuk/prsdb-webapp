@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.performance
 
 import io.gatling.javaapi.core.CoreDsl.atOnceUsers
+import io.gatling.javaapi.core.CoreDsl.bodyString
 import io.gatling.javaapi.core.CoreDsl.css
 import io.gatling.javaapi.core.CoreDsl.scenario
 import io.gatling.javaapi.core.Simulation
+import io.gatling.javaapi.http.HttpDsl.header
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 
@@ -32,7 +34,9 @@ class FormSubmissionPostSimulation : Simulation() {
                 http("Submit form-submission")
                     .post("/performance-test/form-submission")
                     .formParam("_csrf", "#{csrfToken}")
-                    .check(status().`is`(200)),
+                    .check(status().`is`(200))
+                    .check(header("Content-Type").`is`("text/plain"))
+                    .check(bodyString().`is`("Submission received (no-op)")),
             )
 
     init {

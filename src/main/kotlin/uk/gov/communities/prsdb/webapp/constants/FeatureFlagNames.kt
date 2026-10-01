@@ -30,7 +30,7 @@ const val LANDLORD_DASHBOARD_UPDATE = "pdjb-926-landlord-dashboard-update"
 
 const val MULTI_USER_ORGANISATIONS = "pdjb-1210-multi-user-organisations"
 
-const val GATLING_POST_ENDPOINT = "pdjb-431-gatling-post-endpoint"
+const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
 
 val featureFlagNames =
     listOf(

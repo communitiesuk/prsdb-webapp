@@ -68,7 +68,7 @@ Gatling fails the build if any request assertion fails, so these tasks can be wi
 `RegisterAsLandlordGetSimulation` targets an existing public page and needs nothing else.
 
 `FormSubmissionPostSimulation` targets the POST endpoint added for performance testing, which is gated behind
-the `pdjb-431-gatling-post-endpoint` feature flag. That flag is enabled only in the NFT environment, so to run
+the `pdjb-238-gatling-post-endpoint` feature flag. That flag is enabled only in the NFT environment, so to run
 this simulation locally you must enable it first, by either:
 
 - setting `enabled: true` for that flag in `src/main/resources/application-local.yml`, then restarting the app
