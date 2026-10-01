@@ -256,7 +256,12 @@ class NftDataSeederTests(
             jdbcTemplate.queryForList<Int>(
                 "SELECT role FROM organisational_landlord_invitation",
             )
-        assertTrue(invitationRoles.all { it == OrganisationalLandlordUserRole.ADMIN.ordinal || it == OrganisationalLandlordUserRole.EDITOR.ordinal }) {
+        assertTrue(
+            invitationRoles.all {
+                it == OrganisationalLandlordUserRole.ADMIN.ordinal ||
+                    it == OrganisationalLandlordUserRole.EDITOR.ordinal
+            },
+        ) {
             "Expected all organisational landlord invitations to use valid organisational landlord roles"
         }
     }

@@ -310,10 +310,17 @@ object NftDataFaker {
             }
             emailsUsed += email
 
+            val role =
+                if (generateBoolean(probabilityTrue = 0.7)) {
+                    OrganisationalLandlordUserRole.ADMIN
+                } else {
+                    OrganisationalLandlordUserRole.EDITOR
+                }
+
             invitations +=
                 OrganisationalLandlordInvitationDetails(
                     invitedEmail = email,
-                    role = if (generateBoolean(probabilityTrue = 0.7)) OrganisationalLandlordUserRole.ADMIN else OrganisationalLandlordUserRole.EDITOR,
+                    role = role,
                     invitationExpiredEmailSent = false,
                     isHidden = false,
                 )
