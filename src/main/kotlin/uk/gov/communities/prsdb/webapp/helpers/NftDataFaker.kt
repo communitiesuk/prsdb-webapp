@@ -311,7 +311,7 @@ object NftDataFaker {
             }
             emailsUsed += email
 
-            val role = generateOrganisationLandlordRole()
+            val role = generateOrganisationLandlordRole(probabilityOfAdmin = 0.8)
 
             invitations +=
                 OrganisationalLandlordInvitationDetails(
@@ -325,7 +325,7 @@ object NftDataFaker {
         return invitations
     }
 
-    fun generateOrganisationLandlordRole(probabilityOfAdmin: Double = 0.2): OrganisationalLandlordUserRole =
+    fun generateOrganisationLandlordRole(probabilityOfAdmin: Double = 0.8): OrganisationalLandlordUserRole =
         if (generateBoolean(probabilityTrue = probabilityOfAdmin)) {
             OrganisationalLandlordUserRole.ADMIN
         } else {
@@ -367,7 +367,7 @@ object NftDataFaker {
         val extraUsers =
             (1..numOfExtraUsers).map {
                 val name = generateName()
-                val role = generateOrganisationLandlordRole(probabilityOfAdmin = 0.2)
+                val role = generateOrganisationLandlordRole(probabilityOfAdmin = 0.8)
                 // Extra users are always freshly generated people, distinct from the registrant and main contact, so
                 // that each has its own subject identifier and satisfies the organisational landlord user's unique
                 // constraint on (organisation_landlord_id, subject_identifier).
