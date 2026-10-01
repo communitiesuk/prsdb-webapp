@@ -253,6 +253,8 @@ object NftDataFaker {
         val registrantEmail = generateEmail(registrantName)
         val mainContactName = generateName()
 
+        val organisationalLandlordUsers = generateOrganisationalLandlordUsers(subjectId, registrantName, registrantEmail, createdDate)
+
         return OrganisationLandlordDetails(
             name = name,
             email = generateEmail(name),
@@ -277,8 +279,47 @@ object NftDataFaker {
             // Per the real registration journey, only organisations without a company number need governing body
             // members (see LandlordRegistrationService.registerOrganisationLandlord).
             hasGoverningBody = !isCompany,
-            users = generateOrganisationalLandlordUsers(subjectId, registrantName, registrantEmail, createdDate),
+            users = organisationalLandlordUsers,
+            pendingInvitations = generateOrganisationalLandlordInvitations(organisationalLandlordUsers),
         )
+    }
+
+    fun generateOrganisationalLandlordInvitations(
+        users: List<OrganisationalLandlordUserDetails>,
+    ): List<OrganisationalLandlordInvitationDetails> {
+        val existingEmails = users.map { it.email }.toSet()
+        val numOfPartners =
+            when (faker.random().nextDouble()) {
+                // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
+                in 0.0..0.60 -> 0
+                in 0.60..0.85 -> faker.random().nextInt(1, 2)
+                else -> faker.random().nextInt(2, 4)
+            }
+
+        if (numOfPartners == 0) {
+            return emptyList()
+        }
+
+        val invitations = mutableListOf<OrganisationalLandlordInvitationDetails>()
+        val emailsUsed = existingEmails.toMutableSet()
+
+        repeat(numOfPartners) {
+            var email = generateEmail(generateName())
+            while (email in emailsUsed) {
+                email = generateEmail(generateName())
+            }
+            emailsUsed += email
+
+            invitations +=
+                OrganisationalLandlordInvitationDetails(
+                    invitedEmail = email,
+                    role = if (generateBoolean(probabilityTrue = 0.7)) OrganisationalLandlordUserRole.ADMIN else OrganisationalLandlordUserRole.EDITOR,
+                    invitationExpiredEmailSent = false,
+                    isHidden = false,
+                )
+        }
+
+        return invitations
     }
 
     fun generateOrganisationalLandlordUsers(
@@ -748,6 +789,7 @@ object NftDataFaker {
         val registrantPhoneNumber: String,
         val hasGoverningBody: Boolean,
         val users: List<OrganisationalLandlordUserDetails>,
+        val pendingInvitations: List<OrganisationalLandlordInvitationDetails>,
     )
 
     data class OrganisationalLandlordUserDetails(
@@ -756,6 +798,13 @@ object NftDataFaker {
         val name: String,
         val email: String,
         val role: OrganisationalLandlordUserRole,
+    )
+
+    data class OrganisationalLandlordInvitationDetails(
+        val invitedEmail: String,
+        val role: OrganisationalLandlordUserRole,
+        val invitationExpiredEmailSent: Boolean = false,
+        val isHidden: Boolean = false,
     )
 
     data class GoverningBodyMemberDetails(

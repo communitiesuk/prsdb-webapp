@@ -593,16 +593,18 @@ class NftDataSeeder(
             organisationalLandlordUserStmt.addBatch()
         }
 
-        organisationalLandlordInvitationStmt.setTimestamp(1, coreDetails.createdDate)
-        organisationalLandlordInvitationStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(coreDetails.createdDate))
-        organisationalLandlordInvitationStmt.setObject(3, NftDataFaker.generateInvitationToken())
-        organisationalLandlordInvitationStmt.setString(4, details.registrantEmail)
-        organisationalLandlordInvitationStmt.setLong(5, coreDetails.id)
-        organisationalLandlordInvitationStmt.setString(6, details.name)
-        organisationalLandlordInvitationStmt.setInt(7, OrganisationalLandlordUserRole.ADMIN.ordinal)
-        organisationalLandlordInvitationStmt.setBoolean(8, false)
-        organisationalLandlordInvitationStmt.setBoolean(9, false)
-        organisationalLandlordInvitationStmt.addBatch()
+        details.pendingInvitations.forEach { invitation ->
+            organisationalLandlordInvitationStmt.setTimestamp(1, coreDetails.createdDate)
+            organisationalLandlordInvitationStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(coreDetails.createdDate))
+            organisationalLandlordInvitationStmt.setObject(3, NftDataFaker.generateInvitationToken())
+            organisationalLandlordInvitationStmt.setString(4, invitation.invitedEmail)
+            organisationalLandlordInvitationStmt.setLong(5, coreDetails.id)
+            organisationalLandlordInvitationStmt.setString(6, details.name)
+            organisationalLandlordInvitationStmt.setInt(7, invitation.role.ordinal)
+            organisationalLandlordInvitationStmt.setBoolean(8, invitation.invitationExpiredEmailSent)
+            organisationalLandlordInvitationStmt.setBoolean(9, invitation.isHidden)
+            organisationalLandlordInvitationStmt.addBatch()
+        }
 
         if (details.hasGoverningBody) {
             NftDataFaker.generateGoverningBodyMembers(hasLeadTrustee = details.isTrust).forEach { member ->
