@@ -496,7 +496,7 @@ object NftDataFaker {
         val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
 
         val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
-        
+
         val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
             if (!gasCertificateSafetyMissing) {
