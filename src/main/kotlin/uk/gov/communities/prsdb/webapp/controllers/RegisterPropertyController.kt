@@ -59,7 +59,7 @@ import java.security.Principal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class RegisterPropertyController(

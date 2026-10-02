@@ -5,12 +5,13 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
@@ -21,6 +22,7 @@ class LandlordDeregistrationService(
     private val organisationLandlordRepository: OrganisationLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
     private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
+    private val organisationalLandlordInvitationRepository: OrganisationalLandlordInvitationRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val prsdbUserRepository: PrsdbUserRepository,
@@ -46,6 +48,8 @@ class LandlordDeregistrationService(
         deregisterLandlordProperties(orgLandlord)
 
         organisationGoverningBodyMemberRepository.deleteByOrganisationalLandlord(orgLandlord)
+
+        organisationalLandlordInvitationRepository.deleteByOrganisationalLandlord(orgLandlord)
 
         val orgLandlordUsers = organisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)
         val baseUserIds = orgLandlordUsers.map { it.baseUser.id }
@@ -83,7 +87,7 @@ class LandlordDeregistrationService(
     }
 
     private fun deleteBaseUserIfNoOtherRoles(baseUserId: String) {
-        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_LANDLORD }) {
+        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_INDIVIDUAL_LANDLORD }) {
             prsdbUserRepository.deleteById(baseUserId)
         }
     }

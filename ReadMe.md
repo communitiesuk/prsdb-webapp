@@ -148,7 +148,7 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 | `nft-seed.batch-size`         | `NFT_SEED_BATCH_SIZE`           | 10               | Batch size for bulk inserts.                                                                                 |
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
-| `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 500              | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+| `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 1000             | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
 
 To test at a larger, more realistic scale locally (e.g. to catch batching/performance issues that don't show up at
 the small `local` defaults), override the scale-related env vars before running, e.g.:

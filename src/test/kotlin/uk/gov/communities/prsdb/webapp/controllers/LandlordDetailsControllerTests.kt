@@ -50,7 +50,7 @@ class LandlordDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getUserLandlordDetails returns 200 with the current view for a valid request from a landlord`() {
             val landlord = MockLandlordData.createIndividualLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -69,7 +69,7 @@ class LandlordDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getUserLandlordDetails returns the org details view with shell attributes for an organisation landlord`() {
             val orgLandlord = MockLandlordData.createOrgLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)

@@ -253,6 +253,8 @@ object NftDataFaker {
         val registrantEmail = generateEmail(registrantName)
         val mainContactName = generateName()
 
+        val organisationalLandlordUsers = generateOrganisationalLandlordUsers(subjectId, registrantName, registrantEmail, createdDate)
+
         return OrganisationLandlordDetails(
             name = name,
             email = generateEmail(name),
@@ -277,9 +279,58 @@ object NftDataFaker {
             // Per the real registration journey, only organisations without a company number need governing body
             // members (see LandlordRegistrationService.registerOrganisationLandlord).
             hasGoverningBody = !isCompany,
-            users = generateOrganisationalLandlordUsers(subjectId, registrantName, registrantEmail, createdDate),
+            users = organisationalLandlordUsers,
+            pendingInvitations = generateOrganisationalLandlordInvitations(organisationalLandlordUsers),
         )
     }
+
+    fun generateOrganisationalLandlordInvitations(
+        users: List<OrganisationalLandlordUserDetails>,
+    ): List<OrganisationalLandlordInvitationDetails> {
+        val existingEmails = users.map { it.email }.toSet()
+        val randomDouble = faker.random().nextDouble()
+        val numberOfInvitations =
+            when {
+                // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
+                randomDouble < 0.60 -> 0
+                randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+                else -> faker.random().nextInt(2, 4)
+            }
+
+        if (numberOfInvitations == 0) {
+            return emptyList()
+        }
+
+        val invitations = mutableListOf<OrganisationalLandlordInvitationDetails>()
+        val emailsUsed = existingEmails.toMutableSet()
+
+        repeat(numberOfInvitations) {
+            var email = generateEmail(generateName())
+            while (email in emailsUsed) {
+                email = generateEmail(generateName())
+            }
+            emailsUsed += email
+
+            val role = generateOrganisationLandlordRole(probabilityOfAdmin = 0.8)
+
+            invitations +=
+                OrganisationalLandlordInvitationDetails(
+                    invitedEmail = email,
+                    role = role,
+                    invitationExpiredEmailSent = generateBoolean(probabilityTrue = 0.05),
+                    isHidden = generateBoolean(probabilityTrue = 0.1),
+                )
+        }
+
+        return invitations
+    }
+
+    fun generateOrganisationLandlordRole(probabilityOfAdmin: Double = 0.8): OrganisationalLandlordUserRole =
+        if (generateBoolean(probabilityTrue = probabilityOfAdmin)) {
+            OrganisationalLandlordUserRole.ADMIN
+        } else {
+            OrganisationalLandlordUserRole.EDITOR
+        }
 
     fun generateOrganisationalLandlordUsers(
         registrantSubjectId: String,
@@ -316,12 +367,7 @@ object NftDataFaker {
         val extraUsers =
             (1..numOfExtraUsers).map {
                 val name = generateName()
-                val role =
-                    if (generateBoolean(probabilityTrue = 0.8)) {
-                        OrganisationalLandlordUserRole.EDITOR
-                    } else {
-                        OrganisationalLandlordUserRole.ADMIN
-                    }
+                val role = generateOrganisationLandlordRole(probabilityOfAdmin = 0.8)
                 // Extra users are always freshly generated people, distinct from the registrant and main contact, so
                 // that each has its own subject identifier and satisfies the organisational landlord user's unique
                 // constraint on (organisation_landlord_id, subject_identifier).
@@ -451,9 +497,9 @@ object NftDataFaker {
 
         val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
 
-        val gasSafetyCertficateMissing = generateBoolean(probabilityTrue = 0.1)
+        val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
-            if (!gasSafetyCertficateMissing) {
+            if (!gasCertificateSafetyMissing) {
                 generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
             } else {
                 null
@@ -748,6 +794,7 @@ object NftDataFaker {
         val registrantPhoneNumber: String,
         val hasGoverningBody: Boolean,
         val users: List<OrganisationalLandlordUserDetails>,
+        val pendingInvitations: List<OrganisationalLandlordInvitationDetails>,
     )
 
     data class OrganisationalLandlordUserDetails(
@@ -756,6 +803,13 @@ object NftDataFaker {
         val name: String,
         val email: String,
         val role: OrganisationalLandlordUserRole,
+    )
+
+    data class OrganisationalLandlordInvitationDetails(
+        val invitedEmail: String,
+        val role: OrganisationalLandlordUserRole,
+        val invitationExpiredEmailSent: Boolean = false,
+        val isHidden: Boolean = false,
     )
 
     data class GoverningBodyMemberDetails(

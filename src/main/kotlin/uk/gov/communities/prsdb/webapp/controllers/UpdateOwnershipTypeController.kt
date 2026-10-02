@@ -22,7 +22,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_OWNERSHIP_TYPE_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class UpdateOwnershipTypeController(
     private val journeyFactory: UpdateOwnershipTypeJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
