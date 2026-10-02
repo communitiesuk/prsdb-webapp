@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.GRATIS_PERIOD_END_DATE
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -18,9 +19,16 @@ class PaymentService(
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
 ) {
     fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
-        val govUkPayStatus = govUkPayClient.getPayment(paymentId).state.status
+        val govUkPayState = govUkPayClient.getPayment(paymentId).state
+        val status = PaymentStatus.fromGovUKPayStatus(govUkPayState.status)
+        val failureType =
+            if (status.isFailedOrCancelled()) {
+                PaymentFailureType.fromGovUkPayCode(govUkPayState.code)
+            } else {
+                null
+            }
 
-        return PaymentStatusCheckDataModel(paymentId, PaymentStatus.fromGovUKPayStatus(govUkPayStatus))
+        return PaymentStatusCheckDataModel(paymentId, status, failureType)
     }
 
     fun calculateProRatedFeeInPence(
