@@ -1,15 +1,27 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import java.time.Instant
 import java.time.LocalDate
 
 class PaymentServiceTests {
-    private val paymentService = PaymentService(annualFeeInPence = 2000)
+    private val mockGovUkPayClient: GovUkPayClient = mock()
+    private val paymentService = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = 2000)
 
     @ParameterizedTest
     @MethodSource("provideWorkedExamples")
@@ -20,7 +32,7 @@ class PaymentServiceTests {
         expectedFeeInPence: Int,
     ) {
         // Arrange
-        val paymentServiceWithPolicyFee = PaymentService(annualFeeInPence)
+        val paymentServiceWithPolicyFee = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = annualFeeInPence)
 
         // Act
         val fee = paymentServiceWithPolicyFee.calculateProRatedFeeInPence(renewalDate, today)
@@ -234,7 +246,56 @@ class PaymentServiceTests {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideGovUkPayStatusesAndExpectedStatuses")
+    fun `getPaymentStatus maps the GovUkPay payment status to a payment status`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
+    ) {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(govUkPayStatus))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedStatus), paymentStatusCheck)
+    }
+
+    @Test
+    fun `getPaymentStatus propagates GovUkPayException from the client`() {
+        // Arrange
+        val govUkPayException = GovUkPayException("GovUkPay request failed: connection refused")
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(govUkPayException)
+
+        // Act
+        val thrownException = assertThrows<GovUkPayException> { paymentService.getPaymentStatus(PAYMENT_ID) }
+
+        // Assert
+        assertSame(govUkPayException, thrownException)
+    }
+
+    private fun createGovUkPayPayment(status: GovUkPayPaymentStatus) =
+        GovUkPayPayment(
+            paymentId = PAYMENT_ID,
+            amount = 2000,
+            reference = "reference",
+            description = "description",
+            createdDate = Instant.parse("2026-10-01T09:00:00Z"),
+            state = GovUkPayPaymentState(status = status, finished = status in FINISHED_GOV_UK_PAY_STATUSES),
+        )
+
     companion object {
+        private const val PAYMENT_ID = "payment-id"
+
+        private val FINISHED_GOV_UK_PAY_STATUSES =
+            setOf(
+                GovUkPayPaymentStatus.SUCCESS,
+                GovUkPayPaymentStatus.FAILED,
+                GovUkPayPaymentStatus.CANCELLED,
+                GovUkPayPaymentStatus.ERROR,
+            )
+
         @JvmStatic
         fun provideWorkedExamples() =
             listOf(
@@ -244,6 +305,19 @@ class PaymentServiceTests {
                 Arguments.of(6500, LocalDate.of(2027, 1, 31), LocalDate.of(2028, 1, 31), 1371),
                 // c = 366, g = 143, d = 366 -> 3960.38
                 Arguments.of(6500, LocalDate.of(2027, 6, 25), LocalDate.of(2028, 6, 25), 3960),
+            )
+
+        @JvmStatic
+        fun provideGovUkPayStatusesAndExpectedStatuses() =
+            listOf(
+                Arguments.of(GovUkPayPaymentStatus.CREATED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.STARTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.SUBMITTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.CAPTURABLE, PaymentStatus.CAPTURABLE),
+                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentStatus.SUCCEEDED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
             )
     }
 }

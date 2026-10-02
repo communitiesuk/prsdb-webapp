@@ -2,8 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.GRATIS_PERIOD_END_DATE
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import java.time.LocalDate
 import java.time.Month
 import java.time.Year
@@ -11,8 +14,15 @@ import java.time.temporal.ChronoUnit
 
 @PrsdbWebService
 class PaymentService(
+    private val govUkPayClient: GovUkPayClient,
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
 ) {
+    fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
+        val govUkPayStatus = govUkPayClient.getPayment(paymentId).state.status
+
+        return PaymentStatusCheckDataModel(paymentId, PaymentStatus.fromGovUKPayStatus(govUkPayStatus))
+    }
+
     fun calculateProRatedFeeInPence(
         renewalDate: LocalDate,
         today: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
