@@ -42,3 +42,6 @@ argon2:
   iterations: 2
   memory: 16384
   parallelism: 1
+
+gov-uk-pay:
+  gratis-period-end-date: 2027-01-01
