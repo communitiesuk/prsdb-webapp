@@ -54,7 +54,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -71,7 +71,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -85,7 +85,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 

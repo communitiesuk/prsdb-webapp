@@ -52,7 +52,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -62,7 +62,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 403 for a registered company organisation landlord as cannot have governing body`() {
         val registeredCompanyOrg = OrganisationalLandlord()
         registeredCompanyOrg.companyNumber = "12345678"
@@ -74,7 +74,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 200 for an eligible organisation landlord`() {
         val eligibleOrg = OrganisationalLandlord()
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(eligibleOrg)
@@ -114,7 +114,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -128,7 +128,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 200 for an eligible organisation landlord`() {
         val eligibleOrg = OrganisationalLandlord()
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(eligibleOrg)

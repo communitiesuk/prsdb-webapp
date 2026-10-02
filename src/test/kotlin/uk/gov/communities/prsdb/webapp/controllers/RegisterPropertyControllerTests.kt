@@ -94,7 +94,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `index returns 200 for a landlord user`() {
         mvc
             .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
@@ -104,7 +104,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `index passes registerPropertyInitialStep and backUrl model attributes`() {
         mvc
             .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
@@ -121,7 +121,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 with correct model attributes for an occupied property with incomplete compliance`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -167,7 +167,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation hides the what you need to do next section`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -216,7 +216,7 @@ class RegisterPropertyControllerTests(
 
     // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation uses compliance block when phase two is disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -247,7 +247,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes every selected provide later detail`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -296,7 +296,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation hides provide missing details section when delegated to letting agent`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -334,7 +334,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation only shows provide later items that were selected`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -379,7 +379,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -407,7 +407,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for occupied property with complete compliance`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -447,7 +447,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 400 if there's no property ownership ID in session`() {
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(null)
 
@@ -457,7 +457,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
         val propertyRegistrationNumber = 0L
 
@@ -473,7 +473,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes individual survey URL in the model for individual landlord`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -502,7 +502,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes org survey URL in the model for org landlord`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -531,7 +531,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getResume redirects to task-list with the supplied journey id`() {
         val journeyId = "journey-123"
 
@@ -544,7 +544,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent true when flag enabled and delegation exists`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -579,7 +579,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent false when flag disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -604,7 +604,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent false when flag enabled but no delegation exists`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =

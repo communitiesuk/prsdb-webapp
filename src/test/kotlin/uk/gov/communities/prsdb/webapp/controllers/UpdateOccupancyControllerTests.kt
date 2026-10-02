@@ -45,7 +45,7 @@ class UpdateOccupancyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep initializes the journey and redirects when no journey state exists`() {
         val currentLastModifiedDate = Instant.parse("2026-09-22T10:00:00Z")
         val journeyId = "occupancy-journey-id"

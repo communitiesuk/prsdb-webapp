@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -209,6 +210,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @BeforeEach
     fun setup() {
+        featureFlagManager.disableFeature(PAYMENTS)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         whenever(
             absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
@@ -242,6 +244,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `completing the payment journey successfully reaches the confirmation page when payments is enabled`(page: Page) {
+            featureFlagManager.enableFeature(PAYMENTS)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
 
@@ -255,6 +258,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
             page: Page,
         ) {
+            featureFlagManager.enableFeature(PAYMENTS)
             // Start page (not a journey step, but it is how the user accesses the journey)
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -633,6 +637,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `User can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
             page: Page,
         ) {
+            featureFlagManager.enableFeature(PAYMENTS)
             // Start page (not a journey step, but it is how the user accesses the journey)
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -1010,6 +1015,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
+            featureFlagManager.enableFeature(PAYMENTS)
             // Gas supply page
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)

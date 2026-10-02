@@ -45,7 +45,7 @@ class UpdateLandlordAddressControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 200 for a landlord user`() {
         whenever(
             mockJourneyFactory.createJourneySteps(),

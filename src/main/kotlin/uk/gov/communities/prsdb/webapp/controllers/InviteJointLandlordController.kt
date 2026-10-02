@@ -28,7 +28,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(INVITE_JOINT_LANDLORD_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class InviteJointLandlordController(
     private val journeyFactory: InviteJointLandlordJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
