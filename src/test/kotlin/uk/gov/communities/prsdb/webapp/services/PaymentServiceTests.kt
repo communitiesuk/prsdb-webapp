@@ -1,27 +1,89 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
-import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
+import java.time.MonthDay
+import java.util.UUID
+import kotlin.test.assertContains
 
+@ExtendWith(MockitoExtension::class)
 class PaymentServiceTests {
-    private val mockGovUkPayClient: GovUkPayClient = mock()
-    private val paymentService = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = 2000)
+    @Mock
+    private lateinit var mockGovUkPayClient: GovUkPayClient
+
+    @Mock
+    private lateinit var mockPaymentRepository: PaymentRepository
+
+    @Mock
+    private lateinit var mockLandlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
+
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    private val messageSource = YamlMessageSource("classpath:messages")
+
+    private lateinit var paymentService: PaymentService
+
+    private val journeyId = "journey-123"
+    private val userId = "user-123"
+    private val returnUrl = "https://example.test/landlord/register-property/payment-return?journeyId=journey-123"
+    private val email = "landlord@example.com"
+    private val pastGratisPeriodEndDate = "2020-01-01"
+
+    @BeforeEach
+    fun setUp() {
+        paymentService = createPaymentService()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
+    }
 
     @ParameterizedTest
     @MethodSource("provideWorkedExamples")
@@ -32,7 +94,7 @@ class PaymentServiceTests {
         expectedFeeInPence: Int,
     ) {
         // Arrange
-        val paymentServiceWithPolicyFee = PaymentService(govUkPayClient = mockGovUkPayClient, annualFeeInPence = annualFeeInPence)
+        val paymentServiceWithPolicyFee = createPaymentService(annualFeeInPence = annualFeeInPence)
 
         // Act
         val fee = paymentServiceWithPolicyFee.calculateProRatedFeeInPence(renewalDate, today)
@@ -246,6 +308,236 @@ class PaymentServiceTests {
         }
     }
 
+    @Test
+    fun `calculateProRatedFeeInPence uses the configured gratis period end date`() {
+        // Arrange
+        val paymentServiceWithEarlierGratisPeriod = createPaymentService(gratisPeriodEndDate = "2026-01-31")
+        val today = LocalDate.of(2026, 1, 1)
+        val renewalDate = LocalDate.of(2027, 1, 1)
+
+        // Act
+        val fee = paymentServiceWithEarlierGratisPeriod.calculateProRatedFeeInPence(renewalDate, today)
+
+        // Assert
+        // c = 365, g = 31, d = 365 -> 1830.14
+        assertEquals(1830, fee)
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment requests a GOV UK Pay payment for the pro-rated fee`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val anniversary = MonthDay.of(Month.MARCH, 1)
+        setUpIncompletePropertyAndLandlord(anniversary)
+        stubGovUkPayCreatePayment()
+        val expectedAmount = paymentService.calculateProRatedFeeInPence(RenewalDateHelper.getRenewalDate(anniversary))
+
+        // Act
+        paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(mockGovUkPayClient).createPayment(requestCaptor.capture())
+        val request = requestCaptor.firstValue
+        assertEquals(expectedAmount, request.amount)
+        assertEquals("Register your rental property", request.description)
+        assertEquals(returnUrl, request.returnUrl)
+        assertEquals(email, request.email)
+        assertDoesNotThrow { UUID.fromString(request.reference) }
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment saves a created payment for the journey and user`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val anniversary = MonthDay.of(Month.MARCH, 1)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord(anniversary)
+        val createdDate = Instant.parse("2026-10-02T11:30:00Z")
+        stubGovUkPayCreatePayment(paymentId = "new-payment-id", createdDate = createdDate)
+        val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary)
+
+        // Act
+        paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(mockGovUkPayClient).createPayment(requestCaptor.capture())
+        val paymentCaptor = argumentCaptor<Payment>()
+        verify(mockPaymentRepository).save(paymentCaptor.capture())
+        val payment = paymentCaptor.firstValue
+        assertEquals("new-payment-id", payment.paymentId)
+        assertEquals(requestCaptor.firstValue.amount, payment.amountInPence)
+        assertEquals(requestCaptor.firstValue.reference, payment.reference)
+        assertEquals(createdDate, payment.paymentCreatedAt)
+        assertEquals(expectedRenewalDate, payment.forPeriodEnding)
+        assertEquals(PaymentStatus.CREATED, payment.status)
+        assertEquals(incompleteProperty, payment.associatedIncompleteProperty)
+        assertEquals(incompleteProperty.user, payment.payingUser)
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment returns the GOV UK Pay next url`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        setUpIncompletePropertyAndLandlord()
+        stubGovUkPayCreatePayment(nextUrl = "https://pay.example.test/next")
+
+        // Act
+        val nextUrl = paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        assertEquals("https://pay.example.test/next", nextUrl)
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment throws when there is no incomplete property for the journey`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        setMockPrincipal(userId)
+        whenever(mockLandlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId))
+            .thenReturn(null)
+
+        // Act & Assert
+        assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+        verifyNoInteractions(mockGovUkPayClient, mockPaymentRepository)
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment throws without calling GOV UK Pay when the fee is zero`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = "2099-01-01")
+        setUpIncompletePropertyAndLandlord()
+
+        // Act
+        val exception =
+            assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+
+        // Assert
+        assertContains(exception.message!!, "GOV.UK Pay only accepts amounts greater than zero")
+        verifyNoInteractions(mockGovUkPayClient, mockPaymentRepository)
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment does not save a payment when GOV UK Pay fails`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        setUpIncompletePropertyAndLandlord()
+        whenever(mockGovUkPayClient.createPayment(any())).thenThrow(GovUkPayException("GOV.UK Pay request failed", RuntimeException()))
+
+        // Act & Assert
+        assertThrows<GovUkPayException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+        verify(mockPaymentRepository, never()).save(any<Payment>())
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideUnfinishedInProgressPaymentStatuses")
+    fun `createPropertyRegistrationPayment cancels an in-progress payment that can be cancelled before creating a new one`(
+        paymentStatus: PaymentStatus,
+        govUkPayStatus: GovUkPayPaymentStatus,
+    ) {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty, paymentStatus)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
+        stubGovUkPayCreatePayment()
+
+        // Act
+        paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        val inOrder = inOrder(mockGovUkPayClient)
+        inOrder.verify(mockGovUkPayClient).getPayment(existingPayment.paymentId)
+        inOrder.verify(mockGovUkPayClient).cancelPayment(existingPayment.paymentId)
+        inOrder.verify(mockGovUkPayClient).createPayment(any())
+        assertEquals(PaymentStatus.CANCELLED, existingPayment.status)
+        verify(mockPaymentRepository).save(existingPayment)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideFinishedGovUkPayStatuses")
+    fun `createPropertyRegistrationPayment records the outcome of an in-progress payment that has already finished`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
+    ) {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
+        stubGovUkPayCreatePayment()
+
+        // Act
+        paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        verify(mockGovUkPayClient, never()).cancelPayment(any())
+        assertEquals(expectedStatus, existingPayment.status)
+        verify(mockPaymentRepository).save(existingPayment)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideFinishedGovUkPayStatuses")
+    fun `createPropertyRegistrationPayment records the outcome of an in-progress payment that finishes before it can be cancelled`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
+    ) {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId)).thenReturn(
+            createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.STARTED),
+            createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus),
+        )
+        doThrow(GovUkPayException(HttpStatus.BAD_REQUEST, "P0501", "Cancellation of payment failed", RuntimeException()))
+            .whenever(mockGovUkPayClient)
+            .cancelPayment(existingPayment.paymentId)
+        stubGovUkPayCreatePayment()
+
+        // Act
+        paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+
+        // Assert
+        assertEquals(expectedStatus, existingPayment.status)
+        verify(mockPaymentRepository).save(existingPayment)
+        verify(mockGovUkPayClient).createPayment(any())
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment throws a failed cancellation with context when the payment can still be cancelled`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.STARTED))
+        val cancellationFailure =
+            GovUkPayException(HttpStatus.INTERNAL_SERVER_ERROR, "P0598", "Downstream system error", RuntimeException())
+        doThrow(cancellationFailure).whenever(mockGovUkPayClient).cancelPayment(existingPayment.paymentId)
+
+        // Act
+        val exception =
+            assertThrows<GovUkPayException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+
+        // Assert
+        assertSame(cancellationFailure, exception.cause)
+        assertContains(exception.message!!, existingPayment.paymentId)
+        assertContains(exception.message!!, journeyId)
+        verify(mockGovUkPayClient, never()).createPayment(any())
+        verify(mockPaymentRepository, never()).save(any<Payment>())
+    }
+
     @ParameterizedTest
     @MethodSource("provideGovUkPayStatusesAndExpectedStatuses")
     fun `getPaymentStatus maps the GovUkPay payment status to a payment status`(
@@ -253,13 +545,40 @@ class PaymentServiceTests {
         expectedStatus: PaymentStatus,
     ) {
         // Arrange
-        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(govUkPayStatus))
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
 
         // Act
         val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
 
         // Assert
-        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedStatus), paymentStatusCheck)
+        assertEquals(PAYMENT_ID, paymentStatusCheck.paymentId)
+        assertEquals(expectedStatus, paymentStatusCheck.status)
+    }
+
+    @Test
+    fun `getPaymentStatus marks the payment as cancellable when GOV UK Pay returns a cancel link`() {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+            .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.STARTED))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertTrue(paymentStatusCheck.isCancellable)
+    }
+
+    @Test
+    fun `getPaymentStatus marks the payment as not cancellable when GOV UK Pay returns no cancel link`() {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+            .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.STARTED).copy(links = GovUkPayPaymentLinks()))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertFalse(paymentStatusCheck.isCancellable)
     }
 
     @Test
@@ -275,25 +594,83 @@ class PaymentServiceTests {
         assertSame(govUkPayException, thrownException)
     }
 
-    private fun createGovUkPayPayment(status: GovUkPayPaymentStatus) =
-        GovUkPayPayment(
-            paymentId = PAYMENT_ID,
-            amount = 2000,
-            reference = "reference",
-            description = "description",
-            createdDate = Instant.parse("2026-10-01T09:00:00Z"),
-            state = GovUkPayPaymentState(status = status, finished = status in FINISHED_GOV_UK_PAY_STATUSES),
-        )
+    private fun createPaymentService(
+        annualFeeInPence: Int = 2000,
+        gratisPeriodEndDate: String = "2027-11-14",
+    ) = PaymentService(
+        annualFeeInPence,
+        gratisPeriodEndDate,
+        mockGovUkPayClient,
+        mockPaymentRepository,
+        mockLandlordIncompletePropertiesRepository,
+        mockUserToLandlordService,
+        messageSource,
+    )
+
+    private fun setUpIncompletePropertyAndLandlord(anniversary: MonthDay = MonthDay.of(Month.MARCH, 1)): LandlordIncompleteProperty {
+        setMockPrincipal(userId)
+        val user = MockLandlordData.createPrsdbUser(userId)
+        val incompleteProperty =
+            LandlordIncompleteProperty(user, MockSavedJourneyStateData.createSavedJourneyState(journeyId = journeyId, baseUser = user))
+        whenever(mockLandlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId))
+            .thenReturn(incompleteProperty)
+        val landlord = MockLandlordData.createIndividualLandlord(baseUser = user).apply { setAnniversaryIfAbsent(anniversary) }
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        return incompleteProperty
+    }
+
+    private fun stubGovUkPayCreatePayment(
+        paymentId: String = "new-payment-id",
+        nextUrl: String = "https://pay.example.test/next",
+        createdDate: Instant = Instant.now(),
+    ) {
+        // GOV.UK Pay echoes the requested amount and reference back in the created payment
+        whenever(mockGovUkPayClient.createPayment(any())).thenAnswer { invocation ->
+            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
+            createGovUkPayCreatedPayment(
+                paymentId = paymentId,
+                amount = request.amount,
+                reference = request.reference,
+                createdDate = createdDate,
+                nextUrl = nextUrl,
+            )
+        }
+    }
+
+    private fun setMockPrincipal(name: String) {
+        val authentication = mock<Authentication>()
+        whenever(authentication.name).thenReturn(name)
+        val context = mock<SecurityContext>()
+        whenever(context.authentication).thenReturn(authentication)
+        SecurityContextHolder.setContext(context)
+    }
+
+    private fun createExistingPayment(
+        incompleteProperty: LandlordIncompleteProperty,
+        status: PaymentStatus = PaymentStatus.CREATED,
+    ) = Payment(
+        paymentId = "existing-payment-id",
+        amountInPence = 1000,
+        reference = "existing-reference",
+        paymentCreatedAt = Instant.now(),
+        forPeriodEnding = LocalDate.of(2027, 3, 1),
+        status = status,
+        incompleteProperty = incompleteProperty,
+    )
 
     companion object {
         private const val PAYMENT_ID = "payment-id"
 
-        private val FINISHED_GOV_UK_PAY_STATUSES =
-            setOf(
-                GovUkPayPaymentStatus.SUCCESS,
-                GovUkPayPaymentStatus.FAILED,
-                GovUkPayPaymentStatus.CANCELLED,
-                GovUkPayPaymentStatus.ERROR,
+        private val IN_PROGRESS_PAYMENT_STATUSES = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
+
+        @JvmStatic
+        fun provideUnfinishedInProgressPaymentStatuses() =
+            listOf(
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.CREATED),
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.STARTED),
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.SUBMITTED),
+                Arguments.of(PaymentStatus.CREATED, GovUkPayPaymentStatus.CAPTURABLE),
+                Arguments.of(PaymentStatus.CAPTURABLE, GovUkPayPaymentStatus.CAPTURABLE),
             )
 
         @JvmStatic
@@ -305,6 +682,15 @@ class PaymentServiceTests {
                 Arguments.of(6500, LocalDate.of(2027, 1, 31), LocalDate.of(2028, 1, 31), 1371),
                 // c = 366, g = 143, d = 366 -> 3960.38
                 Arguments.of(6500, LocalDate.of(2027, 6, 25), LocalDate.of(2028, 6, 25), 3960),
+            )
+
+        @JvmStatic
+        fun provideFinishedGovUkPayStatuses() =
+            listOf(
+                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentStatus.SUCCEEDED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
             )
 
         @JvmStatic

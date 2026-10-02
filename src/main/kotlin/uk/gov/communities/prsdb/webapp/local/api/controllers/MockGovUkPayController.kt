@@ -296,14 +296,7 @@ class MockGovUkPayController(
             private set
 
         val finished: Boolean
-            get() =
-                status in
-                    setOf(
-                        GovUkPayPaymentStatus.SUCCESS,
-                        GovUkPayPaymentStatus.CANCELLED,
-                        GovUkPayPaymentStatus.FAILED,
-                        GovUkPayPaymentStatus.ERROR,
-                    )
+            get() = status in GovUkPayPaymentStatus.FINISHED_STATUSES
 
         fun markCapturable() {
             status = GovUkPayPaymentStatus.CAPTURABLE
