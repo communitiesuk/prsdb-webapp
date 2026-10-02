@@ -25,6 +25,7 @@ class TeamMembersController(
     private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     @GetMapping
+    // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     fun getTeamMembers(
         model: Model,
