@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 @WithOrgLandlordProfile
 class TeamMembersTests : IntegrationTestWithImmutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
     @Test
-    fun `the team members page lists administrators and editors alphabetically and marks the current user`() {
+    fun `the administrators tab is shown by default, listing administrators alphabetically and marking the current user`() {
         // Act
         val teamMembersPage = navigator.goToTeamMembers()
 
@@ -22,6 +22,12 @@ class TeamMembersTests : IntegrationTestWithImmutableData(listOf("data-local.sql
         val secondAdmin = teamMembersPage.administratorsSummaryList.getRowByIndex(1)
         assertThat(secondAdmin.key).hasText("Administrator 2")
         assertThat(secondAdmin.value).hasText("Local Registrant (You)")
+    }
+
+    @Test
+    fun `the editors tab lists the organisation's editors`() {
+        // Arrange
+        val teamMembersPage = navigator.goToTeamMembers()
 
         // Act
         teamMembersPage.tabs.goToEditors(editorCount = 1)
