@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmation
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import java.security.Principal
 
-@PreAuthorize("hasAnyRole('LANDLORD')")
+@PreAuthorize("hasAnyRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(LandlordController.LANDLORD_BASE_URL, "/")
 class IncompletePropertiesController(

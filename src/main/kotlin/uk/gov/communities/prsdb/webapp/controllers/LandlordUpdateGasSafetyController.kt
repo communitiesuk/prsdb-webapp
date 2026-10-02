@@ -34,7 +34,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_GAS_SAFETY_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class LandlordUpdateGasSafetyController(
     private val journeyFactory: UpdateGasSafetyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

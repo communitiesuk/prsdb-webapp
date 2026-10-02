@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_CORRESPONDENCE_ADDRESS_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class LandlordUpdateCorrespondenceAddressController(
     private val journeyFactory: UpdateCorrespondenceAddressJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

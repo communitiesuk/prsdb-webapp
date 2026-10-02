@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -84,14 +85,20 @@ class PaymentService(
     }
 
     private fun cancelPaymentIfUnfinished(payment: Payment) {
-        val govUkPayStatus = PaymentStatus.fromGovUKPayStatus(govUkPayClient.getPayment(payment.paymentId).state.status)
-        if (govUkPayStatus in PaymentStatus.IN_PROGRESS_STATUSES) {
+        val paymentStatus = getPaymentStatus(payment.paymentId)
+        if (paymentStatus.isInProgress()) {
             govUkPayClient.cancelPayment(payment.paymentId)
             payment.status = PaymentStatus.CANCELLED
         } else {
-            payment.status = govUkPayStatus
+            payment.status = paymentStatus.status
         }
         paymentRepository.save(payment)
+    }
+
+    fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
+        val govUkPayStatus = govUkPayClient.getPayment(paymentId).state.status
+
+        return PaymentStatusCheckDataModel(paymentId, PaymentStatus.fromGovUKPayStatus(govUkPayStatus))
     }
 
     fun calculateProRatedFeeInPence(

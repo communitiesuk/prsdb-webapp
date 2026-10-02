@@ -52,7 +52,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -62,7 +62,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 403 for a non-trust organisation landlord`() {
         val nonTrustOrg = OrganisationalLandlord()
         nonTrustOrg.isTrust = false
@@ -74,7 +74,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getUpdateStep returns 200 for an organisation landlord trust`() {
         val trustOrg = OrganisationalLandlord()
         trustOrg.isTrust = true
@@ -115,7 +115,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -129,7 +129,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postUpdateStep returns 200 for an organisation landlord trust`() {
         val trustOrg = OrganisationalLandlord()
         trustOrg.isTrust = true

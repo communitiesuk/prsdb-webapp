@@ -109,7 +109,7 @@ class LandlordDashboardUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val prsdbUserService = mock<PrsdbUserService>()
@@ -158,7 +158,7 @@ class LandlordDashboardUrlTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
         // Arrange
         val landlord = createIndividualLandlord()

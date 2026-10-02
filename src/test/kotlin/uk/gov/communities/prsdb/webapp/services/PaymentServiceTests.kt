@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -32,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -432,7 +434,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty, paymentStatus)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
@@ -459,7 +461,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, inProgressPaymentStatuses))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
@@ -472,6 +474,35 @@ class PaymentServiceTests {
         verify(mockGovUkPayClient, never()).cancelPayment(any())
         assertEquals(expectedStatus, existingPayment.status)
         verify(mockPaymentRepository).save(existingPayment)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideGovUkPayStatusesAndExpectedStatuses")
+    fun `getPaymentStatus maps the GovUkPay payment status to a payment status`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
+    ) {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, expectedStatus), paymentStatusCheck)
+    }
+
+    @Test
+    fun `getPaymentStatus propagates GovUkPayException from the client`() {
+        // Arrange
+        val govUkPayException = GovUkPayException("GovUkPay request failed: connection refused")
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(govUkPayException)
+
+        // Act
+        val thrownException = assertThrows<GovUkPayException> { paymentService.getPaymentStatus(PAYMENT_ID) }
+
+        // Assert
+        assertSame(govUkPayException, thrownException)
     }
 
     private fun createPaymentService(
@@ -536,18 +567,20 @@ class PaymentServiceTests {
         reference = "existing-reference",
         description = "Register your rental property",
         createdDate = Instant.now(),
-        state = GovUkPayPaymentState(status = status, finished = status in finishedGovUkPayStatuses),
+        state = GovUkPayPaymentState(status = status, finished = status in FINISHED_GOV_UK_PAY_STATUSES),
     )
 
     companion object {
-        private val inProgressPaymentStatuses = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
+        private const val PAYMENT_ID = "payment-id"
 
-        private val finishedGovUkPayStatuses =
-            listOf(
+        private val IN_PROGRESS_PAYMENT_STATUSES = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
+
+        private val FINISHED_GOV_UK_PAY_STATUSES =
+            setOf(
                 GovUkPayPaymentStatus.SUCCESS,
                 GovUkPayPaymentStatus.FAILED,
-                GovUkPayPaymentStatus.ERROR,
                 GovUkPayPaymentStatus.CANCELLED,
+                GovUkPayPaymentStatus.ERROR,
             )
 
         @JvmStatic
@@ -578,6 +611,19 @@ class PaymentServiceTests {
                 Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
+            )
+
+        @JvmStatic
+        fun provideGovUkPayStatusesAndExpectedStatuses() =
+            listOf(
+                Arguments.of(GovUkPayPaymentStatus.CREATED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.STARTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.SUBMITTED, PaymentStatus.CREATED),
+                Arguments.of(GovUkPayPaymentStatus.CAPTURABLE, PaymentStatus.CAPTURABLE),
+                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentStatus.SUCCEEDED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
             )
     }
 }
