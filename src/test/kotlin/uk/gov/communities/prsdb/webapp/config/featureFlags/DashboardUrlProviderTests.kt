@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_EDITOR
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -33,9 +35,25 @@ class DashboardUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `when feature is enabled returns the landlord dashboard for a landlord`() {
+    fun `when feature is enabled returns the landlord dashboard for an individual landlord`() {
         featureFlagManager.enableFeature(DASHBOARD_NAV_LINK)
         setAuthenticatedRoles(ROLE_INDIVIDUAL_LANDLORD)
+
+        assertEquals(LANDLORD_DASHBOARD_URL, dashboardUrlProvider.getDashboardUrlForCurrentUser())
+    }
+
+    @Test
+    fun `when feature is enabled returns the landlord dashboard for an org admin`() {
+        featureFlagManager.enableFeature(DASHBOARD_NAV_LINK)
+        setAuthenticatedRoles(ROLE_ORG_ADMIN)
+
+        assertEquals(LANDLORD_DASHBOARD_URL, dashboardUrlProvider.getDashboardUrlForCurrentUser())
+    }
+
+    @Test
+    fun `when feature is enabled returns the landlord dashboard for an org editor`() {
+        featureFlagManager.enableFeature(DASHBOARD_NAV_LINK)
+        setAuthenticatedRoles(ROLE_ORG_EDITOR)
 
         assertEquals(LANDLORD_DASHBOARD_URL, dashboardUrlProvider.getDashboardUrlForCurrentUser())
     }

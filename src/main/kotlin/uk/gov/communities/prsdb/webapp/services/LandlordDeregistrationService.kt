@@ -2,10 +2,10 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AnyLandlordRoles
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
-import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -87,7 +87,7 @@ class LandlordDeregistrationService(
     }
 
     private fun deleteBaseUserIfNoOtherRoles(baseUserId: String) {
-        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_INDIVIDUAL_LANDLORD }) {
+        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it in AnyLandlordRoles.ROLES }) {
             prsdbUserRepository.deleteById(baseUserId)
         }
     }

@@ -2,6 +2,10 @@ package uk.gov.communities.prsdb.webapp.constants
 
 const val ROLE_INDIVIDUAL_LANDLORD = "ROLE_INDIVIDUAL_LANDLORD"
 
+const val ROLE_ORG_ADMIN = "ROLE_ORG_ADMIN"
+
+const val ROLE_ORG_EDITOR = "ROLE_ORG_EDITOR"
+
 const val ROLE_LOCAL_COUNCIL_ADMIN = "ROLE_LOCAL_COUNCIL_ADMIN"
 
 const val ROLE_LOCAL_COUNCIL_USER = "ROLE_LOCAL_COUNCIL_USER"

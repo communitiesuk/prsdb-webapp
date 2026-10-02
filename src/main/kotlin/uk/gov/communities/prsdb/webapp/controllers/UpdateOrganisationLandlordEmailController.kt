@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_ORG_EMAIL_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateOrganisationLandlordEmailController(
     private val journeyFactory: UpdateOrganisationEmailJourneyFactory,
     private val userToLandlordService: UserToLandlordService,

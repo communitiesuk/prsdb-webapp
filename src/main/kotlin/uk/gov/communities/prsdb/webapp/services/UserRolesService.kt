@@ -4,15 +4,21 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_EDITOR
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 
 @PrsdbWebService
 class UserRolesService(
+    val individualLandlordRepository: IndividualLandlordRepository,
+    val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
     val localCouncilUserRepository: LocalCouncilUserRepository,
     val systemOperatorRepository: SystemOperatorRepository,
-    val userToLandlordService: UserToLandlordService,
 ) {
     // Note: there is no ROLE_LETTING_AGENT, because the letting agent is not a distinct system user.
     // Letting agents are instead granted access to a particular property during the session
@@ -21,8 +27,15 @@ class UserRolesService(
     fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
-        if (userToLandlordService.getLandlordForBaseUserIdOrNull(subjectId) != null) {
+        if (individualLandlordRepository.findByBaseUser_Id(subjectId) != null) {
             roles.add(ROLE_INDIVIDUAL_LANDLORD)
+        }
+
+        organisationalLandlordUserRepository.findByBaseUser_Id(subjectId).forEach { orgUser ->
+            when (orgUser.role) {
+                OrganisationalLandlordUserRole.ADMIN -> roles.add(ROLE_ORG_ADMIN)
+                OrganisationalLandlordUserRole.EDITOR -> roles.add(ROLE_ORG_EDITOR)
+            }
         }
 
         return roles
@@ -51,10 +64,7 @@ class UserRolesService(
         getLandlordRolesForSubjectId(subjectId) +
             getLocalCouncilRolesForSubjectId(subjectId)
 
-    fun getHasLandlordUserRole(subjectId: String): Boolean {
-        val roles = getLandlordRolesForSubjectId(subjectId)
-        return roles.contains(ROLE_INDIVIDUAL_LANDLORD)
-    }
+    fun getUserHasAnyLandlordRole(subjectId: String): Boolean = getLandlordRolesForSubjectId(subjectId).isNotEmpty()
 
     fun getHasLocalCouncilRole(subjectId: String): Boolean {
         val roles = getLocalCouncilRolesForSubjectId(subjectId)

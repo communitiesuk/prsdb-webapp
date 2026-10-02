@@ -36,7 +36,7 @@ class CheckUserRoleStepConfig(
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         val principal = SecurityContextHolder.getContext().authentication.principal as OidcUser
-        state.userIsLandlord = userRolesService.getHasLandlordUserRole(principal.name)
+        state.userIsLandlord = userRolesService.getUserHasAnyLandlordRole(principal.name)
     }
 }
 
