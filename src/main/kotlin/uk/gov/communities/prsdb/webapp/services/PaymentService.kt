@@ -53,9 +53,19 @@ class PaymentService(
                 "${amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
         }
 
-        paymentRepository
-            .findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, PaymentStatus.IN_PROGRESS_STATUSES)
-            .forEach { cancelOrReconcilePayment(it, journeyId) }
+        val existingPayments = paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty)
+        val reconciledPayments =
+            existingPayments.map { if (it.status in PaymentStatus.IN_PROGRESS_STATUSES) cancelOrReconcilePayment(it, journeyId) else it }
+
+        // TODO PDJB-993: Before capturing a payment, check this property has no other SUCCEEDED payment and cancel it if so.
+        //  The check below can't catch two registrations of the same property submitted at nearly the same time, because
+        //  neither can see the other's payment yet.
+        reconciledPayments.firstOrNull { it.status == PaymentStatus.SUCCEEDED }?.let { succeededPayment ->
+            throw IllegalStateException(
+                "Cannot create a GOV.UK Pay payment for journey $journeyId: payment ${succeededPayment.paymentId} for this " +
+                    "property has already succeeded",
+            )
+        }
 
         val reference = UUID.randomUUID().toString()
         val createdPayment =
@@ -77,7 +87,7 @@ class PaymentService(
     private fun cancelOrReconcilePayment(
         payment: Payment,
         journeyId: String,
-    ) {
+    ): Payment {
         val statusBeforeCancellation = getPaymentStatus(payment.paymentId)
 
         if (statusBeforeCancellation.isCancellable) {
@@ -100,6 +110,7 @@ class PaymentService(
         }
 
         paymentRepository.save(payment)
+        return payment
     }
 
     fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {

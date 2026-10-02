@@ -439,7 +439,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty, paymentStatus)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
@@ -458,7 +458,7 @@ class PaymentServiceTests {
     }
 
     @ParameterizedTest
-    @MethodSource("provideFinishedGovUkPayStatuses")
+    @MethodSource("provideUnsuccessfulFinishedGovUkPayStatuses")
     fun `createPropertyRegistrationPayment records the outcome of an in-progress payment that has already finished`(
         govUkPayStatus: GovUkPayPaymentStatus,
         expectedStatus: PaymentStatus,
@@ -467,7 +467,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, govUkPayStatus))
@@ -483,7 +483,7 @@ class PaymentServiceTests {
     }
 
     @ParameterizedTest
-    @MethodSource("provideFinishedGovUkPayStatuses")
+    @MethodSource("provideUnsuccessfulFinishedGovUkPayStatuses")
     fun `createPropertyRegistrationPayment records the outcome of an in-progress payment that finishes before it can be cancelled`(
         govUkPayStatus: GovUkPayPaymentStatus,
         expectedStatus: PaymentStatus,
@@ -492,7 +492,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId)).thenReturn(
             createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.STARTED),
@@ -518,7 +518,7 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val incompleteProperty = setUpIncompletePropertyAndLandlord()
         val existingPayment = createExistingPayment(incompleteProperty)
-        whenever(mockPaymentRepository.findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, IN_PROGRESS_PAYMENT_STATUSES))
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
             .thenReturn(listOf(existingPayment))
         whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
             .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.STARTED))
@@ -535,6 +535,75 @@ class PaymentServiceTests {
         assertContains(exception.message!!, existingPayment.paymentId)
         assertContains(exception.message!!, journeyId)
         verify(mockGovUkPayClient, never()).createPayment(any())
+        verify(mockPaymentRepository, never()).save(any<Payment>())
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment records an in-progress payment that has already succeeded and does not create another`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
+            .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS))
+
+        // Act
+        val exception =
+            assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+
+        // Assert
+        assertEquals(PaymentStatus.SUCCEEDED, existingPayment.status)
+        verify(mockPaymentRepository).save(existingPayment)
+        assertContains(exception.message!!, existingPayment.paymentId)
+        assertContains(exception.message!!, journeyId)
+        verify(mockGovUkPayClient, never()).cancelPayment(any())
+        verify(mockGovUkPayClient, never()).createPayment(any())
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment records a payment that succeeds before it can be cancelled and does not create another`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val existingPayment = createExistingPayment(incompleteProperty, PaymentStatus.CAPTURABLE)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
+            .thenReturn(listOf(existingPayment))
+        whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId)).thenReturn(
+            createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.CAPTURABLE),
+            createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS),
+        )
+        doThrow(GovUkPayException(HttpStatus.BAD_REQUEST, "P0501", "Cancellation of payment failed", RuntimeException()))
+            .whenever(mockGovUkPayClient)
+            .cancelPayment(existingPayment.paymentId)
+
+        // Act
+        assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+
+        // Assert
+        assertEquals(PaymentStatus.SUCCEEDED, existingPayment.status)
+        verify(mockPaymentRepository).save(existingPayment)
+        verify(mockGovUkPayClient, never()).createPayment(any())
+    }
+
+    @Test
+    fun `createPropertyRegistrationPayment does not create another payment when the property already has a succeeded payment`() {
+        // Arrange
+        paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+        val incompleteProperty = setUpIncompletePropertyAndLandlord()
+        val succeededPayment = createExistingPayment(incompleteProperty, PaymentStatus.SUCCEEDED)
+        whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
+            .thenReturn(listOf(succeededPayment))
+
+        // Act
+        val exception =
+            assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+
+        // Assert
+        assertContains(exception.message!!, succeededPayment.paymentId)
+        assertContains(exception.message!!, journeyId)
+        verifyNoInteractions(mockGovUkPayClient)
         verify(mockPaymentRepository, never()).save(any<Payment>())
     }
 
@@ -661,8 +730,6 @@ class PaymentServiceTests {
     companion object {
         private const val PAYMENT_ID = "payment-id"
 
-        private val IN_PROGRESS_PAYMENT_STATUSES = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
-
         @JvmStatic
         fun provideUnfinishedInProgressPaymentStatuses() =
             listOf(
@@ -685,9 +752,8 @@ class PaymentServiceTests {
             )
 
         @JvmStatic
-        fun provideFinishedGovUkPayStatuses() =
+        fun provideUnsuccessfulFinishedGovUkPayStatuses() =
             listOf(
-                Arguments.of(GovUkPayPaymentStatus.SUCCESS, PaymentStatus.SUCCEEDED),
                 Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
