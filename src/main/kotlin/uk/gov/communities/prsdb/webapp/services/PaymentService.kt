@@ -78,25 +78,25 @@ class PaymentService(
         payment: Payment,
         journeyId: String,
     ) {
-        val paymentStatus = getPaymentStatus(payment.paymentId)
+        val statusBeforeCancellation = getPaymentStatus(payment.paymentId)
 
-        if (paymentStatus.isCancellable) {
+        if (statusBeforeCancellation.isCancellable) {
             try {
                 govUkPayClient.cancelPayment(payment.paymentId)
                 payment.status = PaymentStatus.CANCELLED
             } catch (exception: GovUkPayException) {
-                val latestPaymentStatus = getPaymentStatus(payment.paymentId)
-                if (latestPaymentStatus.isCancellable) {
+                val statusAfterFailedCancellation = getPaymentStatus(payment.paymentId)
+                if (statusAfterFailedCancellation.isCancellable) {
                     throw GovUkPayException(
                         "Could not cancel in-progress GOV.UK Pay payment ${payment.paymentId} before creating a new payment for " +
                             "journey $journeyId: GOV.UK Pay rejected the cancellation but still reports the payment as cancellable",
                         exception,
                     )
                 }
-                payment.status = latestPaymentStatus.status
+                payment.status = statusAfterFailedCancellation.status
             }
         } else {
-            payment.status = paymentStatus.status
+            payment.status = statusBeforeCancellation.status
         }
 
         paymentRepository.save(payment)
@@ -108,7 +108,7 @@ class PaymentService(
         return PaymentStatusCheckDataModel(
             paymentId = paymentId,
             status = PaymentStatus.fromGovUKPayStatus(govUkPayPayment.state.status),
-            isCancellable = govUkPayPayment.links.cancel != null,
+            isCancellable = govUkPayPayment.links.cancelUrl != null,
         )
     }
 

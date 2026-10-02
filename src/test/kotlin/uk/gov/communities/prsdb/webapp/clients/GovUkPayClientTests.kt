@@ -390,7 +390,7 @@ class GovUkPayClientTests {
         val payment = govUkPayClient.getPayment(PAYMENT_ID)
 
         // Assert
-        assertEquals(GovUkPayLink(href = cancelUrl), payment.links.cancel)
+        assertEquals(GovUkPayLink(href = cancelUrl), payment.links.cancelUrl)
         mockServer.verify()
     }
 
@@ -405,7 +405,7 @@ class GovUkPayClientTests {
         val payment = govUkPayClient.getPayment(PAYMENT_ID)
 
         // Assert
-        assertNull(payment.links.cancel)
+        assertNull(payment.links.cancelUrl)
         mockServer.verify()
     }
 

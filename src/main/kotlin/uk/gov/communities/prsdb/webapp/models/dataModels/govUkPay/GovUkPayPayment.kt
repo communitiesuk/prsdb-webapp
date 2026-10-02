@@ -21,7 +21,7 @@ data class GovUkPayPayment(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayPaymentLinks(
     @JsonProperty("next_url") val nextUrl: GovUkPayLink? = null,
-    val cancel: GovUkPayLink? = null,
+    @JsonProperty("cancel") val cancelUrl: GovUkPayLink? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
