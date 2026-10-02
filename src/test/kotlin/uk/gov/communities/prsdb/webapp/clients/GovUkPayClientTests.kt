@@ -155,6 +155,21 @@ class GovUkPayClientTests {
     }
 
     @Test
+    fun `createPayment throws GovUkPayException for a success status other than 201`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments"))
+            .andRespond(withSuccess(createdPaymentBody(includeNextUrl = true), MediaType.APPLICATION_JSON))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createPayment(createPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to create payment with HTTP status 200 instead of 201", exception.message)
+        mockServer.verify()
+    }
+
+    @Test
     fun `createPayment wraps a network failure in GovUkPayException`() {
         // Arrange
         mockServer
@@ -182,6 +197,21 @@ class GovUkPayClientTests {
         govUkPayClient.capturePayment(PAYMENT_ID)
 
         // Assert
+        mockServer.verify()
+    }
+
+    @Test
+    fun `capturePayment throws GovUkPayException for a success status other than 204`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/capture"))
+            .andRespond(withSuccess())
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.capturePayment(PAYMENT_ID) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to capture payment with HTTP status 200 instead of 204", exception.message)
         mockServer.verify()
     }
 
@@ -241,6 +271,21 @@ class GovUkPayClientTests {
         govUkPayClient.cancelPayment(PAYMENT_ID)
 
         // Assert
+        mockServer.verify()
+    }
+
+    @Test
+    fun `cancelPayment throws GovUkPayException for a success status other than 204`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/cancel"))
+            .andRespond(withSuccess())
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.cancelPayment(PAYMENT_ID) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to cancel payment with HTTP status 200 instead of 204", exception.message)
         mockServer.verify()
     }
 

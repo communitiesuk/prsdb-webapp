@@ -31,6 +31,7 @@ class GovUkPayClient(
                     .accept(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
+                    .requireStatus(HttpStatus.CREATED, "create payment")
                     .body<GovUkPayPayment>()
             } ?: throw GovUkPayException("GOV.UK Pay create payment response had no body")
         val nextUrl =
@@ -46,6 +47,7 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/capture", paymentId)
                 .retrieve()
+                .requireStatus(HttpStatus.NO_CONTENT, "capture payment")
                 .toBodilessEntity()
         }
     }
@@ -56,6 +58,7 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/cancel", paymentId)
                 .retrieve()
+                .requireStatus(HttpStatus.NO_CONTENT, "cancel payment")
                 .toBodilessEntity()
         }
     }
@@ -101,6 +104,16 @@ class GovUkPayClient(
             throw GovUkPayException(exception.statusCode, errorResponse?.code, errorResponse?.description, exception)
         } catch (exception: RestClientException) {
             throw GovUkPayException("GOV.UK Pay request failed: ${exception.message}", exception)
+        }
+
+    private fun RestClient.ResponseSpec.requireStatus(
+        expectedStatus: HttpStatus,
+        operation: String,
+    ): RestClient.ResponseSpec =
+        onStatus({ !it.isError && it.value() != expectedStatus.value() }) { _, response ->
+            throw GovUkPayException(
+                "GOV.UK Pay responded to $operation with HTTP status ${response.statusCode.value()} instead of ${expectedStatus.value()}",
+            )
         }
 
     // Error responses from outside GOV.UK Pay (e.g. a gateway error page) may not be JSON
