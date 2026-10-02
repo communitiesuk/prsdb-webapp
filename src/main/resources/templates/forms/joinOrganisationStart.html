@@ -1,0 +1,17 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="organisationName" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <h1 class="govuk-heading-xl" th:text="#{acceptOrganisationInvitation.joinOrganisation.heading}">acceptOrganisationInvitation.joinOrganisation.heading</h1>
+    <p class="govuk-body" th:text="#{acceptOrganisationInvitation.joinOrganisation.introduction(${organisationName})}">acceptOrganisationInvitation.joinOrganisation.introduction</p>
+    <p class="govuk-body" th:text="#{acceptOrganisationInvitation.joinOrganisation.listIntro}">acceptOrganisationInvitation.joinOrganisation.listIntro</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{acceptOrganisationInvitation.joinOrganisation.bullet.one}">acceptOrganisationInvitation.joinOrganisation.bullet.one</li>
+        <li th:text="#{acceptOrganisationInvitation.joinOrganisation.bullet.two}">acceptOrganisationInvitation.joinOrganisation.bullet.two</li>
+    </ul>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+</th:block>
+</html>
