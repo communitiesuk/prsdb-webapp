@@ -10,7 +10,7 @@ data class PaymentStatusCheckDataModel(
 
     fun isCapturable() = status == PaymentStatus.CAPTURABLE
 
-    fun isInProgress() = isCreated() || isCapturable()
+    fun isInProgress() = status in PaymentStatus.IN_PROGRESS_STATUSES
 
     fun isSucceeded() = status == PaymentStatus.SUCCEEDED
 
