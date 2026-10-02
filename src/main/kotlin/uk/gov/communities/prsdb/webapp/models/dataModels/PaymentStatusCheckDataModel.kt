@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 data class PaymentStatusCheckDataModel(
     val paymentId: String,
     val status: PaymentStatus,
+    val isCancellable: Boolean,
 ) {
     fun isCreated() = status == PaymentStatus.CREATED
 

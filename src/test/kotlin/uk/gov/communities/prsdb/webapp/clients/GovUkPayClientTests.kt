@@ -322,6 +322,49 @@ class GovUkPayClientTests {
     }
 
     @Test
+    fun `getPayment returns the cancel link for a payment that can be cancelled`() {
+        // Arrange
+        val cancelUrl = "$BASE_URL/v1/payments/$PAYMENT_ID/cancel"
+        val cancellablePaymentBody =
+            paymentBody(
+                stateJson = """{ "status": "started", "finished": false }""",
+                settlementSummaryJson = "{}",
+                linksJson =
+                    """
+                    {
+                        "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" },
+                        "cancel": { "href": "$cancelUrl", "method": "POST" }
+                    }
+                    """,
+            )
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(cancellablePaymentBody, MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPayment(PAYMENT_ID)
+
+        // Assert
+        assertEquals(GovUkPayLink(href = cancelUrl), payment.links.cancel)
+        mockServer.verify()
+    }
+
+    @Test
+    fun `getPayment returns no cancel link for a payment that cannot be cancelled`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPayment(PAYMENT_ID)
+
+        // Assert
+        assertNull(payment.links.cancel)
+        mockServer.verify()
+    }
+
+    @Test
     fun `getPayment throws GovUkPayException for an unrecognised payment status`() {
         // Arrange
         val unknownStatusBody = paymentBody(stateJson = """{ "status": "some_new_status", "finished": false }""")
@@ -469,6 +512,7 @@ class GovUkPayClientTests {
         stateJson: String = """{ "status": "success", "finished": true }""",
         settlementSummaryJson: String =
             """{ "capture_submit_time": "2026-09-28T13:15:00.000Z", "captured_date": "$CAPTURED_DATE" }""",
+        linksJson: String = """{ "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" } }""",
     ) = """
         {
             "amount": $AMOUNT,
@@ -486,7 +530,7 @@ class GovUkPayClientTests {
             "moto": false,
             "return_url": "$RETURN_URL",
             "authorisation_mode": "web",
-            "_links": { "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" } }
+            "_links": $linksJson
         }
         """
 

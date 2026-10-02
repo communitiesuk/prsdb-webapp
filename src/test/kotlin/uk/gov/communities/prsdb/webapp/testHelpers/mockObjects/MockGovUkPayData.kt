@@ -31,7 +31,11 @@ class MockGovUkPayData {
                 description = description,
                 createdDate = createdDate,
                 state = GovUkPayPaymentState(status = status, finished = finished),
-                links = GovUkPayPaymentLinks(nextUrl = nextUrl?.let { GovUkPayLink(href = it) }),
+                links =
+                    GovUkPayPaymentLinks(
+                        nextUrl = nextUrl?.let { GovUkPayLink(href = it) },
+                        cancel = if (finished) null else GovUkPayLink(href = "https://pay.example.test/v1/payments/$paymentId/cancel"),
+                    ),
             )
         }
 

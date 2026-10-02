@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -54,7 +55,7 @@ class PaymentService(
 
         paymentRepository
             .findAllByAssociatedIncompletePropertyAndStatusIn(incompleteProperty, PaymentStatus.IN_PROGRESS_STATUSES)
-            .forEach { cancelPaymentIfUnfinished(it) }
+            .forEach { cancelOrReconcilePayment(it, journeyId) }
 
         val reference = UUID.randomUUID().toString()
         val createdPayment =
@@ -73,21 +74,42 @@ class PaymentService(
         return createdPayment.nextUrl
     }
 
-    private fun cancelPaymentIfUnfinished(payment: Payment) {
+    private fun cancelOrReconcilePayment(
+        payment: Payment,
+        journeyId: String,
+    ) {
         val paymentStatus = getPaymentStatus(payment.paymentId)
-        if (paymentStatus.isInProgress()) {
-            govUkPayClient.cancelPayment(payment.paymentId)
-            payment.status = PaymentStatus.CANCELLED
+
+        if (paymentStatus.isCancellable) {
+            try {
+                govUkPayClient.cancelPayment(payment.paymentId)
+                payment.status = PaymentStatus.CANCELLED
+            } catch (exception: GovUkPayException) {
+                val latestPaymentStatus = getPaymentStatus(payment.paymentId)
+                if (latestPaymentStatus.isCancellable) {
+                    throw GovUkPayException(
+                        "Could not cancel in-progress GOV.UK Pay payment ${payment.paymentId} before creating a new payment for " +
+                            "journey $journeyId: GOV.UK Pay rejected the cancellation but still reports the payment as cancellable",
+                        exception,
+                    )
+                }
+                payment.status = latestPaymentStatus.status
+            }
         } else {
             payment.status = paymentStatus.status
         }
+
         paymentRepository.save(payment)
     }
 
     fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
-        val govUkPayStatus = govUkPayClient.getPayment(paymentId).state.status
+        val govUkPayPayment = govUkPayClient.getPayment(paymentId)
 
-        return PaymentStatusCheckDataModel(paymentId, PaymentStatus.fromGovUKPayStatus(govUkPayStatus))
+        return PaymentStatusCheckDataModel(
+            paymentId = paymentId,
+            status = PaymentStatus.fromGovUKPayStatus(govUkPayPayment.state.status),
+            isCancellable = govUkPayPayment.links.cancel != null,
+        )
     }
 
     fun calculateProRatedFeeInPence(
