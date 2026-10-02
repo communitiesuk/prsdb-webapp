@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
-import uk.gov.communities.prsdb.webapp.services.TeamMembersUrlProvider
+import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -46,7 +46,7 @@ class GlobalModelAttributesTests {
     private lateinit var dashboardUrlProvider: DashboardUrlProvider
 
     @Mock
-    private lateinit var teamMembersUrlProvider: TeamMembersUrlProvider
+    private lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
 
     @Mock
     private lateinit var featureFlagOverrideService: FeatureFlagOverrideService
@@ -60,7 +60,7 @@ class GlobalModelAttributesTests {
                 backUrlStorageService,
                 messageSource,
                 dashboardUrlProvider,
-                teamMembersUrlProvider,
+                manageTeamMembersUrlProvider,
                 featureFlagOverrideService,
             )
         ReflectionTestUtils.setField(globalModelAttributes, "plausibleSiteId", "test-site-id")
@@ -305,7 +305,7 @@ class GlobalModelAttributesTests {
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
         whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
-        whenever(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser()).thenReturn("/landlord/team-members")
+        whenever(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser()).thenReturn("/landlord/team-members")
         val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
@@ -335,7 +335,7 @@ class GlobalModelAttributesTests {
 
         verify(backUrlStorageService, never()).storeCurrentUrlReturningKey()
         verify(dashboardUrlProvider, never()).getDashboardUrlForCurrentUser()
-        verify(teamMembersUrlProvider, never()).getTeamMembersUrlForCurrentUser()
+        verify(manageTeamMembersUrlProvider, never()).getManageTeamMembersUrlForCurrentUser()
         verifyNoInteractions(messageSource)
         assertTrue(model.asMap().isEmpty())
     }

@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
-import uk.gov.communities.prsdb.webapp.services.TeamMembersUrlProvider
+import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
@@ -69,7 +69,7 @@ abstract class ControllerTest(
     lateinit var dashboardUrlProvider: DashboardUrlProvider
 
     @MockitoBean
-    lateinit var teamMembersUrlProvider: TeamMembersUrlProvider
+    lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
 
     @MockitoBean
     lateinit var featureFlagOverrideService: FeatureFlagOverrideService

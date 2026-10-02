@@ -9,11 +9,11 @@ import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Compani
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 
 @PrsdbWebService
-class TeamMembersUrlProvider(
+class ManageTeamMembersUrlProvider(
     private val featureFlagManager: FeatureFlagManager,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
-    fun getTeamMembersUrlForCurrentUser(): String? {
+    fun getManageTeamMembersUrlForCurrentUser(): String? {
         // TODO PDJB-1828: Remove this check when the MULTI_USER_ORGANISATIONS flag is removed
         if (!featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)) {
             return null

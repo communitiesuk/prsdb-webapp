@@ -19,11 +19,11 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
-import uk.gov.communities.prsdb.webapp.services.TeamMembersUrlProvider
+import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
 
-class TeamMembersUrlProviderTests : FeatureFlagTest() {
+class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
     @Autowired
-    lateinit var teamMembersUrlProvider: TeamMembersUrlProvider
+    lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
 
     @MockitoBean
     lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
@@ -51,7 +51,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
         setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
-        assertEquals(TEAM_MEMBERS_ROUTE, teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
+        assertEquals(TEAM_MEMBERS_ROUTE, manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
 
     @Test
@@ -59,20 +59,20 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
         setAuthenticatedUser("individual-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("individual-user")).thenReturn(false)
 
-        assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
+        assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
 
     @Test
     fun `returns null when the user is not a landlord`() {
         setAuthenticatedUser("local-council-user", ROLE_LOCAL_COUNCIL_USER)
 
-        assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
+        assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
         verify(organisationalLandlordUserRepository, never()).existsByBaseUser_Id(any())
     }
 
     @Test
     fun `returns null when there is no authenticated user`() {
-        assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
+        assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
 
     // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS flag is removed
@@ -82,7 +82,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
         setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
-        assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
+        assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
         verify(organisationalLandlordUserRepository, never()).existsByBaseUser_Id(any())
     }
 }
