@@ -35,10 +35,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.time.Instant
@@ -349,7 +348,8 @@ class PaymentServiceTests {
         paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
         val anniversary = MonthDay.of(Month.MARCH, 1)
         val incompleteProperty = setUpIncompletePropertyAndLandlord(anniversary)
-        stubGovUkPayCreatePayment(paymentId = "new-payment-id")
+        val createdDate = Instant.parse("2026-10-02T11:30:00Z")
+        stubGovUkPayCreatePayment(paymentId = "new-payment-id", createdDate = createdDate)
         val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary)
 
         // Act
@@ -364,6 +364,7 @@ class PaymentServiceTests {
         assertEquals("new-payment-id", payment.paymentId)
         assertEquals(requestCaptor.firstValue.amount, payment.amountInPence)
         assertEquals(requestCaptor.firstValue.reference, payment.reference)
+        assertEquals(createdDate, payment.paymentCreatedAt)
         assertEquals(expectedRenewalDate, payment.forPeriodEnding)
         assertEquals(PaymentStatus.CREATED, payment.status)
         assertEquals(incompleteProperty, payment.associatedIncompleteProperty)
@@ -533,8 +534,19 @@ class PaymentServiceTests {
     private fun stubGovUkPayCreatePayment(
         paymentId: String = "new-payment-id",
         nextUrl: String = "https://pay.example.test/next",
+        createdDate: Instant = Instant.now(),
     ) {
-        whenever(mockGovUkPayClient.createPayment(any())).thenReturn(GovUkPayCreatedPayment(paymentId, nextUrl))
+        // GOV.UK Pay echoes the requested amount and reference back in the created payment
+        whenever(mockGovUkPayClient.createPayment(any())).thenAnswer { invocation ->
+            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
+            createGovUkPayCreatedPayment(
+                paymentId = paymentId,
+                amount = request.amount,
+                reference = request.reference,
+                createdDate = createdDate,
+                nextUrl = nextUrl,
+            )
+        }
     }
 
     private fun setMockPrincipal(name: String) {
@@ -558,30 +570,10 @@ class PaymentServiceTests {
         incompleteProperty = incompleteProperty,
     )
 
-    private fun createGovUkPayPayment(
-        paymentId: String,
-        status: GovUkPayPaymentStatus,
-    ) = GovUkPayPayment(
-        paymentId = paymentId,
-        amount = 1000,
-        reference = "existing-reference",
-        description = "Register your rental property",
-        createdDate = Instant.now(),
-        state = GovUkPayPaymentState(status = status, finished = status in FINISHED_GOV_UK_PAY_STATUSES),
-    )
-
     companion object {
         private const val PAYMENT_ID = "payment-id"
 
         private val IN_PROGRESS_PAYMENT_STATUSES = listOf(PaymentStatus.CREATED, PaymentStatus.CAPTURABLE)
-
-        private val FINISHED_GOV_UK_PAY_STATUSES =
-            setOf(
-                GovUkPayPaymentStatus.SUCCESS,
-                GovUkPayPaymentStatus.FAILED,
-                GovUkPayPaymentStatus.CANCELLED,
-                GovUkPayPaymentStatus.ERROR,
-            )
 
         @JvmStatic
         fun provideUnfinishedInProgressPaymentStatuses() =

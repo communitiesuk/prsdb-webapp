@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.MonthDay
@@ -69,17 +68,7 @@ class PaymentService(
                 ),
             )
 
-        paymentRepository.save(
-            Payment(
-                paymentId = createdPayment.paymentId,
-                amountInPence = amountInPence,
-                reference = reference,
-                paymentCreatedAt = Instant.now(),
-                forPeriodEnding = renewalDate,
-                status = PaymentStatus.CREATED,
-                incompleteProperty = incompleteProperty,
-            ),
-        )
+        paymentRepository.save(Payment.fromGovUkPay(createdPayment.payment, renewalDate, incompleteProperty))
 
         return createdPayment.nextUrl
     }

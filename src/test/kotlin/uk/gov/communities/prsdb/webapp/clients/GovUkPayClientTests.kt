@@ -30,7 +30,9 @@ import org.springframework.web.client.RestClientResponseException
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLink
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPaySettlementSummary
@@ -109,7 +111,7 @@ class GovUkPayClientTests {
     }
 
     @Test
-    fun `createPayment returns the payment ID and next URL of the created payment`() {
+    fun `createPayment returns the created payment and its next URL`() {
         // Arrange
         mockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdResponse())
 
@@ -117,7 +119,7 @@ class GovUkPayClientTests {
         val createdPayment = govUkPayClient.createPayment(createPaymentRequest())
 
         // Assert
-        assertEquals(GovUkPayCreatedPayment(paymentId = PAYMENT_ID, nextUrl = NEXT_URL), createdPayment)
+        assertEquals(expectedCreatedPayment(), createdPayment)
         mockServer.verify()
     }
 
@@ -360,7 +362,7 @@ class GovUkPayClientTests {
         val createdPayment = govUkPayClient.createPayment(createPaymentRequest())
 
         // Assert
-        assertEquals(GovUkPayCreatedPayment(paymentId = PAYMENT_ID, nextUrl = NEXT_URL), createdPayment)
+        assertEquals(expectedCreatedPayment(), createdPayment)
         mockServer.verify()
     }
 
@@ -418,6 +420,21 @@ class GovUkPayClientTests {
             description = DESCRIPTION,
             returnUrl = RETURN_URL,
             email = email,
+        )
+
+    private fun expectedCreatedPayment() =
+        GovUkPayCreatedPayment(
+            payment =
+                GovUkPayPayment(
+                    paymentId = PAYMENT_ID,
+                    amount = AMOUNT,
+                    reference = REFERENCE,
+                    description = DESCRIPTION,
+                    createdDate = Instant.parse(CREATED_DATE),
+                    state = GovUkPayPaymentState(status = GovUkPayPaymentStatus.CREATED, finished = false),
+                    links = GovUkPayPaymentLinks(nextUrl = GovUkPayLink(href = NEXT_URL)),
+                ),
+            nextUrl = NEXT_URL,
         )
 
     private fun createdResponse(includeNextUrl: Boolean = true) =

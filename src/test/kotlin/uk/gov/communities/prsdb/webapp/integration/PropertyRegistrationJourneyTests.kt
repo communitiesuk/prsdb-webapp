@@ -145,7 +145,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Payme
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -154,6 +153,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileDownloader
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
 import java.net.URI
 import java.nio.file.Path
 import java.time.MonthDay
@@ -264,9 +264,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
         // The fake GOV.UK Pay sends the user straight back to the return URL, as if they had completed the card details pages
         whenever(govUkPayClient.createPayment(any())).thenAnswer { invocation ->
-            GovUkPayCreatedPayment(
+            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
+            MockGovUkPayData.createGovUkPayCreatedPayment(
                 paymentId = "test-payment-${UUID.randomUUID()}",
-                nextUrl = invocation.getArgument<GovUkPayCreatePaymentRequest>(0).returnUrl,
+                amount = request.amount,
+                reference = request.reference,
+                nextUrl = request.returnUrl,
             )
         }
     }
