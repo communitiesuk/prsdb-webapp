@@ -1829,8 +1829,12 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptInvitationJourney(): ValidateTokenPage {
-        navigate(AcceptInvitationController.ACCEPT_INVITATION_ROUTE)
+    fun goToAcceptInvitationJourney(token: String? = null): ValidateTokenPage {
+        // TODO PDJB-1822: Once the token is required and validated at entry, make `token` non-nullable here and
+        //  return the invalid link page for a missing or unknown token. Also change the ValidateTokenPage return
+        //  type when ValidateTokenStep becomes an internal step.
+        val tokenQuery = token?.let { "?token=$it" } ?: ""
+        navigate("${AcceptInvitationController.ACCEPT_INVITATION_ROUTE}$tokenQuery")
         return createValidPage(page, ValidateTokenPage::class)
     }
 

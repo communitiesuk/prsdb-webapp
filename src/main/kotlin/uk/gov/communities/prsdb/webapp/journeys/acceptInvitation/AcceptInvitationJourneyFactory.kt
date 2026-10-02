@@ -19,10 +19,12 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateT
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @PrsdbWebService
 class AcceptInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<AcceptInvitationJourney>,
+    private val invitationService: OrganisationalLandlordInvitationService,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -37,14 +39,23 @@ class AcceptInvitationJourneyFactory(
                 initialStep()
                 nextStep { outcome ->
                     when (outcome) {
-                        TokenValidity.VALID -> journey.joinOrganisationStep
+                        // TODO PDJB-1822: Validate the token once (e.g. in ValidateTokenStep's afterStepIsReached, as the
+                        //  joint landlord journey does) and store the organisation in journey state. This lookup is
+                        //  repeated in JoinOrganisationStepConfig, so both should read the stored result instead.
+                        TokenValidity.VALID ->
+                            if (invitationService.getOrganisationNameForJourneyIdOrNull(state.journeyId) != null) {
+                                journey.joinOrganisationStep
+                            } else {
+                                journey.invalidLinkStep
+                            }
+
                         TokenValidity.INVALID -> journey.invalidLinkStep
                     }
                 }
             }
             step(journey.invalidLinkStep) {
                 routeSegment(InvalidLinkStep.ROUTE_SEGMENT)
-                parents { journey.validateTokenStep.hasOutcome(TokenValidity.INVALID) }
+                parents { journey.validateTokenStep.isComplete() }
                 backDestination { Destination.Nowhere() }
                 nextDestination { Destination.Nowhere() }
             }

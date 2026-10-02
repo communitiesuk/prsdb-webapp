@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @WebMvcTest(AcceptInvitationController::class)
 class AcceptInvitationControllerTests(
@@ -30,6 +32,9 @@ class AcceptInvitationControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: AcceptInvitationJourneyFactory
+
+    @MockitoBean
+    private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -60,6 +65,7 @@ class AcceptInvitationControllerTests(
         @WithMockUser(value = "user")
         fun `startJourney initializes state and redirects for authenticated user without landlord role`() {
             whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
+            val token = "1234abcd-5678-abcd-1234-567abcd2222a"
 
             val expectedRedirectUrl =
                 JourneyStateService
@@ -69,11 +75,15 @@ class AcceptInvitationControllerTests(
                     )
 
             mvc
-                .get(ACCEPT_INVITATION_ROUTE)
+                .get(ACCEPT_INVITATION_ROUTE) {
+                    param("token", token)
+                }
                 .andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(expectedRedirectUrl)
                 }
+
+            verify(invitationService).addJourneyIdInvitationTokenPairToSession(journeyId, token)
         }
     }
 
@@ -93,8 +103,8 @@ class AcceptInvitationControllerTests(
                 }
         }
 
-        // TODO: add controller coverage for unauthenticated access to the validate-token step once that permission is allowed.
-        // TODO: add controller coverage for unauthenticated access to the invalid-link step once that permission is allowed.
+        // TODO PDJB-1822: add controller coverage for unauthenticated access to the validate-token step once that permission is allowed.
+        // TODO PDJB-1822: add controller coverage for unauthenticated access to the invalid-link step once that permission is allowed.
         @Test
         @WithMockUser(value = "user")
         fun `getJourneyStep returns 404 when step is not found`() {

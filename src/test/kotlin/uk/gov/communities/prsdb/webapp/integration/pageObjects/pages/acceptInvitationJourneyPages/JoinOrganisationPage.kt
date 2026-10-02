@@ -11,5 +11,6 @@ class JoinOrganisationPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${JoinOrganisationStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
+    val introductionText = page.locator("main p.govuk-body").first()
     val form = PostForm(page)
 }

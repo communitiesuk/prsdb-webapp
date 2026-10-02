@@ -1,4 +1,11 @@
 title: Join your organisation
+joinOrganisation:
+  heading: Join your organisation
+  introduction: You’ve been invited to access this service as part of {0,,organisationName}.
+  listIntro: 'You’ll need to provide:'
+  bullet:
+    one: your full name
+    two: your email address
 validateToken:
   fieldSetHeading: Validate the organisation invitation token (TODO PDJB-1822)
   radios:
