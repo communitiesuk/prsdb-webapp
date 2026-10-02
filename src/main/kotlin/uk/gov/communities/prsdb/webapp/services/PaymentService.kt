@@ -22,7 +22,7 @@ class PaymentService(
         val govUkPayState = govUkPayClient.getPayment(paymentId).state
         val status = PaymentStatus.fromGovUKPayStatus(govUkPayState.status)
         val failureType =
-            if (status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED) {
+            if (status.isFailedOrCancelled()) {
                 PaymentFailureType.fromGovUkPayCode(govUkPayState.code)
             } else {
                 null

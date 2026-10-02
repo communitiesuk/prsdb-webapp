@@ -16,5 +16,5 @@ data class PaymentStatusCheckDataModel(
 
     fun isSucceeded() = status == PaymentStatus.SUCCEEDED
 
-    fun isFailedOrCancelled() = status == PaymentStatus.FAILED || status == PaymentStatus.CANCELLED
+    fun isFailedOrCancelled() = status.isFailedOrCancelled()
 }
