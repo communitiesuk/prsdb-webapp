@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -50,6 +51,13 @@ class AuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sq
 
         dashboard.authenticatedHeader.dashboardNavLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `landlord dashboard does not show a manage team members nav link for an individual landlord`() {
+        val dashboard = navigator.goToLandlordDashboard()
+
+        assertThat(dashboard.authenticatedHeader.manageTeamMembersNavLink).hasCount(0)
     }
 
     @Test
@@ -117,5 +125,18 @@ class AuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sq
 
             assertThat(header.dashboardNavLink).hasCount(0)
         }
+    }
+}
+
+@WithOrgLandlordProfile
+class OrgLandlordAuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Test
+    fun `organisation landlord dashboard shows a manage team members nav link that goes to the team members page`(page: Page) {
+        val dashboard = navigator.goToLandlordDashboard()
+
+        assertThat(dashboard.authenticatedHeader.manageTeamMembersNavLink).isVisible()
+
+        dashboard.authenticatedHeader.manageTeamMembersNavLink.clickAndWait()
+        assertPageIs(page, TeamMembersPage::class)
     }
 }

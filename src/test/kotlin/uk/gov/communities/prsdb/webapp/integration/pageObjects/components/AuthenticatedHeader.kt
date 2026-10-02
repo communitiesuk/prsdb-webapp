@@ -13,6 +13,7 @@ class AuthenticatedHeader(
     val signOutLink = Link(parentLocator.locator("$SELECTOR a:has(.rebranded-one-login-header__nav__link-content--sign-out)"))
     val dashboardNavLink = Link.byText(parentLocator, "Dashboard", selectorOrLocator = ".govuk-service-navigation__link")
     val manageUsersNavLink = Link.byText(parentLocator, "Manage users", selectorOrLocator = ".govuk-service-navigation__link")
+    val manageTeamMembersNavLink = Link.byText(parentLocator, "Manage team members", selectorOrLocator = ".govuk-service-navigation__link")
 
     companion object {
         const val SELECTOR = ".rebranded-one-login-header"
