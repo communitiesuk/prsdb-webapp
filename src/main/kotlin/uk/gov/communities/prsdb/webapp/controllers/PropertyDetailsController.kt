@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -29,11 +28,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
@@ -67,13 +64,11 @@ class PropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
         val (propertyDetails, viewName) =
             getPropertyDetailsViewModelAndView(
                 propertyOwnership,
-                provideLaterEnabled,
                 showCorrespondenceSection,
                 isLandlordView = true,
             )
@@ -91,7 +86,7 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject(
             "notificationBanner",
-            buildNotificationBanner(provideLaterEnabled, isLandlordView = true, propertyDetails, propertyCompliance),
+            buildNotificationBanner(isLandlordView = true, propertyDetails, propertyCompliance),
         )
 
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -190,13 +185,11 @@ class PropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
         val (propertyDetails, viewName) =
             getPropertyDetailsViewModelAndView(
                 propertyOwnership,
-                provideLaterEnabled,
                 showCorrespondenceSection,
                 isLandlordView = false,
             )
@@ -237,7 +230,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute(
             "notificationBanner",
-            buildNotificationBanner(provideLaterEnabled, isLandlordView = false, propertyDetails, propertyCompliance),
+            buildNotificationBanner(isLandlordView = false, propertyDetails, propertyCompliance),
         )
         model.addAttribute("isLandlordView", false)
 
@@ -247,52 +240,31 @@ class PropertyDetailsController(
     }
 
     private fun buildNotificationBanner(
-        provideLaterEnabled: Boolean,
         isLandlordView: Boolean,
-        propertyDetails: PropertyDetailsViewModelBase,
+        propertyDetails: PropertyDetailsViewModel,
         propertyCompliance: PropertyCompliance,
     ): List<NotificationMessage> =
-        if (provideLaterEnabled) {
-            val provideLaterDetails = propertyDetails as PropertyDetailsViewModel
-            notificationBannerViewModelService
-                .getPropertyDetailsNotificationBanner(
-                    propertyCompliance = propertyCompliance,
-                    isLandlordView = isLandlordView,
-                    isOccupied = provideLaterDetails.isOccupied,
-                    isLicensingProvideLater = provideLaterDetails.isLicensingProvideLater,
-                    isTenancyProvideLater = provideLaterDetails.isTenancyProvideLater,
-                ).messages
-        } else {
-            notificationBannerViewModelService.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView)
-        }
+        notificationBannerViewModelService
+            .getPropertyDetailsNotificationBanner(
+                propertyCompliance = propertyCompliance,
+                isLandlordView = isLandlordView,
+                isOccupied = propertyDetails.isOccupied,
+                isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
+                isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
+            ).messages
 
     private fun getPropertyDetailsViewModelAndView(
         propertyOwnership: PropertyOwnership,
-        provideLaterEnabled: Boolean,
         showCorrespondenceSection: Boolean,
         isLandlordView: Boolean,
-    ): Pair<PropertyDetailsViewModelBase, String> =
-        if (provideLaterEnabled) {
-            Pair(
-                PropertyDetailsViewModel(
-                    propertyOwnership,
-                    isLandlordView,
-                    messageSource,
-                    showCorrespondenceSection,
-                ),
-                PROPERTY_DETAILS_VIEW,
-            )
-        } else {
-            Pair(
-                PropertyDetailsBeforePdjb939ViewModel(propertyOwnership, isLandlordView, messageSource),
-                PROPERTY_DETAILS_BEFORE_PDJB939_VIEW,
-            )
-        }
+    ): Pair<PropertyDetailsViewModel, String> =
+        Pair(
+            PropertyDetailsViewModel(propertyOwnership, isLandlordView, messageSource, showCorrespondenceSection),
+            PROPERTY_DETAILS_VIEW,
+        )
 
     companion object {
         const val PROPERTY_DETAILS_VIEW = "propertyDetailsView"
-
-        const val PROPERTY_DETAILS_BEFORE_PDJB939_VIEW = "propertyDetailsViewBeforePdjb939"
 
         const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
         const val REMOVE_EXPIRED_INVITE_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$REMOVE_EXPIRED_INVITE_PATH_SEGMENT/{invitationId}"

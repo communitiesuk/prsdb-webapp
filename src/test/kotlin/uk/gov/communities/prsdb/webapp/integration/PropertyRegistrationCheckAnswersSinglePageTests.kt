@@ -14,7 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -69,8 +68,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
     @BeforeEach
-    fun enabledFeatureFlags() {
-        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    fun enableFeatureFlag() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
@@ -89,7 +87,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `after changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -127,7 +125,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `the gas supply change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -158,7 +156,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `when landlord provides details, rented out section is shown and email row is hidden`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLandlordProvidesRentalDetails()
@@ -177,7 +175,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `delegated occupied property CYA displays required sections and letting agent details`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLettingAgentProvidesRentalDetails()
@@ -189,7 +187,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            val headings = checkAnswersPage.restructuredSectionHeadings
+            val headings = checkAnswersPage.sectionHeadings
             assertEquals(
                 listOf(
                     "About your property",
@@ -233,7 +231,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `when delegating to a letting agent, the EPC section is hidden`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent()
                         .withBedrooms(),
@@ -249,7 +247,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `when delegating to a letting agent after entering an EPC, the EPC section is hidden`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent()
                         .withCompliantEpc()
@@ -266,7 +264,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `rented out section appears after occupied and before licensing when landlord provides details`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLandlordProvidesRentalDetails()
@@ -274,7 +272,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            val headings = checkAnswersPage.restructuredSectionHeadings
+            val headings = checkAnswersPage.sectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
             val licensingIndex = headings.indexOf("Tell us if the property needs a license")
@@ -285,9 +283,9 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `restructured CYA page uses the expected heading hierarchy`(page: Page) {
+        fun `CYA page uses the expected heading hierarchy`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -295,7 +293,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
         }
@@ -312,7 +310,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `when delegate to letting agent feature is disabled, letting agent delegation section is not displayed`(page: Page) {
             featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLandlordProvidesRentalDetails()
@@ -328,7 +326,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `when property is unoccupied, letting agent delegation unoccupied panel is displayed`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -365,7 +363,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `the electrical certificate change link navigates to the has electrical certificate page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -412,7 +410,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `the licensing number change link navigates to the licensing page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersWithSelectiveLicence()
                         .withBedrooms(),
@@ -449,7 +447,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `The back link on the check joint landlords page returns to the CYA page when reached from there`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withCheckedJointLandlords(mutableListOf("email@address.com")),
@@ -669,12 +667,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     "Who the council should contact",
                     "Tell us if your property’s occupied",
                 ),
-                checkAnswersPage.restructuredSectionHeadings.take(5),
+                checkAnswersPage.sectionHeadings.take(5),
             )
             assertThat(checkAnswersPage.correspondenceRowKeys).hasText(arrayOf("Email address", "Postal address"))
             assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.value).hasText("alex.surname@example.com")
-            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
-                .hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
         }
 
         @Test
@@ -700,10 +700,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             selectPage.selectAddressAndSubmit("2 Fake Way")
 
             checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
-                .hasText(arrayOf("2 Fake Way", "FA1 1AB"))
-            assertThat(checkAnswersPage.summaryList.propertyAddressRow.value.locator("p"))
-                .hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("2 Fake Way", "FA1 1AB"))
+            assertThat(
+                checkAnswersPage.summaryList.propertyAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
         }
 
         @Test
@@ -728,7 +732,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
         private fun goToCheckAnswersWithCorrespondence(page: Page): CheckAnswersPagePropertyRegistration {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms()

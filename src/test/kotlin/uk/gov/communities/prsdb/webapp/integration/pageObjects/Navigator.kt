@@ -152,7 +152,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
@@ -300,7 +299,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitati
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -698,36 +696,34 @@ class Navigator(
             PropertyRegistrationCyaStep.ROUTE_SEGMENT,
         )
 
-    fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
+    fun goToPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
+    fun goToPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder
                 .beforePropertyRegistrationCheckAnswers()
-                // The restructured "Property details" task includes the number of bedrooms for all properties, so it
-                // must be set for that task to be complete even when the property is unoccupied.
                 .withBedrooms()
                 .withAdditionalData("cachedOccupied", "false")
                 .build(),
@@ -739,6 +735,14 @@ class Navigator(
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
         navigateToPropertyRegistrationJourneyStep(LookupAddressStep.ROUTE_SEGMENT)
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCorrespondenceEmailPage(): CorrespondenceEmailFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCorrespondenceEmailAddress().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CorrespondenceEmailStep.ROUTE_SEGMENT)
+        return createValidPage(page, CorrespondenceEmailFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationSelectAddressPage(
@@ -773,14 +777,6 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(PropertyTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, PropertyTypeFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCorrespondenceEmailPage(): CorrespondenceEmailFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCorrespondenceEmailAddress().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CorrespondenceEmailStep.ROUTE_SEGMENT)
-        return createValidPage(page, CorrespondenceEmailFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
@@ -863,14 +859,6 @@ class Navigator(
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRestructuredOccupancyPage(): OccupancyFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(OccupiedStep.ROUTE_SEGMENT)
-        return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
-    }
-
     fun skipToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHouseholds().build(),
@@ -881,7 +869,7 @@ class Navigator(
 
     fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforeTenancyDetails(),
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
@@ -1448,24 +1436,6 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
-    fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
@@ -1474,18 +1444,6 @@ class Navigator(
         return createValidPage(
             page,
             OccupancyFormPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        navigate(
-            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-                "/${PropertyRegistrationCyaStep.ROUTE_SEGMENT}",
-        )
-        return createValidPage(
-            page,
-            CheckOccupancyAnswersPagePropertyDetailsUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
