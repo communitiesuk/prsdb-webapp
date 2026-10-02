@@ -440,12 +440,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 checkLicensingAnswersPage.summaryName.getText(),
                 "You have removed this property’s licence",
             )
-            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+            assertThat(
+                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value,
+            ).containsText("This property does not need a licence")
         }
 
         @Test
@@ -530,7 +532,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
                 val originalNumberOfBedrooms =
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value.textContent()
+                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value
+                        .textContent()
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value).containsText("1")
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -724,7 +727,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             @Test
             fun `the occupancy answer can be changed from the check answers page`(page: Page) {
                 // The property starts occupied and delegated; make it vacant to reach the check answers page
-                navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                navigator
+                    .goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     .propertyDetailsSummaryList.occupancyRow
                     .clickFirstActionLinkAndWait()
 
