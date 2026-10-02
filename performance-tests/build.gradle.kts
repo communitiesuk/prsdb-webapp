@@ -28,6 +28,27 @@ dependencies {
         "ktlint"("ch.qos.logback:logback-classic:1.5.35")
         "ktlint"("ch.qos.logback:logback-core:1.5.35")
     }
+
+    implementation("io.gatling:gatling-http-java:3.16.0")
+    testImplementation(kotlin("test-junit5"))
+    testImplementation(platform("org.junit:junit-bom:5.12.2"))
+    testRuntimeOnly("io.gatling:gatling-app:3.16.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    systemProperty("performance.test.classpath", sourceSets.test.get().runtimeClasspath.asPath)
+}
+
+gatling {
+    includeTestOutput = false
+    systemProperties =
+        System
+            .getProperties()
+            .stringPropertyNames()
+            .filter { it.startsWith("gatling.") }
+            .associateWith { System.getProperty(it) }
 }
 
 // No dependency on project(":")  — the  simulations don't reuse any webapp classes. If we want to use these in the future
