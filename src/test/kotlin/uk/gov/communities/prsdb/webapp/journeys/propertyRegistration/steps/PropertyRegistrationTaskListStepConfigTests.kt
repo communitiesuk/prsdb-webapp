@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
@@ -66,9 +65,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class WhoProvidesDetailsTaskListItemTests {
         @BeforeEach
-        fun enableRestructureAndStubState() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            stubRestructuredState()
+        fun enableStubState() {
+            stubState()
         }
 
         @Test
@@ -125,10 +123,9 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property when delegation is disabled`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(false)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -146,10 +143,9 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details as NOT_NEEDED_YET for an unoccupied property when delegation is enabled`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockState.cachedOccupied).thenReturn(false)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -167,10 +163,9 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details task for an occupied property`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(true)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -187,9 +182,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class CorrespondenceTaskListItemTests {
         @BeforeEach
-        fun enableRestructureAndStubState() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            stubRestructuredState()
+        fun stubState() {
+            this@PropertyRegistrationTaskListStepConfigTests.stubState()
         }
 
         @Test
@@ -235,20 +229,15 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class SubmitYourRegistrationTaskListItemTests {
         @BeforeEach
-        fun enableRestructureAndStubState() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            stubRestructuredState()
+        fun stubState() {
+            this@PropertyRegistrationTaskListStepConfigTests.stubState()
         }
 
         @Test
-        fun `getTaskListViewModel labels the submit task 'Check and submit your answers' when PAYMENTS is disabled`() {
-            // Arrange
+        fun `getTaskListViewModel labels the submit task as check and submit when PAYMENTS is disabled`() {
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
-
-            // Act
             val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
 
-            // Assert
             assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
             assertEquals(
                 listOf("registerProperty.taskList.checkAndSubmit.checkAnswers"),
@@ -257,14 +246,10 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel labels the submit task 'Submit and pay' but keeps the section heading when PAYMENTS is enabled`() {
-            // Arrange
+        fun `getTaskListViewModel labels the submit task submit and pay when PAYMENTS is enabled`() {
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-
-            // Act
             val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
 
-            // Assert
             assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
             assertEquals(
                 listOf("registerProperty.taskList.checkAndSubmit.checkAnswersWithPayment"),
@@ -273,7 +258,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
     }
 
-    private fun stubRestructuredState() {
+    private fun stubState() {
         val mockPropertyDetailsTask = mock<PropertyDetailsTask>()
         val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
         val mockCorrespondenceTask = mock<CorrespondenceTask>()

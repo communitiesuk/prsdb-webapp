@@ -323,12 +323,12 @@ occupancy:
   fieldSetHint: What you choose here decides which compliance and rent details you need to add.
 numberOfHouseholds:
   heading: Households in your property
+  questionHeading: How many households are in your property?
   paragraph:
     one: The number of households in your property helps local authorities understand if your property needs a House in Multiple Occupation (HMO) licence.
     two: 'A household is:'
     three: 'A family includes people who are:'
     four: Unrelated adults who are not a couple are separate households.
-  'heading.two': What is a household?
   bullet:
     point:
       one: one person living alone
@@ -336,21 +336,8 @@ numberOfHouseholds:
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
   label: Enter how many households live in your property
-  restructureAndSkipping:
-    heading: Households in your property
-    paragraph:
-      one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.
-      two: 'A household is one person living alone or a family living together. A family includes people who are:'
-      three: Unrelated adults (who are not a couple) are separate households.
-    bullet:
-      point:
-        one: married
-        two: related (like aunts or cousins)
-        three: living together as a couple
-    questionHeading: How many households are in your property?
-    input:
-      error: 'Enter how many separate households, like 1 or 2'
-    label: Enter how many households live in your property
+  input:
+    error: Enter how many separate households, like 1 or 2
 numberOfPeople:
   input:
     error:
@@ -561,15 +548,11 @@ checkPropertyAnswers:
     heading: About your property
   propertyDetails:
     heading: Property details
-    address: Property address
     localCouncil: Local council
     type: Property type
     bedrooms: Number of bedrooms
-    ownership: Ownership type
     licensingType: Licensing type
-    noLicensing:
-      old: None
-      restructureAndSkipping: This property does not need a licence
+    noLicensingRequired: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -586,10 +569,8 @@ checkPropertyAnswers:
     licensing:
       heading: Tell us if the property needs a license
   tenancyDetails:
-    restructureAndSkipping:
-      heading: Tenancy details
-      tenancyDetailsRow: Tenancy details
-    heading: Tenancy and rental information
+    heading: Tenancy details
+    tenancyDetailsRow: Tenancy details
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later

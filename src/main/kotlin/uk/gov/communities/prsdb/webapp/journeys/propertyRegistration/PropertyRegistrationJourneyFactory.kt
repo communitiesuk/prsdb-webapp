@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
@@ -91,7 +90,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
@@ -145,9 +143,7 @@ class PropertyRegistrationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
-            val correspondenceEnabled =
-                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
-                    featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+            val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
@@ -235,51 +231,50 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
                     val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-                    when {
-                        isSkippingEnabled && isDelegateEnabled -> occupancyChangeCyaJourney()
-                        isSkippingEnabled -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
-                        else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
+                    if (isDelegateEnabled) {
+                        occupancyChangeCyaJourney()
+                    } else {
+                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                     }
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
-                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    configureStep(journey.tenancyDetailsTask.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.propertyDetailsTask.bedrooms, BedroomsStep.ROUTE_SEGMENT)
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.rentIncludesBillsTask) {
+                    fromTask(journey.tenancyDetailsTask.rentIncludesBillsTask) {
                         checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.tenancyDetailsTask.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
                 }
 
                 RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
+                    configureStep(journey.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -386,166 +381,6 @@ class PropertyRegistrationJourneyFactory(
         }
 
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            restructuredMainJourneyMap(state)
-        } else {
-            legacyMainJourneyMap(state)
-        }
-
-    private fun legacyMainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        journey(state) {
-            unreachableStepStep { journey.taskListStep }
-            configure {
-                withAdditionalContentProperty { "title" to "registerProperty.title" }
-            }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            configureStep(journey.confirmMissingComplianceStep) {
-                withAdditionalContentProperty {
-                    "sectionHeaderInfo" to
-                        SectionHeaderViewModel(
-                            sectionNameKey = "registerProperty.submitRegistration",
-                            sectionNumber = 0,
-                            totalSections = 0,
-                            useNumbering = false,
-                        )
-                }
-            }
-            step(journey.taskListStep) {
-                routeSegment(TASK_LIST_PATH_SEGMENT)
-                initialStep()
-                noNextDestination()
-            }
-            section {
-                if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                    withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
-                } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.heading")
-                }
-                fromTask(journey.propertyDetailsTask) {
-                    task(task.addressTask) {
-                        parents { journey.taskListStep.always() }
-                        nextStep { task.addToLandlordIncompletePropertiesStep }
-                    }
-                    step(task.addToLandlordIncompletePropertiesStep) {
-                        parents { task.addressTask.isComplete() }
-                        nextStep { task.propertyTypeStep }
-                        saveProgress()
-                    }
-                    step(task.propertyTypeStep) {
-                        routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
-                        parents { task.addressTask.isComplete() }
-                        nextStep { journey.ownershipAndLandlordsTask.ownershipTypeStep }
-                        saveProgress()
-                    }
-                }
-                fromTask(journey.ownershipAndLandlordsTask) {
-                    step(task.ownershipTypeStep) {
-                        routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
-                        parents { journey.propertyDetailsTask.propertyTypeStep.isComplete() }
-                        nextStep { journey.licensingTask.firstStep }
-                        saveProgress()
-                    }
-                }
-                task(journey.licensingTask) {
-                    withDependencies { journey }
-                    parents { journey.ownershipAndLandlordsTask.ownershipTypeStep.isComplete() }
-                    nextStep { journey.occupationTask.firstStep }
-                    saveProgress()
-                }
-
-                task(journey.occupationTask.inJourney(journey)) {
-                    parents { journey.licensingTask.isComplete() }
-                    nextStep { journey.ownershipAndLandlordsTask.jointLandlordsTask.firstStep }
-                    saveProgress()
-                }
-                task(journey.ownershipAndLandlordsTask.jointLandlordsTask) {
-                    withDependencies { journey }
-                    parents { journey.occupationTask.isComplete() }
-                    nextStep { journey.gasSafetyTask.firstStep }
-                    saveProgress()
-                }
-                task(journey.gasSafetyTask) {
-                    withDependencies { journey }
-                    parents { journey.ownershipAndLandlordsTask.jointLandlordsTask.isComplete() }
-                    nextStep { journey.taskListStep }
-                    saveProgress()
-                }
-                task(journey.electricalSafetyTask) {
-                    withDependencies { journey }
-                    parents { journey.gasSafetyTask.isComplete() }
-                    backStep { journey.taskListStep }
-                    nextStep { journey.taskListStep }
-                    saveProgress()
-                }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
-                }
-                task(journey.epcTask) {
-                    withDependencies { journey }
-                    parents { journey.electricalSafetyTask.isComplete() }
-                    backStep { journey.taskListStep }
-                    nextStep { journey.taskListStep }
-                    saveProgress()
-                }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
-                step(journey.cyaStep) {
-                    routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-                    backStep { journey.taskListStep }
-                    parents {
-                        journey.epcTask.isComplete()
-                    }
-                    nextStep { journey.hasMissingComplianceStep }
-                }
-                step(journey.hasMissingComplianceStep) {
-                    parents { journey.cyaStep.isComplete() }
-                    nextStep { mode ->
-                        when (mode) {
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES -> {
-                                journey.confirmMissingComplianceStep
-                            }
-
-                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
-                                journey.savePropertyRegistrationDataStep
-                            }
-                        }
-                    }
-                }
-                step(journey.confirmMissingComplianceStep) {
-                    routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
-                    parents {
-                        journey.hasMissingComplianceStep.hasOutcome(
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
-                        )
-                    }
-                    nextDestination { mode ->
-                        when (mode) {
-                            ConfirmMissingComplianceMode.GO_BACK -> {
-                                Destination(journey.cyaStep)
-                            }
-
-                            ConfirmMissingComplianceMode.CONFIRMED -> {
-                                Destination(journey.savePropertyRegistrationDataStep)
-                            }
-                        }
-                    }
-                }
-                step(journey.savePropertyRegistrationDataStep) {
-                    parents {
-                        OrParents(
-                            journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
-                            ),
-                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                        )
-                    }
-                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
-                }
-            }
-        }
-
-    private fun restructuredMainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
@@ -867,11 +702,7 @@ class PropertyRegistrationJourney(
     override val licensingTask: LicensingTask,
     // Occupation steps
     override val occupied: OccupiedStep,
-    // ===== Journey-structure tasks (the two alternative flows diverge here) =====
-    // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
-    // legacySectionViewModels, bedrooms override) when the old journey is removed.
-    override val occupationTask: OccupationTask,
-    // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
+    // ===== Journey-structure tasks (grouping tasks for the task-list structure) =====
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
     override val correspondenceTask: CorrespondenceTask,
@@ -936,13 +767,6 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
-    // Legacy steps and tasks that should be removed when the legacy structure is retired
-    override val bedrooms = propertyDetailsTask.bedrooms
-    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
-    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
-    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
-    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
-
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
@@ -997,11 +821,7 @@ interface PropertyRegistrationJourneyState :
     // No property ownership exists yet during registration.
     override val propertyOwnershipId: Long? get() = null
 
-    // Journey-structure tasks (the two alternative flows)
-    // Legacy journey only (flag-off) — remove with the old journey
-    val occupationTask: OccupationTask
-
-    // Restructured journey only (flag-on)
+    // Journey-structure tasks
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
 
@@ -1028,11 +848,11 @@ interface PropertyRegistrationJourneyState :
     val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
+    val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 
-    // Check both flags before reading the step outcome: the who-provides step is not wired into
-    // the legacy journey, so accessing its outcome there would throw.
+    // TODO PDJB-1617: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
+    //  once the feature flag is removed and the letting agent journey is fully implemented
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
             whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
 }

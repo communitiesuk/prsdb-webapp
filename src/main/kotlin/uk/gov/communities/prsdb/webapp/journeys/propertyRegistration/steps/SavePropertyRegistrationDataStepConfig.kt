@@ -5,7 +5,6 @@ import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -55,8 +54,7 @@ class SavePropertyRegistrationDataStepConfig(
 
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val correspondenceEnabled = isSkippingEnabled && featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+        val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val lettingAgentEmail =
             if (isDelegatedToLettingAgent) {
@@ -64,8 +62,8 @@ class SavePropertyRegistrationDataStepConfig(
             } else {
                 null
             }
-        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatedToLettingAgent
-        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
+        val shouldRequireTenancyDetails = isOccupied && !state.tenancyDetailsTask.provideTenancyDetailsLater && !isDelegatedToLettingAgent
+        val billsIncludedDataModel = state.tenancyDetailsTask.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
             jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
@@ -92,7 +90,7 @@ class SavePropertyRegistrationDataStepConfig(
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (shouldRequireTenancyDetails) {
-                    state.householdsAndTenantsTask.households.formModel
+                    state.tenancyDetailsTask.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
                 } else {
@@ -100,38 +98,34 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             numberOfPeople =
                 if (shouldRequireTenancyDetails) {
-                    state.householdsAndTenantsTask.tenants.formModel
+                    state.tenancyDetailsTask.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
                 } else {
                     0
                 },
             numBedrooms =
-                if (isSkippingEnabled || shouldRequireTenancyDetails) {
-                    state.bedrooms.formModel
-                        .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        .toInt()
-                } else {
-                    null
-                },
+                state.propertyDetailsTask.bedrooms.formModel
+                    .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                    .toInt(),
             billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
-            furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,
+            furnishedStatus = if (shouldRequireTenancyDetails) state.tenancyDetailsTask.furnishedStatus.formModel.furnishedStatus else null,
             rentFrequency =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
                 } else {
                     null
                 },
             customRentFrequency =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
                 } else {
                     null
                 },
             rentAmount =
                 if (shouldRequireTenancyDetails) {
-                    state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
+                    state.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
                     null
@@ -141,10 +135,19 @@ class SavePropertyRegistrationDataStepConfig(
             markedJointLandlord = markedJointLandlord,
             hasGasSupply =
                 when (state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome) {
-                    GasSupplyOutcome.HAS_SUPPLY -> true
-                    GasSupplyOutcome.NO_SUPPLY -> false
-                    GasSupplyOutcome.PROVIDE_LATER -> null
-                    null ->
+                    GasSupplyOutcome.HAS_SUPPLY -> {
+                        true
+                    }
+
+                    GasSupplyOutcome.NO_SUPPLY -> {
+                        false
+                    }
+
+                    GasSupplyOutcome.PROVIDE_LATER -> {
+                        null
+                    }
+
+                    null -> {
                         if (isDelegatedToLettingAgent) {
                             null
                         } else {
@@ -152,6 +155,7 @@ class SavePropertyRegistrationDataStepConfig(
                                 "gasSupplyOutcome must be answered before registration unless it is delegated to a letting agent",
                             )
                         }
+                    }
                 },
             gasSafetyCertIssueDate =
                 state.gasSafetyTask.gasSafetyDetailsTask
@@ -178,8 +182,12 @@ class SavePropertyRegistrationDataStepConfig(
                 state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.energyRating,
+            epcExpiryDate =
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?.expiryDateAsJavaLocalDate,
+            epcEnergyRating =
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?.energyRating,
             tenancyStartedBeforeEpcExpiry =
                 state.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
@@ -197,8 +205,7 @@ class SavePropertyRegistrationDataStepConfig(
             licenseProvideLater =
                 isDelegatedToLettingAgent ||
                     state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
-            tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
-            isDelegatedToLettingAgent = isDelegatedToLettingAgent,
+            tenancyProvideLater = isDelegatedToLettingAgent || state.tenancyDetailsTask.provideTenancyDetailsLater,
             correspondenceEmail =
                 if (correspondenceEnabled) {
                     state.correspondenceTask.correspondenceEmailStep.formModel
@@ -207,6 +214,7 @@ class SavePropertyRegistrationDataStepConfig(
                     null
                 },
             correspondenceAddressModel = if (correspondenceEnabled) state.correspondenceTask.addressTask.getAddress() else null,
+            isDelegatedToLettingAgent = isDelegatedToLettingAgent,
         )
     }
 }
