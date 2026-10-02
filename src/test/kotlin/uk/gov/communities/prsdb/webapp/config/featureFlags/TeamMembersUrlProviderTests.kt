@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.config.featureFlags
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -27,6 +28,11 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     @MockitoBean
     lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
+    @BeforeEach
+    fun enableFeatureFlags() {
+        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+    }
+
     @AfterEach
     fun clearSecurityContext() {
         SecurityContextHolder.clearContext()
@@ -41,8 +47,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `when feature is enabled returns the team members route for an organisation landlord user`() {
-        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+    fun `returns the team members route for an organisation landlord user`() {
         setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
@@ -50,8 +55,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `when feature is enabled returns null for a landlord who is not an organisation landlord user`() {
-        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+    fun `returns null for a landlord who is not an organisation landlord user`() {
         setAuthenticatedUser("individual-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("individual-user")).thenReturn(false)
 
@@ -59,8 +63,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `when feature is enabled returns null when the user is not a landlord`() {
-        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+    fun `returns null when the user is not a landlord`() {
         setAuthenticatedUser("local-council-user", ROLE_LOCAL_COUNCIL_USER)
 
         assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
@@ -68,9 +71,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `when feature is enabled returns null when there is no authenticated user`() {
-        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
-
+    fun `returns null when there is no authenticated user`() {
         assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
     }
 
