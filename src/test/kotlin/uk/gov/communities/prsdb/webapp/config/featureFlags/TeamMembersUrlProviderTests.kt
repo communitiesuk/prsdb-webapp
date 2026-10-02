@@ -14,7 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
-import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
@@ -43,7 +43,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is enabled returns the team members route for an organisation landlord user`() {
         featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedUser("org-user", ROLE_LANDLORD)
+        setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
         assertEquals(TEAM_MEMBERS_ROUTE, teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
@@ -52,7 +52,7 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is enabled returns null for a landlord who is not an organisation landlord user`() {
         featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedUser("individual-user", ROLE_LANDLORD)
+        setAuthenticatedUser("individual-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("individual-user")).thenReturn(false)
 
         assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
@@ -74,10 +74,11 @@ class TeamMembersUrlProviderTests : FeatureFlagTest() {
         assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
     }
 
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS flag is removed
     @Test
     fun `when feature is disabled returns null even for an organisation landlord user`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedUser("org-user", ROLE_LANDLORD)
+        setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
         assertNull(teamMembersUrlProvider.getTeamMembersUrlForCurrentUser())
