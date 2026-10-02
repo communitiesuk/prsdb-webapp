@@ -35,9 +35,8 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
         val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
         assertEquals("Join your organisation", joinOrganisationPage.heading.getText())
         assertEquals(
-            true, joinOrganisationPage.introductionText.textContent()?.contains(
-                "Local Organisation Landlord.",
-            )
+            true,
+            joinOrganisationPage.introductionText.textContent()?.contains("Local Organisation Landlord."),
         )
         joinOrganisationPage.form.submit()
 
