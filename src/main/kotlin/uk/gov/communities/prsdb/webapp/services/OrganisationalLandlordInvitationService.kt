@@ -12,11 +12,11 @@ class OrganisationalLandlordInvitationService(
     private val invitationRepository: OrganisationalLandlordInvitationRepository,
     private val session: HttpSession,
 ) {
+    // TODO PDJB-1774: Add clearJourneyIdInvitationTokenPairsForTokenFromSession and call it when the invitation journey completes.
     fun addJourneyIdInvitationTokenPairToSession(
         journeyId: String,
         token: String,
     ) {
-        // TODO PDJB-1774: Call clearJourneyIdInvitationTokenPairsForTokenFromSession when the invitation journey completes.
         val existingPairs = getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
         existingPairs.add(journeyId to token)
         session.setAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS, existingPairs)
