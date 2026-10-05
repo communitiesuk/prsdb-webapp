@@ -40,7 +40,7 @@ class ResumePropertyRegistrationJourneyTests :
         incompletePropertiesPage.firstSummaryCard.continueLink.clickAndWait()
         var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
-        taskListPage.clickRegisterTaskWithName("Property details")
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
         assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
         val backLink = BackLink.default(page)

@@ -28,7 +28,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         fun `the property details page loads with the property details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
-            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test
@@ -36,7 +36,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            assertEquals("landlord-details", detailsPage.tabs.activeTabPanelId)
+            assertEquals(detailsPage.tabs.activeTabPanelId, "landlord-details")
         }
 
         @Test
@@ -44,7 +44,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToComplianceInformation()
 
-            assertEquals(COMPLIANCE_INFO_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            assertEquals(detailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
         }
 
         @Test
@@ -54,7 +54,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             detailsPage.tabs.goToPropertyDetails()
 
-            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
+            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
         }
 
         @Test

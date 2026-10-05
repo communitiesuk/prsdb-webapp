@@ -122,25 +122,12 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationPropertyType() = PropertyStateSessionBuilder().withLookupAddress().withSelectedAddress()
 
         fun beforePropertyRegistrationCorrespondenceEmailAddress() =
-            beforePropertyRegistrationPropertyType()
-                .withPropertyType()
-                .withBedrooms()
-                .withOwnershipType()
-                .withHasNoJointLandlords()
+            beforePropertyRegistrationPropertyType().withPropertyType().withBedrooms().withOwnershipType().withHasNoJointLandlords()
 
         fun beforePropertyRegistrationOwnershipType() =
             beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
 
         fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
-
-        fun beforePropertyRegistrationSelectiveLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
-
-        fun beforePropertyRegistrationHmoMandatoryLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-
-        fun beforePropertyRegistrationHmoAdditionalLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
 
         fun beforePropertyRegistrationOccupiedLicensingType() =
             beforePropertyRegistrationOwnershipType()
@@ -175,7 +162,6 @@ class PropertyStateSessionBuilder(
                 .withNoTenants()
                 .withBedrooms()
                 .withOccupancyStatus(true)
-                .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withCheckEpcAnswersComplete()
                 .withLandlordProvidesRentalDetails()
 
@@ -455,16 +441,6 @@ class PropertyStateSessionBuilder(
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
-
-        fun beforePropertyRegistrationCheckAnswersWithJointLandlords(
-            invitedEmails: MutableList<String> = mutableListOf("email@address.com"),
-        ) = beforePropertyRegistrationOccupancy()
-            .withOccupancyStatus(false)
-            .withCheckedJointLandlords(invitedEmails)
-            .withLicensingType(LicensingType.NO_LICENSING)
-            .withGasSafetyTaskCompletedWithNoGasSupply()
-            .withElectricalSafetyCertificateMissing()
-            .withCompliantEpc()
 
         fun beforePropertyRegistrationCheckAnswersWithSelectiveLicence() =
             beforePropertyRegistrationLicensingType()

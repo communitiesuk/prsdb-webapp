@@ -671,10 +671,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             )
             assertThat(checkAnswersPage.correspondenceRowKeys).hasText(arrayOf("Email address", "Postal address"))
             assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.value).hasText("alex.surname@example.com")
-            assertThat(
-                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
-                    .locator("p"),
-            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
+            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
+                .hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
         }
 
         @Test
@@ -700,14 +698,10 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             selectPage.selectAddressAndSubmit("2 Fake Way")
 
             checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(
-                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
-                    .locator("p"),
-            ).hasText(arrayOf("2 Fake Way", "FA1 1AB"))
-            assertThat(
-                checkAnswersPage.summaryList.propertyAddressRow.value
-                    .locator("p"),
-            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
+            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
+                .hasText(arrayOf("2 Fake Way", "FA1 1AB"))
+            assertThat(checkAnswersPage.summaryList.propertyAddressRow.value.locator("p"))
+                .hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
         }
 
         @Test

@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -246,7 +245,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.disableFeature(PAYMENTS)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         whenever(
             absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
@@ -298,7 +296,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
         paymentReturnPage.form.submit()
         // TODO PDJB-993: Replace this radio selection with the real payment outcome once PaymentRoutingStep becomes an
-        // internal step - the success outcome will then come from the payment status rather than a user-submitted radio.
+        //  internal step - the success outcome will then come from the payment status rather than a user-submitted radio.
         val paymentRoutingPage = createValidPage(page, PaymentRoutingFormPagePropertyRegistration::class)
         paymentRoutingPage.form.radios.selectValue(PaymentOutcome.SUCCESS)
         paymentRoutingPage.form.submit()
@@ -306,16 +304,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Nested
-    inner class CorrespondenceEnabled {
+    inner class EnableFeatureFlags {
         @BeforeEach
-        fun enableCorrespondenceFlag() {
+        fun enableFeatureFlags() {
             featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         }
 
         @Test
         fun `completing the payment journey successfully reaches the confirmation page when payments is enabled`(page: Page) {
-            featureFlagManager.enableFeature(PAYMENTS)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
 
@@ -365,7 +362,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
             page: Page,
         ) {
-            featureFlagManager.enableFeature(PAYMENTS)
             // Start page (not a journey step, but it is how the user accesses the journey)
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -514,7 +510,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.sectionHeader).containsText(gasSafetyHeader)
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
@@ -524,7 +520,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkGasCertUploadsPage.table.rows.count())
 
             checkGasCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -539,7 +535,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.submit()
 
             // Remove Gas Cert Upload - render page
@@ -577,7 +573,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Electrical Cert Uploads - render page
             assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
@@ -586,7 +582,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
 
             checkElectricalCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -603,7 +599,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.submit()
             val checkElectricalSafetyAnswersPage =
                 assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
@@ -744,7 +740,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `User can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
             page: Page,
         ) {
-            featureFlagManager.enableFeature(PAYMENTS)
             // Start page (not a journey step, but it is how the user accesses the journey)
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -954,7 +949,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 propertyOwnershipCaptor.value.correspondenceAddress.singleLineAddress,
             )
             assertNull(propertyOwnershipCaptor.value.correspondenceAddress.uprn)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -1122,7 +1117,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
-            featureFlagManager.enableFeature(PAYMENTS)
             // Gas supply page
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
@@ -1231,6 +1225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     propertyOwnershipCaptor.value.registrationNumber,
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -1356,9 +1351,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
             checkEpcAnswersPage.form.submit()
             val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
+            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
         }
 
         @Test
@@ -1502,9 +1497,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
             checkEpcAnswersPage.form.submit()
             val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
+            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
         }
 
         @Test
@@ -1681,7 +1676,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             registerPropertyStartPage.startButton.clickAndWait()
             var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
-            taskListPage.clickRegisterTaskWithName("Property details")
+            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
             assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
             val backLink = BackLink.default(page)
@@ -1723,7 +1718,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 taskListPage.getRentedOutTaskNames(),
             )
             assertEquals(
-                listOf("Check and submit your answers"),
+                listOf("Submit and pay"),
                 taskListPage.getSubmitYourRegistrationTaskNames(),
             )
 
@@ -1735,7 +1730,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.tenancyHeading).isVisible()
@@ -1754,7 +1749,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -1769,7 +1764,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
@@ -1777,6 +1772,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        @Suppress("ktlint:standard:max-line-length")
         fun `occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
@@ -1798,7 +1794,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submitDifferentEmail("correspondence@example.com")
+            correspondenceEmailPage.submitAccountEmail()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
 
@@ -1906,7 +1902,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
             assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
@@ -2059,7 +2055,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+                taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
             )
         }
 
@@ -2084,7 +2080,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+                taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
             )
         }
 
@@ -2104,7 +2100,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
             assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
@@ -2162,7 +2158,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withCheckedJointLandlords(mutableListOf("email@address.com")),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
@@ -2182,7 +2178,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
                 .containsText("No, I am the only landlord for this property")
@@ -2213,6 +2209,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        @Suppress("ktlint:standard:max-line-length")
         fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
@@ -2232,11 +2229,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             lettingAgentEmailPage.submitEmail("agent@example.com")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.submitButton).containsText("Complete registration")
+            assertThat(checkAnswersPage.submitButton).containsText("Submit and pay")
             assertThat(checkAnswersPage.warning).isVisible()
             checkAnswersPage.confirm()
 
-            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
@@ -2253,7 +2250,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
 
@@ -2266,7 +2263,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            completePropertyRegistrationPaymentSuccessfully(page)
         }
 
         @Test
@@ -2277,7 +2274,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.confirm()
 
@@ -2286,7 +2283,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2322,7 +2319,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.confirm()
 
@@ -2331,7 +2328,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2350,7 +2347,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
         }
 
-        // TODO PDJB-1617: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
+        // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
         @Nested
         inner class DelegateToLettingAgentDisabled {
             @BeforeEach
@@ -2389,9 +2386,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
                 assertFalse(tenancyDetailsTask.hasLink)
 
-                val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+                val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
                 assertTrue(checkAndSubmitTask.hasLink)
-                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
                 val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
                 // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
@@ -2453,6 +2450,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
                 assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
             }
+
+            @Test
+            fun `registering a property saves the landlord's email and address as the correspondence details`(page: Page) {
+                val taskListPage =
+                    navigator.goToPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswersOccupied()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+                checkAnswersPage.confirm()
+
+                val confirmMissingCompliancePage =
+                    assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+                confirmMissingCompliancePage.form.radios.selectValue("true")
+                confirmMissingCompliancePage.form.submit()
+
+                completePropertyRegistrationPaymentSuccessfully(page)
+
+                val propertyOwnershipCaptor = captor<PropertyOwnership>()
+                verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+                assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+                assertEquals(1L, propertyOwnershipCaptor.value.correspondenceAddress.id)
+            }
         }
     }
 
@@ -2501,7 +2523,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .withElectricalCertUploads(mapOf(1 to CertificateUpload(electricalUpload.id, "pdjb-1698-electrical-cert.pdf")))
                         .withCompliantEpc(acceptedEpc),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.clickFirstActionLinkAndWait()
@@ -2511,7 +2533,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val delegatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             delegatedCheckAnswersPage.confirm()
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2542,14 +2564,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertNull(propertyCompliance.tenancyStartedBeforeEpcExpiry)
             assertNull(propertyCompliance.epcExemptionReason)
             assertNull(propertyCompliance.epcMeesExemptionReason)
-            assertTrue(propertyCompliance.epcProvideLater == true)
+            assertEquals(true, propertyCompliance.epcProvideLater)
             assertNull(propertyCompliance.hasGasSupply)
             assertNull(propertyCompliance.gasSafetyCertIssueDate)
-            assertTrue(propertyCompliance.gasSafetyCertProvideLater == true)
+            assertEquals(true, propertyCompliance.gasSafetyCertProvideLater)
             assertTrue(gasSafetyFileUploadIds.isEmpty())
             assertNull(propertyCompliance.electricalSafetyExpiryDate)
             assertNull(propertyCompliance.electricalCertType)
-            assertTrue(propertyCompliance.electricalSafetyCertProvideLater == true)
+            assertEquals(true, propertyCompliance.electricalSafetyCertProvideLater)
             assertTrue(electricalSafetyFileUploadIds.isEmpty())
         }
 
@@ -2562,7 +2584,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
@@ -2585,7 +2607,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
@@ -2622,7 +2644,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                updatedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+                updatedTaskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
             )
         }
 
@@ -2635,7 +2657,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
@@ -2672,7 +2694,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
@@ -2697,7 +2719,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                reoccupiedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+                reoccupiedTaskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
             )
 
             // Navigating straight to the CYA page is not possible while the registration is incomplete: the user is
@@ -2714,13 +2736,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).isVisible()
 
             checkAnswersPage.confirm()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            completePropertyRegistrationPaymentSuccessfully(page)
         }
     }
 

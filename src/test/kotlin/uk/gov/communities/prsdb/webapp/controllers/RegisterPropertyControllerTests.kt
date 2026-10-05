@@ -50,8 +50,8 @@ import java.math.BigDecimal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@Import(MessageSourceConfig::class)
 @WebMvcTest(RegisterPropertyController::class)
+@Import(MessageSourceConfig::class)
 class RegisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {

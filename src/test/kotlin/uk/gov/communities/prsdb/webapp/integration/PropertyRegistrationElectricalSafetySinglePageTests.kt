@@ -28,6 +28,34 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
     }
 
     @Nested
+    inner class CheckElectricalCertUploadsStep {
+        @Test
+        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page)
+
+            assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
+            assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
+        }
+
+        @Test
+        fun `The remove link includes the file name as visually hidden text`(page: Page) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page)
+
+            assertThat(checkUploadsPage.table.getClickableCell(0, 2).link).hasText("Remove electrical-safety-cert.pdf")
+            assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("electrical-safety-cert.pdf")
+        }
+
+        private fun navigateToCheckUploadsPage(page: Page): CheckElectricalCertUploadsFormPagePropertyRegistration {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            return assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class CheckElectricalSafetyAnswersStep {
         @Test
         fun `Cert uploaded EIC - cert type change link navigates to has electrical cert page`(page: Page) {
@@ -97,32 +125,6 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
                 )
             cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-        }
-    }
-
-    @Nested
-    inner class CheckElectricalCertUploadsStep {
-        @Test
-        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
-            val checkUploadsPage = navigateToCheckUploadsPage(page)
-            assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
-            assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
-        }
-
-        @Test
-        fun `The remove link includes the file name as visually hidden text`(page: Page) {
-            val checkUploadsPage = navigateToCheckUploadsPage(page)
-            assertThat(checkUploadsPage.table.getClickableCell(0, 2).link).hasText("Remove electrical-safety-cert.pdf")
-            assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("electrical-safety-cert.pdf")
-        }
-
-        private fun navigateToCheckUploadsPage(page: Page): CheckElectricalCertUploadsFormPagePropertyRegistration {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
-                )
-            cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            return assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
         }
     }
 

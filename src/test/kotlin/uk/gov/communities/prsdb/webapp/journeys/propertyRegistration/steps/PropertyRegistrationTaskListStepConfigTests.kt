@@ -65,7 +65,7 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class WhoProvidesDetailsTaskListItemTests {
         @BeforeEach
-        fun enableStubState() {
+        fun setUp() {
             stubState()
         }
 
@@ -182,8 +182,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class CorrespondenceTaskListItemTests {
         @BeforeEach
-        fun stubState() {
-            this@PropertyRegistrationTaskListStepConfigTests.stubState()
+        fun setUp() {
+            stubState()
         }
 
         @Test
@@ -229,15 +229,19 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class SubmitYourRegistrationTaskListItemTests {
         @BeforeEach
-        fun stubState() {
-            this@PropertyRegistrationTaskListStepConfigTests.stubState()
+        fun setUp() {
+            stubState()
         }
 
         @Test
-        fun `getTaskListViewModel labels the submit task as check and submit when PAYMENTS is disabled`() {
+        fun `getTaskListViewModel labels the submit task 'Check and submit your answers' when PAYMENTS is disabled`() {
+            // Arrange
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
+
+            // Act
             val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
 
+            // Assert
             assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
             assertEquals(
                 listOf("registerProperty.taskList.checkAndSubmit.checkAnswers"),
@@ -246,10 +250,14 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel labels the submit task submit and pay when PAYMENTS is enabled`() {
+        fun `getTaskListViewModel labels the submit task 'Submit and pay' but keeps the section heading when PAYMENTS is enabled`() {
+            // Arrange
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+
+            // Act
             val submitSection = stepConfig.getTaskListViewModel(mockState).taskSections[2]
 
+            // Assert
             assertEquals("registerProperty.taskList.submitYourRegistration.heading", submitSection.headingKey)
             assertEquals(
                 listOf("registerProperty.taskList.checkAndSubmit.checkAnswersWithPayment"),
