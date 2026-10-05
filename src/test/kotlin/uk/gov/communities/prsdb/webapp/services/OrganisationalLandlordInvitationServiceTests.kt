@@ -52,6 +52,25 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
+    fun `addJourneyIdInvitationTokenPairToSession preserves existing pairs in the session`() {
+        // Arrange
+        val existingPair = "existing-journey-id" to "existing-token"
+        val existingPairs = mutableListOf(existingPair)
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(existingPairs)
+
+        // Act
+        invitationService.addJourneyIdInvitationTokenPairToSession(journeyId, token.toString())
+
+        // Assert
+        verify(mockHttpSession)
+            .setAttribute(
+                ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS,
+                mutableListOf(existingPair, journeyId to token.toString()),
+            )
+    }
+
+    @Test
     fun `getInvitationForJourneyIdOrNull returns the invitation for a token associated with the journey`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
