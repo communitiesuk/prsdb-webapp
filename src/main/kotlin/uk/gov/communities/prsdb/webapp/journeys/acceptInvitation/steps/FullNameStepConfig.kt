@@ -6,18 +6,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 
 @JourneyFrameworkComponent("acceptInvitationFullNameStepConfig")
 class FullNameStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptInvitationJourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+    AbstractRequestableStepConfig<Complete, NameFormModel, AcceptInvitationJourneyState>() {
+    override val formModelClass = NameFormModel::class
 
-    // TODO PDJB-1772: Invitees must give their full name
     override fun getStepSpecificContent(state: AcceptInvitationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "What is your full name? (TODO PDJB-1772)")
+        mapOf(
+            "fieldSetHeading" to "forms.name.fieldSetHeading",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
 
-    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/todo"
+    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/nameForm"
 
     override fun mode(state: AcceptInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -25,7 +27,7 @@ class FullNameStepConfig :
 @JourneyFrameworkComponent("acceptInvitationFullNameStep")
 final class FullNameStep(
     stepConfig: FullNameStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, AcceptInvitationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, NameFormModel, AcceptInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = NAME_PATH_SEGMENT
     }

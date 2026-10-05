@@ -1,9 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -42,7 +46,7 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 2. Full Name page
         val fullNamePage = assertPageIs(page, FullNamePage::class)
-        fullNamePage.form.submit()
+        fullNamePage.submitName("Jane Smith")
 
         // 3. Email Address page
         val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
@@ -55,6 +59,38 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
         // 5. Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPage::class)
         assertTrue(confirmationPage.heading.getText().contains("TODO PDJB-1775"))
+    }
+
+    @Test
+    fun `full name page shows the heading and button`() {
+        val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+
+        assertEquals("What is your full name?", fullNamePage.heading.getText().trim())
+        BaseComponent.assertThat(fullNamePage.form.submitButton).isVisible()
+    }
+
+    @Test
+    fun `pressing save without entering a name shows error`(page: Page) {
+        val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+
+        // Press Save without typing anything
+        fullNamePage.form.submit()
+
+        assertThat(fullNamePage.form.getErrorMessage()).containsText("You must enter your full name")
+        assertPageIs(page, FullNamePage::class)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "   ", "\t"])
+    fun `blank full names do not advance the journey`(
+        blankName: String,
+        page: Page,
+    ) {
+        val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+
+        fullNamePage.submitName(blankName)
+        assertThat(fullNamePage.form.getErrorMessage()).containsText("You must enter your full name")
+        assertPageIs(page, FullNamePage::class)
     }
 
     @Test

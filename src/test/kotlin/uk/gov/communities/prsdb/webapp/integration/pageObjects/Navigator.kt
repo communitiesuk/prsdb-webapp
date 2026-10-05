@@ -89,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
@@ -295,6 +296,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionContro
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettingAgentJourneyTokenRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.AcceptInvitationJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
@@ -309,6 +311,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep as RegistrationEpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep as RegistrationEpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep as RegistrationLowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep as AcceptInvitationFullNameStep
 
 class Navigator(
     private val page: Page,
@@ -1836,6 +1839,17 @@ class Navigator(
         val tokenQuery = token?.let { "?token=$it" } ?: ""
         navigate("${AcceptInvitationController.ACCEPT_INVITATION_ROUTE}$tokenQuery")
         return createValidPage(page, ValidateTokenPage::class)
+    }
+
+    fun goToAcceptInvitationFullNamePage(): FullNamePage {
+        setJourneyStateInSession(AcceptInvitationJourneyStateSessionBuilder.beforeFullName().build())
+        val journeyUrl =
+            JourneyStateService.urlWithJourneyState(
+                "${AcceptInvitationController.ACCEPT_INVITATION_ROUTE}/${AcceptInvitationFullNameStep.ROUTE_SEGMENT}",
+                TEST_JOURNEY_ID,
+            )
+        navigate(journeyUrl)
+        return createValidPage(page, FullNamePage::class)
     }
 
     companion object {
