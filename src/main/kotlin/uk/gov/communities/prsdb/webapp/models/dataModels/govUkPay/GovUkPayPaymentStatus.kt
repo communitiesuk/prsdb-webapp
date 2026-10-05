@@ -26,4 +26,9 @@ enum class GovUkPayPaymentStatus {
 
     @JsonProperty("error")
     ERROR,
+    ;
+
+    companion object {
+        val FINISHED_STATUSES = listOf(SUCCESS, FAILED, CANCELLED, ERROR)
+    }
 }

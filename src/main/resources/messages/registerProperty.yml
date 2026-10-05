@@ -208,6 +208,7 @@ correspondenceEmail:
           error:
             missing: Enter an email address
             invalidFormat: Enter an email address in the correct format, like name@example.com
+paymentDescription: Register your rental property
 paymentOutcome:
   # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
   fieldSetHeading: TODO PDJB-993 payment outcome internal step
