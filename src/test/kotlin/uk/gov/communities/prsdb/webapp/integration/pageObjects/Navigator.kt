@@ -52,6 +52,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
@@ -89,6 +90,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
@@ -1327,6 +1329,11 @@ class Navigator(
         return createValidPage(page, OrgLandlordDetailsPage::class)
     }
 
+    fun goToTeamMembers(): TeamMembersPage {
+        navigate(TeamMembersController.TEAM_MEMBERS_ROUTE)
+        return createValidPage(page, TeamMembersPage::class)
+    }
+
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
         navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
         return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
@@ -1841,13 +1848,13 @@ class Navigator(
         setJourneyStateInSession(
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeFullName().build(),
         )
-        val journeyUrl =
-            JourneyStateService.urlWithJourneyState(
-                "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/${AcceptInvitationFullNameStep.ROUTE_SEGMENT}",
-                TEST_JOURNEY_ID,
-            )
+        val journeyPath =
+            "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
+                AcceptInvitationFullNameStep.ROUTE_SEGMENT
+        val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
         navigate(journeyUrl)
         return createValidPage(page, FullNamePage::class)
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
     }
 
     companion object {

@@ -23,4 +23,7 @@ class OrganisationalLandlordUserService(
         organisationalLandlordUserRepository.save(
             OrganisationalLandlordUser(organisationalLandlord, baseUser, name, email, role),
         )
+
+    fun getOrganisationalLandlordUsers(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordUser> =
+        organisationalLandlordUserRepository.findByOrganisationalLandlord(organisationalLandlord)
 }
