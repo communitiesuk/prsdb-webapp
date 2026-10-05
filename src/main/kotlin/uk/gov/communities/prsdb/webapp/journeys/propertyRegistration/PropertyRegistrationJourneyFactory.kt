@@ -241,41 +241,41 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
-                    configureStep(journey.tenancyDetailsTask.householdsAndTenantsTask.tenants) {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    configureStep(journey.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.propertyDetailsTask.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask.rentIncludesBillsTask)
+                    checkAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.tenancyDetailsTask.rentIncludesBillsTask) {
+                    fromTask(journey.rentIncludesBillsTask) {
                         checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.tenancyDetailsTask.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
                 RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
-                    configureStep(journey.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount) {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -755,7 +755,6 @@ class PropertyRegistrationJourney(
     // and a form-model read would throw (see TODO PDJB-585). Populated in WhoProvidesRentalDetailsStepConfig.afterStepDataIsAdded.
     override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
         delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
-    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
 
@@ -773,6 +772,13 @@ class PropertyRegistrationJourney(
             return occupied.formModelOrNull?.occupied
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
+
+    // Aliases for nested steps and tasks required by OccupationState
+    override val bedrooms = propertyDetailsTask.bedrooms
+    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
+    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
+    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
+    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
@@ -856,7 +862,6 @@ interface PropertyRegistrationJourneyState :
     val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
-    val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 
     // TODO PDJB-1617: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
     //  once the feature flag is removed and the letting agent journey is fully implemented

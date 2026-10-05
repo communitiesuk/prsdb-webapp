@@ -18,8 +18,13 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -48,11 +53,6 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         return journeyMap(state, checkingAnswersFor, propertyId)
     }
-
-    fun initializeJourneyState(
-        seed: Any?,
-        currentLastModifiedDate: java.time.Instant,
-    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
     private fun isDelegatedToLettingAgent(propertyId: Long): Boolean = propertyOwnershipService.hasLettingAgent(propertyId)
 
@@ -214,21 +214,34 @@ class UpdateOccupancyJourneyFactory(
             }
         }
     }
+
+    fun initializeJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
 class UpdateOccupancyJourney(
     // Occupancy task
     override val occupied: OccupiedStep,
+    // Nested households and tenants task
+    override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
+    override val bedrooms: BedroomsStep,
+    // Nested rent includes bills task
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
+    override val furnishedStatus: FurnishedStatusStep,
+    // Nested rent frequency and amount task
+    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // Finish check-your-answers step
     override val finishCyaStep: FinishCyaJourneyStep,
-    // Completion step for the redesigned single-page update
+    // Completion step for the single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
     // Routes past the interruption unless the property is being unoccupied while delegated to a letting agent
     override val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep,
     // Interruption shown when unoccupying a property that is delegated to a letting agent
     override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
-    // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
+    // Check-your-answers step for the update (included when DELEGATE_TO_LETTING_AGENT is enabled -
     // see journeyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
     journeyStateService: JourneyStateService,
@@ -236,8 +249,8 @@ class UpdateOccupancyJourney(
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    // Only the redesigned update with letting agent delegation has its own check-your-answers page. The redesigned
-    // single-page update with delegation off has no check-your-answers page, so it never reads this.
+    // Only the update with letting agent delegation has its own check-your-answers page. The single-page update
+    // with delegation off has no check-your-answers page, so it never reads this.
     override val cyaStep: JourneyStep.RequestableStep<*, *, *>
         get() = checkYourAnswersStep
 

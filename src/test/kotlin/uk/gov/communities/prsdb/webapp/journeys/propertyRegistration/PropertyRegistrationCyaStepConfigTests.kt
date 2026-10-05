@@ -206,6 +206,7 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockPropertyDetailsTask.propertyTypeStep).thenReturn(mockPropertyTypeStep)
         lenient().`when`(mockPropertyTypeStep.formModel).thenReturn(mockPropertyTypeFormModel)
         lenient().`when`(mockPropertyDetailsTask.bedrooms).thenReturn(mockBedroomsStep)
+        lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockBedroomsFormModel)
         lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
         lenient().`when`(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
@@ -284,6 +285,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `contact rows show the selected account email instead of a retained different email`() {
             val rows = correspondenceRows()
+
             assertEquals(
                 listOf(
                     "forms.checkPropertyAnswers.correspondence.emailAddress",
@@ -297,6 +299,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `contact rows show the different email when selected`() {
             emailForm.correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
+
             assertEquals("council.contact@example.com", correspondenceRows()[0].fieldValue)
             verify(mockState, never()).loggedInLandlordEmailAtStartOfJourney
         }
@@ -317,6 +320,7 @@ class PropertyRegistrationCyaStepConfigTests {
                     postcode = "LS1 1AA",
                 ),
             )
+
             assertEquals(
                 listOf("12 Test Road", "Test District", "Leeds", "West Yorkshire", "LS1 1AA"),
                 correspondenceRows()[1].fieldValue,
@@ -326,6 +330,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `contact change links have independent child journey ids and the postal address route prefix`() {
             val rows = correspondenceRows()
+
             assertEquals("forms.links.change", rows[0].actions.single().text)
             assertEquals("forms.links.change", rows[1].actions.single().text)
             assertEquals(
@@ -342,6 +347,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `disabled correspondence does not read contact state or create child journeys`() {
             whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
+
             assertEquals(emptyList<SummaryListRowViewModel>(), correspondenceRows())
             verify(mockState, never()).correspondenceTask
             verify(mockState, never()).getCyaJourneyId(emailStep)
@@ -380,7 +386,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent puts tenancyDetails from getCheckYourAnswersSummaryList`() {
+        fun `getStepSpecificContent puts rentedOutTenancyRows from getCheckYourAnswersSummaryList`() {
             val expectedTenancyDetails = listOf<SummaryListRowViewModel>()
             whenever(
                 mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any()),
@@ -388,7 +394,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals(expectedTenancyDetails, content["tenancyDetails"])
+            assertEquals(expectedTenancyDetails, content["rentedOutTenancyRows"])
         }
 
         @Test
@@ -417,22 +423,26 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
+        fun `getStepSpecificContent uses complete registration button when unoccupied`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
+        }
+
+        @Test
         fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+
             val content = stepConfig.getStepSpecificContent(mockState)
+
             assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
         }
 
         @Test
         fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
-            val content = stepConfig.getStepSpecificContent(mockState)
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -445,7 +455,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
+            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
             assertEquals(
                 "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
                 licensingRows.first().fieldValue,
@@ -459,7 +469,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
+            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
             assertEquals(
                 "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
                 licensingRows.first().fieldValue,
@@ -547,9 +557,9 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class NotDelegatedToLettingAgentContent {
+    inner class NonDelegatedContent {
         @BeforeEach
-        fun setUpStubs() {
+        fun enableLettingAgentFlag() {
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
         }
@@ -658,9 +668,9 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class DelegatedToLettingAgentContent {
+    inner class DelegatedContent {
         @BeforeEach
-        fun setUpStubs() {
+        fun enableDelegationFlag() {
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
         }
@@ -688,14 +698,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-            val content = stepConfig.getStepSpecificContent(mockState)
-            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
-        }
-
-        @Test
         fun `getStepSpecificContent shows unoccupied tenancy body text when delegated property is unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
@@ -716,6 +718,16 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertNull(content["tenancyUnoccupiedBodyTextKey"])
+        }
+
+        @Test
+        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
         }
     }
 }
