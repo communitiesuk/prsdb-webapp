@@ -1841,7 +1841,7 @@ class Navigator(
         setJourneyStateInSession(AcceptInvitationJourneyStateSessionBuilder.beforeFullName().build())
         val journeyUrl =
             JourneyStateService.urlWithJourneyState(
-                "${AcceptInvitationController.ACCEPT_INVITATION_ROUTE}/${AcceptInvitationFullNameStep.ROUTE_SEGMENT}",
+                "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/${AcceptInvitationFullNameStep.ROUTE_SEGMENT}",
                 TEST_JOURNEY_ID,
             )
         navigate(journeyUrl)
