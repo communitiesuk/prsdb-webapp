@@ -63,6 +63,7 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
         // Go to the start of accept invitation journey (Validate Token page)
         val validateTokenPage = navigator.goToAcceptInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
         assertPageIs(page, ValidateTokenPage::class)
+        // TODO PDJB-1822: Validate token step
         validateTokenPage.form.radios.selectValue(TokenValidity.INVALID)
         validateTokenPage.form.submit()
 
