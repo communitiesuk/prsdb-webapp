@@ -211,7 +211,6 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         @Test
         fun `Submitting with a blank numberOfBedrooms field returns an error`(page: Page) {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
-            bedroomsPage.form.numberOfBedroomsInput.fill("")
             bedroomsPage.form.submit()
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
         }

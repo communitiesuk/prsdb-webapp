@@ -2347,7 +2347,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
         }
 
-        // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
+        // TODO PDJB-1617: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
         @Nested
         inner class DelegateToLettingAgentDisabled {
             @BeforeEach

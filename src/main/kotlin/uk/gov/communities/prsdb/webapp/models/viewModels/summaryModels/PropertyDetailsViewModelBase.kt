@@ -49,7 +49,6 @@ abstract class PropertyDetailsViewModelBase(
 ) {
     protected val changeLinkMessageKey = "forms.links.change"
 
-    val address: String = propertyOwnership.address.singleLineAddress
     val addressParts: List<String> = propertyOwnership.address.toMultiLineAddress().split("\n")
 
     val isOccupied = propertyOwnership.isOccupied
@@ -104,13 +103,10 @@ abstract class PropertyDetailsViewModelBase(
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )
 
-    protected fun occupiedRow(
-        labelKey: String,
-        occupied: Boolean = isOccupied,
-    ): SummaryListRowViewModel =
+    protected fun occupiedRow(labelKey: String): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             labelKey,
-            MessageKeyConverter.convert(occupied),
+            MessageKeyConverter.convert(isOccupied),
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                 "/${OccupiedStep.ROUTE_SEGMENT}",
         )

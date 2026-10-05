@@ -95,9 +95,6 @@ class CheckAnswersPagePropertyRegistration(
         return (0 until rowCount).map { index -> tenancyRowKeys.nth(index).innerText().trim() }
     }
 
-    val complianceCertificatesHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
-
     val gasSafetyHeading =
         Heading(page.locator("h3", Page.LocatorOptions().setHasText("Gas safety certificate")))
 
@@ -122,7 +119,6 @@ class CheckAnswersPagePropertyRegistration(
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
         val whoProvidesRentalDetailsRow = getRow("Who will provide this property’s rental details?")
         val lettingAgentEmailRow = getRow("Letting agent or property manager’s email address")
-        val occupiedByTenantsRow = getRow(Pattern.compile("^Occupied by tenants$"))
         val tenancyDetailsRow = getRow("Tenancy details")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
