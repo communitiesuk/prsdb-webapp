@@ -63,7 +63,7 @@ class RegisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getJourneyStep redirects to dashboard for landlord on privacy notice step`() {
         whenever(userRolesService.getHasLandlordUserRole(any())).thenReturn(true)
 

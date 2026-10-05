@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvi
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(SWITCH_TO_INDIVIDUAL_ROUTE)
 class SwitchToIndividualController(

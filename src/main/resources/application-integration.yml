@@ -22,6 +22,9 @@ features:
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-238-gatling-post-endpoint"
+      enabled: false
+      expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
       enabled: true
       expiry-date: "2026-12-31"
@@ -31,8 +34,14 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: true
+      expiry-date: "2026-11-01"
 
 argon2:
   iterations: 2
   memory: 16384
   parallelism: 1
+
+gov-uk-pay:
+  gratis-period-end-date: 2027-01-01

@@ -59,7 +59,7 @@ import java.security.Principal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class RegisterPropertyController(
@@ -126,6 +126,9 @@ class RegisterPropertyController(
 
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
+        // TODO: PDJB-1742: Remove this model attribute when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
+        model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
+
         val provideMissingDetails =
             hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
 

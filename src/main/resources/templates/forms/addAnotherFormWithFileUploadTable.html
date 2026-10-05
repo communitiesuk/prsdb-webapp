@@ -20,10 +20,10 @@
         th:text="#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}">
     </h1>
     <p class="govuk-inset-text" th:text="#{${summaryText}}" id="summary-text">summaryText</p>
-    <table th:replace="~{fragments/tables/table :: table(
+    <table th:replace="~{fragments/tables/actionsTable :: actionsTable(
                             ${ {'uploads.checkUploads.fileName',
                             'uploads.checkUploads.status',
-                            null} },
+                            'common.table.actions'} },
                             ~{::tbody},
                             null
                         )}">
@@ -35,7 +35,10 @@
                 </td>
                 <td class="govuk-table__cell govuk-!-width-one-third" th:text="#{${upload.status}}"></td>
                 <td class="govuk-table__cell govuk-!-width-one-third">
-                    <a class="govuk-link" th:href="@{${upload.removeUrl}}" th:text="#{forms.links.remove}"></a>
+                    <a class="govuk-link" th:href="@{${upload.removeUrl}}">
+                        <span th:text="#{forms.links.remove}">forms.links.remove</span>
+                        <span class="govuk-visually-hidden" th:text="${upload.fileName}">fileName</span>
+                    </a>
                 </td>
         </tbody>
     </table>

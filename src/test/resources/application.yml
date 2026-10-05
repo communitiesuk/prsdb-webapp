@@ -49,6 +49,7 @@ gov-uk-pay:
   base-url: https://gov-uk-pay.test
   api-key: test-api-key
   annual-payment-amount-in-pence: 2000
+  gratis-period-end-date: 2020-01-01
 
 cloudwatch-metrics:
   ecs:
@@ -101,6 +102,9 @@ features:
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-238-gatling-post-endpoint"
+      enabled: false
+      expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
       enabled: false
       expiry-date: "2026-12-31"
@@ -110,3 +114,6 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: false
+      expiry-date: "2026-11-01"

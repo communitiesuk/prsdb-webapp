@@ -64,7 +64,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(name = "correspondence_email", nullable = false)
     lateinit var correspondenceEmail: String
-        private set
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "correspondence_address_id", nullable = false)
@@ -90,6 +89,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
+
+    @OneToMany(mappedBy = "associatedProperty", orphanRemoval = true)
+    val payments: MutableSet<Payment> = mutableSetOf()
 
     var numBedrooms: Int? = null
 
@@ -121,6 +123,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     var tenancyProvideLater: Boolean? = null
 
+    @Column(name = "renewal_date", nullable = false)
+    lateinit var renewalDate: LocalDate
+        private set
+
     constructor(
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -133,6 +139,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         license: License?,
         correspondenceEmail: String,
         correspondenceAddress: Address,
+        renewalDate: LocalDate,
         isActive: Boolean = true,
         numBedrooms: Int? = null,
         billsIncludedList: String? = null,
@@ -158,6 +165,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.license = license
         this.correspondenceEmail = correspondenceEmail
         this.correspondenceAddress = correspondenceAddress
+        this.renewalDate = renewalDate
         this.isActive = isActive
         this.numBedrooms = numBedrooms
         this.billsIncludedList = billsIncludedList

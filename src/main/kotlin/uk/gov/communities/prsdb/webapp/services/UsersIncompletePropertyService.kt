@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -65,7 +65,7 @@ class UsersIncompletePropertyService(
 
     fun addIncompletePropertyForUser(state: SavedJourneyState) {
         val newEntry =
-            LandlordIncompleteProperties(
+            LandlordIncompleteProperty(
                 user = state.user,
                 savedJourneyState = state,
             )

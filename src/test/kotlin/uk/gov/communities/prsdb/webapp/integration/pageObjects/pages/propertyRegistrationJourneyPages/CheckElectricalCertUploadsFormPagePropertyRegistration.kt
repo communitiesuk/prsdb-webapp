@@ -30,5 +30,8 @@ class CheckElectricalCertUploadsFormPagePropertyRegistration(
 
     class CheckUploadsTable(
         page: Page,
-    ) : Table(page)
+    ) : Table(page) {
+        val actionsHeader = headerRow.getCell(2)
+        val actionsHeaderVisuallyHiddenText = headerRow.getVisuallyHiddenText(2)
+    }
 }
