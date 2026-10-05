@@ -15,6 +15,18 @@ data class GovUkPayPayment(
     @JsonProperty("created_date") val createdDate: Instant,
     val state: GovUkPayPaymentState,
     @JsonProperty("settlement_summary") val settlementSummary: GovUkPaySettlementSummary? = null,
+    @JsonProperty("_links") val links: GovUkPayPaymentLinks = GovUkPayPaymentLinks(),
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GovUkPayPaymentLinks(
+    @JsonProperty("next_url") val nextUrl: GovUkPayLink? = null,
+    @JsonProperty("cancel") val cancelUrl: GovUkPayLink? = null,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GovUkPayLink(
+    val href: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

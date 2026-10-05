@@ -13,6 +13,8 @@ enum class PaymentStatus {
     fun isFailedOrCancelled() = this == FAILED || this == CANCELLED
 
     companion object {
+        val IN_PROGRESS_STATUSES = listOf(CREATED, CAPTURABLE)
+
         fun fromGovUKPayStatus(status: GovUkPayPaymentStatus): PaymentStatus =
             when (status) {
                 GovUkPayPaymentStatus.CREATED -> CREATED

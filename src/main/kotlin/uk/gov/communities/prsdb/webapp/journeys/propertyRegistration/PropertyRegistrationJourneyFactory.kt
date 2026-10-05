@@ -63,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -813,11 +814,16 @@ class PropertyRegistrationJourneyFactory(
                                 journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                             )
                         }
+                        nextStep { journey.paymentReturnStep }
+                    }
+                    step(journey.paymentReturnStep) {
+                        routeSegment(PaymentReturnStep.ROUTE_SEGMENT)
+                        parents { journey.paymentSummaryStep.isComplete() }
                         nextStep { journey.paymentRoutingStep }
                     }
                     step(journey.paymentRoutingStep) {
                         routeSegment(PaymentRoutingStep.ROUTE_SEGMENT)
-                        parents { journey.paymentSummaryStep.isComplete() }
+                        parents { journey.paymentReturnStep.isComplete() }
                         nextDestination { mode ->
                             when (mode) {
                                 PaymentOutcome.SUCCESS -> Destination(journey.savePropertyRegistrationDataStep)
@@ -899,6 +905,7 @@ class PropertyRegistrationJourney(
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     // Payment steps (behind PAYMENTS flag)
     override val paymentSummaryStep: PaymentSummaryStep,
+    override val paymentReturnStep: PaymentReturnStep,
     override val paymentRoutingStep: PaymentRoutingStep,
     override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
     override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
@@ -1023,6 +1030,7 @@ interface PropertyRegistrationJourneyState :
 
     // Payment steps (behind PAYMENTS flag)
     val paymentSummaryStep: PaymentSummaryStep
+    val paymentReturnStep: PaymentReturnStep
     val paymentRoutingStep: PaymentRoutingStep
     val retryablePaymentFailedStep: RetryablePaymentFailedStep
     val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep
