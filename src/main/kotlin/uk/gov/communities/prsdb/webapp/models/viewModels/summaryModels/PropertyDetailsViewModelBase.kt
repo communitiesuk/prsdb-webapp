@@ -41,7 +41,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 
-// TODO PDJB-939 - this can be combined with PropertyDetailsViewModel once the pdjb939 flag is removed (assuming it is not used elsewhere)
 abstract class PropertyDetailsViewModelBase(
     protected val propertyOwnership: PropertyOwnership,
     protected val viewType: PropertyDetailsViewType,
