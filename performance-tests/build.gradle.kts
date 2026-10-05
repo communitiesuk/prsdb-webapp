@@ -36,6 +36,12 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+sourceSets {
+    test {
+        resources.srcDir("src/gatling/resources")
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     systemProperty("performance.test.classpath", sourceSets.test.get().runtimeClasspath.asPath)

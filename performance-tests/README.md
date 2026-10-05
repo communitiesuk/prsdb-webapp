@@ -14,8 +14,8 @@ performance-tests/
     BaseUrlConfig.kt                   # Resolves the target base URL
     RegisterAsLandlordGetSimulation.kt # GET-only example
     FormSubmissionPostSimulation.kt    # GET -> extract CSRF -> POST example
-    BasicJourneysSimulation.kt         # One user: simulator login -> phone update
-  src/gatling/resources/               # Feeder files, logback config, etc.
+    BasicJourneysSimulation.kt         # Serial one-user populations: phone update -> registration
+  src/gatling/resources/fixtures/       # Synthetic One Login identity-verification claims
   src/main/kotlin/                     # Reusable HTTP chains and run configuration
   src/test/kotlin/                     # Deterministic Gatling contract tests
   scripts/start-local.mjs              # Local official-simulator application bootstrap
@@ -80,8 +80,12 @@ The contracts prove cookie continuity, CSRF extraction, form encoding and preser
 They also prove that incorrect bodies/content types, missing CSRF tokens, incomplete journeys and unsaved updates
 fail the runner, and that maximum/mean timing gates reject deliberately delayed responses. Authentication
 contracts preserve authorization queries, hidden fields, JSON textarea defaults and cookies, reject off-origin
-destinations, and prevent mutation after failed login. These fixtures do **not** measure application performance;
-use the real local run below for that.
+destinations, and prevent mutation after failed login. Identity-verification contracts check the VTR and claims,
+synthetic identity fields, verified/unverified outcomes, rejected authentication, and cookie separation between
+the app and simulator. Registration contracts check each form's CSRF token and journey ID, fail before mutation
+when the subject is already registered, and require a registration number plus dashboard access. A sequential
+authentication contract proves the phone-update and registration populations use distinct subjects and fresh
+app/simulator cookies. These fixtures do **not** measure application performance; use the real local run below.
 
 `BasicRunConfig` separates the target from the measurement mode. Both targets use the same HTTP journey logic;
 the existing toy simulations continue to use `BaseUrlConfig` unchanged.
@@ -91,7 +95,8 @@ the existing toy simulations continue to use `BaseUrlConfig` unchanged.
 | `gatling.target` | Explicit `local` or `nft` target |
 | `gatling.baseUrl` | Application origin, including the local/worktree port |
 | `gatling.simulatorUrl` | Official One Login simulator origin |
-| `gatling.basic.landlordSubject` | Synthetic landlord identity from the target's fixtures |
+| `gatling.basic.landlordSubject` | Seeded synthetic landlord for the phone-update slice |
+| `gatling.basic.registrationSubject` | Fresh, unregistered synthetic subject for registration; must differ from `landlordSubject` |
 | `gatling.basic.mode` | `baseline` records timings; `gated` applies explicit timing limits |
 | `gatling.local.basic.maxResponseTimeMs` / `meanResponseTimeMs` | Local gated limits, positive integer milliseconds |
 | `gatling.nft.basic.maxResponseTimeMs` / `meanResponseTimeMs` | Separately agreed NFT gated limits |
@@ -158,32 +163,42 @@ In another terminal, run:
   -Dgatling.target=local -Dgatling.basic.mode=baseline \
   -Dgatling.baseUrl=http://localhost:8080 \
   -Dgatling.simulatorUrl=http://127.0.0.1:13000 \
-  -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:UVWXY
+  -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:UVWXY \
+  -Dgatling.basic.registrationSubject=urn:fdc:gov.uk:2026:PERF-REGISTRATION-001
 ```
 
 Match the URLs to the ports used by the bootstrap. The Gradle module forwards `gatling.*` properties to the
-simulation JVM and excludes test-only simulations from production runs.
+simulation JVM and excludes test-only simulations from production runs. Use a new, unregistered synthetic
+registration subject for each run, or restore the local database before reusing one; the registration chain stops
+at its preflight if that subject already has a landlord registration.
 
-The slice signs in as seeded landlord Alexander Smith, opens the rendered phone-change link, preserves the
-journey URL and CSRF token, submits the fictional London number `02079460123`, then checks that exact number
-in the saved phone summary row. Each redirect is a separate named request. There is exactly **one sequential
-virtual user**, no embedded-resource fetching and no load injection.
+The basic suite first signs in as seeded landlord Alexander Smith, opens the rendered phone-change link, preserves
+the journey URL and CSRF token, submits the fictional London number `02079460123`, then checks that exact number
+in the saved phone summary row. A separate sequential user signs in with the unregistered registration subject,
+performs identity verification with synthetic claims, accepts the privacy notice, and completes the individual
+manual-address registration. Registration clears the app session to refresh the user's roles, so the journey
+reauthenticates with the same subject before checking the confirmation registration number and following the
+dashboard link.
+The two one-user populations run serially, so no app or simulator cookies cross between identities. Each
+redirect is a separate named request; there is one active virtual user at a time, no embedded-resource fetching
+and no load injection.
 
-Reset/reseed between comparable baselines so an existing update/session does not change the starting fixture.
+Reset/reseed between comparable baselines so the seeded phone value and registration subject return to their
+initial state. The registration fixtures are synthetic and do not contain real identity data.
 For a local timing-gate experiment, change the mode to `gated` and supply both
 `gatling.local.basic.maxResponseTimeMs` and `gatling.local.basic.meanResponseTimeMs`. These are explicit local
 limits, not agreed NFT SLAs. Simulator front-channel requests are checked for correctness but excluded from
 application timing gates; the application callback includes its back-channel authentication work.
 
-This first slice does not yet cover registration, identity verification, council or letting-agent journeys, or
-run the scheduled NFT workflow. See ADRs 0035-0040 for the basic/load distinction, API-level measurement,
-runner, scheduling, Gatling and fixture-restoration decisions.
+The local basic slice now covers seeded phone update and individual registration through the manual-address
+branch. It does not cover other registration branches, council or letting-agent journeys, or run the scheduled
+NFT workflow. See ADRs 0035-0040 for the basic/load distinction, API-level measurement, runner, scheduling,
+Gatling and fixture-restoration decisions.
 
 ### Prerequisites for a local run
 
-1. Start the webapp locally using the standard `local` run configuration (it starts the Docker Compose
-   dependencies, runs the Flyway migrations, and activates the `local,local-no-auth` profiles). See the
-   project's main README for details.
+1. For the real basic suite, start the app using `performance-tests/scripts/start-local.mjs` as described above.
+   The standard `local,local-no-auth` run configuration does not exercise One Login authentication.
 2. Confirm the app is up and note the port from your `.env`.
 
 `RegisterAsLandlordGetSimulation` targets an existing public page and needs nothing else.
