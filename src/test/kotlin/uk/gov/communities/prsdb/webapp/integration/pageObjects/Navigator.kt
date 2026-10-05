@@ -52,6 +52,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
@@ -89,6 +90,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
@@ -1322,6 +1324,11 @@ class Navigator(
     fun goToOrgLandlordDetails(): OrgLandlordDetailsPage {
         navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, OrgLandlordDetailsPage::class)
+    }
+
+    fun goToTeamMembers(): TeamMembersPage {
+        navigate(TeamMembersController.TEAM_MEMBERS_ROUTE)
+        return createValidPage(page, TeamMembersPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
