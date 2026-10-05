@@ -296,7 +296,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionContro
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettingAgentJourneyTokenRequestModel
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.AcceptInvitationJourneyStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
@@ -1838,7 +1838,9 @@ class Navigator(
     }
 
     fun goToAcceptInvitationFullNamePage(): FullNamePage {
-        setJourneyStateInSession(AcceptInvitationJourneyStateSessionBuilder.beforeFullName().build())
+        setJourneyStateInSession(
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeFullName().build(),
+        )
         val journeyUrl =
             JourneyStateService.urlWithJourneyState(
                 "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/${AcceptInvitationFullNameStep.ROUTE_SEGMENT}",

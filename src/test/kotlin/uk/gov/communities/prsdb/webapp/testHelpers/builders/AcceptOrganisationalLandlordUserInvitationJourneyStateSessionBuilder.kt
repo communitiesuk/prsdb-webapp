@@ -6,10 +6,11 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TokenValidityFormModel
 
-class AcceptInvitationJourneyStateSessionBuilder : JourneyStateSessionBuilder<AcceptInvitationJourneyStateSessionBuilder>() {
+class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
+    JourneyStateSessionBuilder<AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder>() {
     companion object {
-        fun beforeFullName(): AcceptInvitationJourneyStateSessionBuilder =
-            AcceptInvitationJourneyStateSessionBuilder()
+        fun beforeFullName(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder()
                 .withSubmittedValue(
                     ValidateTokenStep.ROUTE_SEGMENT,
                     TokenValidityFormModel(TokenValidity.VALID),
