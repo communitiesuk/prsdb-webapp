@@ -575,7 +575,6 @@ checkPropertyAnswers:
     provideLater: Provide this later
     unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
-    bedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills
     billsIncluded: Which bills are included
     furnishedStatus: Furniture provided
@@ -583,7 +582,6 @@ checkPropertyAnswers:
     rentAmount: Rent amount
     customFrequencyRentAmountSuffix: per month
   jointLandlordsDetails:
-    heading: Invite joint landlords
     invitations: Invitations
     jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?

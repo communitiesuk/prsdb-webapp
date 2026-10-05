@@ -104,9 +104,6 @@ taskList:
     checkAnswersWithPayment: Submit and pay
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
-checkAnswers:
-  complianceCertificates:
-    heading: Compliance certificates
 deleteIncompleteProperties:
   incompleteProperties:
     title: Delete incomplete property

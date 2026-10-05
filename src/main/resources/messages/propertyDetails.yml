@@ -226,7 +226,6 @@ propertyRecord:
         middleText: ' and valid '
         complianceLinkText: compliance certificates
   licensingInformation:
-    heading: Licensing information
     licensingType: Licensing type
     licensingNumber: Licensing number
   tenancyAndRentalInformation:
