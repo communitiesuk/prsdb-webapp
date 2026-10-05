@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourn
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(LEAVE_PROPERTY_ROUTE)
 class LeavePropertyController(

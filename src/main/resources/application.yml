@@ -113,6 +113,7 @@ gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
+  gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
 
 cloudwatch-metrics:
   ecs:
@@ -157,9 +158,12 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
@@ -171,6 +175,9 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: false
+      expiry-date: "2026-11-01"
 
 ---
 

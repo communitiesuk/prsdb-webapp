@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toJavaLocalDate
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
@@ -10,12 +12,14 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
@@ -48,6 +52,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @WebMvcTest(RegisterPropertyController::class)
+@Import(MessageSourceConfig::class)
 class RegisterPropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -90,7 +95,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `index returns 200 for a landlord user`() {
         mvc
             .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
@@ -100,7 +105,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `index passes registerPropertyInitialStep and backUrl model attributes`() {
         mvc
             .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
@@ -117,7 +122,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 with correct model attributes for an occupied property with incomplete compliance`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -163,8 +168,8 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation shows the provide missing details block when phase two is enabled`() {
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation hides the what you need to do next section`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -193,6 +198,8 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            // TODO: PDJB-1742: Remove this assertion when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
+            .andExpect(MockMvcResultMatchers.model().attribute("propertyRegistrationPhaseTwoEnabled", true))
             .andExpect(
                 MockMvcResultMatchers.model().attribute(
                     "provideMissingDetailsViewModel",
@@ -205,12 +212,13 @@ class RegisterPropertyControllerTests(
                     ),
                 ),
             ).andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
+            .andExpect(MockMvcResultMatchers.content().string(not(containsString("What you need to do next"))))
     }
 
     // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation uses the before pdjb-939 compliance block when phase two is disabled`() {
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation uses compliance block when phase two is disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -236,10 +244,11 @@ class RegisterPropertyControllerTests(
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
+            .andExpect(MockMvcResultMatchers.content().string(containsString("What you need to do next")))
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes every selected provide later detail`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -288,7 +297,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation hides provide missing details section when delegated to letting agent`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -327,7 +336,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation only shows provide later items that were selected`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -372,7 +381,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -400,7 +409,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for occupied property with complete compliance`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -440,7 +449,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 400 if there's no property ownership ID in session`() {
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(null)
 
@@ -450,7 +459,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 400 if the property ownership ID in session is not valid`() {
         val propertyRegistrationNumber = 0L
 
@@ -466,7 +475,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes individual survey URL in the model for individual landlord`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -495,7 +504,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation includes org survey URL in the model for org landlord`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -524,7 +533,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getResume redirects to task-list with the supplied journey id`() {
         val journeyId = "journey-123"
 
@@ -537,7 +546,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent true when flag enabled and delegation exists`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -573,7 +582,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent false when flag disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -598,7 +607,7 @@ class RegisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns delegatedToLettingAgent false when flag enabled but no delegation exists`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =

@@ -1,17 +1,15 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CorrespondenceEmailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 
-interface CorrespondenceState : JourneyState {
-    val correspondenceEmailStep: CorrespondenceEmailStep
+interface CorrespondenceState : CorrespondenceEmailState {
     val addressTask: CorrespondenceAddressTask
-    val loggedInLandlordEmailAtStartOfJourney: String?
 }
 
 @JourneyFrameworkComponent

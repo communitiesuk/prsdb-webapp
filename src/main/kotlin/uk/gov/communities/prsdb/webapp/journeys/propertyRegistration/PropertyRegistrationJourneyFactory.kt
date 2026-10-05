@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -62,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -103,6 +105,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
@@ -143,6 +146,10 @@ class PropertyRegistrationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
+            val correspondenceEnabled =
+                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+                    featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
@@ -157,6 +164,24 @@ class PropertyRegistrationJourneyFactory(
                         fromTask(journey.whoProvidesDetailsTask) {
                             checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                         }
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
+                CorrespondenceEmailStep.ROUTE_SEGMENT -> {
+                    if (correspondenceEnabled) {
+                        fromTask(journey.correspondenceTask, journey) {
+                            checkAnswerStep(task.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
+                        }
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
+                "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
+                    if (correspondenceEnabled) {
+                        checkAnswerTask(journey.correspondenceTask.addressTask, CorrespondenceAddressTask.ROUTE_SEGMENT)
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                     }
@@ -789,11 +814,16 @@ class PropertyRegistrationJourneyFactory(
                                 journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                             )
                         }
+                        nextStep { journey.paymentReturnStep }
+                    }
+                    step(journey.paymentReturnStep) {
+                        routeSegment(PaymentReturnStep.ROUTE_SEGMENT)
+                        parents { journey.paymentSummaryStep.isComplete() }
                         nextStep { journey.paymentRoutingStep }
                     }
                     step(journey.paymentRoutingStep) {
                         routeSegment(PaymentRoutingStep.ROUTE_SEGMENT)
-                        parents { journey.paymentSummaryStep.isComplete() }
+                        parents { journey.paymentReturnStep.isComplete() }
                         nextDestination { mode ->
                             when (mode) {
                                 PaymentOutcome.SUCCESS -> Destination(journey.savePropertyRegistrationDataStep)
@@ -875,6 +905,7 @@ class PropertyRegistrationJourney(
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     // Payment steps (behind PAYMENTS flag)
     override val paymentSummaryStep: PaymentSummaryStep,
+    override val paymentReturnStep: PaymentReturnStep,
     override val paymentRoutingStep: PaymentRoutingStep,
     override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
     override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
@@ -884,8 +915,6 @@ class PropertyRegistrationJourney(
     PropertyRegistrationJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
-    // TODO: PDJB-1593: ensure correspondence CYA reuses the originally selected email source rather than
-    // recalculating from the live landlord email when the page is revisited.
     override var loggedInLandlordEmailAtStartOfJourney: String by
         delegateProvider.requiredImmutableDelegate("loggedInLandlordEmailAtStartOfJourney")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
@@ -1001,6 +1030,7 @@ interface PropertyRegistrationJourneyState :
 
     // Payment steps (behind PAYMENTS flag)
     val paymentSummaryStep: PaymentSummaryStep
+    val paymentReturnStep: PaymentReturnStep
     val paymentRoutingStep: PaymentRoutingStep
     val retryablePaymentFailedStep: RetryablePaymentFailedStep
     val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep

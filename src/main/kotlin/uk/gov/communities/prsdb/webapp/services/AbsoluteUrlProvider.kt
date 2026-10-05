@@ -14,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsCo
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import java.net.URI
 import java.security.Principal
 import java.util.UUID
@@ -47,6 +50,14 @@ class AbsoluteUrlProvider(
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
             .replacePath(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .build()
+            .toUri()
+
+    fun buildPropertyRegistrationPaymentReturnUri(journeyId: String): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}")
+            .queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
             .build()
             .toUri()
 

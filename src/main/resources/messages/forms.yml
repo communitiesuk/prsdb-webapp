@@ -574,6 +574,10 @@ checkPropertyAnswers:
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
     heading: Ownership and landlords
+  # TODO PDJB-1307: Move these messages out of forms.yml
+  correspondence:
+    emailAddress: Email address
+    postalAddress: Postal address
   occupancy:
     heading: Tell us if your property’s occupied
     question: Is this property occupied by tenants?
@@ -620,6 +624,9 @@ checkPropertyAnswers:
       agentEmail:
         label: Letting agent or property manager’s email address
 update:
+  correspondenceEmail:
+    summaryName: You updated who the council should contact for this property
+    emailAddress: Email address
   email:
     title: Update your email address
     body: We’ll use this to send you information and updates.

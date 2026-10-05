@@ -148,7 +148,7 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 | `nft-seed.batch-size`         | `NFT_SEED_BATCH_SIZE`           | 10               | Batch size for bulk inserts.                                                                                 |
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
-| `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 500              | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+| `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 1000             | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
 
 To test at a larger, more realistic scale locally (e.g. to catch batching/performance issues that don't show up at
 the small `local` defaults), override the scale-related env vars before running, e.g.:
@@ -294,6 +294,23 @@ logging in.
   (it should look like `urn:fdc:gov.uk:2022:string-of-characters`)
 
 If anyone knows a better way to do this please add it here!
+
+### NFT One Login Simulator profile
+
+The `one-login-simulator` Spring profile overrides the webapp's One Login OAuth2 client configuration to target
+the GOV.UK One Login Simulator deployed in NFT, instead of the real GOV.UK One Login integration environment.
+
+This profile is **NFT-only** and is never active by default. It must be explicitly added alongside the `nft`
+profile (e.g. `SPRING_PROFILES_ACTIVE=default,nft,one-login-simulator`) to take effect, and requires five
+dedicated environment variables to be set: `ONE_LOGIN_SIMULATOR_CLIENT_ID`, `ONE_LOGIN_SIMULATOR_PUBLIC_KEY`,
+`ONE_LOGIN_SIMULATOR_PRIVATE_KEY`, `ONE_LOGIN_SIMULATOR_ISSUER_URL`, and `ONE_LOGIN_SIMULATOR_DID_URL`. These are
+separate from the standard `ONE_LOGIN_*` variables, so activating this profile never risks or overwrites the
+real One Login credentials.
+
+This profile exists to support performance testing against the simulator (see `communitiesuk/prsdb-infra#348`
+for the simulator's infrastructure). Activating/deactivating it, starting/stopping the simulator service, and
+running performance tests is intentionally **not** automated by this profile alone — that orchestration is
+separate, future work (PDJB-430).
 
 ### Testing Org Landlords
 

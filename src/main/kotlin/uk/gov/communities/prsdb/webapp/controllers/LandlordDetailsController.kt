@@ -39,7 +39,7 @@ class LandlordDetailsController(
     private val userToLandlordService: UserToLandlordService,
     private val messageSource: MessageSource,
 ) {
-    @PreAuthorize("hasRole('LANDLORD')")
+    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()

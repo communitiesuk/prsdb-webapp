@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 @PrsdbController
 @RequestMapping(PROPERTY_DEREGISTRATION_ROUTE)
 class DeregisterPropertyController(

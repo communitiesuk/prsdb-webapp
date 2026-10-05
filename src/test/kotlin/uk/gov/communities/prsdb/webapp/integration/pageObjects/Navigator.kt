@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
@@ -88,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -1825,6 +1827,11 @@ class Navigator(
                 "?journeyId=$TEST_JOURNEY_ID",
         )
         return createValidPage(page, EnterPasswordPage::class)
+    }
+
+    fun goToAcceptInvitationJourney(): ValidateTokenPage {
+        navigate(AcceptInvitationController.ACCEPT_INVITATION_ROUTE)
+        return createValidPage(page, ValidateTokenPage::class)
     }
 
     companion object {

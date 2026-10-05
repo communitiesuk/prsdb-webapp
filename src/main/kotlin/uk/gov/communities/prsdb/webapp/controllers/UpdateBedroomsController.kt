@@ -21,7 +21,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_BEDROOMS_ROUTE)
-@PreAuthorize("hasRole('LANDLORD')")
+@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class UpdateBedroomsController(
     private val journeyFactory: UpdateBedroomsJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

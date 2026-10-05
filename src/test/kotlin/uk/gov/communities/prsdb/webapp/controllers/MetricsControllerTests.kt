@@ -76,7 +76,7 @@ class MetricsControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getMetrics returns 403 for LANDLORD role`() {
         mvc
             .get(METRICS_URL)
@@ -112,7 +112,7 @@ class MetricsControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `submitMetrics returns 403 for LANDLORD role`() {
         mvc
             .post(METRICS_URL) {

@@ -17,9 +17,12 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "pdjb-238-gatling-post-endpoint"
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
@@ -31,8 +34,34 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: false
+      expiry-date: "2026-11-01"
 
 argon2:
   iterations: 2
   memory: 19456
   parallelism: 1
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: one-login-simulator
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: ${ONE_LOGIN_SIMULATOR_CLIENT_ID}
+        provider:
+          one-login:
+            issuer-uri: ${ONE_LOGIN_SIMULATOR_ISSUER_URL}
+
+one-login:
+  jwt:
+    public.key: ${ONE_LOGIN_SIMULATOR_PUBLIC_KEY}
+    private.key: ${ONE_LOGIN_SIMULATOR_PRIVATE_KEY}
+  did.uri: ${ONE_LOGIN_SIMULATOR_DID_URL}
