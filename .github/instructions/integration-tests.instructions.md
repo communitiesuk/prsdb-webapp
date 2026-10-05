@@ -48,6 +48,12 @@ class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
 - Prefer **properties** over factory methods
 - Prefer **custom classes** over raw `Locator`
 
+### Page Validation
+`BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, and checks the page
+`<title>` matches `[Error: ]<heading> - <service name> - GOV.UK`. When `STRICT_TITLE_CHECK` is enabled it also checks
+the title heading matches the h1 text; override `hasCustomTitle = true` on page objects whose title deliberately
+differs from the h1, and `usesSharedLayout = false` on static pages that don't use the shared layout.
+
 ## Components
 
 Page objects use reusable components from `integration/pageObjects/components/` (35+ components):

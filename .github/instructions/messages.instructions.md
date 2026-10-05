@@ -54,8 +54,8 @@ confirmation:
       one: We've sent you an email...
 
 # In default.yml — keys are used as-is, no prefix
-notFound.title: 'Page not found - {0,,serviceName} - GOV.UK'
-notFound.header: Page not found
+serviceName: Register your rental property
+pageTitleFormat: '{0,,heading} - {1,,serviceName} - GOV.UK'
 
 # In commonText.yml — keys are auto-prefixed with "commonText."
 yes: 'Yes'
@@ -66,9 +66,12 @@ no: 'No'
 
 | Type | Pattern | Example |
 |------|---------|---------|
-| Page titles | `{feature}.title` | `registerProperty.title` |
-| Page headings | `{feature}.heading` | `registerProperty.heading` |
-| Error messages | `{errorType}.{component}` | `notFound.header` |
+| Page headings (also used as the page title) | `{feature}.heading` | `registerProperty.heading` |
+| Page title overrides (only where the heading is unsuitable as a title) | `{feature}.pageTitle` | `landlordDetails.pageTitle` |
+| Error messages | `{errorType}.{component}` | `error.notFound.header` |
+
+Page titles must not include the service name or `GOV.UK` — the layout appends them using `pageTitleFormat` (see
+`frontend.instructions.md`).
 | Form labels | `forms.{formName}.{fieldName}` | In feature YAML or `form.yml` |
 | Common UI | `common.{element}` | `common.confirmationPage.whatHappensNext` |
 | Parameterised | `{0,,paramName}` syntax | `You have {0,,number} outstanding actions` |
