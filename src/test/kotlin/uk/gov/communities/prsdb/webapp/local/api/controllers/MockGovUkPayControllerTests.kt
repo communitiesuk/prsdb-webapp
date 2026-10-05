@@ -18,10 +18,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
-import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import java.time.Instant
-import java.time.LocalDate
 import java.util.Optional
 
 class MockGovUkPayControllerTests {
@@ -342,14 +341,13 @@ class MockGovUkPayControllerTests {
     }
 
     private fun createSavedPayment(status: PaymentStatus) =
-        Payment().apply {
-            paymentId = SAVED_PAYMENT_ID
-            amountInPence = 2000
-            reference = "saved-reference"
-            paymentCreatedAt = Instant.parse("2025-01-15T10:00:00Z")
-            forPeriodEnding = LocalDate.of(2026, 1, 15)
-            this.status = status
-        }
+        createPayment(
+            paymentId = SAVED_PAYMENT_ID,
+            amountInPence = 2000,
+            reference = "saved-reference",
+            paymentCreatedAt = Instant.parse("2025-01-15T10:00:00Z"),
+            status = status,
+        )
 
     companion object {
         private const val SAVED_PAYMENT_ID = "saved-payment"

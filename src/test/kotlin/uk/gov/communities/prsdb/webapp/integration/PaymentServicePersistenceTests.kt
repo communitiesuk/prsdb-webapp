@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.fail
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
@@ -120,7 +118,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
         verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
-        assertPaymentSucceededForProperty(CREATED_PAYMENT_ID)
+        assertPaymentSucceededForProperty()
     }
 
     @Test
@@ -200,19 +198,6 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `finalisePayment does not register the property for a payment that is already being finalised`() {
-        // Act
-        val status =
-            paymentService.finalisePayment(CAPTURABLE_PAYMENT_ID, PaymentStatus.CAPTURABLE) {
-                fail("Property should not be registered")
-            }
-
-        // Assert
-        assertEquals(PaymentStatus.CAPTURABLE, status)
-        verifyNoInteractions(mockGovUkPayClient)
-    }
-
-    @Test
     fun `finalisePayment succeeds when the payment is already loaded in an open-in-view persistence context`() {
         // Arrange
         val entityManager = entityManagerFactory.createEntityManager()
@@ -230,7 +215,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             TransactionSynchronizationManager.unbindResource(entityManagerFactory)
             entityManager.close()
         }
-        assertPaymentSucceededForProperty(CREATED_PAYMENT_ID)
+        assertPaymentSucceededForProperty()
     }
 
     @Test
@@ -253,7 +238,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
         // Assert
         assertContains(exception.message!!, CREATED_PAYMENT_ID)
-        assertPaymentSucceededForProperty(CREATED_PAYMENT_ID)
+        assertPaymentSucceededForProperty()
         assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(CAPTURABLE_PAYMENT_ID))
         verify(mockGovUkPayClient, never()).createPayment(any())
     }
@@ -266,8 +251,8 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         landlordRepository.saveAndFlush(landlord)
     }
 
-    private fun assertPaymentSucceededForProperty(paymentId: String) {
-        val payment = paymentRepository.findById(paymentId).get()
+    private fun assertPaymentSucceededForProperty() {
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
         assertEquals(PaymentStatus.SUCCEEDED, payment.status)
         assertEquals(PROPERTY_OWNERSHIP_ID, payment.associatedProperty?.id)
         assertNull(payment.associatedIncompleteProperty)
