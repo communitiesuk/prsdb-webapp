@@ -91,11 +91,11 @@ class LettingAgentUpdateLicensingJourneyTests : IntegrationTestWithMutableData("
         val checkYourAnswersPage = assertPageIs(page, CheckLicensingAnswersPageLettingAgentUpdate::class, urlArguments)
 
         assertContains(checkYourAnswersPage.summaryName.getText(), "You have removed this property’s licence")
-        assertThat(checkYourAnswersPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
+        assertThat(checkYourAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
         checkYourAnswersPage.confirm()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
-        assertThat(propertyDetailsPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
+        assertThat(propertyDetailsPage.summaryList.licensingTypeRow.value).containsText("None")
     }
 
     @Test
