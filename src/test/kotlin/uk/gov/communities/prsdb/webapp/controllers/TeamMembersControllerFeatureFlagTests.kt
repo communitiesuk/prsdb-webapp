@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 
 // TODO PDJB-1828: Delete this class when the MULTI_USER_ORGANISATIONS flag is removed
+// TODO PDJB-1819: Change the mock user roles to ORG_ADMIN
 class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() {
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
