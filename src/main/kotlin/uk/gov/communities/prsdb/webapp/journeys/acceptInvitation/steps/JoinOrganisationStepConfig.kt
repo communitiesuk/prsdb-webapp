@@ -25,7 +25,7 @@ class JoinOrganisationStepConfig(
                     invitationService.getInvitationForJourneyIdOrNull(state.journeyId)
                         ?.organisationalLandlord
                         ?.name
-                        ?: throw PrsdbWebException("Organisation invitation name not found for journey ${state.journeyId}")
+                        ?: throw PrsdbWebException("Could not find an organisation name for invitation journey ${state.journeyId}")
                 ),
         )
 
