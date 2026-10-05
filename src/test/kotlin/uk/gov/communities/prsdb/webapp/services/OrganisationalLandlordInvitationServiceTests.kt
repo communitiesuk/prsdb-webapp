@@ -35,7 +35,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `associates an invitation token with a journey in the session`() {
+    fun `addJourneyIdInvitationTokenPairToSession adds the journey id and invitation token to the session`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(null)
@@ -52,7 +52,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns the invitation for a token associated with the journey`() {
+    fun `getInvitationForJourneyIdOrNull returns the invitation for a token associated with the journey`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
@@ -67,7 +67,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns null when the journey has no stored token`() {
+    fun `getInvitationForJourneyIdOrNull returns null when the journey has no stored token`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(null)
@@ -81,7 +81,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns null when the stored token is malformed`() {
+    fun `getInvitationForJourneyIdOrNull returns null when the stored token is malformed`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to "not-a-uuid"))
@@ -95,7 +95,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns null when no invitation matches the stored token`() {
+    fun `getInvitationForJourneyIdOrNull returns null when no invitation matches the stored token`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
