@@ -15,12 +15,13 @@ class BasicJourneysSimulation : Simulation() {
                 "gatling.basic.registrationSubject must be provided for the registration journey"
             }
         require(registrationSubject != config.landlordSubject) {
-            "The registration subject must be distinct from the seeded phone-update landlord"
+            "The registration subject must be distinct from the seeded phone/email-update landlord"
         }
         val phoneUpdate =
             scenario("Seeded landlord phone update")
                 .exec(OneLoginAuthentication.chain(config))
                 .exec(LandlordPhoneUpdateJourney.chain(config))
+                .exec(LandlordEmailUpdateJourney.chain(config))
                 .injectOpen(atOnceUsers(1))
         val registration =
             scenario("Fresh individual landlord registration")
@@ -41,6 +42,7 @@ class BasicJourneysSimulation : Simulation() {
                     config,
                     OneLoginAuthentication.applicationRequestNames +
                         LandlordPhoneUpdateJourney.requestNames +
+                        LandlordEmailUpdateJourney.requestNames +
                         OneLoginAuthentication.loginRequestNames(REGISTRATION_LOGIN_PREFIX) +
                         IndividualLandlordRegistrationJourney.requestNames,
                 ),

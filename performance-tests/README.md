@@ -14,7 +14,7 @@ performance-tests/
     BaseUrlConfig.kt                   # Resolves the target base URL
     RegisterAsLandlordGetSimulation.kt # GET-only example
     FormSubmissionPostSimulation.kt    # GET -> extract CSRF -> POST example
-    BasicJourneysSimulation.kt         # Serial one-user populations: phone update -> registration
+    BasicJourneysSimulation.kt         # Serial one-user populations: phone/email updates -> registration
   src/gatling/resources/fixtures/       # Synthetic One Login identity-verification claims
   src/main/kotlin/                     # Reusable HTTP chains and run configuration
   src/test/kotlin/                     # Deterministic Gatling contract tests
@@ -95,7 +95,7 @@ the existing toy simulations continue to use `BaseUrlConfig` unchanged.
 | `gatling.target` | Explicit `local` or `nft` target |
 | `gatling.baseUrl` | Application origin, including the local/worktree port |
 | `gatling.simulatorUrl` | Official One Login simulator origin |
-| `gatling.basic.landlordSubject` | Seeded synthetic landlord for the phone-update slice |
+| `gatling.basic.landlordSubject` | Seeded synthetic landlord for the phone and email update slices |
 | `gatling.basic.registrationSubject` | Fresh, unregistered synthetic subject for registration; must differ from `landlordSubject` |
 | `gatling.basic.mode` | `baseline` records timings; `gated` applies explicit timing limits |
 | `gatling.local.basic.maxResponseTimeMs` / `meanResponseTimeMs` | Local gated limits, positive integer milliseconds |
@@ -174,7 +174,10 @@ at its preflight if that subject already has a landlord registration.
 
 The basic suite first signs in as seeded landlord Alexander Smith, opens the rendered phone-change link, preserves
 the journey URL and CSRF token, submits the fictional London number `02079460123`, then checks that exact number
-in the saved phone summary row. A separate sequential user signs in with the unregistered registration subject,
+in the saved phone summary row. It then follows the rendered email-change link in that same session, preserves
+the email journey URL and hidden fields, submits `performance-landlord@example.invalid`, and checks that address
+in the saved email summary row. Run with the local profile and do not enable `use-notify`; local email
+notifications are handled by the stub service. A separate sequential user signs in with the unregistered registration subject,
 performs identity verification with synthetic claims, accepts the privacy notice, and completes the individual
 manual-address registration. Registration clears the app session to refresh the user's roles, so the journey
 reauthenticates with the same subject before checking the confirmation registration number and following the
@@ -183,14 +186,14 @@ The two one-user populations run serially, so no app or simulator cookies cross 
 redirect is a separate named request; there is one active virtual user at a time, no embedded-resource fetching
 and no load injection.
 
-Reset/reseed between comparable baselines so the seeded phone value and registration subject return to their
+Reset/reseed between comparable baselines so the seeded phone/email values and registration subject return to their
 initial state. The registration fixtures are synthetic and do not contain real identity data.
 For a local timing-gate experiment, change the mode to `gated` and supply both
 `gatling.local.basic.maxResponseTimeMs` and `gatling.local.basic.meanResponseTimeMs`. These are explicit local
 limits, not agreed NFT SLAs. Simulator front-channel requests are checked for correctness but excluded from
 application timing gates; the application callback includes its back-channel authentication work.
 
-The local basic slice now covers seeded phone update and individual registration through the manual-address
+The local basic slice now covers seeded phone and email updates and individual registration through the manual-address
 branch. It does not cover other registration branches, council or letting-agent journeys, or run the scheduled
 NFT workflow. See ADRs 0035-0040 for the basic/load distinction, API-level measurement, runner, scheduling,
 Gatling and fixture-restoration decisions.

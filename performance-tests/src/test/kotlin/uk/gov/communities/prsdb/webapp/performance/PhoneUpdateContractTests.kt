@@ -22,10 +22,20 @@ class PhoneUpdateContractTests {
 
             assertEquals(0, result.exitCode, result.output)
             assertEquals(
-                listOf("GET entry", "GET form", "POST form", "GET details"),
+                listOf(
+                    "GET phone entry",
+                    "GET phone form",
+                    "POST phone form",
+                    "GET details",
+                    "GET email entry",
+                    "GET email form",
+                    "POST email form",
+                    "GET details",
+                ),
                 server.requests.toList(),
             )
             assertEquals(LandlordPhoneUpdateJourney.PHONE_NUMBER, server.submittedPhone)
+            assertEquals(LandlordEmailUpdateJourney.EMAIL_ADDRESS, server.submittedEmail)
         }
     }
 
@@ -35,7 +45,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertEquals(listOf("GET entry"), server.requests.toList())
+            assertEquals(listOf("GET phone entry"), server.requests.toList())
         }
     }
 
@@ -45,7 +55,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertFalse(server.requests.contains("POST form"))
+            assertFalse(server.requests.contains("POST phone form"))
         }
     }
 
@@ -55,7 +65,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertEquals("POST form", server.requests.last())
+            assertEquals("POST phone form", server.requests.last())
         }
     }
 
@@ -65,7 +75,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertEquals("POST form", server.requests.last())
+            assertEquals("POST phone form", server.requests.last())
         }
     }
 
@@ -75,7 +85,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertEquals("POST form", server.requests.last())
+            assertEquals("POST phone form", server.requests.last())
         }
     }
 
@@ -85,7 +95,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertFalse(server.requests.contains("POST form"))
+            assertFalse(server.requests.contains("POST phone form"))
         }
     }
 
@@ -95,7 +105,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertFalse(server.requests.contains("POST form"))
+            assertFalse(server.requests.contains("POST phone form"))
         }
     }
 
@@ -105,7 +115,7 @@ class PhoneUpdateContractTests {
             val result = runSimulation(server)
 
             assertEquals(2, result.exitCode, result.output)
-            assertFalse(server.requests.contains("POST form"))
+            assertFalse(server.requests.contains("POST phone form"))
         }
     }
 
@@ -148,14 +158,19 @@ class PhoneUpdateContractTests {
         val requests = ConcurrentLinkedQueue<String>()
         var submittedPhone: String? = null
             private set
+        var submittedEmail: String? = null
+            private set
         private val step = "/landlord/landlord-details/update-phone-number/phone-number"
+        private val emailStep = "/landlord/landlord-details/update-email/email"
+        private val emailJourneyQuery = "journeyId=email-synthetic"
+        private var detailsCount = 0
 
         init {
             server.createContext("/") { exchange ->
                 val (status, body) =
                     when {
                         exchange.requestURI.path == step && exchange.requestURI.rawQuery == null -> {
-                            requests.add("GET entry")
+                            requests.add("GET phone entry")
                             if (issueCookie) {
                                 exchange.responseHeaders.add("Set-Cookie", "SESSION=phone-session; Path=/; HttpOnly")
                             }
@@ -163,7 +178,7 @@ class PhoneUpdateContractTests {
                             entryStatus to ""
                         }
                         exchange.requestURI.path == step && exchange.requestMethod == "GET" -> {
-                            requests.add("GET form")
+                            requests.add("GET phone form")
                             val csrf =
                                 if (includeCsrf) """<input type="hidden" name="_csrf" value="$csrfValue">""" else ""
                             if (exchange.requestURI.rawQuery == "journeyId=synthetic%2Bjourney") {
@@ -175,7 +190,7 @@ class PhoneUpdateContractTests {
                             }
                         }
                         exchange.requestURI.path == step && exchange.requestMethod == "POST" -> {
-                            requests.add("POST form")
+                            requests.add("POST phone form")
                             val fields =
                                 exchange.requestBody.readAllBytes().toString(StandardCharsets.UTF_8).split("&").associate {
                                     val parts = it.split("=", limit = 2)
@@ -194,13 +209,51 @@ class PhoneUpdateContractTests {
                                 403 to "Invalid journey submission"
                             }
                         }
+                        exchange.requestURI.path == emailStep &&
+                            exchange.requestMethod == "GET" &&
+                            exchange.requestURI.rawQuery == null -> {
+                            requests.add("GET email entry")
+                            exchange.responseHeaders.add("Location", "$emailStep?$emailJourneyQuery")
+                            302 to ""
+                        }
+                        exchange.requestURI.path == emailStep &&
+                            exchange.requestMethod == "GET" &&
+                            exchange.requestURI.rawQuery == emailJourneyQuery -> {
+                            requests.add("GET email form")
+                            200 to """<form method="post" action=""><input type="hidden" name="_csrf" value="email-csrf"><input name="emailAddress"></form>"""
+                        }
+                        exchange.requestURI.path == emailStep && exchange.requestMethod == "POST" -> {
+                            requests.add("POST email form")
+                            val fields =
+                                exchange.requestBody.readAllBytes().toString(StandardCharsets.UTF_8).split("&").associate {
+                                    val parts = it.split("=", limit = 2)
+                                    URLDecoder.decode(parts[0], StandardCharsets.UTF_8) to
+                                        URLDecoder.decode(parts.getOrElse(1) { "" }, StandardCharsets.UTF_8)
+                                }
+                            submittedEmail = fields["emailAddress"]
+                            if (
+                                fields["_csrf"] == "email-csrf" &&
+                                exchange.requestURI.rawQuery == emailJourneyQuery &&
+                                exchange.requestHeaders.getFirst("Cookie").orEmpty().contains("SESSION=phone-session")
+                            ) {
+                                exchange.responseHeaders.add("Location", "/landlord/landlord-details")
+                                302 to ""
+                            } else {
+                                403 to "Invalid email journey submission"
+                            }
+                        }
                         exchange.requestURI.path == "/landlord/landlord-details" -> {
                             requests.add("GET details")
+                            detailsCount++
                             val saved = if (persistPhone) submittedPhone else "07123456789"
                             200 to """
                                 <div class="govuk-summary-list__row">
                                   <dd class="govuk-summary-list__value">$saved</dd>
                                   <dd><a href="$step">Change phone number</a></dd>
+                                </div>
+                                <div class="govuk-summary-list__row">
+                                  <dd class="govuk-summary-list__value">${if (detailsCount > 1) submittedEmail else "old@example.invalid"}</dd>
+                                  <dd><a href="$emailStep">Change email</a></dd>
                                 </div>
                                 """.trimIndent()
                         }
