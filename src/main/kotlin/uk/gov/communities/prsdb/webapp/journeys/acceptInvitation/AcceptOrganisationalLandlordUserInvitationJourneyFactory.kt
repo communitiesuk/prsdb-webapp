@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 
 @PrsdbWebService
-class AcceptInvitationJourneyFactory(
+class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<AcceptInvitationJourney>,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
@@ -77,10 +77,7 @@ class AcceptInvitationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(): String {
-        val state = stateFactory.getObject()
-        return state.initializeState(null)
-    }
+    fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
 @JourneyFrameworkComponent("acceptInvitationJourney")
@@ -96,8 +93,10 @@ class AcceptInvitationJourney(
 ) : AbstractJourneyState(journeyStateService),
     AcceptInvitationJourneyState {
     override fun generateJourneyId(seed: Any?): String {
+        val token = seed as? String
+        val tokenDescription = token?.let { " for token $it" }.orEmpty()
         return super<AbstractJourneyState>.generateJourneyId(
-            "Accept invitation journey at time ${System.currentTimeMillis()}",
+            "Accept organisational landlord user invitation journey$tokenDescription at time ${System.currentTimeMillis()}",
         )
     }
 }

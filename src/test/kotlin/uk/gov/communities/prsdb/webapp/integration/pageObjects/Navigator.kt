@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
@@ -1836,8 +1836,8 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptInvitationJourney(): ValidateTokenPage {
-        navigate(AcceptInvitationController.ACCEPT_INVITATION_ROUTE)
+    fun goToAcceptInvitationJourney(token: String): ValidateTokenPage {
+        navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
         return createValidPage(page, ValidateTokenPage::class)
     }
 
