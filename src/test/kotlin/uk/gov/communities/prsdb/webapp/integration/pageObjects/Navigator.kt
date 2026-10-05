@@ -152,7 +152,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
@@ -263,7 +262,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
@@ -300,7 +298,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitati
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -698,36 +695,34 @@ class Navigator(
             PropertyRegistrationCyaStep.ROUTE_SEGMENT,
         )
 
-    fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
+    fun goToPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+    fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
+    fun goToPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder
                 .beforePropertyRegistrationCheckAnswers()
-                // The restructured "Property details" task includes the number of bedrooms for all properties, so it
-                // must be set for that task to be complete even when the property is unoccupied.
                 .withBedrooms()
                 .withAdditionalData("cachedOccupied", "false")
                 .build(),
@@ -791,14 +786,6 @@ class Navigator(
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationLicensingType().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(LicensingTypeStep.ROUTE_SEGMENT)
-        return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
-    }
-
     fun skipToPropertyRegistrationOccupiedLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOccupiedLicensingType().build(),
@@ -807,28 +794,12 @@ class Navigator(
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationSelectiveLicence().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(SelectiveLicenceStep.ROUTE_SEGMENT)
-        return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
-    }
-
     fun skipToPropertyRegistrationOccupiedSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutSelectiveLicence().build(),
         )
         navigateToPropertyRegistrationJourneyStep(SelectiveLicenceStep.ROUTE_SEGMENT)
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHmoMandatoryLicence().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(HmoMandatoryLicenceStep.ROUTE_SEGMENT)
-        return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationOccupiedHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
@@ -847,14 +818,6 @@ class Navigator(
         return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHmoAdditionalLicence().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(HmoAdditionalLicenceStep.ROUTE_SEGMENT)
-        return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
-    }
-
     fun skipToPropertyRegistrationOccupancyPage(): OccupancyFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy().build(),
@@ -863,25 +826,9 @@ class Navigator(
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRestructuredOccupancyPage(): OccupancyFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(OccupiedStep.ROUTE_SEGMENT)
-        return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHouseholds().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(HouseholdStep.ROUTE_SEGMENT)
-        return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-    }
-
     fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforeTenancyDetails(),
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
@@ -894,14 +841,6 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)
         return createValidPage(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationPeople().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(TenantsStep.ROUTE_SEGMENT)
-        return createValidPage(page, NumberOfPeopleFormPagePropertyRegistration::class)
     }
 
     fun skipToTenancyDetailsPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
@@ -920,14 +859,6 @@ class Navigator(
         return createValidPage(page, NumberOfBedroomsFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRentIncludesBillsPage(): RentIncludesBillsFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRentIncludesBills().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(RentIncludesBillsStep.ROUTE_SEGMENT)
-        return createValidPage(page, RentIncludesBillsFormPagePropertyRegistration::class)
-    }
-
     fun skipToTenancyDetailsRentIncludesBillsPage(): RentIncludesBillsFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforeTenancyDetailsRentIncludesBills().build(),
@@ -936,28 +867,12 @@ class Navigator(
         return createValidPage(page, RentIncludesBillsFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationBillsIncluded().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
-        return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
-    }
-
     fun skipToTenancyDetailsBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforeTenancyDetailsBillsIncluded().build(),
         )
         navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
         return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationFurnishedStatusPage(): FurnishedStatusFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFurnished().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(FurnishedStatusStep.ROUTE_SEGMENT)
-        return createValidPage(page, FurnishedStatusFormPagePropertyRegistration::class)
     }
 
     fun skipToTenancyDetailsFurnishedStatusPage(): FurnishedStatusFormPagePropertyRegistration {
@@ -974,24 +889,6 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(RentFrequencyStep.ROUTE_SEGMENT)
         return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRentFrequency().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(RentFrequencyStep.ROUTE_SEGMENT)
-        return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationRentAmountPage(
-        rentFrequency: RentFrequency = RentFrequency.MONTHLY,
-    ): RentAmountFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRentAmount(rentFrequency).build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(RentAmountStep.ROUTE_SEGMENT)
-        return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
     fun skipToTenancyDetailsRentAmountPage(rentFrequency: RentFrequency = RentFrequency.MONTHLY): RentAmountFormPagePropertyRegistration {
@@ -1203,20 +1100,6 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
         return createValidPage(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
-        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().build())
-        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckAnswersPageWithJointLandlords(): CheckAnswersPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithJointLandlords().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPageWithSelectiveLicence(): CheckAnswersPagePropertyRegistration {
@@ -1448,24 +1331,6 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
-    fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
@@ -1474,18 +1339,6 @@ class Navigator(
         return createValidPage(
             page,
             OccupancyFormPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        navigate(
-            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-                "/${PropertyRegistrationCyaStep.ROUTE_SEGMENT}",
-        )
-        return createValidPage(
-            page,
-            CheckOccupancyAnswersPagePropertyDetailsUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

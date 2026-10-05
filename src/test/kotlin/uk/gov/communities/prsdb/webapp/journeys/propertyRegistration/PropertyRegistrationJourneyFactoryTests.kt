@@ -11,7 +11,6 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
@@ -35,7 +34,7 @@ class PropertyRegistrationJourneyFactoryTests {
     fun `createJourneySteps treats contact answers as unknown checkable elements when the CORRESPONDENCE_ADDRESS flag is off`(
         checkingAnswersFor: String,
     ) {
-        val factory = factoryFor(checkingAnswersFor, correspondenceEnabled = false, restructureEnabled = true)
+        val factory = factoryFor(checkingAnswersFor, correspondenceEnabled = false)
 
         val exception = assertThrows<IllegalStateException> { factory.createJourneySteps() }
 
@@ -46,7 +45,6 @@ class PropertyRegistrationJourneyFactoryTests {
         checkingAnswersFor: String?,
         delegateEnabled: Boolean = false,
         correspondenceEnabled: Boolean = false,
-        restructureEnabled: Boolean = false,
     ): PropertyRegistrationJourneyFactory {
         val state = mock<PropertyRegistrationJourneyState> { on { this.checkingAnswersFor } doReturn checkingAnswersFor }
         val stateFactory = mock<ObjectFactory<PropertyRegistrationJourneyState>> { on { getObject() } doReturn state }
@@ -54,7 +52,6 @@ class PropertyRegistrationJourneyFactoryTests {
             mock<FeatureFlagManager> {
                 on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateEnabled
                 on { checkFeature(CORRESPONDENCE_ADDRESS) } doReturn correspondenceEnabled
-                on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn restructureEnabled
             }
         val landlord = mock<Landlord> { on { email } doReturn "original.landlord@example.com" }
         val userToLandlordService = mock<UserToLandlordService> { on { getCurrentLandlordForUser() } doReturn landlord }

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
-import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -139,14 +139,15 @@ class ComplianceStatusDataModelTests {
     }
 
     @Test
-    fun `fromPropertyCompliance sets provideLaterDeadline to the supplied value`() {
+    fun `fromPropertyCompliance sets provideLaterDeadline from the property ownership`() {
         // Arrange
-        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
-        val expectedDeadline = LocalDate.of(2025, 2, 12)
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(propertyIsOccupied = true)
+        val propertyOwnership = propertyCompliance.propertyOwnership
+        propertyOwnership.lastOccupiedDate = propertyOwnership.registrationDate
+        val expectedDeadline = propertyOwnership.registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
 
         // Act
-        val complianceStatusDataModel =
-            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, provideLaterDeadline = expectedDeadline)
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
         // Assert
         assertEquals(expectedDeadline, complianceStatusDataModel.provideLaterDeadline)

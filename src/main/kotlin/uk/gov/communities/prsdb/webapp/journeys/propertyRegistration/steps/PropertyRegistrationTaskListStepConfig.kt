@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -38,15 +37,6 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
-        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
-        val sectionViewModels =
-            if (isSkippingEnabled) {
-                restructuredSectionViewModels(state)
-            } else {
-                legacySectionViewModels(state)
-            }
-
         val backUrlFromState =
             state
                 .backUrlKey
@@ -56,67 +46,13 @@ class PropertyRegistrationTaskListStepConfig(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
-            sectionViewModels,
-            numberSections = !isSkippingEnabled,
+            sectionViewModels(state),
+            numberSections = false,
             backUrl = backUrlFromState,
         )
     }
 
-    private fun legacySectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> {
-        val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
-        val registerTaskItems =
-            listOf(
-                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.propertyDetailsTask.addressTask),
-                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyDetailsTask.propertyTypeStep),
-                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", ownershipTypeStep),
-                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
-                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addTenancyInfo", state.occupationTask),
-            ) +
-                listOf(
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.register.inviteJointLandlords",
-                        state.ownershipAndLandlordsTask.jointLandlordsTask,
-                    ),
-                ) +
-                listOf(
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.gasSafety",
-                        state.gasSafetyTask,
-                    ),
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.electricalSafety",
-                        state.electricalSafetyTask,
-                    ),
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.epc",
-                        state.epcTask,
-                    ),
-                )
-
-        val registerSectionHeading =
-            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                "registerProperty.taskList.register.restructureAndSkipping.heading"
-            } else {
-                "registerProperty.taskList.register.heading"
-            }
-
-        return listOf(
-            TaskSectionViewModel(
-                registerSectionHeading,
-                "register-property",
-                registerTaskItems,
-            ),
-            TaskSectionViewModel(
-                "registerProperty.taskList.checkAndSubmit.heading",
-                "check-and-submit",
-                listOf(
-                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
-                ),
-            ),
-        )
-    }
-
-    private fun restructuredSectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
+    private fun sectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
         listOf(
             TaskSectionViewModel(
                 "registerProperty.taskList.aboutYourProperty.heading",

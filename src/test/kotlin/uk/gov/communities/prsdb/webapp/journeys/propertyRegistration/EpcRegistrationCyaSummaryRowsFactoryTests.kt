@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -40,7 +38,6 @@ import kotlin.test.assertTrue
 
 class EpcRegistrationCyaSummaryRowsFactoryTests {
     private val mockEpcCertificateUrlProvider: EpcCertificateUrlProvider = mock()
-    private val mockFeatureFlagManager: FeatureFlagManager = mock()
 
     private val mockHasEpcStep: HasEpcStep = mock()
     private val mockEpcAgeCheckStep: EpcAgeCheckStep = mock()
@@ -530,30 +527,9 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     }
 
     @Test
-    fun `createNonEpcRows returns provideEpcLaterOccupied when scenario is SKIPPED_OCCUPIED`() {
+    fun `createNonEpcRows returns provideThisLaterOccupied when scenario is SKIPPED_OCCUPIED`() {
         // Arrange
         setupStateForScenario(EpcScenario.SKIPPED_OCCUPIED)
-        val expectedRows =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
-                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied",
-                    null as String?,
-                ),
-            )
-
-        // Act
-        val rows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createNonEpcRows()
-
-        // Assert
-        assertEquals(expectedRows, rows)
-    }
-
-    @Test
-    fun `createNonEpcRows returns provideThisLaterOccupied when scenario is SKIPPED_OCCUPIED and isSkippingEnabled is true`() {
-        // Arrange
-        setupStateForScenario(EpcScenario.SKIPPED_OCCUPIED)
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         val expectedRows =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -568,7 +544,6 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             EpcRegistrationCyaSummaryRowsFactory(
                 mockEpcCertificateUrlProvider,
                 mockState,
-                mockFeatureFlagManager,
             ).createNonEpcRows()
 
         // Assert
@@ -576,30 +551,9 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     }
 
     @Test
-    fun `createNonEpcRows returns provideEpcLaterUnoccupied when scenario is SKIPPED_UNOCCUPIED`() {
+    fun `createNonEpcRows returns provideThisLaterUnoccupied when scenario is SKIPPED_UNOCCUPIED`() {
         // Arrange
         setupStateForScenario(EpcScenario.SKIPPED_UNOCCUPIED)
-        val expectedRows =
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
-                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied",
-                    null as String?,
-                ),
-            )
-
-        // Act
-        val rows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createNonEpcRows()
-
-        // Assert
-        assertEquals(expectedRows, rows)
-    }
-
-    @Test
-    fun `createNonEpcRows returns provideThisLaterUnoccupied when scenario is SKIPPED_UNOCCUPIED and isSkippingEnabled is true`() {
-        // Arrange
-        setupStateForScenario(EpcScenario.SKIPPED_UNOCCUPIED)
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         val expectedRows =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -614,7 +568,6 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             EpcRegistrationCyaSummaryRowsFactory(
                 mockEpcCertificateUrlProvider,
                 mockState,
-                mockFeatureFlagManager,
             ).createNonEpcRows()
 
         // Assert

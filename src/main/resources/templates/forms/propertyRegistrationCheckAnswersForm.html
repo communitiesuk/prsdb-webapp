@@ -35,7 +35,6 @@
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="warningTextKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="lettingAgentDelegation" type="java.util.List"*/-->
 <!--/*@thymesVar id="lettingAgentDelegationBodyText" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="showLettingAgentDelegationUnoccupiedPanel" type="java.lang.Boolean"*/-->
@@ -48,9 +47,6 @@
             <br>
             <span th:text="${propertyName}"></span>
         </h1>
-        <th:block th:if="${insetText == true}">
-            <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText</p>
-        </th:block>
         <h2 class="govuk-heading-l" th:text="#{${aboutPropertyHeadingKey}}"></h2>
         <h3 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
