@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import org.springframework.transaction.annotation.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import java.util.UUID
 
@@ -16,16 +16,13 @@ class OrganisationalLandlordInvitationService(
         journeyId: String,
         token: String,
     ) {
+        // TODO PDJB-1774: Clear this journey/token association when the invitation journey completes.
         val existingPairs = getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
         existingPairs.add(journeyId to token)
         session.setAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS, existingPairs)
     }
 
-    // TODO PDJB-1822: Replace this nullable lookup with the token validation used by the other invitation services
-    //  (throw PrsdbWebException for a missing/unknown token, or return a boolean validity check) once the
-    //  token is validated up front, so callers no longer need to handle null.
-    @Transactional(readOnly = true)
-    fun getOrganisationNameForJourneyIdOrNull(journeyId: String): String? {
+    fun getInvitationForJourneyIdOrNull(journeyId: String): OrganisationalLandlordInvitation? {
         val token =
             getJourneyIdInvitationTokenPairsFromSession()
                 ?.find { it.first == journeyId }
@@ -39,7 +36,7 @@ class OrganisationalLandlordInvitationService(
                 return null
             }
 
-        return invitationRepository.findByToken(tokenUuid)?.organisationalLandlord?.name
+        return invitationRepository.findByToken(tokenUuid)
     }
 
     @Suppress("UNCHECKED_CAST")
