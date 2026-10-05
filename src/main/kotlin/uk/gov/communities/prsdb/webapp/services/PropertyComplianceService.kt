@@ -205,15 +205,9 @@ class PropertyComplianceService(
                 )
 
         return compliances
-            .map {
-                ComplianceStatusDataModel.fromPropertyCompliance(
-                    it,
-                    provideLaterDeadline = getProvideLaterDeadline(it.propertyOwnership),
-                )
-            }.filter { it.shouldShowOnComplianceActionsPage }
+            .map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            .filter { it.shouldShowOnComplianceActionsPage }
     }
-
-    private fun getProvideLaterDeadline(propertyOwnership: PropertyOwnership): LocalDate? = propertyOwnership.provideLaterDeadline
 
     @Transactional
     fun updateGasSafety(

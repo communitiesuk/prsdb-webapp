@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentControl
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
@@ -66,11 +65,12 @@ class PropertyDetailsController(
 
         val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
-        val (propertyDetails, viewName) =
-            getPropertyDetailsViewModelAndView(
-                propertyOwnership,
-                showCorrespondenceSection,
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
                 isLandlordView = true,
+                messageSource = messageSource,
+                showCorrespondenceSection = showCorrespondenceSection,
             )
 
         val propertyComplianceDetails =
@@ -80,7 +80,7 @@ class PropertyDetailsController(
                 propertyOwnershipId = propertyOwnershipId,
             )
 
-        val modelAndView = ModelAndView(viewName)
+        val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
@@ -187,11 +187,12 @@ class PropertyDetailsController(
 
         val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
-        val (propertyDetails, viewName) =
-            getPropertyDetailsViewModelAndView(
-                propertyOwnership,
-                showCorrespondenceSection,
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
                 isLandlordView = false,
+                messageSource = messageSource,
+                showCorrespondenceSection = showCorrespondenceSection,
             )
 
         val landlordSummaryCards =
@@ -236,7 +237,7 @@ class PropertyDetailsController(
 
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
-        return viewName
+        return PROPERTY_DETAILS_VIEW
     }
 
     private fun buildNotificationBanner(
@@ -252,16 +253,6 @@ class PropertyDetailsController(
                 isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
                 isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
             ).messages
-
-    private fun getPropertyDetailsViewModelAndView(
-        propertyOwnership: PropertyOwnership,
-        showCorrespondenceSection: Boolean,
-        isLandlordView: Boolean,
-    ): Pair<PropertyDetailsViewModel, String> =
-        Pair(
-            PropertyDetailsViewModel(propertyOwnership, isLandlordView, messageSource, showCorrespondenceSection),
-            PROPERTY_DETAILS_VIEW,
-        )
 
     companion object {
         const val PROPERTY_DETAILS_VIEW = "propertyDetailsView"

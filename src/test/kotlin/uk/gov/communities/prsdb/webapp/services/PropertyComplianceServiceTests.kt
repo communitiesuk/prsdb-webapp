@@ -241,12 +241,7 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
-            nonCompliantProperties.map { compliance ->
-                ComplianceStatusDataModel.fromPropertyCompliance(
-                    compliance,
-                    provideLaterDeadline = compliance.propertyOwnership.provideLaterDeadline,
-                )
-            }
+            nonCompliantProperties.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
 
         // Act
         val returnedNonCompliantProperties =
@@ -298,7 +293,7 @@ class PropertyComplianceServiceTests {
 
     @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `getNonCompliantPropertiesForLandlord anchors the provide-later deadline to the registration date when the flag is enabled and the property was occupied since registration`() {
+    fun `getNonCompliantPropertiesForLandlord anchors the provide-later deadline to the registration date when the property was occupied since registration`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val registrationDate = LocalDate.of(2025, 3, 1)
@@ -332,7 +327,7 @@ class PropertyComplianceServiceTests {
 
     @Suppress("ktlint:standard:max-line-length")
     @Test
-    fun `getNonCompliantPropertiesForLandlord leaves the provide-later deadline null when the flag is enabled and the property was occupied after registration`() {
+    fun `getNonCompliantPropertiesForLandlord leaves the provide-later deadline null when the property was occupied after registration`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val registrationDate = LocalDate.of(2025, 3, 1)
