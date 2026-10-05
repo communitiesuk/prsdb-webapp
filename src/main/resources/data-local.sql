@@ -578,8 +578,7 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
        ('urn:fdc:gov.uk:2022:UVWXY', 5),
        ('urn:fdc:gov.uk:2022:UVWXY', 6);
 
--- Payments in each status. The local GOV.UK Pay stub only knows about payments created since the app started, so
--- starting a new payment for "1, Pending Payments Road" fails locally when reconciling its in-progress payments.
+-- Payments in each status. The local GOV.UK Pay mock restores these from the database when they're first requested.
 INSERT INTO payment (payment_id, created_date, amount_in_pence, reference, payment_created_at, for_period_ending, status,
                      paying_user_id, associated_property_id, associated_incomplete_property_user_id,
                      associated_incomplete_property_saved_journey_state_id)

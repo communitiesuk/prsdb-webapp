@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import java.net.URI
@@ -32,6 +36,9 @@ import kotlin.random.Random
  * Attributes that the real API only returns in circumstances this mock can't produce (e.g. Stripe fees, Worldpay SCA
  * exemptions, recurring payment agreements, corporate card surcharges, 3D Secure, digital wallets) are omitted, as they
  * would be for a real payment made using a test (sandbox) account.
+ *
+ * Payments are held in memory, so any payment not created since the app started (e.g. seeded by data-local.sql) is
+ * restored from our database with the status we last recorded for it.
  */
 @Profile("local")
 @PrsdbRestController
@@ -39,6 +46,7 @@ import kotlin.random.Random
 class MockGovUkPayController(
     @Value("\${server.port}") private val serverPort: String,
     private val objectMapper: ObjectMapper,
+    private val paymentRepository: PaymentRepository,
 ) {
     private val payments = ConcurrentHashMap<String, StoredPayment>()
 
@@ -75,7 +83,7 @@ class MockGovUkPayController(
                 metadata = request.optJSONObject("metadata"),
                 cardholderName = prefilledDetails?.optStringOrNull("cardholder_name"),
                 billingAddress = prefilledDetails?.optJSONObject("billing_address"),
-                providerId = Random.nextLong(1_000_000_000L, 9_999_999_999L).toString(),
+                providerId = generateProviderId(),
                 chargeToken = UUID.randomUUID().toString(),
                 createdDate = Instant.now().toString(),
             )
@@ -89,7 +97,7 @@ class MockGovUkPayController(
     fun mockCardPage(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
-        val payment = payments[paymentId] ?: return notFound()
+        val payment = findPayment(paymentId) ?: return notFound()
         if (payment.delayedCapture) {
             payment.markCapturable()
         } else {
@@ -103,7 +111,7 @@ class MockGovUkPayController(
     fun getPayment(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
-        val payment = payments[paymentId] ?: return notFound()
+        val payment = findPayment(paymentId) ?: return notFound()
         return jsonResponse(HttpStatus.OK, payment.toResponseJson())
     }
 
@@ -111,7 +119,7 @@ class MockGovUkPayController(
     fun capturePayment(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
-        val payment = payments[paymentId] ?: return notFound()
+        val payment = findPayment(paymentId) ?: return notFound()
         if (payment.status != GovUkPayPaymentStatus.CAPTURABLE) {
             return jsonResponse(
                 HttpStatus.BAD_REQUEST,
@@ -126,12 +134,48 @@ class MockGovUkPayController(
     fun cancelPayment(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
-        val payment = payments[paymentId] ?: return notFound()
+        val payment = findPayment(paymentId) ?: return notFound()
         if (payment.finished) {
             return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P0501", "Cancellation of payment failed"))
         }
         payment.markCancelled()
         return ResponseEntity.noContent().build()
+    }
+
+    private fun findPayment(paymentId: String): StoredPayment? {
+        payments[paymentId]?.let { return it }
+        val savedPayment = paymentRepository.findByIdOrNull(paymentId) ?: return null
+        return payments.computeIfAbsent(paymentId) { savedPayment.toStoredPayment() }
+    }
+
+    private fun Payment.toStoredPayment(): StoredPayment {
+        val storedPayment =
+            StoredPayment(
+                paymentId = paymentId,
+                amount = amountInPence,
+                reference = reference,
+                description = "Payment restored from the PRSDB database",
+                returnUrl = "",
+                language = "en",
+                email = null,
+                delayedCapture = true,
+                moto = false,
+                authorisationMode = "web",
+                metadata = null,
+                cardholderName = null,
+                billingAddress = null,
+                providerId = generateProviderId(),
+                chargeToken = UUID.randomUUID().toString(),
+                createdDate = paymentCreatedAt.toString(),
+            )
+        when (status) {
+            PaymentStatus.CREATED -> {}
+            PaymentStatus.CAPTURABLE -> storedPayment.markCapturable()
+            PaymentStatus.SUCCEEDED -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
+            PaymentStatus.FAILED -> storedPayment.markFailed()
+            PaymentStatus.CANCELLED -> storedPayment.markCancelled()
+        }
+        return storedPayment
     }
 
     private fun validateCreatePaymentRequest(
@@ -268,6 +312,8 @@ class MockGovUkPayController(
         return (1..26).map { chars[Random.nextInt(chars.length)] }.joinToString("")
     }
 
+    private fun generateProviderId(): String = Random.nextLong(1_000_000_000L, 9_999_999_999L).toString()
+
     private class StoredPayment(
         val paymentId: String,
         val amount: Int,
@@ -303,10 +349,14 @@ class MockGovUkPayController(
             cardEntered = true
         }
 
-        fun markCaptured() {
+        fun markCaptured(at: Instant = Instant.now()) {
             status = GovUkPayPaymentStatus.SUCCESS
             cardEntered = true
-            capturedAt = Instant.now()
+            capturedAt = at
+        }
+
+        fun markFailed() {
+            status = GovUkPayPaymentStatus.FAILED
         }
 
         fun markCancelled() {
