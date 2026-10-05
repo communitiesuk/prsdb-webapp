@@ -20,8 +20,12 @@ class JoinOrganisationStepConfig(
         mapOf(
             "organisationName" to
                 (
-                    invitationService.getOrganisationNameForJourneyIdOrNull(state.journeyId)
-                        ?: throw PrsdbWebException("Organisation invitation name not found for journey ${state.journeyId}")
+                    // TODO PDJB-1822: Cache the validated invitation or organisation name in journey state
+                    // to avoid this repeated lookup.
+                    invitationService.getInvitationForJourneyIdOrNull(state.journeyId)
+                        ?.organisationalLandlord
+                        ?.name
+                        ?: throw PrsdbWebException("Could not find an organisation name for invitation journey ${state.journeyId}")
                 ),
         )
 

@@ -11,31 +11,28 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController.Companion.ACCEPT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptOrganisationalLandlordUserInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @PrsdbController
 @RequestMapping(ACCEPT_INVITATION_ROUTE)
-class AcceptInvitationController(
-    private val journeyFactory: AcceptInvitationJourneyFactory,
+class AcceptOrganisationalLandlordUserInvitationController(
+    private val journeyFactory: AcceptOrganisationalLandlordUserInvitationJourneyFactory,
     private val invitationService: OrganisationalLandlordInvitationService,
 ) {
     @GetMapping
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     fun startJourney(
-        @RequestParam(value = TOKEN, required = false) token: String?,
+        @RequestParam(value = TOKEN, required = true) token: String,
     ): ModelAndView {
-        val journeyId = journeyFactory.initializeJourneyState()
-        // TODO PDJB-1822: Make the token param required and validate it here, before the journey starts
-        //  (redirect to the invalid link page if it is missing or doesn't match an invitation),
-        //  rather than accepting a null token and only discovering it is unresolvable in the journey.
-        token?.let { invitationService.addJourneyIdInvitationTokenPairToSession(journeyId, it) }
+        val journeyId = journeyFactory.initializeJourneyState(token)
+        invitationService.addJourneyIdInvitationTokenPairToSession(journeyId, token)
         val startUrl =
             JourneyStateService.urlWithJourneyState(
                 "$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",

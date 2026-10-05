@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.controllers.AcceptInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
@@ -1832,12 +1832,8 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptInvitationJourney(token: String? = null): ValidateTokenPage {
-        // TODO PDJB-1822: Once the token is required and validated at entry, make `token` non-nullable here and
-        //  return the invalid link page for a missing or unknown token. Also change the ValidateTokenPage return
-        //  type when ValidateTokenStep becomes an internal step.
-        val tokenQuery = token?.let { "?token=$it" } ?: ""
-        navigate("${AcceptInvitationController.ACCEPT_INVITATION_ROUTE}$tokenQuery")
+    fun goToAcceptInvitationJourney(token: String): ValidateTokenPage {
+        navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
         return createValidPage(page, ValidateTokenPage::class)
     }
 

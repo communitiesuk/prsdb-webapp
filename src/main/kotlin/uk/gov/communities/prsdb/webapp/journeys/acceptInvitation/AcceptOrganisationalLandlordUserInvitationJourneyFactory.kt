@@ -19,12 +19,10 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateT
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @PrsdbWebService
-class AcceptInvitationJourneyFactory(
+class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<AcceptInvitationJourney>,
-    private val invitationService: OrganisationalLandlordInvitationService,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -39,23 +37,14 @@ class AcceptInvitationJourneyFactory(
                 initialStep()
                 nextStep { outcome ->
                     when (outcome) {
-                        // TODO PDJB-1822: Validate the token once (e.g. in ValidateTokenStep's afterStepIsReached, as the
-                        //  joint landlord journey does) and store the organisation in journey state. This lookup is
-                        //  repeated in JoinOrganisationStepConfig, so both should read the stored result instead.
-                        TokenValidity.VALID ->
-                            if (invitationService.getOrganisationNameForJourneyIdOrNull(state.journeyId) != null) {
-                                journey.joinOrganisationStep
-                            } else {
-                                journey.invalidLinkStep
-                            }
-
+                        TokenValidity.VALID -> journey.joinOrganisationStep
                         TokenValidity.INVALID -> journey.invalidLinkStep
                     }
                 }
             }
             step(journey.invalidLinkStep) {
                 routeSegment(InvalidLinkStep.ROUTE_SEGMENT)
-                parents { journey.validateTokenStep.isComplete() }
+                parents { journey.validateTokenStep.hasOutcome(TokenValidity.INVALID) }
                 backDestination { Destination.Nowhere() }
                 nextDestination { Destination.Nowhere() }
             }
@@ -88,10 +77,7 @@ class AcceptInvitationJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(): String {
-        val state = stateFactory.getObject()
-        return state.initializeState(null)
-    }
+    fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
 @JourneyFrameworkComponent("acceptInvitationJourney")
@@ -107,8 +93,10 @@ class AcceptInvitationJourney(
 ) : AbstractJourneyState(journeyStateService),
     AcceptInvitationJourneyState {
     override fun generateJourneyId(seed: Any?): String {
+        val token = seed as? String
+        val tokenDescription = token?.let { " for token $it" }.orEmpty()
         return super<AbstractJourneyState>.generateJourneyId(
-            "Accept invitation journey at time ${System.currentTimeMillis()}",
+            "Accept organisational landlord user invitation journey$tokenDescription at time ${System.currentTimeMillis()}",
         )
     }
 }
