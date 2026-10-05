@@ -106,8 +106,10 @@ limits to each explicitly named application request, so a fast page cannot hide 
 Local limits prove the gates work; they are not NFT acceptance limits. Future load simulations can reuse journey
 chains, but must define their own workload rather than changing the single-user basic profile.
 
-PR CI runs these module contracts once in a separate job, not once in each webapp test shard. It does not run
-simulations against a deployed environment.
+Build and Test does not run performance-module contracts or simulations. Its webapp test shards explicitly
+invoke `:test` to avoid selecting the performance module's tests. Automated performance execution belongs in
+the dedicated PDJB-430 performance-testing action, which is still to be implemented; the commands here remain
+available for explicit local development runs.
 
 ### Real local basic journey (macOS/Linux)
 
