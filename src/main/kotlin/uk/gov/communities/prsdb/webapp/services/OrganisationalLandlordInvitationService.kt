@@ -16,7 +16,7 @@ class OrganisationalLandlordInvitationService(
         journeyId: String,
         token: String,
     ) {
-        // TODO PDJB-1774: Clear this journey/token association when the invitation journey completes.
+        // TODO PDJB-1774: Call clearJourneyIdInvitationTokenPairsForTokenFromSession when the invitation journey completes.
         val existingPairs = getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
         existingPairs.add(journeyId to token)
         session.setAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS, existingPairs)
