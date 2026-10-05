@@ -6,4 +6,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class MaintenancePage(
     page: Page,
-) : BasePage(page, MaintenanceController.MAINTENANCE_ROUTE)
+) : BasePage(page, MaintenanceController.MAINTENANCE_ROUTE) {
+    override val usesSharedLayout = false
+}

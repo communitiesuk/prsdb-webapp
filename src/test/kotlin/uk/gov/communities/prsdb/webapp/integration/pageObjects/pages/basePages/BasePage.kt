@@ -5,12 +5,24 @@ import com.microsoft.playwright.Page
 import kotlin.reflect.KClass
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 
 abstract class BasePage(
     val page: Page,
     private val urlSegment: String? = null,
 ) {
+    protected open val hasCustomTitle = false
+
+    protected open val usesSharedLayout = true
+
     companion object {
+        // TODO PDJB-1364: Enable once every page's title is built from its h1
+        const val STRICT_TITLE_CHECK = false
+
+        private val TITLE_FORMAT =
+            Regex("^(Error: )?(.+) - (Register your rental property|Check a rental property or landlord) - GOV\\.UK$")
+
         fun <T : BasePage> createValidPage(
             page: Page,
             expectedPageClass: KClass<T>,
@@ -41,6 +53,25 @@ abstract class BasePage(
 
     private fun validate() {
         if (urlSegment != null) assertContains(page.url(), urlSegment)
+        if (usesSharedLayout) validateTitle()
+    }
+
+    private fun validateTitle() {
+        val title = page.title()
+        val match =
+            assertNotNull(
+                TITLE_FORMAT.matchEntire(title),
+                "Page title \"$title\" does not match the format \"[Error: ]<heading> - <service name> - GOV.UK\"",
+            )
+        val titleHeading = match.groupValues[2]
+        assertNotEquals("null", titleHeading, "Page title \"$title\" is missing its heading")
+
+        if (STRICT_TITLE_CHECK && !hasCustomTitle) {
+            val h1 = page.locator("h1").first()
+            assertEquals(1, h1.count(), "Page has no h1 to build its title from")
+            val h1Text = h1.textContent().replace(Regex("\\s+"), " ").trim()
+            assertEquals(h1Text, titleHeading, "Page title should match the h1 (set hasCustomTitle if it deliberately differs)")
+        }
     }
 
     private fun getAxeViolations() =
