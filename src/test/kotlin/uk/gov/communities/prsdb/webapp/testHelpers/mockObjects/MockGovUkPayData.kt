@@ -22,6 +22,7 @@ class MockGovUkPayData {
             description: String = "Register your rental property",
             createdDate: Instant = Instant.now(),
             nextUrl: String? = null,
+            code: String? = null,
         ): GovUkPayPayment {
             val finished = status in GovUkPayPaymentStatus.FINISHED_STATUSES
             return GovUkPayPayment(
@@ -30,7 +31,7 @@ class MockGovUkPayData {
                 reference = reference,
                 description = description,
                 createdDate = createdDate,
-                state = GovUkPayPaymentState(status = status, finished = finished),
+                state = GovUkPayPaymentState(status = status, finished = finished, code = code),
                 links =
                     GovUkPayPaymentLinks(
                         nextUrl = nextUrl?.let { GovUkPayLink(href = it) },

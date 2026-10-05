@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -115,11 +116,19 @@ class PaymentService(
 
     fun getPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
         val govUkPayPayment = govUkPayClient.getPayment(paymentId)
+        val status = PaymentStatus.fromGovUKPayStatus(govUkPayPayment.state.status)
+        val failureType =
+            if (status.isFailedOrCancelled()) {
+                PaymentFailureType.fromGovUkPayCode(govUkPayPayment.state.code)
+            } else {
+                null
+            }
 
         return PaymentStatusCheckDataModel(
             paymentId = paymentId,
-            status = PaymentStatus.fromGovUKPayStatus(govUkPayPayment.state.status),
+            status = status,
             isCancellable = govUkPayPayment.links.cancelUrl != null,
+            failureType = failureType,
         )
     }
 

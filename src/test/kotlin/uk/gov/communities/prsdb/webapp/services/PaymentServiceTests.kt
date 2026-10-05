@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
@@ -30,6 +32,7 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
@@ -37,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -650,6 +654,43 @@ class PaymentServiceTests {
         assertFalse(paymentStatusCheck.isCancellable)
     }
 
+    @ParameterizedTest
+    @MethodSource("provideFailedGovUkPayStatusesCodesAndExpectedFailureTypes")
+    fun `getPaymentStatus maps the GovUkPay error code to a failure type for failed or cancelled payments`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        govUkPayCode: String?,
+        expectedStatus: PaymentStatus,
+        expectedFailureType: PaymentFailureType,
+    ) {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+            .thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus, code = govUkPayCode))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertEquals(
+            PaymentStatusCheckDataModel(PAYMENT_ID, expectedStatus, isCancellable = false, failureType = expectedFailureType),
+            paymentStatusCheck,
+        )
+    }
+
+    @ParameterizedTest
+    @EnumSource(GovUkPayPaymentStatus::class, names = ["CREATED", "STARTED", "SUBMITTED", "CAPTURABLE", "SUCCESS"])
+    fun `getPaymentStatus does not set a failure type for payments that have not failed or been cancelled`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+    ) {
+        // Arrange
+        whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus, code = "P0010"))
+
+        // Act
+        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+
+        // Assert
+        assertNull(paymentStatusCheck.failureType)
+    }
+
     @Test
     fun `getPaymentStatus propagates GovUkPayException from the client`() {
         // Arrange
@@ -770,6 +811,18 @@ class PaymentServiceTests {
                 Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
                 Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
+            )
+
+        @JvmStatic
+        fun provideFailedGovUkPayStatusesCodesAndExpectedFailureTypes() =
+            listOf(
+                Arguments.of(GovUkPayPaymentStatus.FAILED, "P0010", PaymentStatus.FAILED, PaymentFailureType.PAYMENT_METHOD_REJECTED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, "P0020", PaymentStatus.FAILED, PaymentFailureType.PAYMENT_EXPIRED),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, "P0030", PaymentStatus.FAILED, PaymentFailureType.CANCELLED_BY_USER),
+                Arguments.of(GovUkPayPaymentStatus.CANCELLED, "P0040", PaymentStatus.CANCELLED, PaymentFailureType.CANCELLED_BY_SERVICE),
+                Arguments.of(GovUkPayPaymentStatus.ERROR, "P0050", PaymentStatus.FAILED, PaymentFailureType.PAYMENT_PROVIDER_ERROR),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, "P9999", PaymentStatus.FAILED, PaymentFailureType.UNKNOWN),
+                Arguments.of(GovUkPayPaymentStatus.FAILED, null, PaymentStatus.FAILED, PaymentFailureType.UNKNOWN),
             )
     }
 }

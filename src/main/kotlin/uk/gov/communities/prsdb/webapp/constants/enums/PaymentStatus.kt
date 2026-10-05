@@ -6,9 +6,11 @@ enum class PaymentStatus {
     CREATED,
     CAPTURABLE,
     SUCCEEDED,
-    FAILED,
-    CANCELLED,
+    FAILED, // Includes payments cancelled by the user
+    CANCELLED, // Only payments cancelled by our service
     ;
+
+    fun isFailedOrCancelled() = this == FAILED || this == CANCELLED
 
     companion object {
         val IN_PROGRESS_STATUSES = listOf(CREATED, CAPTURABLE)
