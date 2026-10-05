@@ -31,9 +31,8 @@ each page title is unique and descriptive:
   service name or `GOV.UK` — the layout adds them, using "Check a rental property or landlord" on local council and
   system operator pages and "Register your rental property" elsewhere.
 - Only use a different title when the h1 is unsuitable — for example, it is too long, is not a concise description of
-  the page, or contains personal data (names, addresses, postcodes). Either pass a different message key as the
-  `title` argument, or set a `pageTitle` model attribute / journey step content property to a message key, which
-  overrides the `title` argument.
+  the page, or contains personal data (names, addresses, postcodes). In that case, pass a different message as the
+  `title` argument.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
 
 ### Using Fragments

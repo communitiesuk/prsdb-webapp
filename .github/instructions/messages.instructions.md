@@ -69,12 +69,12 @@ no: 'No'
 | Page headings (also used as the page title) | `{feature}.heading` | `registerProperty.heading` |
 | Page title overrides (only where the heading is unsuitable as a title) | `{feature}.pageTitle` | `landlordDetails.pageTitle` |
 | Error messages | `{errorType}.{component}` | `error.notFound.header` |
-
-Page titles must not include the service name or `GOV.UK` — the layout appends them using `pageTitleFormat` (see
-`frontend.instructions.md`).
 | Form labels | `forms.{formName}.{fieldName}` | In feature YAML or `form.yml` |
 | Common UI | `common.{element}` | `common.confirmationPage.whatHappensNext` |
 | Parameterised | `{0,,paramName}` syntax | `You have {0,,number} outstanding actions` |
+
+Page titles must not include the service name or `GOV.UK` — the layout appends them using `pageTitleFormat` (see
+`frontend.instructions.md`).
 
 ## Numbered Content Blocks
 
