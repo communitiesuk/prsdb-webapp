@@ -684,7 +684,7 @@ class PaymentServiceTests {
 
     @ParameterizedTest
     @MethodSource("provideGovUkPayStatusesAndExpectedStatuses")
-    fun `getPaymentStatus maps the GovUkPay payment status to a payment status`(
+    fun `getGovUkPayPaymentStatus maps the GovUkPay payment status to a payment status`(
         govUkPayStatus: GovUkPayPaymentStatus,
         expectedStatus: PaymentStatus,
     ) {
@@ -692,7 +692,7 @@ class PaymentServiceTests {
         whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
 
         // Act
-        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+        val paymentStatusCheck = paymentService.getGovUkPayPaymentStatus(PAYMENT_ID)
 
         // Assert
         assertEquals(PAYMENT_ID, paymentStatusCheck.paymentId)
@@ -700,26 +700,26 @@ class PaymentServiceTests {
     }
 
     @Test
-    fun `getPaymentStatus marks the payment as cancellable when GOV UK Pay returns a cancel link`() {
+    fun `getGovUkPayPaymentStatus marks the payment as cancellable when GOV UK Pay returns a cancel link`() {
         // Arrange
         whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
             .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.STARTED))
 
         // Act
-        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+        val paymentStatusCheck = paymentService.getGovUkPayPaymentStatus(PAYMENT_ID)
 
         // Assert
         assertTrue(paymentStatusCheck.isCancellable)
     }
 
     @Test
-    fun `getPaymentStatus marks the payment as not cancellable when GOV UK Pay returns no cancel link`() {
+    fun `getGovUkPayPaymentStatus marks the payment as not cancellable when GOV UK Pay returns no cancel link`() {
         // Arrange
         whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
             .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.STARTED).copy(links = GovUkPayPaymentLinks()))
 
         // Act
-        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+        val paymentStatusCheck = paymentService.getGovUkPayPaymentStatus(PAYMENT_ID)
 
         // Assert
         assertFalse(paymentStatusCheck.isCancellable)
@@ -727,7 +727,7 @@ class PaymentServiceTests {
 
     @ParameterizedTest
     @MethodSource("provideFailedGovUkPayStatusesCodesAndExpectedFailureTypes")
-    fun `getPaymentStatus maps the GovUkPay error code to a failure type for failed or cancelled payments`(
+    fun `getGovUkPayPaymentStatus maps the GovUkPay error code to a failure type for failed or cancelled payments`(
         govUkPayStatus: GovUkPayPaymentStatus,
         govUkPayCode: String?,
         expectedStatus: PaymentStatus,
@@ -738,7 +738,7 @@ class PaymentServiceTests {
             .thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus, code = govUkPayCode))
 
         // Act
-        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+        val paymentStatusCheck = paymentService.getGovUkPayPaymentStatus(PAYMENT_ID)
 
         // Assert
         assertEquals(
@@ -749,27 +749,27 @@ class PaymentServiceTests {
 
     @ParameterizedTest
     @EnumSource(GovUkPayPaymentStatus::class, names = ["CREATED", "STARTED", "SUBMITTED", "CAPTURABLE", "SUCCESS"])
-    fun `getPaymentStatus does not set a failure type for payments that have not failed or been cancelled`(
+    fun `getGovUkPayPaymentStatus does not set a failure type for payments that have not failed or been cancelled`(
         govUkPayStatus: GovUkPayPaymentStatus,
     ) {
         // Arrange
         whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus, code = "P0010"))
 
         // Act
-        val paymentStatusCheck = paymentService.getPaymentStatus(PAYMENT_ID)
+        val paymentStatusCheck = paymentService.getGovUkPayPaymentStatus(PAYMENT_ID)
 
         // Assert
         assertNull(paymentStatusCheck.failureType)
     }
 
     @Test
-    fun `getPaymentStatus propagates GovUkPayException from the client`() {
+    fun `getGovUkPayPaymentStatus propagates GovUkPayException from the client`() {
         // Arrange
         val govUkPayException = GovUkPayException("GovUkPay request failed: connection refused")
         whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(govUkPayException)
 
         // Act
-        val thrownException = assertThrows<GovUkPayException> { paymentService.getPaymentStatus(PAYMENT_ID) }
+        val thrownException = assertThrows<GovUkPayException> { paymentService.getGovUkPayPaymentStatus(PAYMENT_ID) }
 
         // Assert
         assertSame(govUkPayException, thrownException)
