@@ -1,4 +1,12 @@
 title: Join your organisation
+validateToken:
+  fieldSetHeading: Validate the organisation invitation token (TODO PDJB-1822)
+  radios:
+    option:
+      valid: 'Yes, this is the correct invitation token'
+      invalid: 'No, this is not the correct invitation token'
+    error:
+      missing: Select whether this invitation token is correct or not
 joinOrganisation:
   heading: Join your organisation
   introduction: You’ve been invited to access this service as part of {0,,organisationName}.
@@ -6,11 +14,7 @@ joinOrganisation:
   bullet:
     one: your full name
     two: your email address
-validateToken:
-  fieldSetHeading: Validate the organisation invitation token (TODO PDJB-1822)
-  radios:
-    option:
-      valid: "Yes, this is the correct invitation token"
-      invalid: "No, this is not the correct invitation token"
-    error:
-      missing: "Select whether this invitation token is correct or not"
+email:
+  error:
+    missing: Enter your email address
+    invalidFormat: Enter an email address in the correct format, like name@example.com

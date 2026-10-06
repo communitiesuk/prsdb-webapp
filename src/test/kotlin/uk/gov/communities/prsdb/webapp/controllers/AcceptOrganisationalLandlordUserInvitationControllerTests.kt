@@ -37,9 +37,6 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     @MockitoBean
-    private lateinit var invitationService: OrganisationalLandlordInvitationService
-
-    @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     @MockitoBean

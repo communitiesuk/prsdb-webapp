@@ -43,7 +43,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
                         //  joint landlord journey does) and store the organisation in journey state. This lookup is
                         //  repeated in JoinOrganisationStepConfig, so both should read the stored result instead.
                         TokenValidity.VALID ->
-                            if (invitationService.getOrganisationNameForJourneyIdOrNull(state.journeyId) != null) {
+                            if (invitationService.getInvitationForJourneyIdOrNull(state.journeyId) != null) {
                                 journey.joinOrganisationStep
                             } else {
                                 journey.invalidLinkStep

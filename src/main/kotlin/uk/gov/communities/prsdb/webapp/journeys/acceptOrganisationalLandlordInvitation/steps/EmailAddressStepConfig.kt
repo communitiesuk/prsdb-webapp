@@ -6,18 +6,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrganisationInvitationEmailFormModel
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStepConfig")
 class EmailAddressStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+    AbstractRequestableStepConfig<Complete, AcceptOrganisationInvitationEmailFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+    override val formModelClass = AcceptOrganisationInvitationEmailFormModel::class
 
-    // TODO PDJB-1773: Invitees must give their email address
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "What is your email address? (TODO PDJB-1773)")
+        mapOf(
+            "fieldSetHeading" to "forms.email.fieldSetHeading",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
 
-    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todo"
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/emailForm"
 
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
         getFormModelFromStateOrNull(state)?.let {
@@ -28,7 +30,7 @@ class EmailAddressStepConfig :
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStep")
 final class EmailAddressStep(
     stepConfig: EmailAddressStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, AcceptOrganisationInvitationEmailFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = EMAIL_PATH_SEGMENT
     }
