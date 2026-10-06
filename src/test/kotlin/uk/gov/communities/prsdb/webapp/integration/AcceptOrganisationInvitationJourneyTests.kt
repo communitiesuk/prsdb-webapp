@@ -46,7 +46,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 3. Email Address page
         val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
-        emailAddressPage.form.submit()
+        emailAddressPage.submitEmail("invitee@example.com")
 
         // 4. Check Answers page
         val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)

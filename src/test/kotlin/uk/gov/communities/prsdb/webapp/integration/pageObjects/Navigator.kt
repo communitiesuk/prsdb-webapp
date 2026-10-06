@@ -91,6 +91,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
@@ -305,6 +306,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep as AcceptInvitationEmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep as AcceptInvitationFullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep as OrgAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep as DeregistrationConfirmStep
@@ -1706,6 +1708,18 @@ class Navigator(
         val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
         navigate(journeyUrl)
         return createValidPage(page, FullNamePage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationEmailAddressPage(): EmailAddressPage {
+        setJourneyStateInSession(
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeEmailAddress().build(),
+        )
+        val journeyPath =
+            "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
+                AcceptInvitationEmailAddressStep.ROUTE_SEGMENT
+        val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
+        navigate(journeyUrl)
+        return createValidPage(page, EmailAddressPage::class)
     }
 
     companion object {
