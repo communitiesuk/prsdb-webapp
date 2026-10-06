@@ -27,12 +27,9 @@ Every page uses `fragments/layout :: layout(title, content, hasErrors)`:
 ### Page Titles
 The layout builds the `<title>` as `[Error: ]<title> - <service name> - GOV.UK` (via the `pageTitleFormat` message), so
 each page title is unique and descriptive:
-- Pass the **same expression as the page's h1** as the `title` argument (excluding any caption). Do not include the
-  service name or `GOV.UK` — the layout adds them, using "Check a rental property or landlord" on local council and
-  system operator pages and "Register your rental property" elsewhere.
-- Only use a different title when the h1 is unsuitable — for example, it is too long, is not a concise description of
-  the page, or contains personal data (names, addresses, postcodes). In that case, pass a different message as the
-  `title` argument.
+- Pass the **same expression as the page's h1** as the `title` argument.
+- Only use a different title when the h1 is unsuitable — for example, it is more than 65 characters. In that case, pass a different message as the
+  `title` argument, but this should be rare and should always be checked first.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
 
 ### Using Fragments
