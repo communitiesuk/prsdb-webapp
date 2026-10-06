@@ -14,8 +14,6 @@ abstract class BasePage(
 ) {
     protected open val hasCustomTitle = false
 
-    protected open val usesSharedLayout = true
-
     companion object {
         // TODO PDJB-1364: Enable once every page's title is built from its h1
         const val STRICT_TITLE_CHECK = false
@@ -53,10 +51,10 @@ abstract class BasePage(
 
     private fun validate() {
         if (urlSegment != null) assertContains(page.url(), urlSegment)
-        if (usesSharedLayout) validateTitle()
+        validateTitle()
     }
 
-    private fun validateTitle() {
+    protected open fun validateTitle() {
         val title = page.title()
         val match =
             assertNotNull(

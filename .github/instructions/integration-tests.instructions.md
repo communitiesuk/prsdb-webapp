@@ -52,7 +52,8 @@ class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
 `BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, and checks the page
 `<title>` matches `[Error: ]<heading> - <service name> - GOV.UK`. When `STRICT_TITLE_CHECK` is enabled it also checks
 the title heading matches the h1 text; override `hasCustomTitle = true` on page objects whose title deliberately
-differs from the h1, and `usesSharedLayout = false` on static pages that don't use the shared layout.
+differs from the h1. Pages that don't use the shared layout (e.g. `MaintenancePage`) override `validateTitle()` with
+their own title check.
 
 ## Components
 
