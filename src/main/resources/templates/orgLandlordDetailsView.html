@@ -7,7 +7,7 @@
 
         <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">orgLandlord.name</h1>
 
-        <p class="govuk-body" th:if="${isLandlordView}">
+        <p class="govuk-body" th:if="${showDeleteLandlordRecordLink}">
             <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
                th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>
         </p>
