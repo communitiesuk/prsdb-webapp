@@ -11,7 +11,9 @@ import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
 import kotlin.test.assertEquals
 
 class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -48,18 +50,36 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
         @ParameterizedTest
         @ValueSource(strings = ["", "   ", "\t"])
         fun `submitting null or whitespace full name returns an error`(
-            blankName: String,
+            blankFullName: String,
             page: Page,
         ) {
             // Arrange
             val fullNamePage = navigator.goToAcceptOrganisationalLandlordInvitationFullNamePage()
 
             // Act
-            fullNamePage.submitName(blankName)
+            fullNamePage.submitName(blankFullName)
 
             // Assert
             assertThat(fullNamePage.form.getErrorMessage()).containsText("You must enter your full name")
             assertPageIs(page, FullNamePage::class)
+        }
+
+        @Test
+        fun `full name page back link returns to join organisation page`(page: Page) {
+            // Arrange
+            val validateTokenPage =
+                navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
+            validateTokenPage.form.radios.selectValue(TokenValidity.VALID)
+            validateTokenPage.form.submit()
+            val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
+            joinOrganisationPage.form.submit()
+            val fullNamePage = assertPageIs(page, FullNamePage::class)
+
+            // Act
+            fullNamePage.backLink.clickAndWait()
+
+            // Assert
+            assertPageIs(page, JoinOrganisationPage::class)
         }
     }
 
@@ -118,6 +138,18 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
             val emailPage = assertPageIs(page, EmailAddressPage::class)
             assertThat(emailPage.form.getErrorMessage())
                 .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `email address page back link returns to full name page`(page: Page) {
+            // Arrange
+            val emailAddressPage = navigator.goToAcceptOrganisationalLandlordInvitationEmailAddressPage()
+
+            // Act
+            emailAddressPage.backLink.clickAndWait()
+
+            // Assert
+            assertPageIs(page, FullNamePage::class)
         }
     }
 }

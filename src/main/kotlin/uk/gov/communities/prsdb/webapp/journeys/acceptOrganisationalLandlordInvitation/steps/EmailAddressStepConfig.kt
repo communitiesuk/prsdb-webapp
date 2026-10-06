@@ -10,7 +10,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrg
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStepConfig")
 class EmailAddressStepConfig :
-    AbstractRequestableStepConfig<Complete, AcceptOrganisationInvitationEmailFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+    AbstractRequestableStepConfig<
+        Complete,
+        AcceptOrganisationInvitationEmailFormModel,
+        AcceptOrganisationalLandlordUserInvitationJourneyState,
+        >() {
     override val formModelClass = AcceptOrganisationInvitationEmailFormModel::class
 
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
@@ -30,7 +34,9 @@ class EmailAddressStepConfig :
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStep")
 final class EmailAddressStep(
     stepConfig: EmailAddressStepConfig,
-) : RequestableStep<Complete, AcceptOrganisationInvitationEmailFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, AcceptOrganisationInvitationEmailFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(
+        stepConfig,
+    ) {
     companion object {
         const val ROUTE_SEGMENT = EMAIL_PATH_SEGMENT
     }
