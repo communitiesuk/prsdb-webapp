@@ -4,9 +4,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData.Companion.createPrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -47,13 +46,12 @@ class PaymentTests {
         val createdDate = Instant.now()
         val periodEnding = LocalDate.now()
         val govUkPayPayment =
-            GovUkPayPayment(
+            createGovUkPayPayment(
                 paymentId = "payment-id",
+                status = GovUkPayPaymentStatus.SUCCESS,
                 amount = 100,
                 reference = "reference",
-                description = "description",
                 createdDate = createdDate,
-                state = GovUkPayPaymentState(status = GovUkPayPaymentStatus.SUCCESS, finished = true),
             )
 
         // Act

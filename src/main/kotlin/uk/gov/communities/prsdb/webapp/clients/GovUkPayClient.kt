@@ -11,7 +11,6 @@ import org.springframework.web.client.body
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -23,7 +22,7 @@ class GovUkPayClient(
     @Value("\${gov-uk-pay.rate-limit-retry-delays-ms:1000,2000}") private val rateLimitRetryDelaysMs: List<Long>,
 ) {
     fun createPayment(request: GovUkPayCreatePaymentRequest): GovUkPayCreatedPayment {
-        val response =
+        val payment =
             sendWithRateLimitRetries {
                 client
                     .post()
@@ -32,10 +31,14 @@ class GovUkPayClient(
                     .accept(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
-                    .body<GovUkPayCreatePaymentResponse>()
+                    .requireStatus(HttpStatus.CREATED, "create payment")
+                    .body<GovUkPayPayment>()
             } ?: throw GovUkPayException("GOV.UK Pay create payment response had no body")
+        val nextUrl =
+            payment.links.nextUrl?.href
+                ?: throw GovUkPayException("GOV.UK Pay create payment response for payment ${payment.paymentId} had no next_url")
 
-        return GovUkPayCreatedPayment(paymentId = response.paymentId, nextUrl = response.links.nextUrl.href)
+        return GovUkPayCreatedPayment(payment = payment, nextUrl = nextUrl)
     }
 
     fun capturePayment(paymentId: String) {
@@ -44,6 +47,7 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/capture", paymentId)
                 .retrieve()
+                .requireStatus(HttpStatus.NO_CONTENT, "capture payment")
                 .toBodilessEntity()
         }
     }
@@ -54,6 +58,7 @@ class GovUkPayClient(
                 .post()
                 .uri("/v1/payments/{paymentId}/cancel", paymentId)
                 .retrieve()
+                .requireStatus(HttpStatus.NO_CONTENT, "cancel payment")
                 .toBodilessEntity()
         }
     }
@@ -99,6 +104,16 @@ class GovUkPayClient(
             throw GovUkPayException(exception.statusCode, errorResponse?.code, errorResponse?.description, exception)
         } catch (exception: RestClientException) {
             throw GovUkPayException("GOV.UK Pay request failed: ${exception.message}", exception)
+        }
+
+    private fun RestClient.ResponseSpec.requireStatus(
+        expectedStatus: HttpStatus,
+        operation: String,
+    ): RestClient.ResponseSpec =
+        onStatus({ !it.isError && it.value() != expectedStatus.value() }) { _, response ->
+            throw GovUkPayException(
+                "GOV.UK Pay responded to $operation with HTTP status ${response.statusCode.value()} instead of ${expectedStatus.value()}",
+            )
         }
 
     // Error responses from outside GOV.UK Pay (e.g. a gateway error page) may not be JSON

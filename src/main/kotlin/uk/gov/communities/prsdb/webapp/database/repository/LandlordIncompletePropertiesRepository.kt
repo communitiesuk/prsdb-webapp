@@ -26,4 +26,10 @@ interface LandlordIncompletePropertiesRepository : JpaRepository<LandlordIncompl
 
     @Suppress("ktlint:standard:function-naming")
     fun countByUser_Id(userId: String): Long
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findBySavedJourneyState_JourneyIdAndUser_Id(
+        journeyId: String,
+        userId: String,
+    ): LandlordIncompleteProperty?
 }
