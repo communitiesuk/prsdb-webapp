@@ -315,8 +315,6 @@ epcTask:
     error:
       missing: Select if you have an EPC for this property
     fieldSetHeading: Do you have an EPC for this property?
-    buttons:
-      provideEpcDetailsLater: Provide EPC details later
     radios:
       option:
         'no':
@@ -551,8 +549,6 @@ epcTask:
       lowRatingOccupiedInset: "The council can see that there is no valid EPC, even though this property’s occupied."
     hasEpc:
       label: Do you have an EPC for this property?
-      provideEpcLaterOccupied: Provide EPC details later
-      provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
       occupiedWithDeadline: Provide EPC details later (before {0})
       provideThisLaterOccupied: Provide this later
       provideThisLaterUnoccupied: Provide this later (within 28 days of the property being occupied)

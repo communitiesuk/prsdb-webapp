@@ -5,7 +5,6 @@ import kotlinx.datetime.toJavaLocalDate
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATIO
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -59,7 +58,7 @@ import java.security.Principal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfLandlord
 @PrsdbController
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class RegisterPropertyController(
@@ -133,11 +132,7 @@ class RegisterPropertyController(
             hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
 
         // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
-        val lettingAgentFeatureEnabled =
-            featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-                // We should release the prop reg restructures first, but just to be sure make sure it's released too.
-                // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
-                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val lettingAgentFeatureEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         model.addAttribute("lettingAgentFeatureEnabled", lettingAgentFeatureEnabled)
 
         val delegatedToLettingAgent =

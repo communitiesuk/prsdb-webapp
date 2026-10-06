@@ -229,7 +229,8 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 
 -- Org landlord setup
 INSERT INTO prsdb_user (id, created_date)
-VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00'),
+       ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1) ON CONFLICT DO NOTHING;
@@ -269,9 +270,10 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
-SELECT * FROM (VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, created_date)
--- Skip linking this user as an organisation landlord user if they are already registered as an individual landlord,
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+SELECT * FROM (VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '2026-07-30 00:00:00+00'::timestamptz),
+                      (2, 11, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+-- Skip linking a user as an organisation landlord user if they are already registered as an individual landlord,
 -- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
 WHERE NOT EXISTS (
     SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.subject_identifier
@@ -395,8 +397,8 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 49-56.
--- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- For manual QA of the notification banners and "Provide this later"
+-- rows in the property record. Each property takes one
 -- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.

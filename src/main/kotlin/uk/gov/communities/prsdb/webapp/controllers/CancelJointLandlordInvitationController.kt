@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.st
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @PrsdbController
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfLandlord
 @RequestMapping(CANCEL_JOINT_LANDLORD_INVITATION_ROUTE)
 class CancelJointLandlordInvitationController(
     private val journeyFactory: CancelJointLandlordInvitationJourneyFactory,
