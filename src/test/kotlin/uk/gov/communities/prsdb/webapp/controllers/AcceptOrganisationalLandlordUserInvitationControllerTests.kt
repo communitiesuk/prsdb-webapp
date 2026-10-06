@@ -21,9 +21,9 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptOrganisationalLandlordUserInvitationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @WebMvcTest(AcceptOrganisationalLandlordUserInvitationController::class)

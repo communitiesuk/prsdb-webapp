@@ -1,9 +1,9 @@
-package uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps
+package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TokenValidityFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
@@ -12,13 +12,13 @@ enum class TokenValidity {
     INVALID,
 }
 
-@JourneyFrameworkComponent("acceptInvitationValidateTokenStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig :
-    AbstractRequestableStepConfig<TokenValidity, TokenValidityFormModel, AcceptInvitationJourneyState>() {
+    AbstractRequestableStepConfig<TokenValidity, TokenValidityFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = TokenValidityFormModel::class
 
     // TODO PDJB-1822: Validate token step (stub with radios)
-    override fun getStepSpecificContent(state: AcceptInvitationJourneyState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
         mapOf(
             "fieldName" to "tokenValidity",
             "fieldSetHeading" to "acceptOrganisationInvitation.validateToken.fieldSetHeading",
@@ -35,15 +35,15 @@ class ValidateTokenStepConfig :
                 ),
         )
 
-    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todoWithRadios"
 
-    override fun mode(state: AcceptInvitationJourneyState) = getFormModelFromStateOrNull(state)?.tokenValidity
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.tokenValidity
 }
 
-@JourneyFrameworkComponent("acceptInvitationValidateTokenStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationValidateTokenStep")
 final class ValidateTokenStep(
     stepConfig: ValidateTokenStepConfig,
-) : RequestableStep<TokenValidity, TokenValidityFormModel, AcceptInvitationJourneyState>(stepConfig) {
+) : RequestableStep<TokenValidity, TokenValidityFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "validate-token"
     }
