@@ -5,29 +5,20 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
 
 class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
     @Autowired
     lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
-
-    @MockitoBean
-    lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
     @BeforeEach
     fun enableFeatureFlags() {
@@ -48,17 +39,15 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `returns the team members route for an organisation landlord user`() {
-        setAuthenticatedUser("org-user", ROLE_ORG_ADMIN)
-        whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
+    fun `returns the team members route for an organisation admin`() {
+        setAuthenticatedUser("org-admin", ROLE_ORG_ADMIN)
 
         assertEquals(TEAM_MEMBERS_ROUTE, manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
 
     @Test
-    fun `returns null for a landlord who is not an organisation landlord user`() {
+    fun `returns null for a landlord who is not an organisation admin`() {
         setAuthenticatedUser("individual-user", ROLE_INDIVIDUAL_LANDLORD)
-        whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("individual-user")).thenReturn(false)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
@@ -68,7 +57,6 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
         setAuthenticatedUser("local-council-user", ROLE_LOCAL_COUNCIL_USER)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
-        verify(organisationalLandlordUserRepository, never()).existsByBaseUser_Id(any())
     }
 
     @Test
@@ -78,12 +66,10 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
 
     // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS flag is removed
     @Test
-    fun `when feature is disabled returns null even for an organisation landlord user`() {
+    fun `when feature is disabled returns null even for an organisation admin`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedUser("org-user", ROLE_ORG_ADMIN)
-        whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
+        setAuthenticatedUser("org-admin", ROLE_ORG_ADMIN)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
-        verify(organisationalLandlordUserRepository, never()).existsByBaseUser_Id(any())
     }
 }
