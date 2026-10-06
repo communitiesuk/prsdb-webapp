@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@JourneyFrameworkComponent("acceptInvitationCheckAnswersStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStepConfig")
 class CheckAnswersStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     // TODO PDJB-1774: This should inherit from AbstractCheckYourAnswersStepConfig rather than the generic requestable base class.
