@@ -13,17 +13,24 @@ applyTo: "**/templates/**,**/css/**,**/js/**,**/assets/**"
 ## Thymeleaf Templates
 
 ### Layout Structure
+Every page uses `fragments/layout :: layout(title, content, hasErrors)`:
 ```html
 <!DOCTYPE html>
-<html th:replace="~{layout :: layout(~{::main}, ~{::title})}">
-<head><title>Page Title - Service Name</title></head>
-<body>
+<html th:replace="~{fragments/layout :: layout(#{example.heading}, ~{::main}, false)}">
 <main>
+    <h1 class="govuk-heading-l" th:text="#{example.heading}">Example heading</h1>
     <!-- Page content here -->
 </main>
-</body>
 </html>
 ```
+
+### Page Titles
+The layout builds the `<title>` as `[Error: ]<title> - <service name> - GOV.UK` (via the `pageTitleFormat` message), so
+each page title is unique and descriptive:
+- Pass the **same expression as the page's h1** as the `title` argument.
+- Only use a different title when the h1 is unsuitable — for example, it is more than 65 characters. In that case, pass a shorter message as the
+  `title` argument, but this should be rare and should always be checked first.
+- The `Error: ` prefix is added automatically when `hasErrors` is true.
 
 ### Using Fragments
 ```html
