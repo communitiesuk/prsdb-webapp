@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps
+package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -10,7 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import kotlin.test.assertEquals
 

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.acceptInvitation
+package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -8,14 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.CheckAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ConfirmationStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.EmailAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.InvalidLinkStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.JoinOrganisationStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.TokenValidity
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete

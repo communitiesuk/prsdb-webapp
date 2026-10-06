@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.EmailAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 
 class EmailAddressPage(
     page: Page,

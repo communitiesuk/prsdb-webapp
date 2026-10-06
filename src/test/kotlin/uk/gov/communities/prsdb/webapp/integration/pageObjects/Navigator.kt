@@ -308,7 +308,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourn
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.FullNameStep as AcceptInvitationFullNameStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep as AcceptInvitationFullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep as OrgAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep as DeregistrationConfirmStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep as RegistrationEpcExpiredStep

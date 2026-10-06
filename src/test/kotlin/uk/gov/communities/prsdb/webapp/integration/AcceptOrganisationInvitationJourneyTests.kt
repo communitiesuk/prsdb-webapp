@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.TokenValidity
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
