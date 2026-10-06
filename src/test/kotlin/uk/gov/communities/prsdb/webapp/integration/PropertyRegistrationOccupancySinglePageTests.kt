@@ -2,25 +2,18 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 
 class PropertyRegistrationOccupancySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun enableRestructureAndSkippingFlag() {
-        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    }
-
     @Nested
     inner class OccupancyStep {
         @Test
         fun `Submitting with no occupancy option selected returns an error`(page: Page) {
-            val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+            val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
             occupancyPage.form.submit()
             assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
         }

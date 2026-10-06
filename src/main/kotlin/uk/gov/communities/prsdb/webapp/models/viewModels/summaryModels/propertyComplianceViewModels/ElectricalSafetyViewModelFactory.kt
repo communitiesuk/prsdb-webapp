@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -17,8 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
-    featureFlagManager: FeatureFlagManager,
-) : ComplianceViewModelFactoryBase(messageSource, featureFlagManager) {
+) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
     override val provideLaterNoDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
