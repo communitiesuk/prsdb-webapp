@@ -9,7 +9,7 @@
       th:with="pageTitleServiceName=${serviceName ?: #messages.msg('serviceName')}">
 <head>
     <meta charset="utf-8">
-    <title th:text="((${hasErrors}) ? #{forms.errorMessage.prefix} : '') + #{pageTitleFormat(${title}, ${pageTitleServiceName})}">GOV.UK - The best place to find government services and information</title>
+    <title th:text="((${hasErrors}) ? #{forms.errorMessage.prefix} : '') + #{pageTitleFormat(${title}, ${pageTitleServiceName})}">GOV.UK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#1d70b8">
     <link rel="icon" sizes="48x48" th:href="@{/assets/rebrand/images/favicon.ico}">
