@@ -1,0 +1,49 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <h1 class="govuk-heading-l" th:text="#{acceptOrganisationInvitation.invalidLink.heading}">
+                    acceptOrganisationInvitation.invalidLink.heading
+                </h1>
+                <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.heading}">
+                    acceptOrganisationInvitation.invalidLink.whatsHappened.heading
+                </h2>
+                <h3 class="govuk-heading-s" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.heading}">
+                    acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.heading
+                </h3>
+                <p class="govuk-body">
+                    <span th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.paragraph}">
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.paragraph</span>
+                    <a class="govuk-link" th:href="@{${dashboardUrl}}" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.link}">
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.link</a>.
+                </p>
+                <h3 class="govuk-heading-s" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.heading}">
+                    acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.heading
+                </h3>
+                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.paragraph}">
+                    acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.paragraph
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.listItem.one}">
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.listItem.one
+                    </li>
+                    <li th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.listItem.two}">
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.listItem.two
+                    </li>
+                </ul>
+                <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.invalidLink.stillNeedAccess.heading}">
+                    acceptOrganisationInvitation.invalidLink.stillNeedAccess.heading
+                </h2>
+                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.invalidLink.stillNeedAccess.paragraph}">
+                    acceptOrganisationInvitation.invalidLink.stillNeedAccess.paragraph
+                </p>
+            </div>
+        </div>
+    </main>
+</th:block>
+</html>

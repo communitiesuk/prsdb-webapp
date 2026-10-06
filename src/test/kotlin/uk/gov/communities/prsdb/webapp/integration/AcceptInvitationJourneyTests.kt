@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -69,6 +72,15 @@ class AcceptInvitationJourneyTests : IntegrationTestWithMutableData("data-local.
 
         // 2. Invalid link page
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
-        assertTrue(invalidLinkPage.heading.getText().contains("TODO PDJB-1821)"))
+        BaseComponent.assertThat(invalidLinkPage.heading)
+            .containsText("There was a problem with this invitation link")
+        assertThat(invalidLinkPage.alreadyRespondedText)
+            .containsText("Each invitation can only be used once.")
+        BaseComponent.assertThat(invalidLinkPage.signInLink).hasText("sign in to your account")
+        BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
+        assertThat(invalidLinkPage.bulletPoints).hasCount(2)
+        assertThat(invalidLinkPage.bulletPoints.first()).containsText("expired (it’s over 28 days old)")
+        assertThat(invalidLinkPage.stillNeedAccessText)
+            .containsText("Ask someone at your organisation with administrator access to invite you again.")
     }
 }

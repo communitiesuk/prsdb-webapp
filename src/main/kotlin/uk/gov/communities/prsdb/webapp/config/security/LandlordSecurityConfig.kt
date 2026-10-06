@@ -29,15 +29,18 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Com
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.INVITATION_REJECTED_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep as AcceptInvitationValidateTokenStep
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -84,6 +87,16 @@ class LandlordSecurityConfig(
                     .requestMatchers(
                         AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE +
                             "/$INVITATION_REJECTED_PATH_SEGMENT",
+                    ).permitAll()
+                    .requestMatchers(AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE)
+                    .permitAll()
+                    .requestMatchers(
+                        AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE +
+                            "/${AcceptInvitationValidateTokenStep.ROUTE_SEGMENT}",
+                    ).permitAll()
+                    .requestMatchers(
+                        AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE +
+                            "/${InvalidLinkStep.ROUTE_SEGMENT}",
                     ).permitAll()
                     .anyRequest()
                     .authenticated()
