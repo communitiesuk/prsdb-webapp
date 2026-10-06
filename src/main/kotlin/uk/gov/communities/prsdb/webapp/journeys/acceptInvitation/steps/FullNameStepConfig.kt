@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitatio
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 
-@JourneyFrameworkComponent("acceptInvitationFullNameStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordUserInvitationFullNameStepConfig")
 class FullNameStepConfig :
     AbstractRequestableStepConfig<Complete, NameFormModel, AcceptInvitationJourneyState>() {
     override val formModelClass = NameFormModel::class
