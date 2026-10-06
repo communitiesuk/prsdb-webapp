@@ -121,6 +121,44 @@ interface CheckYourAnswersJourneyState : JourneyState {
             }
         }
 
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTaskFrom(
+            task: Task<TTaskState, *>,
+            startStep: JourneyStep<*, *, *>,
+            route: String? = null,
+        ) {
+            checkAnswerTask(task, route)
+            configureStep(startStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.checkAnswerTaskFrom(
+            task: Task<TTaskState, TDependencies>,
+            dependencies: () -> TDependencies,
+            startStep: JourneyStep<*, *, *>,
+            route: String? = null,
+        ) {
+            checkAnswerTask(task, dependencies, route)
+            configureStep(startStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTaskFrom(
+            task: Task<TTaskState, *>,
+            startStep: JourneyStep<*, *, *>,
+            route: String? = null,
+            configure: TaskInitialiser<TTaskState, *>.() -> Unit,
+        ) {
+            checkAnswerTask(task, route, configure)
+            configureStep(startStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+        }
+
         fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
             step: JourneyStep<TMode, *, T>,
             route: String,

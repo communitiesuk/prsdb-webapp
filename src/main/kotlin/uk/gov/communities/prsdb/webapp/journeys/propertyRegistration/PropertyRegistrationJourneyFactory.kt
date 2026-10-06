@@ -104,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
@@ -305,10 +306,11 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
-                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyTask.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep,
+                    )
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
