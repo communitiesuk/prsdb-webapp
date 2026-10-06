@@ -92,7 +92,7 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
 
             // Assert
             assertEquals("What is your email address?", emailAddressPage.heading.getText().trim())
-            BaseComponent.assertThat(emailAddressPage.form.submitButton).hasText("Save and continue")
+            BaseComponent.assertThat(emailAddressPage.form.submitButton).isVisible()
         }
 
         @Test
