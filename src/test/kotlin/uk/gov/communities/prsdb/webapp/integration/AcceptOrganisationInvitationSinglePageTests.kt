@@ -89,6 +89,23 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
                 .containsText("Enter your email address")
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = ["", "   ", "\t"])
+        fun `submitting empty or whitespace email address returns an error`(
+            blankEmail: String,
+            page: Page,
+        ) {
+            // Arrange
+            val emailAddressPage = navigator.goToAcceptOrganisationalLandlordInvitationEmailAddressPage()
+
+            // Act
+            emailAddressPage.submitEmail(blankEmail)
+
+            // Assert
+            assertThat(emailAddressPage.form.getErrorMessage()).containsText("Enter your email address")
+            assertPageIs(page, EmailAddressPage::class)
+        }
+
         @Test
         fun `submitting an invalid email address returns an error`(page: Page) {
             // Arrange
