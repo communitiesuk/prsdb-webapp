@@ -825,6 +825,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Correspondence manual address - render page
             assertThat(correspondenceManualAddressPage.form.fieldsetHeading).containsText("Enter a postal address")
+            assertThat(correspondenceManualAddressPage.form.submitButton).containsText("Confirm and continue")
             correspondenceManualAddressPage.submitAddress(
                 addressLineOne = "1 Fictional Road",
                 townOrCity = "Fictional Town",

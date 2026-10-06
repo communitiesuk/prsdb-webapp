@@ -11,7 +11,6 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 
@@ -21,7 +20,6 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     protected abstract val updateStepRoute: String
     protected abstract val stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
     protected abstract val userToLandlordService: UserToLandlordService
-    protected abstract val organisationalLandlordUserService: OrganisationalLandlordUserService
 
     protected abstract fun stubCreateJourneySteps()
 
@@ -43,7 +41,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -53,7 +51,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getUpdateStep returns 200 for an organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(validOrganisationLandlord())
         stubCreateJourneySteps()
@@ -89,7 +87,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `postUpdateStep returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -103,7 +101,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `postUpdateStep returns 200 for an organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(validOrganisationLandlord())
         stubCreateJourneySteps()
@@ -117,5 +115,13 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
             }.andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"], value = "user")
+    fun `getUpdateStep returns 403 for an org editor`() {
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
     }
 }

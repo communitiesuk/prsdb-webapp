@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
@@ -39,7 +40,7 @@ class LandlordDetailsController(
     private val userToLandlordService: UserToLandlordService,
     private val messageSource: MessageSource,
 ) {
-    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+    @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()

@@ -17,8 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserServic
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
-// TODO PDJB-1819: Change this to the ORG_ADMIN role
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 @PrsdbController
 @RequestMapping(TEAM_MEMBERS_ROUTE)
 class TeamMembersController(

@@ -33,6 +33,7 @@ class CorrespondenceAddressTask(
             "fieldSetHeading" to "addressForms.manualAddress.correspondence.fieldSetHeading",
             "fieldSetHint" to null,
             "showCorrespondenceInset" to true,
+            "submitButtonText" to "forms.buttons.confirmAndContinue",
         )
 
     companion object {

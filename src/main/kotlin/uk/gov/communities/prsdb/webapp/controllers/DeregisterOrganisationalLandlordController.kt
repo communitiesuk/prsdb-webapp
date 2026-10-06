@@ -29,13 +29,13 @@ class DeregisterOrganisationalLandlordController(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val userToLandlordService: UserToLandlordService,
 ) {
-    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+    @PreAuthorize("hasRole('ORG_ADMIN')")
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
-    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+    @PreAuthorize("hasRole('ORG_ADMIN')")
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
