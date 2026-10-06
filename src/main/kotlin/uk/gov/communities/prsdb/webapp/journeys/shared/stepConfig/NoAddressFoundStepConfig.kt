@@ -21,7 +21,8 @@ class NoAddressFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInput
             "postcode" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::postcode),
             "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
-            "pageTitleOverride" to "addressForms.noAddressFound.pageTitle",
+            "pageTitleOverride" to
+                if (restrictToEngland) "addressForms.noAddressFound.english.pageTitle" else "addressForms.noAddressFound.pageTitle",
         )
 
     override fun chooseTemplate(state: AddressState) = "forms/noAddressFoundForm"

@@ -9,7 +9,7 @@ abstract class NoAddressFoundFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    override val expectedTitleHeading = "No matching address found"
+    override val expectedTitleHeading = "No matching address in England or Wales found"
 
     val form = NoAddressFoundForm(page)
     val searchAgain = Link.byText(page, "search again")

@@ -12,6 +12,28 @@ import kotlin.test.assertEquals
 class NoAddressFoundStepConfigTests {
     @Test
     fun `getStepSpecificContent overrides the page title`() {
+        val content = NoAddressFoundStepConfig().getStepSpecificContent(mockAddressState())
+
+        assertEquals("addressForms.noAddressFound.pageTitle", content["pageTitleOverride"])
+    }
+
+    @Test
+    fun `getStepSpecificContent overrides the page title with the England-only title when restricted to England`() {
+        val content = NoAddressFoundStepConfig().restrictToEngland().getStepSpecificContent(mockAddressState())
+
+        assertEquals("addressForms.noAddressFound.english.pageTitle", content["pageTitleOverride"])
+    }
+
+    @Test
+    fun `afterStepDataIsAdded caches manual address selection`() {
+        val state = mock<AddressState>()
+
+        NoAddressFoundStepConfig().afterStepDataIsAdded(state)
+
+        verify(state).cachedSelectedAddress = MANUAL_ADDRESS_CHOSEN
+    }
+
+    private fun mockAddressState(): AddressState {
         val lookupAddressStep = mock<LookupAddressStep>()
         whenever(lookupAddressStep.formModel).thenReturn(
             LookupAddressFormModel().apply {
@@ -22,18 +44,6 @@ class NoAddressFoundStepConfigTests {
         whenever(lookupAddressStep.currentJourneyId).thenReturn("journey-id")
         val state = mock<AddressState>()
         whenever(state.lookupAddressStep).thenReturn(lookupAddressStep)
-
-        val content = NoAddressFoundStepConfig().getStepSpecificContent(state)
-
-        assertEquals("addressForms.noAddressFound.pageTitle", content["pageTitleOverride"])
-    }
-
-    @Test
-    fun `afterStepDataIsAdded caches manual address selection`() {
-        val state = mock<AddressState>()
-
-        NoAddressFoundStepConfig().afterStepDataIsAdded(state)
-
-        verify(state).cachedSelectedAddress = MANUAL_ADDRESS_CHOSEN
+        return state
     }
 }
