@@ -1839,12 +1839,12 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptInvitationJourney(token: String): ValidateTokenPage {
+    fun goToAcceptOrganisationalLandlordInvitationJourney(token: String): ValidateTokenPage {
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
         return createValidPage(page, ValidateTokenPage::class)
     }
 
-    fun goToAcceptInvitationFullNamePage(): FullNamePage {
+    fun goToAcceptOrganisationalLandlordInvitationFullNamePage(): FullNamePage {
         setJourneyStateInSession(
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeFullName().build(),
         )

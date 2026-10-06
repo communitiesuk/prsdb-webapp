@@ -24,7 +24,7 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `full name page shows the heading and button`() {
             // Arrange and Act
-            val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+            val fullNamePage = navigator.goToAcceptOrganisationalLandlordInvitationFullNamePage()
 
             // Assert
             assertEquals("What is your full name?", fullNamePage.heading.getText().trim())
@@ -34,7 +34,7 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `submitting an empty full name returns an error`(page: Page) {
             // Arrange
-            val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+            val fullNamePage = navigator.goToAcceptOrganisationalLandlordInvitationFullNamePage()
 
             // Act
             fullNamePage.form.submit()
@@ -51,7 +51,7 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
             page: Page,
         ) {
             // Arrange
-            val fullNamePage = navigator.goToAcceptInvitationFullNamePage()
+            val fullNamePage = navigator.goToAcceptOrganisationalLandlordInvitationFullNamePage()
 
             // Act
             fullNamePage.submitName(blankName)

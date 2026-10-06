@@ -25,7 +25,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
     @Test
     fun `Invitees can successfully accept an invitation to join an organisation`(page: Page) {
         // 1. Go to the start of accept invitation journey (Validate Token page)
-        val validateTokenPage = navigator.goToAcceptInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
+        val validateTokenPage = navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
         assertPageIs(page, ValidateTokenPage::class)
         // TODO PDJB-1822: Validate token step
         validateTokenPage.form.radios.selectValue(TokenValidity.VALID)
@@ -61,7 +61,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
     @Test
     fun `Invitees are redirected to invalid link page when token validation placeholder is invalid`(page: Page) {
         // Go to the start of accept invitation journey (Validate Token page)
-        val validateTokenPage = navigator.goToAcceptInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
+        val validateTokenPage = navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
         assertPageIs(page, ValidateTokenPage::class)
         // TODO PDJB-1822: Validate token step
         validateTokenPage.form.radios.selectValue(TokenValidity.INVALID)
