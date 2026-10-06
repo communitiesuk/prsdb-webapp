@@ -704,7 +704,7 @@ class Navigator(
     fun goToPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
             goToPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
@@ -713,7 +713,7 @@ class Navigator(
     fun goToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         val taskListPage =
             goToPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
@@ -723,9 +723,6 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder
                 .beforePropertyRegistrationCheckAnswers()
-                // The "Property details" task includes the number of bedrooms for all properties, so it
-                // must be set for that task to be complete even when the property is unoccupied.
-                .withBedrooms()
                 .withAdditionalData("cachedOccupied", "false")
                 .build(),
         )

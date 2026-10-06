@@ -24,8 +24,10 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.occupancyChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.whoProvidesChangeCyaJourney
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.BedroomsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
@@ -773,7 +775,7 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
-    // Aliases for nested steps and tasks required by OccupationState
+    // Aliases for nested steps and tasks required by BedroomsState and TenancyDetailsState
     override val bedrooms = propertyDetailsTask.bedrooms
     override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
     override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
@@ -811,6 +813,8 @@ class PropertyRegistrationJourney(
 
 interface PropertyRegistrationJourneyState :
     OccupationState,
+    BedroomsState,
+    TenancyDetailsState,
     InviteJointLandlordsTaskDependencies,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,

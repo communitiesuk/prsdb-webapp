@@ -626,9 +626,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
-
-            assertThat(detailsPage.sectionHeading("Licensing information")).isHidden()
-            assertThat(detailsPage.sectionHeading("Tenancy and rental information")).isHidden()
         }
 
         @Test

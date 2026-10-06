@@ -131,7 +131,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     @EnumSource(CorrespondenceEmailOption::class)
     fun `registration passes the selected correspondence email and postal address`(choice: CorrespondenceEmailOption) {
         // Arrange
-        setupStateForPropertyRegistration(numberOfBedrooms = "4")
+        setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
         val correspondenceTask = mock<CorrespondenceTask>()
@@ -169,7 +169,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     @Test
     fun `registration passes no correspondence details when the CORRESPONDENCE_ADDRESS flag is off`() {
         // Arrange
-        setupStateForPropertyRegistration(numberOfBedrooms = "4")
+        setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
@@ -905,7 +905,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         assertNotEquals(defaultDestination, result)
     }
 
-    private fun setupStateForPropertyRegistration(numberOfBedrooms: String = "3") {
+    private fun setupStateForPropertyRegistration() {
         val mockOccupiedStep = mock<OccupiedStep>()
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
@@ -913,7 +913,7 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         val mockBedroomsStep = mock<BedroomsStep>()
         whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
-        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { this.numberOfBedrooms = numberOfBedrooms })
+        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
 
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)

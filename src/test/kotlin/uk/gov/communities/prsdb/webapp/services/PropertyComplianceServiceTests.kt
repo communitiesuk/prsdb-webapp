@@ -325,7 +325,6 @@ class PropertyComplianceServiceTests {
         )
     }
 
-    @Suppress("ktlint:standard:max-line-length")
     @Test
     fun `getNonCompliantPropertiesForLandlord leaves the provide-later deadline null when the property was occupied after registration`() {
         // Arrange

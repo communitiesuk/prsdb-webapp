@@ -183,23 +183,19 @@ class PropertyStateSessionBuilder(
                 rentFrequency,
             )
 
-        fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationOwnershipType().withBedrooms().withOwnershipType()
+        fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
-                beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY)
-                    .withRentAmount()
-                    .withHasJointLandlords(true)
-                    .withInvitedJointLandlords(alreadyInvitedEmails)
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
             } else {
-                beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount().withHasJointLandlords(true)
+                beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
             }
 
         fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationInviteJointLandlords()
                 .withHasNoJointLandlords()
                 .withOccupancyStatus(propertyIsOccupied)
-                .withLicensingType(LicensingType.NO_LICENSING)
                 .apply { if (propertyIsOccupied) withLandlordProvidesRentalDetails() }
 
         fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()

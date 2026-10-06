@@ -95,17 +95,17 @@ abstract class PropertyDetailsViewModelBase(
             withActionLink = false,
         )
 
-    protected fun ownershipTypeRow(labelKey: String): SummaryListRowViewModel =
+    protected fun ownershipTypeRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
-            labelKey,
+            "propertyDetails.propertyRecord.ownership.ownershipType",
             MessageKeyConverter.convert(propertyOwnership.ownershipType),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )
 
-    protected fun occupiedRow(labelKey: String): SummaryListRowViewModel =
+    protected fun occupiedRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
-            labelKey,
+            "propertyDetails.propertyRecord.occupation.isOccupied",
             MessageKeyConverter.convert(isOccupied),
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                 "/${OccupiedStep.ROUTE_SEGMENT}",

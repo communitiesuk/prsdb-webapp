@@ -42,7 +42,7 @@ class OccupancyDetailsHelper {
         state: T,
         messageSource: MessageSource,
         provideLaterDestination: Destination? = null,
-    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> where T : OccupationState, T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = state.occupied.formModel.occupied ?: false
@@ -181,7 +181,7 @@ class OccupancyDetailsHelper {
         state: T,
         messageSource: MessageSource,
         provideLaterDestination: Destination? = null,
-    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
         if (state.householdsAndTenantsTask.households.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
             getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask, provideLaterDestination)
         } else {
