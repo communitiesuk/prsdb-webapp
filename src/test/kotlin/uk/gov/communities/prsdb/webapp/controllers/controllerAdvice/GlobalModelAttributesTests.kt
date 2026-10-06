@@ -300,7 +300,7 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes adds a manage team members nav link after the dashboard link for an organisation user`() {
+    fun `addGlobalModelAttributes adds a manage team members nav link after the dashboard when a url is provided`() {
         // Arrange
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)

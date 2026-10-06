@@ -131,7 +131,7 @@ class AuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sq
 @WithOrgLandlordProfile
 class OrgLandlordAuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
-    fun `organisation landlord dashboard shows a manage team members nav link that goes to the team members page`(page: Page) {
+    fun `landlord dashboard for an org admin shows a manage team members nav link that goes to the team members page`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
 
         assertThat(dashboard.authenticatedHeader.manageTeamMembersNavLink).isVisible()
