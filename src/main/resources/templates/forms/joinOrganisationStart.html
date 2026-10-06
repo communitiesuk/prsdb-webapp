@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <h1 class="govuk-heading-xl" th:text="#{acceptOrganisationInvitation.joinOrganisation.heading}">acceptOrganisationInvitation.joinOrganisation.heading</h1>
+    <h1 class="govuk-heading-l" th:text="#{acceptOrganisationInvitation.joinOrganisation.heading}">acceptOrganisationInvitation.joinOrganisation.heading</h1>
     <p class="govuk-body" th:text="#{acceptOrganisationInvitation.joinOrganisation.introduction(${organisationName})}">acceptOrganisationInvitation.joinOrganisation.introduction</p>
     <p class="govuk-body" th:text="#{acceptOrganisationInvitation.joinOrganisation.listIntro}">acceptOrganisationInvitation.joinOrganisation.listIntro</p>
     <ul class="govuk-list govuk-list--bullet">
