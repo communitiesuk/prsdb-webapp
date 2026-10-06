@@ -91,7 +91,7 @@ class AcceptInvitationJourney(
     override val confirmationStep: ConfirmationStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
-    AcceptInvitationJourneyState {
+    AcceptOrganisationalLandlordUserInvitationJourneyState {
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         val tokenDescription = token?.let { " for token $it" }.orEmpty()
@@ -101,7 +101,7 @@ class AcceptInvitationJourney(
     }
 }
 
-interface AcceptInvitationJourneyState : JourneyState {
+interface AcceptOrganisationalLandlordUserInvitationJourneyState : JourneyState {
     val validateTokenStep: ValidateTokenStep
     val invalidLinkStep: InvalidLinkStep
     val joinOrganisationStep: JoinOrganisationStep

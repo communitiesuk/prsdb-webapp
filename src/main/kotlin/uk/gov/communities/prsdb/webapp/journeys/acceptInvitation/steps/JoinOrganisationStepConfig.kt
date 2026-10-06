@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
@@ -13,10 +13,10 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitation
 class JoinOrganisationStepConfig(
     private val invitationService: OrganisationalLandlordInvitationService,
 ) :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptInvitationJourneyState>() {
+    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: AcceptInvitationJourneyState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
         mapOf(
             "organisationName" to
                 (
@@ -29,15 +29,15 @@ class JoinOrganisationStepConfig(
                 ),
         )
 
-    override fun chooseTemplate(state: AcceptInvitationJourneyState) = "forms/joinOrganisationStart"
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/joinOrganisationStart"
 
-    override fun mode(state: AcceptInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent("acceptInvitationJoinOrganisationStep")
 final class JoinOrganisationStep(
     stepConfig: JoinOrganisationStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, AcceptInvitationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "join-your-organisation"
     }

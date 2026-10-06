@@ -10,7 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import kotlin.test.assertEquals
 
@@ -20,7 +20,7 @@ class JoinOrganisationStepConfigTests {
     lateinit var mockInvitationService: OrganisationalLandlordInvitationService
 
     @Mock
-    lateinit var mockState: AcceptInvitationJourneyState
+    lateinit var mockState: AcceptOrganisationalLandlordUserInvitationJourneyState
 
     @Test
     fun `getStepSpecificContent returns organisation name from invitation`() {
