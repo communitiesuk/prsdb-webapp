@@ -68,7 +68,7 @@ class CheckUserRoleStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         setMockPrincipal(username)
-        whenever(mockUserRolesService.getUserHasAnyLandlordRole(username)).thenReturn(false)
+        whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(false)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -82,7 +82,7 @@ class CheckUserRoleStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         setMockPrincipal(username)
-        whenever(mockUserRolesService.getUserHasAnyLandlordRole(username)).thenReturn(true)
+        whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(true)
 
         // Act
         stepConfig.afterStepIsReached(mockState)

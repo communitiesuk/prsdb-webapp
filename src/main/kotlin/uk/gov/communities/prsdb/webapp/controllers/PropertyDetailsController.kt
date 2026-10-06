@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -57,7 +57,7 @@ class PropertyDetailsController(
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    @AllowIfAnyLandlord
+    @AllowIfLandlord
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
@@ -164,7 +164,7 @@ class PropertyDetailsController(
     }
 
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.PDJB
-    @AllowIfAnyLandlord
+    @AllowIfLandlord
     @GetMapping(REMOVE_EXPIRED_INVITE_ROUTE)
     fun removeExpiredInvite(
         @PathVariable propertyOwnershipId: Long,

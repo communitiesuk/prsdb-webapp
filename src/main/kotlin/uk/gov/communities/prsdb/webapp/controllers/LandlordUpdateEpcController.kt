@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_EPC_ROUTE)
-@AllowIfAnyLandlord
+@AllowIfLandlord
 class LandlordUpdateEpcController(
     private val journeyFactory: UpdateEpcJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

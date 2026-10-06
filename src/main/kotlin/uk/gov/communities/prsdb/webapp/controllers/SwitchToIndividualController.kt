@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvi
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@AllowIfAnyLandlord
+@AllowIfLandlord
 @PrsdbController
 @RequestMapping(SWITCH_TO_INDIVIDUAL_ROUTE)
 class SwitchToIndividualController(

@@ -64,7 +64,7 @@ class UserRolesService(
         getLandlordRolesForSubjectId(subjectId) +
             getLocalCouncilRolesForSubjectId(subjectId)
 
-    fun getUserHasAnyLandlordRole(subjectId: String): Boolean = getLandlordRolesForSubjectId(subjectId).isNotEmpty()
+    fun getUserHasLandlordRole(subjectId: String): Boolean = getLandlordRolesForSubjectId(subjectId).isNotEmpty()
 
     fun getHasLocalCouncilRole(subjectId: String): Boolean {
         val roles = getLocalCouncilRolesForSubjectId(subjectId)

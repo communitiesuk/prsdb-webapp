@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_CORRESPONDENCE_ADDRESS_ROUTE)
-@AllowIfAnyLandlord
+@AllowIfLandlord
 class LandlordUpdateCorrespondenceAddressController(
     private val journeyFactory: UpdateCorrespondenceAddressJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

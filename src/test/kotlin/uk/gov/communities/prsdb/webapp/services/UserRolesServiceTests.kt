@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
@@ -35,7 +34,6 @@ class UserRolesServiceTests {
         organisationalLandlordUserRepository = Mockito.mock(OrganisationalLandlordUserRepository::class.java)
         localCouncilUserRepository = Mockito.mock(LocalCouncilUserRepository::class.java)
         systemOperatorRepository = Mockito.mock(SystemOperatorRepository::class.java)
-        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(any())).thenReturn(emptyList())
         userRolesService =
             UserRolesService(
                 individualLandlordRepository,
@@ -267,7 +265,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns true for an individual landlord user`() {
+    fun `getUserHasLandlordRole returns true for an individual landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val landlord = MockLandlordData.createIndividualLandlord(baseUser)
@@ -275,32 +273,32 @@ class UserRolesServiceTests {
             .thenReturn(landlord)
 
         // Act
-        val hasLandlordUserRole = userRolesService.getUserHasAnyLandlordRole(baseUser.id)
+        val hasLandlordUserRole = userRolesService.getUserHasLandlordRole(baseUser.id)
 
         // Assert
         Assertions.assertTrue(hasLandlordUserRole)
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns true for an organisation admin user`() {
+    fun `getUserHasLandlordRole returns true for an organisation admin user`() {
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val orgUser = MockLandlordData.createOrganisationalLandlordUser(baseUser, OrganisationalLandlordUserRole.ADMIN)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUser.id)).thenReturn(listOf(orgUser))
 
-        Assertions.assertTrue(userRolesService.getUserHasAnyLandlordRole(baseUser.id))
+        Assertions.assertTrue(userRolesService.getUserHasLandlordRole(baseUser.id))
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns true for an organisation editor user`() {
+    fun `getUserHasLandlordRole returns true for an organisation editor user`() {
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val orgUser = MockLandlordData.createOrganisationalLandlordUser(baseUser, OrganisationalLandlordUserRole.EDITOR)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUser.id)).thenReturn(listOf(orgUser))
 
-        Assertions.assertTrue(userRolesService.getUserHasAnyLandlordRole(baseUser.id))
+        Assertions.assertTrue(userRolesService.getUserHasLandlordRole(baseUser.id))
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns false for a local council manager`() {
+    fun `getUserHasLandlordRole returns false for a local council manager`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = true)
@@ -309,14 +307,14 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLandlordUserRole = userRolesService.getUserHasAnyLandlordRole(baseUser.id)
+        val hasLandlordUserRole = userRolesService.getUserHasLandlordRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLandlordUserRole)
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns false for a standard local council user`() {
+    fun `getUserHasLandlordRole returns false for a standard local council user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLocalCouncilData.createLocalCouncilUser(baseUser, isManager = false)
@@ -325,19 +323,19 @@ class UserRolesServiceTests {
             .thenReturn(user)
 
         // Act
-        val hasLandlordUserRole = userRolesService.getUserHasAnyLandlordRole(baseUser.id)
+        val hasLandlordUserRole = userRolesService.getUserHasLandlordRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLandlordUserRole)
     }
 
     @Test
-    fun `getUserHasAnyLandlordRole returns false for a user without roles`() {
+    fun `getUserHasLandlordRole returns false for a user without roles`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
 
         // Act
-        val hasLandlordUserRole = userRolesService.getUserHasAnyLandlordRole(baseUser.id)
+        val hasLandlordUserRole = userRolesService.getUserHasLandlordRole(baseUser.id)
 
         // Assert
         Assertions.assertFalse(hasLandlordUserRole)

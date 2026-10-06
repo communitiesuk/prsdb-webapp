@@ -6,7 +6,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfAnyLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
-@AllowIfAnyLandlord
+@AllowIfLandlord
 @PrsdbController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
