@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import java.util.UUID
@@ -36,7 +35,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `associates an invitation token with a journey in the session`() {
+    fun `addJourneyIdInvitationTokenPairToSession adds the journey id and invitation token to the session`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(null)
@@ -53,31 +52,47 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns the organisation name for a token associated with the journey`() {
+    fun `addJourneyIdInvitationTokenPairToSession preserves existing pairs in the session`() {
+        // Arrange
+        val existingPair = "existing-journey-id" to "existing-token"
+        val existingPairs = mutableListOf(existingPair)
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(existingPairs)
+
+        // Act
+        invitationService.addJourneyIdInvitationTokenPairToSession(journeyId, token.toString())
+
+        // Assert
+        verify(mockHttpSession)
+            .setAttribute(
+                ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS,
+                mutableListOf(existingPair, journeyId to token.toString()),
+            )
+    }
+
+    @Test
+    fun `getInvitationForJourneyIdOrNull returns the invitation for a token associated with the journey`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
         val invitation = org.mockito.kotlin.mock<OrganisationalLandlordInvitation>()
-        val organisation = org.mockito.kotlin.mock<OrganisationalLandlord>()
-        whenever(invitation.organisationalLandlord).thenReturn(organisation)
-        whenever(organisation.name).thenReturn("Local Organisation Landlord")
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
 
         // Act
-        val result = invitationService.getOrganisationNameForJourneyIdOrNull(journeyId)
+        val result = invitationService.getInvitationForJourneyIdOrNull(journeyId)
 
         // Assert
-        assertEquals("Local Organisation Landlord", result)
+        assertEquals(invitation, result)
     }
 
     @Test
-    fun `returns null when the journey has no stored token`() {
+    fun `getInvitationForJourneyIdOrNull returns null when the journey has no stored token`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(null)
 
         // Act
-        val result = invitationService.getOrganisationNameForJourneyIdOrNull(journeyId)
+        val result = invitationService.getInvitationForJourneyIdOrNull(journeyId)
 
         // Assert
         assertNull(result)
@@ -85,13 +100,13 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns null when the stored token is malformed`() {
+    fun `getInvitationForJourneyIdOrNull returns null when the stored token is malformed`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to "not-a-uuid"))
 
         // Act
-        val result = invitationService.getOrganisationNameForJourneyIdOrNull(journeyId)
+        val result = invitationService.getInvitationForJourneyIdOrNull(journeyId)
 
         // Assert
         assertNull(result)
@@ -99,14 +114,14 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `returns null when no invitation matches the stored token`() {
+    fun `getInvitationForJourneyIdOrNull returns null when no invitation matches the stored token`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(null)
 
         // Act
-        val result = invitationService.getOrganisationNameForJourneyIdOrNull(journeyId)
+        val result = invitationService.getInvitationForJourneyIdOrNull(journeyId)
 
         // Assert
         assertNull(result)

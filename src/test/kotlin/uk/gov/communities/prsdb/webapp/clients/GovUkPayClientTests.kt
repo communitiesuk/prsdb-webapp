@@ -30,7 +30,9 @@ import org.springframework.web.client.RestClientResponseException
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLink
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPaySettlementSummary
@@ -109,7 +111,7 @@ class GovUkPayClientTests {
     }
 
     @Test
-    fun `createPayment returns the payment ID and next URL of the created payment`() {
+    fun `createPayment returns the created payment and its next URL`() {
         // Arrange
         mockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdResponse())
 
@@ -117,7 +119,7 @@ class GovUkPayClientTests {
         val createdPayment = govUkPayClient.createPayment(createPaymentRequest())
 
         // Assert
-        assertEquals(GovUkPayCreatedPayment(paymentId = PAYMENT_ID, nextUrl = NEXT_URL), createdPayment)
+        assertEquals(expectedCreatedPayment(), createdPayment)
         mockServer.verify()
     }
 
@@ -153,6 +155,21 @@ class GovUkPayClientTests {
     }
 
     @Test
+    fun `createPayment throws GovUkPayException for a success status other than 201`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments"))
+            .andRespond(withSuccess(createdPaymentBody(includeNextUrl = true), MediaType.APPLICATION_JSON))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createPayment(createPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to create payment with HTTP status 200 instead of 201", exception.message)
+        mockServer.verify()
+    }
+
+    @Test
     fun `createPayment wraps a network failure in GovUkPayException`() {
         // Arrange
         mockServer
@@ -180,6 +197,21 @@ class GovUkPayClientTests {
         govUkPayClient.capturePayment(PAYMENT_ID)
 
         // Assert
+        mockServer.verify()
+    }
+
+    @Test
+    fun `capturePayment throws GovUkPayException for a success status other than 204`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/capture"))
+            .andRespond(withSuccess())
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.capturePayment(PAYMENT_ID) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to capture payment with HTTP status 200 instead of 204", exception.message)
         mockServer.verify()
     }
 
@@ -239,6 +271,21 @@ class GovUkPayClientTests {
         govUkPayClient.cancelPayment(PAYMENT_ID)
 
         // Assert
+        mockServer.verify()
+    }
+
+    @Test
+    fun `cancelPayment throws GovUkPayException for a success status other than 204`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/cancel"))
+            .andRespond(withSuccess())
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.cancelPayment(PAYMENT_ID) }
+
+        // Assert
+        assertEquals("GOV.UK Pay responded to cancel payment with HTTP status 200 instead of 204", exception.message)
         mockServer.verify()
     }
 
@@ -320,6 +367,49 @@ class GovUkPayClientTests {
     }
 
     @Test
+    fun `getPayment returns the cancel link for a payment that can be cancelled`() {
+        // Arrange
+        val cancelUrl = "$BASE_URL/v1/payments/$PAYMENT_ID/cancel"
+        val cancellablePaymentBody =
+            paymentBody(
+                stateJson = """{ "status": "started", "finished": false }""",
+                settlementSummaryJson = "{}",
+                linksJson =
+                    """
+                    {
+                        "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" },
+                        "cancel": { "href": "$cancelUrl", "method": "POST" }
+                    }
+                    """,
+            )
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(cancellablePaymentBody, MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPayment(PAYMENT_ID)
+
+        // Assert
+        assertEquals(GovUkPayLink(href = cancelUrl), payment.links.cancelUrl)
+        mockServer.verify()
+    }
+
+    @Test
+    fun `getPayment returns no cancel link for a payment that cannot be cancelled`() {
+        // Arrange
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPayment(PAYMENT_ID)
+
+        // Assert
+        assertNull(payment.links.cancelUrl)
+        mockServer.verify()
+    }
+
+    @Test
     fun `getPayment throws GovUkPayException for an unrecognised payment status`() {
         // Arrange
         val unknownStatusBody = paymentBody(stateJson = """{ "status": "some_new_status", "finished": false }""")
@@ -360,7 +450,7 @@ class GovUkPayClientTests {
         val createdPayment = govUkPayClient.createPayment(createPaymentRequest())
 
         // Assert
-        assertEquals(GovUkPayCreatedPayment(paymentId = PAYMENT_ID, nextUrl = NEXT_URL), createdPayment)
+        assertEquals(expectedCreatedPayment(), createdPayment)
         mockServer.verify()
     }
 
@@ -420,6 +510,21 @@ class GovUkPayClientTests {
             email = email,
         )
 
+    private fun expectedCreatedPayment() =
+        GovUkPayCreatedPayment(
+            payment =
+                GovUkPayPayment(
+                    paymentId = PAYMENT_ID,
+                    amount = AMOUNT,
+                    reference = REFERENCE,
+                    description = DESCRIPTION,
+                    createdDate = Instant.parse(CREATED_DATE),
+                    state = GovUkPayPaymentState(status = GovUkPayPaymentStatus.CREATED, finished = false),
+                    links = GovUkPayPaymentLinks(nextUrl = GovUkPayLink(href = NEXT_URL)),
+                ),
+            nextUrl = NEXT_URL,
+        )
+
     private fun createdResponse(includeNextUrl: Boolean = true) =
         withStatus(HttpStatus.CREATED)
             .contentType(MediaType.APPLICATION_JSON)
@@ -452,6 +557,7 @@ class GovUkPayClientTests {
         stateJson: String = """{ "status": "success", "finished": true }""",
         settlementSummaryJson: String =
             """{ "capture_submit_time": "2026-09-28T13:15:00.000Z", "captured_date": "$CAPTURED_DATE" }""",
+        linksJson: String = """{ "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" } }""",
     ) = """
         {
             "amount": $AMOUNT,
@@ -469,7 +575,7 @@ class GovUkPayClientTests {
             "moto": false,
             "return_url": "$RETURN_URL",
             "authorisation_mode": "web",
-            "_links": { "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" } }
+            "_links": $linksJson
         }
         """
 

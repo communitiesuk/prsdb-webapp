@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
@@ -15,14 +14,13 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 
 class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableData("data-local.sql") {
     @BeforeEach
-    fun enableFlags() {
-        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    fun enableFlag() {
         featureFlagManager.enableFeature(PAYMENTS)
     }
 
     @Test
     fun `submitting check your answers routes to the payment summary step when payments is enabled`(page: Page) {
-        val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments()
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
         assertThat(checkAnswersPage.submitButton).containsText("Submit and pay")
 
         checkAnswersPage.confirm()
@@ -35,7 +33,7 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
     fun `submitting check your answers routes straight to confirmation when payments is disabled`(page: Page) {
         featureFlagManager.disableFeature(PAYMENTS)
 
-        val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPage()
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPage()
         assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
         assertThat(checkAnswersPage.submitButton).containsText("Complete registration")
 
@@ -49,7 +47,7 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         featureFlagManager.disableFeature(PAYMENTS)
 
         val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
+            navigator.goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder
                     .beforePropertyRegistrationCheckAnswersOccupied()
                     .withBedrooms(),
