@@ -17,10 +17,11 @@
                     acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.heading
                 </h3>
                 <p class="govuk-body">
-                    <span th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.paragraph}">
-                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.paragraph</span>
+                    <span th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.beforeLink}">
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.beforeLink</span>
                     <a class="govuk-link" th:href="@{${dashboardUrl}}" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.link}">
-                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.link</a>.
+                        acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.link</a><span
+                        th:remove="tag" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.afterLink}">acceptOrganisationInvitation.invalidLink.whatsHappened.alreadyResponded.afterLink</span>
                 </p>
                 <h3 class="govuk-heading-s" th:text="#{acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.heading}">
                     acceptOrganisationInvitation.invalidLink.whatsHappened.notResponded.heading

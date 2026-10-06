@@ -12,8 +12,9 @@ invalidLink:
     heading: What’s happened
     alreadyResponded:
       heading: If you have already responded to this invitation
-      paragraph: Each invitation can only be used once. If you’ve already accepted this invitation,
+      beforeLink: Each invitation can only be used once. If you’ve already accepted this invitation,
       link: sign in to your account
+      afterLink: .
     notResponded:
       heading: If you have not responded to this invitation
       paragraph: 'This invitation has either:'
