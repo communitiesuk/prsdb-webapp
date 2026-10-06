@@ -23,7 +23,7 @@ class CheckAnswersStepConfig :
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("acceptInvitationCheckAnswersStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStep")
 final class CheckAnswersStep(
     stepConfig: CheckAnswersStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {

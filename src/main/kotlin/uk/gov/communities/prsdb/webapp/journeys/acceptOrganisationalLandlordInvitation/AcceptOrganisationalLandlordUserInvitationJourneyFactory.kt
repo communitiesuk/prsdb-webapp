@@ -80,7 +80,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
-@JourneyFrameworkComponent("acceptInvitationJourney")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJourney")
 class AcceptInvitationJourney(
     override val validateTokenStep: ValidateTokenStep,
     override val invalidLinkStep: InvalidLinkStep,

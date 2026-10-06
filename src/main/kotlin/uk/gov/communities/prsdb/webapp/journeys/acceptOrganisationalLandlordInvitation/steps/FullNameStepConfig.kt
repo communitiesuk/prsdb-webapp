@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 
-@JourneyFrameworkComponent("acceptOrganisationalLandlordUserInvitationFullNameStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationFullNameStepConfig")
 class FullNameStepConfig :
     AbstractRequestableStepConfig<Complete, NameFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NameFormModel::class
@@ -24,7 +24,7 @@ class FullNameStepConfig :
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("acceptInvitationFullNameStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationFullNameStep")
 final class FullNameStep(
     stepConfig: FullNameStepConfig,
 ) : RequestableStep<Complete, NameFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {

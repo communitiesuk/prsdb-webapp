@@ -12,7 +12,7 @@ enum class TokenValidity {
     INVALID,
 }
 
-@JourneyFrameworkComponent("acceptInvitationValidateTokenStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig :
     AbstractRequestableStepConfig<TokenValidity, TokenValidityFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = TokenValidityFormModel::class
@@ -40,7 +40,7 @@ class ValidateTokenStepConfig :
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.tokenValidity
 }
 
-@JourneyFrameworkComponent("acceptInvitationValidateTokenStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationValidateTokenStep")
 final class ValidateTokenStep(
     stepConfig: ValidateTokenStepConfig,
 ) : RequestableStep<TokenValidity, TokenValidityFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {

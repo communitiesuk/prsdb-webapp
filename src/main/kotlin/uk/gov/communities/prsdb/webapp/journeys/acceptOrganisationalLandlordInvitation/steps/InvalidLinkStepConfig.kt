@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@JourneyFrameworkComponent("acceptInvitationInvalidLinkStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationInvalidLinkStepConfig")
 class InvalidLinkStepConfig :
     AbstractRequestableStepConfig<Nothing, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -21,7 +21,7 @@ class InvalidLinkStepConfig :
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = null
 }
 
-@JourneyFrameworkComponent("acceptInvitationInvalidLinkStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationInvalidLinkStep")
 final class InvalidLinkStep(
     stepConfig: InvalidLinkStepConfig,
 ) : RequestableStep<Nothing, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {

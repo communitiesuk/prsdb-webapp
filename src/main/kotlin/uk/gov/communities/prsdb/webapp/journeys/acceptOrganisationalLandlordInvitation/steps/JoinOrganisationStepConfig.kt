@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
-@JourneyFrameworkComponent("acceptInvitationJoinOrganisationStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJoinOrganisationStepConfig")
 class JoinOrganisationStepConfig(
     private val invitationService: OrganisationalLandlordInvitationService,
 ) :
@@ -34,7 +34,7 @@ class JoinOrganisationStepConfig(
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("acceptInvitationJoinOrganisationStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJoinOrganisationStep")
 final class JoinOrganisationStep(
     stepConfig: JoinOrganisationStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {

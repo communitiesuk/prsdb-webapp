@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@JourneyFrameworkComponent("acceptInvitationEmailAddressStepConfig")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStepConfig")
 class EmailAddressStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -22,7 +22,7 @@ class EmailAddressStepConfig :
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("acceptInvitationEmailAddressStep")
+@JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationEmailAddressStep")
 final class EmailAddressStep(
     stepConfig: EmailAddressStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
