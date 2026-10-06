@@ -37,8 +37,9 @@ import kotlin.random.Random
  * exemptions, recurring payment agreements, corporate card surcharges, 3D Secure, digital wallets) are omitted, as they
  * would be for a real payment made using a test (sandbox) account.
  *
- * Payments are held in memory, so any payment not created since the app started (e.g. seeded by data-local.sql) is
- * restored from our database with the status we last recorded for it.
+ * GOV.UK Pay's own record of each payment is mocked in memory, so it only covers payments created through this mock
+ * since the app started. Any other payment (e.g. seeded by data-local.sql) is rebuilt from our payment table, using
+ * the status we last recorded for it.
  */
 @Profile("local")
 @PrsdbRestController
