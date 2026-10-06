@@ -4,7 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
-import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_ROLES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
@@ -28,7 +28,7 @@ class DashboardUrlProvider(
                 ?: return null
 
         return when {
-            authorities.contains(ROLE_INDIVIDUAL_LANDLORD) -> LANDLORD_DASHBOARD_URL
+            authorities.any { it in LANDLORD_ROLES } -> LANDLORD_DASHBOARD_URL
             authorities.contains(ROLE_LOCAL_COUNCIL_USER) || authorities.contains(ROLE_LOCAL_COUNCIL_ADMIN) ->
                 LOCAL_COUNCIL_DASHBOARD_URL
             authorities.contains(ROLE_SYSTEM_OPERATOR) -> SYSTEM_OPERATOR_DASHBOARD_URL

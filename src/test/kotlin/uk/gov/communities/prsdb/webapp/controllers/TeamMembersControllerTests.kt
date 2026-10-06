@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 
-// TODO PDJB-1819: Change the mock user roles to ORG_ADMIN
 @WebMvcTest(TeamMembersController::class)
 class TeamMembersControllerTests(
     @Autowired val webContext: WebApplicationContext,
@@ -55,7 +54,7 @@ class TeamMembersControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getTeamMembers returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -67,7 +66,7 @@ class TeamMembersControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getTeamMembers returns 200 for an organisation landlord`() {
         stubOrgLandlordWithCurrentUser()
 

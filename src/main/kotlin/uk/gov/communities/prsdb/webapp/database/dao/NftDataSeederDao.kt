@@ -163,6 +163,17 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
+    fun prepareOwnedPropertyPaymentStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO payment 
+            (payment_id, created_date, last_modified_date, amount_in_pence, reference, payment_created_at, for_period_ending, 
+             status, paying_user_id, associated_property_id, associated_incomplete_property_user_id, associated_incomplete_property_saved_journey_state_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 2, ?, ?, null, null)
+            """
+        return connection.prepareStatement(query)
+    }
+
     fun prepareLandlordshipMembersStatement(): PreparedStatement {
         val query =
             """
