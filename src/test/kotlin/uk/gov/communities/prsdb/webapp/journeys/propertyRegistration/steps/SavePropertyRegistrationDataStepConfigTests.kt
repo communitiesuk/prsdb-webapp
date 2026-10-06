@@ -28,7 +28,6 @@ import org.mockito.quality.Strictness
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -134,11 +133,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
-        val bedrooms = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(bedrooms)
-        whenever(bedrooms.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "4" })
         val correspondenceTask = mock<CorrespondenceTask>()
         val emailStep = mock<CorrespondenceEmailStep>()
         val addressTask = mock<CorrespondenceAddressTask>()
@@ -176,11 +171,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
-        val bedrooms = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(bedrooms)
-        whenever(bedrooms.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "4" })
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -608,6 +599,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = false })
 
+        val mockBedroomsStep = mock<BedroomsStep>()
+        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
+
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
@@ -841,7 +836,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = eq(0),
             numberOfPeople = eq(0),
-            numBedrooms = isNull(),
+            numBedrooms = eq(3),
             billsIncludedList = isNull(),
             customBillsIncluded = isNull(),
             furnishedStatus = isNull(),
@@ -915,6 +910,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(occupancyFormModel)
+
+        val mockBedroomsStep = mock<BedroomsStep>()
+        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
 
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
@@ -1083,10 +1082,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         whenever(mockHouseholdStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "1" })
         whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "2" })
-
-        val mockBedroomsStep = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
-        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "1" })
 
         val mockFurnishedStatusStep = mock<FurnishedStatusStep>()
         whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)

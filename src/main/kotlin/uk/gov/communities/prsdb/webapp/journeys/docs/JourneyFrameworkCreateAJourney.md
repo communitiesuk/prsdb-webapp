@@ -735,7 +735,7 @@ src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/propertyRegistration/
 │   ├── BedroomsStepConfig.kt
 │   └── ...
 └── tasks/                                     # Reusable task definitions
-    ├── OccupationTask.kt
+    ├── HouseholdsAndTenantsTask.kt
     ├── LicensingTask.kt
     └── ...
 ```

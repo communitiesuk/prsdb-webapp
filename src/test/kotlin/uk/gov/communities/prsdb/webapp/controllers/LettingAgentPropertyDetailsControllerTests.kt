@@ -104,8 +104,8 @@ class LettingAgentPropertyDetailsControllerTests(
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
         return PropertyComplianceViewModelFactory(
             GasSafetyViewModelFactory(mock(), messageSource, mock()),
-            ElectricalSafetyViewModelFactory(mock(), messageSource, mock()),
-            EpcViewModelFactory(messageSource, mock()),
+            ElectricalSafetyViewModelFactory(mock(), messageSource),
+            EpcViewModelFactory(messageSource),
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
             viewType = PropertyDetailsViewType.LETTING_AGENT,

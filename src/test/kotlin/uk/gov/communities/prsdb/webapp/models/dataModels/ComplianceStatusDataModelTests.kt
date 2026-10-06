@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -139,23 +142,36 @@ class ComplianceStatusDataModelTests {
     }
 
     @Test
-    fun `fromPropertyCompliance sets provideLaterDeadline to the supplied value`() {
+    fun `fromPropertyCompliance sets provideLaterDeadline from the property ownership when occupied since registration`() {
         // Arrange
-        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
-        val expectedDeadline = LocalDate.of(2025, 2, 12)
+        val registrationDate = LocalDate.of(2025, 3, 1)
+        val propertyOwnership =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate,
+            )
+        val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
-        val complianceStatusDataModel =
-            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, provideLaterDeadline = expectedDeadline)
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
         // Assert
-        assertEquals(expectedDeadline, complianceStatusDataModel.provideLaterDeadline)
+        assertEquals(
+            registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+            complianceStatusDataModel.provideLaterDeadline,
+        )
     }
 
     @Test
-    fun `fromPropertyCompliance defaults provideLaterDeadline to null`() {
+    fun `fromPropertyCompliance leaves provideLaterDeadline null when the property was occupied after registration`() {
         // Arrange
-        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val registrationDate = LocalDate.of(2025, 3, 1)
+        val propertyOwnership =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate.plusDays(30),
+            )
+        val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
         val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)

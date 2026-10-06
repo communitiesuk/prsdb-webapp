@@ -13,16 +13,10 @@ class TaskListPagePropertyRegistration(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT",
     ) {
-    private val registerTasks = TaskList.byIndex(page, 0)
-    private val checkAndSubmitTasks = TaskList.byIndex(page, 1)
     val aboutYourPropertyTasks = TaskList.byIndex(page, 0)
     val rentedOutTasks = TaskList.byIndex(page, 1)
     val submitYourRegistrationTasks = TaskList.byIndex(page, 2)
     val backLink = BackLink.default(page)
-
-    fun clickRegisterTaskWithName(name: String) = registerTasks.getTask(name).clickAndWait()
-
-    fun clickCheckAndSubmitTaskWithName(name: String) = checkAndSubmitTasks.getTask(name).clickAndWait()
 
     fun clickAboutYourPropertyTaskWithName(name: String) = aboutYourPropertyTasks.getTask(name).clickAndWait()
 
@@ -49,5 +43,5 @@ class TaskListPagePropertyRegistration(
     fun taskHasStatus(
         name: String,
         status: String,
-    ): Boolean = registerTasks.getTask(name).statusText.contains(status)
+    ): Boolean = aboutYourPropertyTasks.getTask(name).statusText.contains(status)
 }

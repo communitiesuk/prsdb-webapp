@@ -41,7 +41,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 
-// TODO PDJB-939 - this can be combined with PropertyDetailsViewModel once the pdjb939 flag is removed (assuming it is not used elsewhere)
 abstract class PropertyDetailsViewModelBase(
     protected val propertyOwnership: PropertyOwnership,
     protected val viewType: PropertyDetailsViewType,
@@ -50,7 +49,6 @@ abstract class PropertyDetailsViewModelBase(
 ) {
     protected val changeLinkMessageKey = "forms.links.change"
 
-    val address: String = propertyOwnership.address.singleLineAddress
     val addressParts: List<String> = propertyOwnership.address.toMultiLineAddress().split("\n")
 
     val isOccupied = propertyOwnership.isOccupied
@@ -97,21 +95,18 @@ abstract class PropertyDetailsViewModelBase(
             withActionLink = false,
         )
 
-    protected fun ownershipTypeRow(labelKey: String): SummaryListRowViewModel =
+    protected fun ownershipTypeRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
-            labelKey,
+            "propertyDetails.propertyRecord.ownership.ownershipType",
             MessageKeyConverter.convert(propertyOwnership.ownershipType),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )
 
-    protected fun occupiedRow(
-        labelKey: String,
-        occupied: Boolean = isOccupied,
-    ): SummaryListRowViewModel =
+    protected fun occupiedRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
-            labelKey,
-            MessageKeyConverter.convert(occupied),
+            "propertyDetails.propertyRecord.occupation.isOccupied",
+            MessageKeyConverter.convert(isOccupied),
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                 "/${OccupiedStep.ROUTE_SEGMENT}",
         )
