@@ -1854,7 +1854,6 @@ class Navigator(
         val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
         navigate(journeyUrl)
         return createValidPage(page, FullNamePage::class)
-import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
     }
 
     companion object {
