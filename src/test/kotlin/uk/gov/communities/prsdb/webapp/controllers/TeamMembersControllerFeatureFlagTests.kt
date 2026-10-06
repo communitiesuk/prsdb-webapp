@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 
 // TODO PDJB-1828: Delete this class when the MULTI_USER_ORGANISATIONS flag is removed
-// TODO PDJB-1819: Change the mock user roles to ORG_ADMIN
 class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() {
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
@@ -24,7 +23,7 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
     @MockitoBean
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    @WithMockUser(roles = ["ORG_ADMIN"])
     @Test
     fun `team members page is unavailable if the multi-user organisations feature flag is disabled`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
@@ -34,7 +33,7 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
             .andExpect { status { isNotFound() } }
     }
 
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     @Test
     fun `team members page is available if the multi-user organisations feature flag is enabled`() {
         featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
