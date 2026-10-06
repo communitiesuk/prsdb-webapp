@@ -113,6 +113,7 @@ gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
+  gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
 
 cloudwatch-metrics:
   ecs:
@@ -147,9 +148,6 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-restructure-and-skipping"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-phase-two"
       enabled: false
       expiry-date: "2026-12-31"

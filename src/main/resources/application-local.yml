@@ -104,6 +104,7 @@ gov-uk-pay:
   base-url: http://localhost:${server.port}/local/gov-uk-pay
   api-key: local-gov-uk-pay-api-key
   annual-payment-amount-in-pence: 2000
+  gratis-period-end-date: 2020-01-01
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
@@ -117,9 +118,6 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-restructure-and-skipping"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-phase-two"
       enabled: true
       expiry-date: "2026-12-31"

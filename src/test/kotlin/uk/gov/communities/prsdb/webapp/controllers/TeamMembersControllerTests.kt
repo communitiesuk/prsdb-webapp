@@ -54,7 +54,7 @@ class TeamMembersControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getTeamMembers returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
@@ -66,7 +66,7 @@ class TeamMembersControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getTeamMembers returns 200 for an organisation landlord`() {
         stubOrgLandlordWithCurrentUser()
 

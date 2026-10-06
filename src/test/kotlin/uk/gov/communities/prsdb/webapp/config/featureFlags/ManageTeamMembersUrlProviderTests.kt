@@ -17,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
@@ -48,7 +49,7 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
 
     @Test
     fun `returns the team members route for an organisation landlord user`() {
-        setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
+        setAuthenticatedUser("org-user", ROLE_ORG_ADMIN)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
         assertEquals(TEAM_MEMBERS_ROUTE, manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
@@ -79,7 +80,7 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is disabled returns null even for an organisation landlord user`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedUser("org-user", ROLE_INDIVIDUAL_LANDLORD)
+        setAuthenticatedUser("org-user", ROLE_ORG_ADMIN)
         whenever(organisationalLandlordUserRepository.existsByBaseUser_Id("org-user")).thenReturn(true)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())

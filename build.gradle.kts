@@ -40,7 +40,9 @@ extra["tomcat.version"] = "10.1.59"
 // GHSA-jhq6-gfmj-v8fx: logback object injection via HardenedObjectInputStream (fixed in 1.5.35).
 extra["logback.version"] = "1.5.35"
 // CVE-2026-54515 / GHSA-5jmj-h7xm-6q6v: jackson-databind case-insensitive @JsonIgnoreProperties bypass (fixed in 2.21.5).
-extra["jackson-bom.version"] = "2.21.5"
+// CVE-2026-19032, -68497, -83557: jackson-databind advisories (fixed in 2.21.6).
+// CVE-2026-89407, -89425, -91776, -91777: jackson-core / jackson-databind DoS advisories (fixed in 2.21.7).
+extra["jackson-bom.version"] = "2.21.7"
 // Multiple netty-codec / netty-codec-http / netty-codec-http2 advisories fixed in 4.1.136.Final
 // (CVE-2026-55831, -55833, -56745, -56746, -59898, -59899, -59900, -59901, -59921), plus
 // GHSA-8c42-7qj2-3j46: netty-codec-http CORS Vary header overwrite cache poisoning (fixed in 4.1.137.Final).
@@ -325,8 +327,8 @@ buildscript {
             force("org.apache.commons:commons-lang3:3.18.0")
             // The Flyway and Spring Boot plugins pull jackson 2.21.4 onto the build classpath. The
             // extra["jackson-bom.version"] override above only applies to the project's dependency
-            // management, not here, so GHSA-5gvw-p9qm-jgwh / GHSA-mhm7-754m-9p8w are reported against it.
-            force("com.fasterxml.jackson:jackson-bom:2.21.5")
+            // management, not here, so the jackson advisories listed above are also reported against it.
+            force("com.fasterxml.jackson:jackson-bom:2.21.7")
             // spring-boot-buildpack-platform also pulls a vulnerable httpclient5 onto the build classpath.
             // CVE-2026-64607 / GHSA-hjcp-jmpx-g3qm: connection leak on Content-Encoding decode error
             // leading to pool exhaustion (fixed in 5.6.3).

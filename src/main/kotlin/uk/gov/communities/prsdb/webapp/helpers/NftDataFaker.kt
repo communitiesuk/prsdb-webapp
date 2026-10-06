@@ -93,6 +93,14 @@ object NftDataFaker {
         )
     }
 
+    fun generatePaymentId(): String = scenarioRandom.nextLong().toULong().toString(36)
+
+    fun generatePaymentAmount(): Int = scenarioRandom.nextInt(6500)
+
+    fun generatePaymentReference(): String = faker.animal().name()
+
+    fun generatePaymentCreated(registrationCreated: Timestamp): Timestamp = generateTimestampBefore(registrationCreated, 5)
+
     fun generateReminderEmailSent(): Boolean = scenarioRandom.nextDouble() < 0.25
 
     fun generateNumberLessThan(max: Int): Int = faker.random().nextInt(max)
@@ -742,6 +750,11 @@ object NftDataFaker {
         date: Date,
         maxDaysAgo: Long,
     ): Date = Date.valueOf(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toLocalDate().toInstant()).toLocalDate())
+
+    private fun generateTimestampBefore(
+        date: Timestamp,
+        maxDaysAgo: Long,
+    ): Timestamp = Timestamp.from(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toInstant()))
 
     private fun generateUsername(name: String): String {
         val nameParts = name.split(" ")

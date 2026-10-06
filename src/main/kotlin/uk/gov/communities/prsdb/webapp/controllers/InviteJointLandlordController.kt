@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
@@ -28,7 +28,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(INVITE_JOINT_LANDLORD_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfLandlord
 class InviteJointLandlordController(
     private val journeyFactory: InviteJointLandlordJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,

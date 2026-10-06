@@ -27,7 +27,7 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
     @MockitoBean
     private lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
 
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    @WithMockUser(roles = ["ORG_ADMIN"])
     @Test
     fun `team members page is unavailable if the multi-user organisations feature flag is disabled`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
@@ -37,7 +37,7 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
             .andExpect { status { isNotFound() } }
     }
 
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     @Test
     fun `team members page is available if the multi-user organisations feature flag is enabled`() {
         featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)

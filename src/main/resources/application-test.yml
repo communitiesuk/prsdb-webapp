@@ -7,9 +7,6 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-restructure-and-skipping"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-phase-two"
       enabled: true
       expiry-date: "2026-12-31"
@@ -42,3 +39,6 @@ argon2:
   iterations: 2
   memory: 16384
   parallelism: 1
+
+gov-uk-pay:
+  gratis-period-end-date: 2027-01-01

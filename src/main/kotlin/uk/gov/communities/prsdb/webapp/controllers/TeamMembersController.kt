@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserServic
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 @PrsdbController
 @RequestMapping(TEAM_MEMBERS_ROUTE)
 class TeamMembersController(

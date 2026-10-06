@@ -82,8 +82,10 @@ Spring will automatically add any `FlippingStrategyFactory` beans (such as `Rele
 You can define a service which calls different versions of a function depending on the value of a feature flag.
 
 * Define an interface
-* Define two implementations of the interface, annotated with `@PrsdbWebService("bean-name")`.
+* Define two implementations of the interface, annotated with `@Service("bean-name")` and `@Conditional(WebServerOnly::class)`.
     * Add the `@Primary` annotation to the implementation that should be used by default.
+    * Do not use `@PrsdbWebService`. FF4J only reads the bean name from a `@Service` annotation placed directly on the class.
+      Without one, it creates every bean in the application on each call to find the name.
 * Annotate members in your interface with `@PrsdbFlip(name = "...", alterBean = "...")` where the `alterBean` value matches the name you
   gave to your second implementation.
 * You are also able to annotate the interface itself with `@PrsdbFlip` if you want to switch the whole service on and off based on a feature flag, rather than individual functions.
@@ -103,11 +105,13 @@ extending `DisabledFeatureFlagStrategy` (mark the disabled one `@Primary`):
 interface PaymentsPropertyRegistrationStrategy : FeatureFlagStrategy
 
 @Primary
-@PrsdbWebService("payments-property-registration-flag-off")
+@Conditional(WebServerOnly::class)
+@Service("payments-property-registration-flag-off")
 class PaymentsPropertyRegistrationStrategyImplFlagOff :
     DisabledFeatureFlagStrategy(), PaymentsPropertyRegistrationStrategy
 
-@PrsdbWebService("payments-property-registration-flag-on")
+@Conditional(WebServerOnly::class)
+@Service("payments-property-registration-flag-on")
 class PaymentsPropertyRegistrationStrategyImplFlagOn :
     EnabledFeatureFlagStrategy(), PaymentsPropertyRegistrationStrategy
 ```
