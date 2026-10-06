@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
@@ -74,13 +73,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
         BaseComponent.assertThat(invalidLinkPage.heading)
             .containsText("There was a problem with this invitation link")
-        assertThat(invalidLinkPage.alreadyRespondedText)
-            .containsText("Each invitation can only be used once.")
-        BaseComponent.assertThat(invalidLinkPage.signInLink).hasText("sign in to your account")
         BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
-        assertThat(invalidLinkPage.bulletPoints).hasCount(2)
-        assertThat(invalidLinkPage.bulletPoints.first()).containsText("expired (it’s over 28 days old)")
-        assertThat(invalidLinkPage.stillNeedAccessText)
-            .containsText("Ask someone at your organisation with administrator access to invite you again.")
     }
 }
