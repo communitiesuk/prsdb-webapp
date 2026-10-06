@@ -233,7 +233,8 @@ VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026
        ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
-VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1) ON CONFLICT DO NOTHING;
+VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1), -- Org landlord (Team-PRSDB+orglandlord)
+       (901, '2026-07-30 00:00:00+00', 210000000901, 1) ON CONFLICT DO NOTHING; -- Editor org landlord (Team-PRSDB+orglandlordeditor)
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -245,14 +246,32 @@ INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
                       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
                       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
                       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
-SELECT * FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
+SELECT id, registration_number_id, landlord_type, created_date,
+       organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+       organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+       organisation_is_company, organisation_is_charity, organisation_is_trust,
+       organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone
+FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
         'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
         'Test Registrant', '1980-01-01'::date, 'Team-PRSDB+orglandlord@softwire.com', '07777777778',
         true, true, true,
         '12345678', 0, '1234567',
         'Lead Trustee Name', '1975-06-15'::date, 'lead.trustee@example.com',
         '07777777779', 1,
-        'Main Contact Name', 'main.contact@example.com', '07777777780')) AS v (
+        'Main Contact Name', 'main.contact@example.com', '07777777780',
+        'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'),
+       (100, 901, 1, '2026-07-30 00:00:00+00'::timestamptz,
+        'Test Editor Organisation Landlord', 1, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777781',
+        'Test Editor', '1985-01-01'::date, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777782',
+        true, false, false,
+        '87654322', null, null,
+        null, null, null,
+        null, null,
+        'Editor Main Contact', 'editor.main.contact@example.com', '07777777783',
+        'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk')) AS v (
            id, registration_number_id, landlord_type, created_date,
            organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
            organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
@@ -260,11 +279,12 @@ SELECT * FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
            organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
            organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
            organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
-           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
--- Skip creating this organisation landlord if its user is already registered as an individual landlord: the user link
+           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone,
+           user_subject_identifier)
+-- Skip creating an organisation landlord if its user is already registered as an individual landlord: the user link
 -- below would be skipped for the same reason, so creating the landlord would leave an organisation landlord with no users.
 WHERE NOT EXISTS (
-    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'
+    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.user_subject_identifier
 )
 ON CONFLICT DO NOTHING;
 
@@ -272,7 +292,7 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 
 INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
 SELECT * FROM (VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '2026-07-30 00:00:00+00'::timestamptz),
-                      (2, 11, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+                      (2, 100, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
 -- Skip linking a user as an organisation landlord user if they are already registered as an individual landlord,
 -- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
 WHERE NOT EXISTS (

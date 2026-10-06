@@ -165,8 +165,9 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (84, '08/19/26', 1502423346, 0),
        (85, '08/25/26', 1502423347, 1),
        (86, '01/15/25', 1502423348, 0),
-       (87, '01/15/25', 1502423350, 0),
-       (900, '07/23/26', 1502423349, 1); -- Test org landlord (Team-PRSDB+orglandlord)
+       (87, '01/15/25', 1502423351, 0),
+       (900, '07/23/26', 1502423349, 1), -- Test org landlord (Team-PRSDB+orglandlord)
+       (901, '07/23/26', 1502423350, 1); -- Test editor org landlord (Team-PRSDB+orglandlordeditor)
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -300,12 +301,16 @@ VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
        (100, '07/23/26', '07/23/26', 900, 1, 'Test Organisation Landlord', 5,
         'Team-PRSDB+orglandlord@softwire.com', '07777777777', 'Test Registrant', '01/01/1980',
         'Team-PRSDB+orglandlord@softwire.com', '07777777778', true, false, false, '87654321',
-        'Main Contact Name', 'main.contact@example.com', '07777777780');
+        'Main Contact Name', 'main.contact@example.com', '07777777780'),
+       (101, '07/23/26', '07/23/26', 901, 1, 'Test Editor Organisation Landlord', 5,
+        'Team-PRSDB+orglandlordeditor@softwire.com', '07777777781', 'Test Editor', '01/01/1985',
+        'Team-PRSDB+orglandlordeditor@softwire.com', '07777777782', true, false, false, '87654322',
+        'Editor Main Contact', 'editor.main.contact@example.com', '07777777783');
 
 INSERT INTO organisational_landlord_user (organisation_landlord_id, subject_identifier, name, email, role, created_date)
 VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', 0, '07/23/26'),
        (100, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '07/23/26'),
-       (100, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '07/23/26');
+       (101, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '07/23/26');
 
 INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
                                                role, invitation_expired_email_sent, is_hidden)
