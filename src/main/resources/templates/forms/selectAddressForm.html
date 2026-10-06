@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
@@ -11,7 +10,7 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
         <div th:id="'address-hint'" class="govuk-hint">
             <span th:remove="tag" th:text="#{addressForms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">addressForms.selectAddress.fieldSetHint.beforePostcode</span>

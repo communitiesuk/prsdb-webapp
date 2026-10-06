@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="taskListViewModel" type="uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel"*/-->
 <!DOCTYPE html>
 <html>
-    <body th:replace="~{fragments/layout :: layout(#{${taskListViewModel.title}}, ~{::body/content()}, false)}">
+    <body th:replace="~{fragments/layout :: layout(#{${taskListViewModel.pageHeading}}, ~{::body/content()}, false)}">
         <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl ?: taskListViewModel.backUrl})}"></a>
         <main class="govuk-main-wrapper" id="main-content">
             <th:block id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">

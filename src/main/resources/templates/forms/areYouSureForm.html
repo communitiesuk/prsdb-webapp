@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
@@ -8,7 +7,7 @@
 <!--/*@thymesVar id="submitButtonTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showCancelLink" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
 <th:block id="form-content"
           th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)},
                    submitButtonKey=${submitButtonTextKey == null ? 'forms.buttons.continue' : submitButtonTextKey},
