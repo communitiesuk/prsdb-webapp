@@ -17,10 +17,11 @@
                     acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.heading
                 </h3>
                 <p class="govuk-body">
-                    <span th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph}">
-                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph</span>
+                    <span th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.beforeLink}">
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.beforeLink</span>
                     <a class="govuk-link" th:href="@{${dashboardUrl}}" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link}">
-                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link</a>.
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link</a><span
+                        th:remove="tag" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.afterLink}">acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.afterLink</span>
                 </p>
                 <h3 class="govuk-heading-s" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading}">
                     acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading

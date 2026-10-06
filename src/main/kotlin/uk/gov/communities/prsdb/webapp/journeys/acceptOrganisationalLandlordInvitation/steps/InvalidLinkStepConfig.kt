@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInv
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
@@ -12,11 +13,10 @@ class InvalidLinkStepConfig :
     AbstractRequestableStepConfig<Nothing, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-1821: Invalid invitation link page
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "Invalid link (TODO PDJB-1821)")
+        mapOf("dashboardUrl" to LandlordController.LANDLORD_DASHBOARD_URL)
 
-    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todoNoButton"
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/acceptInvitationInvalidLink"
 
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = null
 }
