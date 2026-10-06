@@ -34,13 +34,13 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.ValidateTokenStep as AcceptInvitationValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep as OrganisationalLandlordInvitationValidateTokenStep
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -92,7 +92,7 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers(
                         AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE +
-                            "/${AcceptInvitationValidateTokenStep.ROUTE_SEGMENT}",
+                            "/${OrganisationalLandlordInvitationValidateTokenStep.ROUTE_SEGMENT}",
                     ).permitAll()
                     .requestMatchers(
                         AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE +

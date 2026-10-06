@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.acceptInvitation.steps.InvalidLinkStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 
 class InvalidLinkPage(
     page: Page,

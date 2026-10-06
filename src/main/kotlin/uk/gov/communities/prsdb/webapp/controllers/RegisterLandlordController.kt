@@ -49,7 +49,7 @@ class RegisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         if (stepPath.trimStart('/') == PrivacyNoticeStep.ROUTE_SEGMENT &&
-            userRolesService.getHasLandlordUserRole(principal.name)
+            userRolesService.getUserHasLandlordRole(principal.name)
         ) {
             ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
