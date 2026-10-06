@@ -19,7 +19,10 @@ class ConfirmationStepConfig :
 
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todoNoButton"
 
-    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
+            Complete.COMPLETE
+        }
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationConfirmationStep")

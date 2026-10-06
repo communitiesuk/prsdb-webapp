@@ -20,7 +20,10 @@ class CheckAnswersStepConfig :
 
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todo"
 
-    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
+            Complete.COMPLETE
+        }
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStep")

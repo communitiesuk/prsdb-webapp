@@ -31,7 +31,10 @@ class JoinOrganisationStepConfig(
 
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/joinOrganisationStart"
 
-    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
+            Complete.COMPLETE
+        }
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJoinOrganisationStep")

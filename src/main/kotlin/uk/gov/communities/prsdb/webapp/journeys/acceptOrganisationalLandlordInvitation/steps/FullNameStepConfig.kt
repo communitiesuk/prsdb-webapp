@@ -21,7 +21,10 @@ class FullNameStepConfig :
 
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/nameForm"
 
-    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
+        getFormModelFromStateOrNull(state)?.let {
+            Complete.COMPLETE
+        }
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationFullNameStep")
