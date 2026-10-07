@@ -16,8 +16,6 @@ class InviteTeamMemberFormPage(
     val introduction = Paragraph(page.locator("main p.govuk-body").first())
     val form = FormWithRadios(page)
     val emailInput = TextInput.emailByFieldName(page.locator("html"), "emailAddress")
-    val accessLevelFieldset = page.locator("main fieldset")
-    val errorFormGroups = page.locator("main .govuk-form-group--error")
 
     fun submitInvitation(
         email: String,

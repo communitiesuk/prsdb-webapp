@@ -1,10 +1,13 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagTestCallingEndpoints
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
@@ -53,5 +56,34 @@ class InviteTeamMemberControllerFeatureFlagTests : FeatureFlagTestCallingEndpoin
         mvc
             .get(INVITE_TEAM_MEMBER_START_PATH)
             .andExpect { status { is3xxRedirection() } }
+    }
+
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    @Test
+    fun `submitting the invite team member journey is unavailable if the multi-user organisations feature flag is disabled`() {
+        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
+
+        mvc
+            .post(INVITE_TEAM_MEMBER_START_PATH) {
+                param("formData", "")
+                with(csrf())
+            }.andExpect { status { isNotFound() } }
+    }
+
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    @Test
+    fun `submitting the invite team member journey is available if the multi-user organisations feature flag is enabled`() {
+        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createOrgLandlord())
+        whenever(journeyFactory.createJourneySteps())
+            .thenReturn(mapOf(InviteTeamMemberStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+        whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("redirect:$TEAM_MEMBERS_ROUTE"))
+
+        mvc
+            .post(INVITE_TEAM_MEMBER_START_PATH) {
+                param("formData", "")
+                with(csrf())
+            }.andExpect { status { is3xxRedirection() } }
     }
 }
