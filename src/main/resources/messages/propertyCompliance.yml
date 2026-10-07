@@ -534,6 +534,7 @@ epcTask:
         paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
   checkEpcAnswers:
     heading: Energy performance certificate (EPC)
+    pageTitle: Check your energy performance certificate (EPC) answers
     epc:
       yourEpc: Your EPC
       viewFullEpc: View full EPC (opens in new tab)
