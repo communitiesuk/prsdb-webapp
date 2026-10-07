@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
@@ -12,12 +13,11 @@ abstract class RentAmountFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(
-        page,
-        urlSegment,
-    ) {
+    page,
+    urlSegment,
+) {
     val backLink = BackLink.default(page)
     val header = Heading(page.locator("h1"))
-    val subheading = Heading(page.locator("main h2"))
     val sectionHeader = SectionHeader(page.locator("main"))
     val billsExplanationForRentFrequency = Paragraph(page.getByTestId("bills-explanation-for-frequency"))
     val rentCalculationParagraph =
@@ -38,5 +38,8 @@ abstract class RentAmountFormBasePage(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val rentAmountInput = TextInput.textByFieldName(locator, "rentAmount")
+
+        fun rentAmountInputWithLabel(label: String): TextInput =
+            TextInput(locator.getByLabel(label, Locator.GetByLabelOptions().setExact(true)))
     }
 }
