@@ -221,7 +221,7 @@ class PaymentService(
                 val isClaimed =
                     paymentRepository.updateStatusIfCurrentStatusIn(
                         paymentId,
-                        PaymentStatus.IN_PROGRESS_STATUSES,
+                        listOf(PaymentStatus.CAPTURABLE),
                         PaymentStatus.SUCCEEDED,
                         Instant.now(),
                     ) == 1
@@ -311,7 +311,7 @@ class PaymentService(
 
         paymentRepository.updateStatusIfCurrentStatusIn(
             paymentId,
-            PaymentStatus.IN_PROGRESS_STATUSES,
+            listOf(PaymentStatus.CAPTURABLE),
             govUkPayStatus,
             Instant.now(),
         )
