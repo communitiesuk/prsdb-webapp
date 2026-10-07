@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.config.featureFlags
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -34,14 +35,14 @@ class OrganisationPermissionsProviderTests : FeatureFlagTest() {
         SecurityContextHolder.clearContext()
     }
 
-    private fun setAuthenticatedRoles(vararg roles: String) {
+    private fun setAuthenticatedRole(role: String) {
         SecurityContextHolder.getContext().authentication =
-            UsernamePasswordAuthenticationToken("user", "password", roles.map { SimpleGrantedAuthority(it) })
+            UsernamePasswordAuthenticationToken("user", "password", listOf(SimpleGrantedAuthority(role)))
     }
 
     @Test
     fun `isCurrentUserOrgAdmin returns true for an organisation admin`() {
-        setAuthenticatedRoles(ROLE_ORG_ADMIN)
+        setAuthenticatedRole(ROLE_ORG_ADMIN)
 
         assertTrue(organisationPermissionsProvider.isCurrentUserOrgAdmin())
     }
@@ -49,7 +50,7 @@ class OrganisationPermissionsProviderTests : FeatureFlagTest() {
     @ParameterizedTest(name = "for a user with the {0} role")
     @ValueSource(strings = [ROLE_ORG_EDITOR, ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER])
     fun `isCurrentUserOrgAdmin returns false for a user who is not an organisation admin`(role: String) {
-        setAuthenticatedRoles(role)
+        setAuthenticatedRole(role)
 
         assertFalse(organisationPermissionsProvider.isCurrentUserOrgAdmin())
     }
@@ -59,46 +60,23 @@ class OrganisationPermissionsProviderTests : FeatureFlagTest() {
         assertFalse(organisationPermissionsProvider.isCurrentUserOrgAdmin())
     }
 
-    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
-    @Test
-    fun `isCurrentUserOrgAdmin is unaffected by the feature flag being disabled`() {
-        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-        setAuthenticatedRoles(ROLE_ORG_EDITOR)
+    @ParameterizedTest(name = "for a user with the {0} role")
+    @ValueSource(strings = [ROLE_ORG_ADMIN, ROLE_ORG_EDITOR, ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER])
+    fun `canCurrentUserPerformOrgAdminActions returns the result of isCurrentUserOrgAdmin`(role: String) {
+        setAuthenticatedRole(role)
 
-        assertFalse(organisationPermissionsProvider.isCurrentUserOrgAdmin())
+        assertEquals(
+            organisationPermissionsProvider.isCurrentUserOrgAdmin(),
+            organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions(),
+        )
     }
 
     @Test
-    fun `returns true for an organisation admin`() {
-        setAuthenticatedRoles(ROLE_ORG_ADMIN)
-
-        assertTrue(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
-    }
-
-    @Test
-    fun `returns false for an organisation editor`() {
-        setAuthenticatedRoles(ROLE_ORG_EDITOR)
-
-        assertFalse(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
-    }
-
-    @Test
-    fun `returns true for a user who is both an organisation admin and editor`() {
-        setAuthenticatedRoles(ROLE_ORG_ADMIN, ROLE_ORG_EDITOR)
-
-        assertTrue(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
-    }
-
-    @Test
-    fun `returns false for an individual landlord`() {
-        setAuthenticatedRoles(ROLE_INDIVIDUAL_LANDLORD)
-
-        assertFalse(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
-    }
-
-    @Test
-    fun `returns false when there is no authenticated user`() {
-        assertFalse(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
+    fun `canCurrentUserPerformOrgAdminActions returns the result of isCurrentUserOrgAdmin when there is no authenticated user`() {
+        assertEquals(
+            organisationPermissionsProvider.isCurrentUserOrgAdmin(),
+            organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions(),
+        )
     }
 
     // TODO PDJB-1828: Remove this nested class when the MULTI_USER_ORGANISATIONS feature flag is removed
@@ -109,16 +87,10 @@ class OrganisationPermissionsProviderTests : FeatureFlagTest() {
             featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
         }
 
-        @Test
-        fun `returns true for an organisation editor`() {
-            setAuthenticatedRoles(ROLE_ORG_EDITOR)
-
-            assertTrue(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
-        }
-
-        @Test
-        fun `returns true for an organisation admin`() {
-            setAuthenticatedRoles(ROLE_ORG_ADMIN)
+        @ParameterizedTest(name = "for a user with the {0} role")
+        @ValueSource(strings = [ROLE_ORG_ADMIN, ROLE_ORG_EDITOR])
+        fun `canCurrentUserPerformOrgAdminActions returns true for any organisation user`(role: String) {
+            setAuthenticatedRole(role)
 
             assertTrue(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
         }
