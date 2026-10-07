@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="landlordGasSafetyUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.pageTitle}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
             <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.heading}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.heading</h1>

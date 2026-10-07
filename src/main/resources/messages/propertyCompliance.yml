@@ -119,6 +119,7 @@ gasSafetyTask:
         paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
   provideGasSafetyDetailsLater:
     heading: Provide these details later
+    pageTitle: Provide your gas safety certificate later
     whenToProvide:
       heading: When you’ll need to provide these details
     occupied:

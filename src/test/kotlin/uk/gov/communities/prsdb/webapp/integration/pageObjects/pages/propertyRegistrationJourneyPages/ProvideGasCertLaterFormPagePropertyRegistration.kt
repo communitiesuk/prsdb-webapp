@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 class ProvideGasCertLaterFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ProvideGasCertLaterStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Provide your gas safety certificate later"
+
     val heading = Heading(page.locator("h1"))
     val paragraphs = page.locator("main section p.govuk-body")
     val gasSafetyLink = Link.byText(page, "gas safety for landlords (opens in new tab)")
