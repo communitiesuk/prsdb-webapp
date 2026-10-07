@@ -191,43 +191,41 @@ class PaymentService(
         registerProperty: () -> PropertyOwnership,
         deleteJourney: () -> Unit,
     ): PaymentStatus {
-        val isClaimed =
-            paymentRepository.updateStatusIfCurrentStatusIn(
-                paymentId,
-                listOf(PaymentStatus.CREATED),
-                PaymentStatus.CAPTURABLE,
-                Instant.now(),
-            ) == 1
-        if (!isClaimed) return getStoredPaymentStatus(paymentId)
+        recordPaymentAsCapturable(paymentId)
 
-        val finalisation =
+        val finalisationResult =
             try {
                 registerPropertyAndCapturePayment(paymentId, registerProperty, deleteJourney)
             } catch (exception: Exception) {
                 return cancelUnfinalisedPayment(paymentId, exception)
             }
 
-        finalisation.cancelledOtherPaymentIds.forEach { tryToCancelOtherPaymentOnGovUkPay(it, paymentId) }
-        return finalisation.status
+        finalisationResult.otherPaymentIdsToCancelOnGovUkPay.forEach { tryToCancelOtherPaymentOnGovUkPay(it, paymentId) }
+        return finalisationResult.status
+    }
+
+    private fun recordPaymentAsCapturable(paymentId: String) {
+        paymentRepository.updateStatusIfCurrentStatusIn(paymentId, listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE, Instant.now())
     }
 
     private fun registerPropertyAndCapturePayment(
         paymentId: String,
         registerProperty: () -> PropertyOwnership,
         deleteJourney: () -> Unit,
-    ): Finalisation =
+    ): FinalisationResult =
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
-                val incompleteProperty = lockIncompleteProperty(paymentId)
+                val incompleteProperty =
+                    lockIncompletePropertyOrNull(paymentId) ?: return@execute FinalisationResult(getStoredPaymentStatus(paymentId))
 
-                val isStillCapturable =
+                val isClaimed =
                     paymentRepository.updateStatusIfCurrentStatusIn(
                         paymentId,
-                        listOf(PaymentStatus.CAPTURABLE),
+                        PaymentStatus.IN_PROGRESS_STATUSES,
                         PaymentStatus.SUCCEEDED,
                         Instant.now(),
                     ) == 1
-                if (!isStillCapturable) return@execute Finalisation(getStoredPaymentStatus(paymentId))
+                if (!isClaimed) return@execute FinalisationResult(getStoredPaymentStatus(paymentId))
 
                 val otherPaymentIds = getStoredPaymentIds(incompleteProperty) - paymentId
                 checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
@@ -249,19 +247,14 @@ class PaymentService(
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 govUkPayClient.capturePayment(paymentId)
-                Finalisation(PaymentStatus.SUCCEEDED, cancelledOtherPaymentIds)
+                FinalisationResult(PaymentStatus.SUCCEEDED, cancelledOtherPaymentIds)
             },
         )
 
-    private fun lockIncompleteProperty(paymentId: String): LandlordIncompleteProperty {
-        val incompletePropertyId =
-            checkNotNull(paymentRepository.findByIdOrNull(paymentId)?.associatedIncompleteProperty) {
-                "Payment $paymentId is not linked to an incomplete property"
-            }.id
-        return checkNotNull(landlordIncompletePropertiesRepository.findByIdForUpdate(incompletePropertyId)) {
-            "No incomplete property found with ID $incompletePropertyId for payment $paymentId"
+    private fun lockIncompletePropertyOrNull(paymentId: String): LandlordIncompleteProperty? =
+        paymentRepository.findByIdOrNull(paymentId)?.associatedIncompleteProperty?.let { incompleteProperty ->
+            landlordIncompletePropertiesRepository.findByIdForUpdate(incompleteProperty.id)
         }
-    }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
@@ -318,11 +311,11 @@ class PaymentService(
 
         paymentRepository.updateStatusIfCurrentStatusIn(
             paymentId,
-            listOf(PaymentStatus.CAPTURABLE),
+            PaymentStatus.IN_PROGRESS_STATUSES,
             govUkPayStatus,
             Instant.now(),
         )
-        return getStoredPaymentStatus(paymentId)
+        return paymentRepository.findStatusByPaymentId(paymentId) ?: govUkPayStatus
     }
 
     private fun getStoredPaymentStatus(paymentId: String): PaymentStatus =
@@ -362,8 +355,8 @@ class PaymentService(
             .map { LocalDate.of(it, Month.FEBRUARY, 29) }
             .any { !it.isBefore(today) && it.isBefore(renewalDate) }
 
-    private data class Finalisation(
+    private data class FinalisationResult(
         val status: PaymentStatus,
-        val cancelledOtherPaymentIds: List<String> = emptyList(),
+        val otherPaymentIdsToCancelOnGovUkPay: List<String> = emptyList(),
     )
 }

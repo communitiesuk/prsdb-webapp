@@ -406,6 +406,55 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
+    fun `finalisePayment leaves a payment it could neither finalise nor cancel recorded as capturable`() {
+        // Arrange
+        doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+
+        // Act
+        assertThrows<GovUkPayException> {
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, ::getProperty, ::deleteJourney)
+        }
+
+        // Assert
+        assertEquals(PaymentStatus.CAPTURABLE, paymentRepository.findStatusByPaymentId(CREATED_PAYMENT_ID))
+    }
+
+    @Test
+    fun `finalisePayment can be retried after a failure that could not be cancelled on GOV UK Pay`() {
+        // Arrange
+        doThrow(GovUkPayException("Capture failed")).doNothing().whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+        assertThrows<GovUkPayException> {
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, ::getProperty, ::deleteJourney)
+        }
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, ::getProperty, ::deleteJourney)
+
+        // Assert
+        assertEquals(PaymentStatus.SUCCEEDED, status)
+        verify(mockGovUkPayClient, times(2)).capturePayment(CREATED_PAYMENT_ID)
+        assertPaymentSucceededForProperty()
+    }
+
+    @Test
+    fun `finalisePayment cancels a payment that has been deleted along with its journey`() {
+        // Arrange
+        TransactionTemplate(transactionManager).executeWithoutResult { deleteJourney() }
+
+        // Act
+        val status = paymentService.finalisePayment(CAPTURABLE_PAYMENT_ID, PaymentStatus.CAPTURABLE, ::getProperty, ::deleteJourney)
+
+        // Assert
+        assertEquals(PaymentStatus.CANCELLED, status)
+        verify(mockGovUkPayClient).cancelPayment(CAPTURABLE_PAYMENT_ID)
+        verify(mockGovUkPayClient, never()).capturePayment(any())
+    }
+
+    @Test
     fun `getPropertyRegistrationPaymentStatus returns the GOV UK Pay status of the journey's latest payment`() {
         // Arrange
         JourneyTestHelper.setMockUser(USER_ID)
