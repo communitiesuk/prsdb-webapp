@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
@@ -53,11 +54,23 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
     @Nested
     inner class StartJourney {
         @Test
-        fun `startJourney redirects unauthenticated users to login`() {
+        fun `startJourney initializes state and redirects for an unauthenticated user`() {
+            val token = "1234abcd-5678-abcd-1234-567abcd2222a"
+            whenever(journeyFactory.initializeJourneyState(token)).thenReturn(journeyId)
+
+            val expectedRedirectUrl =
+                JourneyStateService
+                    .urlWithJourneyState(
+                        "$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
+                        journeyId,
+                    )
+
             mvc
-                .get(ACCEPT_INVITATION_ROUTE)
-                .andExpect {
+                .get(ACCEPT_INVITATION_ROUTE) {
+                    param("token", token)
+                }.andExpect {
                     status { is3xxRedirection() }
+                    redirectedUrl(expectedRedirectUrl)
                 }
         }
 
@@ -114,8 +127,42 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
                 }
         }
 
-        // TODO PDJB-1822: add controller coverage for unauthenticated access to the validate-token step once that permission is allowed.
-        // TODO PDJB-1822: add controller coverage for unauthenticated access to the invalid-link step once that permission is allowed.
+        @Test
+        fun `getJourneyStep returns the validate token step for an unauthenticated user`() {
+            whenever(journeyFactory.createJourneySteps())
+                .thenReturn(mapOf(ValidateTokenStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+            whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
+
+            mvc
+                .get("$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .andExpect {
+                    status { isOk() }
+                }
+        }
+
+        @Test
+        fun `getJourneyStep returns the invalid link step for an unauthenticated user`() {
+            whenever(journeyFactory.createJourneySteps())
+                .thenReturn(mapOf(InvalidLinkStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+            whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
+
+            mvc
+                .get("$ACCEPT_INVITATION_ROUTE/${InvalidLinkStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .andExpect {
+                    status { isOk() }
+                }
+        }
+
+        @Test
+        fun `getJourneyStep redirects an unauthenticated user to login for a step that requires authentication`() {
+            mvc
+                .get("$ACCEPT_INVITATION_ROUTE/${JoinOrganisationStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .andExpect {
+                    status { is3xxRedirection() }
+                    redirectedUrlPattern("**/oauth2/authorization/one-login")
+                }
+        }
+
         @Test
         @WithMockUser(value = "user")
         fun `getJourneyStep returns 404 when step is not found`() {
