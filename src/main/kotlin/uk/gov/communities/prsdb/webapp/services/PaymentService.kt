@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.MessageSource
@@ -39,6 +40,7 @@ class PaymentService(
     private val userToLandlordService: UserToLandlordService,
     private val messageSource: MessageSource,
     private val transactionTemplate: TransactionTemplate,
+    private val entityManager: EntityManager,
 ) {
     private val gratisPeriodEndDate: LocalDate = LocalDate.parse(gratisPeriodEndDate)
 
@@ -47,11 +49,7 @@ class PaymentService(
         returnUrl: String,
         email: String,
     ): String {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val incompleteProperty =
-            checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
-                "No incomplete property found for journey $journeyId and user $baseUserId"
-            }
+        val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 
         val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
         val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
@@ -63,9 +61,6 @@ class PaymentService(
 
         val reconciledStoredStatuses = reconcileStoredPaymentStatuses(incompleteProperty, journeyId)
 
-        // TODO PDJB-993: Before capturing a payment, check this property has no other SUCCEEDED payment and cancel it if so.
-        //  The check below can't catch two registrations of the same property submitted at nearly the same time, because
-        //  neither can see the other's payment yet.
         reconciledStoredStatuses.filterValues { it == PaymentStatus.SUCCEEDED }.keys.firstOrNull()?.let { succeededPaymentId ->
             throw IllegalStateException(
                 "Cannot create a GOV.UK Pay payment for journey $journeyId: payment $succeededPaymentId for this " +
@@ -140,6 +135,15 @@ class PaymentService(
             govUkPayStatusAfterFailedCancellation.status
         }
 
+    fun getPropertyRegistrationPaymentStatus(journeyId: String): PaymentStatusCheckDataModel {
+        val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
+        val latestPayment =
+            checkNotNull(paymentRepository.findFirstByAssociatedIncompletePropertyOrderByPaymentCreatedAtDesc(incompleteProperty)) {
+                "No payment found for journey $journeyId"
+            }
+        return getGovUkPayPaymentStatus(latestPayment.paymentId)
+    }
+
     fun getGovUkPayPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
         val govUkPayPayment = govUkPayClient.getPayment(paymentId)
         val status = PaymentStatus.fromGovUKPayStatus(govUkPayPayment.state.status)
@@ -164,6 +168,7 @@ class PaymentService(
         paymentId: String,
         govUkPayStatus: PaymentStatus,
         registerProperty: () -> PropertyOwnership,
+        deleteJourney: () -> Unit,
     ): PaymentStatus =
         when (govUkPayStatus) {
             PaymentStatus.CREATED -> throw IllegalArgumentException("Payment $paymentId cannot be finalised while in progress")
@@ -178,12 +183,13 @@ class PaymentService(
                 getStoredPaymentStatus(paymentId)
             }
 
-            PaymentStatus.CAPTURABLE -> finaliseCapturablePayment(paymentId, registerProperty)
+            PaymentStatus.CAPTURABLE -> finaliseCapturablePayment(paymentId, registerProperty, deleteJourney)
         }
 
     private fun finaliseCapturablePayment(
         paymentId: String,
         registerProperty: () -> PropertyOwnership,
+        deleteJourney: () -> Unit,
     ): PaymentStatus {
         val isClaimed =
             paymentRepository.updateStatusIfCurrentStatusIn(
@@ -194,19 +200,26 @@ class PaymentService(
             ) == 1
         if (!isClaimed) return getStoredPaymentStatus(paymentId)
 
-        return try {
-            registerPropertyAndCapturePayment(paymentId, registerProperty)
-        } catch (exception: Exception) {
-            cancelUnfinalisedPayment(paymentId, exception)
-        }
+        val finalisation =
+            try {
+                registerPropertyAndCapturePayment(paymentId, registerProperty, deleteJourney)
+            } catch (exception: Exception) {
+                return cancelUnfinalisedPayment(paymentId, exception)
+            }
+
+        finalisation.cancelledOtherPaymentIds.forEach { tryToCancelOtherPaymentOnGovUkPay(it, paymentId) }
+        return finalisation.status
     }
 
     private fun registerPropertyAndCapturePayment(
         paymentId: String,
         registerProperty: () -> PropertyOwnership,
-    ): PaymentStatus =
+        deleteJourney: () -> Unit,
+    ): Finalisation =
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
+                val incompleteProperty = lockIncompleteProperty(paymentId)
+
                 val isStillCapturable =
                     paymentRepository.updateStatusIfCurrentStatusIn(
                         paymentId,
@@ -214,7 +227,11 @@ class PaymentService(
                         PaymentStatus.SUCCEEDED,
                         Instant.now(),
                     ) == 1
-                if (!isStillCapturable) return@execute getStoredPaymentStatus(paymentId)
+                if (!isStillCapturable) return@execute Finalisation(getStoredPaymentStatus(paymentId))
+
+                val otherPaymentIds = getStoredPaymentIds(incompleteProperty) - paymentId
+                checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
+                val cancelledOtherPaymentIds = cancelInProgressPayments(otherPaymentIds)
 
                 val property = registerProperty()
 
@@ -224,12 +241,64 @@ class PaymentService(
                 storedPayment.status = PaymentStatus.SUCCEEDED
                 paymentRepository.saveAndFlush(storedPayment)
 
+                // Detached here because the @MapsId on its savedJourneyState cascades a persist on flush, undoing the journey's deletion
+                entityManager.detach(incompleteProperty)
+                deleteJourney()
+                paymentRepository.flush()
+
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 govUkPayClient.capturePayment(paymentId)
-                PaymentStatus.SUCCEEDED
+                Finalisation(PaymentStatus.SUCCEEDED, cancelledOtherPaymentIds)
             },
         )
+
+    private fun lockIncompleteProperty(paymentId: String): LandlordIncompleteProperty {
+        val incompletePropertyId =
+            checkNotNull(paymentRepository.findByIdOrNull(paymentId)?.associatedIncompleteProperty) {
+                "Payment $paymentId is not linked to an incomplete property"
+            }.id
+        return checkNotNull(landlordIncompletePropertiesRepository.findByIdForUpdate(incompletePropertyId)) {
+            "No incomplete property found with ID $incompletePropertyId for payment $paymentId"
+        }
+    }
+
+    private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
+        paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
+
+    private fun checkNoOtherPaymentHasSucceeded(
+        otherPaymentIds: List<String>,
+        paymentId: String,
+    ) {
+        otherPaymentIds.firstOrNull { getStoredPaymentStatus(it) == PaymentStatus.SUCCEEDED }?.let { succeededPaymentId ->
+            throw IllegalStateException(
+                "Cannot finalise payment $paymentId: payment $succeededPaymentId for this property has already succeeded",
+            )
+        }
+    }
+
+    private fun cancelInProgressPayments(paymentIds: List<String>): List<String> =
+        paymentIds.filter { paymentId ->
+            paymentRepository.updateStatusIfCurrentStatusIn(
+                paymentId,
+                PaymentStatus.IN_PROGRESS_STATUSES,
+                PaymentStatus.CANCELLED,
+                Instant.now(),
+            ) == 1
+        }
+
+    private fun tryToCancelOtherPaymentOnGovUkPay(
+        otherPaymentId: String,
+        finalisedPaymentId: String,
+    ) {
+        try {
+            cancelOrGetFinishedGovUkPayStatus(otherPaymentId, "after finalising payment $finalisedPaymentId")
+        } catch (exception: Exception) {
+            println(
+                "Failed to cancel GOV.UK Pay payment $otherPaymentId after finalising payment $finalisedPaymentId: ${exception.message}",
+            )
+        }
+    }
 
     private fun cancelUnfinalisedPayment(
         paymentId: String,
@@ -259,6 +328,13 @@ class PaymentService(
     private fun getStoredPaymentStatus(paymentId: String): PaymentStatus =
         checkNotNull(paymentRepository.findStatusByPaymentId(paymentId)) { "Payment $paymentId not found" }
 
+    private fun getIncompletePropertyForCurrentUser(journeyId: String): LandlordIncompleteProperty {
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        return checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
+            "No incomplete property found for journey $journeyId and user $baseUserId"
+        }
+    }
+
     fun calculateProRatedFeeInPence(
         renewalDate: LocalDate,
         today: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
@@ -285,4 +361,9 @@ class PaymentService(
             .filter { Year.isLeap(it.toLong()) }
             .map { LocalDate.of(it, Month.FEBRUARY, 29) }
             .any { !it.isBefore(today) && it.isBefore(renewalDate) }
+
+    private data class Finalisation(
+        val status: PaymentStatus,
+        val cancelledOtherPaymentIds: List<String> = emptyList(),
+    )
 }
