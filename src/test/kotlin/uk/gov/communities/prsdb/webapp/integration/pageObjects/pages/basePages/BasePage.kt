@@ -12,7 +12,9 @@ abstract class BasePage(
     val page: Page,
     private val urlSegment: String? = null,
 ) {
-    protected open val expectedTitleHeading: String
+    protected open val expectedTitleHeading: String? = null
+
+    private val h1Text: String
         get() {
             val h1 = page.locator("h1").first()
             assertEquals(1, h1.count(), "Page has no h1 to build its title from")
@@ -69,9 +71,13 @@ abstract class BasePage(
         val titleHeading = match.groupValues[2]
         assertNotEquals("null", titleHeading, "Page title \"$title\" is missing its heading")
 
-        if (STRICT_TITLE_CHECK) {
+        expectedTitleHeading?.let {
+            assertEquals(it, titleHeading, "Page title should match the page object's expectedTitleHeading")
+        }
+
+        if (expectedTitleHeading == null && STRICT_TITLE_CHECK) {
             assertEquals(
-                expectedTitleHeading,
+                h1Text,
                 titleHeading,
                 "Page title should match the h1 (override expectedTitleHeading if it deliberately differs)",
             )
