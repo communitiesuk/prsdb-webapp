@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentEmailService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.sendEmailToLandlord
 class ConfirmYouAreALandlordForThisPropertyStepConfig(
     private val invitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
+    private val currentEmailService: CurrentEmailService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val acceptedEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedEmail>,
@@ -84,15 +86,17 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        acceptedEmailSender.sendEmailToLandlord(
-            acceptingLandlord,
+        val currentUser = currentEmailService.getCurrentUserDetails()
+        acceptedEmailSender.sendEmail(
+            currentUser.email,
             JointLandlordInvitationAcceptedEmail(
-                recipientName = acceptingLandlord.name,
+                recipientName = currentUser.name,
                 propertyAddress = propertyAddress,
                 propertyRecordUrl = propertyRecordUrl,
                 propertyRegistrationNumber = propertyRegistrationNumber,
             ),
         )
+        // TODO: PDJB-1274: Send emails to other members of the org
 
         propertyOwnership.landlords
             .filter { it.id != acceptingLandlord.id }
