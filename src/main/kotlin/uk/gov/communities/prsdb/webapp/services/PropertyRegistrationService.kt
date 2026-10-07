@@ -84,7 +84,7 @@ class PropertyRegistrationService(
         isDelegatedToLettingAgent: Boolean = false,
         correspondenceEmail: String? = null,
         correspondenceAddressModel: AddressDataModel? = null,
-    ) {
+    ): PropertyOwnership {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
@@ -164,6 +164,8 @@ class PropertyRegistrationService(
             epcProvideLater = epcProvideLater ?: false,
             tenancyProvideLater = tenancyProvideLater ?: false,
         )
+
+        return propertyOwnership
     }
 
     private fun createPropertyOwnershipAndRelatedEntities(

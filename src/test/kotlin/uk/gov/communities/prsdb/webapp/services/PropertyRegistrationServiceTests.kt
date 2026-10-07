@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -492,6 +493,76 @@ class PropertyRegistrationServiceTests {
         )
 
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(eq(registrationNumber.number))
+    }
+
+    @Test
+    fun `registerProperty returns the property ownership it created`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 5678)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord),
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                isOccupied = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
+                tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        val result =
+            propertyRegistrationService.registerProperty(
+                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.SELECTIVE_LICENCE,
+                licenceNumber = "Licence",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 2,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+            )
+
+        // Assert
+        assertSame(expectedPropertyOwnership, result)
     }
 
     @Test
