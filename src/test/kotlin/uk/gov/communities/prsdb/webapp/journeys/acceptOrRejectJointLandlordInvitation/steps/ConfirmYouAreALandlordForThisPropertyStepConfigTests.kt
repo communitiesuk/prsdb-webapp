@@ -3,33 +3,33 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentEmailService
+import uk.gov.communities.prsdb.webapp.services.CurrentEmailService.CurrentUserDetails
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -45,6 +45,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @Mock
     lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
+    lateinit var mockCurrentEmailService: CurrentEmailService
 
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
@@ -176,12 +179,14 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends accepted email to accepting landlord when token is valid`() {
+    fun `afterStepDataIsAdded sends accepted email to the authenticated user's email and name`() {
         // Arrange
         val stepConfig = setupStepConfig()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 42)
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
-        val landlord = setupValidTokenWithLandlord(invitation)
+        setupValidTokenWithLandlord(invitation)
+        whenever(mockCurrentEmailService.getCurrentUserDetails())
+            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
         val expectedPropertyUrl = "https://example.com/property"
 
         // Act
@@ -189,9 +194,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
         // Assert
         val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
-        verify(mockAcceptedEmailSender).sendEmail(eq(landlord.email), emailCaptor.capture())
+        verify(mockAcceptedEmailSender).sendEmail(eq("current-user@example.com"), emailCaptor.capture())
         val email = emailCaptor.firstValue
-        assertEquals(landlord.name, email.recipientName)
+        assertEquals("Current User", email.recipientName)
         assertEquals(propertyOwnership.address.toMultiLineAddress(), email.propertyAddress)
         assertEquals(expectedPropertyUrl, email.propertyRecordUrl)
         assertEquals(
@@ -265,7 +270,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends accepted email to each accepting organisation administrator`() {
+    fun `afterStepDataIsAdded sends one accepted email to the current organisational user`() {
         // Arrange
         val stepConfig = setupStepConfig()
         val acceptingLandlord =
@@ -290,16 +295,16 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
                 correspondenceEmail = "correspondence@example.com",
             )
         setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
+        whenever(mockCurrentEmailService.getCurrentUserDetails())
+            .thenReturn(CurrentUserDetails(name = "Current Editor", email = "editor@example.com"))
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
         val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
-        verify(mockAcceptedEmailSender).sendEmail(eq("admin-one@example.com"), emailCaptor.capture())
-        verify(mockAcceptedEmailSender).sendEmail(eq("admin-two@example.com"), any())
-        verify(mockAcceptedEmailSender, never()).sendEmail(eq("editor@example.com"), any())
-        assertEquals("Accepting Organisation", emailCaptor.firstValue.recipientName)
+        verify(mockAcceptedEmailSender, times(1)).sendEmail(eq("editor@example.com"), emailCaptor.capture())
+        assertEquals("Current Editor", emailCaptor.firstValue.recipientName)
     }
 
     @Test
@@ -343,6 +348,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
             mockUserToLandlordService,
+            mockCurrentEmailService,
             mockPropertyOwnershipService,
             mockAbsoluteUrlProvider,
             mockAcceptedEmailSender,
@@ -360,6 +366,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     ): JointLandlordInvitation {
         setupTokenValidation(true)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
+        lenient()
+            .`when`(mockCurrentEmailService.getCurrentUserDetails())
+            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
         return invitation
     }
 
