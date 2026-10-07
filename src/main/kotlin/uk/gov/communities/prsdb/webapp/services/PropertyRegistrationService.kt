@@ -86,10 +86,10 @@ class PropertyRegistrationService(
                 jointLandlordEmails,
                 isDelegatedToLettingAgent,
                 licenseProvideLater = licenseProvideLater,
-                gasSafetyCertProvideLater = gasSafetyCertProvideLater ?: false,
-                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater ?: false,
-                epcProvideLater = epcProvideLater ?: false,
-                tenancyProvideLater = tenancyProvideLater ?: false,
+                gasSafetyCertProvideLater = gasSafetyCertProvideLater,
+                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
+                epcProvideLater = epcProvideLater,
+                tenancyProvideLater = tenancyProvideLater,
             )
 
             propertyOwnership

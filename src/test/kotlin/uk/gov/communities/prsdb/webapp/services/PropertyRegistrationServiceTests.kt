@@ -33,11 +33,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.net.URI
 import java.time.LocalDate
 import java.time.MonthDay
@@ -100,7 +100,7 @@ class PropertyRegistrationServiceTests {
         val errorThrown =
             assertThrows<EntityExistsException> {
                 propertyRegistrationService.registerProperty(
-                    PropertyRegistrationDataModel(
+                    MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                         addressModel = registeredAddress,
                         propertyType = PropertyType.DETACHED_HOUSE,
                         licenseType = LicensingType.NO_LICENSING,
@@ -159,13 +159,13 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
@@ -260,7 +260,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -268,7 +268,7 @@ class PropertyRegistrationServiceTests {
         // Act
         val propertyOwnership =
             propertyRegistrationService.registerProperty(
-                PropertyRegistrationDataModel(
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                     addressModel = addressDataModel,
                     propertyType = propertyType,
                     licenseType = licenceType,
@@ -313,10 +313,13 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = false,
-            tenancyProvideLater = null,
+            tenancyProvideLater = false,
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumber.number,
+            gasSafetyCertProvideLater = false,
+            electricalSafetyCertProvideLater = false,
+            epcProvideLater = false,
         )
     }
 
@@ -375,7 +378,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
@@ -413,15 +416,18 @@ class PropertyRegistrationServiceTests {
             hasGasSupply = true,
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyFileUploadIds = listOf(10L, 20L),
+            gasSafetyCertProvideLater = false,
             electricalSafetyFileUploadIds = listOf(30L),
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+            electricalSafetyCertProvideLater = false,
             epcCertificateUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
             epcEnergyRating = epcEnergyRating,
             tenancyStartedBeforeEpcExpiry = true,
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = meesExemptionReason,
+            epcProvideLater = false,
         )
     }
 
@@ -473,7 +479,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.SELECTIVE_LICENCE,
@@ -569,13 +575,13 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -615,6 +621,7 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = false,
+            tenancyProvideLater = false,
         )
     }
 
@@ -679,13 +686,14 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = true,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = LicensingType.PROVIDE_LATER,
@@ -727,7 +735,7 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = true,
-            tenancyProvideLater = null,
+            tenancyProvideLater = false,
         )
     }
 
@@ -783,14 +791,14 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -867,14 +875,14 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -948,7 +956,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -958,7 +966,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -1038,14 +1046,14 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -1118,14 +1126,14 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = propertyType,
                 licenseType = licenceType,
@@ -1198,7 +1206,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
@@ -1295,7 +1303,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = addressDataModel,
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
@@ -1386,7 +1394,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
@@ -1456,7 +1464,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
 
         propertyRegistrationService.registerProperty(
-            PropertyRegistrationDataModel(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
