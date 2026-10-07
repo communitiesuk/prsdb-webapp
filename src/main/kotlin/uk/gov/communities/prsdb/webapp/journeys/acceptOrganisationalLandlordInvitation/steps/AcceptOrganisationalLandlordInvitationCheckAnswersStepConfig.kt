@@ -28,6 +28,7 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
         // Also clear its session token and refresh the security context so the invitee receives their new role.
     }
 
+    // override this as the next step will handle deleting the journey (TODO PDJB-1774)
     override fun resolveNextDestination(
         state: AcceptOrganisationalLandlordUserInvitationJourneyState,
         defaultDestination: Destination,
