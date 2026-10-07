@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -13,12 +15,16 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedEmail
@@ -258,6 +264,81 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         verifyNoInteractions(mockOtherLandlordEmailSender)
     }
 
+    @Test
+    fun `afterStepDataIsAdded sends accepted email to each accepting organisation administrator`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val acceptingLandlord =
+            MockLandlordData.createOrgLandlord(
+                name = "Accepting Organisation",
+                registrantEmail = "admin-one@example.com",
+                registrantRole = OrganisationalLandlordUserRole.ADMIN,
+            )
+        MockLandlordData.createOrganisationalLandlordUser(
+            organisationalLandlord = acceptingLandlord,
+            email = "admin-two@example.com",
+            role = OrganisationalLandlordUserRole.ADMIN,
+        )
+        MockLandlordData.createOrganisationalLandlordUser(
+            organisationalLandlord = acceptingLandlord,
+            email = "editor@example.com",
+            role = OrganisationalLandlordUserRole.EDITOR,
+        )
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(acceptingLandlord),
+                correspondenceEmail = "correspondence@example.com",
+            )
+        setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
+        verify(mockAcceptedEmailSender).sendEmail(eq("admin-one@example.com"), emailCaptor.capture())
+        verify(mockAcceptedEmailSender).sendEmail(eq("admin-two@example.com"), any())
+        verify(mockAcceptedEmailSender, never()).sendEmail(eq("editor@example.com"), any())
+        assertEquals("Accepting Organisation", emailCaptor.firstValue.recipientName)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends other landlord email to each existing organisation administrator`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val acceptingLandlord =
+            MockLandlordData.createIndividualLandlord(
+                name = "Accepting Landlord",
+                baseUser = MockLandlordData.createPrsdbUser(baseUserId),
+            )
+        val otherLandlord =
+            MockLandlordData.createOrgLandlord(
+                name = "Existing Organisation",
+                registrantEmail = "admin@example.com",
+                registrantRole = OrganisationalLandlordUserRole.ADMIN,
+            )
+        MockLandlordData.createOrganisationalLandlordUser(
+            organisationalLandlord = otherLandlord,
+            email = "editor@example.com",
+            role = OrganisationalLandlordUserRole.EDITOR,
+        )
+        val ownership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(acceptingLandlord, otherLandlord),
+            )
+        setupValidTokenWithLandlordAndOwnership(acceptingLandlord, ownership)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedOtherLandlordEmail>()
+        verify(mockOtherLandlordEmailSender).sendEmail(eq("admin@example.com"), emailCaptor.capture())
+        verify(mockOtherLandlordEmailSender, never()).sendEmail(eq("editor@example.com"), any())
+        assertEquals("Existing Organisation", emailCaptor.firstValue.recipientName)
+        assertEquals("Accepting Landlord", emailCaptor.firstValue.inviteeName)
+    }
+
     private fun setupStepConfig() =
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
@@ -284,7 +365,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     private fun setupValidTokenWithLandlord(
         invitation: JointLandlordInvitation = MockJointLandlordData.createJointLandlordInvitation(),
-    ): IndividualLandlord {
+    ): Landlord {
         setupValidTokenWithInvitation(invitation)
         val landlord =
             MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
@@ -294,7 +375,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     }
 
     private fun setupValidTokenWithLandlordAndOwnership(
-        acceptingLandlord: IndividualLandlord,
+        acceptingLandlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
