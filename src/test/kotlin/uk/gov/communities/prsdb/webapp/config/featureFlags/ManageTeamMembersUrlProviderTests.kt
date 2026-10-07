@@ -26,14 +26,14 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
 
     @Test
     fun `returns the team members route when the current user is an organisation admin`() {
-        whenever(organisationPermissionsProvider.isCurrentUserOrgAdmin()).thenReturn(true)
+        whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(true)
 
         assertEquals(TEAM_MEMBERS_ROUTE, manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
 
     @Test
     fun `returns null when the current user is not an organisation admin`() {
-        whenever(organisationPermissionsProvider.isCurrentUserOrgAdmin()).thenReturn(false)
+        whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(false)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }
@@ -42,7 +42,7 @@ class ManageTeamMembersUrlProviderTests : FeatureFlagTest() {
     @Test
     fun `when feature is disabled returns null even for an organisation admin`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-        whenever(organisationPermissionsProvider.isCurrentUserOrgAdmin()).thenReturn(true)
+        whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(true)
 
         assertNull(manageTeamMembersUrlProvider.getManageTeamMembersUrlForCurrentUser())
     }

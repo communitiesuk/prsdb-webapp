@@ -12,20 +12,19 @@ class OrganisationPermissionsProvider(
     //  MULTI_USER_ORGANISATIONS feature flag is removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun isCurrentUserOrgAdmin(): Boolean =
-        SecurityContextHolder
+    fun canCurrentUserPerformOrgAdminActions(): Boolean {
+        // TODO PDJB-1828: Remove this block when the MULTI_USER_ORGANISATIONS feature flag is removed.
+        //  Organisation editors cannot exist while the flag is disabled, so every organisation user is
+        //  an admin and can perform org admin actions.
+        if (!featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)) {
+            return true
+        }
+
+        return SecurityContextHolder
             .getContext()
             .authentication
             ?.authorities
             ?.any { it.authority == ROLE_ORG_ADMIN }
             ?: false
-
-    fun canCurrentUserPerformOrgAdminActions(): Boolean {
-        // TODO PDJB-1828: Remove this block when the MULTI_USER_ORGANISATIONS feature flag is removed
-        if (!featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)) {
-            return true
-        }
-
-        return isCurrentUserOrgAdmin()
     }
 }

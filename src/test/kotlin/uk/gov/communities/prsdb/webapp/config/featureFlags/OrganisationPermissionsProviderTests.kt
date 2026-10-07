@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.config.featureFlags
 
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -41,42 +40,23 @@ class OrganisationPermissionsProviderTests : FeatureFlagTest() {
     }
 
     @Test
-    fun `isCurrentUserOrgAdmin returns true for an organisation admin`() {
+    fun `canCurrentUserPerformOrgAdminActions returns true for an organisation admin`() {
         setAuthenticatedRole(ROLE_ORG_ADMIN)
 
-        assertTrue(organisationPermissionsProvider.isCurrentUserOrgAdmin())
+        assertTrue(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
     }
 
     @ParameterizedTest(name = "for a user with the {0} role")
     @ValueSource(strings = [ROLE_ORG_EDITOR, ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER])
-    fun `isCurrentUserOrgAdmin returns false for a user who is not an organisation admin`(role: String) {
+    fun `canCurrentUserPerformOrgAdminActions returns false for a user who is not an organisation admin`(role: String) {
         setAuthenticatedRole(role)
 
-        assertFalse(organisationPermissionsProvider.isCurrentUserOrgAdmin())
+        assertFalse(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
     }
 
     @Test
-    fun `isCurrentUserOrgAdmin returns false when there is no authenticated user`() {
-        assertFalse(organisationPermissionsProvider.isCurrentUserOrgAdmin())
-    }
-
-    @ParameterizedTest(name = "for a user with the {0} role")
-    @ValueSource(strings = [ROLE_ORG_ADMIN, ROLE_ORG_EDITOR, ROLE_INDIVIDUAL_LANDLORD, ROLE_LOCAL_COUNCIL_USER])
-    fun `canCurrentUserPerformOrgAdminActions returns the result of isCurrentUserOrgAdmin`(role: String) {
-        setAuthenticatedRole(role)
-
-        assertEquals(
-            organisationPermissionsProvider.isCurrentUserOrgAdmin(),
-            organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions(),
-        )
-    }
-
-    @Test
-    fun `canCurrentUserPerformOrgAdminActions returns the result of isCurrentUserOrgAdmin when there is no authenticated user`() {
-        assertEquals(
-            organisationPermissionsProvider.isCurrentUserOrgAdmin(),
-            organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions(),
-        )
+    fun `canCurrentUserPerformOrgAdminActions returns false when there is no authenticated user`() {
+        assertFalse(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions())
     }
 
     // TODO PDJB-1828: Remove this nested class when the MULTI_USER_ORGANISATIONS feature flag is removed

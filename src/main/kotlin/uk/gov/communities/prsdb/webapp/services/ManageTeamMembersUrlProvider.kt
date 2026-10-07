@@ -16,7 +16,7 @@ class ManageTeamMembersUrlProvider(
             return null
         }
 
-        if (!organisationPermissionsProvider.isCurrentUserOrgAdmin()) {
+        if (!organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()) {
             return null
         }
 
