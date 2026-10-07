@@ -14,6 +14,24 @@ joinOrganisation:
   bullet:
     one: your full name
     two: your email address
+invalidLink:
+  heading: There was a problem with this invitation link
+  whatsHappened:
+    heading: What’s happened
+    alreadyResponded:
+      heading: If you have already responded to this invitation
+      beforeLink: Each invitation can only be used once. If you’ve already accepted this invitation,
+      link: sign in to your account
+      afterLink: .
+    notResponded:
+      heading: If you have not responded to this invitation
+      paragraph: 'This invitation has either:'
+      listItem:
+        one: expired (it’s over 28 days old)
+        two: been cancelled by the sender (for example, they sent it by mistake)
+  stillNeedAccess:
+    heading: If you still need access
+    paragraph: Ask someone at your organisation with administrator access to invite you again.
 email:
   error:
     missing: Enter your email address
