@@ -24,8 +24,8 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        // TODO PDJB-1774: Save the submitted details as an organisational landlord user with the role from the invitation, then delete the invitation.
-        // Also clear its session token and refresh the security context so the invitee receives their new role.
+        // TODO PDJB-1774: Add a separate internal step to save the submitted details as an organisational landlord user with the role from the invitation,
+        // delete the invitation, clear its session token, and refresh the security context so the invitee receives their new role.
     }
 
     // override this as the next step will handle deleting the journey (TODO PDJB-1774)
