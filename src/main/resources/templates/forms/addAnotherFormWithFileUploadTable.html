@@ -11,9 +11,10 @@
 <!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherTitle" type="java.lang.String"*/-->
 <!--/*@thymesVar id="optionalAddAnotherTitleParam" type="java.lang.Int"*/-->
+<!--/*@thymesVar id="pageTitleOverride" type="java.lang.String"*/-->
 
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${pageTitleOverride ?: addAnotherTitle}(${optionalAddAnotherTitleParam})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
     <h1 class="govuk-heading-l"
         th:text="#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}">

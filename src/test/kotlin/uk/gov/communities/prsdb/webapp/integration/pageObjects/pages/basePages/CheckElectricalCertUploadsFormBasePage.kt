@@ -9,6 +9,9 @@ open class CheckElectricalCertUploadsFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    override val expectedTitleHeading: String
+        get() = page.locator("h1").textContent().trim().replace(" file", " electrical safety certificate file")
+
     val backLink = BackLink.default(page)
     val table = Table(page)
     val form = CheckUploadsForm(page)

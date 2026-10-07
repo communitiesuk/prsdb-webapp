@@ -14,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 class CheckGasCertUploadsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckGasCertUploadsStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading: String
+        get() = page.locator("h1").textContent().trim().replace(" file", " gas safety certificate file")
+
     val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
 
