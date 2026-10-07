@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -9,11 +10,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -125,5 +129,23 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         assertNull(result)
+    }
+
+    @Test
+    fun `createInvitation saves an invitation for the organisation with the given email, role and a token`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        val invitationCaptor = argumentCaptor<OrganisationalLandlordInvitation>()
+        verify(mockInvitationRepository).save(invitationCaptor.capture())
+        val savedInvitation = invitationCaptor.firstValue
+        assertEquals("invitee@example.com", savedInvitation.invitedEmail)
+        assertEquals(EDITOR, savedInvitation.role)
+        assertEquals(organisation, savedInvitation.organisationalLandlord)
+        assertNotNull(savedInvitation.token)
     }
 }

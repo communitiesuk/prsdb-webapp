@@ -1,0 +1,20 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteTeamMemberFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="organisationName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{inviteTeamMember.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{inviteTeamMember.heading}">inviteTeamMember.heading</h1>
+    <p class="govuk-body" th:text="#{inviteTeamMember.intro(${organisationName})}">inviteTeamMember.intro</p>
+</th:block>
+<th:block id="form-content">
+    <div th:replace="~{fragments/forms/emailInput :: emailInput(#{inviteTeamMember.email.label}, 'emailAddress', null)}"></div>
+    <th:block id="role-fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#role-fieldset-content/content()}, fieldName='role', fieldSetHeading=#{inviteTeamMember.role.fieldSetHeading}, fieldSetHint=null, scopeErrorsToField=true)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'role', null, ${radioOptions})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.saveAndContinue})}"></button>
+</th:block>
+</html>
