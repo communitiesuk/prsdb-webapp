@@ -64,7 +64,7 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStep")
-final class CheckAnswersStep(
+final class AcceptOrganisationalLandlordInvitationCheckAnswersStep(
     stepConfig: AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig,
 ) : AbstractCheckYourAnswersStep<AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
