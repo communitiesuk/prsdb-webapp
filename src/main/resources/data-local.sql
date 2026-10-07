@@ -165,6 +165,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (84, '08/19/26', 1502423346, 0),
        (85, '08/25/26', 1502423347, 1),
        (86, '01/15/25', 1502423348, 0),
+       (87, '01/15/25', 1502423351, 0),
        (900, '07/23/26', 1502423349, 1), -- Test org landlord (Team-PRSDB+orglandlord)
        (901, '07/23/26', 1502423350, 1); -- Test editor org landlord (Team-PRSDB+orglandlordeditor)
 
@@ -230,7 +231,8 @@ VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB
        (55, '07/23/26', '07/23/26', 5009, 'Org Landlord House, PRSDB Road, OL1 1AA', 1, 'OL1 1AA', 'Org Landlord House', 'PRSDB Road'),
        (56, '07/23/26', '07/23/26', 5010, 'Joint Org House, PRSDB Road, JO1 1AA', 1, 'JO1 1AA', 'Joint Org House', 'PRSDB Road'),
        (57, '08/19/26', '08/19/26', 5011, 'Letting Agent House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Letting Agent House', 'PRSDB Road'),
-       (58, '08/19/26', '08/19/26', 5012, 'Delegated At Registration House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Delegated At Registration House', 'PRSDB Road');
+       (58, '08/19/26', '08/19/26', 5012, 'Delegated At Registration House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Delegated At Registration House', 'PRSDB Road'),
+       (59, '01/15/25', '01/15/25', 5013, 'Succeeded Payment House, PRSDB Road, SP1 1AA', 1, 'SP1 1AA', 'Succeeded Payment House', 'PRSDB Road');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -392,7 +394,8 @@ VALUES (39, true, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_dat
        (47, true, 1, 0, 0, 82, 55, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, false, false, null, false, false, 'email@example.com', 1, current_date + 365),
        (48, true, 1, 0, 0, 83, 56, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, true, false, null, false, false, 'email@example.com', 1, current_date + 365),
        (49, true, 1, 1, 2, 84, 57, '08/19/26', '08/19/26', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365),
-       (50, true, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365);
+       (50, true, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
+       (51, true, 1, 1, 2, 87, 59, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -455,7 +458,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 48, '2025-07-23'),
        (36, 48, '2025-07-23'),
        (1, 49, '2026-08-19'),
-       (1, 50, '2025-01-15')
+       (1, 50, '2025-01-15'),
+       (1, 51, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
@@ -543,7 +547,10 @@ VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, false, false, false),
        (49, 49, '08/19/26', '08/19/26', null, false, null, null, null, null,
-        null, null, null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
+        null, null, null, null, true, true, true, false, false, false),
+       (50, 51, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
@@ -572,7 +579,8 @@ VALUES (1, current_date-22,current_date-22, 'example-incomplete-journey1', '{"jo
        (2, current_date-22,current_date-29, 'example-incomplete-journey2', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
        (3, current_date-9,current_date-9, 'example-incomplete-journey3', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
        (4, current_date-29,current_date-29, 'example-incomplete-journey4', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', 2),
-       (5, current_date-23,current_date-23, 'example-incomplete-journey5', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null);
+       (5, current_date-23,current_date-23, 'example-incomplete-journey5', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
+       (6, current_date, current_date, 'example-incomplete-journey-with-payments', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"PP1 1AA"},"select-address":{"address":"1, Pending Payments Road, PP1 1AA"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1, Pending Payments Road, PP1 1AA\",\"localCouncilId\":1,\"uprn\":5014,\"buildingNumber\":\"1\",\"streetName\":\"Pending Payments Road\",\"postcode\":\"PP1 1AA\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null);
 
 SELECT setval(pg_get_serial_sequence('saved_journey_state', 'id'), (SELECT MAX(id) FROM saved_journey_state));
 
@@ -581,7 +589,18 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
        ('urn:fdc:gov.uk:2022:UVWXY', 2),
        ('urn:fdc:gov.uk:2022:UVWXY', 3),
        ('urn:fdc:gov.uk:2022:UVWXY', 4),
-       ('urn:fdc:gov.uk:2022:UVWXY', 5);
+       ('urn:fdc:gov.uk:2022:UVWXY', 5),
+       ('urn:fdc:gov.uk:2022:UVWXY', 6);
+
+-- Payments in each status. The local GOV.UK Pay mock restores these from the database when they're first requested.
+INSERT INTO payment (payment_id, created_date, amount_in_pence, reference, payment_created_at, for_period_ending, status,
+                     paying_user_id, associated_property_id, associated_incomplete_property_user_id,
+                     associated_incomplete_property_saved_journey_state_id)
+VALUES ('created-payment', current_date, 2000, 'created-payment-reference', current_date, current_date + 365, 0, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('capturable-payment', current_date, 2000, 'capturable-payment-reference', current_date, current_date + 365, 1, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('failed-payment', current_date, 2000, 'failed-payment-reference', current_date, current_date + 365, 3, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('cancelled-payment', current_date, 2000, 'cancelled-payment-reference', current_date, current_date + 365, 4, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('succeeded-payment', '01/15/25', 2000, 'succeeded-payment-reference', '01/15/25', current_date + 365, 2, 'urn:fdc:gov.uk:2022:UVWXY', 51, null, null);
 
 INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),
