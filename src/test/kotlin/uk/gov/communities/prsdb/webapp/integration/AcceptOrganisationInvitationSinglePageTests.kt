@@ -207,5 +207,4 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
             assertPageIs(page, EmailAddressPage::class)
         }
     }
-
 }
