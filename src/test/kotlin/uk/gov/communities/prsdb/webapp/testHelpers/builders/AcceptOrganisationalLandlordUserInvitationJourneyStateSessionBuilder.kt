@@ -7,6 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TokenValidityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrganisationInvitationEmailFormModel
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 
 class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
     JourneyStateSessionBuilder<AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder>() {
@@ -24,6 +26,13 @@ class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
                 .withSubmittedValue(
                     FullNameStep.ROUTE_SEGMENT,
                     NameFormModel().apply { name = "Jane Smith" },
+                )
+
+        fun beforeCheckAnswers(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
+            beforeEmailAddress()
+                .withSubmittedValue(
+                    EmailAddressStep.ROUTE_SEGMENT,
+                    AcceptOrganisationInvitationEmailFormModel().apply { emailAddress = "invitee@example.com" },
                 )
     }
 }

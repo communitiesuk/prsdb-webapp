@@ -152,4 +152,60 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
             assertPageIs(page, FullNamePage::class)
         }
     }
+
+    @Nested
+    inner class AcceptOrganisationInvitationCheckAnswersStep {
+        @Test
+        fun `check answers displays the organisation and invitee details with only name and email editable`(page: Page) {
+            // Arrange
+            val checkAnswersPage = navigator.goToAcceptOrganisationalLandlordInvitationCheckAnswersPage()
+
+            // Assert
+            assertThat(checkAnswersPage.summaryList.organisationRow.value).containsText("Local Organisation Landlord")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.organisationRow.actions.firstActionLink).isHidden()
+            assertThat(checkAnswersPage.summaryList.nameRow.value).containsText("Jane Smith")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.nameRow.actions.firstActionLink).isVisible()
+            assertThat(checkAnswersPage.summaryList.emailRow.value).containsText("invitee@example.com")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.emailRow.actions.firstActionLink).isVisible()
+        }
+
+        @Test
+        fun `name change link opens full name page with saved value`(page: Page) {
+            // Arrange
+            val checkAnswersPage = navigator.goToAcceptOrganisationalLandlordInvitationCheckAnswersPage()
+
+            // Act
+            checkAnswersPage.summaryList.nameRow.clickFirstActionLinkAndWait()
+
+            // Assert
+            val fullNamePage = assertPageIs(page, FullNamePage::class)
+            assertThat(fullNamePage.form.nameInput.locator).hasValue("Jane Smith")
+        }
+
+        @Test
+        fun `email change link opens email page with saved value`(page: Page) {
+            // Arrange
+            val checkAnswersPage = navigator.goToAcceptOrganisationalLandlordInvitationCheckAnswersPage()
+
+            // Act
+            checkAnswersPage.summaryList.emailRow.clickFirstActionLinkAndWait()
+
+            // Assert
+            val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
+            assertThat(emailAddressPage.emailInput.locator).hasValue("invitee@example.com")
+        }
+
+        @Test
+        fun `check answers back link returns to email address page`(page: Page) {
+            // Arrange
+            val checkAnswersPage = navigator.goToAcceptOrganisationalLandlordInvitationCheckAnswersPage()
+
+            // Act
+            checkAnswersPage.backLink.clickAndWait()
+
+            // Assert
+            assertPageIs(page, EmailAddressPage::class)
+        }
+    }
+
 }

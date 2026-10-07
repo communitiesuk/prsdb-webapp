@@ -3,7 +3,12 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -17,6 +22,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @Autowired
+    private lateinit var invitationRepository: OrganisationalLandlordInvitationRepository
+
+    @Autowired
+    private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
+
     @BeforeEach
     fun enableFeatureFlag() {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
@@ -48,7 +59,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
         emailAddressPage.submitEmail("invitee@example.com")
 
-        // 4. Check Answers page
+        // 4. Submit Check Answers
         val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
         checkAnswersPage.form.submit()
 
@@ -60,7 +71,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
     // TODO PDJB-1822: Update test once validate token step is in place
     @Test
     fun `Invitees are redirected to invalid link page when token validation placeholder is invalid`(page: Page) {
-        // Go to the start of accept invitation journey (Validate Token page)
+        // 1. Go to the start of accept invitation journey (Validate Token page)
         val validateTokenPage = navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
         assertPageIs(page, ValidateTokenPage::class)
         // TODO PDJB-1822: Validate token step
@@ -70,5 +81,13 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         // 2. Invalid link page
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
         assertTrue(invalidLinkPage.heading.getText().contains("TODO PDJB-1821)"))
+    }
+
+    @Test
+    fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
+        featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
+
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=1234abcd-5678-abcd-1234-567abcd2222a")
+        assertEquals(404, response?.status())
     }
 }
