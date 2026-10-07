@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.sendEmailToLandlord
 
 @JourneyFrameworkComponent
 class ConfirmYouAreALandlordForThisPropertyStepConfig(
@@ -83,9 +84,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
-        acceptedEmailSender.sendEmail(
-            acceptingLandlord.email,
+        acceptedEmailSender.sendEmailToLandlord(
+            acceptingLandlord,
             JointLandlordInvitationAcceptedEmail(
                 recipientName = acceptingLandlord.name,
                 propertyAddress = propertyAddress,
@@ -96,11 +96,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
 
         propertyOwnership.landlords
             .filter { it.id != acceptingLandlord.id }
-            // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
-                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
-                otherLandlordEmailSender.sendEmail(
-                    landlord.email,
+                otherLandlordEmailSender.sendEmailToLandlord(
+                    landlord,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
                         recipientName = landlord.name,
                         inviteeName = acceptingLandlord.name,

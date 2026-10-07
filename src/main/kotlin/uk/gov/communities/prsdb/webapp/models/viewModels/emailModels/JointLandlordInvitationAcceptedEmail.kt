@@ -5,13 +5,15 @@ data class JointLandlordInvitationAcceptedEmail(
     val propertyAddress: String,
     val propertyRecordUrl: String,
     val propertyRegistrationNumber: String,
-) : EmailTemplateModel {
+) : LandlordEmailTemplateModel {
     private val recipientNameKey = "recipient name"
     private val propertyAddressKey = "property address"
     private val propertyRecordUrlKey = "property record url"
     private val propertyRegistrationNumberKey = "property registration number"
 
     override val template = EmailTemplate.JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL
+
+    override val orgRolesToSendTo = adminsOnly
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

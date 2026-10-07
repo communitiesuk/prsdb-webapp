@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import java.time.LocalDate
+import java.util.Collections
 
 @Entity
 @DiscriminatorValue("1")
@@ -96,18 +97,21 @@ class OrganisationalLandlord() : Landlord() {
     lateinit var mainContactPhone: String
 
     // We eager fetch these as we're temporarily using them to get the email for an org landlord.
-    // We assume one org user per landlord for now so this eager fetch will be cheap.
-    // TODO: PDJB-1274: This eager fetch will no longer be needed once we support multiple users in an org. Remove it
     @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
-    private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
+    private val organisationalLandlordUserSet: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
+
+    @get:Transient
+    val organisationalLandlordUsers: Set<OrganisationalLandlordUser>
+        get() = Collections.unmodifiableSet(organisationalLandlordUserSet)
 
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
+    // Also remove the EAGER fetch on organisationalLandlordUserSet if it still exists
     @get:Transient
     override val email: String
-        get() = organisationalLandlordUsers.single().email
+        get() = organisationalLandlordUserSet.single().email
 
     internal fun addOrganisationalLandlordUser(organisationalLandlordUser: OrganisationalLandlordUser) {
-        organisationalLandlordUsers.add(organisationalLandlordUser)
+        organisationalLandlordUserSet.add(organisationalLandlordUser)
     }
 
     @OneToMany(mappedBy = "organisationalLandlord")
