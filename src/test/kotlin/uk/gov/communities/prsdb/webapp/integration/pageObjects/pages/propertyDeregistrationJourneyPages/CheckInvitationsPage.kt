@@ -15,6 +15,8 @@ class CheckInvitationsPage(
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${CheckPendingInvitationsStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check these actions before you deregister this property"
+
     val heading
         get() = page.locator("h1")
 

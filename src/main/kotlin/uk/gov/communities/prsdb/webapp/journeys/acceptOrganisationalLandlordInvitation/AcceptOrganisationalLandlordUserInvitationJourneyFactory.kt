@@ -4,12 +4,11 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.NAME_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CompleteInvitationAcceptanceStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
@@ -78,7 +77,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
                 nextStep { journey.checkAnswersStep }
             }
             step(journey.checkAnswersStep) {
-                routeSegment(CheckAnswersStep.ROUTE_SEGMENT)
+                routeSegment(AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.emailAddressStep.isComplete() }
                 nextStep { journey.completeInvitationAcceptanceStep }
             }
@@ -105,7 +104,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                NAME_PATH_SEGMENT -> checkAnswerStep(journey.fullNameStep, NAME_PATH_SEGMENT)
+                FullNameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.fullNameStep, FullNameStep.ROUTE_SEGMENT)
                 EmailAddressStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailAddressStep, EmailAddressStep.ROUTE_SEGMENT)
             }
             step(journey.finishCyaStep) {
@@ -124,7 +123,7 @@ class AcceptInvitationJourney(
     override val joinOrganisationStep: JoinOrganisationStep,
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
-    override val checkAnswersStep: CheckAnswersStep,
+    override val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep,
     override val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep,
     override val confirmationStep: ConfirmationStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -152,10 +151,10 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     val joinOrganisationStep: JoinOrganisationStep
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep
-    val checkAnswersStep: CheckAnswersStep
+    val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
     val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep
     val confirmationStep: ConfirmationStep
-    override val cyaStep: CheckAnswersStep
+    override val cyaStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
         get() = checkAnswersStep
     override val finishCyaStep: FinishCyaJourneyStep
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>

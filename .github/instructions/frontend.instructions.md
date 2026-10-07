@@ -29,7 +29,8 @@ The layout builds the `<title>` as `[Error: ]<title> - <service name> - GOV.UK` 
 each page title is unique and descriptive:
 - Pass the **same expression as the page's h1** as the `title` argument.
 - Only use a different title when the h1 is unsuitable — for example, it is more than 65 characters. In that case, pass a shorter message as the
-  `title` argument, but this should be rare and should always be checked first.
+  `title` argument, but this should be rare and should always be checked first. For shared journey form templates
+  where only some steps need a different title, see `pageTitleOverride` in `journeys.instructions.md`.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
 
 ### Using Fragments

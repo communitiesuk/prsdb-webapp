@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStepConfig")
-class CheckAnswersStepConfig(
+class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
     private val invitationService: OrganisationalLandlordInvitationService,
 ) : AbstractCheckYourAnswersStepConfig<AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
@@ -58,8 +58,8 @@ class CheckAnswersStepConfig(
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStep")
-final class CheckAnswersStep(
-    stepConfig: CheckAnswersStepConfig,
+final class AcceptOrganisationalLandlordInvitationCheckAnswersStep(
+    stepConfig: AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig,
 ) : AbstractCheckYourAnswersStep<AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = AbstractCheckYourAnswersStep.ROUTE_SEGMENT
