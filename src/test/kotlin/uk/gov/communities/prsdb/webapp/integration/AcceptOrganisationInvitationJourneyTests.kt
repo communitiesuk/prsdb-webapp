@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -46,7 +48,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 3. Email Address page
         val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
-        emailAddressPage.form.submit()
+        emailAddressPage.submitEmail("invitee@example.com")
 
         // 4. Check Answers page
         val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
@@ -69,6 +71,8 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 2. Invalid link page
         val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
-        assertTrue(invalidLinkPage.heading.getText().contains("TODO PDJB-1821)"))
+        BaseComponent.assertThat(invalidLinkPage.heading)
+            .containsText("There was a problem with this invitation link")
+        BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
     }
 }
