@@ -23,11 +23,6 @@ class CheckAnswersStepConfig(
             "summaryListData" to getSummaryList(state),
         )
 
-    override fun afterStepDataIsAdded(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        // TODO PDJB-1774: Save the submitted details as an organisational landlord user with the role from the invitation, then delete the invitation.
-        // Also clear its session token and refresh the security context so the invitee receives their new role.
-    }
-
     override fun resolveNextDestination(
         state: AcceptOrganisationalLandlordUserInvitationJourneyState,
         defaultDestination: Destination,
