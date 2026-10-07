@@ -77,7 +77,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    open fun beforeChosingUnreachableStepDestination(state: TState) {}
+    open fun beforeChoosingUnreachableStepDestination(state: TState) {}
 
     open fun resolveUnreachableStepDestination(
         state: TState,

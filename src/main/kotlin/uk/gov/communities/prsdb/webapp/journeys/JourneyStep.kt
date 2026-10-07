@@ -143,7 +143,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     }
 
     fun getUnreachableStepDestination(): Destination {
-        stepConfig.beforeChosingUnreachableStepDestination(state)
+        stepConfig.beforeChoosingUnreachableStepDestination(state)
         val defaultDestination = unreachableStepDestination()
         return stepConfig.resolveUnreachableStepDestination(state, defaultDestination)
     }
