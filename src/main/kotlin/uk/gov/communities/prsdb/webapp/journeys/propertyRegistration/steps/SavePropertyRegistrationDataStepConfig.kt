@@ -5,19 +5,21 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyHelper
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
 class SavePropertyRegistrationDataStepConfig(
-    private val propertyRegistrationJourneyHelper: PropertyRegistrationJourneyHelper,
+    private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory,
 ) : AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
         try {
-            propertyRegistrationJourneyHelper.registerProperty(state)
+            propertyRegistrationService.registerProperty(propertyRegistrationDataModelFactory.fromJourneyState(state))
         } catch (_: EntityExistsException) {
             state.propertyDetailsTask.addressTask.isAddressAlreadyRegistered = true
             return

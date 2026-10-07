@@ -12,17 +12,22 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyHelper
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class SavePropertyRegistrationDataStepConfigTests {
     @Mock
-    private lateinit var mockPropertyRegistrationJourneyHelper: PropertyRegistrationJourneyHelper
+    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    @Mock
+    private lateinit var mockPropertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
@@ -35,11 +40,14 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
+    private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
+
     @BeforeEach
     fun setUp() {
         stepConfig =
             SavePropertyRegistrationDataStepConfig(
-                propertyRegistrationJourneyHelper = mockPropertyRegistrationJourneyHelper,
+                propertyRegistrationService = mockPropertyRegistrationService,
+                propertyRegistrationDataModelFactory = mockPropertyRegistrationDataModelFactory,
             )
     }
 
@@ -53,19 +61,22 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached registers the property using the helper`() {
+    fun `afterStepIsReached registers the property using the registration data from the factory`() {
+        // Arrange
+        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
+
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationJourneyHelper).registerProperty(mockState)
-        verify(mockState, never()).propertyDetailsTask
+        verify(mockPropertyRegistrationService).registerProperty(registrationData)
     }
 
     @Test
-    fun `afterStepIsReached sets isAddressAlreadyRegistered when the address has already been registered`() {
+    fun `afterStepIsReached sets isAddressAlreadyRegistered when EntityExistsException`() {
         // Arrange
-        whenever(mockPropertyRegistrationJourneyHelper.registerProperty(mockState))
+        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
+        whenever(mockPropertyRegistrationService.registerProperty(registrationData))
             .thenThrow(EntityExistsException("Address already registered"))
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)

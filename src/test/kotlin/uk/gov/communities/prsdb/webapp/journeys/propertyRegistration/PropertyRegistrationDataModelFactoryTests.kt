@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,15 +15,11 @@ import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -91,14 +87,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
-class PropertyRegistrationJourneyHelperTests {
-    @Mock
-    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
-
+class PropertyRegistrationDataModelFactoryTests {
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
@@ -117,26 +108,20 @@ class PropertyRegistrationJourneyHelperTests {
     @Mock
     private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
 
-    private lateinit var helper: PropertyRegistrationJourneyHelper
+    private lateinit var factory: PropertyRegistrationDataModelFactory
 
     @BeforeEach
     fun setUp() {
-        helper =
-            PropertyRegistrationJourneyHelper(
-                propertyRegistrationService = mockPropertyRegistrationService,
+        factory =
+            PropertyRegistrationDataModelFactory(
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 featureFlagManager = mockFeatureFlagManager,
             )
     }
 
-    @AfterEach
-    fun tearDown() {
-        SecurityContextHolder.clearContext()
-    }
-
     @ParameterizedTest
     @EnumSource(CorrespondenceEmailOption::class)
-    fun `registration passes the selected correspondence email and postal address`(choice: CorrespondenceEmailOption) {
+    fun `fromJourneyState returns the selected correspondence email and postal address`(choice: CorrespondenceEmailOption) {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
@@ -160,13 +145,14 @@ class PropertyRegistrationJourneyHelperTests {
         }
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verifyCorrespondenceDetails(
+        assertEquals(
             if (choice == CorrespondenceEmailOption.ACCOUNT_EMAIL) "account@example.com" else "edited.contact@example.com",
-            postalAddress,
+            result.correspondenceEmail,
         )
+        assertEquals(postalAddress, result.correspondenceAddressModel)
         if (choice == CorrespondenceEmailOption.DIFFERENT_EMAIL) {
             verify(mockState, never()).loggedInLandlordEmailAtStartOfJourney
         }
@@ -174,69 +160,23 @@ class PropertyRegistrationJourneyHelperTests {
 
     // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
     @Test
-    fun `registration passes no correspondence details when the CORRESPONDENCE_ADDRESS flag is off`() {
+    fun `fromJourneyState returns no correspondence details when the CORRESPONDENCE_ADDRESS flag is off`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verifyCorrespondenceDetails(null, null)
+        assertNull(result.correspondenceEmail)
+        assertNull(result.correspondenceAddressModel)
         verify(mockState, never()).correspondenceTask
     }
 
-    private fun verifyCorrespondenceDetails(
-        email: String?,
-        address: AddressDataModel?,
-    ) {
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = any(),
-            tenancyProvideLater = anyOrNull(),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = eq(email),
-            correspondenceAddressModel = eq(address),
-        )
-    }
-
     @Test
-    fun `registerProperty registers property and saves compliance data with all compliance fields from state`() {
+    fun `fromJourneyState returns all compliance fields from state`() {
         // Arrange
         val gasUploadIds = listOf(10L, 20L)
         val gasCertIssueDate = LocalDate(2024, 6, 15)
@@ -271,54 +211,29 @@ class PropertyRegistrationJourneyHelperTests {
         )
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = eq(true),
-            gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
-            gasSafetyFileUploadIds = eq(gasUploadIds),
-            gasSafetyCertProvideLater = eq(false),
-            electricalSafetyFileUploadIds = eq(electricalUploadIds),
-            electricalSafetyExpiryDate = eq(electricalSafetyExpiryDate.toJavaLocalDate()),
-            electricalCertType = eq(CertificateType.Eicr),
-            electricalSafetyCertProvideLater = eq(false),
-            epcCertificateUrl = eq(epcUrl),
-            epcExpiryDate = eq(acceptedEpc.expiryDate.toJavaLocalDate()),
-            epcEnergyRating = eq(acceptedEpc.energyRating),
-            tenancyStartedBeforeEpcExpiry = eq(true),
-            epcExemptionReason = eq(epcExemptionReason),
-            epcMeesExemptionReason = eq(meesExemptionReason),
-            epcProvideLater = eq(false),
-            licenseProvideLater = eq(false),
-            tenancyProvideLater = any(),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(true, result.hasGasSupply)
+        assertEquals(gasCertIssueDate.toJavaLocalDate(), result.gasSafetyCertIssueDate)
+        assertEquals(gasUploadIds, result.gasSafetyFileUploadIds)
+        assertEquals(false, result.gasSafetyCertProvideLater)
+        assertEquals(electricalUploadIds, result.electricalSafetyFileUploadIds)
+        assertEquals(electricalSafetyExpiryDate.toJavaLocalDate(), result.electricalSafetyExpiryDate)
+        assertEquals(CertificateType.Eicr, result.electricalCertType)
+        assertEquals(false, result.electricalSafetyCertProvideLater)
+        assertEquals(epcUrl, result.epcCertificateUrl)
+        assertEquals(acceptedEpc.expiryDate.toJavaLocalDate(), result.epcExpiryDate)
+        assertEquals(acceptedEpc.energyRating, result.epcEnergyRating)
+        assertEquals(true, result.tenancyStartedBeforeEpcExpiry)
+        assertEquals(epcExemptionReason, result.epcExemptionReason)
+        assertEquals(meesExemptionReason, result.epcMeesExemptionReason)
+        assertEquals(false, result.epcProvideLater)
+        assertEquals(false, result.licenseProvideLater)
     }
 
     @Test
-    fun `registerProperty passes licenseProvideLater as true when the user provides licensing later`() {
+    fun `fromJourneyState returns licenseProvideLater as true when the user provides licensing later`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
@@ -326,217 +241,64 @@ class PropertyRegistrationJourneyHelperTests {
         whenever(mockState.licensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = anyOrNull(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = eq(true),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(true, result.licenseProvideLater)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
-    fun `registerProperty passes hasGasSupply as null and gasSafetyCertProvideLater as true when the user provides gas safety later`() {
+    fun `fromJourneyState returns hasGasSupply as null and gasSafetyCertProvideLater as true when the user provides gas safety later`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.PROVIDE_LATER)
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = anyOrNull(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = isNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = eq(true),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertNull(result.hasGasSupply)
+        assertEquals(true, result.gasSafetyCertProvideLater)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
-    fun `registerProperty passes hasGasSupply as false and gasSafetyCertProvideLater as false when the property has no gas supply`() {
+    fun `fromJourneyState returns hasGasSupply as false and gasSafetyCertProvideLater as false when the property has no gas supply`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = anyOrNull(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = eq(false),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = eq(false),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(false, result.hasGasSupply)
+        assertEquals(false, result.gasSafetyCertProvideLater)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
-    fun `registerProperty passes true when user chose provide later on legacy gas cert step`() {
+    fun `fromJourneyState returns true when user chose provide later on legacy gas cert step`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome).thenReturn(GasCertOutcome.PROVIDE_LATER)
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = anyOrNull(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = eq(true),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = eq(true),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(true, result.hasGasSupply)
+        assertEquals(true, result.gasSafetyCertProvideLater)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
-    fun `registerProperty passes all provide-later fields as true when delegating to a letting agent`() {
+    fun `fromJourneyState returns all provide-later fields as true when delegating to a letting agent`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
@@ -551,54 +313,21 @@ class PropertyRegistrationJourneyHelperTests {
         )
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = anyOrNull(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = eq("letting.agent@example.com"),
-            markedJointLandlord = any(),
-            hasGasSupply = isNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = eq(true),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = eq(true),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = eq(true),
-            licenseProvideLater = eq(true),
-            tenancyProvideLater = eq(true),
-            isDelegatedToLettingAgent = eq(true),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals("letting.agent@example.com", result.lettingAgentEmail)
+        assertNull(result.hasGasSupply)
+        assertEquals(true, result.gasSafetyCertProvideLater)
+        assertEquals(true, result.electricalSafetyCertProvideLater)
+        assertEquals(true, result.epcProvideLater)
+        assertEquals(true, result.licenseProvideLater)
+        assertEquals(true, result.tenancyProvideLater)
+        assertEquals(true, result.isDelegatedToLettingAgent)
     }
 
     @Test
-    fun `registerProperty throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
+    fun `fromJourneyState throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
         // Arrange
         whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
 
@@ -652,126 +381,35 @@ class PropertyRegistrationJourneyHelperTests {
         whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
 
         // Act & Assert
-        assertThrows<IllegalStateException> { helper.registerProperty(mockState) }
+        assertThrows<IllegalStateException> { factory.fromJourneyState(mockState) }
     }
 
     @Test
-    fun `registerProperty returns the property ownership created by the service`() {
-        // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceData()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
-        whenever(
-            mockState.electricalSafetyTask.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
-        ).thenReturn(null)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        whenever(
-            mockPropertyRegistrationService.registerProperty(
-                addressModel = any(),
-                propertyType = any(),
-                licenseType = any(),
-                licenceNumber = any(),
-                ownershipType = any(),
-                isOccupied = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                jointLandlordEmails = anyOrNull(),
-                lettingAgentEmail = anyOrNull(),
-                markedJointLandlord = any(),
-                hasGasSupply = anyOrNull(),
-                gasSafetyCertIssueDate = anyOrNull(),
-                gasSafetyFileUploadIds = any(),
-                gasSafetyCertProvideLater = anyOrNull(),
-                electricalSafetyFileUploadIds = any(),
-                electricalSafetyExpiryDate = anyOrNull(),
-                electricalCertType = anyOrNull(),
-                electricalSafetyCertProvideLater = anyOrNull(),
-                epcCertificateUrl = anyOrNull(),
-                epcExpiryDate = anyOrNull(),
-                epcEnergyRating = anyOrNull(),
-                tenancyStartedBeforeEpcExpiry = anyOrNull(),
-                epcExemptionReason = anyOrNull(),
-                epcMeesExemptionReason = anyOrNull(),
-                epcProvideLater = anyOrNull(),
-                licenseProvideLater = anyOrNull(),
-                tenancyProvideLater = any(),
-                isDelegatedToLettingAgent = any(),
-                correspondenceEmail = anyOrNull(),
-                correspondenceAddressModel = anyOrNull(),
-            ),
-        ).thenReturn(propertyOwnership)
-
-        // Act
-        val result = helper.registerProperty(mockState)
-
-        // Assert
-        assertSame(propertyOwnership, result)
-    }
-
-    @Test
-    fun `registerProperty passes nulls and empties when all compliance steps return no data`() {
+    fun `fromJourneyState returns nulls and empties when all compliance steps return no data`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = isNull(),
-            gasSafetyFileUploadIds = eq(emptyList()),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = eq(emptyList()),
-            electricalSafetyExpiryDate = isNull(),
-            electricalCertType = isNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = isNull(),
-            epcExpiryDate = isNull(),
-            epcEnergyRating = isNull(),
-            tenancyStartedBeforeEpcExpiry = isNull(),
-            epcExemptionReason = isNull(),
-            epcMeesExemptionReason = isNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertNull(result.gasSafetyCertIssueDate)
+        assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
+        assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
+        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.electricalCertType)
+        assertNull(result.epcCertificateUrl)
+        assertNull(result.epcExpiryDate)
+        assertNull(result.epcEnergyRating)
+        assertNull(result.tenancyStartedBeforeEpcExpiry)
+        assertNull(result.epcExemptionReason)
+        assertNull(result.epcMeesExemptionReason)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
-    fun `registerProperty passes false tenancyProvideLater when property is occupied and tenancy details are provided`() {
+    fun `fromJourneyState returns false tenancyProvideLater when property is occupied and tenancy details are provided`() {
         // Arrange
         setupStateForPropertyRegistration()
         whenever(mockState.occupied.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
@@ -779,54 +417,26 @@ class PropertyRegistrationJourneyHelperTests {
         setupStateForComplianceDataWithNullValues()
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = eq(true),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = isNull(),
-            gasSafetyFileUploadIds = eq(emptyList()),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = eq(emptyList()),
-            electricalSafetyExpiryDate = isNull(),
-            electricalCertType = isNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = isNull(),
-            epcExpiryDate = isNull(),
-            epcEnergyRating = isNull(),
-            tenancyStartedBeforeEpcExpiry = isNull(),
-            epcExemptionReason = isNull(),
-            epcMeesExemptionReason = isNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(true, result.isOccupied)
+        assertNull(result.gasSafetyCertIssueDate)
+        assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
+        assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
+        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.electricalCertType)
+        assertNull(result.epcCertificateUrl)
+        assertNull(result.epcExpiryDate)
+        assertNull(result.epcEnergyRating)
+        assertNull(result.tenancyStartedBeforeEpcExpiry)
+        assertNull(result.epcExemptionReason)
+        assertNull(result.epcMeesExemptionReason)
+        assertEquals(false, result.tenancyProvideLater)
     }
 
     @Test
-    fun `registerProperty passes null tenancy fields and true tenancyProvideLater when tenancy is provide this later`() {
+    fun `fromJourneyState returns null tenancy fields and true tenancyProvideLater when tenancy is provide this later`() {
         // Arrange
         setupStateForPropertyRegistration()
         whenever(mockState.occupied.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
@@ -834,50 +444,30 @@ class PropertyRegistrationJourneyHelperTests {
         setupStateForComplianceDataWithNullValues()
 
         // Act
-        helper.registerProperty(mockState)
+        val result = factory.fromJourneyState(mockState)
 
         // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = any(),
-            numberOfHouseholds = eq(0),
-            numberOfPeople = eq(0),
-            numBedrooms = eq(3),
-            billsIncludedList = isNull(),
-            customBillsIncluded = isNull(),
-            furnishedStatus = isNull(),
-            rentFrequency = isNull(),
-            customRentFrequency = isNull(),
-            rentAmount = isNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = isNull(),
-            gasSafetyFileUploadIds = eq(emptyList()),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = eq(emptyList()),
-            electricalSafetyExpiryDate = isNull(),
-            electricalCertType = isNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = isNull(),
-            epcExpiryDate = isNull(),
-            epcEnergyRating = isNull(),
-            tenancyStartedBeforeEpcExpiry = isNull(),
-            epcExemptionReason = isNull(),
-            epcMeesExemptionReason = isNull(),
-            epcProvideLater = anyOrNull(),
-            licenseProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(true),
-            isDelegatedToLettingAgent = any(),
-            correspondenceEmail = anyOrNull(),
-            correspondenceAddressModel = anyOrNull(),
-        )
+        assertEquals(0, result.numberOfHouseholds)
+        assertEquals(0, result.numberOfPeople)
+        assertEquals(3, result.numBedrooms)
+        assertNull(result.billsIncludedList)
+        assertNull(result.customBillsIncluded)
+        assertNull(result.furnishedStatus)
+        assertNull(result.rentFrequency)
+        assertNull(result.customRentFrequency)
+        assertNull(result.rentAmount)
+        assertNull(result.gasSafetyCertIssueDate)
+        assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
+        assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
+        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.electricalCertType)
+        assertNull(result.epcCertificateUrl)
+        assertNull(result.epcExpiryDate)
+        assertNull(result.epcEnergyRating)
+        assertNull(result.tenancyStartedBeforeEpcExpiry)
+        assertNull(result.epcExemptionReason)
+        assertNull(result.epcMeesExemptionReason)
+        assertEquals(true, result.tenancyProvideLater)
     }
 
     private fun setupStateForPropertyRegistration() {

@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -218,22 +219,24 @@ class LandlordDashboardUrlTests(
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
-            propertyType = propertyOwnership.propertyBuildType,
-            customPropertyType = propertyOwnership.customPropertyType,
-            licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
-            licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
-            ownershipType = propertyOwnership.ownershipType,
-            isOccupied = propertyOwnership.isOccupied,
-            numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-            numberOfPeople = propertyOwnership.currentNumTenants,
-            numBedrooms = propertyOwnership.numBedrooms,
-            billsIncludedList = propertyOwnership.billsIncludedList,
-            customBillsIncluded = propertyOwnership.customBillsIncluded,
-            furnishedStatus = propertyOwnership.furnishedStatus,
-            rentFrequency = propertyOwnership.rentFrequency,
-            customRentFrequency = propertyOwnership.customRentFrequency,
-            rentAmount = propertyOwnership.rentAmount,
+            PropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
+                propertyType = propertyOwnership.propertyBuildType,
+                customPropertyType = propertyOwnership.customPropertyType,
+                licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
+                licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
+                ownershipType = propertyOwnership.ownershipType,
+                isOccupied = propertyOwnership.isOccupied,
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                numberOfPeople = propertyOwnership.currentNumTenants,
+                numBedrooms = propertyOwnership.numBedrooms,
+                billsIncludedList = propertyOwnership.billsIncludedList,
+                customBillsIncluded = propertyOwnership.customBillsIncluded,
+                furnishedStatus = propertyOwnership.furnishedStatus,
+                rentFrequency = propertyOwnership.rentFrequency,
+                customRentFrequency = propertyOwnership.customRentFrequency,
+                rentAmount = propertyOwnership.rentAmount,
+            ),
         )
 
         // Assert

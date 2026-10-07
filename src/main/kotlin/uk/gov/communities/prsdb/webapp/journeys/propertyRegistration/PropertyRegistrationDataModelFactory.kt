@@ -1,18 +1,18 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.toJavaLocalDate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -20,15 +20,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
-@PrsdbWebService
-class PropertyRegistrationJourneyHelper(
-    private val propertyRegistrationService: PropertyRegistrationService,
+@PrsdbWebComponent
+class PropertyRegistrationDataModelFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun registerProperty(state: PropertyRegistrationJourneyState): PropertyOwnership {
+    fun fromJourneyState(state: PropertyRegistrationJourneyState): PropertyRegistrationDataModel {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
@@ -47,7 +45,7 @@ class PropertyRegistrationJourneyHelper(
                 ?.toList()
         val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
-        return propertyRegistrationService.registerProperty(
+        return PropertyRegistrationDataModel(
             addressModel = state.propertyDetailsTask.addressTask.getAddress(),
             propertyType =
                 state.propertyDetailsTask.propertyTypeStep.formModel
