@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.NAME_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -100,7 +99,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                NAME_PATH_SEGMENT -> checkAnswerStep(journey.fullNameStep, NAME_PATH_SEGMENT)
+                FullNameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.fullNameStep, FullNameStep.ROUTE_SEGMENT)
                 EmailAddressStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailAddressStep, EmailAddressStep.ROUTE_SEGMENT)
             }
             step(journey.finishCyaStep) {
