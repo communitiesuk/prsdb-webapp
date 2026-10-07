@@ -127,7 +127,9 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Nested
-    inner class OrgEditor : NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-trust-editor.sql") {
+    inner class OrgEditor : NestedIntegrationTestWithImmutableData(
+        listOf("data-mockuser-org-landlord-trust.sql", "data-org-landlord-user-is-editor.sql"),
+    ) {
         // TODO PDJB-1828: Remove this setup when the MULTI_USER_ORGANISATIONS feature flag is removed
         @BeforeEach
         fun enableMultiUserOrganisations() {
@@ -193,7 +195,9 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     // defaults to ADMIN), so this only asserts that the flag-off path is a no-op for the view.
     @Nested
     inner class BeforePdjb1210MultiUserOrganisations :
-        NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-trust-editor.sql") {
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-org-landlord-trust.sql", "data-org-landlord-user-is-editor.sql"),
+        ) {
         @BeforeEach
         fun disableMultiUserOrganisationsForBeforePdjb1210Tests() {
             featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
