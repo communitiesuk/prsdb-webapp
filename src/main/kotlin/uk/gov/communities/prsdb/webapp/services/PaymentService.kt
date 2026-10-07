@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -60,16 +61,7 @@ class PaymentService(
                 "${amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
         }
 
-        val storedPayments = paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty)
-        val reconciledStoredStatuses =
-            storedPayments.associate { storedPayment ->
-                storedPayment.paymentId to
-                    if (storedPayment.status in PaymentStatus.IN_PROGRESS_STATUSES) {
-                        cancelOrReconcilePayment(storedPayment.paymentId, journeyId)
-                    } else {
-                        storedPayment.status
-                    }
-            }
+        val reconciledStoredStatuses = reconcileStoredPaymentStatuses(incompleteProperty, journeyId)
 
         // TODO PDJB-993: Before capturing a payment, check this property has no other SUCCEEDED payment and cancel it if so.
         //  The check below can't catch two registrations of the same property submitted at nearly the same time, because
@@ -97,6 +89,19 @@ class PaymentService(
 
         return createdGovUkPayPayment.nextUrl
     }
+
+    private fun reconcileStoredPaymentStatuses(
+        incompleteProperty: LandlordIncompleteProperty,
+        journeyId: String,
+    ): Map<String, PaymentStatus> =
+        paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).associate { storedPayment ->
+            storedPayment.paymentId to
+                if (storedPayment.status in PaymentStatus.IN_PROGRESS_STATUSES) {
+                    cancelOrReconcilePayment(storedPayment.paymentId, journeyId)
+                } else {
+                    storedPayment.status
+                }
+        }
 
     private fun cancelOrReconcilePayment(
         paymentId: String,
@@ -153,6 +158,7 @@ class PaymentService(
         )
     }
 
+    // TODO PDJB-993: Consider replacing the registerProperty callback with a direct call to a property registration service or repository
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun finalisePayment(
         paymentId: String,
