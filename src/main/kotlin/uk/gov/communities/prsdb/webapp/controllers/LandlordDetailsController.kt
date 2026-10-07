@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -38,6 +39,7 @@ class LandlordDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
+    private val organisationPermissionsProvider: OrganisationPermissionsProvider,
     private val messageSource: MessageSource,
 ) {
     @AllowIfLandlord
@@ -77,12 +79,22 @@ class LandlordDetailsController(
         orgLandlord: OrganisationalLandlord,
         model: Model,
     ): String {
-        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource))
+        val canPerformOrgAdminActions = organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()
+
+        model.addAttribute(
+            "orgLandlord",
+            OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = canPerformOrgAdminActions),
+        )
         model.addAttribute(
             "orgLandlordContacts",
-            OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers),
+            OrganisationalLandlordContactsViewModel(
+                orgLandlord,
+                orgLandlord.governingBodyMembers,
+                withChangeLinks = canPerformOrgAdminActions,
+            ),
         )
         model.addAttribute("isLandlordView", true)
+        model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
@@ -163,6 +175,7 @@ class LandlordDetailsController(
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers, withChangeLinks = false),
         )
         model.addAttribute("isLandlordView", false)
+        model.addAttribute("showDeleteLandlordRecordLink", false)
 
         addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
 
