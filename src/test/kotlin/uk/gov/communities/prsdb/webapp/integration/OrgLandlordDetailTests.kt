@@ -171,6 +171,10 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
 
             assertThat(detailsPage.mainContactCard.summaryList.nameRow.value).containsText("Sam Main-Contact")
             assertThat(detailsPage.leadTrusteeCard.summaryList.nameRow.value).containsText("Anita Locke")
+
+            assertEquals(2, detailsPage.governingBodyMemberCardCount())
+            assertThat(detailsPage.governingBodyMemberCard("1. Director").summaryList.nameRow)
+                .containsText("David Director")
         }
 
         @Test
