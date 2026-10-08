@@ -54,6 +54,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
+    fun `buildOrganisationalLandlordInvitationUri returns the accept invitation url with the token`() {
+        val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildOrganisationalLandlordInvitationUri("token-123")
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/accept-invitation?token=token-123")
+    }
+
+    @Test
     fun `buildLettingAgentPropertyDetailsUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")
         val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd1111a")

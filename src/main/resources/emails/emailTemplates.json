@@ -364,5 +364,12 @@
     "enumName": "LETTING_AGENT_COMPLIANCE_UPDATE_NOTIFICATION_EMAIL",
     "subject": "A letting agent or property manager added a new ((certificate type)) to a property record",
     "bodyLocation": "/emails/LettingAgentComplianceUpdateNotification.md"
+  },
+  {
+    "test_id": "",
+    "prod_id": "",
+    "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_EMAIL",
+    "subject": "Invitation to join ((organisation name)) on Register your rental property",
+    "bodyLocation": "/emails/OrganisationalLandlordInvitation.md"
   }
 ]

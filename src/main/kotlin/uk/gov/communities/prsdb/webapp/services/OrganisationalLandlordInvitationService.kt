@@ -8,12 +8,15 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUse
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
 
 @PrsdbWebService
 class OrganisationalLandlordInvitationService(
     private val invitationRepository: OrganisationalLandlordInvitationRepository,
     private val session: HttpSession,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>,
 ) {
     // TODO PDJB-1774: Add clearJourneyIdInvitationTokenPairsForTokenFromSession and call it when the invitation journey completes.
     fun addJourneyIdInvitationTokenPairToSession(
@@ -48,12 +51,20 @@ class OrganisationalLandlordInvitationService(
         role: OrganisationalLandlordUserRole,
         organisationalLandlord: OrganisationalLandlord,
     ) {
-        invitationRepository.save(
+        val invitation =
             OrganisationalLandlordInvitation(
                 token = UUID.randomUUID(),
                 invitedEmail = invitedEmail,
                 organisationalLandlord = organisationalLandlord,
                 role = role,
+            )
+        invitationRepository.save(invitation)
+
+        invitationEmailSender.sendEmail(
+            invitedEmail,
+            OrganisationalLandlordInvitationEmail(
+                organisationName = organisationalLandlord.name,
+                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(invitation.token.toString()),
             ),
         )
     }
