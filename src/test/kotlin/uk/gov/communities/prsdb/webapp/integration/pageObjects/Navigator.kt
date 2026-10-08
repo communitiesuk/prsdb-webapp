@@ -91,6 +91,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
@@ -306,6 +307,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep as AcceptInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep as AcceptInvitationEmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep as AcceptInvitationFullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep as OrgAreYouSureStep
@@ -1615,6 +1617,22 @@ class Navigator(
         response.dispose()
     }
 
+    private fun storeOrganisationalInvitationJourneyToken(
+        journeyId: String,
+        token: String,
+    ) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_ORGANISATIONAL_JOURNEY_TOKEN_ROUTE}",
+                RequestOptions.create().setData(StoreLettingAgentJourneyTokenRequestModel(journeyId, token)),
+            )
+        assertTrue(
+            response.ok(),
+            "Failed to store organisational journey token. Received status code: ${response.status()}",
+        )
+        response.dispose()
+    }
+
     fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
@@ -1702,6 +1720,7 @@ class Navigator(
         setJourneyStateInSession(
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeFullName().build(),
         )
+        storeOrganisationalInvitationJourneyToken(TEST_JOURNEY_ID, "1234abcd-5678-abcd-1234-567abcd2222a")
         val journeyPath =
             "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
                 AcceptInvitationFullNameStep.ROUTE_SEGMENT
@@ -1714,12 +1733,28 @@ class Navigator(
         setJourneyStateInSession(
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeEmailAddress().build(),
         )
+        storeOrganisationalInvitationJourneyToken(TEST_JOURNEY_ID, "1234abcd-5678-abcd-1234-567abcd2222a")
         val journeyPath =
             "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
                 AcceptInvitationEmailAddressStep.ROUTE_SEGMENT
         val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
         navigate(journeyUrl)
         return createValidPage(page, EmailAddressPage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationCheckAnswersPage(): CheckAnswersPage {
+        setJourneyStateInSession(
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeCheckAnswers().build(),
+        )
+        storeOrganisationalInvitationJourneyToken(TEST_JOURNEY_ID, "1234abcd-5678-abcd-1234-567abcd2222a")
+
+        val journeyPath =
+            "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
+                AcceptInvitationCheckAnswersStep.ROUTE_SEGMENT
+        val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
+
+        navigate(journeyUrl)
+        return createValidPage(page, CheckAnswersPage::class)
     }
 
     companion object {

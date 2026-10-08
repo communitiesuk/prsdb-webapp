@@ -9,6 +9,7 @@ info:
       two: If you rent this property out in the future, you must register it again to get a new Property Registration Number.
   cancelLink: Cancel (go back to property record)
 checkInvitations:
+  pageTitle: "Check these actions before you deregister this property"
   heading: "Check these actions before you deregister {0,,address}"
   body: "To deregister this property, we’ll need to do the following:"
   invitations:

@@ -64,8 +64,10 @@ selectAddress:
     missing: Select an address
   addAddressManually: I want to manually enter my address
 noAddressFound:
+  pageTitle: 'No matching address in England or Wales found'
   heading: 'No matching address in England or Wales found for {0,,postcode} and {1,,houseNumber}'
   english:
+    pageTitle: 'No matching address in England found'
     heading: 'No matching address in England found for {0,,postcode} and {1,,houseNameOrNumber}'
     paragraph:
       one:

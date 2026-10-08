@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -38,6 +38,7 @@ class PaymentService(
     private val paymentRepository: PaymentRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val userToLandlordService: UserToLandlordService,
+    private val propertyRegistrationService: PropertyRegistrationService,
     private val messageSource: MessageSource,
     private val transactionTemplate: TransactionTemplate,
     private val entityManager: EntityManager,
@@ -162,17 +163,22 @@ class PaymentService(
         )
     }
 
-    // TODO PDJB-993: Consider replacing the registerProperty callback with a direct call to a property registration service or repository
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun finalisePayment(
         paymentId: String,
         govUkPayStatus: PaymentStatus,
-        registerProperty: () -> PropertyOwnership,
+        registrationData: PropertyRegistrationDataModel,
         deleteJourney: () -> Unit,
     ): PaymentStatus =
         when (govUkPayStatus) {
-            PaymentStatus.CREATED -> throw IllegalArgumentException("Payment $paymentId cannot be finalised while in progress")
-            PaymentStatus.SUCCEEDED -> getStoredPaymentStatus(paymentId)
+            PaymentStatus.CREATED -> {
+                throw IllegalArgumentException("Payment $paymentId cannot be finalised while in progress")
+            }
+
+            PaymentStatus.SUCCEEDED -> {
+                getStoredPaymentStatus(paymentId)
+            }
+
             PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
                 paymentRepository.updateStatusIfCurrentStatusIn(
                     paymentId,
@@ -183,19 +189,21 @@ class PaymentService(
                 getStoredPaymentStatus(paymentId)
             }
 
-            PaymentStatus.CAPTURABLE -> finaliseCapturablePayment(paymentId, registerProperty, deleteJourney)
+            PaymentStatus.CAPTURABLE -> {
+                finaliseCapturablePayment(paymentId, registrationData, deleteJourney)
+            }
         }
 
     private fun finaliseCapturablePayment(
         paymentId: String,
-        registerProperty: () -> PropertyOwnership,
+        registrationData: PropertyRegistrationDataModel,
         deleteJourney: () -> Unit,
     ): PaymentStatus {
         recordPaymentAsCapturable(paymentId)
 
         val finalisationResult =
             try {
-                registerPropertyAndCapturePayment(paymentId, registerProperty, deleteJourney)
+                registerPropertyAndCapturePayment(paymentId, registrationData, deleteJourney)
             } catch (exception: Exception) {
                 return cancelUnfinalisedPayment(paymentId, exception)
             }
@@ -210,7 +218,7 @@ class PaymentService(
 
     private fun registerPropertyAndCapturePayment(
         paymentId: String,
-        registerProperty: () -> PropertyOwnership,
+        registrationData: PropertyRegistrationDataModel,
         deleteJourney: () -> Unit,
     ): FinalisationResult =
         checkNotNull(
@@ -231,7 +239,7 @@ class PaymentService(
                 checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
                 val cancelledOtherPaymentIds = cancelInProgressPayments(otherPaymentIds)
 
-                val property = registerProperty()
+                val property = propertyRegistrationService.registerProperty(registrationData)
 
                 val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
                 storedPayment.associateWithProperty(property)

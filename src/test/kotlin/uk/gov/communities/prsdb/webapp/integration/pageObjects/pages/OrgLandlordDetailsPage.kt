@@ -22,19 +22,19 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 class OrgLandlordDetailsPage(
     page: Page,
 ) : OrgLandlordDetailsBasePage(page, LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE) {
-    private val organisationNameChangeLink =
+    val organisationNameChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
-    private val organisationAddressChangeLink =
+    val organisationAddressChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}']"))
-    private val companiesHouseChangeLink =
+    val companiesHouseChangeLink =
         Link(page.locator("a[href='$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}']"))
-    private val organisationTypeChangeLink =
+    val organisationTypeChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}']"))
-    private val organisationEmailChangeLink =
+    val organisationEmailChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_EMAIL_ROUTE/${OrgEmailStep.ROUTE_SEGMENT}']"))
-    private val organisationCharityChangeLink =
+    val organisationCharityChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_CHARITY_ROUTE/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}']"))
-    private val organisationPhoneNumberChangeLink =
+    val organisationPhoneNumberChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_PHONE_NUMBER_ROUTE/${OrgPhoneNumberStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
