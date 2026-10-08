@@ -131,7 +131,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage =
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
             assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the
