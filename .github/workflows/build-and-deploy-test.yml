@@ -4,6 +4,10 @@ on:
     branches:
       - test
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-deploy-integration:
     name: Build and deploy
