@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 class ConfirmYouAreALandlordForThisPropertyStepConfig(
     private val invitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
+    private val currentUserService: CurrentUserService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val acceptedEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedEmail>,
@@ -83,24 +85,23 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
+        val currentUser = currentUserService.getCurrentUserDetails()
         acceptedEmailSender.sendEmail(
-            acceptingLandlord.email,
+            currentUser.email,
             JointLandlordInvitationAcceptedEmail(
-                recipientName = acceptingLandlord.name,
+                recipientName = currentUser.name,
                 propertyAddress = propertyAddress,
                 propertyRecordUrl = propertyRecordUrl,
                 propertyRegistrationNumber = propertyRegistrationNumber,
             ),
         )
+        // TODO: PDJB-1274: Send emails to other members of the org
 
         propertyOwnership.landlords
             .filter { it.id != acceptingLandlord.id }
-            // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
-                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
-                otherLandlordEmailSender.sendEmail(
-                    landlord.email,
+                otherLandlordEmailSender.sendEmailToLandlord(
+                    landlord,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
                         recipientName = landlord.name,
                         inviteeName = acceptingLandlord.name,

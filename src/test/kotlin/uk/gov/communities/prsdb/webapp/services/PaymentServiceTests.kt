@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
@@ -58,6 +57,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.time.Instant
 import java.time.LocalDate
@@ -85,7 +85,9 @@ class PaymentServiceTests {
     private lateinit var mockTransactionManager: PlatformTransactionManager
 
     @Mock
-    private lateinit var mockRegisterProperty: () -> PropertyOwnership
+    private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
     private val messageSource = YamlMessageSource("classpath:messages")
 
@@ -794,9 +796,9 @@ class PaymentServiceTests {
         fun `finalisePayment throws when GOV UK Pay reports the payment is still in progress`() {
             // Act, Assert
             assertThrows<IllegalArgumentException> {
-                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CREATED, mockRegisterProperty)
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CREATED, registrationData)
             }
-            verifyNoInteractions(mockPaymentRepository, mockGovUkPayClient, mockRegisterProperty)
+            verifyNoInteractions(mockPaymentRepository, mockGovUkPayClient, mockPropertyRegistrationService)
         }
 
         @ParameterizedTest
@@ -808,7 +810,7 @@ class PaymentServiceTests {
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(govUkPayStatus)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, govUkPayStatus, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, govUkPayStatus, registrationData)
 
             // Assert
             assertEquals(govUkPayStatus, status)
@@ -818,7 +820,7 @@ class PaymentServiceTests {
                 eq(govUkPayStatus),
                 any(),
             )
-            verifyNoInteractions(mockGovUkPayClient, mockRegisterProperty)
+            verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService)
         }
 
         @Test
@@ -827,12 +829,12 @@ class PaymentServiceTests {
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
             verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
-            verifyNoInteractions(mockGovUkPayClient, mockRegisterProperty)
+            verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService)
         }
 
         @Test
@@ -842,7 +844,7 @@ class PaymentServiceTests {
 
             // Act, Assert
             assertThrows<IllegalStateException> {
-                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, mockRegisterProperty)
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
             }
         }
 
@@ -852,7 +854,7 @@ class PaymentServiceTests {
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -862,7 +864,7 @@ class PaymentServiceTests {
                 eq(PaymentStatus.CAPTURABLE),
                 any(),
             )
-            verifyNoInteractions(mockTransactionManager, mockGovUkPayClient, mockRegisterProperty)
+            verifyNoInteractions(mockTransactionManager, mockGovUkPayClient, mockPropertyRegistrationService)
         }
 
         @Test
@@ -874,11 +876,11 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenReturn(property)
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenReturn(property)
             whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment))
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -886,7 +888,7 @@ class PaymentServiceTests {
             assertEquals(property, payment.associatedProperty)
             assertNull(payment.associatedIncompleteProperty)
             assertEquals(property.renewalDate, payment.forPeriodEnding)
-            val inOrder = inOrder(mockPaymentRepository, mockRegisterProperty, mockGovUkPayClient, mockTransactionManager)
+            val inOrder = inOrder(mockPaymentRepository, mockPropertyRegistrationService, mockGovUkPayClient, mockTransactionManager)
             inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
                 eq(listOf(PaymentStatus.CREATED)),
@@ -899,7 +901,7 @@ class PaymentServiceTests {
                 eq(PaymentStatus.SUCCEEDED),
                 any(),
             )
-            inOrder.verify(mockRegisterProperty).invoke()
+            inOrder.verify(mockPropertyRegistrationService).registerProperty(registrationData)
             inOrder.verify(mockPaymentRepository).saveAndFlush(payment)
             inOrder.verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
             inOrder.verify(mockTransactionManager).commit(any())
@@ -914,11 +916,11 @@ class PaymentServiceTests {
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
-            verifyNoInteractions(mockRegisterProperty, mockGovUkPayClient)
+            verifyNoInteractions(mockPropertyRegistrationService, mockGovUkPayClient)
         }
 
         @Test
@@ -927,11 +929,12 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenThrow(EntityExistsException("Address already registered"))
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+                .thenThrow(EntityExistsException("Address already registered"))
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
@@ -954,13 +957,14 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
             whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(createPayment()))
             doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
@@ -982,7 +986,7 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenThrow(registrationException)
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenThrow(registrationException)
             doThrow(cancellationFailure).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
                 .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
@@ -990,7 +994,7 @@ class PaymentServiceTests {
             // Act
             val exception =
                 assertThrows<GovUkPayException> {
-                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 }
 
             // Assert
@@ -1010,13 +1014,14 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenThrow(EntityExistsException("Address already registered"))
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+                .thenThrow(EntityExistsException("Address already registered"))
             doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(expectedStatus)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(expectedStatus, status)
@@ -1035,7 +1040,8 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
             whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(createPayment()))
             doThrow(captureException).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
             doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
@@ -1044,7 +1050,7 @@ class PaymentServiceTests {
             // Act
             val exception =
                 assertThrows<IllegalStateException> {
-                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 }
 
             // Assert
@@ -1060,7 +1066,7 @@ class PaymentServiceTests {
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
             stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
             val transactionStatus = stubTransaction()
-            whenever(mockRegisterProperty.invoke()).thenAnswer {
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer {
                 transactionStatus.setRollbackOnly()
                 MockLandlordData.createPropertyOwnership()
             }
@@ -1068,7 +1074,7 @@ class PaymentServiceTests {
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
 
             // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, mockRegisterProperty)
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
@@ -1094,6 +1100,7 @@ class PaymentServiceTests {
         mockPaymentRepository,
         mockLandlordIncompletePropertiesRepository,
         mockUserToLandlordService,
+        mockPropertyRegistrationService,
         messageSource,
         TransactionTemplate(mockTransactionManager),
     )
