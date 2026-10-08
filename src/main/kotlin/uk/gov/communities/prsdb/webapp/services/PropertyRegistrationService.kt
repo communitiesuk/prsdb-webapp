@@ -76,9 +76,8 @@ class PropertyRegistrationService(
                 epcProvideLater = epcProvideLater,
             )
 
-            confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-
             runAfterTransactionCommits {
+                confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
                 sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
             }
 

@@ -80,7 +80,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `registerProperty sends no emails when the transaction it is part of rolls back`() {
+    fun `registerProperty neither caches the registration number nor sends emails when the transaction it is part of rolls back`() {
         // Act
         val propertyOwnership =
             TransactionTemplate(transactionManager).execute { transaction ->
@@ -89,20 +89,25 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
 
         // Assert
         verifyNoEmailsSent()
+        verifyNoInteractions(mockConfirmationService)
         assertTrue(propertyOwnershipRepository.findById(propertyOwnership.id).isEmpty)
         assertTrue(jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyOwnership.id).isEmpty())
         assertNull(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id))
     }
 
     @Test
-    fun `registerProperty sends its emails once the transaction it is part of commits`() {
+    fun `registerProperty caches the registration number and sends its emails once the transaction it is part of commits`() {
         // Act
-        TransactionTemplate(transactionManager).executeWithoutResult {
-            propertyRegistrationService.registerProperty(registrationData)
-            verifyNoEmailsSent()
-        }
+        val propertyOwnership =
+            TransactionTemplate(transactionManager).execute {
+                propertyRegistrationService.registerProperty(registrationData).also {
+                    verifyNoEmailsSent()
+                    verifyNoInteractions(mockConfirmationService)
+                }
+            }!!
 
         // Assert
+        verify(mockConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
         verify(confirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
         verify(lettingAgentInvitationEmailSender).sendEmail(eq(LETTING_AGENT_EMAIL), any())
         verify(jointLandlordInvitationEmailSender).sendEmail(eq(JOINT_LANDLORD_EMAIL), any())

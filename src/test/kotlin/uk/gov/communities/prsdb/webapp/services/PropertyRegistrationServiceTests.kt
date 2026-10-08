@@ -1534,7 +1534,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty creates the invitations but sends no emails before the transaction it is part of commits`() {
+    fun `registerProperty creates the invitations but neither caches the PRN nor sends emails before the transaction commits`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
@@ -1552,11 +1552,15 @@ class PropertyRegistrationServiceTests {
         verify(mockLettingAgentAccessService).createInvitation(propertyOwnership, LETTING_AGENT_EMAIL)
         verify(mockJointLandlordInvitationService).createInvitations(JOINT_LANDLORD_EMAILS, propertyOwnership, landlord)
         verifyNoMoreInteractions(mockJointLandlordInvitationService)
-        verifyNoInteractions(mockConfirmationEmailSender, mockDelegateToLettingAgentEmailService)
+        verifyNoInteractions(
+            mockConfirmationEmailSender,
+            mockDelegateToLettingAgentEmailService,
+            mockPropertyRegistrationConfirmationService,
+        )
     }
 
     @Test
-    fun `registerProperty sends every email once the transaction it is part of commits`() {
+    fun `registerProperty caches the registration number and sends every email once the transaction it is part of commits`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
@@ -1575,6 +1579,7 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
 
         // Assert
+        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
         verify(mockConfirmationEmailSender).sendEmail(eq(landlord.email), any())
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
