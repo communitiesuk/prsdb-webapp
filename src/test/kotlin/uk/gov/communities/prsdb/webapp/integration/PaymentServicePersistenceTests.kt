@@ -265,7 +265,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
         // Act
         assertThrows<IllegalStateException> {
-            paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "https://example.test/return", "user@example.test")
+            paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "user@example.test")
         }
 
         // Assert
@@ -507,7 +507,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `getPropertyRegistrationPaymentStatus returns the GOV UK Pay status of the journey's latest payment`() {
+    fun `getPropertyRegistrationPaymentStatus returns the GOV UK Pay status of the journey's payment with the given reference`() {
         // Arrange
         JourneyTestHelper.setMockUser(USER_ID)
         val incompleteProperty = landlordIncompletePropertiesRepository.findById(INCOMPLETE_PROPERTY_ID).get()
@@ -518,15 +518,27 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
                 incompleteProperty = incompleteProperty,
             ),
         )
-        whenever(mockGovUkPayClient.getPayment(LATEST_PAYMENT_ID))
-            .thenReturn(createGovUkPayPayment(LATEST_PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
+        whenever(mockGovUkPayClient.getPayment(CAPTURABLE_PAYMENT_ID))
+            .thenReturn(createGovUkPayPayment(CAPTURABLE_PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
 
         // Act
-        val paymentStatusCheck = paymentService.getPropertyRegistrationPaymentStatus(JOURNEY_ID)
+        val paymentStatusCheck = paymentService.getPropertyRegistrationPaymentStatus(JOURNEY_ID, CAPTURABLE_PAYMENT_REFERENCE)
 
         // Assert
-        assertEquals(LATEST_PAYMENT_ID, paymentStatusCheck.paymentId)
+        assertEquals(CAPTURABLE_PAYMENT_ID, paymentStatusCheck.paymentId)
         assertEquals(PaymentStatus.CAPTURABLE, paymentStatusCheck.status)
+    }
+
+    @Test
+    fun `getPropertyRegistrationPaymentStatus does not find a payment with the given reference for another property`() {
+        // Arrange
+        JourneyTestHelper.setMockUser(USER_ID)
+
+        // Act, Assert
+        assertThrows<IllegalStateException> {
+            paymentService.getPropertyRegistrationPaymentStatus(JOURNEY_ID, SUCCEEDED_PAYMENT_REFERENCE)
+        }
+        verify(mockGovUkPayClient, never()).getPayment(any())
     }
 
     private fun getProperty(): PropertyOwnership = propertyOwnershipRepository.findById(PROPERTY_OWNERSHIP_ID).get()
@@ -550,7 +562,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     companion object {
         private const val CREATED_PAYMENT_ID = "created-payment"
         private const val CAPTURABLE_PAYMENT_ID = "capturable-payment"
+        private const val CAPTURABLE_PAYMENT_REFERENCE = "capturable-payment-reference"
         private const val SUCCEEDED_PAYMENT_ID = "succeeded-payment"
+        private const val SUCCEEDED_PAYMENT_REFERENCE = "succeeded-payment-reference"
         private const val FAILED_PAYMENT_ID = "failed-payment"
         private const val CANCELLED_PAYMENT_ID = "cancelled-payment"
         private const val LATEST_PAYMENT_ID = "latest-payment"

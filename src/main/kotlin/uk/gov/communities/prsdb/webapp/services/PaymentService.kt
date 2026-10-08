@@ -41,6 +41,7 @@ class PaymentService(
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val userToLandlordService: UserToLandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val messageSource: MessageSource,
     private val transactionTemplate: TransactionTemplate,
     private val entityManager: EntityManager,
@@ -49,7 +50,6 @@ class PaymentService(
 
     fun createPropertyRegistrationPayment(
         journeyId: String,
-        returnUrl: String,
         email: String,
     ): String {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
@@ -72,6 +72,7 @@ class PaymentService(
         }
 
         val reference = UUID.randomUUID().toString()
+        val returnUrl = absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(journeyId, reference).toString()
         val createdGovUkPayPayment =
             govUkPayClient.createPayment(
                 GovUkPayCreatePaymentRequest(
@@ -138,13 +139,16 @@ class PaymentService(
             govUkPayStatusAfterFailedCancellation.status
         }
 
-    fun getPropertyRegistrationPaymentStatus(journeyId: String): PaymentStatusCheckDataModel {
+    fun getPropertyRegistrationPaymentStatus(
+        journeyId: String,
+        paymentReference: String,
+    ): PaymentStatusCheckDataModel {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
-        val latestPayment =
-            checkNotNull(paymentRepository.findFirstByAssociatedIncompletePropertyOrderByPaymentCreatedAtDesc(incompleteProperty)) {
-                "No payment found for journey $journeyId"
+        val payment =
+            checkNotNull(paymentRepository.findByReferenceAndAssociatedIncompleteProperty(paymentReference, incompleteProperty)) {
+                "No payment with reference $paymentReference found for journey $journeyId"
             }
-        return getGovUkPayPaymentStatus(latestPayment.paymentId)
+        return getGovUkPayPaymentStatus(payment.paymentId)
     }
 
     fun getGovUkPayPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {

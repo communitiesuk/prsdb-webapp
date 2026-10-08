@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 
@@ -15,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 class PaymentSummaryStepConfig(
     private val addressAvailabilityService: AddressAvailabilityService,
     private val paymentService: PaymentService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -44,13 +42,7 @@ class PaymentSummaryStepConfig(
             return Destination(addressTask.alreadyRegisteredStep)
         }
 
-        val returnUrl = absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(state.journeyId).toString()
-        val nextUrl =
-            paymentService.createPropertyRegistrationPayment(
-                state.journeyId,
-                returnUrl,
-                state.loggedInLandlordEmailAtStartOfJourney,
-            )
+        val nextUrl = paymentService.createPropertyRegistrationPayment(state.journeyId, state.loggedInLandlordEmailAtStartOfJourney)
         return Destination.ExternalUrl(nextUrl)
     }
 }
