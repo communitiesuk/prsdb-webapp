@@ -70,6 +70,6 @@ class InviteTeamMemberController(
     companion object {
         const val INVITE_TEAM_MEMBER_PATH_SEGMENT = "invite"
         const val INVITE_TEAM_MEMBER_ROUTE = "$TEAM_MEMBERS_ROUTE/$INVITE_TEAM_MEMBER_PATH_SEGMENT"
-        const val INVITE_TEAM_MEMBER_START_PATH = "$INVITE_TEAM_MEMBER_ROUTE/${InviteTeamMemberStep.ROUTE_SEGMENT}"
+        const val INVITE_TEAM_MEMBER_PATH = "$INVITE_TEAM_MEMBER_ROUTE/${InviteTeamMemberStep.ROUTE_SEGMENT}"
     }
 }

@@ -1221,7 +1221,7 @@ class Navigator(
     }
 
     fun goToInviteTeamMemberPage(): InviteTeamMemberFormPage {
-        navigate(InviteTeamMemberController.INVITE_TEAM_MEMBER_START_PATH)
+        navigate(InviteTeamMemberController.INVITE_TEAM_MEMBER_PATH)
         return createValidPage(page, InviteTeamMemberFormPage::class)
     }
 

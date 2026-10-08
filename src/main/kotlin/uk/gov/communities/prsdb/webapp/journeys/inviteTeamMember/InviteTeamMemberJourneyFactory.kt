@@ -22,6 +22,9 @@ class InviteTeamMemberJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.inviteTeamMemberStep }
+            configure {
+                withAdditionalContentProperty { "title" to "inviteTeamMember.title" }
+            }
             step(journey.inviteTeamMemberStep) {
                 routeSegment(InviteTeamMemberStep.ROUTE_SEGMENT)
                 initialStep()
@@ -46,7 +49,12 @@ class InviteTeamMemberJourney(
     override val saveTeamMemberInvitationStep: SaveTeamMemberInvitationStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
-    InviteTeamMemberJourneyState
+    InviteTeamMemberJourneyState {
+    override fun generateJourneyId(seed: Any?): String =
+        super<AbstractJourneyState>.generateJourneyId(
+            "Invite team member journey at time ${System.currentTimeMillis()}",
+        )
+}
 
 interface InviteTeamMemberJourneyState : JourneyState {
     val inviteTeamMemberStep: InviteTeamMemberStep

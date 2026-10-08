@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagTestCallingEndpoints
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
-import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_START_PATH
+import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_PATH
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.InviteTeamMemberJourneyFactory
@@ -40,7 +40,7 @@ class InviteTeamMemberControllerFeatureFlagTests : FeatureFlagTestCallingEndpoin
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
 
         mvc
-            .get(INVITE_TEAM_MEMBER_START_PATH)
+            .get(INVITE_TEAM_MEMBER_PATH)
             .andExpect { status { isNotFound() } }
     }
 
@@ -54,7 +54,7 @@ class InviteTeamMemberControllerFeatureFlagTests : FeatureFlagTestCallingEndpoin
         whenever(stepLifecycleOrchestrator.getStepModelAndView()).thenReturn(ModelAndView("redirect:$TEAM_MEMBERS_ROUTE"))
 
         mvc
-            .get(INVITE_TEAM_MEMBER_START_PATH)
+            .get(INVITE_TEAM_MEMBER_PATH)
             .andExpect { status { is3xxRedirection() } }
     }
 
@@ -64,7 +64,7 @@ class InviteTeamMemberControllerFeatureFlagTests : FeatureFlagTestCallingEndpoin
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
 
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect { status { isNotFound() } }
@@ -81,7 +81,7 @@ class InviteTeamMemberControllerFeatureFlagTests : FeatureFlagTestCallingEndpoin
             .thenReturn(ModelAndView("redirect:$TEAM_MEMBERS_ROUTE"))
 
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect { status { is3xxRedirection() } }

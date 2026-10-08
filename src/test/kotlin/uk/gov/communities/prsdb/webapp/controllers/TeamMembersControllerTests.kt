@@ -9,7 +9,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
-import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_START_PATH
+import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_PATH
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -88,7 +88,7 @@ class TeamMembersControllerTests(
         mvc
             .get(TEAM_MEMBERS_ROUTE)
             .andExpect {
-                model { attribute("inviteTeamMemberUrl", INVITE_TEAM_MEMBER_START_PATH) }
+                model { attribute("inviteTeamMemberUrl", INVITE_TEAM_MEMBER_PATH) }
             }
     }
 }

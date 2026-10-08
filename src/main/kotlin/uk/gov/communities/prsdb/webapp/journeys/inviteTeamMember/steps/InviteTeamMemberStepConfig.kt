@@ -47,6 +47,6 @@ final class InviteTeamMemberStep(
     stepConfig: InviteTeamMemberStepConfig,
 ) : RequestableStep<Complete, InviteTeamMemberFormModel, InviteTeamMemberJourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "details"
+        const val ROUTE_SEGMENT = "invite-team-member"
     }
 }

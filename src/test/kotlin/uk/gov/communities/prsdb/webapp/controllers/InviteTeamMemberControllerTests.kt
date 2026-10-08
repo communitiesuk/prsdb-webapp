@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_START_PATH
+import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_PATH
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.InviteTeamMemberJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.steps.InviteTeamMemberStep
@@ -43,7 +43,7 @@ class InviteTeamMemberControllerTests(
 
     @Test
     fun `getJourneyStep returns a redirect for an unauthenticated user`() {
-        mvc.get(INVITE_TEAM_MEMBER_START_PATH).andExpect {
+        mvc.get(INVITE_TEAM_MEMBER_PATH).andExpect {
             status { is3xxRedirection() }
         }
     }
@@ -51,7 +51,7 @@ class InviteTeamMemberControllerTests(
     @Test
     @WithMockUser
     fun `getJourneyStep returns 403 for a user without a landlord role`() {
-        mvc.get(INVITE_TEAM_MEMBER_START_PATH).andExpect {
+        mvc.get(INVITE_TEAM_MEMBER_PATH).andExpect {
             status { isForbidden() }
         }
     }
@@ -59,7 +59,7 @@ class InviteTeamMemberControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_EDITOR"])
     fun `getJourneyStep returns 403 for an organisation editor`() {
-        mvc.get(INVITE_TEAM_MEMBER_START_PATH).andExpect {
+        mvc.get(INVITE_TEAM_MEMBER_PATH).andExpect {
             status { isForbidden() }
         }
     }
@@ -69,7 +69,7 @@ class InviteTeamMemberControllerTests(
     fun `getJourneyStep returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
-        mvc.get(INVITE_TEAM_MEMBER_START_PATH).andExpect {
+        mvc.get(INVITE_TEAM_MEMBER_PATH).andExpect {
             status { isForbidden() }
         }
     }
@@ -80,7 +80,7 @@ class InviteTeamMemberControllerTests(
         stubOrganisationLandlordJourney()
         whenever(stepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
-        mvc.get(INVITE_TEAM_MEMBER_START_PATH).andExpect {
+        mvc.get(INVITE_TEAM_MEMBER_PATH).andExpect {
             status { isOk() }
         }
     }
@@ -88,7 +88,7 @@ class InviteTeamMemberControllerTests(
     @Test
     fun `postJourneyData returns a redirect for an unauthenticated user`() {
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect {
@@ -97,10 +97,22 @@ class InviteTeamMemberControllerTests(
     }
 
     @Test
+    @WithMockUser
+    fun `postJourneyData returns 403 for a user without a landlord role`() {
+        mvc
+            .post(INVITE_TEAM_MEMBER_PATH) {
+                param("formData", "")
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["ORG_EDITOR"])
     fun `postJourneyData returns 403 for an organisation editor`() {
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect {
@@ -114,7 +126,7 @@ class InviteTeamMemberControllerTests(
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
 
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect {
@@ -129,7 +141,7 @@ class InviteTeamMemberControllerTests(
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any())).thenReturn(placeholderModelAndView)
 
         mvc
-            .post(INVITE_TEAM_MEMBER_START_PATH) {
+            .post(INVITE_TEAM_MEMBER_PATH) {
                 param("formData", "")
                 with(csrf())
             }.andExpect {
