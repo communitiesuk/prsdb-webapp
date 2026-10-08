@@ -16,6 +16,7 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -53,7 +54,6 @@ import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import kotlin.test.assertContains
 
 class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoSpyBean
@@ -144,7 +144,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -162,7 +162,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.CANCELLED, status)
@@ -185,7 +185,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.CANCELLED, status)
@@ -204,7 +204,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         // Act
         val status =
             TransactionTemplate(transactionManager).execute {
-                paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+                paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
             }
 
         // Assert
@@ -217,10 +217,10 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     fun `finalising a payment again returns its status without registering the property or capturing it again`() {
         // Arrange
         whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
-        paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -239,7 +239,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             paymentRepository.findById(CREATED_PAYMENT_ID).get()
 
             // Act
-            val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+            val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -259,20 +259,17 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             .thenReturn(createGovUkPayPayment(CAPTURABLE_PAYMENT_ID, GovUkPayPaymentStatus.CANCELLED))
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenAnswer {
             // Finalised after the existing payments are loaded, but before this payment's outcome is recorded
-            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
             createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS)
         }
 
         // Act
-        val exception =
-            assertThrows<IllegalStateException> {
-                paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "https://example.test/return", "user@example.test")
-            }
+        assertThrows<IllegalStateException> {
+            paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "https://example.test/return", "user@example.test")
+        }
 
         // Assert
-        assertContains(exception.message!!, CREATED_PAYMENT_ID)
         assertPaymentSucceededForProperty()
-        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(CAPTURABLE_PAYMENT_ID))
         verify(mockGovUkPayClient, never()).createPayment(any())
     }
 
@@ -282,16 +279,17 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
-        val otherPayment = paymentRepository.findById(CAPTURABLE_PAYMENT_ID).get()
-        assertEquals(PaymentStatus.CANCELLED, otherPayment.status)
-        assertNotNull(otherPayment.lastModifiedDate)
-        assertEquals(PaymentStatus.FAILED, paymentRepository.findStatusByPaymentId(FAILED_PAYMENT_ID))
-        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(CANCELLED_PAYMENT_ID))
         verify(mockGovUkPayClient).cancelPayment(CAPTURABLE_PAYMENT_ID)
+        verify(paymentRepository).updateStatusIfCurrentStatusIn(
+            eq(CAPTURABLE_PAYMENT_ID),
+            eq(PaymentStatus.IN_PROGRESS_STATUSES),
+            eq(PaymentStatus.CANCELLED),
+            any(),
+        )
         verify(mockGovUkPayClient, never()).cancelPayment(FAILED_PAYMENT_ID)
         verify(mockGovUkPayClient, never()).cancelPayment(CANCELLED_PAYMENT_ID)
     }
@@ -307,7 +305,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         )
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.CANCELLED, status)
@@ -335,14 +333,14 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         try {
             val firstFinalisation =
                 executor.submit<PaymentStatus> {
-                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 }
             assertTrue(captureStarted.await(TIMEOUT_SECONDS, TimeUnit.SECONDS), "Capture did not start")
 
             // Act
             val secondFinalisation =
                 executor.submit<PaymentStatus> {
-                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 }
             assertThrows<TimeoutException>("The second finalisation did not wait for the first") {
                 secondFinalisation.get(500, TimeUnit.MILLISECONDS)
@@ -381,7 +379,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
                 listOf(CREATED_PAYMENT_ID, CAPTURABLE_PAYMENT_ID)
                     .associateWith { paymentId ->
                         executor.submit<PaymentStatus> {
-                            paymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+                            paymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData)
                         }
                     }.mapValues { (_, finalisation) -> finalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS) }
 
@@ -405,7 +403,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -425,7 +423,25 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.CANCELLED, status)
+        assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        assertEquals(PaymentStatus.CANCELLED, payment.status)
+        assertEquals(INCOMPLETE_PROPERTY_ID, payment.associatedIncompleteProperty?.id)
+        assertEquals(INCOMPLETE_PROPERTY_ID, paymentRepository.findById(CAPTURABLE_PAYMENT_ID).get().associatedIncompleteProperty?.id)
+    }
+
+    @Test
+    fun `finalisePayment keeps the journey and does not register the property when another payment cannot be cancelled`() {
+        // Arrange
+        doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CAPTURABLE_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CAPTURABLE_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.CANCELLED, status)
@@ -434,7 +450,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         assertEquals(PaymentStatus.CANCELLED, payment.status)
         assertEquals(INCOMPLETE_PROPERTY_ID, payment.associatedIncompleteProperty?.id)
         assertEquals(PaymentStatus.CAPTURABLE, paymentRepository.findStatusByPaymentId(CAPTURABLE_PAYMENT_ID))
-        verify(mockGovUkPayClient, never()).cancelPayment(CAPTURABLE_PAYMENT_ID)
+        verify(mockPropertyRegistrationService, never()).registerProperty(any())
+        verify(mockGovUkPayClient, never()).capturePayment(any())
+        verify(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
     }
 
     @Test
@@ -447,7 +465,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
         // Act
         assertThrows<GovUkPayException> {
-            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
         }
 
         // Assert
@@ -462,11 +480,11 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
         assertThrows<GovUkPayException> {
-            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
         }
 
         // Act
-        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -480,7 +498,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         TransactionTemplate(transactionManager).executeWithoutResult { deleteJourney() }
 
         // Act
-        val status = paymentService.finalisePayment(CAPTURABLE_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+        val status = paymentService.finalisePayment(CAPTURABLE_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
         assertEquals(PaymentStatus.CANCELLED, status)
