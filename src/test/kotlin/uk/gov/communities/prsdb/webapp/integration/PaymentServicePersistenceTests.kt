@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.Mockito
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.orm.jpa.EntityManagerHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
@@ -46,13 +49,14 @@ import java.time.Instant
 import java.time.MonthDay
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.test.assertContains
 
 class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
-    @Autowired
+    @MockitoSpyBean
     private lateinit var paymentRepository: PaymentRepository
 
     @Autowired
@@ -317,41 +321,79 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `finalisePayment holds a lock on the incomplete property until the property is registered`() {
+    fun `finalising the same payment twice at once registers the property and captures the payment once`() {
         // Arrange
         val executor = Executors.newFixedThreadPool(2)
-        val registrationStarted = CountDownLatch(1)
-        val finishRegistration = CountDownLatch(1)
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer {
-            registrationStarted.countDown()
-            finishRegistration.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            getProperty()
-        }
+        val captureStarted = CountDownLatch(1)
+        val finishCapture = CountDownLatch(1)
+        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        doAnswer {
+            captureStarted.countDown()
+            finishCapture.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        }.whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
 
         try {
-            val finalisation =
+            val firstFinalisation =
                 executor.submit<PaymentStatus> {
-                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, deleteJourney = {})
+                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
                 }
-            assertTrue(registrationStarted.await(TIMEOUT_SECONDS, TimeUnit.SECONDS), "Registration did not start")
+            assertTrue(captureStarted.await(TIMEOUT_SECONDS, TimeUnit.SECONDS), "Capture did not start")
 
             // Act
-            val lockWaiter =
-                executor.submit {
-                    TransactionTemplate(transactionManager).executeWithoutResult {
-                        landlordIncompletePropertiesRepository.findByIdForUpdate(INCOMPLETE_PROPERTY_ID)
-                    }
+            val secondFinalisation =
+                executor.submit<PaymentStatus> {
+                    paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
                 }
+            assertThrows<TimeoutException>("The second finalisation did not wait for the first") {
+                secondFinalisation.get(500, TimeUnit.MILLISECONDS)
+            }
+            finishCapture.countDown()
 
             // Assert
-            assertThrows<TimeoutException>("The incomplete property could be locked while it was being registered") {
-                lockWaiter.get(500, TimeUnit.MILLISECONDS)
-            }
-            finishRegistration.countDown()
-            assertEquals(PaymentStatus.SUCCEEDED, finalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
-            lockWaiter.get(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            assertEquals(PaymentStatus.SUCCEEDED, firstFinalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+            assertEquals(PaymentStatus.SUCCEEDED, secondFinalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+            verify(mockPropertyRegistrationService).registerProperty(registrationData)
+            verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+            assertPaymentSucceededForProperty()
         } finally {
-            finishRegistration.countDown()
+            finishCapture.countDown()
+            executor.shutdown()
+            executor.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        }
+    }
+
+    @Test
+    fun `finalising two payments for the property at once registers the property and captures only one of them`() {
+        // Arrange
+        val executor = Executors.newFixedThreadPool(2)
+        val bothPaymentsClaimed = CyclicBarrier(2)
+        // The repository is a JDK proxy, which Spring spies on by delegating to it rather than by calling real methods
+        val delegateToRepository = Mockito.mockingDetails(paymentRepository).mockCreationSettings.defaultAnswer
+        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        doAnswer { invocation ->
+            bothPaymentsClaimed.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            delegateToRepository.answer(invocation)
+        }.whenever(paymentRepository).findAllByAssociatedIncompleteProperty(any())
+
+        try {
+            // Act
+            val statuses =
+                listOf(CREATED_PAYMENT_ID, CAPTURABLE_PAYMENT_ID)
+                    .associateWith { paymentId ->
+                        executor.submit<PaymentStatus> {
+                            paymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData, ::deleteJourney)
+                        }
+                    }.mapValues { (_, finalisation) -> finalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS) }
+
+            // Assert
+            assertEquals(setOf(PaymentStatus.SUCCEEDED, PaymentStatus.CANCELLED), statuses.values.toSet())
+            val succeededPaymentId = statuses.filterValues { it == PaymentStatus.SUCCEEDED }.keys.single()
+            val cancelledPaymentId = statuses.filterValues { it == PaymentStatus.CANCELLED }.keys.single()
+            verify(mockPropertyRegistrationService).registerProperty(registrationData)
+            verify(mockGovUkPayClient).capturePayment(succeededPaymentId)
+            verify(mockGovUkPayClient, never()).capturePayment(cancelledPaymentId)
+            assertEquals(PROPERTY_OWNERSHIP_ID, paymentRepository.findById(succeededPaymentId).get().associatedProperty?.id)
+        } finally {
             executor.shutdown()
             executor.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         }

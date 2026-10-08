@@ -224,7 +224,8 @@ class PaymentService(
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
                 val incompleteProperty =
-                    lockIncompletePropertyOrNull(paymentId) ?: return@execute FinalisationResult(getStoredPaymentStatus(paymentId))
+                    paymentRepository.findByIdOrNull(paymentId)?.associatedIncompleteProperty
+                        ?: return@execute FinalisationResult(getStoredPaymentStatus(paymentId))
 
                 val isClaimed =
                     paymentRepository.updateStatusIfCurrentStatusIn(
@@ -258,11 +259,6 @@ class PaymentService(
                 FinalisationResult(PaymentStatus.SUCCEEDED, cancelledOtherPaymentIds)
             },
         )
-
-    private fun lockIncompletePropertyOrNull(paymentId: String): LandlordIncompleteProperty? =
-        paymentRepository.findByIdOrNull(paymentId)?.associatedIncompleteProperty?.let { incompleteProperty ->
-            landlordIncompletePropertiesRepository.findByIdForUpdate(incompleteProperty.id)
-        }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
@@ -312,6 +308,10 @@ class PaymentService(
                 cancelException.addSuppressed(cause)
                 throw cancelException
             }
+
+        val wasFinalisedByAnotherRequest =
+            govUkPayStatus == PaymentStatus.SUCCEEDED && paymentRepository.findStatusByPaymentId(paymentId) == PaymentStatus.SUCCEEDED
+        if (wasFinalisedByAnotherRequest) return PaymentStatus.SUCCEEDED
 
         if (!govUkPayStatus.isFailedOrCancelled()) {
             throw IllegalStateException("Payment $paymentId could not be finalised, but GOV.UK Pay reports it as $govUkPayStatus", cause)
