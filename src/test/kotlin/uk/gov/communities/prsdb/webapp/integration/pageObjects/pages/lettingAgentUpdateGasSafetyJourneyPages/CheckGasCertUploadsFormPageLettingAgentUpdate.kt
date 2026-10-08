@@ -17,7 +17,7 @@ class CheckGasCertUploadsFormPageLettingAgentUpdate(
             "/${CheckGasCertUploadsStep.ROUTE_SEGMENT}",
     ) {
     override val expectedTitleHeading: String
-        get() = page.locator("h1").textContent().trim().replace(" file", " gas safety certificate file")
+        get() = table.rows.count().let { "You’ve uploaded $it gas safety certificate file${if (it == 1) "" else "s"}" }
 
     val table = Table(page)
     val form = CheckUploadsForm(page)

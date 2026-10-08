@@ -15,7 +15,7 @@ class CheckGasCertUploadsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckGasCertUploadsStep.ROUTE_SEGMENT}") {
     override val expectedTitleHeading: String
-        get() = page.locator("h1").textContent().trim().replace(" file", " gas safety certificate file")
+        get() = table.rows.count().let { "You’ve uploaded $it gas safety certificate file${if (it == 1) "" else "s"}" }
 
     val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
