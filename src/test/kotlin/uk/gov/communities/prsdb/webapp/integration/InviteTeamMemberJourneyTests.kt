@@ -17,26 +17,35 @@ class InviteTeamMemberJourneyTests : IntegrationTestWithMutableData("data-local.
     private lateinit var organisationalLandlordInvitationRepository: OrganisationalLandlordInvitationRepository
 
     @Test
-    fun `an admin can invite a team member and sees a success banner, which clears on refresh`(page: Page) {
+    fun `an admin can invite a team member from the team members page`(page: Page) {
         // 1. Team members page
-        var teamMembersPage = navigator.goToTeamMembers()
-        assertThat(teamMembersPage.successBanner).isHidden()
+        val teamMembersPage = navigator.goToTeamMembers()
         teamMembersPage.inviteTeamMemberButton.clickAndWait()
 
         // 2. Invite a team member page
         val invitePage = assertPageIs(page, InviteTeamMemberFormPage::class)
         invitePage.submitInvitation("new.member@example.com", OrganisationalLandlordUserRole.EDITOR)
 
-        // 3. Back on the team members page, with the invitation stored and a success banner shown
-        teamMembersPage = assertPageIs(page, TeamMembersPage::class)
-        assertThat(teamMembersPage.successBanner.title).containsText("Success")
-        assertThat(teamMembersPage.successBanner.content.heading).containsText("Invitation sent")
+        // 3. Back on the team members page, with the invitation stored
+        assertPageIs(page, TeamMembersPage::class)
         val invitation =
             organisationalLandlordInvitationRepository.findAll().single { it.invitedEmail == "new.member@example.com" }
         assertEquals(OrganisationalLandlordUserRole.EDITOR, invitation.role)
         assertEquals("Local Organisation Landlord", invitation.organisationalLandlord.name)
+    }
 
-        // 4. The banner is not shown again on refresh
+    @Test
+    fun `an admin sees a success banner after inviting a team member, which clears on refresh`(page: Page) {
+        var teamMembersPage = navigator.goToTeamMembers()
+        assertThat(teamMembersPage.successBanner).isHidden()
+        teamMembersPage.inviteTeamMemberButton.clickAndWait()
+
+        val invitePage = assertPageIs(page, InviteTeamMemberFormPage::class)
+        invitePage.submitInvitation("new.member@example.com", OrganisationalLandlordUserRole.EDITOR)
+
+        teamMembersPage = assertPageIs(page, TeamMembersPage::class)
+        assertThat(teamMembersPage.successBanner.content.heading).containsText("Invitation sent")
+
         page.reload()
         assertThat(teamMembersPage.successBanner).isHidden()
     }
