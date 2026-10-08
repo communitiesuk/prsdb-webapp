@@ -369,6 +369,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `a payment that finishes after the user is sent back to the payment return page reaches the confirmation page`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page).form.submit()
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+            paymentReturnPage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+        }
+
+        @Test
         fun `submitting the payment summary creates a GOV UK Pay payment and returns to the payment return page`(page: Page) {
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()

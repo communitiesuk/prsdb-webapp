@@ -779,6 +779,7 @@ class PropertyRegistrationJourney(
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
+    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
     override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
@@ -860,6 +861,7 @@ interface PropertyRegistrationJourneyState :
     val paymentReturnStep: PaymentReturnStep
     val paymentStatusCheckStep: PaymentStatusCheckStep
     val paymentFailedStep: PaymentFailedStep
+    var paymentReference: String?
     var paymentOutcome: PaymentOutcome?
     var registrationNumberValue: Long?
     var backUrlKey: Int?
