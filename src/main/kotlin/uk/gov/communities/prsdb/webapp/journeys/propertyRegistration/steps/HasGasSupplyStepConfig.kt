@@ -17,6 +17,7 @@ class HasGasSupplyStepConfig :
 
     override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
+            "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasSupply.heading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
