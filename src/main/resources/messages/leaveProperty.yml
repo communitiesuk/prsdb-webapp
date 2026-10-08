@@ -1,6 +1,7 @@
 title: No longer a landlord
 confirm:
   heading: "Confirm that you’re no longer a landlord for {0,,address}"
+  pageTitle: Confirm that you’re no longer a landlord for this property
   body: You should only do this if you’re no longer involved in renting out this property.
   reasonsIntro: "This could be because:"
   reason:
@@ -11,6 +12,7 @@ confirm:
   confirmButton: I’m no longer a landlord
   cancelLink: Cancel (go back to property record)
 confirmation:
+  pageTitle: No longer registered as a landlord for this property
   banner:
     heading: "No longer registered as a landlord for {0,,address}"
   paragraph:

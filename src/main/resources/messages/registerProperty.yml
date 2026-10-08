@@ -109,6 +109,7 @@ deleteIncompleteProperties:
     title: Delete incomplete property
   areYouSure:
     heading: 'Are you sure you want to delete {0,,address} from the database?'
+    pageTitle: Are you sure you want to delete this property from the database?
     radios:
       error:
         missing: Select whether you want to delete this property from the database
