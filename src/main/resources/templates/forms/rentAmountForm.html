@@ -34,7 +34,7 @@
 </th:block>
 <th:block id="form-content" th:with="rentAmountHint=${fieldSetHint}">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='rentAmount', fieldSetHeading=#{${subheading}}, fieldSetHint=null, fieldSetHeadingLabelTo='rentAmount', fieldSetHeadingLabelTag='h2')}">
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='rentAmount', fieldSetHeading=#{${subheading}}, fieldSetHint=null, fieldSetHeadingLabelTo='rentAmount', fieldSetHeadingLabelSize='m')}">
         <th:block th:if="${showRentCalculationSection}">
             <p class="govuk-body" th:text="#{forms.rentAmount.conditionalSection.paragraph.one}">
                 forms.rentAmount.conditionalSection.paragraph.one

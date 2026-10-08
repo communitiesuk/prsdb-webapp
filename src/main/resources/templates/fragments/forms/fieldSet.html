@@ -1,13 +1,13 @@
-<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="conditionalFieldName=${conditionalFieldName ?: null}, fieldSetHeadingLabelTo=${fieldSetHeadingLabelTo ?: null}, fieldSetHeadingLabelTag=${fieldSetHeadingLabelTag ?: 'h1'}, suppressGroupError=${suppressGroupError ?: false}" class="govuk-form-group"
+<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="conditionalFieldName=${conditionalFieldName ?: null}, fieldSetHeadingLabelTo=${fieldSetHeadingLabelTo ?: null}, fieldSetHeadingLabelSize=${fieldSetHeadingLabelSize ?: 'h1'}, suppressGroupError=${suppressGroupError ?: false}" class="govuk-form-group"
      th:classappend="${suppressGroupError} ? '' : (${conditionalFieldName != null and #fields.allErrors().size() == 1 and #fields.hasErrors(conditionalFieldName)} ? '' : (${#fields.hasAnyErrors()} ? 'govuk-form-group--error'))">
     <fieldset class="govuk-fieldset" th:attr="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
         <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend"
-                th:classappend="|govuk-fieldset__legend--${fieldSetHeadingLabelTag == 'h2' ? 'm' : 'l'}|">
+                th:classappend="|govuk-fieldset__legend--${fieldSetHeadingLabelSize == 'm' ? 'm' : 'l'}|">
             <h1 th:if="${fieldSetHeadingLabelTo == null}" class="govuk-fieldset__heading" th:text="${fieldSetHeading}">fieldSetHeading</h1>
-            <h1 th:if="${fieldSetHeadingLabelTo != null and fieldSetHeadingLabelTag != 'h2'}" class="govuk-label-wrapper">
+            <h1 th:if="${fieldSetHeadingLabelTo != null and fieldSetHeadingLabelSize != 'm'}" class="govuk-label-wrapper">
                 <label class="govuk-label govuk-label--l" th:for="${fieldSetHeadingLabelTo}" th:text="${fieldSetHeading}">fieldSetHeading</label>
             </h1>
-            <h2 th:if="${fieldSetHeadingLabelTo != null and fieldSetHeadingLabelTag == 'h2'}" class="govuk-heading-m govuk-!-margin-bottom-0">
+            <h2 th:if="${fieldSetHeadingLabelTo != null and fieldSetHeadingLabelSize == 'm'}" class="govuk-heading-m govuk-!-margin-bottom-0">
                 <label class="govuk-label govuk-label--m" th:for="${fieldSetHeadingLabelTo}" th:text="${fieldSetHeading}">fieldSetHeading</label>
             </h2>
         </legend>
