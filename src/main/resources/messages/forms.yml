@@ -623,6 +623,7 @@ update:
       fieldSetHeading: Update whether your property is occupied by tenants
     lettingAgentInterruption:
       heading: Are you sure you want to change this?
+      pageTitle: Are you sure you want to change this property to unoccupied?
       paragraph:
         one: You’ve changed this property to being unoccupied.
         two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
