@@ -1,91 +1,90 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordEmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.adminsOnly
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.anyOrgLandlordUser
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordUser
 
-class EmailNotificationServiceExtensionsTests {
-    private lateinit var emailSender: EmailNotificationService<LandlordEmailTemplateModel>
+class EmailNotificationServiceTests {
+    private class RecordingEmailSender : EmailNotificationService<EmailTemplateModel> {
+        val sentEmails = mutableListOf<Pair<String, EmailTemplateModel>>()
 
-    @BeforeEach
-    fun setup() {
-        emailSender = mock()
+        override fun sendEmail(
+            recipientAddress: String,
+            email: EmailTemplateModel,
+        ) {
+            sentEmails.add(recipientAddress to email)
+        }
     }
 
-    private class TestLandlordEmail(
-        override val orgRolesToSendTo: List<OrganisationalLandlordUserRole>,
-    ) : LandlordEmailTemplateModel {
+    private class TestEmail : EmailTemplateModel {
         override val template = EmailTemplate.JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL
 
         override fun toHashMap(): HashMap<String, String> = hashMapOf()
     }
 
+    private val emailSender = RecordingEmailSender()
+
     @Test
     fun `sendEmailToLandlord sends to the individual landlord's email`() {
         val landlord = createIndividualLandlord(email = "individual@example.com")
-        val email = TestLandlordEmail(anyOrgLandlordUser)
+        val email = TestEmail()
 
         emailSender.sendEmailToLandlord(landlord, email)
 
-        verify(emailSender).sendEmail(eq("individual@example.com"), eq(email))
+        assertEquals(listOf("individual@example.com" to email), emailSender.sentEmails)
     }
 
     @Test
-    fun `sendEmailToLandlord sends only to administrators for an adminsOnly orgRolesToSendTo`() {
+    fun `sendEmailToLandlord sends only to the organisation's administrators`() {
         val organisationalLandlord = createOrgLandlord(registrantEmail = "admin@example.com")
         createOrganisationalLandlordUser(
             organisationalLandlord = organisationalLandlord,
             email = "editor@example.com",
             role = OrganisationalLandlordUserRole.EDITOR,
         )
-        val email = TestLandlordEmail(adminsOnly)
+        val email = TestEmail()
 
         emailSender.sendEmailToLandlord(organisationalLandlord, email)
 
-        verify(emailSender).sendEmail(eq("admin@example.com"), eq(email))
-        verify(emailSender, never()).sendEmail(eq("editor@example.com"), any())
+        assertEquals(listOf("admin@example.com" to email), emailSender.sentEmails)
     }
 
     @Test
-    fun `sendEmailToLandlord sends to all users for an anyOrgLandlordUser orgRolesToSendTo`() {
-        val organisationalLandlord = createOrgLandlord(registrantEmail = "admin@example.com")
+    fun `sendEmailToLandlord sends to every administrator in the organisation`() {
+        val organisationalLandlord = createOrgLandlord(registrantEmail = "admin-one@example.com")
         createOrganisationalLandlordUser(
             organisationalLandlord = organisationalLandlord,
-            email = "editor@example.com",
-            role = OrganisationalLandlordUserRole.EDITOR,
+            email = "admin-two@example.com",
+            role = OrganisationalLandlordUserRole.ADMIN,
         )
-        val email = TestLandlordEmail(anyOrgLandlordUser)
+        val email = TestEmail()
 
         emailSender.sendEmailToLandlord(organisationalLandlord, email)
 
-        verify(emailSender).sendEmail(eq("admin@example.com"), eq(email))
-        verify(emailSender).sendEmail(eq("editor@example.com"), eq(email))
+        assertEquals(
+            setOf("admin-one@example.com", "admin-two@example.com"),
+            emailSender.sentEmails.map { it.first }.toSet(),
+        )
+        assertTrue(emailSender.sentEmails.all { it.second === email })
     }
 
     @Test
-    fun `sendEmailToLandlord throws when no recipients match the orgRolesToSendTo`() {
+    fun `sendEmailToLandlord throws when the organisation has no administrators`() {
         val organisationalLandlord = createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.EDITOR)
-        val email = TestLandlordEmail(adminsOnly)
+        val email = TestEmail()
 
         assertThrows<NoLandlordEmailRecipientsException> {
             emailSender.sendEmailToLandlord(organisationalLandlord, email)
         }
 
-        verify(emailSender, never()).sendEmail(any(), any())
+        assertTrue(emailSender.sentEmails.isEmpty())
     }
 }

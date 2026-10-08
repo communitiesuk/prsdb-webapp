@@ -25,15 +25,15 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
-class CurrentEmailServiceTests {
+class CurrentUserServiceTests {
     @Mock
     private lateinit var individualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
-    private val service: CurrentEmailService
-        get() = CurrentEmailService(individualLandlordRepository, organisationalLandlordUserRepository)
+    private val service: CurrentUserService
+        get() = CurrentUserService(individualLandlordRepository, organisationalLandlordUserRepository)
 
     @AfterEach
     fun tearDown() {

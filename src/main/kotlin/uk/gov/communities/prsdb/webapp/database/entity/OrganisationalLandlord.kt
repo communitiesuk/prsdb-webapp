@@ -12,8 +12,8 @@ import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import java.time.LocalDate
-import java.util.Collections
 
 @Entity
 @DiscriminatorValue("1")
@@ -98,20 +98,23 @@ class OrganisationalLandlord() : Landlord() {
 
     // We eager fetch these as we're temporarily using them to get the email for an org landlord.
     @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
-    private val organisationalLandlordUserSet: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
+    private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
 
     @get:Transient
-    val organisationalLandlordUsers: Set<OrganisationalLandlordUser>
-        get() = Collections.unmodifiableSet(organisationalLandlordUserSet)
+    val adminEmailAddresses: List<String>
+        get() =
+            organisationalLandlordUsers
+                .filter { it.role == OrganisationalLandlordUserRole.ADMIN }
+                .map { it.email }
 
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
     // Also remove the EAGER fetch on organisationalLandlordUserSet if it still exists
     @get:Transient
     override val email: String
-        get() = organisationalLandlordUserSet.single().email
+        get() = organisationalLandlordUsers.single().email
 
     internal fun addOrganisationalLandlordUser(organisationalLandlordUser: OrganisationalLandlordUser) {
-        organisationalLandlordUserSet.add(organisationalLandlordUser)
+        organisationalLandlordUsers.add(organisationalLandlordUser)
     }
 
     @OneToMany(mappedBy = "organisationalLandlord")

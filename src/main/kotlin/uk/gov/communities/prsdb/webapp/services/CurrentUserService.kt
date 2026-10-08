@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlor
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @PrsdbWebService
-class CurrentEmailService(
+class CurrentUserService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
