@@ -22,9 +22,6 @@ class InviteTeamMemberJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.inviteTeamMemberStep }
-            configure {
-                withAdditionalContentProperty { "title" to "inviteTeamMember.title" }
-            }
             step(journey.inviteTeamMemberStep) {
                 routeSegment(InviteTeamMemberStep.ROUTE_SEGMENT)
                 initialStep()
