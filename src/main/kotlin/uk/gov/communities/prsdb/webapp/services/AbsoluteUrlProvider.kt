@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
@@ -45,6 +46,9 @@ class AbsoluteUrlProvider(
 
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
+
+    fun buildOrganisationalLandlordInvitationUri(token: String): URI =
+        uriFromMethodCall(on(AcceptOrganisationalLandlordUserInvitationController::class.java).startJourney(token))
 
     fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
         UriComponentsBuilder
