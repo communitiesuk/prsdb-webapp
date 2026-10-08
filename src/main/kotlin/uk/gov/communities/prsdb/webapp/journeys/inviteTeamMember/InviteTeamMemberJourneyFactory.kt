@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -31,8 +32,11 @@ class InviteTeamMemberJourneyFactory(
             step(journey.saveTeamMemberInvitationStep) {
                 parents { journey.inviteTeamMemberStep.isComplete() }
                 // TODO PDJB-1757: Redirect to the invitations tab once it exists
-                // TODO PDJB-1762: Show a success banner on the team members page after inviting
-                nextUrl { TEAM_MEMBERS_ROUTE }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(TEAM_MEMBERS_ROUTE)
+                        .withFlashAttribute("successBanner", "teamMembers.successBanner.invitationSent")
+                }
             }
         }
     }
