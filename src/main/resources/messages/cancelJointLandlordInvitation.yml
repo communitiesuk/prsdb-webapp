@@ -11,6 +11,7 @@ areYouSure:
       missing: Select if you want to cancel this invitation
 confirmation:
   title: Invitation cancelled
+  pageTitle: Joint landlord invitation cancelled
   banner:
     heading: Invitation cancelled
     body: '{0} no longer invited to be a joint landlord'

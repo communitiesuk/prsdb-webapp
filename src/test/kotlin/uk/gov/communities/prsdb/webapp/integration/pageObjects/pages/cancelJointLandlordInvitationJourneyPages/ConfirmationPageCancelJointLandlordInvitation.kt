@@ -14,6 +14,8 @@ class ConfirmationPageCancelJointLandlordInvitation(
         page,
         "/$LANDLORD_PATH_SEGMENT/$CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL/$CONFIRMATION_PATH_SEGMENT",
     ) {
+    override val expectedTitleHeading = "Joint landlord invitation cancelled"
+
     val confirmationBanner = ConfirmationBanner(page)
 
     val goBackToPropertyRecordLink = Link.byText(page, "Go back to property record")
