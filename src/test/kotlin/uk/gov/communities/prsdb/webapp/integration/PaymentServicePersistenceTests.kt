@@ -245,7 +245,12 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         // Act
         val exception =
             assertThrows<IllegalStateException> {
-                paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "https://example.test/return", "user@example.test")
+                paymentService.createPropertyRegistrationPayment(
+                    JOURNEY_ID,
+                    "https://example.test/return",
+                    "user@example.test",
+                    paymentService.getPropertyRegistrationPaymentQuote(),
+                )
             }
 
         // Assert

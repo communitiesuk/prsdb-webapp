@@ -48,8 +48,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -351,6 +353,78 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class PropertyRegistrationPaymentQuoteTests {
+        @Test
+        fun `getPropertyRegistrationPaymentQuote uses the existing proration rules and quote date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2027, 10, 10)
+            val anniversary = MonthDay.of(Month.MARCH, 1)
+            val user = MockLandlordData.createPrsdbUser(userId)
+            val landlord = MockLandlordData.createIndividualLandlord(baseUser = user).apply { setAnniversaryIfAbsent(anniversary) }
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            val service = createPaymentService()
+            val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary, quoteDate)
+
+            // Act
+            val quote = service.getPropertyRegistrationPaymentQuote(quoteDate)
+
+            // Assert
+            assertEquals(service.calculateProRatedFeeInPence(expectedRenewalDate, quoteDate), quote.amountInPence)
+            assertEquals(quoteDate, quote.quoteDate)
+            assertEquals(expectedRenewalDate, quote.renewalDate)
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+
+        @Test
+        fun `getPropertyRegistrationPaymentQuote falls back to the quote date when the landlord has no anniversary`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2027, 10, 10)
+            val user = MockLandlordData.createPrsdbUser(userId)
+            val landlord = MockLandlordData.createIndividualLandlord(baseUser = user)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            val service = createPaymentService()
+            val expectedRenewalDate = LocalDate.of(2028, 10, 10)
+
+            // Act
+            val quote = service.getPropertyRegistrationPaymentQuote(quoteDate)
+
+            // Assert
+            assertEquals(expectedRenewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyRegistrationPaymentQuote returns the prorated amount after the gratis period`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { setAnniversaryIfAbsent(MonthDay.of(Month.MARCH, 1)) }
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+            // Act
+            val quote = paymentService.getPropertyRegistrationPaymentQuote(quoteDate)
+
+            // Assert
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+            assertEquals(251, quote.amountInPence)
+            verifyNoInteractions(mockGovUkPayClient, mockPaymentRepository, mockLandlordIncompletePropertiesRepository)
+        }
+
+        @Test
+        fun `getPropertyRegistrationPaymentQuote defaults to the current UK calendar day`() {
+            // Arrange
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+
+            // Act
+            val quote = paymentService.getPropertyRegistrationPaymentQuote()
+
+            // Assert
+            assertEquals(today, quote.quoteDate)
+            assertEquals(RenewalDateHelper.getRenewalDate(MonthDay.from(today), today), quote.renewalDate)
+        }
+    }
+
+    @Nested
     inner class CreatePropertyRegistrationPaymentTests {
         @Test
         fun `createPropertyRegistrationPayment requests a GOV UK Pay payment for the pro-rated fee`() {
@@ -362,7 +436,12 @@ class PaymentServiceTests {
             val expectedAmount = paymentService.calculateProRatedFeeInPence(RenewalDateHelper.getRenewalDate(anniversary))
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
@@ -376,6 +455,42 @@ class PaymentServiceTests {
         }
 
         @Test
+        fun `createPropertyRegistrationPayment uses the supplied session quote`() {
+            // Arrange
+            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+            setMockPrincipal(userId)
+            val user = MockLandlordData.createPrsdbUser(userId)
+            val incompleteProperty =
+                LandlordIncompleteProperty(
+                    user,
+                    MockSavedJourneyStateData.createSavedJourneyState(journeyId = journeyId, baseUser = user),
+                )
+            whenever(mockLandlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId))
+                .thenReturn(incompleteProperty)
+            val expectedRenewalDate = LocalDate.of(2028, 3, 1)
+            val quote =
+                PropertyRegistrationPaymentQuote(
+                    amountInPence = 1234,
+                    quoteDate = LocalDate.of(2027, 10, 10),
+                    renewalDate = expectedRenewalDate,
+                )
+            stubGovUkPayCreatePayment()
+
+            // Act
+            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email, quote)
+
+            // Assert
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(mockGovUkPayClient).createPayment(requestCaptor.capture())
+            assertEquals(quote.amountInPence, requestCaptor.firstValue.amount)
+            val paymentCaptor = argumentCaptor<Payment>()
+            verify(mockPaymentRepository).save(paymentCaptor.capture())
+            assertEquals(expectedRenewalDate, paymentCaptor.firstValue.forPeriodEnding)
+            assertEquals(quote.amountInPence, paymentCaptor.firstValue.amountInPence)
+            verifyNoInteractions(mockUserToLandlordService)
+        }
+
+        @Test
         fun `createPropertyRegistrationPayment saves a created payment for the journey and user`() {
             // Arrange
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
@@ -386,7 +501,12 @@ class PaymentServiceTests {
             val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary)
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
@@ -412,7 +532,13 @@ class PaymentServiceTests {
             stubGovUkPayCreatePayment(nextUrl = "https://pay.example.test/next")
 
             // Act
-            val nextUrl = paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            val nextUrl =
+                paymentService.createPropertyRegistrationPayment(
+                    journeyId,
+                    returnUrl,
+                    email,
+                    paymentService.getPropertyRegistrationPaymentQuote(),
+                )
 
             // Assert
             assertEquals("https://pay.example.test/next", nextUrl)
@@ -425,9 +551,17 @@ class PaymentServiceTests {
             setMockPrincipal(userId)
             whenever(mockLandlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId))
                 .thenReturn(null)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
             // Act & Assert
-            assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+            assertThrows<IllegalStateException> {
+                paymentService.createPropertyRegistrationPayment(
+                    journeyId,
+                    returnUrl,
+                    email,
+                    paymentService.getPropertyRegistrationPaymentQuote(),
+                )
+            }
             verifyNoInteractions(mockGovUkPayClient, mockPaymentRepository)
         }
 
@@ -439,7 +573,14 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+                assertThrows<IllegalStateException> {
+                    paymentService.createPropertyRegistrationPayment(
+                        journeyId,
+                        returnUrl,
+                        email,
+                        paymentService.getPropertyRegistrationPaymentQuote(),
+                    )
+                }
 
             // Assert
             assertContains(exception.message!!, "GOV.UK Pay only accepts amounts greater than zero")
@@ -454,7 +595,14 @@ class PaymentServiceTests {
             whenever(mockGovUkPayClient.createPayment(any())).thenThrow(GovUkPayException("GOV.UK Pay request failed", RuntimeException()))
 
             // Act & Assert
-            assertThrows<GovUkPayException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+            assertThrows<GovUkPayException> {
+                paymentService.createPropertyRegistrationPayment(
+                    journeyId,
+                    returnUrl,
+                    email,
+                    paymentService.getPropertyRegistrationPaymentQuote(),
+                )
+            }
             verify(mockPaymentRepository, never()).save(any<Payment>())
         }
 
@@ -476,7 +624,12 @@ class PaymentServiceTests {
             stubGovUkPayCreatePayment()
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             val inOrder = inOrder(mockGovUkPayClient, mockPaymentRepository)
@@ -512,7 +665,12 @@ class PaymentServiceTests {
             stubGovUkPayCreatePayment()
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             verify(mockGovUkPayClient, never()).cancelPayment(any())
@@ -547,7 +705,12 @@ class PaymentServiceTests {
             stubGovUkPayCreatePayment()
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
@@ -574,7 +737,12 @@ class PaymentServiceTests {
             stubGovUkPayCreatePayment()
 
             // Act
-            paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email)
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                returnUrl,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
 
             // Assert
             verify(mockGovUkPayClient, never()).cancelPayment(any())
@@ -598,7 +766,14 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<GovUkPayException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+                assertThrows<GovUkPayException> {
+                    paymentService.createPropertyRegistrationPayment(
+                        journeyId,
+                        returnUrl,
+                        email,
+                        paymentService.getPropertyRegistrationPaymentQuote(),
+                    )
+                }
 
             // Assert
             assertSame(cancellationFailure, exception.cause)
@@ -623,7 +798,14 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+                assertThrows<IllegalStateException> {
+                    paymentService.createPropertyRegistrationPayment(
+                        journeyId,
+                        returnUrl,
+                        email,
+                        paymentService.getPropertyRegistrationPaymentQuote(),
+                    )
+                }
 
             // Assert
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
@@ -657,7 +839,14 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+                assertThrows<IllegalStateException> {
+                    paymentService.createPropertyRegistrationPayment(
+                        journeyId,
+                        returnUrl,
+                        email,
+                        paymentService.getPropertyRegistrationPaymentQuote(),
+                    )
+                }
 
             // Assert
             assertContains(exception.message!!, existingPayment.paymentId)
@@ -681,7 +870,14 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<IllegalStateException> { paymentService.createPropertyRegistrationPayment(journeyId, returnUrl, email) }
+                assertThrows<IllegalStateException> {
+                    paymentService.createPropertyRegistrationPayment(
+                        journeyId,
+                        returnUrl,
+                        email,
+                        paymentService.getPropertyRegistrationPaymentQuote(),
+                    )
+                }
 
             // Assert
             assertContains(exception.message!!, succeededPayment.paymentId)

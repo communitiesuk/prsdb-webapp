@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -43,10 +44,24 @@ class PaymentService(
 ) {
     private val gratisPeriodEndDate: LocalDate = LocalDate.parse(gratisPeriodEndDate)
 
+    fun getPropertyRegistrationPaymentQuote(
+        quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+    ): PropertyRegistrationPaymentQuote {
+        val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.from(quoteDate)
+        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary, quoteDate)
+
+        return PropertyRegistrationPaymentQuote(
+            amountInPence = calculateProRatedFeeInPence(renewalDate, quoteDate),
+            quoteDate = quoteDate,
+            renewalDate = renewalDate,
+        )
+    }
+
     fun createPropertyRegistrationPayment(
         journeyId: String,
         returnUrl: String,
         email: String,
+        quote: PropertyRegistrationPaymentQuote,
     ): String {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val incompleteProperty =
@@ -54,9 +69,8 @@ class PaymentService(
                 "No incomplete property found for journey $journeyId and user $baseUserId"
             }
 
-        val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
-        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
-        val amountInPence = calculateProRatedFeeInPence(renewalDate)
+        val renewalDate = quote.renewalDate
+        val amountInPence = quote.amountInPence
         check(amountInPence > 0) {
             "Cannot create a GOV.UK Pay payment for journey $journeyId: the fee for the period ending $renewalDate is " +
                 "${amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
