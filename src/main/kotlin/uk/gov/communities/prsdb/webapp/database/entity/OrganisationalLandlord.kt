@@ -12,6 +12,7 @@ import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import java.time.LocalDate
 
 @Entity
@@ -96,12 +97,18 @@ class OrganisationalLandlord() : Landlord() {
     lateinit var mainContactPhone: String
 
     // We eager fetch these as we're temporarily using them to get the email for an org landlord.
-    // We assume one org user per landlord for now so this eager fetch will be cheap.
-    // TODO: PDJB-1274: This eager fetch will no longer be needed once we support multiple users in an org. Remove it
     @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
     private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
 
+    @get:Transient
+    val adminEmailAddresses: List<String>
+        get() =
+            organisationalLandlordUsers
+                .filter { it.role == OrganisationalLandlordUserRole.ADMIN }
+                .map { it.email }
+
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
+    // Also remove the EAGER fetch on organisationalLandlordUserSet if it still exists
     @get:Transient
     override val email: String
         get() = organisationalLandlordUsers.single().email
