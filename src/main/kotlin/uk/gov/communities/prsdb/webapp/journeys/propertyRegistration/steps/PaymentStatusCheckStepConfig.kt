@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStatePersistenceService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -20,22 +19,21 @@ enum class PaymentOutcome {
 class PaymentStatusCheckStepConfig(
     private val paymentService: PaymentService,
     private val propertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory,
-    private val journeyStatePersistenceService: JourneyStatePersistenceService,
 ) : AbstractInternalStepConfig<PaymentOutcome, PropertyRegistrationJourneyState>() {
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
-        val govUkPayStatus = paymentService.getPropertyRegistrationPaymentStatus(state.journeyId)
+        val paymentReference = checkNotNull(state.paymentReference) { "No payment reference for journey ${state.journeyId}" }
+        val govUkPayStatus = paymentService.getPropertyRegistrationPaymentStatus(state.journeyId, paymentReference)
         if (govUkPayStatus.isCreated()) {
             state.paymentOutcome = PaymentOutcome.IN_PROGRESS
             return
         }
 
-        // Only the saved copy is deleted here, because finalisePayment rolls this back if it fails but can't restore the session
         val finalisedStatus =
             paymentService.finalisePayment(
                 govUkPayStatus.paymentId,
                 govUkPayStatus.status,
                 propertyRegistrationDataModelFactory.fromJourneyState(state),
-            ) { journeyStatePersistenceService.deleteJourneyStateData(state.journeyId) }
+            )
 
         state.paymentOutcome =
             when (finalisedStatus) {

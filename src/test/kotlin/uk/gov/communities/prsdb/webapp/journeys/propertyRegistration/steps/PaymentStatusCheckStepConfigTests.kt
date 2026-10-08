@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -13,14 +14,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStatePersistenceService
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -36,15 +34,13 @@ class PaymentStatusCheckStepConfigTests {
     private lateinit var mockPropertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory
 
     @Mock
-    private lateinit var mockJourneyStatePersistenceService: JourneyStatePersistenceService
-
-    @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
     private lateinit var stepConfig: PaymentStatusCheckStepConfig
 
     private val journeyId = "journey-123"
     private val paymentId = "payment-123"
+    private val paymentReference = "payment-reference-123"
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
     private val defaultDestination = Destination.ExternalUrl("default")
 
@@ -54,7 +50,6 @@ class PaymentStatusCheckStepConfigTests {
             PaymentStatusCheckStepConfig(
                 mockPaymentService,
                 mockPropertyRegistrationDataModelFactory,
-                mockJourneyStatePersistenceService,
             )
     }
 
@@ -68,7 +63,7 @@ class PaymentStatusCheckStepConfigTests {
 
         // Assert
         verify(mockState).paymentOutcome = PaymentOutcome.IN_PROGRESS
-        verify(mockPaymentService, never()).finalisePayment(any(), any(), any(), any())
+        verify(mockPaymentService, never()).finalisePayment(any(), any(), any())
     }
 
     @ParameterizedTest
@@ -79,14 +74,14 @@ class PaymentStatusCheckStepConfigTests {
         // Arrange
         stubGovUkPayStatus(govUkPayStatus)
         whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
-        whenever(mockPaymentService.finalisePayment(eq(paymentId), eq(govUkPayStatus), eq(registrationData), any()))
+        whenever(mockPaymentService.finalisePayment(paymentId, govUkPayStatus, registrationData))
             .thenReturn(govUkPayStatus)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentService).finalisePayment(eq(paymentId), eq(govUkPayStatus), eq(registrationData), any())
+        verify(mockPaymentService).finalisePayment(paymentId, govUkPayStatus, registrationData)
     }
 
     @ParameterizedTest
@@ -98,7 +93,7 @@ class PaymentStatusCheckStepConfigTests {
         // Arrange
         stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
         whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
-        whenever(mockPaymentService.finalisePayment(eq(paymentId), eq(PaymentStatus.CAPTURABLE), eq(registrationData), any()))
+        whenever(mockPaymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData))
             .thenReturn(finalisedPaymentStatus)
 
         // Act
@@ -109,22 +104,26 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached gives finalisePayment a callback that only deletes the saved copy of the journey`() {
+    fun `afterStepIsReached checks the status of the payment the user has returned from`() {
         // Arrange
-        stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
-        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
-        whenever(mockPaymentService.finalisePayment(eq(paymentId), eq(PaymentStatus.CAPTURABLE), eq(registrationData), any()))
-            .thenReturn(PaymentStatus.SUCCEEDED)
-        stepConfig.afterStepIsReached(mockState)
-        val deleteJourneyCaptor = argumentCaptor<() -> Unit>()
-        verify(mockPaymentService).finalisePayment(any(), any(), any(), deleteJourneyCaptor.capture())
+        stubGovUkPayStatus(PaymentStatus.CREATED)
 
         // Act
-        deleteJourneyCaptor.firstValue()
+        stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockJourneyStatePersistenceService).deleteJourneyStateData(journeyId)
-        verify(mockState, never()).deleteJourney()
+        verify(mockPaymentService).getPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+    }
+
+    @Test
+    fun `afterStepIsReached throws without checking any payment when the journey has no payment reference`() {
+        // Arrange
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        whenever(mockState.paymentReference).thenReturn(null)
+
+        // Act & Assert
+        assertThrows<IllegalStateException> { stepConfig.afterStepIsReached(mockState) }
+        verifyNoInteractions(mockPaymentService)
     }
 
     @ParameterizedTest
@@ -184,7 +183,8 @@ class PaymentStatusCheckStepConfigTests {
 
     private fun stubGovUkPayStatus(status: PaymentStatus) {
         whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockPaymentService.getPropertyRegistrationPaymentStatus(journeyId))
+        whenever(mockState.paymentReference).thenReturn(paymentReference)
+        whenever(mockPaymentService.getPropertyRegistrationPaymentStatus(journeyId, paymentReference))
             .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status, isCancellable = false))
     }
 
