@@ -42,6 +42,7 @@ class PaymentSummaryStepConfig(
             return Destination(addressTask.alreadyRegisteredStep)
         }
 
+        state.paymentOutcome = null
         val nextUrl = paymentService.createPropertyRegistrationPayment(state.journeyId, state.loggedInLandlordEmailAtStartOfJourney)
         return Destination.ExternalUrl(nextUrl)
     }
