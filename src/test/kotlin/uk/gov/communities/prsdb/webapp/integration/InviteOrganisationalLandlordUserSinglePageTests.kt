@@ -7,11 +7,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import java.util.regex.Pattern
 
 @WithOrgLandlordProfile
-class InviteTeamMemberSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+class InviteOrganisationalLandlordUserSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `the invite page names the admin's organisation`() {
         // Act
-        val invitePage = navigator.goToInviteTeamMemberPage()
+        val invitePage = navigator.goToInviteOrganisationalLandlordUserPage()
 
         // Assert
         assertThat(invitePage.heading).hasText("Invite a team member")
@@ -21,7 +21,7 @@ class InviteTeamMemberSinglePageTests : IntegrationTestWithImmutableData("data-l
     @Test
     fun `an email address error does not mark the access level as errored`() {
         // Arrange
-        val invitePage = navigator.goToInviteTeamMemberPage()
+        val invitePage = navigator.goToInviteOrganisationalLandlordUserPage()
 
         // Act
         invitePage.submitInvitation("not-an-email", OrganisationalLandlordUserRole.EDITOR)
@@ -34,7 +34,7 @@ class InviteTeamMemberSinglePageTests : IntegrationTestWithImmutableData("data-l
     @Test
     fun `a missing access level marks the access level as errored`() {
         // Arrange
-        val invitePage = navigator.goToInviteTeamMemberPage()
+        val invitePage = navigator.goToInviteOrganisationalLandlordUserPage()
 
         // Act
         invitePage.emailInput.fill("new.member@example.com")

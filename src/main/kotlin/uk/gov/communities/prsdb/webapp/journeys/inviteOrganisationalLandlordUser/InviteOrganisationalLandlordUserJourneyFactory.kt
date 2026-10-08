@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember
+package uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -9,27 +9,27 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.steps.InviteTeamMemberStep
-import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.steps.SaveTeamMemberInvitationStep
+import uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser.steps.InviteOrganisationalLandlordUserStep
+import uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser.steps.SaveOrganisationalLandlordUserInvitationStep
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 
 @PrsdbWebService
-class InviteTeamMemberJourneyFactory(
-    private val stateFactory: ObjectFactory<InviteTeamMemberJourney>,
+class InviteOrganisationalLandlordUserJourneyFactory(
+    private val stateFactory: ObjectFactory<InviteOrganisationalLandlordUserJourney>,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepStep { journey.inviteTeamMemberStep }
-            step(journey.inviteTeamMemberStep) {
-                routeSegment(InviteTeamMemberStep.ROUTE_SEGMENT)
+            unreachableStepStep { journey.inviteOrganisationalLandlordUserStep }
+            step(journey.inviteOrganisationalLandlordUserStep) {
+                routeSegment(InviteOrganisationalLandlordUserStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { TEAM_MEMBERS_ROUTE }
-                nextStep { journey.saveTeamMemberInvitationStep }
+                nextStep { journey.saveOrganisationalLandlordUserInvitationStep }
             }
-            step(journey.saveTeamMemberInvitationStep) {
-                parents { journey.inviteTeamMemberStep.isComplete() }
+            step(journey.saveOrganisationalLandlordUserInvitationStep) {
+                parents { journey.inviteOrganisationalLandlordUserStep.isComplete() }
                 // TODO PDJB-1757: Redirect to the invitations tab once it exists
                 // TODO PDJB-1762: Show a success banner on the team members page after inviting
                 nextUrl { TEAM_MEMBERS_ROUTE }
@@ -41,19 +41,19 @@ class InviteTeamMemberJourneyFactory(
 }
 
 @JourneyFrameworkComponent
-class InviteTeamMemberJourney(
-    override val inviteTeamMemberStep: InviteTeamMemberStep,
-    override val saveTeamMemberInvitationStep: SaveTeamMemberInvitationStep,
+class InviteOrganisationalLandlordUserJourney(
+    override val inviteOrganisationalLandlordUserStep: InviteOrganisationalLandlordUserStep,
+    override val saveOrganisationalLandlordUserInvitationStep: SaveOrganisationalLandlordUserInvitationStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
-    InviteTeamMemberJourneyState {
+    InviteOrganisationalLandlordUserJourneyState {
     override fun generateJourneyId(seed: Any?): String =
         super<AbstractJourneyState>.generateJourneyId(
-            "Invite team member journey at time ${System.currentTimeMillis()}",
+            "Invite organisational landlord user journey at time ${System.currentTimeMillis()}",
         )
 }
 
-interface InviteTeamMemberJourneyState : JourneyState {
-    val inviteTeamMemberStep: InviteTeamMemberStep
-    val saveTeamMemberInvitationStep: SaveTeamMemberInvitationStep
+interface InviteOrganisationalLandlordUserJourneyState : JourneyState {
+    val inviteOrganisationalLandlordUserStep: InviteOrganisationalLandlordUserStep
+    val saveOrganisationalLandlordUserInvitationStep: SaveOrganisationalLandlordUserInvitationStep
 }

@@ -12,21 +12,21 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
-import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController.Companion.INVITE_TEAM_MEMBER_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.InviteTeamMemberJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.inviteTeamMember.steps.InviteTeamMemberStep
+import uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser.InviteOrganisationalLandlordUserJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser.steps.InviteOrganisationalLandlordUserStep
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @PreAuthorize("hasRole('ORG_ADMIN')")
-@RequestMapping(INVITE_TEAM_MEMBER_ROUTE)
-class InviteTeamMemberController(
-    private val journeyFactory: InviteTeamMemberJourneyFactory,
+@RequestMapping(INVITE_ORGANISATIONAL_LANDLORD_USER_ROUTE)
+class InviteOrganisationalLandlordUserController(
+    private val journeyFactory: InviteOrganisationalLandlordUserJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
 ) {
     @GetMapping("/{*stepPath}")
@@ -68,8 +68,9 @@ class InviteTeamMemberController(
         )
 
     companion object {
-        const val INVITE_TEAM_MEMBER_PATH_SEGMENT = "invite"
-        const val INVITE_TEAM_MEMBER_ROUTE = "$TEAM_MEMBERS_ROUTE/$INVITE_TEAM_MEMBER_PATH_SEGMENT"
-        const val INVITE_TEAM_MEMBER_PATH = "$INVITE_TEAM_MEMBER_ROUTE/${InviteTeamMemberStep.ROUTE_SEGMENT}"
+        const val INVITE_ORGANISATIONAL_LANDLORD_USER_PATH_SEGMENT = "invite"
+        const val INVITE_ORGANISATIONAL_LANDLORD_USER_ROUTE = "$TEAM_MEMBERS_ROUTE/$INVITE_ORGANISATIONAL_LANDLORD_USER_PATH_SEGMENT"
+        const val INVITE_ORGANISATIONAL_LANDLORD_USER_PATH =
+            "$INVITE_ORGANISATIONAL_LANDLORD_USER_ROUTE/${InviteOrganisationalLandlordUserStep.ROUTE_SEGMENT}"
     }
 }

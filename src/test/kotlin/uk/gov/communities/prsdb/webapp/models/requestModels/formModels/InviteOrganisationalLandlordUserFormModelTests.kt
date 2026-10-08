@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
-class InviteTeamMemberFormModelTests {
+class InviteOrganisationalLandlordUserFormModelTests {
     private val validator = Validation.buildDefaultValidatorFactory().validator
 
     private fun validFormModel() =
-        InviteTeamMemberFormModel().apply {
+        InviteOrganisationalLandlordUserFormModel().apply {
             emailAddress = "invitee@example.com"
             role = OrganisationalLandlordUserRole.ADMIN
         }
@@ -28,7 +28,7 @@ class InviteTeamMemberFormModelTests {
 
         val violations = validator.validate(formModel)
 
-        assertEquals(listOf("inviteTeamMember.email.error.missing"), violations.map { it.message })
+        assertEquals(listOf("inviteOrganisationalLandlordUser.email.error.missing"), violations.map { it.message })
     }
 
     @Test
@@ -37,7 +37,7 @@ class InviteTeamMemberFormModelTests {
 
         val violations = validator.validate(formModel)
 
-        assertEquals(listOf("inviteTeamMember.email.error.invalidFormat"), violations.map { it.message })
+        assertEquals(listOf("inviteOrganisationalLandlordUser.email.error.invalidFormat"), violations.map { it.message })
     }
 
     @Test
@@ -46,6 +46,6 @@ class InviteTeamMemberFormModelTests {
 
         val violations = validator.validate(formModel)
 
-        assertEquals(listOf("inviteTeamMember.role.error.missing"), violations.map { it.message })
+        assertEquals(listOf("inviteOrganisationalLandlordUser.role.error.missing"), violations.map { it.message })
     }
 }

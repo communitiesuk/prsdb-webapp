@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
-import uk.gov.communities.prsdb.webapp.controllers.InviteTeamMemberController
+import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -104,7 +104,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJoint
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.AreYouSurePageCancelLettingAgentDelegation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteTeamMemberJourneyPages.InviteTeamMemberFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1220,9 +1220,9 @@ class Navigator(
         return createValidPage(page, TeamMembersPage::class)
     }
 
-    fun goToInviteTeamMemberPage(): InviteTeamMemberFormPage {
-        navigate(InviteTeamMemberController.INVITE_TEAM_MEMBER_PATH)
-        return createValidPage(page, InviteTeamMemberFormPage::class)
+    fun goToInviteOrganisationalLandlordUserPage(): InviteOrganisationalLandlordUserFormPage {
+        navigate(InviteOrganisationalLandlordUserController.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH)
+        return createValidPage(page, InviteOrganisationalLandlordUserFormPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {

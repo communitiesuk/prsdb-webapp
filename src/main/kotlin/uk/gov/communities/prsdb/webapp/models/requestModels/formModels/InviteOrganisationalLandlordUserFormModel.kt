@@ -9,15 +9,15 @@ import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class InviteTeamMemberFormModel : FormModel {
+class InviteOrganisationalLandlordUserFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "inviteTeamMember.email.error.missing",
+                messageKey = "inviteOrganisationalLandlordUser.email.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "inviteTeamMember.email.error.invalidFormat",
+                messageKey = "inviteOrganisationalLandlordUser.email.error.invalidFormat",
                 validatorType = EmailConstraintValidator::class,
             ),
         ],
@@ -27,7 +27,7 @@ class InviteTeamMemberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "inviteTeamMember.role.error.missing",
+                messageKey = "inviteOrganisationalLandlordUser.role.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],
