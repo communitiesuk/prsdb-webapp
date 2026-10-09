@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 class CheckEpcAnswersFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckEpcAnswersStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your energy performance certificate (EPC) answers"
+
     val heading = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
     val form = Form(page)

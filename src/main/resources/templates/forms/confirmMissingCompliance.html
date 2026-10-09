@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmMissingComplianceFormModel"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="isGasMissing" type="java.lang.Boolean"*/-->
@@ -6,7 +5,7 @@
 <!--/*@thymesVar id="isEpcMissing" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.confirmMissingCompliance.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <h1 class="govuk-heading-l" th:text="#{registerProperty.confirmMissingCompliance.heading}">
         registerProperty.confirmMissingCompliance.heading

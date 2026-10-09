@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{complianceActions.title},~{::#page/content()}, false)}">
+<html id="page" th:replace="~{fragments/layout :: layout(#{complianceActions.heading},~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
     <main class="govuk-main-wrapper" id="main-content">
         <header>
