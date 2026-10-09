@@ -1,22 +1,19 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TokenValidityFormModel
 
 class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
     JourneyStateSessionBuilder<AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder>() {
     companion object {
         fun beforeFullName(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder()
-                .withSubmittedValue(
-                    ValidateTokenStep.ROUTE_SEGMENT,
-                    TokenValidityFormModel(TokenValidity.VALID),
-                )
+                .withAdditionalData("tokenIsValid", "true")
+                .withAdditionalData("organisationName", "\"Local Organisation Landlord\"")
+                .withSubmittedValue(CheckUserIsLandlordStep.ROUTE_SEGMENT, NoInputFormModel())
                 .withSubmittedValue(JoinOrganisationStep.ROUTE_SEGMENT, NoInputFormModel())
 
         fun beforeEmailAddress(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
