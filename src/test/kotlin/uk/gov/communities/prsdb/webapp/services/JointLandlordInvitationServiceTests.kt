@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
@@ -887,7 +887,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(
                 mockInvitation,
             )
-            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.PENDING)
+            whenever(mockInvitation.status).thenReturn(InvitationStatus.PENDING)
 
             assertTrue(invitationService.getTokenIsValid(validToken))
         }
@@ -910,7 +910,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(
                 mockInvitation,
             )
-            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.EXPIRED)
+            whenever(mockInvitation.status).thenReturn(InvitationStatus.EXPIRED)
 
             assertFalse(invitationService.getTokenIsValid(validToken))
         }
@@ -921,7 +921,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(
                 mockInvitation,
             )
-            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.HIDDEN)
+            whenever(mockInvitation.status).thenReturn(InvitationStatus.HIDDEN)
 
             assertFalse(invitationService.getTokenIsValid(validToken))
         }

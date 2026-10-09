@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.util.UUID
 
 class MockLandlordData {
     companion object {
@@ -175,6 +177,32 @@ class MockLandlordData {
                 email = email,
                 role = role,
             )
+
+        const val DEFAULT_ORGANISATIONAL_LANDLORD_INVITATION_ID = 456L
+
+        fun createOrganisationalLandlordInvitation(
+            id: Long = DEFAULT_ORGANISATIONAL_LANDLORD_INVITATION_ID,
+            token: UUID = UUID.randomUUID(),
+            invitedEmail: String = "organisation.invitee@example.com",
+            organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),
+            role: OrganisationalLandlordUserRole = OrganisationalLandlordUserRole.ADMIN,
+            createdDate: Instant = Instant.now(),
+            isHidden: Boolean = false,
+        ): OrganisationalLandlordInvitation {
+            val invitation =
+                OrganisationalLandlordInvitation(
+                    id = id,
+                    token = token,
+                    invitedEmail = invitedEmail,
+                    organisationalLandlord = organisationalLandlord,
+                    role = role,
+                )
+
+            ReflectionTestUtils.setField(invitation, "createdDate", createdDate)
+            invitation.isHidden = isHidden
+
+            return invitation
+        }
 
         fun createPropertyOwnership(
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
