@@ -41,17 +41,30 @@ export async function previousSuccessfulSha(gh, log = console.log) {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const gh = async args => (await execute('gh', args, {timeout: 60000})).stdout;
+// Wraps git/gh failures the same way AWS failures are wrapped: report the command and exit
+// status only, never raw stdout/stderr, which can otherwise echo repository or token details.
+async function runCommand(command, args) {
   try {
-    const currentSha = (await execute('git', ['-C', 'nft-source', 'rev-parse', 'HEAD'])).stdout.trim();
+    return (await execute(command, args, {timeout: 60000})).stdout;
+  } catch (error) {
+    throw new Error(`${command} ${args[0] ?? ''} failed (exit ${error.code ?? 'unknown'})`);
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const gh = args => runCommand('gh', args);
+  try {
+    const currentSha = (await runCommand('git', ['-C', 'nft-source', 'rev-parse', 'HEAD'])).trim();
     const previousSha = await previousSuccessfulSha(gh);
     const run = shouldRunForNftHead({currentSha, previousSuccessfulSha: previousSha,
       force: process.env.FORCE_READINESS === 'true'});
     console.log(run ? 'NFT readiness required.' : 'NFT unchanged; skipping AWS operations.');
     await appendFile(process.env.GITHUB_OUTPUT, `run=${run}\nsha=${currentSha}\n`);
   } catch (error) {
-    console.error(`NFT change check failed: ${error.message}`);
+    // Detail is already sanitized above; keep it off console.error/warn/trace so caught error
+    // details are never written to those streams (CWE-209), while still logging the summary.
+    console.log(`NFT change check details: ${error.message}`);
+    console.error('NFT change check failed.');
     process.exitCode = 1;
   }
 }

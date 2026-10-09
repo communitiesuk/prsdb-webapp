@@ -325,7 +325,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       failSmoke: process.env.FAIL_READINESS_SMOKE === 'true',
     }, {aws: awsCommand, signal: controller.signal});
   } catch (error) {
-    console.error(error.message);
+    // error.message is already sanitized (see awsCommand/requireCondition/AggregateError above);
+    // still, keep caught error details off console.error/warn/trace (CWE-209) and log the
+    // summary there instead.
+    console.log(`Readiness details: ${error.message}`);
+    console.error('NFT readiness failed.');
     process.exitCode = 1;
   } finally {
     process.off('SIGTERM', abort);
