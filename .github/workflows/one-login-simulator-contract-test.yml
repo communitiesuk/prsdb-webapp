@@ -30,4 +30,4 @@ jobs:
       - run: npm run build
 
       - name: Run official simulator contract tests
-        run: ./gradlew oneLoginSimulatorContractTest --no-daemon --console=plain
+        run: ./gradlew testWithOneLoginSimulator --no-daemon --console=plain
