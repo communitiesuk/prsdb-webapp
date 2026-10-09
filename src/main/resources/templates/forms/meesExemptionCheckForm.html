@@ -23,7 +23,7 @@
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{propertyCompliance.epcTask.meesExemptionCheck.doesThePropertyHaveAnExemption.heading(${singleLineAddress})}, null)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'propertyHasExemption', #{propertyCompliance.epcTask.meesExemptionCheck.doesThePropertyHaveAnExemption.heading(${singleLineAddress})}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'propertyHasExemption', null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>

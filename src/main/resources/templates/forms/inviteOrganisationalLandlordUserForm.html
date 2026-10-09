@@ -12,7 +12,7 @@
 <th:block id="form-content">
     <div th:replace="~{fragments/forms/emailInput :: emailInput(#{inviteOrganisationalLandlordUser.email.label}, 'emailAddress', null)}"></div>
     <th:block id="role-fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#role-fieldset-content/content()}, fieldName='role', fieldSetHeading=#{inviteOrganisationalLandlordUser.role.fieldSetHeading}, fieldSetHint=null, scopeErrorsToField=true)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#role-fieldset-content/content()}, fieldName='role', fieldSetHeading=#{inviteOrganisationalLandlordUser.role.fieldSetHeading}, fieldSetHint=null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'role', null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.saveAndContinue})}"></button>
