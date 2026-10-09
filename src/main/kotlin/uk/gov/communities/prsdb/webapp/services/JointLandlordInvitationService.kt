@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -35,7 +35,7 @@ class JointLandlordInvitationService(
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
         invitationRepository
             .findByRegisteredOwnership(propertyOwnership)
-            .filter { it.status == JointLandlordInvitationStatus.PENDING }
+            .filter { it.status == InvitationStatus.PENDING }
 
     fun getPendingAndExpiredInvitations(
         propertyOwnership: PropertyOwnership,
@@ -45,15 +45,15 @@ class JointLandlordInvitationService(
                 .findByRegisteredOwnership(propertyOwnership)
                 .sortedByDescending { it.createdDate }
                 .groupBy { it.status }
-        val pending = grouped[JointLandlordInvitationStatus.PENDING].orEmpty()
-        val expired = grouped[JointLandlordInvitationStatus.EXPIRED].orEmpty()
+        val pending = grouped[InvitationStatus.PENDING].orEmpty()
+        val expired = grouped[InvitationStatus.EXPIRED].orEmpty()
         return Pair(pending, expired)
     }
 
     fun getExistingInvitedEmails(ownershipId: Long): List<String> =
         invitationRepository
             .findByRegisteredOwnershipId(ownershipId)
-            .filter { it.status == JointLandlordInvitationStatus.PENDING }
+            .filter { it.status == InvitationStatus.PENDING }
             .map { it.invitedEmail }
 
     fun sendInvitationEmails(
@@ -136,7 +136,7 @@ class JointLandlordInvitationService(
     ) {
         invitationRepository
             .findByRegisteredOwnership(ownership)
-            .filter { it.status == JointLandlordInvitationStatus.EXPIRED && emails.containsEmail(it.invitedEmail) }
+            .filter { it.status == InvitationStatus.EXPIRED && emails.containsEmail(it.invitedEmail) }
             .forEach { expiredInvitation ->
                 expiredInvitation.isHidden = true
                 invitationRepository.save(expiredInvitation)
@@ -216,7 +216,7 @@ class JointLandlordInvitationService(
 
         val invitation = invitationRepository.findByToken(tokenUuid) ?: return false
 
-        return invitation.status == JointLandlordInvitationStatus.PENDING
+        return invitation.status == InvitationStatus.PENDING
     }
 
     @Transactional
@@ -230,7 +230,7 @@ class JointLandlordInvitationService(
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
         }
 
-        if (invitation.status != JointLandlordInvitationStatus.EXPIRED) {
+        if (invitation.status != InvitationStatus.EXPIRED) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only expired invitations can be hidden")
         }
 
@@ -245,7 +245,7 @@ class JointLandlordInvitationService(
 
     fun getPendingInvitationIfAuthorizedLandlord(invitationId: Long): JointLandlordInvitation {
         val invitation = getInvitationById(invitationId)
-        if (invitation.status != JointLandlordInvitationStatus.PENDING) {
+        if (invitation.status != InvitationStatus.PENDING) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is not pending")
         }
         if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(invitation.registeredOwnership.id)) {

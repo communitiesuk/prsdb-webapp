@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
@@ -25,7 +25,7 @@ class JointLandlordInvitationExpiryEmailService(
         val expiredInvitations =
             invitationRepository
                 .findAllByInvitationExpiredEmailSentFalse()
-                .filter { it.status == JointLandlordInvitationStatus.EXPIRED }
+                .filter { it.status == InvitationStatus.EXPIRED }
         val sentIds = mutableListOf<Long>()
         val failedIds = mutableListOf<Long>()
 

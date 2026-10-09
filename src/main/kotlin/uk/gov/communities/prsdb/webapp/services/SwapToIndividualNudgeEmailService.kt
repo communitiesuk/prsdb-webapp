@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwapToIndividualNudgeEmail
@@ -18,11 +18,11 @@ class SwapToIndividualNudgeEmailService(
 
         val invitations = invitationRepository.findByRegisteredOwnership(propertyOwnership)
 
-        val hasPendingInvitations = invitations.any { it.status == JointLandlordInvitationStatus.PENDING }
+        val hasPendingInvitations = invitations.any { it.status == InvitationStatus.PENDING }
         if (hasPendingInvitations) return
 
         val hasUnprocessedExpiredInvitations =
-            invitations.any { it.status == JointLandlordInvitationStatus.EXPIRED && !it.invitationExpiredEmailSent }
+            invitations.any { it.status == InvitationStatus.EXPIRED && !it.invitationExpiredEmailSent }
         if (hasUnprocessedExpiredInvitations) return
 
         // TODO: PDJB-1274: Update emails to account for org landlord
