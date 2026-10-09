@@ -55,7 +55,7 @@ jobs:
         env:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
           EMAILNOTIFICATIONS_PRODUCTION_APIKEY: ${{ secrets.NOTIFY_PRODUCTION_KEY }}
-        run: ./gradlew clean test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
+        run: ./gradlew clean :test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
 
   lint:
     name: Lint
@@ -97,7 +97,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Check shard and lint results
+      - name: Check test and lint results
         run: |
           echo "test=${{ needs.test.result }} lint=${{ needs.lint.result }}"
           if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
