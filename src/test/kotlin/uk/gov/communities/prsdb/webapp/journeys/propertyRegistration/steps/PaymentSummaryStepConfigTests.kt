@@ -7,7 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -117,6 +119,21 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals("https://pay.example.test/next", assertIs<Destination.ExternalUrl>(result).externalUrl)
+    }
+
+    @Test
+    fun `resolveNextDestination clears the previous payment outcome before creating a new payment`() {
+        // Arrange
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        stubPaymentCreation()
+
+        // Act
+        stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        val inOrder = inOrder(mockState, mockPaymentService)
+        inOrder.verify(mockState).paymentOutcome = null
+        inOrder.verify(mockPaymentService).createPropertyRegistrationPayment(any(), any())
     }
 
     private fun stubPaymentCreation() {

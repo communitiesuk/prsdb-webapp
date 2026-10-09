@@ -58,14 +58,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Letti
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NonRetryablePaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentStatusCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
@@ -74,7 +74,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RetryablePaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
@@ -656,43 +655,40 @@ class PropertyRegistrationJourneyFactory(
                     step(journey.paymentReturnStep) {
                         routeSegment(PaymentReturnStep.ROUTE_SEGMENT)
                         parents { journey.paymentSummaryStep.isComplete() }
-                        nextStep { journey.paymentRoutingStep }
+                        nextStep { journey.paymentStatusCheckStep }
                     }
-                    step(journey.paymentRoutingStep) {
-                        routeSegment(PaymentRoutingStep.ROUTE_SEGMENT)
+                    step(journey.paymentStatusCheckStep) {
                         parents { journey.paymentReturnStep.isComplete() }
                         nextDestination { mode ->
                             when (mode) {
-                                PaymentOutcome.SUCCESS -> Destination(journey.savePropertyRegistrationDataStep)
-                                PaymentOutcome.RETRYABLE_FAILURE -> Destination(journey.retryablePaymentFailedStep)
-                                PaymentOutcome.NON_RETRYABLE_FAILURE -> Destination(journey.nonRetryablePaymentFailedStep)
+                                PaymentOutcome.SUCCESS -> {
+                                    Destination.ExternalUrl("$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+                                }
+
+                                PaymentOutcome.FAILURE -> {
+                                    Destination(journey.paymentFailedStep)
+                                }
+
+                                PaymentOutcome.IN_PROGRESS -> {
+                                    Destination(journey.paymentReturnStep)
+                                }
                             }
                         }
                     }
-                    step(journey.retryablePaymentFailedStep) {
-                        routeSegment(RetryablePaymentFailedStep.ROUTE_SEGMENT)
-                        parents { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.RETRYABLE_FAILURE) }
+                    step(journey.paymentFailedStep) {
+                        routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
+                        parents { journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE) }
                         nextStep { journey.paymentSummaryStep }
-                    }
-                    step(journey.nonRetryablePaymentFailedStep) {
-                        routeSegment(NonRetryablePaymentFailedStep.ROUTE_SEGMENT)
-                        parents { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.NON_RETRYABLE_FAILURE) }
-                        noNextDestination()
                     }
                 }
                 step(journey.savePropertyRegistrationDataStep) {
                     parents {
-                        paymentsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) }
-                            ifDisabled {
-                                OrParents(
-                                    journey.hasMissingComplianceStep.hasOutcome(
-                                        ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
-                                    ),
-                                    journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                                )
-                            }
-                        }
+                        OrParents(
+                            journey.hasMissingComplianceStep.hasOutcome(
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
+                            ),
+                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                        )
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
@@ -739,9 +735,8 @@ class PropertyRegistrationJourney(
     // Payment steps (behind PAYMENTS flag)
     override val paymentSummaryStep: PaymentSummaryStep,
     override val paymentReturnStep: PaymentReturnStep,
-    override val paymentRoutingStep: PaymentRoutingStep,
-    override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
-    override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
+    override val paymentStatusCheckStep: PaymentStatusCheckStep,
+    override val paymentFailedStep: PaymentFailedStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -783,6 +778,9 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
+
+    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
+    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
@@ -861,9 +859,10 @@ interface PropertyRegistrationJourneyState :
     // Payment steps (behind PAYMENTS flag)
     val paymentSummaryStep: PaymentSummaryStep
     val paymentReturnStep: PaymentReturnStep
-    val paymentRoutingStep: PaymentRoutingStep
-    val retryablePaymentFailedStep: RetryablePaymentFailedStep
-    val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep
+    val paymentStatusCheckStep: PaymentStatusCheckStep
+    val paymentFailedStep: PaymentFailedStep
+    var paymentReference: String?
+    var paymentOutcome: PaymentOutcome?
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 

@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -115,8 +116,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentFailedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentReturnFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentRoutingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
@@ -140,10 +141,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -273,6 +274,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 nextUrl = request.returnUrl,
             )
         }
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+    }
+
+    private fun stubGovUkPayPaymentStatus(status: GovUkPayPaymentStatus) {
+        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = status)
+        }
     }
 
     // Journeys seeded through the test session controller never create a LandlordIncompleteProperty, which the
@@ -292,17 +300,22 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
+        val paymentReturnPage = submitPaymentSummary(page)
+        paymentReturnPage.form.submit()
+        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    private fun submitPaymentSummary(page: Page): PaymentReturnFormPagePropertyRegistration {
         val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
         ensureIncompletePropertyExistsForCurrentJourney(page)
         paymentSummaryPage.form.submit()
-        val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
-        paymentReturnPage.form.submit()
-        // TODO PDJB-993: Replace this radio selection with the real payment outcome once PaymentRoutingStep becomes an
-        //  internal step - the success outcome will then come from the payment status rather than a user-submitted radio.
-        val paymentRoutingPage = createValidPage(page, PaymentRoutingFormPagePropertyRegistration::class)
-        paymentRoutingPage.form.radios.selectValue(PaymentOutcome.SUCCESS)
-        paymentRoutingPage.form.submit()
-        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+        return createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
+    }
+
+    private fun getCreatedPayment(): Payment {
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(govUkPayClient).createPayment(requestCaptor.capture())
+        return paymentRepository.findAll().single { it.reference == requestCaptor.firstValue.reference }
     }
 
     @Nested
@@ -321,6 +334,53 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkAnswersPage.confirm()
 
             completePropertyRegistrationPaymentSuccessfully(page)
+            val payment = getCreatedPayment()
+            assertEquals(PaymentStatus.SUCCEEDED, payment.status)
+            verify(govUkPayClient).capturePayment(payment.paymentId)
+        }
+
+        @Test
+        fun `a failed payment shows the payment failed page and continuing returns to the payment summary`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentReturnPage = submitPaymentSummary(page)
+
+            paymentReturnPage.form.submit()
+
+            val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
+            paymentFailedPage.form.submit()
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `a payment that has not finished returns the user to the payment return page`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentReturnPage = submitPaymentSummary(page)
+
+            paymentReturnPage.form.submit()
+
+            assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
+            verify(govUkPayClient, never()).capturePayment(any())
+        }
+
+        @Test
+        fun `a payment that finishes after the user is sent back to the payment return page reaches the confirmation page`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page).form.submit()
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+            paymentReturnPage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
 
         @Test
