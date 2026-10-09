@@ -12,9 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Corre
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,21 +21,20 @@ import kotlin.test.assertTrue
 class UpdateCorrespondenceEmailJourneyFactoryTests {
     private val session = MockHttpSession()
     private val propertyOwnershipService = mock<PropertyOwnershipService>()
-    private val userToLandlordService = mock<UserToLandlordService>()
+    private val currentUserService = mock<CurrentUserService>()
     private val lastModifiedDate = Instant.parse("2026-09-01T12:00:00Z")
     private lateinit var state: UpdateCorrespondenceEmailJourney
     private val factory =
         UpdateCorrespondenceEmailJourneyFactory(
             ObjectFactory { createState().also { state = it } },
             propertyOwnershipService,
-            userToLandlordService,
+            currentUserService,
         )
 
     init {
         JourneyStateService(session, mock(), mock()).initialiseJourneyWithId("journey-id")
         whenever(propertyOwnershipService.getLastModifiedDate(1)).thenReturn(lastModifiedDate)
-        whenever(userToLandlordService.getCurrentLandlordForUser())
-            .thenReturn(MockLandlordData.createIndividualLandlord(email = "account@example.com"))
+        whenever(currentUserService.getCurrentEmail()).thenReturn("account@example.com")
     }
 
     @Test
@@ -55,15 +53,14 @@ class UpdateCorrespondenceEmailJourneyFactoryTests {
     fun `createJourneySteps preserves the initialised state on subsequent calls`() {
         // Arrange
         factory.createJourneySteps(1)
-        whenever(userToLandlordService.getCurrentLandlordForUser())
-            .thenReturn(MockLandlordData.createIndividualLandlord(email = "changed@example.com"))
+        whenever(currentUserService.getCurrentEmail()).thenReturn("changed@example.com")
 
         // Act
         factory.createJourneySteps(1)
 
         // Assert
         assertEquals("account@example.com", state.loggedInLandlordEmailAtStartOfJourney)
-        verify(userToLandlordService, times(1)).getCurrentLandlordForUser()
+        verify(currentUserService, times(1)).getCurrentEmail()
         verify(propertyOwnershipService, times(1)).getLastModifiedDate(1)
     }
 
