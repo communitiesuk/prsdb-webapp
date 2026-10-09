@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
@@ -8,7 +7,7 @@
 <!--/*@thymesVar id="ticketPanelLink" type="uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.epcTask.epcSuperseded.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcSuperseded.heading}">propertyCompliance.epcTask.epcSuperseded.heading</h1>
         <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcSuperseded.subtitle}">propertyCompliance.epcTask.epcSuperseded.subtitle</p>
