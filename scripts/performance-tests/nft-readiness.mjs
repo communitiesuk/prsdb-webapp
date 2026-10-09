@@ -12,7 +12,9 @@ const simulatorName = 'nft-one-login-simulator';
 const appOrigin = 'https://nft.register-home-to-rent.test.communities.gov.uk';
 const simulatorOrigin = 'https://nft.lb.register-home-to-rent.test.communities.gov.uk';
 const taskPrefix = `arn:aws:ecs:${region}:${account}:task-definition/`;
-export const simulatorTaskDefinitionDigest = 'sha256:5257554c6f6a50c471ad231bc8f13da4a866b4a2e320a6d1f2f74e5d0ad52755';
+// The approved digest is owned by infra (terraform/nft/ecs_task_definition) and published here so this
+// script has one source of truth to read at runtime, instead of a second hardcoded copy that can drift.
+const simulatorDigestParameterName = 'nft-one-login-simulator-approved-image-digest';
 
 function requireCondition(condition, message) {
   if (!condition) throw new Error(message);
@@ -126,7 +128,10 @@ export async function runReadiness({runnerIp, runId, expectedSha, failSmoke = fa
         'NFT branch revision is not deployed; refusing to mark an older app ready');
     }
     const simulatorContainer = simulatorTask.containerDefinitions.find(value => value.name === 'prsdb-one-login-simulator');
-    requireCondition(simulatorContainer?.image === `${account}.dkr.ecr.${region}.amazonaws.com/nft-one-login-simulator@${simulatorTaskDefinitionDigest}`,
+    const {Parameter: digestParameter} = await aws('ssm', 'get-parameter', {Name: simulatorDigestParameterName});
+    const approvedDigest = digestParameter?.Value;
+    requireCondition(/^sha256:[0-9a-f]{64}$/.test(approvedDigest ?? ''), 'Approved simulator digest parameter is missing or malformed');
+    requireCondition(simulatorContainer?.image === `${account}.dkr.ecr.${region}.amazonaws.com/nft-one-login-simulator@${approvedDigest}`,
       'Simulator service references an unapproved image; apply the image-pin release first');
     const appEnv = environment(appContainer);
     const simEnv = environment(simulatorContainer);
@@ -145,9 +150,9 @@ export async function runReadiness({runnerIp, runId, expectedSha, failSmoke = fa
       simEnv.INTERACTIVE_MODE === 'true' && simEnv.IDENTITY_VERIFICATION_SUPPORTED === 'true',
       'Unexpected simulator static authentication configuration');
     const images = await aws('ecr', 'describe-images', {
-      repositoryName: 'nft-one-login-simulator', imageIds: [{imageDigest: simulatorTaskDefinitionDigest}],
+      repositoryName: 'nft-one-login-simulator', imageIds: [{imageDigest: approvedDigest}],
     });
-    requireCondition(images.imageDetails?.some(value => value.imageDigest === simulatorTaskDefinitionDigest), 'Simulator image missing from ECR');
+    requireCondition(images.imageDetails?.some(value => value.imageDigest === approvedDigest), 'Simulator image missing from ECR');
     log(`Original app task: ${originalApp.taskDefinition}; simulator task: ${originalSimulator.taskDefinition}; simulator count: 0.`);
 
     for (const scope of ['CLOUDFRONT', 'REGIONAL']) {
