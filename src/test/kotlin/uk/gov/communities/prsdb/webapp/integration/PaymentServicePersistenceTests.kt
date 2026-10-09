@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -39,14 +40,19 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.time.Instant
+import java.time.LocalDate
 import java.time.MonthDay
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CountDownLatch
@@ -80,6 +86,12 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Autowired
     private lateinit var paymentService: PaymentService
 
+    @Autowired
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @Autowired
+    private lateinit var addressService: AddressService
+
     @MockitoBean
     private lateinit var mockGovUkPayClient: GovUkPayClient
 
@@ -87,6 +99,13 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
+
+    private lateinit var originalPeriodEnd: LocalDate
+
+    @BeforeEach
+    fun recordOriginalPaymentPeriod() {
+        originalPeriodEnd = paymentRepository.findById(CREATED_PAYMENT_ID).get().forPeriodEnding
+    }
 
     @AfterEach
     fun clearSecurityContext() {
@@ -141,7 +160,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment links the payment to the registered property and marks it succeeded`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
 
         // Act
         val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
@@ -153,10 +172,55 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
+    fun `finalisePayment persists the original paid period even when registration happens after its renewal date`() {
+        // Arrange
+        val registrationData =
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromManualAddressData("99 Late Payment Road", "Leeds", "LS1 1AA"),
+            )
+        originalPeriodEnd = LocalDate.of(2025, 6, 12)
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        payment.forPeriodEnding = originalPeriodEnd
+        paymentRepository.saveAndFlush(payment)
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
+            propertyOwnershipService.createPropertyOwnership(
+                ownershipType = registrationData.ownershipType,
+                isOccupied = registrationData.isOccupied,
+                numberOfHouseholds = registrationData.numberOfHouseholds,
+                numberOfPeople = registrationData.numberOfPeople,
+                registeringLandlord = landlordRepository.findById(LANDLORD_ID).get(),
+                anniversary = MonthDay.of(3, 15),
+                propertyBuildType = registrationData.propertyType,
+                address = addressService.findOrCreateAddress(registrationData.addressModel),
+                numBedrooms = registrationData.numBedrooms,
+                billsIncludedList = registrationData.billsIncludedList,
+                customBillsIncluded = registrationData.customBillsIncluded,
+                furnishedStatus = registrationData.furnishedStatus,
+                rentFrequency = registrationData.rentFrequency,
+                customRentFrequency = registrationData.customRentFrequency,
+                rentAmount = registrationData.rentAmount,
+                customPropertyType = registrationData.customPropertyType,
+                renewalDate = checkNotNull(it.getArgument<PropertyRegistrationDataModel>(0).renewalDate),
+            )
+        }
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.SUCCEEDED, status)
+        verify(mockPropertyRegistrationService).registerProperty(registrationData.copy(renewalDate = originalPeriodEnd))
+        verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        val registeredProperty = paymentRepository.findById(CREATED_PAYMENT_ID).get().associatedProperty!!
+        assertPaymentSucceededForProperty(registeredProperty.id)
+        assertEquals(originalPeriodEnd, propertyOwnershipRepository.findById(registeredProperty.id).get().renewalDate)
+    }
+
+    @Test
     fun `finalisePayment rolls back the property registration and cancels the payment when capture fails`() {
         // Arrange
         doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer {
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
             setLandlordAnniversary()
             getProperty()
         }
@@ -177,7 +241,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment cancels the payment without capturing it when registration leaves the transaction marked for rollback`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer {
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
             setLandlordAnniversary()
             // Simulates a failed transactional call whose exception was caught during registration
             TransactionTemplate(transactionManager).executeWithoutResult { it.setRollbackOnly() }
@@ -198,7 +262,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment commits the cancellation independently of the caller's transaction when registration fails`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+        whenever(mockPropertyRegistrationService.registerProperty(any()))
             .thenThrow(EntityExistsException("Address already registered"))
 
         // Act
@@ -216,7 +280,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalising a payment again returns its status without registering the property or capturing it again`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Act
@@ -224,14 +288,14 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
-        verify(mockPropertyRegistrationService, times(1)).registerProperty(registrationData)
+        verify(mockPropertyRegistrationService, times(1)).registerProperty(registrationData.copy(renewalDate = originalPeriodEnd))
         verify(mockGovUkPayClient, times(1)).capturePayment(CREATED_PAYMENT_ID)
     }
 
     @Test
     fun `finalisePayment succeeds when the payment is already loaded in an open-in-view persistence context`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         val entityManager = entityManagerFactory.createEntityManager()
         TransactionSynchronizationManager.bindResource(entityManagerFactory, EntityManagerHolder(entityManager))
 
@@ -254,7 +318,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     fun `createPropertyRegistrationPayment does not overwrite a payment that is finalised while it is being reconciled`() {
         // Arrange
         JourneyTestHelper.setMockUser(USER_ID)
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         whenever(mockGovUkPayClient.getPayment(CAPTURABLE_PAYMENT_ID))
             .thenReturn(createGovUkPayPayment(CAPTURABLE_PAYMENT_ID, GovUkPayPaymentStatus.CANCELLED))
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenAnswer {
@@ -280,7 +344,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment cancels the property's other in-progress payments and leaves its finished payments alone`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
 
         // Act
         val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
@@ -328,7 +392,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         val executor = Executors.newFixedThreadPool(2)
         val captureStarted = CountDownLatch(1)
         val finishCapture = CountDownLatch(1)
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         doAnswer {
             captureStarted.countDown()
             finishCapture.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -354,7 +418,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, firstFinalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
             assertEquals(PaymentStatus.SUCCEEDED, secondFinalisation.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
-            verify(mockPropertyRegistrationService).registerProperty(registrationData)
+            verify(mockPropertyRegistrationService).registerProperty(registrationData.copy(renewalDate = originalPeriodEnd))
             verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
             assertPaymentSucceededForProperty()
         } finally {
@@ -371,7 +435,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         val bothPaymentsClaimed = CyclicBarrier(2)
         // The repository is a JDK proxy, which Spring spies on by delegating to it rather than by calling real methods
         val delegateToRepository = Mockito.mockingDetails(paymentRepository).mockCreationSettings.defaultAnswer
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         doAnswer { invocation ->
             bothPaymentsClaimed.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             delegateToRepository.answer(invocation)
@@ -391,7 +455,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             assertEquals(setOf(PaymentStatus.SUCCEEDED, PaymentStatus.CANCELLED), statuses.values.toSet())
             val succeededPaymentId = statuses.filterValues { it == PaymentStatus.SUCCEEDED }.keys.single()
             val cancelledPaymentId = statuses.filterValues { it == PaymentStatus.CANCELLED }.keys.single()
-            verify(mockPropertyRegistrationService).registerProperty(registrationData)
+            verify(mockPropertyRegistrationService).registerProperty(registrationData.copy(renewalDate = originalPeriodEnd))
             verify(mockGovUkPayClient).capturePayment(succeededPaymentId)
             verify(mockGovUkPayClient, never()).capturePayment(cancelledPaymentId)
             assertEquals(PROPERTY_OWNERSHIP_ID, paymentRepository.findById(succeededPaymentId).get().associatedProperty?.id)
@@ -404,7 +468,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment deletes the journey without deleting the finalised payment`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
 
         // Act
         val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
@@ -423,7 +487,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment keeps the journey and the property's other payments when the payment cannot be captured`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
 
         // Act
@@ -462,7 +526,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment leaves a payment it could neither finalise nor cancel recorded as capturable`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
@@ -479,7 +543,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `finalisePayment can be retried after a failure that could not be cancelled on GOV UK Pay`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(registrationData)).thenAnswer { getProperty() }
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
         doThrow(GovUkPayException("Capture failed")).doNothing().whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
@@ -555,12 +619,12 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         landlordRepository.saveAndFlush(landlord)
     }
 
-    private fun assertPaymentSucceededForProperty() {
+    private fun assertPaymentSucceededForProperty(propertyId: Long = PROPERTY_OWNERSHIP_ID) {
         val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
         assertEquals(PaymentStatus.SUCCEEDED, payment.status)
-        assertEquals(PROPERTY_OWNERSHIP_ID, payment.associatedProperty?.id)
+        assertEquals(propertyId, payment.associatedProperty?.id)
         assertNull(payment.associatedIncompleteProperty)
-        assertEquals(getProperty().renewalDate, payment.forPeriodEnding)
+        assertEquals(originalPeriodEnd, payment.forPeriodEnding)
     }
 
     companion object {

@@ -51,4 +51,5 @@ data class PropertyRegistrationDataModel(
     val isDelegatedToLettingAgent: Boolean,
     val correspondenceEmail: String?,
     val correspondenceAddressModel: AddressDataModel?,
+    val renewalDate: LocalDate? = null,
 )

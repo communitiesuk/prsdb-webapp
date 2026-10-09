@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -40,7 +41,13 @@ class PropertyRegistrationService(
             val landlord = userToLandlordService.getCurrentLandlordForUser()
             val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
-            val propertyOwnership = createPropertyOwnershipAndRelatedEntities(registrationData, landlord, anniversary)
+            val propertyOwnership =
+                createPropertyOwnershipAndRelatedEntities(
+                    registrationData,
+                    landlord,
+                    anniversary,
+                    renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
+                )
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
@@ -99,6 +106,7 @@ class PropertyRegistrationService(
         registrationData: PropertyRegistrationDataModel,
         registeringLandlord: Landlord,
         anniversary: MonthDay,
+        renewalDate: LocalDate,
     ): PropertyOwnership =
         with(registrationData) {
             if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -128,6 +136,7 @@ class PropertyRegistrationService(
                 rentAmount = rentAmount,
                 registeringLandlord = registeringLandlord,
                 anniversary = anniversary,
+                renewalDate = renewalDate,
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 markedJointLandlord = markedJointLandlord,

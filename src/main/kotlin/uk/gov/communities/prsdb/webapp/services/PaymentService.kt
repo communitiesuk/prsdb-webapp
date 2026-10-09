@@ -253,11 +253,10 @@ class PaymentService(
                 checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
                 cancelInProgressPayments(otherPaymentIds, paymentId)
 
-                val property = propertyRegistrationService.registerProperty(registrationData)
-
                 val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
+                val property =
+                    propertyRegistrationService.registerProperty(registrationData.copy(renewalDate = storedPayment.forPeriodEnding))
                 storedPayment.associateWithProperty(property)
-                storedPayment.forPeriodEnding = property.renewalDate
                 storedPayment.status = PaymentStatus.SUCCEEDED
                 paymentRepository.saveAndFlush(storedPayment)
 
