@@ -314,11 +314,13 @@ VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@e
 
 INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
                                                role, invitation_expired_email_sent, is_hidden)
-VALUES ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222a', 'pending-org-invite-a@example.com', 36,
+VALUES (current_date, current_date, '1234abcd-5678-abcd-1234-567abcd2222a', 'pending-org-invite-a@example.com', 36,
         0, false, false),
-       ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222b', 'pending-org-invite-b@example.com', 36,
+       (current_date - 10, current_date - 10, '1234abcd-5678-abcd-1234-567abcd2222b', 'pending-org-invite-b@example.com', 36,
         1, false, false),
-       ('08/25/26', '08/25/26', '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
+       (current_date - 20, current_date - 20, '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
+        0, false, false),
+       (current_date - 60, current_date - 60, '1234abcd-5678-abcd-1234-567abcd2222d', 'expired-org-invite-d@example.com', 36,
         0, false, false);
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),

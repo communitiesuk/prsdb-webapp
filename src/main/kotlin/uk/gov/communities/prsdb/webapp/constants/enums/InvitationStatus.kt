@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-enum class JointLandlordInvitationStatus {
+enum class InvitationStatus {
     PENDING,
     EXPIRED,
     HIDDEN,
