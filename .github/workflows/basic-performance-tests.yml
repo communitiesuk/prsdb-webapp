@@ -1,0 +1,97 @@
+name: NFT Performance Readiness
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Run readiness even if NFT has not changed
+        type: boolean
+        default: false
+      fail-smoke:
+        description: Fail the smoke deliberately to prove restoration (no journeys)
+        type: boolean
+        default: false
+
+concurrency:
+  group: nft-app-service-operation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  changes:
+    name: Check NFT changes
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.changes.outputs.run }}
+      sha: ${{ steps.changes.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: nft
+          path: nft-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compare NFT head with previous success
+        id: changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_READINESS: ${{ inputs.force == true || inputs.fail-smoke == true }}
+        run: node scripts/performance-tests/nft-change-check.mjs
+
+  readiness:
+    name: Verify NFT simulator authentication and restore
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Configure NFT runner credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-network-access
+          role-session-name: nft-readiness-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Read runner IPv4 address
+        run: echo "RUNNER_IP=$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)" >> "$GITHUB_ENV"
+      - name: Start simulator, switch app, smoke-check and restore
+        env:
+          EXPECTED_NFT_SHA: ${{ needs.changes.outputs.sha }}
+          FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
+        run: node scripts/performance-tests/nft-readiness.mjs
+
+  marker:
+    name: Record successful NFT head
+    needs: [changes, readiness]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      (needs.readiness.result == 'success' ||
+      (needs.readiness.result == 'skipped' && needs.changes.outputs.run == 'false'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Write NFT SHA marker
+        env:
+          NFT_SHA: ${{ needs.changes.outputs.sha }}
+        run: printf '%s\n' "$NFT_SHA" > nft-head-sha.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nft-head-sha
+          path: nft-head-sha.txt
+          retention-days: 30

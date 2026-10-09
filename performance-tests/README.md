@@ -58,6 +58,119 @@ pass one of those options (and `--non-interactive`) so the build never blocks wa
 
 Gatling fails the build if any request assertion fails, so these tasks can be wired into CI as-is.
 
+### Daily NFT readiness action (PDJB-430 first slice)
+
+`.github/workflows/basic-performance-tests.yml` runs at **02:17 UTC daily** on a standard GitHub-hosted
+runner and can be dispatched manually from `main`. It observes the `nft` branch.
+The workflow and readiness scripts come from `main`; a separate `nft-source` checkout supplies the NFT SHA.
+If NFT has not changed since the last successful workflow, it skips **before assuming AWS credentials**.
+The small `nft-head-sha` artifact records success (including unchanged skips) for 30 days. Missing/expired
+history causes a fresh readiness check; GitHub/API errors or malformed markers fail explicitly. Failures
+do not advance the marker. The deployed app image must also carry the observed NFT SHA, so a failed
+deployment cannot cause an older app to be marked ready.
+
+This first slice **does not run Gatling**, complete login, submit journey forms, restore data, or send
+notifications. It proves the existing simulator can start, the existing app can switch to simulator
+authentication, and both can return to their original state. Daily journey execution remains a follow-up:
+prove ADR-0040 fixture restoration, session handling and safe Notify recipients first. Readiness success
+is not a performance result and does not complete PDJB-430's eventual performance-execution requirement.
+
+Before enabling the workflow:
+
+1.  Verify the **simulator service's exact referenced task**, not simply the latest family revision, uses the approved digest
+   `sha256:5257554c6f6a50c471ad231bc8f13da4a866b4a2e320a6d1f2f74e5d0ad52755` and current shared simulator
+   settings. Do not rotate or overwrite the existing client ID/public/private credentials. The runner
+   checks app/simulator snapshots agree without reading the private key.
+2. Apply the separately reviewed extension to `nft-performance-test-network-access`. It needs app
+   service describe/update, webapp-family task registration, existing app-role PassRole, and simulator
+   ECR image reads, in addition to existing simulator/network access. AWS task-definition describe and
+   deregister do not support resource-level restrictions: those actions are region-restricted to
+   `eu-west-2`, and the script retires only its own returned temporary ARN. No Terraform-admin, DB,
+   SSM, secret-value or `RunTask` permissions are used.
+3. Restrict the GitHub `nft` environment's deployment branches to `main`, without required reviewers,
+   before granting the expanded role. The workflow also rejects dispatches from other refs.
+4. Merge the workflow/scripts into `main` before dispatching. Do not run NFT infra applies, manual
+   ECS changes, or network changes while it is running. The shared non-cancelling concurrency group
+   serializes this action with the **webapp** NFT deploy workflow, not the separate infra repository.
+
+The runner records the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
+entries in logs. It requires a stable one-task app using `default,nft` and a stopped simulator. It:
+
+1. Adds its runner IPv4 `/32` only to the designated runner WAF IP sets and simulator ALB security
+   group, preserving pre-existing entries.
+2. Starts `nft-one-login-simulator` at one task and checks ECS stability and simulator HTTP health.
+3. Registers a temporary revision in **the existing `prsdb-webapp-nft` family**, preserving the exact
+   deployed image/settings/roles/secret references and adding only the `one-login-simulator` profile.
+   Updating the existing app service to that revision restarts it with simulator authentication.
+4. Waits for the app's `/healthcheck`, verifies simulator discovery, and checks the app authorization
+   endpoint redirects to the simulator with the correct client/callback. It never follows that
+   redirect or calls the blocked simulator `/config` endpoint.
+5. Restores the original app task and verifies its health **before** scaling simulator back to zero.
+   It removes only its owned access, then deregisters the temporary app revision.
+
+Manual proof commands:
+
+```bash
+gh workflow run basic-performance-tests.yml --ref main -f force=true
+# A separate controlled-failure run must fail while still restoring the environment:
+gh workflow run basic-performance-tests.yml --ref main -f force=true -f fail-smoke=true
+```
+
+Inspect the exact resulting run and compare original/restored app task ARN/profile/health, simulator
+desired/running count zero, owned access removal and temporary revision retirement. The `fail-smoke`
+input injects failure after the app starts with simulator auth; it never enables mutating journeys.
+
+**Interrupted-run recovery:** ordinary errors and signals trigger bounded best-effort cleanup, but
+hard cancellation/runner loss can prevent it. Do not start another NFT deployment or readiness run
+until an operator has restored/verified the environment. This slice deliberately adds no SSM journal
+or automatic recovery service. Use the run's logs to obtain `ORIGINAL_APP_TASK`, `TEMPORARY_APP_TASK`,
+runner CIDR, WAF names/IDs and SG marker (`PDJB-430:<run-id>-<attempt>`).
+
+First inspect live service state:
+
+```bash
+aws ecs describe-services --profile prsdb-nft --region eu-west-2 --cluster nft-app \
+  --services nft-app nft-one-login-simulator \
+  --query 'services[].{Name:serviceName,Task:taskDefinition,Desired:desiredCount,Running:runningCount}'
+```
+
+If the app still uses **this run's temporary ARN**, restore the original ARN recorded in its logs.
+If it already uses the original ARN, do not unnecessarily redeploy. If it uses any other task ARN,
+coordinate with that deployment's owner rather than overwriting it. With `ORIGINAL_APP_TASK` set
+to the recorded original ARN:
+
+```bash
+aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app \
+  --service nft-app --task-definition "$ORIGINAL_APP_TASK"
+aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app --services nft-app
+curl --fail --max-time 15 https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck
+# Only once the original app is stable and healthy:
+aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app \
+  --service nft-one-login-simulator --desired-count 0
+aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app \
+  --services nft-one-login-simulator
+```
+
+After verifying no service/deployment references `TEMPORARY_APP_TASK`, deregister that exact ARN:
+
+```bash
+aws ecs deregister-task-definition --profile prsdb-nft --region eu-west-2 \
+  --task-definition "$TEMPORARY_APP_TASK"
+```
+
+For network recovery, use `wafv2 get-ip-set` then `update-ip-set` with the **fresh** lock token and
+current address list minus only the logged run-owned CIDR. CloudFront WAF uses `us-east-1`/`CLOUDFRONT`;
+regional WAF uses `eu-west-2`/`REGIONAL`. Do not restore an old complete address-list snapshot. Use
+`ec2 describe-security-group-rules` to find the exact logged CIDR and run description, then revoke
+only those rule IDs with `ec2 revoke-security-group-ingress`. Leave all pre-existing entries alone.
+
+If registration succeeded but its response was lost, the script might not know the new ARN. Inspect
+the webapp task family/latest revision and compare its original image/settings and simulator profile
+to this run before retiring it. **An active temporary revision can become family-latest and be picked
+by existing deployment tooling**; resolve retirement before another NFT deployment. Do not rotate
+credentials or deploy a newer image as a recovery shortcut.
+
+
 ### Prerequisites for a local run
 
 1. Start the webapp locally using the standard `local` run configuration (it starts the Docker Compose
