@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.config
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertTimeoutPreemptively
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -12,18 +14,18 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClientResponseException
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import java.net.ServerSocket
+import java.net.http.HttpTimeoutException
+import java.time.Duration
 
 class GovUkPayConfigTests {
     @Test
     fun `govUkPayRestClient sends requests to the configured base URL with the API key as a bearer token`() {
         // Arrange
-        val config =
-            GovUkPayConfig().apply {
-                baseUrl = BASE_URL
-                apiKey = API_KEY
-            }
+        val config = createConfig()
         // mutate() copies the base URL and interceptors so the mock server sees exactly what the bean would send
         val builder = config.govUkPayRestClient().mutate()
         val mockServer = MockRestServiceServer.bindTo(builder).build()
@@ -95,10 +97,40 @@ class GovUkPayConfigTests {
         mockServer.verify()
     }
 
+    @Test
+    fun `govUkPayRestClient stops waiting for GOV UK Pay to respond after the read timeout`() {
+        // Arrange
+        ServerSocket(0).use { unresponsiveServer ->
+            val client =
+                createConfig()
+                    .apply {
+                        baseUrl = "http://127.0.0.1:${unresponsiveServer.localPort}"
+                        readTimeout = Duration.ofMillis(100)
+                    }.govUkPayRestClient()
+
+            // Act
+            val exception =
+                assertTimeoutPreemptively(Duration.ofSeconds(5)) {
+                    assertThrows(ResourceAccessException::class.java) {
+                        client
+                            .get()
+                            .uri("/v1/payments/{paymentId}", PAYMENT_ID)
+                            .retrieve()
+                            .toBodilessEntity()
+                    }
+                }
+
+            // Assert
+            assertInstanceOf(HttpTimeoutException::class.java, exception.cause)
+        }
+    }
+
     private fun createConfig() =
         GovUkPayConfig().apply {
             baseUrl = BASE_URL
             apiKey = API_KEY
+            connectTimeout = Duration.ofSeconds(1)
+            readTimeout = Duration.ofSeconds(1)
         }
 
     companion object {
