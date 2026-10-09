@@ -94,7 +94,6 @@ gasSafetyTask:
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
   # TODO PDJB-1617: Remove the provideGasCertificateLater section when the letting-agent feature flag is removed.
   provideGasCertificateLater:
-    title: Provide your gas safety certificate later
     heading: Provide your gas safety certificate later
     whenToUpload:
       heading: 'When you’ll need to upload your gas safety certificate'
@@ -119,6 +118,7 @@ gasSafetyTask:
         paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
   provideGasSafetyDetailsLater:
     heading: Provide these details later
+    pageTitle: Provide your gas safety certificate later
     whenToProvide:
       heading: When you’ll need to provide these details
     occupied:
@@ -533,6 +533,7 @@ epcTask:
         paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
   checkEpcAnswers:
     heading: Energy performance certificate (EPC)
+    pageTitle: Check your energy performance certificate (EPC) answers
     epc:
       yourEpc: Your EPC
       viewFullEpc: View full EPC (opens in new tab)

@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
+import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 
 class PropertyRegistrationCorrespondenceEmailSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -57,5 +59,22 @@ class PropertyRegistrationCorrespondenceEmailSinglePageTests : IntegrationTestWi
 
         assertThat(correspondenceEmailPage.errorSummary)
             .containsText("Enter an email address in the correct format")
+    }
+
+    @Nested
+    inner class OrganisationLandlord :
+        NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-with-incomplete-properties.sql") {
+        @BeforeEach
+        fun enableFeatureFlag() {
+            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
+        }
+
+        @Test
+        fun `the account email option displays the logged-in user's email`() {
+            val correspondenceEmailPage = navigator.skipToPropertyRegistrationCorrespondenceEmailPage()
+
+            assertThat(correspondenceEmailPage.form.whichEmailRadios).containsText("logged.in.user@example.com")
+            assertThat(correspondenceEmailPage.form.whichEmailRadios).not().containsText("contact@example.com")
+        }
     }
 }

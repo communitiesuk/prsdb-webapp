@@ -11,7 +11,7 @@
 <!--/*@thymesVar id="nonEpcRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="insetTextKey" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.epcTask.checkEpcAnswers.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.epcTask.checkEpcAnswers.pageTitle}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}">Energy performance certificate (EPC)</h1>
 

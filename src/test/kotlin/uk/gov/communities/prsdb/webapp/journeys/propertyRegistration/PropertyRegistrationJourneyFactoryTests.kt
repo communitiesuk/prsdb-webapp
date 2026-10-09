@@ -11,12 +11,11 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 
 class PropertyRegistrationJourneyFactoryTests {
     @Test
@@ -53,10 +52,9 @@ class PropertyRegistrationJourneyFactoryTests {
                 on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateEnabled
                 on { checkFeature(CORRESPONDENCE_ADDRESS) } doReturn correspondenceEnabled
             }
-        val landlord = mock<Landlord> { on { email } doReturn "original.landlord@example.com" }
-        val userToLandlordService = mock<UserToLandlordService> { on { getCurrentLandlordForUser() } doReturn landlord }
+        val currentUserService = mock<CurrentUserService> { on { getCurrentEmail() } doReturn "original.landlord@example.com" }
         val paymentsStrategy = mock<PaymentsPropertyRegistrationStrategy>()
-        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, userToLandlordService, paymentsStrategy)
+        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, currentUserService, paymentsStrategy)
     }
 
     companion object {

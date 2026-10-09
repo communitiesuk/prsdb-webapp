@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
@@ -9,7 +8,7 @@
 <!--/*@thymesVar id="whenYouCanRegisterAnExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.heading}">
             propertyCompliance.epcTask.confirmEpcDetailsFromUprn.heading

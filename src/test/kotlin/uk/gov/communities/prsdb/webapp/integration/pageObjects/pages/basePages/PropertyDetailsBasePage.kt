@@ -10,6 +10,8 @@ abstract class PropertyDetailsBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    override val expectedTitleHeading = "Property record"
+
     val tabs = PropertyDetailsTabs(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")

@@ -20,10 +20,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
-import java.net.URI
 import java.time.LocalDate
 import kotlin.test.assertIs
 
@@ -34,9 +32,6 @@ class PaymentSummaryStepConfigTests {
 
     @Mock
     private lateinit var mockPaymentService: PaymentService
-
-    @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
@@ -63,7 +58,6 @@ class PaymentSummaryStepConfigTests {
             PaymentSummaryStepConfig(
                 mockAddressAvailabilityService,
                 mockPaymentService,
-                mockAbsoluteUrlProvider,
             )
     }
 
@@ -155,7 +149,6 @@ class PaymentSummaryStepConfigTests {
         assertEquals("https://pay.example.test/next", assertIs<Destination.ExternalUrl>(result).externalUrl)
         verify(mockPaymentService).createPropertyRegistrationPayment(
             journeyId,
-            "https://example.test/landlord/register-property/payment-return?journeyId=$journeyId",
             "landlord@example.com",
             createQuote(today),
         )
@@ -178,8 +171,7 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
-        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any(), any())
-        verifyNoInteractions(mockAbsoluteUrlProvider)
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
     }
 
     @Test
@@ -198,8 +190,7 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
-        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any(), any())
-        verifyNoInteractions(mockAbsoluteUrlProvider)
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
     }
 
     private fun stubAddressTask() {
@@ -213,13 +204,11 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun stubPaymentCreation() {
-        val returnUrl = "https://example.test/landlord/register-property/payment-return?journeyId=$journeyId"
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
-        whenever(mockAbsoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(journeyId)).thenReturn(URI(returnUrl))
         val quote = createQuote(today)
         whenever(mockState.paymentQuote).thenReturn(quote)
-        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, returnUrl, "landlord@example.com", quote))
+        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
             .thenReturn("https://pay.example.test/next")
     }
 
