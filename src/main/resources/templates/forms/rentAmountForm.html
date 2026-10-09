@@ -31,26 +31,23 @@
         <li th:text="#{forms.rentAmount.bullet.four}">forms.rentAmount.bullet.four</li>
         <li th:text="#{forms.rentAmount.bullet.five}">forms.rentAmount.bullet.five</li>
     </ul>
-    <h2 class="govuk-heading-m" th:text="#{${subheading}}">
-        subheading
-    </h2>
-    <th:block th:if="${showRentCalculationSection}">
-        <p class="govuk-body" th:text="#{forms.rentAmount.conditionalSection.paragraph.one}">
-            forms.rentAmount.conditionalSection.paragraph.one
-        </p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{forms.rentAmount.conditionalSection.bullet.one}">forms.rentAmount.conditionalSection.bullet.one</li>
-            <li th:text="#{forms.rentAmount.conditionalSection.bullet.two}">forms.rentAmount.conditionalSection.bullet.two</li>
-        </ul>
-    </th:block>
-    <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.four}">
-        forms.rentAmount.paragraph.four
-    </p>
 </th:block>
-    <th:block id="form-content">
-        <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()},'rentAmount', null, #{${fieldSetHint}})}">
-            <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', null)}"></th:block>
+<th:block id="form-content" th:with="rentAmountHint=${fieldSetHint}">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='rentAmount', fieldSetHeading=#{${subheading}}, fieldSetHint=null, fieldSetHeadingLabelTo='rentAmount', fieldSetHeadingLabelSize='m')}">
+        <th:block th:if="${showRentCalculationSection}">
+            <p class="govuk-body" th:text="#{forms.rentAmount.conditionalSection.paragraph.one}">
+                forms.rentAmount.conditionalSection.paragraph.one
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{forms.rentAmount.conditionalSection.bullet.one}">forms.rentAmount.conditionalSection.bullet.one</li>
+                <li th:text="#{forms.rentAmount.conditionalSection.bullet.two}">forms.rentAmount.conditionalSection.bullet.two</li>
+            </ul>
         </th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
+        <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.four}">forms.rentAmount.paragraph.four</p>
+        <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', #{${rentAmountHint}})}"></th:block>
     </th:block>
+    <button
+        th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
+</th:block>
 </html>
