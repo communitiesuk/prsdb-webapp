@@ -12,6 +12,11 @@ import java.time.Instant
 interface PaymentRepository : JpaRepository<Payment, String> {
     fun findAllByAssociatedIncompleteProperty(associatedIncompleteProperty: LandlordIncompleteProperty): List<Payment>
 
+    fun findByReferenceAndAssociatedIncompleteProperty(
+        reference: String,
+        associatedIncompleteProperty: LandlordIncompleteProperty,
+    ): Payment?
+
     @Modifying
     @Transactional
     @Query(
