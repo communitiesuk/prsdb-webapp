@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationPaymentQuoteSessionStore
 import java.time.LocalDate
 
 @JourneyFrameworkComponent
@@ -19,14 +18,13 @@ class PaymentSummaryStepConfig(
     private val addressAvailabilityService: AddressAvailabilityService,
     private val paymentService: PaymentService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val paymentQuoteSessionStore: PropertyRegistrationPaymentQuoteSessionStore,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     // TODO PDJB-996: Replace this stub with the real payment summary page (shows the amount the user has to pay).
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val quote = paymentService.getPropertyRegistrationPaymentQuote()
-        paymentQuoteSessionStore.storeQuote(state.journeyId, quote)
+        state.paymentQuote = quote
 
         return mapOf("todoComment" to "Payment summary (TODO PDJB-996)")
     }
@@ -53,9 +51,9 @@ class PaymentSummaryStepConfig(
         }
 
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
-        val quote = paymentQuoteSessionStore.getQuote(state.journeyId)
+        val quote = state.paymentQuote
         if (quote == null || quote.quoteDate != today) {
-            paymentQuoteSessionStore.storeQuote(state.journeyId, paymentService.getPropertyRegistrationPaymentQuote(today))
+            state.paymentQuote = paymentService.getPropertyRegistrationPaymentQuote(today)
             // TODO PDJB-996: Confirm how to explain to the user when an overnight refresh changes the quoted amount.
             //  This will most likely be a rare occurrence, but we should still handle it gracefully and inform the user of what has happened.
             //  For now, we will just redirect them back to the payment summary page. If no design decision is made before PDJB-996 is completed

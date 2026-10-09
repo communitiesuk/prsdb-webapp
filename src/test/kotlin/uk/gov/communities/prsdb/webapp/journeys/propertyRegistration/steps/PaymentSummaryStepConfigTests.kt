@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPay
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationPaymentQuoteSessionStore
 import java.net.URI
 import java.time.LocalDate
 import kotlin.test.assertIs
@@ -38,9 +37,6 @@ class PaymentSummaryStepConfigTests {
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-
-    @Mock
-    private lateinit var mockPaymentQuoteSessionStore: PropertyRegistrationPaymentQuoteSessionStore
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
@@ -68,15 +64,13 @@ class PaymentSummaryStepConfigTests {
                 mockAddressAvailabilityService,
                 mockPaymentService,
                 mockAbsoluteUrlProvider,
-                mockPaymentQuoteSessionStore,
             )
     }
 
     @Test
-    fun `getStepSpecificContent stores a newly calculated quote for the journey`() {
+    fun `getStepSpecificContent stores a newly calculated quote in journey state`() {
         // Arrange
         val quote = createQuote(today)
-        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
 
         // Act
@@ -84,7 +78,7 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals("Payment summary (TODO PDJB-996)", content["todoComment"])
-        verify(mockPaymentQuoteSessionStore).storeQuote(journeyId, quote)
+        verify(mockState).paymentQuote = quote
     }
 
     @Test
@@ -143,7 +137,8 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(mockAlreadyRegisteredStep, assertIs<Destination.VisitableStep>(result).step)
-        verifyNoInteractions(mockPaymentService, mockPaymentQuoteSessionStore)
+        verifyNoInteractions(mockPaymentService)
+        verify(mockState, never()).paymentQuote
     }
 
     @Test
@@ -165,7 +160,7 @@ class PaymentSummaryStepConfigTests {
             createQuote(today),
         )
         verify(mockPaymentService, never()).getPropertyRegistrationPaymentQuote(any())
-        verify(mockPaymentQuoteSessionStore, never()).storeQuote(any(), any())
+        verify(mockState, never()).paymentQuote = anyOrNull()
     }
 
     @Test
@@ -175,7 +170,6 @@ class PaymentSummaryStepConfigTests {
         stubSummaryDestination()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
         val refreshedQuote = createQuote(today)
-        whenever(mockPaymentQuoteSessionStore.getQuote(journeyId)).thenReturn(null)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
 
         // Act
@@ -183,7 +177,7 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
-        verify(mockPaymentQuoteSessionStore).storeQuote(journeyId, refreshedQuote)
+        verify(mockState).paymentQuote = refreshedQuote
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any(), any())
         verifyNoInteractions(mockAbsoluteUrlProvider)
     }
@@ -194,7 +188,7 @@ class PaymentSummaryStepConfigTests {
         stubAddressTask()
         stubSummaryDestination()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
-        whenever(mockPaymentQuoteSessionStore.getQuote(journeyId)).thenReturn(createQuote(today.minusDays(1)))
+        whenever(mockState.paymentQuote).thenReturn(createQuote(today.minusDays(1)))
         val refreshedQuote = createQuote(today)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
 
@@ -203,7 +197,7 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
-        verify(mockPaymentQuoteSessionStore).storeQuote(journeyId, refreshedQuote)
+        verify(mockState).paymentQuote = refreshedQuote
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any(), any())
         verifyNoInteractions(mockAbsoluteUrlProvider)
     }
@@ -214,7 +208,6 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun stubSummaryDestination() {
-        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.paymentSummaryStep).thenReturn(mockPaymentSummaryStep)
         whenever(mockPaymentSummaryStep.currentJourneyId).thenReturn(journeyId)
     }
@@ -225,7 +218,7 @@ class PaymentSummaryStepConfigTests {
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
         whenever(mockAbsoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(journeyId)).thenReturn(URI(returnUrl))
         val quote = createQuote(today)
-        whenever(mockPaymentQuoteSessionStore.getQuote(journeyId)).thenReturn(quote)
+        whenever(mockState.paymentQuote).thenReturn(quote)
         whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, returnUrl, "landlord@example.com", quote))
             .thenReturn("https://pay.example.test/next")
     }

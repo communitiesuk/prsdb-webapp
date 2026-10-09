@@ -107,6 +107,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
@@ -785,6 +786,7 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
+    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
@@ -861,6 +863,7 @@ interface PropertyRegistrationJourneyState :
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
 
     // Payment steps (behind PAYMENTS flag)
+    var paymentQuote: PropertyRegistrationPaymentQuote?
     val paymentSummaryStep: PaymentSummaryStep
     val paymentReturnStep: PaymentReturnStep
     val paymentRoutingStep: PaymentRoutingStep
