@@ -64,7 +64,7 @@ jobs:
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-network-access
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
