@@ -411,6 +411,41 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `createPropertyOwnership preserves an explicitly supplied renewal date`() {
+        // Arrange
+        val renewalDate = LocalDate.of(2030, 6, 12)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY))
+            .thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456))
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer { it.arguments[0] as PropertyOwnership }
+
+        // Act
+        val property =
+            propertyOwnershipService.createPropertyOwnership(
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = false,
+                numberOfHouseholds = 0,
+                numberOfPeople = 0,
+                registeringLandlord = landlord,
+                anniversary = MonthDay.of(3, 15),
+                propertyBuildType = PropertyType.DETACHED_HOUSE,
+                address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                renewalDate = renewalDate,
+            )
+
+        // Assert
+        assertEquals(renewalDate, property.renewalDate)
+    }
+
+    @Test
     fun `createPropertyOwnership sets the renewal date from the given anniversary`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createIndividualLandlord()
