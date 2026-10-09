@@ -13,9 +13,9 @@ abstract class RentAmountFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(
-    page,
-    urlSegment,
-) {
+        page,
+        urlSegment,
+    ) {
     val backLink = BackLink.default(page)
     val header = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
