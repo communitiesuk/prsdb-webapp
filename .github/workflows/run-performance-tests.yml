@@ -1,4 +1,4 @@
-name: NFT Performance Readiness
+name: Run Performance Tests
 on:
   schedule:
     - cron: '0 19 * * *'
@@ -46,8 +46,8 @@ jobs:
           FORCE_READINESS: ${{ inputs.force == true || inputs.fail-smoke == true }}
         run: node scripts/performance-tests/nft-change-check.mjs
 
-  readiness:
-    name: Verify NFT simulator authentication and restore
+  performance-tests:
+    name: Prepare, test, and restore NFT
     needs: changes
     if: needs.changes.outputs.run == 'true'
     environment: nft
@@ -70,19 +70,30 @@ jobs:
           role-duration-seconds: 3600
       - name: Read runner IPv4 address
         run: echo "RUNNER_IP=$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)" >> "$GITHUB_ENV"
-      - name: Start simulator, switch app, smoke-check and restore
+      - name: Prepare environment
         env:
           EXPECTED_NFT_SHA: ${{ needs.changes.outputs.sha }}
           FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
-        run: node scripts/performance-tests/nft-readiness.mjs
+          READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
+        run: node scripts/performance-tests/nft-prepare.mjs
+      - name: Run performance tests (stub)
+        run: |
+          echo "::notice::Performance test execution is not yet implemented (PDJB-238, see PR #2028)."
+          echo "Once the Gatling basic-performance-tests simulation is wired in here, it will run against"
+          echo "the NFT app while it is switched to the One Login simulator, before the next step restores it."
+      - name: Restore environment
+        if: always()
+        env:
+          READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
+        run: node scripts/performance-tests/nft-restore.mjs
 
   marker:
     name: Record successful NFT head
-    needs: [changes, readiness]
+    needs: [changes, performance-tests]
     if: >-
       always() && needs.changes.result == 'success' &&
-      (needs.readiness.result == 'success' ||
-      (needs.readiness.result == 'skipped' && needs.changes.outputs.run == 'false'))
+      (needs.performance-tests.result == 'success' ||
+      (needs.performance-tests.result == 'skipped' && needs.changes.outputs.run == 'false'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

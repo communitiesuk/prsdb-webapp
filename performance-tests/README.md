@@ -58,22 +58,32 @@ pass one of those options (and `--non-interactive`) so the build never blocks wa
 
 Gatling fails the build if any request assertion fails, so these tasks can be wired into CI as-is.
 
-### Daily NFT readiness action (PDJB-430 first slice)
+### Daily NFT performance-test orchestrator (PDJB-430 first slice)
 
-`.github/workflows/basic-performance-tests.yml` runs at **02:17 UTC daily** on a standard GitHub-hosted
-runner and can be dispatched manually from `main`. It observes the `nft` branch.
-The workflow and readiness scripts come from `main`; a separate `nft-source` checkout supplies the NFT SHA.
-If NFT has not changed since the last successful workflow, it skips **before assuming AWS credentials**.
-The small `nft-head-sha` artifact records success (including unchanged skips) for 30 days. Missing/expired
-history causes a fresh readiness check; GitHub/API errors or malformed markers fail explicitly. Failures
-do not advance the marker. The deployed app image must also carry the observed NFT SHA, so a failed
-deployment cannot cause an older app to be marked ready.
+`.github/workflows/run-performance-tests.yml` runs at **19:00 UTC daily** (chosen to avoid the 1–2am
+maintenance windows) on a standard GitHub-hosted runner and can be dispatched manually from `main`. It
+observes the `nft` branch. The workflow and scripts come from `main`; a separate `nft-source` checkout
+supplies the NFT SHA. If NFT has not changed since the last successful workflow, it skips **before
+assuming AWS credentials**. The small `nft-head-sha` artifact records success (including unchanged
+skips) for 30 days. Missing/expired history causes a fresh run; GitHub/API errors or malformed markers
+fail explicitly. Failures do not advance the marker. The deployed app image must also carry the
+observed NFT SHA, so a failed deployment cannot cause an older app to be marked ready.
+
+The `performance-tests` job runs three steps on the same runner (so the IP it allowlists for WAF/SG
+access stays valid throughout): **Prepare environment** switches the app to simulator authentication
+and smoke-checks it; **Run performance tests** is currently a stub (see below); **Restore environment**
+(`if: always()`) always runs, even if preparation or the test step failed, and returns the app/simulator
+and any owned WAF/SG entries to their original state. Preparation and restoration are separate scripts
+(`nft-prepare.mjs`/`nft-restore.mjs`, sharing helpers from `nft-shared.mjs`) that hand off a small JSON
+state file between them, rather than one script performing an atomic switch-then-restore.
 
 This first slice **does not run Gatling**, complete login, submit journey forms, restore data, or send
 notifications. It proves the existing simulator can start, the existing app can switch to simulator
 authentication, and both can return to their original state. Daily journey execution remains a follow-up:
-prove ADR-0040 fixture restoration, session handling and safe Notify recipients first. Readiness success
+prove ADR-0040 fixture restoration, session handling and safe Notify recipients first. A successful run
 is not a performance result and does not complete PDJB-430's eventual performance-execution requirement.
+The "Run performance tests" step is a placeholder until the Gatling simulations (PDJB-552, see PR #2028)
+are wired in here to run between preparation and restoration.
 
 Before enabling the workflow:
 
@@ -85,7 +95,7 @@ Before enabling the workflow:
    service describe/update, webapp-family task registration, existing app-role PassRole, and simulator
    ECR image reads, in addition to existing simulator/network access. AWS task-definition describe and
    deregister do not support resource-level restrictions: those actions are region-restricted to
-   `eu-west-2`, and the script retires only its own returned temporary ARN. No Terraform-admin, DB,
+   `eu-west-2`, and the scripts retire only their own returned temporary ARN. No Terraform-admin, DB,
    SSM, secret-value or `RunTask` permissions are used.
 3. Restrict the GitHub `nft` environment's deployment branches to `main`, without required reviewers,
    before granting the expanded role. The workflow also rejects dispatches from other refs.
@@ -93,8 +103,9 @@ Before enabling the workflow:
    ECS changes, or network changes while it is running. The shared non-cancelling concurrency group
    serializes this action with the **webapp** NFT deploy workflow, not the separate infra repository.
 
-The runner records the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
-entries in logs. It requires a stable one-task app using `default,nft` and a stopped simulator. It:
+The scripts record the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
+entries in logs (and in the handoff state file). They require a stable one-task app using `default,nft`
+and a stopped simulator. Preparation:
 
 1. Adds its runner IPv4 `/32` only to the designated runner WAF IP sets and simulator ALB security
    group, preserving pre-existing entries.
@@ -105,15 +116,18 @@ entries in logs. It requires a stable one-task app using `default,nft` and a sto
 4. Waits for the app's `/healthcheck`, verifies simulator discovery, and checks the app authorization
    endpoint redirects to the simulator with the correct client/callback. It never follows that
    redirect or calls the blocked simulator `/config` endpoint.
+
+Restoration (run unconditionally, even after a prior-step failure):
+
 5. Restores the original app task and verifies its health **before** scaling simulator back to zero.
    It removes only its owned access, then deregisters the temporary app revision.
 
 Manual proof commands:
 
 ```bash
-gh workflow run basic-performance-tests.yml --ref main -f force=true
+gh workflow run run-performance-tests.yml --ref main -f force=true
 # A separate controlled-failure run must fail while still restoring the environment:
-gh workflow run basic-performance-tests.yml --ref main -f force=true -f fail-smoke=true
+gh workflow run run-performance-tests.yml --ref main -f force=true -f fail-smoke=true
 ```
 
 Inspect the exact resulting run and compare original/restored app task ARN/profile/health, simulator

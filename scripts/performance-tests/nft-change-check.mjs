@@ -16,7 +16,7 @@ export function shouldRunForNftHead({currentSha, previousSuccessfulSha = null, f
 
 export async function previousSuccessfulSha(gh, log = console.log) {
   const runs = JSON.parse(await gh([
-    'run', 'list', '--repo', 'communitiesuk/prsdb-webapp', '--workflow', 'basic-performance-tests.yml',
+    'run', 'list', '--repo', 'communitiesuk/prsdb-webapp', '--workflow', 'run-performance-tests.yml',
     '--branch', 'main', '--status', 'success', '--limit', '1', '--json', 'databaseId',
   ]));
   if (!runs.length) {
