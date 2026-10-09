@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
 import kotlin.test.assertEquals
 
 class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -67,10 +66,9 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `full name page back link returns to join organisation page`(page: Page) {
             // Arrange
-            val validateTokenPage =
+            val checkUserIsLandlordPage =
                 navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
-            validateTokenPage.form.radios.selectValue(TokenValidity.VALID)
-            validateTokenPage.form.submit()
+            checkUserIsLandlordPage.form.submit()
             val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
             joinOrganisationPage.form.submit()
             val fullNamePage = assertPageIs(page, FullNamePage::class)

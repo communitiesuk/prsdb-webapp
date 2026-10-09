@@ -7,12 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJoinOrganisationStepConfig")
-class JoinOrganisationStepConfig(
-    private val invitationService: OrganisationalLandlordInvitationService,
-) :
+class JoinOrganisationStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -20,11 +17,7 @@ class JoinOrganisationStepConfig(
         mapOf(
             "organisationName" to
                 (
-                    // TODO PDJB-1822: Cache the validated invitation or organisation name in journey state
-                    // to avoid this repeated lookup.
-                    invitationService.getInvitationForJourneyIdOrNull(state.journeyId)
-                        ?.organisationalLandlord
-                        ?.name
+                    state.organisationName
                         ?: throw PrsdbWebException("Could not find an organisation name for invitation journey ${state.journeyId}")
                 ),
         )
