@@ -28,8 +28,16 @@ Every page uses `fragments/layout :: layout(title, content, hasErrors)`:
 The layout builds the `<title>` as `[Error: ]<title> - <service name> - GOV.UK` (via the `pageTitleFormat` message), so
 each page title is unique and descriptive:
 - Pass the **same expression as the page's h1** as the `title` argument.
-- Only use a different title when the h1 is unsuitable — for example, it is more than 65 characters. In that case, pass a shorter message as the
-  `title` argument, but this should be rare and should always be checked first. For shared journey form templates
+- Only use a different title when the h1 is unsuitable as a title on its own. To be a suitable title, the h1 should:
+  - not be too long. Aim for 65 characters or fewer, but this is a guideline: a slightly longer h1 is fine if a
+    shorter title would be less clear.
+  - be unique. Different pages a user can reach should not share a title, e.g. a shared template used by both the gas
+    and electrical safety tasks. Mutually exclusive variants of one step (e.g. occupied/unoccupied versions) can share
+    a title, as a user only sees one of them.
+  - describe the page without its surrounding content, e.g. a check answers page whose h1 is just the topic
+    ("Gas safety certificate") is not descriptive enough.
+- If the h1 fails these checks, pass a different message (usually a `pageTitle` key alongside the `heading` key) as
+  the `title` argument, but this should be rare and should always be checked first. For shared journey form templates
   where only some steps need a different title, see `pageTitleOverride` in `journeys.instructions.md`.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
 

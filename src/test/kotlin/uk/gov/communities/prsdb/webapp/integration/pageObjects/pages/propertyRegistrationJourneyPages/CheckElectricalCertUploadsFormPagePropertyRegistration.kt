@@ -14,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 class CheckElectricalCertUploadsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckElectricalCertUploadsStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading: String
+        get() = table.rows.count().let { "You’ve uploaded $it electrical safety certificate file${if (it == 1) "" else "s"}" }
+
     val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
 

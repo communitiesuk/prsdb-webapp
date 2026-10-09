@@ -150,6 +150,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileDownloader
+import uk.gov.communities.prsdb.webapp.services.PaymentReferenceParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
@@ -255,10 +256,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
-        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any())).thenAnswer { invocation ->
+        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any(), any())).thenAnswer { invocation ->
             URI(
                 "http://localhost:$port${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}" +
-                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}",
+                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}" +
+                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${invocation.getArgument<String>(1)}",
             )
         }
         // The fake GOV.UK Pay sends the user straight back to the return URL, as if they had completed the card details pages
@@ -336,7 +338,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val request = requestCaptor.firstValue
             assertEquals("Register your rental property", request.description)
             assertTrue(request.amount > 0)
-            assertTrue(request.returnUrl.endsWith("${PaymentReturnStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId"))
+            assertTrue(
+                request.returnUrl.endsWith(
+                    "${PaymentReturnStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId" +
+                        "&${PaymentReferenceParameterService.PARAMETER_NAME}=${request.reference}",
+                ),
+            )
             val payment = paymentRepository.findAll().single { it.reference == request.reference }
             assertEquals(PaymentStatus.CREATED, payment.status)
             assertEquals(request.amount, payment.amountInPence)
