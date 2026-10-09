@@ -1,0 +1,18 @@
+heading: Invite a team member
+intro: Send an invitation email to a team member with a secure link allowing them to join {0,,organisationName} on the service.
+email:
+  label: Email address
+  error:
+    missing: Enter an email address
+    invalidFormat: Enter an email address in the correct format, like name@example.com
+role:
+  fieldSetHeading: Choose their access level
+  radios:
+    admin:
+      label: Administrator
+      hint: Can register or edit properties, manage team members, and change organisation information
+    editor:
+      label: Editor
+      hint: Can register or edit property information
+  error:
+    missing: Select their access level

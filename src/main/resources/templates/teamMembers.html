@@ -5,7 +5,7 @@
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
 
-        <!--/* TODO PDJB-1760: add the "Invite a team member" button for admins, linking to the invite team member journey */-->
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${inviteTeamMemberUrl}, #{teamMembers.inviteTeamMemberButton})}"></a>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">

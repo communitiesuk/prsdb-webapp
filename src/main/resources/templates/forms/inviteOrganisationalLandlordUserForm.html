@@ -1,0 +1,20 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteOrganisationalLandlordUserFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="organisationName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{inviteOrganisationalLandlordUser.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{inviteOrganisationalLandlordUser.heading}">inviteOrganisationalLandlordUser.heading</h1>
+    <p class="govuk-body" th:text="#{inviteOrganisationalLandlordUser.intro(${organisationName})}">inviteOrganisationalLandlordUser.intro</p>
+</th:block>
+<th:block id="form-content">
+    <div th:replace="~{fragments/forms/emailInput :: emailInput(#{inviteOrganisationalLandlordUser.email.label}, 'emailAddress', null)}"></div>
+    <th:block id="role-fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#role-fieldset-content/content()}, fieldName='role', fieldSetHeading=#{inviteOrganisationalLandlordUser.role.fieldSetHeading}, fieldSetHint=null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'role', null, ${radioOptions})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.saveAndContinue})}"></button>
+</th:block>
+</html>

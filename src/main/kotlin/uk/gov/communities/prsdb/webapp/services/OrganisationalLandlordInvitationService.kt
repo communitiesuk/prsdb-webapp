@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import java.util.UUID
@@ -37,6 +40,22 @@ class OrganisationalLandlordInvitationService(
             }
 
         return invitationRepository.findByToken(tokenUuid)
+    }
+
+    @Transactional
+    fun createInvitation(
+        invitedEmail: String,
+        role: OrganisationalLandlordUserRole,
+        organisationalLandlord: OrganisationalLandlord,
+    ) {
+        invitationRepository.save(
+            OrganisationalLandlordInvitation(
+                token = UUID.randomUUID(),
+                invitedEmail = invitedEmail,
+                organisationalLandlord = organisationalLandlord,
+                role = role,
+            ),
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
