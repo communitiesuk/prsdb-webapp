@@ -20,6 +20,8 @@ class PropertyDetailsPageLettingAgentView(
             UUID.fromString(urlArguments["token"]!!),
         ),
     ) {
+    override val expectedTitleHeading = "Provide details for a landlord’s rental property"
+
     val summaryList = LettingAgentSummaryList(page)
 
     val serviceNavigation = ServiceNavigation(page)

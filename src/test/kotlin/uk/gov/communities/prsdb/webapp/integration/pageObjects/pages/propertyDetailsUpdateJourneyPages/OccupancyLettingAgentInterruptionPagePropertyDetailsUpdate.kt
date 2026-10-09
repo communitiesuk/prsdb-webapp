@@ -12,4 +12,6 @@ class OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate(
         page,
         UpdateOccupancyController.getUpdateOccupancyRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Are you sure you want to change this property to unoccupied?"
+}
