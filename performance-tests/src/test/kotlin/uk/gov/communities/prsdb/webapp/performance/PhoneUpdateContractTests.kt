@@ -141,6 +141,7 @@ class PhoneUpdateContractTests {
             ),
         )
 
+    @Suppress("ktlint:standard:max-line-length")
     private class PhoneServer(
         private val includeCsrf: Boolean = true,
         private val persistPhone: Boolean = true,
@@ -246,7 +247,8 @@ class PhoneUpdateContractTests {
                             requests.add("GET details")
                             detailsCount++
                             val saved = if (persistPhone) submittedPhone else "07123456789"
-                            200 to """
+                            200 to
+                                """
                                 <div class="govuk-summary-list__row">
                                   <dd class="govuk-summary-list__value">$saved</dd>
                                   <dd><a href="$step">Change phone number</a></dd>

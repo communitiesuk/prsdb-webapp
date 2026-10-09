@@ -137,13 +137,17 @@ class IndividualLandlordRegistrationContractTests {
             get() = "http://127.0.0.1:${server.address.port}"
         val requests = ConcurrentLinkedQueue<Request>()
         val submittedForms = ConcurrentHashMap<String, Map<String, String>>()
+
         @Volatile
         var registrationNumberWasRendered = false
             private set
+
         @Volatile
         private var identityCallbackCompleted = false
+
         @Volatile
         private var reauthenticationPending = false
+
         @Volatile
         private var reauthenticationCompleted = false
 
@@ -192,7 +196,9 @@ class IndividualLandlordRegistrationContractTests {
                             redirect("$baseUrl/authorize?vtr=%5B%22Cl.Cm.P2%22%5D&claims=$ENCODED_CLAIMS")
                         }
                         exchange.requestMethod == "GET" && path == "/authorize" ->
-                            Triple(200, """
+                            Triple(
+                                200,
+                                """
                                 <form method="post" action="$baseUrl/form-submit">
                                   <input type="hidden" name="authCode" value="identity-code">
                                   <input type="hidden" name="authRequestParams" value="encoded-request">
@@ -208,7 +214,9 @@ class IndividualLandlordRegistrationContractTests {
                                   <textarea data-testid="return-codes" name="returnCodes"></textarea>
                                   <button name="continue" value="continue">Continue</button>
                                 </form>
-                                """.trimIndent(), "text/html")
+                                """.trimIndent(),
+                                "text/html",
+                            )
                         exchange.requestMethod == "POST" && path == "/form-submit" -> {
                             if (cookie?.contains("IDV_STATE=identity-flow") != true && !reauthenticationPending) {
                                 Triple(403, "Missing identity session", "text/plain")
@@ -251,10 +259,14 @@ class IndividualLandlordRegistrationContractTests {
                             redirect("/oauth2/authorization/one-login")
                         exchange.requestMethod == "GET" && path == "/landlord/register-as-a-landlord/confirmation" -> {
                             registrationNumberWasRendered = true
-                            Triple(200, """
+                            Triple(
+                                200,
+                                """
                                 <div class="govuk-panel__body"><strong>LRN-SYNTHETIC-001</strong></div>
                                 <a href="/landlord/dashboard">Go to dashboard</a>
-                                """.trimIndent(), "text/html")
+                                """.trimIndent(),
+                                "text/html",
+                            )
                         }
                         exchange.requestMethod == "GET" && path == "/landlord/dashboard" ->
                             Triple(200, "<h1>Landlord dashboard</h1>Landlord registration number", "text/html")
@@ -303,9 +315,9 @@ class IndividualLandlordRegistrationContractTests {
             path.substringAfter("/landlord/register-as-a-landlord/", "").takeIf {
                 it in
                     setOf(
-                    "privacy-notice",
-                    "confirm-identity",
-                    "email",
+                        "privacy-notice",
+                        "confirm-identity",
+                        "email",
                         "phone-number",
                         "landlord-type",
                         "country-of-residence",
@@ -388,5 +400,4 @@ class IndividualLandlordRegistrationContractTests {
                     )
         }
     }
-
 }

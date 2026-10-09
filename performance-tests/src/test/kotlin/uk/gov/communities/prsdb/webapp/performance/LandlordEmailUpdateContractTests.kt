@@ -72,6 +72,7 @@ class LandlordEmailUpdateContractTests {
             ),
         )
 
+    @Suppress("ktlint:standard:max-line-length")
     private class EmailServer(
         private val includeValidationError: Boolean = false,
         private val contentType: String = "text/html; charset=utf-8",

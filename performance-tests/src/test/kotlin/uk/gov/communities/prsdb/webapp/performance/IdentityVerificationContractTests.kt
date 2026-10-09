@@ -7,8 +7,8 @@ import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -101,12 +101,15 @@ class IdentityVerificationContractTests {
         val appRequests = ConcurrentLinkedQueue<Request>()
         val simulatorRequests = ConcurrentLinkedQueue<Request>()
         val authorizationParameters = ConcurrentHashMap<String, String>()
+
         @Volatile
         var submittedFields: Map<String, String> = emptyMap()
             private set
+
         @Volatile
         var resumedLocation: String? = null
             private set
+
         @Volatile
         private var verified = true
 
@@ -177,7 +180,8 @@ class IdentityVerificationContractTests {
                                     URLDecoder.decode(parts.getOrElse(1) { "" }, StandardCharsets.UTF_8)
                             }
                             exchange.responseHeaders.add("Set-Cookie", "SIM_SESSION=identity-flow; Path=/; HttpOnly")
-                            200 to """
+                            200 to
+                                """
                                 <form method="post" action="$simulatorUrl/form-submit">
                                   <input type="hidden" name="authCode" value="identity-code">
                                   <input type="hidden" name="authRequestParams" value="encoded-request">

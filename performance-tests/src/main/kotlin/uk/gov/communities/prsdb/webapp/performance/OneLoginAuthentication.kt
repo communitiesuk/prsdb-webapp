@@ -27,8 +27,7 @@ object OneLoginAuthentication {
             IDENTITY_VERIFICATION_RESUME_REQUEST,
         )
 
-    fun loginRequestNames(requestNamePrefix: String): List<String> =
-        listOf("$requestNamePrefix: start", "$requestNamePrefix: callback")
+    fun loginRequestNames(requestNamePrefix: String): List<String> = listOf("$requestNamePrefix: start", "$requestNamePrefix: callback")
 
     fun authorizationUrlKey(requestNamePrefix: String): String = "${requestNamePrefix.replace(' ', '-')}-authorize-url"
 
@@ -52,31 +51,31 @@ object OneLoginAuthentication {
         var chain =
             exec(
                 http(loginRequestNames[0])
-                .get("/oauth2/authorization/one-login")
-                .disableFollowRedirect()
-                .check(status().`is`(302))
-                .check(
-                    header("Location")
-                        .transform { HttpDestination.resolve(it, config.simulatorUrl) }
-                        .saveAs(authorizeUrlKey),
-                ),
+                    .get("/oauth2/authorization/one-login")
+                    .disableFollowRedirect()
+                    .check(status().`is`(302))
+                    .check(
+                        header("Location")
+                            .transform { HttpDestination.resolve(it, config.simulatorUrl) }
+                            .saveAs(authorizeUrlKey),
+                    ),
             ).exitHereIfFailed()
-            .exec(authenticationCompletionChain(config, subject, requestNamePrefix, authorizeUrlKey))
+                .exec(authenticationCompletionChain(config, subject, requestNamePrefix, authorizeUrlKey))
 
         if (requireLandlordDetails) {
             chain =
                 chain.exec(
                     http(DETAILS_REQUEST)
-                    .get("/landlord/landlord-details")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(header("Content-Type").transform { it.substringBefore(';').trim().lowercase() }.`is`("text/html"))
-                    .check(
-                        css("a[href*='/landlord-details/update-phone-number']", "href")
-                            .transform { HttpDestination.resolve(it, config.baseUrl) }
-                            .saveAs("phoneUpdateEntry"),
-                    ),
-                    ).exitHereIfFailed()
+                        .get("/landlord/landlord-details")
+                        .disableFollowRedirect()
+                        .check(status().`is`(200))
+                        .check(header("Content-Type").transform { it.substringBefore(';').trim().lowercase() }.`is`("text/html"))
+                        .check(
+                            css("a[href*='/landlord-details/update-phone-number']", "href")
+                                .transform { HttpDestination.resolve(it, config.baseUrl) }
+                                .saveAs("phoneUpdateEntry"),
+                        ),
+                ).exitHereIfFailed()
         }
         return chain
     }

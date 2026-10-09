@@ -16,14 +16,14 @@ class PhoneUpdateContractSimulation : Simulation() {
                 .exec { session ->
                     session.set("phoneUpdateEntry", "/landlord/landlord-details/update-phone-number/phone-number")
                 }.exec(LandlordPhoneUpdateJourney.chain(config))
-            .exec(LandlordEmailUpdateJourney.chain(config))
-            .injectOpen(atOnceUsers(1)),
+                .exec(LandlordEmailUpdateJourney.chain(config))
+                .injectOpen(atOnceUsers(1)),
         ).protocols(http.baseUrl(config.baseUrl))
             .assertions(
-            BasicPerformanceAssertions.forRequests(
-                config,
-                LandlordPhoneUpdateJourney.requestNames + LandlordEmailUpdateJourney.requestNames,
-            ),
+                BasicPerformanceAssertions.forRequests(
+                    config,
+                    LandlordPhoneUpdateJourney.requestNames + LandlordEmailUpdateJourney.requestNames,
+                ),
             )
     }
 }

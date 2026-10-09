@@ -90,7 +90,8 @@ class SequentialAuthenticationContractTests {
                         "/authorize" -> {
                             simulatorAuthorizeCookies.add(exchange.requestHeaders.getFirst("Cookie").orEmpty())
                             exchange.responseHeaders.add("Set-Cookie", "SIM_SESSION=sim-session-$flow; Path=/; HttpOnly")
-                            200 to """
+                            200 to
+                                """
                                 <form method="post" action="$simulatorUrl/form-submit?flow=$flow">
                                   <input type="hidden" name="authCode" value="code-$flow">
                                   <input type="hidden" name="authRequestParams" value="request-$flow">
@@ -111,7 +112,10 @@ class SequentialAuthenticationContractTests {
                             submittedSubjects.add(submitted["sub"].orEmpty())
                             exchange.responseHeaders.add(
                                 "Location",
-                                "$appUrl/login/oauth2/code/one-login?code=${URLEncoder.encode(submitted["sub"], StandardCharsets.UTF_8)}&state=state-$flow",
+                                "$appUrl/login/oauth2/code/one-login?code=${URLEncoder.encode(
+                                    submitted["sub"],
+                                    StandardCharsets.UTF_8,
+                                )}&state=state-$flow",
                             )
                             302 to ""
                         }

@@ -134,7 +134,8 @@ class AuthenticationContractTests {
                         "/authorize" -> {
                             val authCode =
                                 if (includeAuthCode) """<input type="hidden" name="authCode" value="code-value">""" else ""
-                            200 to """
+                            200 to
+                                """
                                 <form method="post" action="${formAction ?: "$prefix/form-submit?flow=login"}">
                                   $authCode
                                   <input type="hidden" name="authRequestParams" value="encoded + &amp; request">
@@ -176,11 +177,12 @@ class AuthenticationContractTests {
                             if (!cookie.contains("SESSION=authenticated-session")) {
                                 401 to "Missing authenticated session"
                             } else {
-                                200 to if (authenticated) {
-                                    """<a href="/landlord/landlord-details/update-phone-number">Change phone number</a>"""
-                                } else {
-                                    "<h1>Sign in</h1>"
-                                }
+                                200 to
+                                    if (authenticated) {
+                                        """<a href="/landlord/landlord-details/update-phone-number">Change phone number</a>"""
+                                    } else {
+                                        "<h1>Sign in</h1>"
+                                    }
                             }
                         "/mutation" ->
                             if (cookie.contains("SESSION=authenticated-session")) {
