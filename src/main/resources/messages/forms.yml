@@ -30,6 +30,7 @@ links:
   change: Change
   remove: Remove
   cancel: Cancel
+  resend: Resend
   goBack: Go back
 radios:
   dividerText: or

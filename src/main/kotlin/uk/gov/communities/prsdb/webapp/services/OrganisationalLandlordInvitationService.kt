@@ -119,6 +119,9 @@ class OrganisationalLandlordInvitationService(
             .map { it.invitedEmail } +
             organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
 
+    fun getInvitationsForOrganisation(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordInvitation> =
+        invitationRepository.findByOrganisationalLandlord(organisationalLandlord)
+
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
         session
