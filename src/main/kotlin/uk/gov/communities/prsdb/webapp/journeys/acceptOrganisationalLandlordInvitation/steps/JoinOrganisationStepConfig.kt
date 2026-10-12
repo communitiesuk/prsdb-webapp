@@ -18,7 +18,9 @@ class JoinOrganisationStepConfig :
             "organisationName" to
                 (
                     state.organisationName
-                        ?: throw PrsdbWebException("Could not find an organisation name for invitation journey ${state.journeyId}")
+                        ?: throw PrsdbWebException(
+                            "Could not find an organisation name in the journey state for invitation journey ${state.journeyId}",
+                        )
                 ),
         )
 
