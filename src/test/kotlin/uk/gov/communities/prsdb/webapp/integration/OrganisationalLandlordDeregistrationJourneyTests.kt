@@ -55,7 +55,7 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
                 Int::class.java,
             )
 
-        assertEquals(3, beforeDeregistrationOrgInvitationCount)
+        assertEquals(4, beforeDeregistrationOrgInvitationCount)
         assertEquals(0, landlordCount)
         assertEquals(0, orgLandlordUserCount)
         assertEquals(0, afterDeregistrationOrgInvitationCount)
