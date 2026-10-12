@@ -652,6 +652,7 @@ class PropertyRegistrationJourneyFactory(
                             )
                         }
                         nextStep { journey.paymentReturnStep }
+                        saveProgress()
                     }
                     step(journey.paymentReturnStep) {
                         routeSegment(PaymentReturnStep.ROUTE_SEGMENT)

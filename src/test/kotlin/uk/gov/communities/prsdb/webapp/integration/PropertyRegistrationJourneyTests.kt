@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
@@ -379,6 +380,27 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             paymentReturnPage.form.submit()
 
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+        }
+
+        @Test
+        fun `a user whose session expires while paying can resume from the GOV UK Pay return URL after signing in again`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page)
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient).createPayment(requestCaptor.capture())
+
+            // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
+            browserContext.clearCookies()
+            page.navigate(requestCaptor.firstValue.returnUrl)
+
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            paymentReturnPage.form.submit()
             assertPageIs(page, ConfirmationPagePropertyRegistration::class)
             assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
