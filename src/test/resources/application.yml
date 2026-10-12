@@ -50,6 +50,8 @@ gov-uk-pay:
   api-key: test-api-key
   annual-payment-amount-in-pence: 2000
   gratis-period-end-date: 2020-01-01
+  connect-timeout: 5s
+  read-timeout: 10s
 
 cloudwatch-metrics:
   ecs:

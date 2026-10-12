@@ -17,10 +17,10 @@ class GovUkPayConfig {
     @Value("\${gov-uk-pay.api-key}")
     lateinit var apiKey: String
 
-    @Value("\${gov-uk-pay.connect-timeout:5s}")
+    @Value("\${gov-uk-pay.connect-timeout}")
     lateinit var connectTimeout: Duration
 
-    @Value("\${gov-uk-pay.read-timeout:10s}")
+    @Value("\${gov-uk-pay.read-timeout}")
     lateinit var readTimeout: Duration
 
     // RestClient only treats 4xx and 5xx responses as errors, so we also reject other non-2xx responses (e.g. redirects)
