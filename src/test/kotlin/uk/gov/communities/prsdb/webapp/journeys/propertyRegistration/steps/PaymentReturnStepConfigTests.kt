@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,6 +27,44 @@ class PaymentReturnStepConfigTests {
     @BeforeEach
     fun setUp() {
         stepConfig = PaymentReturnStepConfig(mockPaymentReferenceParameterService)
+    }
+
+    @Test
+    fun `beforeAttemptingToReachStep returns true when the URL has a payment reference`() {
+        // Arrange
+        whenever(mockPaymentReferenceParameterService.getParameterOrNull()).thenReturn("payment-reference")
+
+        // Act
+        val result = stepConfig.beforeAttemptingToReachStep(mockState)
+
+        // Assert
+        assertTrue(result)
+    }
+
+    @Test
+    fun `beforeAttemptingToReachStep returns true when the URL does not have a payment reference but the journey state does`() {
+        // Arrange
+        whenever(mockPaymentReferenceParameterService.getParameterOrNull()).thenReturn(null)
+        whenever(mockState.paymentReference).thenReturn("payment-reference")
+
+        // Act
+        val result = stepConfig.beforeAttemptingToReachStep(mockState)
+
+        // Assert
+        assertTrue(result)
+    }
+
+    @Test
+    fun `beforeAttemptingToReachStep returns false when neither the URL nor the journey state has a payment reference`() {
+        // Arrange
+        whenever(mockPaymentReferenceParameterService.getParameterOrNull()).thenReturn(null)
+        whenever(mockState.paymentReference).thenReturn(null)
+
+        // Act
+        val result = stepConfig.beforeAttemptingToReachStep(mockState)
+
+        // Assert
+        assertFalse(result)
     }
 
     @Test

@@ -20,6 +20,9 @@ class PaymentReturnStepConfig(
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todo"
 
+    override fun beforeAttemptingToReachStep(state: PropertyRegistrationJourneyState): Boolean =
+        paymentReferenceParameterService.getParameterOrNull() != null || state.paymentReference != null
+
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
         val paymentReference = paymentReferenceParameterService.getParameterOrNull() ?: return
         state.paymentReference = paymentReference
