@@ -15,4 +15,8 @@ abstract class InterruptionPage(
     val goBackLink = Link(page.locator(".govuk-link--inverse"))
 
     fun submit() = form.submit()
+
+    // Steps that choose between interruption templates only override the title of the generic "change this?" variant
+    protected fun titleHeadingIfConfirmingChange(titleHeading: String) =
+        titleHeading.takeIf { heading.textContent().trim() == "Are you sure you want to change this?" }
 }

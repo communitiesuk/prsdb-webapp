@@ -154,6 +154,7 @@ orgTypeTrustInterruption:
       two: You must provide details including contact information for your organisation’s lead trustee.
   removingTrust:
     heading: Are you sure you want to change this?
+    pageTitle: Are you sure you want to change your organisation type?
     paragraph:
       one: "You’ve changed the type of your organisation from a trust to {0}."
       two: This means that the lead trustee details will be removed.
@@ -178,6 +179,7 @@ companiesHouseInterruption:
       two: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
   changedToCompany:
     heading: Are you sure you want to change this?
+    pageTitle: Are you sure you want to change your Companies House status?
     paragraph:
       one: You’ve changed your organisation’s Companies House registration status from No to Yes.
       two: 'This means we will remove the details you provided for:'

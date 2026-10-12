@@ -7,4 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 
 class OrgTypeTrustInterruptionPageUpdateOrganisationType(
     page: Page,
-) : InterruptionPage(page, "$UPDATE_ORG_TYPE_ROUTE/${OrgTypeTrustInterruptionStep.ROUTE_SEGMENT}")
+) : InterruptionPage(page, "$UPDATE_ORG_TYPE_ROUTE/${OrgTypeTrustInterruptionStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading
+        get() = titleHeadingIfConfirmingChange("Are you sure you want to change your organisation type?")
+}
