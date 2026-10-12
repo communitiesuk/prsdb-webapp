@@ -6,26 +6,32 @@ applyTo: "**/helpers/**,**/extensions/**,**/converters/**"
 
 ## Package Structure
 
+Common locations (not an exhaustive inventory):
 ```
 helpers/
 ├── converters/        # MessageKeyConverter for domain → i18n key mapping
 ├── extensions/        # Kotlin extension functions
-│   ├── journeyExtensions/   # JourneyExtensions, JourneyDataExtensions, PropertyComplianceJourneyDataExtensions
-│   ├── savedJourneyStateExtensions/
+│   ├── savedJourneyStateExtensions/SavedJourneyStateExtensions.kt
 │   ├── FileItemInputIteratorExtensions.kt
 │   ├── MessageSourceExtensions.kt
 │   ├── PreparedStatementExtensions.kt
-│   ├── PropertyComplianceViewModelExtensions.kt
+│   ├── StringExtensions.kt
 │   ├── SummaryCardViewModelExtensions.kt
 │   ├── SummaryListViewModelExtensions.kt
 │   └── ZipInputStreamExtensions.kt
 ├── AddressHelper.kt, BillsIncludedHelper.kt, CompleteByDateHelper.kt, ...
-├── DateTimeHelper.kt, JourneyDataHelper.kt, RentDataHelper.kt, ...
-├── LocalDateSerializer.kt                     # KotlinX serializer
-├── MaximumLengthInputStream.kt                 # Bounded input stream
-├── PropertyComplianceJourneyHelper.kt          # Compliance journey utilities
-├── PropertyRegistrationJourneyDataHelper.kt    # Registration journey utilities
-└── URIQueryBuilder.kt                          # Fluent URI builder
+├── DateTimeHelper.kt, RentDataHelper.kt, ...
+├── CertificateFilenameHelper.kt               # Certificate upload keys
+├── CertificateUploadHelper.kt                 # Upload processing → FormData
+├── LocalDateSerializer.kt                     # KotlinX serializer for java.time.LocalDate
+├── MaximumLengthInputStream.kt                # Bounded input stream
+├── MetricsDurationHelper.kt                   # Localised metrics durations
+├── TransactionHelper.kt                       # Post-commit callbacks
+└── URIQueryBuilder.kt                         # Fluent URI builder
+
+journeys/shared/helpers/
+├── ComplianceDetailsHelper.kt                 # Typed-state compliance CYA content
+└── OccupancyDetailsHelper.kt                  # Typed-state occupancy CYA rows
 ```
 
 ## Converters
@@ -53,20 +59,37 @@ When adding a new enum that needs display text, add a branch to the converter.
 
 ## Extension Functions
 
-### Receiver Extensions (most common pattern)
+Both top-level functions and companion-scoped extensions are used. Follow the surrounding file's pattern and import companion extension functions explicitly (e.g. `MessageSourceExtensions.Companion.getMessageForKey`).
+
+- `StringExtensions` normalises currency, integer and email strings and supplies normalised email comparison/collection helpers
+- `SavedJourneyStateExtensions` remains responsible for extracting the property-registration address from a serialised saved state
+
+Extension files are in `helpers/extensions/`. Place new extensions in the appropriate file, or create a new `{Type}Extensions.kt` file.
+
+### Receiver Extensions
 ```kotlin
-fun MessageSource.getMessageForKey(key: String, args: Array<Any>? = null) =
-    getMessage(key, args, Locale.getDefault())
+class MessageSourceExtensions {
+    companion object {
+        fun MessageSource.getMessageForKey(
+            key: String,
+            args: Array<Any>? = null,
+        ) = getMessage(key, args, Locale.getDefault())
+    }
+}
 ```
 
 ### Collection Extensions (DSL-style builders)
 ```kotlin
-fun MutableList<SummaryListRowViewModel>.addRow(
-    key: String,
-    value: Any?,
-    actionText: String? = null,
-) { ... }
+val rows = mutableListOf<SummaryListRowViewModel>()
+rows.addRow(
+    key = "forms.checkPropertyAnswers.tenancyDetails.occupied",
+    value = isOccupied,
+    actionText = "forms.links.change",
+    actionLink = changeDestination.toUrlStringOrNull(),
+)
 ```
+
+`addRow` adds an action only when both `actionText` and `actionLink` are non-null and `withActionLink` is true (the default).
 
 ### Null-Safe DB Operations
 ```kotlin
@@ -76,30 +99,34 @@ fun PreparedStatement.setStringOrNull(parameterIndex: Int, value: String?) {
 }
 ```
 
-The `journeyExtensions/` subdirectory contains 3 files:
-- `JourneyExtensions.kt` — Map extension for back URL handling
-- `JourneyDataExtensions.kt` — address/journey data parsing
-- `PropertyComplianceJourneyDataExtensions.kt` — 40+ getter functions for compliance journey data (gas safety, EICR, EPC fields)
+## Journey and Upload Helpers
 
-Extension files are in `helpers/extensions/`. Place new extensions in the appropriate file, or create a new `{Type}Extensions.kt` file.
+- Prefer typed journey state and `step.formModel` / `formModelOrNull` for answers; `FormData` is the submitted-data map (`Map<String, Any?>`), not a replacement for typed state
+- Reuse `journeys/shared/helpers/ComplianceDetailsHelper` and `OccupancyDetailsHelper` for CYA content/rows and child-journey `Destination` links
+- `CertificateFilenameHelper` constructs certificate upload keys; `CertificateUploadHelper` validates upload tokens/metadata, handles streaming uploads and returns `FormData`. Import `MaximumLengthInputStream.Companion.withMaxLength` for bounded streams
 
 ## URI Query Builder
 
-Fluent builder for manipulating request query parameters:
+Fluent builder for manipulating request query parameters. `build()` returns `UriComponents`; call `toUriString()` when a string URL is needed:
 
 ```kotlin
 URIQueryBuilder.fromHTTPServletRequest(request)
     .updateParam("page", 2)
     .removeParam("filter")
     .build()
+    .toUriString()
 ```
+
+## Transaction Callbacks
+
+`TransactionHelper.runAfterTransactionCommits { ... }` registers an `afterCommit` callback when Spring transaction synchronisation is active; otherwise it runs the action immediately. It does not start a transaction. Use it for post-commit side effects within appropriately transactional flows.
 
 ## Kotlin Idioms Used
 
 | Idiom | Example |
 |-------|---------|
-| Reified type parameters | `inline fun <reified E : Enum<E>> getFieldEnumValue()` |
-| Scope functions | `selectedAddress?.let { LocalDate.parse(it) }` |
+| Type aliases | `FormData` = `Map<String, Any?>` |
+| Scope functions | `dateString?.let { LocalDate.parse(it) }` |
 | Default parameters | `fun helper(args: Array<Any>? = null)` |
 | Companion objects | Static-like factory methods |
-| Elvis operator | `pageData ?: return null` |
+| Elvis operator | `formData ?: return null` |

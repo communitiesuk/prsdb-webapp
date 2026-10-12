@@ -33,19 +33,19 @@ enum class PropertyType {
     DETACHED_HOUSE, SEMI_DETACHED_HOUSE, TERRACED_HOUSE, FLAT, OTHER
 }
 
-enum class TaskStatus {
-    CANNOT_START, NOT_STARTED, IN_PROGRESS, COMPLETED
+enum class WhoProvidesRentalDetails {
+    LANDLORD, LETTING_AGENT
 }
 ```
 
-### Collections (for validated sets of constants)
+### Registered Feature Flags
 ```kotlin
-val featureFlagNames = listOf(
-    EXAMPLE_FEATURE_FLAG_ONE,
-    MIGRATE_PROPERTY_REGISTRATION,
-    // ...
-)
+const val DELEGATE_TO_LETTING_AGENT = "pdjb-1022-delegate-to-letting-agent"
 ```
+
+Add each flag constant to the existing `featureFlagNames` list; declaring it alone does not register it.
+The same applies to releases and `featureFlagReleaseNames`. See
+[feature-flags.instructions.md](feature-flags.instructions.md) for configuration and validation.
 
 ## Constant Categories
 
@@ -56,7 +56,7 @@ val featureFlagNames = listOf(
 | `ExternalLinks.kt` | External GOV.UK and service URLs |
 | `FeatureFlagNames.kt` | Feature flag name constants and validation list |
 | `FormConstants.kt` | Form attribute names |
-| `JourneyNames.kt` | Journey identifier strings |
+| `JourneyNames.kt` | Journey URL constants used by route annotations |
 | `PaginationConstants.kt` | Pagination defaults |
 | `UserRoleConstants.kt` | User role string constants |
 | `UrlSegmentConstants.kt` | URL path segment constants |
@@ -71,7 +71,12 @@ val featureFlagNames = listOf(
 
 Domain enums live in `constants/enums/`. They are used in `when` expressions throughout the codebase and often mapped to i18n message keys via `MessageKeyConverter`.
 
-Common enums include: `PropertyType`, `TaskStatus`, `RentFrequency`, `OwnershipType`, `LicensingType`, `FurnishedStatus`, `BillsIncluded`, `JourneyType`, `FileUploadStatus`, `FileCategory`, `RegistrationNumberType`, `ComplianceCertStatus`, and compliance exemption enums (`GasSafetyExemptionReason`, `EicrExemptionReason`, `EpcExemptionReason`, `MeesExemptionReason`).
+Representative enums include `PropertyType`, `TaskStatus`, `RentFrequency`, `CertificateType`, `OrgType`,
+`LandlordType`, `WhoProvidesRentalDetails`, `EpcExemptionReason` and `MeesExemptionReason`.
+
+`TaskStatus` includes `NOT_NEEDED_YET` and the transitional `NOT_REQUIRED` value. Preserve the latter's
+feature-flag-dependent behaviour until its removal TODO is addressed; do not assume only the four basic states.
+Follow the existing enum's naming and mapping rather than renaming values for style.
 
 When adding a new enum:
 1. Create it in `constants/enums/`
