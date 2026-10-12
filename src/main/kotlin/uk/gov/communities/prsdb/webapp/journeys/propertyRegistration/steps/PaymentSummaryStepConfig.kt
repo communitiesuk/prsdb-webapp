@@ -50,6 +50,9 @@ class PaymentSummaryStepConfig(
 
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
         val quote = state.paymentQuote
+
+        // TODO PDJB-1861: Check that the quote the user was shown matches the stored quote before creating the payment (e.g. when                                                                                                                                                                                                                                               ┃
+        //  the page is open in several tabs), and explain to the user when the quoted amount has changed.
         if (quote == null || quote.quoteDate != today) {
             state.paymentQuote = paymentService.getPropertyRegistrationPaymentQuote(today)
             // TODO PDJB-996: Confirm how to explain to the user when an overnight refresh changes the quoted amount.
