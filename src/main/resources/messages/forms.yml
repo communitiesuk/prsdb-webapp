@@ -249,7 +249,7 @@ todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
 alreadyRegistered:
-  heading: This property is registered on the database.
+  heading: This property is registered on the database
   paragraph:
     one: '{0,,address} is already registered on the database.'
     two:
@@ -641,7 +641,7 @@ update:
   billsIncluded:
     fieldSetHeading: Update which of these you include in the rent
   furnishedStatus:
-    fieldSetHeading: Update is the property furnished
+    fieldSetHeading: Update whether the property is furnished
   rentFrequency:
     heading: Update when you charge rent
   rentAmount:
