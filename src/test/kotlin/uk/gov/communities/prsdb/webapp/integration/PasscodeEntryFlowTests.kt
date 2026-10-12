@@ -6,8 +6,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InvalidPasscodePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
@@ -49,13 +51,6 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
     }
 
     @Test
-    fun `Restricted landlord pages outside registration do not require a passcode`(page: Page) {
-        // The landlord dashboard is no longer passcode-gated - it is protected by role-based auth only
-        navigator.navigateToLandlordDashboard()
-        assertPageIs(page, LandlordDashboardPage::class)
-    }
-
-    @Test
     fun `Logged in users claim a passcode by accessing the registration journey`(
         page: Page,
         browserContext: BrowserContext,
@@ -69,8 +64,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
 
         // Re-authenticate; as the passcode is claimed, the user reaches the gated registration
         // journey without being sent back to passcode entry
-        navigator.navigateToLandlordDashboard()
-        assertPageIs(page, LandlordDashboardPage::class)
+        goToDashboardAndAssertAccessDenied(page)
         navigator.navigateToLandlordRegistrationStartPage()
         assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
     }
@@ -91,8 +85,7 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
     @Test
     fun `Users are still redirected to their original previous page after being sent to the invalid passcode page`(page: Page) {
         // Authenticate, then hit the gated registration journey so the original destination is remembered
-        navigator.navigateToLandlordDashboard()
-        assertPageIs(page, LandlordDashboardPage::class)
+        goToDashboardAndAssertAccessDenied(page)
 
         navigator.navigateToLandlordRegistrationStartPage()
         var passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
@@ -114,27 +107,34 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         authenticateThenSubmitPasscodeOnRegistrationJourney(page, "FREE01")
         assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
 
-        // Try to access passcode pages
+        // Try to access passcode pages - the user is redirected to the dashboard
         navigator.navigateToPasscodeEntryPage()
-        assertPageIs(page, LandlordDashboardPage::class)
+        assertAccessDeniedOnDashboard(page)
 
         navigator.navigateToInvalidPasscodePage()
-        assertPageIs(page, LandlordDashboardPage::class)
+        assertAccessDeniedOnDashboard(page)
     }
 
     private fun authenticateThenSubmitPasscodeOnRegistrationJourney(
         page: Page,
         passcode: String,
     ) {
-        // Not a real user flow: a real user authenticates via One Login and would not reach the
-        // dashboard before registering. Under the local-no-auth test profile, visiting an
-        // authenticated route (the dashboard) simply logs the mock user in, which is all we need here.
-        navigator.navigateToLandlordDashboard()
-        assertPageIs(page, LandlordDashboardPage::class)
+        goToDashboardAndAssertAccessDenied(page)
 
         // The registration journey is gated, so the authenticated user is sent to passcode entry
         navigator.navigateToLandlordRegistrationStartPage()
         val passcodeEntryPage = assertPageIs(page, PasscodeEntryPage::class)
         passcodeEntryPage.submitPasscode(passcode)
+    }
+
+    private fun goToDashboardAndAssertAccessDenied(page: Page) {
+        navigator.navigateToLandlordDashboard()
+        assertAccessDeniedOnDashboard(page)
+    }
+
+    private fun assertAccessDeniedOnDashboard(page: Page) {
+        assertThat(page.url()).contains(LANDLORD_DASHBOARD_URL)
+        val errorPage = assertPageIs(page, ErrorPage::class)
+        BaseComponent.assertThat(errorPage.heading).containsText("You do not have permission to access this page")
     }
 }
