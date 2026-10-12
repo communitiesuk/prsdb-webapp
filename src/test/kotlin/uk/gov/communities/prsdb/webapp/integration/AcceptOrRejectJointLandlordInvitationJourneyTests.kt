@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LandlordTypeFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LookupAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgAddressFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgCheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgCompanyNumberFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgEmailFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgIsRegisteredCharityFormPageAcceptJointLandlordInvitation
@@ -196,7 +197,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageAcceptJointLandlordInvitation::class)
             orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
 
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPageAcceptJointLandlordInvitation::class)
+            val checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageAcceptJointLandlordInvitation::class)
             checkAnswersPage.confirmAndSubmit()
 
             val confirmYouAreALandlordForThisPropertyPage = assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
