@@ -17,10 +17,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
-import java.net.URI
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
@@ -30,9 +28,6 @@ class PaymentSummaryStepConfigTests {
 
     @Mock
     private lateinit var mockPaymentService: PaymentService
-
-    @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
@@ -51,7 +46,7 @@ class PaymentSummaryStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig = PaymentSummaryStepConfig(mockAddressAvailabilityService, mockPaymentService, mockAbsoluteUrlProvider)
+        stepConfig = PaymentSummaryStepConfig(mockAddressAvailabilityService, mockPaymentService)
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
     }
@@ -125,11 +120,9 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun stubPaymentCreation() {
-        val returnUrl = "https://example.test/landlord/register-property/payment-return?journeyId=$journeyId"
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
-        whenever(mockAbsoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(journeyId)).thenReturn(URI(returnUrl))
-        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, returnUrl, "landlord@example.com"))
+        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com"))
             .thenReturn("https://pay.example.test/next")
     }
 }

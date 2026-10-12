@@ -108,23 +108,21 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import java.security.Principal
 
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val featureFlagManager: FeatureFlagManager,
-    private val userToLandlordService: UserToLandlordService,
+    private val currentUserService: CurrentUserService,
     private val paymentsStrategy: PaymentsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            // TODO: PDJB-1738: Use the current organisational sub-user's email rather than the organisation's email
-            // when setting the initial loggedInLandlordEmailAtStartOfJourney snapshot.
-            state.loggedInLandlordEmailAtStartOfJourney = userToLandlordService.getCurrentLandlordForUser().email
+            state.loggedInLandlordEmailAtStartOfJourney = currentUserService.getCurrentEmail()
             state.isStateInitialized = true
         }
 

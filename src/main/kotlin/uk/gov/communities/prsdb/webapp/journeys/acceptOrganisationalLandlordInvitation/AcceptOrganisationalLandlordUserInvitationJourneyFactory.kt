@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
@@ -19,6 +19,9 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 
 @PrsdbWebService
 class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
@@ -26,8 +29,17 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+        val checkingAnswersFor = state.checkingAnswersFor
 
-        return journey(state) {
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun mainJourneyMap(state: AcceptInvitationJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.validateTokenStep }
             configure {
                 withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
@@ -64,7 +76,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
                 nextStep { journey.checkAnswersStep }
             }
             step(journey.checkAnswersStep) {
-                routeSegment(CheckAnswersStep.ROUTE_SEGMENT)
+                routeSegment(AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.emailAddressStep.isComplete() }
                 nextStep { journey.confirmationStep }
             }
@@ -75,7 +87,26 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
                 nextDestination { Destination.Nowhere() }
             }
         }
-    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: AcceptInvitationJourney,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configure {
+                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                FullNameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.fullNameStep, FullNameStep.ROUTE_SEGMENT)
+                EmailAddressStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailAddressStep, EmailAddressStep.ROUTE_SEGMENT)
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
 
     fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
@@ -87,11 +118,18 @@ class AcceptInvitationJourney(
     override val joinOrganisationStep: JoinOrganisationStep,
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
-    override val checkAnswersStep: CheckAnswersStep,
+    override val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep,
     override val confirmationStep: ConfirmationStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
+    override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     AcceptOrganisationalLandlordUserInvitationJourneyState {
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         val tokenDescription = token?.let { " for token $it" }.orEmpty()
@@ -101,12 +139,16 @@ class AcceptInvitationJourney(
     }
 }
 
-interface AcceptOrganisationalLandlordUserInvitationJourneyState : JourneyState {
+interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnswersJourneyState {
     val validateTokenStep: ValidateTokenStep
     val invalidLinkStep: InvalidLinkStep
     val joinOrganisationStep: JoinOrganisationStep
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep
-    val checkAnswersStep: CheckAnswersStep
+    val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
     val confirmationStep: ConfirmationStep
+    override val cyaStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
+        get() = checkAnswersStep
+    override val finishCyaStep: FinishCyaJourneyStep
+    override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>
 }

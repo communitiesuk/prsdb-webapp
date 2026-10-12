@@ -16,6 +16,8 @@ class ConfirmPageLeaveProperty(
         LeavePropertyController.getLeavePropertyBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${ConfirmStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Confirm that you’re no longer a landlord for this property"
+
     val heading
         get() = page.locator("h1")
 

@@ -184,7 +184,7 @@ tasks.named<Test>("test") {
     exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
 }
 
-tasks.register<Test>("oneLoginSimulatorContractTest") {
+tasks.register<Test>("testWithOneLoginSimulator") {
     group = "verification"
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")

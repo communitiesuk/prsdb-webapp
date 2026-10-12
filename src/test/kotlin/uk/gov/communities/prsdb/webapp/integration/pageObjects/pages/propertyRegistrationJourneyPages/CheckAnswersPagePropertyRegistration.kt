@@ -18,6 +18,8 @@ import java.util.regex.Pattern
 class CheckAnswersPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PropertyRegistrationCyaStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your answers for this property"
+
     fun confirm() = form.submit()
 
     val form = PostForm(page)

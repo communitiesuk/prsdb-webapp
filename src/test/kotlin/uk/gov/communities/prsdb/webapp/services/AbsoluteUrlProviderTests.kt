@@ -66,13 +66,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
-    fun `buildPropertyRegistrationPaymentReturnUri returns the payment return step url for the journey`() {
+    fun `buildPropertyRegistrationPaymentReturnUri returns the payment return step url for the journey and payment`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")
 
-        val uri = provider.buildPropertyRegistrationPaymentReturnUri("journey-123")
+        val uri = provider.buildPropertyRegistrationPaymentReturnUri("journey-123", "payment-reference")
 
         assertThat(uri.toString())
-            .isEqualTo("https://example.test/landlord/register-property/payment-return?journeyId=journey-123")
+            .isEqualTo(
+                "https://example.test/landlord/register-property/payment-return?journeyId=journey-123&paymentReference=payment-reference",
+            )
     }
 
     private fun createProvider(

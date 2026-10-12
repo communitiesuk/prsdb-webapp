@@ -139,9 +139,8 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.header)
                     .containsText("What is the weekly rent?")
-                BaseComponent
-                    .assertThat(rentAmountPage.subheading)
-                    .containsText("Weekly rent")
+                val rentLabel = "Weekly rent"
+                BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total weekly rent agreed with the tenant.")
@@ -154,9 +153,8 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.header)
                     .containsText("What is the 4-weekly rent?")
-                BaseComponent
-                    .assertThat(rentAmountPage.subheading)
-                    .containsText("4-weekly rent")
+                val rentLabel = "4-weekly rent"
+                BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total 4-weekly rent agreed with the tenant.")
@@ -169,9 +167,8 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.header)
                     .containsText("What is the monthly rent?")
-                BaseComponent
-                    .assertThat(rentAmountPage.subheading)
-                    .containsText("Monthly rent")
+                val rentLabel = "Monthly rent"
+                BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
@@ -184,9 +181,8 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.header)
                     .containsText("What is the monthly rent?")
-                BaseComponent
-                    .assertThat(rentAmountPage.subheading)
-                    .containsText("Monthly rent")
+                val rentLabel = "Monthly rent"
+                BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")

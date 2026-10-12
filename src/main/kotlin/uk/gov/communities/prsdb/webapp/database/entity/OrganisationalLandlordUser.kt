@@ -32,6 +32,7 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String
 
+    // See CurrentUserService on getting the name/email of the user that's currently logged in
     @Column(nullable = false)
     lateinit var email: String
 

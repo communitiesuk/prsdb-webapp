@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="complianceInfoTabId" type="java.lang.String"*/-->
 <!--/*@thymesVar id="delegateToLettingAgentLink" type="uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel"*/-->
 <!DOCTYPE html>
-<html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.pageTitle}, ~{::#main-content/content()}, false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
         <div id="page-contents">

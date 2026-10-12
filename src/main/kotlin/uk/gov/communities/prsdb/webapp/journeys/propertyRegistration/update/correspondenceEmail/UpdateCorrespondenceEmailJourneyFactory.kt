@@ -18,14 +18,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Corre
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbWebService
 class UpdateCorrespondenceEmailJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateCorrespondenceEmailJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val userToLandlordService: UserToLandlordService,
+    private val currentUserService: CurrentUserService,
 ) {
     fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -33,8 +33,7 @@ class UpdateCorrespondenceEmailJourneyFactory(
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
-            // TODO PDJB-1738: Use the organisational sub-user's email, consistently with registration.
-            state.loggedInLandlordEmailAtStartOfJourney = userToLandlordService.getCurrentLandlordForUser().email
+            state.loggedInLandlordEmailAtStartOfJourney = currentUserService.getCurrentEmail()
             state.isStateInitialized = true
         }
 

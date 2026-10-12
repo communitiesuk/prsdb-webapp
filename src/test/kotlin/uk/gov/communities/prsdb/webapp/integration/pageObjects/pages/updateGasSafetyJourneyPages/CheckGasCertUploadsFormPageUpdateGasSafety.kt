@@ -16,6 +16,9 @@ class CheckGasCertUploadsFormPageUpdateGasSafety(
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
             "/${CheckGasCertUploadsStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading: String
+        get() = table.rows.count().let { "You’ve uploaded $it gas safety certificate file${if (it == 1) "" else "s"}" }
+
     val table = Table(page)
     val form = CheckUploadsForm(page)
 }
