@@ -9,7 +9,6 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -74,6 +73,20 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals("Payment summary (TODO PDJB-996)", content["todoComment"])
         verify(mockState).paymentQuote = quote
+    }
+
+    @Test
+    fun `afterStepDataIsAdded clears the previous payment outcome and reference`() {
+        // Arrange
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = null
+        verify(mockState).paymentReference = null
     }
 
     @Test
@@ -192,22 +205,6 @@ class PaymentSummaryStepConfigTests {
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
-    }
-
-    @Test
-    fun `resolveNextDestination clears the previous payment outcome before creating a new payment`() {
-        // Arrange
-        stubAddressTask()
-        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
-        stubPaymentCreation()
-
-        // Act
-        stepConfig.resolveNextDestination(mockState, defaultDestination)
-
-        // Assert
-        val inOrder = inOrder(mockState, mockPaymentService)
-        inOrder.verify(mockState).paymentOutcome = null
-        inOrder.verify(mockPaymentService).createPropertyRegistrationPayment(any(), any(), any())
     }
 
     private fun stubAddressTask() {
