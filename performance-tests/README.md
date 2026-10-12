@@ -60,10 +60,12 @@ Gatling fails the build if any request assertion fails, so these tasks can be wi
 
 ### Daily NFT performance-test orchestrator (PDJB-430 first slice)
 
-`.github/workflows/run-performance-tests.yml` runs at **19:00 UTC daily** (chosen to avoid the 1–2am
-maintenance windows) on a standard GitHub-hosted runner and can be dispatched manually from `main`. It
-observes the `nft` branch. The workflow and scripts come from `main`; a separate `nft-source` checkout
-supplies the NFT SHA. If NFT has not changed since the last successful workflow, it skips **before
+`.github/workflows/schedule-performance-tests.yml` runs on `main` at **19:00 UTC daily** (chosen to avoid
+the 1–2am maintenance windows) and only dispatches `run-performance-tests.yml` on the `nft` branch
+(`gh workflow run run-performance-tests.yml --ref nft`). The orchestrator workflow and its scripts run
+entirely from `nft`, so `main` never needs access to the `nft` environment, and the observed NFT SHA is
+simply the checked-out `HEAD`. It runs on a standard GitHub-hosted runner and can also be dispatched
+manually from `nft`. If NFT has not changed since the last successful workflow, it skips **before
 assuming AWS credentials**. The small `nft-head-sha` artifact records success (including unchanged
 skips) for 30 days. Missing/expired history causes a fresh run; GitHub/API errors or malformed markers
 fail explicitly. Failures do not advance the marker. The deployed app image must also carry the
@@ -97,9 +99,10 @@ Before enabling the workflow:
    deregister do not support resource-level restrictions: those actions are region-restricted to
    `eu-west-2`, and the scripts retire only their own returned temporary ARN. No Terraform-admin, DB,
    SSM, secret-value or `RunTask` permissions are used.
-3. Restrict the GitHub `nft` environment's deployment branches to `main`, without required reviewers,
-   before granting the expanded role. The workflow also rejects dispatches from other refs.
-4. Merge the workflow/scripts into `main` before dispatching. Do not run NFT infra applies, manual
+3. Keep the GitHub `nft` environment's deployment branches restricted to `nft` (as for normal NFT deploys),
+   without required reviewers, before granting the expanded role. The workflow also rejects dispatches
+   from other refs.
+4. Merge the workflow/scripts into `main` (so the scheduler and workflow are registered) and release them to `nft` before dispatching. Do not run NFT infra applies, manual
    ECS changes, or network changes while it is running. The shared non-cancelling concurrency group
    serializes this action with the **webapp** NFT deploy workflow, not the separate infra repository.
 
@@ -125,9 +128,9 @@ Restoration (run unconditionally, even after a prior-step failure):
 Manual proof commands:
 
 ```bash
-gh workflow run run-performance-tests.yml --ref main -f force=true
+gh workflow run run-performance-tests.yml --ref nft -f force=true
 # A separate controlled-failure run must fail while still restoring the environment:
-gh workflow run run-performance-tests.yml --ref main -f force=true -f fail-smoke=true
+gh workflow run run-performance-tests.yml --ref nft -f force=true -f fail-smoke=true
 ```
 
 Inspect the exact resulting run and compare original/restored app task ARN/profile/health, simulator

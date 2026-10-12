@@ -17,7 +17,7 @@ export function shouldRunForNftHead({currentSha, previousSuccessfulSha = null, f
 export async function previousSuccessfulSha(gh, log = console.log) {
   const runs = JSON.parse(await gh([
     'run', 'list', '--repo', 'communitiesuk/prsdb-webapp', '--workflow', 'run-performance-tests.yml',
-    '--branch', 'main', '--status', 'success', '--limit', '1', '--json', 'databaseId',
+    '--branch', 'nft', '--status', 'success', '--limit', '1', '--json', 'databaseId',
   ]));
   if (!runs.length) {
     log('No successful readiness run exists; checking NFT readiness.');
@@ -54,7 +54,7 @@ async function runCommand(command, args) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const gh = args => runCommand('gh', args);
   try {
-    const currentSha = (await runCommand('git', ['-C', 'nft-source', 'rev-parse', 'HEAD'])).trim();
+    const currentSha = (await runCommand('git', ['rev-parse', 'HEAD'])).trim();
     const previousSha = await previousSuccessfulSha(gh);
     const run = shouldRunForNftHead({currentSha, previousSuccessfulSha: previousSha,
       force: process.env.FORCE_READINESS === 'true'});

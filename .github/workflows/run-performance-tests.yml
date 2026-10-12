@@ -1,7 +1,5 @@
 name: Run Performance Tests
 on:
-  schedule:
-    - cron: '0 19 * * *'
   workflow_dispatch:
     inputs:
       force:
@@ -24,7 +22,7 @@ permissions:
 jobs:
   changes:
     name: Check NFT changes
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/nft'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -32,10 +30,6 @@ jobs:
       sha: ${{ steps.changes.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: nft
-          path: nft-source
       - uses: actions/setup-node@v4
         with:
           node-version: 22
