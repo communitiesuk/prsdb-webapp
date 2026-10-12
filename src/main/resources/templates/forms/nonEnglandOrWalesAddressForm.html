@@ -1,6 +1,6 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::#page/content()}, false)}">
+<html id="page" th:replace="~{fragments/layout :: layout(#{addressForms.nonEnglandOrWalesAddress.heading}, ~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
     <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
         <main class="govuk-main-wrapper" id="main-content">
