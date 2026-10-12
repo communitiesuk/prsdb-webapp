@@ -14,4 +14,6 @@ class CheckHouseholdsAnswersPageLettingAgentUpdate(
         LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(
             UUID.fromString(urlArguments["token"]!!),
         ) + "/${UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your households and tenants answers"
+}

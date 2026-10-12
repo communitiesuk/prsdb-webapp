@@ -12,4 +12,6 @@ class CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate(
         page,
         LandlordUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your bills answers"
+}

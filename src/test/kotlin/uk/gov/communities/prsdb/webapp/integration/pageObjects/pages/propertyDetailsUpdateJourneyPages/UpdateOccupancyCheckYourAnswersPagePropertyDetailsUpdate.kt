@@ -15,6 +15,8 @@ class UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate(
         UpdateOccupancyController.getUpdateOccupancyRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your occupancy answers"
+
     val form = Form(page)
 
     val summaryList = OccupancyCheckYourAnswersSummaryList(page)
