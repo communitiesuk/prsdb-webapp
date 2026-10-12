@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -503,7 +504,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
 
         runAfterTransactionCommits {
-            jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+            sendEmailAndLogFailures("the other landlord left notification emails for property ownership ${propertyOwnership.id}") {
+                jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+            }
         }
     }
 
