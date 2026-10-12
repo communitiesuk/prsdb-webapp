@@ -61,6 +61,8 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
@@ -1021,6 +1023,33 @@ class PaymentServiceTests {
                 eq(PaymentStatus.CANCELLED),
                 any(),
             )
+        }
+
+        @Test
+        fun `finalisePayment logs why finalising failed when it cancels the payment`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment()
+            whenever(mockPropertyRegistrationService.registerProperty(registrationData))
+                .thenThrow(EntityExistsException("Address already registered"))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+                // Assert
+                val output = outContent.toString()
+                assertTrue(output.contains("Failed to finalise payment $PAYMENT_ID"))
+                assertTrue(output.contains("EntityExistsException: Address already registered"))
+            } finally {
+                System.setOut(originalOut)
+            }
         }
 
         @Test
