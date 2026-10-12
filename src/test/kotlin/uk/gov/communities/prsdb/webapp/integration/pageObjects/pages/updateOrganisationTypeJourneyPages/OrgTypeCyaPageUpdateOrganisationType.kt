@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 class OrgTypeCyaPageUpdateOrganisationType(
     page: Page,
 ) : BasePage(page, "$UPDATE_ORG_TYPE_ROUTE/${OrgTypeCyaStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your organisation type answers"
+
     val form = Form(page)
     val summaryList = OrgTypeSummaryList(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)

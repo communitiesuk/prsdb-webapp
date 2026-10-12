@@ -38,6 +38,7 @@ email:
     missing: Enter your email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
 checkAnswers:
+  pageTitle: Check your answers before joining your organisation
   summaryName: Your details
   rowHeading:
     organisation: Organisation

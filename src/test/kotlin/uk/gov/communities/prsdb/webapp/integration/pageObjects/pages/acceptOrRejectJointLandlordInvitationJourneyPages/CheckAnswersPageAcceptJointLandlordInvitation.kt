@@ -12,6 +12,8 @@ class CheckAnswersPageAcceptJointLandlordInvitation(
         page,
         "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your landlord registration answers"
+
     val form = PostForm(page)
 
     fun confirmAndSubmit() = form.submit()
