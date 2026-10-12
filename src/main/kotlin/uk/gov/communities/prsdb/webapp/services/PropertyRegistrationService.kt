@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -42,9 +43,17 @@ class PropertyRegistrationService(
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
         with(registrationData) {
             val landlord = userToLandlordService.getCurrentLandlordForUser()
+            // TODO PDJB-1860: Derive a landlord's first anniversary from the paid renewal date when available;                                                                                                                                                                                                                                                                      ┃
+            //  retain the existing anniversary, and use today's UK date when registering without payment.
             val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
-            val propertyOwnership = createPropertyOwnershipAndRelatedEntities(registrationData, landlord, anniversary)
+            val propertyOwnership =
+                createPropertyOwnershipAndRelatedEntities(
+                    registrationData,
+                    landlord,
+                    anniversary,
+                    renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
+                )
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
@@ -89,6 +98,7 @@ class PropertyRegistrationService(
         registrationData: PropertyRegistrationDataModel,
         registeringLandlord: Landlord,
         anniversary: MonthDay,
+        renewalDate: LocalDate,
     ): PropertyOwnership =
         with(registrationData) {
             if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -118,6 +128,7 @@ class PropertyRegistrationService(
                 rentAmount = rentAmount,
                 registeringLandlord = registeringLandlord,
                 anniversary = anniversary,
+                renewalDate = renewalDate,
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 markedJointLandlord = markedJointLandlord,
