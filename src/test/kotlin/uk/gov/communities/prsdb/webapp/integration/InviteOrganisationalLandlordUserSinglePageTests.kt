@@ -16,6 +16,7 @@ class InviteOrganisationalLandlordUserSinglePageTests : IntegrationTestWithImmut
         // Assert
         assertThat(invitePage.heading).hasText("Invite a team member")
         assertThat(invitePage.introduction).containsText("Local Organisation Landlord")
+        assertThat(invitePage.form.submitButton).hasText("Send invitation")
     }
 
     @Test
@@ -43,5 +44,17 @@ class InviteOrganisationalLandlordUserSinglePageTests : IntegrationTestWithImmut
         // Assert
         assertThat(invitePage.form.getErrorMessage("role")).isVisible()
         assertThat(invitePage.accessLevelFormGroup).hasClass(Pattern.compile(".*govuk-form-group--error.*"))
+    }
+
+    @Test
+    fun `an email address that has already been invited shows the already invited error`() {
+        // Arrange
+        val invitePage = navigator.goToInviteOrganisationalLandlordUserPage()
+
+        // Act
+        invitePage.submitInvitation("pending-org-invite-a@example.com", OrganisationalLandlordUserRole.EDITOR)
+
+        // Assert
+        assertThat(invitePage.form.getErrorMessage("emailAddress")).containsText("This email address has already been invited")
     }
 }

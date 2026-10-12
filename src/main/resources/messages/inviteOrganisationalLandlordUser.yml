@@ -5,6 +5,7 @@ email:
   error:
     missing: Enter an email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
+    alreadyInvited: This email address has already been invited
 role:
   fieldSetHeading: Choose their access level
   radios:
@@ -13,6 +14,7 @@ role:
       hint: Can register or edit properties, manage team members, and change organisation information
     editor:
       label: Editor
-      hint: Can register or edit property information
+      hint: Can register or edit properties
   error:
     missing: Select their access level
+submitButton: Send invitation

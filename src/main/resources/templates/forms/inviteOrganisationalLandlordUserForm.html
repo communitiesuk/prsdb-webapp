@@ -15,6 +15,6 @@
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#role-fieldset-content/content()}, fieldName='role', fieldSetHeading=#{inviteOrganisationalLandlordUser.role.fieldSetHeading}, fieldSetHint=null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'role', null, ${radioOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{inviteOrganisationalLandlordUser.submitButton})}"></button>
 </th:block>
 </html>

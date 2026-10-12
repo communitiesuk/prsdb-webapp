@@ -10,12 +10,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.util.UUID
@@ -28,6 +32,9 @@ class OrganisationalLandlordInvitationServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
+    @Mock
+    private lateinit var mockOrganisationalLandlordUserService: OrganisationalLandlordUserService
+
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     private val journeyId = "test-journey-id"
@@ -35,7 +42,8 @@ class OrganisationalLandlordInvitationServiceTests {
 
     @BeforeEach
     fun setup() {
-        invitationService = OrganisationalLandlordInvitationService(mockInvitationRepository, mockHttpSession)
+        invitationService =
+            OrganisationalLandlordInvitationService(mockInvitationRepository, mockHttpSession, mockOrganisationalLandlordUserService)
     }
 
     @Test
@@ -147,5 +155,53 @@ class OrganisationalLandlordInvitationServiceTests {
         assertEquals(EDITOR, savedInvitation.role)
         assertEquals(organisation, savedInvitation.organisationalLandlord)
         assertNotNull(savedInvitation.token)
+    }
+
+    @Test
+    fun `createInvitation does not save an invitation when the email address has already been invited`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(OrganisationalLandlordInvitation(UUID.randomUUID(), "invitee@example.com", organisation, EDITOR)),
+        )
+
+        // Act
+        invitationService.createInvitation("Invitee@Example.com", EDITOR, organisation)
+
+        // Assert
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `createInvitation does not save an invitation when the email address belongs to a team member`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
+            listOf(OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Team Member", "invitee@example.com", EDITOR)),
+        )
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `getInvitedEmails returns the invited email addresses for the organisation`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(
+                OrganisationalLandlordInvitation(UUID.randomUUID(), "first@example.com", organisation, EDITOR),
+                OrganisationalLandlordInvitation(UUID.randomUUID(), "second@example.com", organisation, EDITOR),
+            ),
+        )
+
+        // Act
+        val invitedEmails = invitationService.getInvitedEmails(organisation)
+
+        // Assert
+        assertEquals(listOf("first@example.com", "second@example.com"), invitedEmails)
     }
 }

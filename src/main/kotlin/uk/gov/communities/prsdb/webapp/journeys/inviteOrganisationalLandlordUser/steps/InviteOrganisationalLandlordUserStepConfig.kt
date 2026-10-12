@@ -3,16 +3,21 @@ package uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUse
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.inviteOrganisationalLandlordUser.InviteOrganisationalLandlordUserJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteOrganisationalLandlordUserFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class InviteOrganisationalLandlordUserStepConfig(
     private val userToLandlordService: UserToLandlordService,
+    private val invitationService: OrganisationalLandlordInvitationService,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) : AbstractRequestableStepConfig<Complete, InviteOrganisationalLandlordUserFormModel, InviteOrganisationalLandlordUserJourneyState>() {
     override val formModelClass = InviteOrganisationalLandlordUserFormModel::class
 
@@ -35,6 +40,22 @@ class InviteOrganisationalLandlordUserStepConfig(
         )
 
     override fun chooseTemplate(state: InviteOrganisationalLandlordUserJourneyState) = "forms/inviteOrganisationalLandlordUserForm"
+
+    override fun enrichSubmittedDataBeforeValidation(
+        state: InviteOrganisationalLandlordUserJourneyState,
+        formData: FormData,
+    ): FormData {
+        val organisationalLandlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        return super.enrichSubmittedDataBeforeValidation(state, formData) +
+            (
+                InviteOrganisationalLandlordUserFormModel::invitedEmailAddresses.name to
+                    invitationService.getInvitedEmails(organisationalLandlord)
+            ) +
+            (
+                InviteOrganisationalLandlordUserFormModel::memberEmailAddresses.name to
+                    organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
+            )
+    }
 
     override fun mode(state: InviteOrganisationalLandlordUserJourneyState) =
         getFormModelFromStateOrNull(state)?.let {
