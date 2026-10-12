@@ -1,0 +1,20 @@
+title: Change access level
+heading: Change access level
+hint:
+  currentLevel:
+    administrator: '{0,,name} is currently an administrator.'
+    editor: '{0,,name} is currently an editor.'
+  email: We will send them a confirmation email.
+radios:
+  heading: Choose an access level
+  option:
+    administrator:
+      label: Administrator
+      hint: Can register or edit properties, manage team members, and change organisation information
+    editor:
+      label: Editor
+      hint: Can register or edit properties
+  error:
+    missing: Select the access level
+buttons:
+  removeAccess: Remove access

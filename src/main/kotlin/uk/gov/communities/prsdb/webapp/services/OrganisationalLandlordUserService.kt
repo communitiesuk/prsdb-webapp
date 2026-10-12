@@ -7,10 +7,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @PrsdbWebService
 class OrganisationalLandlordUserService(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @Transactional
     fun createOrganisationalLandlordUser(
@@ -26,4 +28,29 @@ class OrganisationalLandlordUserService(
 
     fun getOrganisationalLandlordUsers(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordUser> =
         organisationalLandlordUserRepository.findByOrganisationalLandlord(organisationalLandlord)
+
+    fun getOrganisationalLandlordUserOrNull(id: Long): OrganisationalLandlordUser? =
+        organisationalLandlordUserRepository.findById(id).orElse(null)
+
+    fun getCurrentUserIsAuthorizedToEditRecord(organisationalLandlordUserId: Long): Boolean {
+        val currentUser = userToLandlordService.getCurrentOrganisationalLandlordTeamMember() ?: return false
+        if (currentUser.role != OrganisationalLandlordUserRole.ADMIN) {
+            return false
+        }
+
+        val member = getOrganisationalLandlordUserOrNull(organisationalLandlordUserId) ?: return false
+        return member.organisationalLandlord.id == currentUser.organisationalLandlord.id
+    }
+
+    @Transactional
+    fun updateRole(
+        id: Long,
+        role: OrganisationalLandlordUserRole,
+    ) {
+        val user =
+            getOrganisationalLandlordUserOrNull(id)
+                ?: throw PrsdbWebException("No organisational landlord user found with id $id")
+        user.role = role
+        organisationalLandlordUserRepository.save(user)
+    }
 }

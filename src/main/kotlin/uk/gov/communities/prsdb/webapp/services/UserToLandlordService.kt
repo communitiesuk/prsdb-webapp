@@ -6,6 +6,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -38,6 +39,11 @@ class UserToLandlordService(
     }
 
     fun doesCurrentUserHaveLandlord(): Boolean = getCurrentLandlordForUserOrNull() != null
+
+    fun getCurrentOrganisationalLandlordTeamMember(): OrganisationalLandlordUser? {
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        return organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).singleOrNull()
+    }
 
     /**
      * Calls getCurrentLandlordForUser and discards result.
