@@ -16,6 +16,7 @@ joinOrganisation:
     two: your email address
 invalidLink:
   heading: There was a problem with this invitation link
+  pageTitle: There was a problem with this organisation invitation link
   whatsHappened:
     heading: What’s happened
     alreadyResponded:

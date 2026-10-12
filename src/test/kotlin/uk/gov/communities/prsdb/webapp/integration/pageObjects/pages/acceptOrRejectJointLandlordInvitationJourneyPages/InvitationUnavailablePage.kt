@@ -7,4 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 
 class InvitationUnavailablePage(
     page: Page,
-) : BasePage(page, "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${InviteUnavailableStep.ROUTE_SEGMENT}")
+) : BasePage(page, "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${InviteUnavailableStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "There was a problem with this joint landlord invitation link"
+}
