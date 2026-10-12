@@ -64,6 +64,8 @@ class TeamMembersTests :
                 assertThat(row.value).hasText(email)
                 assertThat(row.actions.getActionLink("Resend")).isVisible()
                 assertThat(row.actions.getActionLink("Cancel")).isVisible()
+                // TODO PDJB-1758: assert the Resend link goes to the resend invitation page
+                // TODO PDJB-1769: assert the Cancel link goes to the cancel invitation page
             }
 
         val expiredInvitations = teamMembersPage.expiredInvitationsSummaryList
@@ -73,6 +75,7 @@ class TeamMembersTests :
         assertThat(expiredRow.value).hasText("expired-org-invite-d@example.com")
         assertThat(expiredRow.actions.getActionLink("Resend")).isVisible()
         assertThat(expiredRow.actions.getActionLink("Remove")).isVisible()
+        // TODO PDJB-1854: assert the Remove link goes to the remove expired invitation page
 
         assertThat(teamMembersPage.invitationsPanel).not().containsText("hidden-org-invite-e@example.com")
     }
