@@ -39,15 +39,14 @@ class SwapToIndividualNudgeEmailServiceTests {
     @Test
     fun `sendNudgeEmailIfApplicable sends email when property is marked joint with sole landlord and no pending invitations`() {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val soleLandlord =
+            MockLandlordData.createIndividualLandlord(
+                name = "Alice",
+                email = "alice@example.com",
+            )
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                landlords =
-                    mutableSetOf(
-                        MockLandlordData.createIndividualLandlord(
-                            name = "Alice",
-                            email = "alice@example.com",
-                        ),
-                    ),
+                landlords = mutableSetOf(soleLandlord),
                 address = address,
                 markedJointLandlord = true,
             )
@@ -61,7 +60,7 @@ class SwapToIndividualNudgeEmailServiceTests {
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
         val emailCaptor = argumentCaptor<SwapToIndividualNudgeEmail>()
-        verify(mockNudgeEmailNotificationService).sendEmail(eq("alice@example.com"), emailCaptor.capture())
+        verify(mockNudgeEmailNotificationService).sendEmailToLandlord(eq(soleLandlord), emailCaptor.capture())
 
         val sentEmail = emailCaptor.firstValue
         assertEquals("Alice", sentEmail.recipientName)
@@ -78,7 +77,7 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
-        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockNudgeEmailNotificationService, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -95,7 +94,7 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
-        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockNudgeEmailNotificationService, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -115,7 +114,7 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
-        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockNudgeEmailNotificationService, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -135,7 +134,7 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
-        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockNudgeEmailNotificationService, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -151,6 +150,7 @@ class SwapToIndividualNudgeEmailServiceTests {
                     ),
                 markedJointLandlord = true,
             )
+        val soleLandlord = propertyOwnership.landlords.single()
         val expiredInvitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 propertyOwnership = propertyOwnership,
@@ -166,6 +166,6 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
-        verify(mockNudgeEmailNotificationService).sendEmail(eq("bob@example.com"), any())
+        verify(mockNudgeEmailNotificationService).sendEmailToLandlord(eq(soleLandlord), any())
     }
 }

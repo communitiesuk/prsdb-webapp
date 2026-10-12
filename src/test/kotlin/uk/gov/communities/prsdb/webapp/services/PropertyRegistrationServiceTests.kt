@@ -84,6 +84,9 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockFeatureFlagManager: uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 
+    @Mock
+    private lateinit var mockCurrentUserService: CurrentUserService
+
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
 
@@ -432,9 +435,10 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sends a confirmation email and caches the registration number when it registers the property`() {
+    fun `registerProperty sends confirmation email to current user and caches the registration number when it registers the property`() {
         // Arrange
-        val landlord = MockLandlordData.createIndividualLandlord()
+        val landlord = MockLandlordData.createOrgLandlord()
+        val currentUserEmail = "admin@example.com"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 5678)
 
         val expectedPropertyOwnership =
@@ -443,6 +447,7 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
@@ -501,7 +506,7 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockConfirmationEmailSender).sendEmail(
-            eq(landlord.email),
+            eq(currentUserEmail),
             argThat<PropertyRegistrationConfirmationEmail> { email ->
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
                     email.multiLineAddress == expectedPropertyOwnership.address.toMultiLineAddress() &&
@@ -1355,6 +1360,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty sends confirmation email with isDelegatedToLettingAgent when delegated`() {
         val landlord = MockLandlordData.createIndividualLandlord()
+        val currentUserEmail = "admin@example.com"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 9999)
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -1362,6 +1368,7 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
@@ -1416,7 +1423,7 @@ class PropertyRegistrationServiceTests {
         )
 
         verify(mockConfirmationEmailSender).sendEmail(
-            eq(landlord.email),
+            eq(currentUserEmail),
             argThat<PropertyRegistrationConfirmationEmail> { isDelegatedToLettingAgent },
         )
     }
@@ -1424,6 +1431,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty sends confirmation email with provide-later flags for a non-delegated occupied property`() {
         val landlord = MockLandlordData.createIndividualLandlord()
+        val currentUserEmail = "admin@example.com"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 8888)
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -1431,6 +1439,7 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
@@ -1491,7 +1500,7 @@ class PropertyRegistrationServiceTests {
         )
 
         verify(mockConfirmationEmailSender).sendEmail(
-            eq(landlord.email),
+            eq(currentUserEmail),
             argThat<PropertyRegistrationConfirmationEmail> {
                 isPdjb939PhaseTwoEnabled &&
                     licenseProvideLater &&
