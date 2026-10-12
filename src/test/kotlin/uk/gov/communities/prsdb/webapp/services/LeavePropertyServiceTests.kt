@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -148,6 +151,34 @@ class LeavePropertyServiceTests {
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
         verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
+    }
+
+    @Test
+    fun `leavePropertyOwnership still sends the nudge email without throwing when the confirmation email fails to send`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        doThrow(RuntimeException("Email failed to send")).whenever(emailSender).sendEmail(any(), any())
+
+        assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
+
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
+    }
+
+    @Test
+    fun `leavePropertyOwnership does not throw when the nudge email fails to send`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        doThrow(RuntimeException("Email failed to send"))
+            .whenever(mockSwapToIndividualNudgeEmailService)
+            .sendNudgeEmailIfApplicable(propertyOwnership)
+
+        assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
     }
 
     @Test

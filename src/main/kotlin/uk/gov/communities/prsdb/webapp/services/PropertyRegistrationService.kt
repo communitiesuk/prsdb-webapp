@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -136,42 +137,30 @@ class PropertyRegistrationService(
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
     ) {
-        trySendingEmail("property registration confirmation", propertyOwnership) {
+        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
             sendConfirmationEmail(registrationData, landlord, propertyOwnership)
         }
 
         lettingAgentInvitation?.let { invitation ->
-            trySendingEmail("letting agent invitation", propertyOwnership) {
+            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)
             }
         }
 
         jointLandlordInvitations.forEach { invitation ->
-            trySendingEmail("joint landlord invitation", propertyOwnership) {
+            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationEmail(invitation)
             }
         }
 
         if (jointLandlordInvitations.isNotEmpty()) {
-            trySendingEmail("joint landlord invitation confirmation", propertyOwnership) {
+            sendEmailAndLogFailures("the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationConfirmationEmails(
                     jointLandlordInvitations.map { it.invitedEmail },
                     propertyOwnership,
                     landlord,
                 )
             }
-        }
-    }
-
-    private fun trySendingEmail(
-        emailDescription: String,
-        propertyOwnership: PropertyOwnership,
-        sendEmail: () -> Unit,
-    ) {
-        try {
-            sendEmail()
-        } catch (exception: Exception) {
-            println("Failed to send the $emailDescription email for property ownership ${propertyOwnership.id}: ${exception.message}")
         }
     }
 
