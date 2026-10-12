@@ -20,11 +20,11 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -42,7 +42,8 @@ class VirusNotificationEmailHandlerTests {
     private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
-    private lateinit var individualLandlordRepository: IndividualLandlordRepository
+    private lateinit var landlordRepository: LandlordRepository
+    private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -54,7 +55,8 @@ class VirusNotificationEmailHandlerTests {
         emailNotificationService = mock()
         absoluteUrlProvider = mock()
         propertyOwnershipRepository = mock()
-        individualLandlordRepository = mock()
+        landlordRepository = mock()
+        organisationalLandlordUserRepository = mock()
         savedJourneyStateRepository = mock()
         lettingAgentAccessRepository = mock()
         featureFlagManager = mock()
@@ -66,7 +68,8 @@ class VirusNotificationEmailHandlerTests {
                 emailNotificationService,
                 absoluteUrlProvider,
                 propertyOwnershipRepository,
-                individualLandlordRepository,
+                landlordRepository,
+                organisationalLandlordUserRepository,
                 savedJourneyStateRepository,
                 lettingAgentAccessRepository,
                 featureFlagManager,
@@ -289,35 +292,45 @@ class VirusNotificationEmailHandlerTests {
             CertificateType.Eic -> "EIC"
         }
 
-    private fun arrangeIncompletePropertyCallback(certType: CertificateType): VirusScanUnsuccessfulEmail {
+    private fun arrangeSavedJourneyStateForUsers(
+        journeyId: String,
+        baseUserIds: Collection<String>,
+        singleLineAddress: String = "1 Main St, Anytown",
+    ) {
+        val savedJourneyState =
+            MockSavedJourneyStateData.createSavedJourneyState(
+                journeyId = journeyId,
+                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(singleLineAddress),
+            )
+        whenever(savedJourneyStateRepository.findFirstByJourneyIdAndUser_IdIn(journeyId, baseUserIds)).thenReturn(
+            savedJourneyState,
+        )
+    }
+
+    private fun expectedIncompletePropertyEmail(
+        certType: CertificateType,
+        recipientName: String,
+    ) = VirusScanUnsuccessfulEmail(
+        certificateType = expectedCertType(certType),
+        recipientName = recipientName,
+        propertyAddress = "1 Main St\nAnytown",
+        landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
+    )
+
+    @ParameterizedTest
+    @EnumSource(CertificateType::class)
+    fun `handleCallback for incomplete property emails an individual landlord`(certType: CertificateType) {
         val landlord =
             MockLandlordData.createIndividualLandlord(
                 baseUser = MockPrsdbUserData.createPrsdbUser("subject-1"),
                 name = "Jane Smith",
                 email = "jane@example.com",
             )
-        doReturn(Optional.of(landlord)).whenever(individualLandlordRepository).findById(7L)
-        val savedJourneyState =
-            MockSavedJourneyStateData.createSavedJourneyState(
-                journeyId = "journey-1",
-                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress("1 Main St, Anytown"),
-            )
-        whenever(savedJourneyStateRepository.findByJourneyIdAndUser_Id("journey-1", "subject-1")).thenReturn(
-            savedJourneyState,
-        )
-        return VirusScanUnsuccessfulEmail(
-            certificateType = expectedCertType(certType),
-            recipientName = "Jane Smith",
-            propertyAddress = "1 Main St\nAnytown",
-            landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
-        )
-    }
+        doReturn(Optional.of(landlord)).whenever(landlordRepository).findById(7L)
+        arrangeSavedJourneyStateForUsers(journeyId = "journey-1", baseUserIds = listOf("subject-1"))
+        val expectedEmail = expectedIncompletePropertyEmail(certType, "Jane Smith")
 
-    @ParameterizedTest
-    @EnumSource(CertificateType::class)
-    fun `handleCallback for incomplete property emails the registering landlord`(certType: CertificateType) {
-        val expectedEmail = arrangeIncompletePropertyCallback(certType)
-        val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
+        val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, landlordId = 7L)
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(
                 mock(),
@@ -325,18 +338,59 @@ class VirusNotificationEmailHandlerTests {
             ),
         )
 
-        val emailCaptor = argumentCaptor<EmailTemplateModel>()
-        val addressCaptor = argumentCaptor<String>()
-        verify(emailNotificationService).sendEmail(addressCaptor.capture(), emailCaptor.capture())
-        assertEquals("jane@example.com", addressCaptor.firstValue)
-        assertEquals(expectedEmail, emailCaptor.firstValue)
+        verify(emailNotificationService).sendEmailToLandlord(eq(landlord), eq(expectedEmail))
+        verify(emailNotificationService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `handleCallback for incomplete property emails an organisational landlord`() {
+        val baseUser = MockPrsdbUserData.createPrsdbUser("org-subuser-1")
+        val orgLandlord =
+            MockLandlordData.createOrgLandlord(
+                baseUser = baseUser,
+                name = "Org Landlord",
+                registrantEmail = "org-admin@example.com",
+            )
+        doReturn(Optional.of(orgLandlord)).whenever(landlordRepository).findById(9L)
+        whenever(organisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord))
+            .thenReturn(
+                listOf(
+                    MockLandlordData.createOrganisationalLandlordUser(
+                        baseUser = baseUser,
+                        organisationalLandlord = orgLandlord,
+                    ),
+                ),
+            )
+        arrangeSavedJourneyStateForUsers(journeyId = "journey-1", baseUserIds = listOf("org-subuser-1"))
+        val expectedEmail = expectedIncompletePropertyEmail(CertificateType.GasSafetyCert, "Org Landlord")
+
+        val data =
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.GasSafetyCert, landlordId = 9L)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(
+                mock(),
+                Json.encodeToString<EmailNotificationData>(data),
+            ),
+        )
+
+        verify(emailNotificationService).sendEmailToLandlord(eq(orgLandlord), eq(expectedEmail))
+        verify(emailNotificationService, never()).sendEmail(any(), any())
     }
 
     @ParameterizedTest
     @EnumSource(CertificateType::class)
     fun `handleCallback for incomplete-property monitoring email sends to the monitoring team`(certType: CertificateType) {
-        val expectedEmail = arrangeIncompletePropertyCallback(certType).copy(recipientName = "Monitoring Team")
-        val inner = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
+        val landlord =
+            MockLandlordData.createIndividualLandlord(
+                baseUser = MockPrsdbUserData.createPrsdbUser("subject-1"),
+                name = "Jane Smith",
+                email = "jane@example.com",
+            )
+        doReturn(Optional.of(landlord)).whenever(landlordRepository).findById(7L)
+        arrangeSavedJourneyStateForUsers(journeyId = "journey-1", baseUserIds = listOf("subject-1"))
+        val expectedEmail = expectedIncompletePropertyEmail(certType, "Monitoring Team")
+
+        val inner = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, landlordId = 7L)
         val data = EmailNotificationData.VirusMonitoringEmailNotification(inner)
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(
@@ -345,18 +399,35 @@ class VirusNotificationEmailHandlerTests {
             ),
         )
 
-        val emailCaptor = argumentCaptor<EmailTemplateModel>()
-        val addressCaptor = argumentCaptor<String>()
-        verify(emailNotificationService).sendEmail(addressCaptor.capture(), emailCaptor.capture())
-        assertEquals(virusMonitoringEmail, addressCaptor.firstValue)
-        assertEquals(expectedEmail, emailCaptor.firstValue)
+        verify(emailNotificationService).sendEmail(eq(virusMonitoringEmail), eq(expectedEmail))
+        verify(emailNotificationService, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
     fun `handleCallback for incomplete property throws when the landlord cannot be found`() {
-        doReturn(Optional.empty<IndividualLandlord>()).whenever(individualLandlordRepository).findById(7L)
+        doReturn(Optional.empty<Landlord>()).whenever(landlordRepository).findById(7L)
         val data =
-            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L)
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, landlordId = 7L)
+        assertThrows<IllegalStateException> {
+            virusNotificationEmailHandler.handleCallback(
+                VirusScanCallback(
+                    mock(),
+                    Json.encodeToString<EmailNotificationData>(data),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `handleCallback for incomplete property throws when the saved journey state cannot be found`() {
+        val landlord =
+            MockLandlordData.createIndividualLandlord(
+                baseUser = MockPrsdbUserData.createPrsdbUser("subject-1"),
+            )
+        doReturn(Optional.of(landlord)).whenever(landlordRepository).findById(7L)
+        whenever(savedJourneyStateRepository.findFirstByJourneyIdAndUser_IdIn("journey-1", listOf("subject-1"))).thenReturn(null)
+        val data =
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, landlordId = 7L)
         assertThrows<IllegalStateException> {
             virusNotificationEmailHandler.handleCallback(
                 VirusScanCallback(

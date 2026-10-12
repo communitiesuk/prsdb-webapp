@@ -16,6 +16,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyState
@@ -112,7 +113,7 @@ class CancelInvitationStepConfigTests {
             landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
-        assertEquals(otherLandlordEmail, landlordCaptor.firstValue.email)
+        assertEquals(otherLandlordEmail, (landlordCaptor.firstValue as IndividualLandlord).email)
     }
 
     @Test
@@ -127,7 +128,7 @@ class CancelInvitationStepConfigTests {
             landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
-        assertNotEquals(cancellerEmail, landlordCaptor.firstValue.email)
+        assertNotEquals(cancellerEmail, (landlordCaptor.firstValue as IndividualLandlord).email)
     }
 
     @Test

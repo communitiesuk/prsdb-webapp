@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -135,7 +135,7 @@ class PropertyComplianceServiceTests {
         SecurityContextHolder.clearContext()
     }
 
-    private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
+    private fun setMockPrincipal(landlord: IndividualLandlord = mockLoggedInLandlord) {
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
         lenient()
             .`when`(mockCurrentUserService.getCurrentUserDetails())

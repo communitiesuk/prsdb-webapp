@@ -9,9 +9,9 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyState
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -36,10 +36,10 @@ class AllowLettingAgentStepConfigTests {
     lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
 
     @Mock
-    lateinit var mockJourneyState: DelegateToLettingAgentJourneyState
+    lateinit var mockCurrentUserService: CurrentUserService
 
     @Mock
-    lateinit var mockLandlord: Landlord
+    lateinit var mockJourneyState: DelegateToLettingAgentJourneyState
 
     private fun createStepConfig() =
         AllowLettingAgentStepConfig(
@@ -47,21 +47,32 @@ class AllowLettingAgentStepConfigTests {
             mockPropertyOwnershipService,
             mockLettingAgentAccessService,
             mockDelegateToLettingAgentEmailService,
+            mockCurrentUserService,
         ).apply {
             urlPath = AllowLettingAgentStep.ROUTE_SEGMENT
             validator = AlwaysTrueValidator()
         }
 
     @Test
-    fun `enrichSubmittedDataBeforeValidation injects the landlord email`() {
+    fun `enrichSubmittedDataBeforeValidation injects the current user email`() {
         val stepConfig = createStepConfig()
 
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
-        whenever(mockLandlord.email).thenReturn("landlord@example.com")
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("user@example.com")
 
         val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
 
-        assertEquals("landlord@example.com", result["landlordEmail"])
+        assertEquals("user@example.com", result["currentUserEmail"])
+    }
+
+    @Test
+    fun `enrichSubmittedDataBeforeValidation injects the acting sub-user email for an organisational user`() {
+        val stepConfig = createStepConfig()
+
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("sub-user@example.com")
+
+        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
+
+        assertEquals("sub-user@example.com", result["currentUserEmail"])
     }
 
     @Test
