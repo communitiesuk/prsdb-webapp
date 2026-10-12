@@ -1712,7 +1712,9 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptOrganisationalLandlordInvitationJourney(token: String): CheckUserIsLandlordPage {
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): CheckUserIsLandlordPage {
+        // TODO PDJB-1829: CheckUserIsLandlordStep is currently a placeholder, so a valid token lands here. Once that step decides
+        // whether the invitee is already a landlord user, this should navigate on to the journey's start page and return that instead.
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
         return createValidPage(page, CheckUserIsLandlordPage::class)
     }
