@@ -14,6 +14,8 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordInvitation
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -125,5 +127,19 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         assertNull(result)
+    }
+
+    @Test
+    fun `getInvitationsForOrganisation returns the organisation's invitations from the repository`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val invitations = listOf(createOrganisationalLandlordInvitation(organisationalLandlord = organisation))
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(invitations)
+
+        // Act
+        val result = invitationService.getInvitationsForOrganisation(organisation)
+
+        // Assert
+        assertEquals(invitations, result)
     }
 }

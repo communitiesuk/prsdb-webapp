@@ -17,3 +17,13 @@ editors:
   description: Editors can register and update properties.
   rowHeading: Editor {0,,number}
   noEditors: There are currently no editors.
+invitations:
+  tab: Invitations ({0,,count})
+  heading: Invitations
+  description: Sent invitations that have not been accepted.
+  rowHeading: Invitation {0,,number}
+  noInvitations: There are no outstanding invitations.
+  expired:
+    heading: Expired invitations
+    description: Invitations that have not been accepted after {0,,count} days.
+    rowHeading: Expired invite {0,,number}

@@ -8,14 +8,20 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TeamMembersViewModel
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordInvitation
+import kotlin.test.assertEquals
 
 @WebMvcTest(TeamMembersController::class)
 class TeamMembersControllerTests(
@@ -27,11 +33,21 @@ class TeamMembersControllerTests(
     @MockitoBean
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
+    @MockitoBean
+    private lateinit var organisationalLandlordInvitationService: OrganisationalLandlordInvitationService
+
     private fun stubOrgLandlordWithCurrentUser() {
         val organisation = createOrgLandlord()
-        val currentUser = OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Current User", "user@example.com", ADMIN)
+        val currentUser =
+            OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Current User", "user@example.com", ADMIN)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(organisation)
-        whenever(organisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(listOf(currentUser))
+        whenever(organisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
+            listOf(
+                currentUser,
+            ),
+        )
+        whenever(organisationalLandlordInvitationService.getInvitationsForOrganisation(organisation))
+            .thenReturn(listOf(createOrganisationalLandlordInvitation(organisationalLandlord = organisation)))
     }
 
     @Test
@@ -77,5 +93,25 @@ class TeamMembersControllerTests(
                 view { name("teamMembers") }
                 model { attributeExists("teamMembers") }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `getTeamMembers adds the organisation's invitations and the invitations tab id to the model`() {
+        stubOrgLandlordWithCurrentUser()
+
+        val result =
+            mvc
+                .get(TEAM_MEMBERS_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("invitationsTabId", INVITATIONS_FRAGMENT)
+                        attribute("invitationLifetimeInDays", ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS)
+                    }
+                }.andReturn()
+
+        val teamMembers = result.modelAndView!!.model["teamMembers"] as TeamMembersViewModel
+        assertEquals(1, teamMembers.pendingInvitationRows.size)
     }
 }
