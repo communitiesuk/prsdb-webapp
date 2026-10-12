@@ -33,6 +33,7 @@ class PropertyRegistrationService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val featureFlagManager: FeatureFlagManager,
+    private val currentUserService: CurrentUserService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -151,9 +152,8 @@ class PropertyRegistrationService(
         epcProvideLater: Boolean,
         tenancyProvideLater: Boolean,
     ) {
-        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
-            landlord.email,
+            currentUserService.getCurrentEmail(),
             PropertyRegistrationConfirmationEmail(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
@@ -171,6 +171,7 @@ class PropertyRegistrationService(
                 tenancyProvideLater = tenancyProvideLater,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
             jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)

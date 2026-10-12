@@ -18,6 +18,7 @@ class LeavePropertyService(
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val userToLandlordService: UserToLandlordService,
+    private val currentUserService: CurrentUserService,
 ) {
     fun getPropertyOwnershipIfUserCanLeave(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
@@ -40,17 +41,19 @@ class LeavePropertyService(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
+        val currentUser = currentUserService.getCurrentUserDetails()
+
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
-        // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
         TransactionHelper.runAfterTransactionCommits {
             confirmationEmailSender.sendEmail(
-                landlord.email,
+                currentUser.email,
                 JointLandlordYouLeftConfirmation(
-                    recipientName = landlord.name,
+                    recipientName = currentUser.name,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 ),
             )
+            // TODO: PDJB-1274: Update emails to account for other users in the org
             swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
         }
     }
