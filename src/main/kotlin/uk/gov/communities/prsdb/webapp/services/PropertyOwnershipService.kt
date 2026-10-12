@@ -18,9 +18,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -103,7 +105,7 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
+                correspondenceEmail = correspondenceEmail ?: getCorrespondenceContactEmail(registeringLandlord),
                 correspondenceAddress = correspondenceAddress,
                 renewalDate = renewalDate,
                 isActive = isActive,
@@ -122,6 +124,14 @@ class PropertyOwnershipService(
             },
         )
     }
+
+    // TODO: PDJB-1733: Remove this method too, it's only used if correspondence email is null
+    private fun getCorrespondenceContactEmail(landlord: Landlord): String =
+        when (landlord) {
+            is IndividualLandlord -> landlord.email
+            is OrganisationalLandlord -> landlord.wholeOrgEmail
+            else -> throw IllegalArgumentException("Unknown landlord type")
+        }
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)

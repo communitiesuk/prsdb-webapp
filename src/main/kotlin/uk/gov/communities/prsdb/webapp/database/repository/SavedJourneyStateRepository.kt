@@ -11,6 +11,11 @@ interface SavedJourneyStateRepository : JpaRepository<SavedJourneyState, Long> {
         principalName: String,
     ): SavedJourneyState?
 
+    fun findFirstByJourneyIdAndUser_IdIn(
+        journeyId: String,
+        principalNames: Collection<String>,
+    ): SavedJourneyState?
+
     fun existsByJourneyIdAndUser_Id(
         journeyId: String,
         principalName: String,
