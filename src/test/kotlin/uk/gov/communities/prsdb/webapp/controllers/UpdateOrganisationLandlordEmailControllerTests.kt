@@ -8,7 +8,6 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationEmail.UpdateOrganisationEmailJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(UpdateOrganisationLandlordEmailController::class)
@@ -23,9 +22,6 @@ class UpdateOrganisationLandlordEmailControllerTests(
 
     @MockitoBean
     override lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    override lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     override val updateStepRoute =
         UpdateOrganisationLandlordEmailController.UPDATE_ORG_EMAIL_ROUTE +

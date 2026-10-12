@@ -1,6 +1,6 @@
 <!--/*@thymesVar id="todoComment" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout('TODO', ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(${todoComment}, ~{::main}, false)}">
   <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">

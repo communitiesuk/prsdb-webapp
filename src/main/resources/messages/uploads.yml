@@ -1,5 +1,9 @@
 checkUploads:
   heading: '{0,choice,0#You’ve uploaded 0 files|1#You’ve uploaded 1 file|1<You’ve uploaded {0} files}'
+  gasSafety:
+    pageTitle: '{0,choice,0#You’ve uploaded 0 gas safety certificate files|1#You’ve uploaded 1 gas safety certificate file|1<You’ve uploaded {0} gas safety certificate files}'
+  electricalSafety:
+    pageTitle: '{0,choice,0#You’ve uploaded 0 electrical safety certificate files|1#You’ve uploaded 1 electrical safety certificate file|1<You’ve uploaded {0} electrical safety certificate files}'
   paragraph: We’re still processing these files. You can continue your registration while this finishes.
   fileName: File name
   status: Status

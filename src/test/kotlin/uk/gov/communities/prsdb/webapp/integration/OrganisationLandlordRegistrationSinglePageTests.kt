@@ -46,10 +46,11 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the legend text is not shown as a header when there is no error`() {
+        fun `the question heading is rendered as the fieldset legend`() {
             val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
-            assertThat(landlordTypePage.page.locator(".govuk-fieldset__legend")).hasCount(0)
+            assertThat(landlordTypePage.page.locator(".govuk-fieldset__legend h1"))
+                .containsText("Are you registering as an individual or an organisation?")
             assertThat(landlordTypePage.page.locator(".govuk-error-message")).hasCount(0)
         }
 

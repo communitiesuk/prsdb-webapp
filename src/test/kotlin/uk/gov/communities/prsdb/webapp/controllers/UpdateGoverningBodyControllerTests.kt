@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody.UpdateGoverningBodyJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(UpdateGoverningBodyController::class)
@@ -28,9 +27,6 @@ class UpdateGoverningBodyControllerTests(
     @MockitoBean
     override lateinit var userToLandlordService: UserToLandlordService
 
-    @MockitoBean
-    override lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
-
     override val updateStepRoute =
         UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE +
             "/${OrgGovBodyMemberListStep.ROUTE_SEGMENT}"
@@ -41,7 +37,7 @@ class UpdateGoverningBodyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getUpdateStep returns 403 for a registered company organisation landlord as cannot have governing body`() {
         val registeredCompanyOrg = OrganisationalLandlord()
         registeredCompanyOrg.companyNumber = "12345678"

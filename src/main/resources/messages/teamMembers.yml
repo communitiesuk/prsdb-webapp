@@ -1,0 +1,19 @@
+title: Team members
+heading: Team members
+currentUserName: '{0,,name} (You)'
+administrators:
+  tab: Administrators ({0,,count})
+  heading: Administrators
+  description: 'Administrators can:'
+  bullet:
+    one: register and update properties
+    two: add or remove team members
+    three: update organisation details and contacts
+    four: remove the organisation from the service
+  rowHeading: Administrator {0,,number}
+editors:
+  tab: Editors ({0,,count})
+  heading: Editors
+  description: Editors can register and update properties.
+  rowHeading: Editor {0,,number}
+  noEditors: There are currently no editors.

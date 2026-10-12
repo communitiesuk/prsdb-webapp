@@ -98,13 +98,17 @@ interface MyService {
     fun doSomething()
 }
 
+// Implementations use @Service rather than @PrsdbWebService, as FF4J only reads bean names from a @Service on the class
+
 // Default implementation (flag off)
-@PrsdbWebService
 @Primary
+@Conditional(WebServerOnly::class)
+@Service("currentImpl")
 class MyServiceImpl : MyService { }
 
 // Alternative implementation (flag on)
-@PrsdbWebService("newImpl")
+@Conditional(WebServerOnly::class)
+@Service("newImpl")
 class MyServiceNewImpl : MyService { }
 ```
 

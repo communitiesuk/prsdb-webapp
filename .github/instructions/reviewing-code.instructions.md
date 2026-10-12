@@ -25,7 +25,9 @@ runs in task-runner mode. Code should use:
 For scheduled task components, the equivalents are `@PrsdbTask` and `@PrsdbScheduledTask`.
 
 Any new controller, service, component, or configuration class that uses a bare Spring stereotype annotation instead
-of the project wrapper is a review finding.
+of the project wrapper is a review finding. The exception is implementations of `@PrsdbFlip` interfaces, which must use
+`@Service("bean-name")` with `@Conditional(WebServerOnly::class)`, because FF4J only reads bean names from a `@Service`
+on the class itself.
 
 ## Dependency Injection
 

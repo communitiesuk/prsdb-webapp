@@ -8,6 +8,8 @@ open class UpdateEpcCheckYourAnswersBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    override val expectedTitleHeading = "Check your energy performance certificate (EPC) answers"
+
     val form = Form(page)
 
     val summaryList = EpcCheckYourAnswersSummaryList(page)

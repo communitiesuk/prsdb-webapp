@@ -3,13 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -617,29 +615,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class BeforePdjb939Layout {
-        // Flag-off (legacy) property record layout. Delete this class when PDJB-939 is permanently on.
-        @BeforeEach
-        fun disableFlag() {
-            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        }
-
-        @Test
-        fun `landlord view displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
-
-            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
-        }
-
-        @Test
-        fun `local council view displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
-
-            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
-        }
-    }
-
-    @Nested
     inner class PropertyDetailsTab {
         @Test
         fun `landlord view groups the property record into sections`(page: Page) {
@@ -651,9 +626,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
-
-            assertThat(detailsPage.sectionHeading("Licensing information")).isHidden()
-            assertThat(detailsPage.sectionHeading("Tenancy and rental information")).isHidden()
         }
 
         @Test

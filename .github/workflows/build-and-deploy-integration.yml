@@ -4,6 +4,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 concurrency:
   group: deploy-integration
   cancel-in-progress: false

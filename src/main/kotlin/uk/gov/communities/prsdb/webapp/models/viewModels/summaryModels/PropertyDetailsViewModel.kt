@@ -28,7 +28,7 @@ class PropertyDetailsViewModel(
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
     val ownershipSection: List<SummaryListRowViewModel> =
-        listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
+        listOf(ownershipTypeRow())
 
     val correspondenceSection: List<SummaryListRowViewModel>? =
         if (showCorrespondenceSection) {
@@ -53,7 +53,7 @@ class PropertyDetailsViewModel(
         }
 
     val occupiedSection: List<SummaryListRowViewModel> =
-        listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
+        listOf(occupiedRow())
 
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 

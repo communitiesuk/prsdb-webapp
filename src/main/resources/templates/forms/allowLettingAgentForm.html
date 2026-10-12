@@ -2,7 +2,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{delegateToLettingAgent.title}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{delegateToLettingAgent.allowLettingAgent.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <h1 class="govuk-heading-l" th:text="#{delegateToLettingAgent.allowLettingAgent.heading}">
         delegateToLettingAgent.allowLettingAgent.heading
     </h1>

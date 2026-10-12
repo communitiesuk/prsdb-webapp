@@ -53,11 +53,15 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
-    fun buildPropertyRegistrationPaymentReturnUri(journeyId: String): URI =
+    fun buildPropertyRegistrationPaymentReturnUri(
+        journeyId: String,
+        paymentReference: String,
+    ): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
             .replacePath("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}")
             .queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
+            .queryParam(PaymentReferenceParameterService.PARAMETER_NAME, paymentReference)
             .build()
             .toUri()
 

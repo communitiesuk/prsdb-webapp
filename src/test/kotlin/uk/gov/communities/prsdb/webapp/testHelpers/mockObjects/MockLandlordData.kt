@@ -161,6 +161,21 @@ class MockLandlordData {
             return landlord
         }
 
+        fun createOrganisationalLandlordUser(
+            baseUser: PrsdbUser = createPrsdbUser(),
+            role: OrganisationalLandlordUserRole = OrganisationalLandlordUserRole.ADMIN,
+            organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),
+            name: String = "Organisation user",
+            email: String = "organisation.user@example.com",
+        ): OrganisationalLandlordUser =
+            OrganisationalLandlordUser(
+                organisationalLandlord = organisationalLandlord,
+                baseUser = baseUser,
+                name = name,
+                email = email,
+                role = role,
+            )
+
         fun createPropertyOwnership(
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,

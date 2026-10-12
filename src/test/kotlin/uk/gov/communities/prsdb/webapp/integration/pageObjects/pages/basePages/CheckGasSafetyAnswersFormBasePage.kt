@@ -10,6 +10,8 @@ open class CheckGasSafetyAnswersFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    override val expectedTitleHeading = "Check your gas safety certificate answers"
+
     val heading = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
     val form = Form(page)

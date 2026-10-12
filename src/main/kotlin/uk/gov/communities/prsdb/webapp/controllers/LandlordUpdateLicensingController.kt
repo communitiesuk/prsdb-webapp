@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -22,7 +22,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_LICENSING_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@AllowIfLandlord
 class LandlordUpdateLicensingController(
     private val journeyFactory: UpdateLicensingJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
