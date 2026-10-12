@@ -135,19 +135,9 @@ class PropertyRegistrationService(
         propertyOwnership: PropertyOwnership,
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
-    ) = with(registrationData) {
+    ) {
         trySendingEmail("property registration confirmation", propertyOwnership) {
-            sendConfirmationEmail(
-                landlord,
-                propertyOwnership,
-                jointLandlordEmails,
-                isDelegatedToLettingAgent,
-                licenseProvideLater = licenseProvideLater,
-                gasSafetyCertProvideLater = gasSafetyCertProvideLater,
-                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
-                epcProvideLater = epcProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            )
+            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
         }
 
         lettingAgentInvitation?.let { invitation ->
@@ -186,16 +176,10 @@ class PropertyRegistrationService(
     }
 
     private fun sendConfirmationEmail(
+        registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
-        jointLandlordEmails: List<String>?,
-        isDelegatedToLettingAgent: Boolean,
-        licenseProvideLater: Boolean,
-        gasSafetyCertProvideLater: Boolean,
-        electricalSafetyCertProvideLater: Boolean,
-        epcProvideLater: Boolean,
-        tenancyProvideLater: Boolean,
-    ) {
+    ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
             landlord.email,

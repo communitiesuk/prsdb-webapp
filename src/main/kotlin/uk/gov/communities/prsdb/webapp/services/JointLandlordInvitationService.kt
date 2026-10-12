@@ -74,8 +74,8 @@ class JointLandlordInvitationService(
         hideExpiredPropertyInvitesForEmails(propertyOwnership, emailsToInvite)
 
         emailsToInvite.forEach { email ->
-            // Save the invitation before sending the email so the link in the email always resolves to a real token.
-            // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
+            // createInvitation saves the invitation before we send the email, so the link in the email always resolves to a
+            // real token. If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
             val invitation = createInvitation(email, propertyOwnership, invitingLandlord)
 
             try {

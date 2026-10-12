@@ -1534,7 +1534,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty creates the invitations but neither caches the PRN nor sends emails before the transaction commits`() {
+    fun `registerProperty creates the invitations but neither sets the last PRN registered this session nor sends emails before commit`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
@@ -1560,7 +1560,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty caches the registration number and sends every email once the transaction it is part of commits`() {
+    fun `registerProperty sets the last PRN registered this session and sends every email once the transaction it is part of commits`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))

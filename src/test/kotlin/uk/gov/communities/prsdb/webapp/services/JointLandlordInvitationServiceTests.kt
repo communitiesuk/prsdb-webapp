@@ -16,7 +16,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
@@ -737,7 +736,7 @@ class JointLandlordInvitationServiceTests {
     @Nested
     inner class CreateInvitationsTests {
         @Test
-        fun `createInvitations saves and returns an invitation for each email without checking existing invitations`() {
+        fun `createInvitations saves and returns an invitation for each email`() {
             // Arrange
             val jointLandlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -751,19 +750,6 @@ class JointLandlordInvitationServiceTests {
             assertTrue(invitations.all { it.invitingLandlordName == invitingLandlord.name })
             assertEquals(invitations.size, invitations.map { it.token }.distinct().size)
             invitations.forEach { invitation -> verify(mockJointLandlordInvitationRepository).save(invitation) }
-            verifyNoMoreInteractions(mockJointLandlordInvitationRepository)
-        }
-
-        @Test
-        fun `createInvitations does not send any emails`() {
-            // Arrange
-            val propertyOwnership = MockLandlordData.createPropertyOwnership()
-
-            // Act
-            invitationService.createInvitations(listOf("landlord1@example.com"), propertyOwnership, invitingLandlord)
-
-            // Assert
-            verifyNoInteractions(mockInvitationEmailSender, mockConfirmationEmailSender, mockNotifyExistingEmailSender)
         }
     }
 

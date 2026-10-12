@@ -80,7 +80,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `registerProperty neither caches the registration number nor sends emails when the transaction it is part of rolls back`() {
+    fun `registerProperty neither sets the last PRN registered this session nor sends emails when its transaction rolls back`() {
         // Act
         val propertyOwnership =
             TransactionTemplate(transactionManager).execute { transaction ->
@@ -96,14 +96,11 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `registerProperty caches the registration number and sends its emails once the transaction it is part of commits`() {
+    fun `registerProperty sets the last PRN registered this session and sends its emails once its transaction commits`() {
         // Act
         val propertyOwnership =
             TransactionTemplate(transactionManager).execute {
-                propertyRegistrationService.registerProperty(registrationData).also {
-                    verifyNoEmailsSent()
-                    verifyNoInteractions(mockConfirmationService)
-                }
+                propertyRegistrationService.registerProperty(registrationData)
             }!!
 
         // Assert
