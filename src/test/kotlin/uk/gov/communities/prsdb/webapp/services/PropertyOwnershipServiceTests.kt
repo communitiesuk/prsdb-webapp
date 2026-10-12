@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -18,6 +19,7 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -1902,6 +1904,24 @@ class PropertyOwnershipServiceTests {
 
             assertFalse(propertyOwnership.landlords.any { it == landlord })
             verify(mockEmailService).sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+        }
+
+        @Test
+        fun `removeLandlord still removes the landlord without throwing when the remaining landlords fail to be notified`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val otherLandlord = MockLandlordData.createIndividualLandlord(name = "Other")
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord, otherLandlord),
+                )
+            doThrow(RuntimeException("Email failed to send"))
+                .whenever(mockEmailService)
+                .sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+
+            assertDoesNotThrow { propertyOwnershipService.removeLandlord(propertyOwnership, landlord) }
+
+            assertFalse(propertyOwnership.landlords.any { it == landlord })
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
     }
 

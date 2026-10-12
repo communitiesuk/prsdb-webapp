@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
 import kotlin.String
@@ -44,14 +45,18 @@ class LeavePropertyService(
 
         // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
         TransactionHelper.runAfterTransactionCommits {
-            confirmationEmailSender.sendEmail(
-                landlord.email,
-                JointLandlordYouLeftConfirmation(
-                    recipientName = landlord.name,
-                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                ),
-            )
-            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
+            EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {
+                confirmationEmailSender.sendEmail(
+                    landlord.email,
+                    JointLandlordYouLeftConfirmation(
+                        recipientName = landlord.name,
+                        propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    ),
+                )
+            }
+            EmailHelper.sendEmailAndLogFailures("the swap to individual nudge email for property ownership ${propertyOwnership.id}") {
+                swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
+            }
         }
     }
 

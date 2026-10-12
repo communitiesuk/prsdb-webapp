@@ -267,6 +267,8 @@ class PaymentService(
 
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
+                // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
+                // TODO PDJB-1853: Reconcile the payment if the transaction fails to commit after capture.
                 govUkPayClient.capturePayment(paymentId)
                 PaymentStatus.SUCCEEDED
             },
