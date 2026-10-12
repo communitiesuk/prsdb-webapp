@@ -682,16 +682,18 @@ class PropertyRegistrationJourneyFactory(
                         nextStep { journey.paymentSummaryStep }
                     }
                 }
-                step(journey.savePropertyRegistrationDataStep) {
-                    parents {
-                        OrParents(
-                            journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
-                            ),
-                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                        )
+                paymentsStrategy.ifDisabled {
+                    step(journey.savePropertyRegistrationDataStep) {
+                        parents {
+                            OrParents(
+                                journey.hasMissingComplianceStep.hasOutcome(
+                                    ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
+                                ),
+                                journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                            )
+                        }
+                        nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                     }
-                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
