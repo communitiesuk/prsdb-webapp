@@ -178,10 +178,7 @@ class MockLandlordData {
                 role = role,
             )
 
-        const val DEFAULT_ORGANISATIONAL_LANDLORD_INVITATION_ID = 456L
-
         fun createOrganisationalLandlordInvitation(
-            id: Long = DEFAULT_ORGANISATIONAL_LANDLORD_INVITATION_ID,
             token: UUID = UUID.randomUUID(),
             invitedEmail: String = "organisation.invitee@example.com",
             organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),
@@ -191,7 +188,6 @@ class MockLandlordData {
         ): OrganisationalLandlordInvitation {
             val invitation =
                 OrganisationalLandlordInvitation(
-                    id = id,
                     token = token,
                     invitedEmail = invitedEmail,
                     organisationalLandlord = organisationalLandlord,

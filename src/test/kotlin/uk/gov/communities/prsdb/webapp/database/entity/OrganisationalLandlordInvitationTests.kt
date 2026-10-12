@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -15,7 +15,7 @@ class OrganisationalLandlordInvitationTests {
             Instant.now().minus((ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS - 1).toLong(), ChronoUnit.DAYS)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
-        assertEquals(InvitationStatus.PENDING, invitation.status)
+        assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
     }
 
     @Test
@@ -24,7 +24,7 @@ class OrganisationalLandlordInvitationTests {
             Instant.now().minus(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
-        assertEquals(InvitationStatus.PENDING, invitation.status)
+        assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
     }
 
     @Test
@@ -33,14 +33,14 @@ class OrganisationalLandlordInvitationTests {
             Instant.now().minus((ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
-        assertEquals(InvitationStatus.EXPIRED, invitation.status)
+        assertEquals(OrganisationalLandlordInvitationStatus.EXPIRED, invitation.status)
     }
 
     @Test
     fun `status returns HIDDEN when the invitation is hidden`() {
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(isHidden = true)
 
-        assertEquals(InvitationStatus.HIDDEN, invitation.status)
+        assertEquals(OrganisationalLandlordInvitationStatus.HIDDEN, invitation.status)
     }
 
     @Test
@@ -50,6 +50,6 @@ class OrganisationalLandlordInvitationTests {
         val invitation =
             MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate, isHidden = true)
 
-        assertEquals(InvitationStatus.HIDDEN, invitation.status)
+        assertEquals(OrganisationalLandlordInvitationStatus.HIDDEN, invitation.status)
     }
 }

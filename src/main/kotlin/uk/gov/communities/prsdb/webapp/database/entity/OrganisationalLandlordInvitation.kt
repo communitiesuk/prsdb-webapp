@@ -12,7 +12,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.InvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.util.UUID
@@ -56,12 +56,12 @@ class OrganisationalLandlordInvitation(
     private val isExpired: Boolean
         get() = DateTimeHelper().getCurrentDateInUK() > expiresOnDate
 
-    val status: InvitationStatus
+    val status: OrganisationalLandlordInvitationStatus
         get() =
             when {
-                isHidden -> InvitationStatus.HIDDEN
-                isExpired -> InvitationStatus.EXPIRED
-                else -> InvitationStatus.PENDING
+                isHidden -> OrganisationalLandlordInvitationStatus.HIDDEN
+                isExpired -> OrganisationalLandlordInvitationStatus.EXPIRED
+                else -> OrganisationalLandlordInvitationStatus.PENDING
             }
 
     constructor(
