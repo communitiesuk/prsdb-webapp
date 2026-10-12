@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.leadTrustee.UpdateLeadTrusteeJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(UpdateLeadTrusteeController::class)
@@ -27,9 +26,6 @@ class UpdateLeadTrusteeControllerTests(
 
     @MockitoBean
     override lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    override lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     override val updateStepRoute =
         UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE +
@@ -47,7 +43,7 @@ class UpdateLeadTrusteeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getUpdateStep returns 403 for a non-trust organisation landlord`() {
         val nonTrustOrg = OrganisationalLandlord()
         nonTrustOrg.isTrust = false

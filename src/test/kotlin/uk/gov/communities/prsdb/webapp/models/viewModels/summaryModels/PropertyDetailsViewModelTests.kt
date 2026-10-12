@@ -337,7 +337,7 @@ class PropertyDetailsViewModelTests {
                 viewModel.licensingSection.map { it.fieldHeading },
             )
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensing.old",
+                "forms.checkPropertyAnswers.propertyDetails.noLicensing",
                 viewModel.licensingSection.single().fieldValue,
             )
         }

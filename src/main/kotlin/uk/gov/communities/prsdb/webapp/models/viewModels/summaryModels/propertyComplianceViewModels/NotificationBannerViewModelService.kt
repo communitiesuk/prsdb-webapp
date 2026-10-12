@@ -29,20 +29,9 @@ class NotificationBannerViewModelService {
         )
     }
 
-    fun getBeforePdjb939NotificationBanner(
-        propertyCompliance: PropertyCompliance,
-        isLandlordView: Boolean,
-    ): List<NotificationMessage> =
-        if (isLandlordView) {
-            getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView, beforePdjb939 = true)
-        } else {
-            emptyList()
-        }
-
     fun getComplianceNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
-        beforePdjb939: Boolean = false,
     ): List<NotificationMessage> {
         val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
@@ -57,7 +46,7 @@ class NotificationBannerViewModelService {
                 }
 
                 statusModel.displayAnyMissingOrFaulty -> {
-                    missingMainTextKey(isLandlordView, beforePdjb939) to VIEW_COMPLIANCE_CERTIFICATES_KEY
+                    missingMainTextKey(isLandlordView) to VIEW_COMPLIANCE_CERTIFICATES_KEY
                 }
 
                 statusModel.expiredCertificateCount > 1 -> {
@@ -82,11 +71,6 @@ class NotificationBannerViewModelService {
                 }
             }
 
-        // Before PDJB-939 the compliance banner always used a single generic "view compliance
-        // certificates" link, so keep that for the flag-off path and only use the cert-specific
-        // link text for the new (flag-on) banner.
-        val linkTextKey = if (beforePdjb939) VIEW_COMPLIANCE_CERTIFICATES_KEY else specificLinkTextKey
-
         return listOf(
             NotificationMessage(
                 mainText = mainTextKey,
@@ -94,7 +78,7 @@ class NotificationBannerViewModelService {
                     listOf(
                         NotificationBannerLink(
                             linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
-                            linkText = linkTextKey,
+                            linkText = specificLinkTextKey,
                             afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
                         ),
                     ),
@@ -102,12 +86,8 @@ class NotificationBannerViewModelService {
         )
     }
 
-    private fun missingMainTextKey(
-        isLandlordView: Boolean,
-        beforePdjb939: Boolean,
-    ): String =
+    private fun missingMainTextKey(isLandlordView: Boolean): String =
         when {
-            beforePdjb939 -> "$NOTIFICATION_KEY_PREFIX.missing.beforePdjb939.mainText"
             isLandlordView -> "$NOTIFICATION_KEY_PREFIX.missing.landlord.mainText"
             else -> "$NOTIFICATION_KEY_PREFIX.missing.localCouncil.mainText"
         }

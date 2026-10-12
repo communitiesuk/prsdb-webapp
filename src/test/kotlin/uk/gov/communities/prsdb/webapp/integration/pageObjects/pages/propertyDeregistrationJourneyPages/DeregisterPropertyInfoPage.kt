@@ -16,6 +16,8 @@ class DeregisterPropertyInfoPage(
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${DeregisterInfoStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Deregister this property"
+
     val heading
         get() = page.locator("h1")
 

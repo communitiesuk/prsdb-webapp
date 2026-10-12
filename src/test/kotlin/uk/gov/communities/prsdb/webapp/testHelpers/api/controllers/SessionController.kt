@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadataStore
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettingAgentJourneyTokenRequestModel
@@ -21,8 +22,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettin
 @RequestMapping("/local")
 class SessionController(
     private val session: HttpSession,
-    private val invitationService: LocalCouncilInvitationService,
+    private val localCouncilInvitationService: LocalCouncilInvitationService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val organisationalInvitationService: OrganisationalLandlordInvitationService,
 ) {
     @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
     fun setJourneyState(
@@ -43,7 +45,7 @@ class SessionController(
     fun storeInvitationToken(
         @RequestBody requestBody: StoreInvitationTokenRequestModel,
     ) {
-        invitationService.storeTokenInSession(requestBody.token)
+        localCouncilInvitationService.storeTokenInSession(requestBody.token)
     }
 
     @PostMapping("/$STORE_LETTING_AGENT_ACCESS_PATH_SEGMENT", consumes = ["application/json"])
@@ -60,6 +62,13 @@ class SessionController(
         lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession(requestBody.journeyId, requestBody.token)
     }
 
+    @PostMapping("/$STORE_ORGANISATIONAL_JOURNEY_TOKEN_PATH_SEGMENT", consumes = ["application/json"])
+    fun storeOrganisationalJourneyToken(
+        @RequestBody requestBody: StoreLettingAgentJourneyTokenRequestModel,
+    ) {
+        organisationalInvitationService.addJourneyIdInvitationTokenPairToSession(requestBody.journeyId, requestBody.token)
+    }
+
     companion object {
         const val SET_JOURNEY_DATA_PATH_SEGMENT = "set-journey-data"
         const val SET_JOURNEY_STATE_PATH_SEGMENT = "set-journey-state"
@@ -74,5 +83,8 @@ class SessionController(
 
         const val STORE_LETTING_AGENT_JOURNEY_TOKEN_PATH_SEGMENT = "store-letting-agent-journey-token"
         const val STORE_LETTING_AGENT_JOURNEY_TOKEN_ROUTE = "local/$STORE_LETTING_AGENT_JOURNEY_TOKEN_PATH_SEGMENT"
+
+        const val STORE_ORGANISATIONAL_JOURNEY_TOKEN_PATH_SEGMENT = "store-organisational-journey-token"
+        const val STORE_ORGANISATIONAL_JOURNEY_TOKEN_ROUTE = "local/$STORE_ORGANISATIONAL_JOURNEY_TOKEN_PATH_SEGMENT"
     }
 }

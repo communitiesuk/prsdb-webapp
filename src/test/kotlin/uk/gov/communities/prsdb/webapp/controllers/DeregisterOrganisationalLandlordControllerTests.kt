@@ -54,7 +54,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -71,7 +71,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
             organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -85,7 +85,7 @@ class DeregisterOrganisationalLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
@@ -165,6 +165,16 @@ class DeregisterOrganisationalLandlordControllerTests(
             .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"], value = "user")
+    fun `getJourneyStep returns 403 for an org editor`() {
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { isForbidden() }
             }
     }
 }

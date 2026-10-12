@@ -5,6 +5,10 @@ import org.hamcrest.Matchers.matchesPattern
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -13,14 +17,20 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import java.time.Instant
+import java.util.Optional
 
 class MockGovUkPayControllerTests {
     private lateinit var mvc: MockMvc
     private val objectMapper = ObjectMapper()
+    private val mockPaymentRepository: PaymentRepository = mock()
 
     @BeforeEach
     fun setup() {
-        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080", objectMapper)).build()
+        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080", objectMapper, mockPaymentRepository)).build()
     }
 
     private fun createBody(
@@ -273,5 +283,73 @@ class MockGovUkPayControllerTests {
             .andExpect(jsonPath("$._links.capture.method").value("POST"))
             .andExpect(jsonPath("$._links.cancel.method").value("POST"))
             .andExpect(jsonPath("$._links.next_url").doesNotExist())
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "CREATED, created, false",
+        "CAPTURABLE, capturable, false",
+        "SUCCEEDED, success, true",
+        "FAILED, failed, true",
+        "CANCELLED, cancelled, true",
+    )
+    fun `getting a payment created before the mock started returns it with its status from the database`(
+        savedStatus: PaymentStatus,
+        expectedStatus: String,
+        expectedFinished: Boolean,
+    ) {
+        whenever(mockPaymentRepository.findById(SAVED_PAYMENT_ID)).thenReturn(Optional.of(createSavedPayment(savedStatus)))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.payment_id").value(SAVED_PAYMENT_ID))
+            .andExpect(jsonPath("$.amount").value(2000))
+            .andExpect(jsonPath("$.reference").value("saved-reference"))
+            .andExpect(jsonPath("$.created_date").value("2025-01-15T10:00:00Z"))
+            .andExpect(jsonPath("$.delayed_capture").value(true))
+            .andExpect(jsonPath("$.state.status").value(expectedStatus))
+            .andExpect(jsonPath("$.state.finished").value(expectedFinished))
+    }
+
+    @Test
+    fun `cancelling a payment created before the mock started moves it to cancelled`() {
+        whenever(mockPaymentRepository.findById(SAVED_PAYMENT_ID))
+            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.CAPTURABLE)))
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID/cancel"))
+            .andExpect(status().isNoContent)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID"))
+            .andExpect(jsonPath("$.state.status").value("cancelled"))
+    }
+
+    @Test
+    fun `capturing a capturable payment created before the mock started moves it to success`() {
+        whenever(mockPaymentRepository.findById(SAVED_PAYMENT_ID))
+            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.CAPTURABLE)))
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID/capture"))
+            .andExpect(status().isNoContent)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID"))
+            .andExpect(jsonPath("$.state.status").value("success"))
+    }
+
+    private fun createSavedPayment(status: PaymentStatus) =
+        createPayment(
+            paymentId = SAVED_PAYMENT_ID,
+            amountInPence = 2000,
+            reference = "saved-reference",
+            paymentCreatedAt = Instant.parse("2025-01-15T10:00:00Z"),
+            status = status,
+        )
+
+    companion object {
+        private const val SAVED_PAYMENT_ID = "saved-payment"
     }
 }

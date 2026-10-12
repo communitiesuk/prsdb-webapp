@@ -79,6 +79,29 @@ class LandlordControllerTests(
             .get("/$LANDLORD_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    fun `index returns a redirect for an org admin`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"])
+    fun `index returns a redirect for an org editor`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
             }
     }
 

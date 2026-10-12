@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbController
 @RequestMapping(UPDATE_LEAD_TRUSTEE_ROUTE)
-@PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+@PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateLeadTrusteeController(
     private val journeyFactory: UpdateLeadTrusteeJourneyFactory,
     private val userToLandlordService: UserToLandlordService,

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -37,9 +39,10 @@ class LandlordDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
+    private val organisationPermissionsProvider: OrganisationPermissionsProvider,
     private val messageSource: MessageSource,
 ) {
-    @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
+    @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -76,12 +79,22 @@ class LandlordDetailsController(
         orgLandlord: OrganisationalLandlord,
         model: Model,
     ): String {
-        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource))
+        val canPerformOrgAdminActions = organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()
+
+        model.addAttribute(
+            "orgLandlord",
+            OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = canPerformOrgAdminActions),
+        )
         model.addAttribute(
             "orgLandlordContacts",
-            OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers),
+            OrganisationalLandlordContactsViewModel(
+                orgLandlord,
+                orgLandlord.governingBodyMembers,
+                withChangeLinks = canPerformOrgAdminActions,
+            ),
         )
         model.addAttribute("isLandlordView", true)
+        model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
@@ -162,6 +175,7 @@ class LandlordDetailsController(
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers, withChangeLinks = false),
         )
         model.addAttribute("isLandlordView", false)
+        model.addAttribute("showDeleteLandlordRecordLink", false)
 
         addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <th:block id="main-content"
-              th:replace="~{fragments/layout :: layout(#{${messagePrefix + '.title'}}, ~{::#main-content/content()}, false)}">
+              th:replace="~{fragments/layout :: layout(#{${pageTitleOverride ?: messagePrefix + '.checkInvitations.heading'}(${address})}, ~{::#main-content/content()}, false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents"

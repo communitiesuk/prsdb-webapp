@@ -15,6 +15,7 @@ class BeforePdjb1022HasGasSupplyStepConfig : AbstractRequestableStepConfig<YesOr
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
+            "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasSupply.heading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),

@@ -8,7 +8,6 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.UpdateCompaniesHouseJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(UpdateCompaniesHouseController::class)
@@ -23,9 +22,6 @@ class UpdateCompaniesHouseControllerTests(
 
     @MockitoBean
     override lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    override lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     override val updateStepRoute =
         UpdateCompaniesHouseController.UPDATE_COMPANIES_HOUSE_ROUTE +

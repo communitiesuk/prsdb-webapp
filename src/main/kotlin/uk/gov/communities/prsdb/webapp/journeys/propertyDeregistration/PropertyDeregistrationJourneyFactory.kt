@@ -73,6 +73,7 @@ class PropertyDeregistrationJourneyFactory(
             step(journey.checkPendingInvitationsStep) {
                 routeSegment(CheckPendingInvitationsStep.ROUTE_SEGMENT)
                 withAdditionalContentProperty { "messagePrefix" to "deregisterProperty" }
+                withAdditionalContentProperty { "pageTitleOverride" to "deregisterProperty.checkInvitations.pageTitle" }
                 parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
                 backUrl {
                     DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +

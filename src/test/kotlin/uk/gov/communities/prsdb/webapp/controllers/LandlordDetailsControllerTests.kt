@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.whenever
@@ -12,7 +13,13 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -31,6 +38,9 @@ class LandlordDetailsControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var organisationPermissionsProvider: OrganisationPermissionsProvider
 
     @Nested
     inner class GetUserLandlordDetailsTests {
@@ -96,6 +106,90 @@ class LandlordDetailsControllerTests(
                         "registeredPropertiesList",
                         "registerPropertyUrl",
                         "backUrl",
+                        "showDeleteLandlordRecordLink",
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getUserLandlordDetails shows change links and the delete link for an org admin`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(true)
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attribute("showDeleteLandlordRecordLink", true)
+                    attribute(
+                        "orgLandlord",
+                        Matchers.hasProperty<OrgLandlordViewModel>(
+                            "organisationDetails",
+                            Matchers.hasItem(
+                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(true)),
+                            ),
+                        ),
+                    )
+                    attribute(
+                        "orgLandlordContacts",
+                        Matchers.hasProperty<OrganisationalLandlordContactsViewModel>(
+                            "mainContactCard",
+                            Matchers.hasProperty<SummaryCardViewModel>("actions", Matchers.not(Matchers.empty<Any>())),
+                        ),
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_EDITOR"])
+        fun `getUserLandlordDetails hides change links and the delete link for an org editor`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.EDITOR)
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(false)
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attribute("showDeleteLandlordRecordLink", false)
+                    attribute(
+                        "orgLandlord",
+                        Matchers.hasProperty<OrgLandlordViewModel>(
+                            "organisationDetails",
+                            Matchers.everyItem(
+                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(false)),
+                            ),
+                        ),
+                    )
+                    attribute(
+                        "orgLandlordContacts",
+                        Matchers.hasProperty<OrganisationalLandlordContactsViewModel>(
+                            "mainContactCard",
+                            Matchers.hasProperty<SummaryCardViewModel>("actions", Matchers.empty<Any>()),
+                        ),
+                    )
+                    attribute(
+                        "orgLandlordContacts",
+                        Matchers.hasProperty<OrganisationalLandlordContactsViewModel>(
+                            "showGoverningBodyMembersLink",
+                            Matchers.`is`(false),
+                        ),
                     )
                 }
             }
@@ -187,6 +281,7 @@ class LandlordDetailsControllerTests(
                 model {
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
                     attribute("isLandlordView", false)
+                    attribute("showDeleteLandlordRecordLink", false)
                     attributeExists("orgLandlord", "orgLandlordContacts", "registeredPropertiesList", "backUrl")
                     attributeDoesNotExist("deleteLandlordRecordUrl", "lastModifiedDate")
                 }

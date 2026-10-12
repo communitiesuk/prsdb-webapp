@@ -1,5 +1,6 @@
 serviceName: Register your rental property
 localCouncilServiceName: Check a rental property or landlord
+pageTitleFormat: '{0,,heading} - {1,,serviceName} - GOV.UK'
 startButtonText: Start
 searchButtonText: Search
 sectionHeader: 'Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}'
