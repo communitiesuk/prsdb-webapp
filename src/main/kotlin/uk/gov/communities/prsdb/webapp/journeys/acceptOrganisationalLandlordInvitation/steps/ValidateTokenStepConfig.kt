@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -28,12 +27,10 @@ class ValidateTokenStepConfig(
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState): String = ""
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        val invitation = invitationService.getInvitationForJourneyIdOrNull(state.journeyId)
+        val organisationName = invitationService.getOrganisationNameForInvitationIfValid(state.journeyId)
 
-        val pendingInvitation = invitation?.takeIf { it.status == OrganisationalLandlordInvitationStatus.PENDING }
-
-        state.tokenIsValid = pendingInvitation != null
-        state.organisationName = pendingInvitation?.organisationalLandlord?.name
+        state.tokenIsValid = organisationName != null
+        state.organisationName = organisationName
     }
 
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): TokenValidity? =
