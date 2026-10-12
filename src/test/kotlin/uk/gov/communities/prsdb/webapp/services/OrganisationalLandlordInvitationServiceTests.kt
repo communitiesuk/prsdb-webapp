@@ -212,4 +212,18 @@ class OrganisationalLandlordInvitationServiceTests {
         assertNull(result)
         verifyNoInteractions(mockInvitationRepository)
     }
+
+    @Test
+    fun `getOrganisationNameForInvitationIfValid returns null when the stored token is malformed`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to "not-a-uuid"))
+
+        // Act
+        val result = invitationService.getOrganisationNameForInvitationIfValid(journeyId)
+
+        // Assert
+        assertNull(result)
+        verifyNoInteractions(mockInvitationRepository)
+    }
 }
