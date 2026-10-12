@@ -213,6 +213,7 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
+                renewalDate = any(),
             ),
         ).thenReturn(propertyOwnership)
 
