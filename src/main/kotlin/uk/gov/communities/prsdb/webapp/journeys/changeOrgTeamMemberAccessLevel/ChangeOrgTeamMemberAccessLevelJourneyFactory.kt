@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -13,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.CompleteChangeAccessLevelStep
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ChangeOrgTeamMemberAccessLevelFormModel
 
 @PrsdbWebService
 class ChangeOrgTeamMemberAccessLevelJourneyFactory(
@@ -82,4 +85,7 @@ interface ChangeOrgTeamMemberAccessLevelJourneyState : JourneyState {
     val completeChangeAccessLevelStep: CompleteChangeAccessLevelStep
     var otherOrganisationalLandlordUserId: Long
     var isStateInitialized: Boolean
+
+    val selectedRole: OrganisationalLandlordUserRole
+        get() = accessLevelStep.formModel.notNullValue(ChangeOrgTeamMemberAccessLevelFormModel::role)
 }
