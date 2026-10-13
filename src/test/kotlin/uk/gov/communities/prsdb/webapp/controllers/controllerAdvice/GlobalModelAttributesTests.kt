@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
+import jakarta.servlet.RequestDispatcher
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -110,6 +111,37 @@ class GlobalModelAttributesTests {
 
         assertEquals(defaultServiceName, model["serviceName"])
         assertNull(model["showServiceNavigation"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes uses the originally requested route for the service name on forwarded error pages`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/error"
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/$LOCAL_COUNCIL_PATH_SEGMENT/not-a-page")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(customServiceName, model["serviceName"])
+        assertNull(model["showServiceNavigation"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes uses the default service name on forwarded error pages from other routes`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/error"
+        request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, "/landlord/not-a-page")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(defaultServiceName, model["serviceName"])
     }
 
     @Test
