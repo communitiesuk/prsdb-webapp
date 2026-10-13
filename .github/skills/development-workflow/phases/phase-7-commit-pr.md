@@ -10,7 +10,8 @@ Once the user confirms satisfaction:
     - If the agent cannot but the item is relevant, ask the user to confirm.
     - If not relevant to this PR, delete it from the PR description.
 5. Use the `raising-pull-requests` skill to create the PR as a **draft**
-   (use `gh pr create --draft`).
+   (use `gh pr create --draft`). Any paragraph the AI writes in the description must be wrapped in a multiline HTML comment
+   (`<!-- ... -->`) so the PR author can uncomment what they want to keep.
 6. Report the PR URL to the user.
 7. **If a worktree was created in Phase 1**, clean up the worktree using the
    `using-git-worktrees` skill. If the user opted to work in the current
