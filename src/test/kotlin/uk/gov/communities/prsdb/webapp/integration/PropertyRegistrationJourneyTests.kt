@@ -473,12 +473,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkAnswersPage.confirm()
             val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
             val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-            assertThat(paymentSummaryPage.paymentDate).hasText(today.minusDays(1).format(dateFormatter))
+            assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
 
             paymentSummaryPage.form.submit()
 
             val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-            assertThat(refreshedSummaryPage.paymentDate).hasText(today.format(dateFormatter))
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
         }
 

@@ -2,12 +2,9 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="annualFee" type="java.lang.String"*/-->
-<!--/*@thymesVar id="amount" type="java.lang.String"*/-->
-<!--/*@thymesVar id="paymentDate" type="java.lang.String"*/-->
-<!--/*@thymesVar id="renewalDate" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="firstChargeableDate" type="java.lang.String"*/-->
-<!--/*@thymesVar id="isInFreePeriod" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="addressParts" type="java.util.List"*/-->
+<!--/*@thymesVar id="isPreGratisPeriod" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentSummary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -18,11 +15,11 @@
     <p class="govuk-body" th:text="#{registerProperty.paymentSummary.annualFee(${annualFee})}">
         registerProperty.paymentSummary.annualFee
     </p>
-    <p class="govuk-body" th:if="${isInFreePeriod}" th:text="#{registerProperty.paymentSummary.freePeriod(${firstChargeableDate})}">
-        registerProperty.paymentSummary.freePeriod
+    <p class="govuk-body" th:if="${isPreGratisPeriod}" th:text="#{registerProperty.paymentSummary.preGratisPeriod(${firstChargeableDate})}">
+        registerProperty.paymentSummary.preGratisPeriod
     </p>
-    <p class="govuk-body" th:unless="${isInFreePeriod}" th:text="#{registerProperty.paymentSummary.chargePeriod(${firstChargeableDate})}">
-        registerProperty.paymentSummary.chargePeriod
+    <p class="govuk-body" th:unless="${isPreGratisPeriod}" th:text="#{registerProperty.paymentSummary.postGratisPeriod(${firstChargeableDate})}">
+        registerProperty.paymentSummary.postGratisPeriod
     </p>
     <p class="govuk-body" th:text="#{registerProperty.paymentSummary.renewalDateExplanation}">
         registerProperty.paymentSummary.renewalDateExplanation
@@ -31,34 +28,7 @@
     <h2 class="govuk-heading-m" th:text="#{registerProperty.paymentSummary.summary.heading}">
         registerProperty.paymentSummary.summary.heading
     </h2>
-    <dl class="govuk-summary-list">
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key" th:text="#{registerProperty.paymentSummary.summary.address}">
-                registerProperty.paymentSummary.summary.address
-            </dt>
-            <dd class="govuk-summary-list__value" id="property-address">
-                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
-            </dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key" th:text="#{registerProperty.paymentSummary.summary.payment}">
-                registerProperty.paymentSummary.summary.payment
-            </dt>
-            <dd class="govuk-summary-list__value" id="payment-amount" th:text="${amount}">amount</dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key" th:text="#{registerProperty.paymentSummary.summary.paymentDate}">
-                registerProperty.paymentSummary.summary.paymentDate
-            </dt>
-            <dd class="govuk-summary-list__value" id="payment-date" th:text="${paymentDate}">paymentDate</dd>
-        </div>
-        <div class="govuk-summary-list__row">
-            <dt class="govuk-summary-list__key" th:text="#{registerProperty.paymentSummary.summary.renewalDate}">
-                registerProperty.paymentSummary.summary.renewalDate
-            </dt>
-            <dd class="govuk-summary-list__value" id="renewal-date" th:text="${renewalDate}">renewalDate</dd>
-        </div>
-    </dl>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListRows})}"></dl>
 
     <div class="govuk-inset-text" th:text="#{registerProperty.paymentSummary.prnHint}">
         registerProperty.paymentSummary.prnHint

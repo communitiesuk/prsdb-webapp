@@ -2,15 +2,17 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -29,19 +31,28 @@ class PaymentSummaryStepConfig(
         val firstChargeableDate = paymentService.getFirstChargeableDate(quote.quoteDate)
 
         return mapOf(
-            "annualFee" to formatPence(paymentService.getAnnualFeeInPence()),
-            "amount" to formatPence(quote.amountInPence),
-            "paymentDate" to quote.quoteDate.format(DATE_FORMATTER),
-            "renewalDate" to quote.renewalDate.format(DATE_FORMATTER),
+            "annualFee" to PaymentHelper.formatPence(paymentService.getAnnualFeeInPence()),
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
-            "isInFreePeriod" to firstChargeableDate.isAfter(quote.quoteDate),
-            "addressParts" to
-                state.propertyDetailsTask.addressTask
-                    .getAddress()
-                    .toMultiLineAddress()
-                    .split("\n"),
+            "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.quoteDate),
+            "summaryListRows" to getSummaryListRows(state, quote),
         )
     }
+
+    private fun getSummaryListRows(
+        state: PropertyRegistrationJourneyState,
+        quote: PropertyRegistrationPaymentQuote,
+    ) = listOf(
+        SummaryListRowViewModel(
+            "registerProperty.paymentSummary.summary.address",
+            state.propertyDetailsTask.addressTask
+                .getAddress()
+                .toMultiLineAddress()
+                .split("\n"),
+        ),
+        SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", PaymentHelper.formatPence(quote.amountInPence)),
+        SummaryListRowViewModel("registerProperty.paymentSummary.summary.paymentDate", quote.quoteDate.format(DATE_FORMATTER)),
+        SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", quote.renewalDate.format(DATE_FORMATTER)),
+    )
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentSummary"
 
@@ -86,11 +97,6 @@ class PaymentSummaryStepConfig(
                 quote,
             )
         return Destination.ExternalUrl(nextUrl)
-    }
-
-    private fun formatPence(pence: Int): String {
-        val pounds = BigDecimal(pence).movePointLeft(2)
-        return if (pence % 100 == 0) "£${pounds.toBigInteger()}" else "£${pounds.setScale(2)}"
     }
 
     companion object {

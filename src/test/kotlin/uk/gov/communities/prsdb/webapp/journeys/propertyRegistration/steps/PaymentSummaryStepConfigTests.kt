@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import java.time.LocalDate
@@ -75,15 +76,23 @@ class PaymentSummaryStepConfigTests {
         // Assert
         verify(mockState).paymentQuote = quote
         assertEquals("£20", content["annualFee"])
-        assertEquals("£12.34", content["amount"])
-        assertEquals(today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)), content["paymentDate"])
-        assertEquals("1 March 2028", content["renewalDate"])
         assertEquals("1 January 2027", content["firstChargeableDate"])
-        assertEquals(listOf("1 Example Road", "EG1 2AB"), content["addressParts"])
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", "£12.34"),
+                SummaryListRowViewModel(
+                    "registerProperty.paymentSummary.summary.paymentDate",
+                    today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
+                ),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", "1 March 2028"),
+            ),
+            content["summaryListRows"],
+        )
     }
 
     @Test
-    fun `getStepSpecificContent flags the free period when the first chargeable date is after the quote date`() {
+    fun `getStepSpecificContent flags the pre-gratis period when the first chargeable date is after the quote date`() {
         // Arrange
         stubSummaryContent(createQuote(today), firstChargeableDate = today.plusDays(1))
 
@@ -91,11 +100,11 @@ class PaymentSummaryStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals(true, content["isInFreePeriod"])
+        assertEquals(true, content["isPreGratisPeriod"])
     }
 
     @Test
-    fun `getStepSpecificContent does not flag the free period when charging starts on the quote date`() {
+    fun `getStepSpecificContent does not flag the pre-gratis period when charging starts on the quote date`() {
         // Arrange
         stubSummaryContent(createQuote(today), firstChargeableDate = today)
 
@@ -103,7 +112,7 @@ class PaymentSummaryStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals(false, content["isInFreePeriod"])
+        assertEquals(false, content["isPreGratisPeriod"])
     }
 
     @Test

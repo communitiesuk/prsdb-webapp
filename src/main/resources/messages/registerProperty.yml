@@ -199,8 +199,8 @@ paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
   annualFee: The annual property fee is {0}. You are paying an adjusted (pro-rated) fee.
-  freePeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
-  chargePeriod: You are paying for {0} to your renewal date.
+  preGratisPeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
+  postGratisPeriod: You are paying for {0} to your renewal date.
   renewalDateExplanation: Your renewal date is 1 year from when you registered your first property.
   summary:
     heading: Payment summary
