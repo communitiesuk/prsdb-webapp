@@ -117,7 +117,8 @@ class PaymentsPropertyRegistrationStrategyImplFlagOn :
 ```
 
 Callers branch through the injected strategy. `EnabledFeatureFlagStrategy` runs the `ifEnabled` branch,
-`DisabledFeatureFlagStrategy` runs the `ifDisabled` branch, and a bare `ifEnabled { }` is a no-op when disabled:
+`DisabledFeatureFlagStrategy` runs the `ifDisabled` branch, a bare `ifEnabled { }` is a no-op when disabled, and a bare
+`ifDisabled { }` is a no-op when enabled:
 
 ```kotlin
 // Pick a value depending on the flag
@@ -129,6 +130,11 @@ val headingKey = paymentsStrategy.ifEnabledOrElse {
 // Run some code only when the flag is enabled
 paymentsStrategy.ifEnabled {
     step(journey.paymentSummaryStep) { /* ... */ }
+}
+
+// Run some code only when the flag is disabled
+paymentsStrategy.ifDisabled {
+    step(journey.savePropertyRegistrationDataStep) { /* ... */ }
 }
 ```
 

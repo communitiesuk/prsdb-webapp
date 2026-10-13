@@ -31,6 +31,7 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val currentUserService: CurrentUserService,
 ) {
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
         invitationRepository
@@ -117,9 +118,8 @@ class JointLandlordInvitationService(
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
-        // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
         confirmationEmailSender.sendEmail(
-            invitingLandlord.email,
+            currentUserService.getCurrentEmail(),
             JointLandlordInvitationConfirmationEmail(
                 senderName = invitingLandlord.name,
                 propertyAddress = propertyAddress,
@@ -130,9 +130,8 @@ class JointLandlordInvitationService(
 
         val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
         existingJointLandlords.forEach { landlord ->
-            // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
-            notifyExistingEmailSender.sendEmail(
-                landlord.email,
+            notifyExistingEmailSender.sendEmailToLandlord(
+                landlord,
                 JointLandlordInvitationNotifyExistingEmail(
                     recipientName = landlord.name,
                     propertyAddress = propertyAddress,

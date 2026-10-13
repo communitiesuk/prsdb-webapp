@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -47,10 +49,15 @@ class DeregisterStepConfigTests {
     lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
     @Mock
+    lateinit var mockCurrentUserService: CurrentUserService
+
+    @Mock
     lateinit var mockState: LandlordDeregistrationJourneyState
 
     private val baseUserId = "test-user-id"
     private val landlordEmail = "landlord@example.com"
+    private val currentUserEmail = "current-user@example.com"
+    private val currentUserName = "Current User"
 
     @AfterEach
     fun tearDown() {
@@ -85,7 +92,7 @@ class DeregisterStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockConfirmationWithPropertiesEmailSender).sendEmail(
-            eq(landlordEmail),
+            eq(currentUserEmail),
             any<LandlordWithPropertiesDeregistrationConfirmationEmail>(),
         )
     }
@@ -121,7 +128,7 @@ class DeregisterStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockConfirmationWithNoPropertiesEmailSender).sendEmail(
-            eq(landlordEmail),
+            eq(currentUserEmail),
             any<LandlordNoPropertiesDeregistrationConfirmationEmail>(),
         )
     }
@@ -150,6 +157,32 @@ class DeregisterStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached uses the current user name in the with-properties confirmation email`() {
+        val stepConfig = setupStepConfig()
+        setupMocksForWithProperties()
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockConfirmationWithPropertiesEmailSender).sendEmail(
+            eq(currentUserEmail),
+            argThat { fullName == currentUserName },
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached uses the current user name in the no-properties confirmation email`() {
+        val stepConfig = setupStepConfig()
+        setupMocksForNoProperties()
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockConfirmationWithNoPropertiesEmailSender).sendEmail(
+            eq(currentUserEmail),
+            eq(LandlordNoPropertiesDeregistrationConfirmationEmail(currentUserName)),
+        )
+    }
+
+    @Test
     fun `resolveNextDestination deletes the journey`() {
         val stepConfig = setupStepConfig()
 
@@ -169,6 +202,7 @@ class DeregisterStepConfigTests {
         val jointProperty =
             MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        setupCurrentUser()
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -181,12 +215,19 @@ class DeregisterStepConfigTests {
         val landlord =
             MockLandlordData.createIndividualLandlord(email = landlordEmail, propertyOwnerships = setOf(property))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        setupCurrentUser()
     }
 
     private fun setupMocksForNoProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
         val landlord = MockLandlordData.createIndividualLandlord(email = landlordEmail, propertyOwnerships = emptySet())
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        setupCurrentUser()
+    }
+
+    private fun setupCurrentUser() {
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = currentUserName, email = currentUserEmail))
     }
 
     private fun setupStepConfig(): DeregisterStepConfig =
@@ -194,6 +235,7 @@ class DeregisterStepConfigTests {
             mockLandlordDeregistrationService,
             mockUserToLandlordService,
             mockSecurityContextService,
+            mockCurrentUserService,
             mockConfirmationWithPropertiesEmailSender,
             mockConfirmationWithNoPropertiesEmailSender,
             mockSwapToIndividualNudgeEmailService,

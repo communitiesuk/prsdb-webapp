@@ -49,8 +49,8 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
         emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
 
         val emailCaptor = argumentCaptor<JointLandlordOtherLandlordLeftNotification>()
-        verify(mockNotificationEmailService).sendEmail(eq("bob@example.com"), emailCaptor.capture())
-        verify(mockNotificationEmailService).sendEmail(eq("carol@example.com"), emailCaptor.capture())
+        verify(mockNotificationEmailService).sendEmailToLandlord(eq(remainingLandlordOne), emailCaptor.capture())
+        verify(mockNotificationEmailService).sendEmailToLandlord(eq(remainingLandlordTwo), emailCaptor.capture())
 
         val bobEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Bob" }
         assertEquals("Alice", bobEmail.leavingLandlord)
@@ -73,6 +73,6 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
 
         emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
 
-        verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+        verify(mockNotificationEmailService, never()).sendEmailToLandlord(any(), any())
     }
 }

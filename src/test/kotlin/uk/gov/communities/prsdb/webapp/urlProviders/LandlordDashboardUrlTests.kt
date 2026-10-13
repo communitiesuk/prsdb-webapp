@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
@@ -124,6 +125,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mock(),
                 absoluteUrlProvider,
+                mock(),
             )
 
         whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
@@ -165,6 +167,7 @@ class LandlordDashboardUrlTests(
         val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockUserToLandlordService = mock<UserToLandlordService>()
+        val mockCurrentUserService = mock<CurrentUserService>()
         val propertyRegistrationService =
             PropertyRegistrationService(
                 addressService = mock(),
@@ -180,8 +183,10 @@ class LandlordDashboardUrlTests(
                 lettingAgentAccessService = mock(),
                 delegateToLettingAgentEmailService = mock(),
                 featureFlagManager = mock(),
+                currentUserService = mockCurrentUserService,
             )
 
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(landlord.email)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -208,6 +213,7 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
+                renewalDate = any(),
             ),
         ).thenReturn(propertyOwnership)
 

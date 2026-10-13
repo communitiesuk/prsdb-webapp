@@ -9,5 +9,9 @@ class CompaniesHouseInterruptionPageLandlordRegistration(
     page: Page,
 ) : InterruptionPage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgCompaniesHouseInterruptionStep.ROUTE_SEGMENT}") {
     override val expectedTitleHeading
-        get() = titleHeadingIfConfirmingChange("Are you sure you want to change your Companies House status?")
+        get() =
+            when (heading.textContent().trim()) {
+                "Are you sure you want to change this?" -> "Are you sure you want to change your Companies House status?"
+                else -> null
+            }
 }
