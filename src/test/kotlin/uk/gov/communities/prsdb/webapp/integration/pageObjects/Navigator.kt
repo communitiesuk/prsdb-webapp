@@ -93,9 +93,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -1718,9 +1719,16 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptOrganisationalLandlordInvitationJourney(token: String): ValidateTokenPage {
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): CheckUserIsLandlordPage {
+        // TODO PDJB-1829: CheckUserIsLandlordStep is currently a placeholder, so a valid token lands here. Once that step decides
+        // whether the invitee is already a landlord user, this should navigate on to the journey's start page and return that instead.
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
-        return createValidPage(page, ValidateTokenPage::class)
+        return createValidPage(page, CheckUserIsLandlordPage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(token: String): InvalidLinkPage {
+        navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
+        return createValidPage(page, InvalidLinkPage::class)
     }
 
     fun goToAcceptOrganisationalLandlordInvitationFullNamePage(): FullNamePage {
