@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
@@ -14,8 +13,13 @@ class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
         fun beforeFullName(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder()
                 .withAdditionalData("tokenIsValid", "true")
-                .withSubmittedValue(CheckUserIsLandlordStep.ROUTE_SEGMENT, NoInputFormModel())
+                .withAdditionalData("userIsLandlord", "false")
                 .withSubmittedValue(JoinOrganisationStep.ROUTE_SEGMENT, NoInputFormModel())
+
+        fun beforeUserIsAlreadyLandlord(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder()
+                .withAdditionalData("tokenIsValid", "true")
+                .withAdditionalData("userIsLandlord", "true")
 
         fun beforeEmailAddress(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
             beforeFullName()

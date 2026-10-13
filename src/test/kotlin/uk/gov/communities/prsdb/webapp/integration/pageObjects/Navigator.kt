@@ -93,10 +93,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.UserIsAlreadyLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -214,6 +215,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeTrustInterruptionPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.UserIsAlreadyLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
@@ -1719,11 +1721,27 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): CheckUserIsLandlordPage {
-        // TODO PDJB-1829: CheckUserIsLandlordStep is currently a placeholder, so a valid token lands here. Once that step decides
-        // whether the invitee is already a landlord user, this should navigate on to the journey's start page and return that instead.
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): JoinOrganisationPage {
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
-        return createValidPage(page, CheckUserIsLandlordPage::class)
+        return createValidPage(page, JoinOrganisationPage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationJourneyAsExistingLandlord(token: String): UserIsAlreadyLandlordPage {
+        navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
+        return createValidPage(page, UserIsAlreadyLandlordPage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationUserIsAlreadyLandlordPage(): UserIsAlreadyLandlordPage {
+        setJourneyStateInSession(
+            AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder.beforeUserIsAlreadyLandlord().build(),
+        )
+        storeOrganisationalInvitationJourneyToken(TEST_JOURNEY_ID, "1234abcd-5678-abcd-1234-567abcd2222a")
+        val journeyPath =
+            "${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}/" +
+                UserIsAlreadyLandlordStep.ROUTE_SEGMENT
+        val journeyUrl = JourneyStateService.urlWithJourneyState(journeyPath, TEST_JOURNEY_ID)
+        navigate(journeyUrl)
+        return createValidPage(page, UserIsAlreadyLandlordPage::class)
     }
 
     fun goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(token: String): InvalidLinkPage {
