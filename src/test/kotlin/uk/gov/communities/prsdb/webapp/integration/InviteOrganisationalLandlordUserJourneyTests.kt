@@ -2,12 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
@@ -15,8 +20,14 @@ class InviteOrganisationalLandlordUserJourneyTests : IntegrationTestWithMutableD
     @Autowired
     private lateinit var organisationalLandlordInvitationRepository: OrganisationalLandlordInvitationRepository
 
+    @Autowired
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    private lateinit var invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
+
     @Test
-    fun `an admin can invite a team member from the team members page`(page: Page) {
+    fun `an admin can invite a team member from the team members page and the invitee is emailed`(page: Page) {
         val teamMembersPage = navigator.goToTeamMembers()
         teamMembersPage.inviteTeamMemberButton.clickAndWait()
 
@@ -30,5 +41,12 @@ class InviteOrganisationalLandlordUserJourneyTests : IntegrationTestWithMutableD
             organisationalLandlordInvitationRepository.findAll().single { it.invitedEmail == "new.member@example.com" }
         assertEquals(OrganisationalLandlordUserRole.EDITOR, invitation.role)
         assertEquals("Local Organisation Landlord", invitation.organisationalLandlord.name)
+        verify(invitationEmailSender).sendEmail(
+            "new.member@example.com",
+            OrganisationalLandlordInvitationEmail(
+                organisationName = "Local Organisation Landlord",
+                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(invitation.token.toString()),
+            ),
+        )
     }
 }
