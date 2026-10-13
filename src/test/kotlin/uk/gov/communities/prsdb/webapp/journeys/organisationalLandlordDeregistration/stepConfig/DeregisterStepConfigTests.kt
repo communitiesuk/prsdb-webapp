@@ -96,11 +96,11 @@ class DeregisterStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val emailCaptor = argumentCaptor<OrganisationalLandlordDeregistrationConfirmationEmail>()
-        verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), emailCaptor.capture())
+        verify(mockConfirmationEmailSender).sendEmail(eq(CURRENT_EMAIL), emailCaptor.capture())
 
         assertEquals(
             OrganisationalLandlordDeregistrationConfirmationEmail(
-                registrantName = currentUserName,
+                registrantName = CURRENT_USERNAME,
                 organisationName = "Example Housing Association",
             ),
             emailCaptor.firstValue,
@@ -140,7 +140,7 @@ class DeregisterStepConfigTests {
 
     private fun setupCurrentUser() {
         whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = currentUserName, email = currentUserEmail))
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = CURRENT_USERNAME, email = CURRENT_EMAIL))
     }
 
     private fun setupStepConfig() =
@@ -154,7 +154,7 @@ class DeregisterStepConfigTests {
         )
 
     companion object {
-        private const val currentUserName = "Sam Smith"
-        private const val currentUserEmail = "sam.smith@example.com"
+        private const val CURRENT_USERNAME = "Sam Smith"
+        private const val CURRENT_EMAIL = "sam.smith@example.com"
     }
 }

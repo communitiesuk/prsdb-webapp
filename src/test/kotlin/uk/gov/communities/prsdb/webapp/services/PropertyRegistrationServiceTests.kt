@@ -1614,6 +1614,8 @@ class PropertyRegistrationServiceTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
+        val currentUserEmail = "admin@example.com"
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         val lettingAgentInvitation = createLettingAgentInvitation(propertyOwnership)
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(lettingAgentInvitation)
@@ -1628,7 +1630,7 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-        verify(mockConfirmationEmailSender).sendEmail(eq(landlord.email), any())
+        verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),

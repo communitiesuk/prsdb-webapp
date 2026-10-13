@@ -796,7 +796,7 @@ class JointLandlordInvitationServiceTests {
     @Nested
     inner class SendInvitationConfirmationEmailsTests {
         @Test
-        fun `sendInvitationConfirmationEmails sends the confirmation to the inviting landlord and notifies the other landlords`() {
+        fun `sendInvitationConfirmationEmails sends the confirmation to the current user and notifies the other landlords`() {
             // Arrange
             val existingLandlord =
                 MockLandlordData.createIndividualLandlord(name = "Existing", email = "existing@example.com")
@@ -812,13 +812,14 @@ class JointLandlordInvitationServiceTests {
             val propertyDetailsUri = URI("https://example.com/property/123")
             whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(123L)).thenReturn(propertyDetailsUri)
             val invitedEmails = listOf("landlord1@example.com", "landlord2@example.com")
+            whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("current-user@example.com")
 
             // Act
             invitationService.sendInvitationConfirmationEmails(invitedEmails, propertyOwnership, invitingLandlord)
 
             // Assert
             verify(mockConfirmationEmailSender).sendEmail(
-                invitingLandlord.email,
+                "current-user@example.com",
                 JointLandlordInvitationConfirmationEmail(
                     senderName = invitingLandlord.name,
                     propertyAddress = "123 Test Street\nLondon\nSW1A 1AA",
@@ -826,8 +827,8 @@ class JointLandlordInvitationServiceTests {
                     propertyRecordUrl = propertyDetailsUri.toString(),
                 ),
             )
-            verify(mockNotifyExistingEmailSender).sendEmail(
-                "existing@example.com",
+            verify(mockNotifyExistingEmailSender).sendEmailToLandlord(
+                existingLandlord,
                 JointLandlordInvitationNotifyExistingEmail(
                     recipientName = "Existing",
                     propertyAddress = "123 Test Street\nLondon\nSW1A 1AA",
@@ -835,7 +836,7 @@ class JointLandlordInvitationServiceTests {
                     propertyRecordUrl = propertyDetailsUri.toString(),
                 ),
             )
-            verify(mockNotifyExistingEmailSender, times(1)).sendEmail(any(), any())
+            verify(mockNotifyExistingEmailSender, times(1)).sendEmailToLandlord(any(), any())
             verifyNoInteractions(mockInvitationEmailSender)
         }
     }
