@@ -33,6 +33,26 @@ class PaymentsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     }
 
     @Test
+    fun `when feature is disabled ifDisabled executes the action`() {
+        featureFlagManager.disableFeature(PAYMENTS)
+        var actionExecuted = false
+
+        strategy.ifDisabled { actionExecuted = true }
+
+        assertTrue(actionExecuted)
+    }
+
+    @Test
+    fun `when feature is enabled ifDisabled does not execute the action`() {
+        featureFlagManager.enableFeature(PAYMENTS)
+        var actionExecuted = false
+
+        strategy.ifDisabled { actionExecuted = true }
+
+        assertFalse(actionExecuted)
+    }
+
+    @Test
     fun `when feature is disabled ifEnabledOrElse returns the disabled branch`() {
         featureFlagManager.disableFeature(PAYMENTS)
 

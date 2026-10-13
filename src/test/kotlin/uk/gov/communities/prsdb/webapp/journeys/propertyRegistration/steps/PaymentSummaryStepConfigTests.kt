@@ -76,6 +76,20 @@ class PaymentSummaryStepConfigTests {
     }
 
     @Test
+    fun `afterStepDataIsAdded clears the previous payment outcome and reference`() {
+        // Arrange
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = null
+        verify(mockState).paymentReference = null
+    }
+
+    @Test
     fun `afterStepDataIsAdded marks the address as already registered when it has been registered since the journey started`() {
         // Arrange
         stubAddressTask()

@@ -222,6 +222,7 @@ class PaymentService(
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
         } catch (exception: Exception) {
+            println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
         }
     }
