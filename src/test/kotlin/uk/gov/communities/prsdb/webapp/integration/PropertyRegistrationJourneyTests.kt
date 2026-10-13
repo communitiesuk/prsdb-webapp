@@ -158,9 +158,11 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
+import java.math.BigDecimal
 import java.net.URI
 import java.nio.file.Path
 import java.time.LocalDate
+import java.text.NumberFormat
 import java.time.MonthDay
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -345,10 +347,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkAnswersPage.confirm()
 
-            completePropertyRegistrationPaymentSuccessfully(page)
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
             val payment = getCreatedPayment()
             assertEquals(PaymentStatus.SUCCEEDED, payment.status)
             verify(govUkPayClient).capturePayment(payment.paymentId)
+
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+            assertThat(confirmationPage.paymentSummaryHeading).isVisible()
+            assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
+                .containsText(
+                    NumberFormat.getCurrencyInstance(Locale.UK).format(BigDecimal.valueOf(payment.amountInPence.toLong(), 2)),
+                )
+            assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
+                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+            assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
+                .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
 
         @Test

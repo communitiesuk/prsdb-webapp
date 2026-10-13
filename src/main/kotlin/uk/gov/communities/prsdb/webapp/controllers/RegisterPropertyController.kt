@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
@@ -47,9 +48,11 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.ProvideMissingDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PaymentSummaryViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -70,6 +73,7 @@ class RegisterPropertyController(
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
+    private val paymentService: PaymentService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -112,6 +116,14 @@ class RegisterPropertyController(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
+
+        if (featureFlagManager.checkFeature(PAYMENTS)) {
+            val payment =
+                checkNotNull(paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)) {
+                    "No succeeded payment was found for property ownership ${propertyOwnership.id}"
+                }
+            model.addAttribute("paymentSummaryViewModel", PaymentSummaryViewModel.from(payment, propertyOwnership.renewalDate))
+        }
 
         val isOccupied = propertyOwnership.isOccupied
         val propertyCompliance =
