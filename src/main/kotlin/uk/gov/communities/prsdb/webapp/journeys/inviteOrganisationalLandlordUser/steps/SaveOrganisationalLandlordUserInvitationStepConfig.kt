@@ -25,7 +25,6 @@ class SaveOrganisationalLandlordUserInvitationStepConfig(
             role = formModel.notNullValue(InviteOrganisationalLandlordUserFormModel::role),
             organisationalLandlord = userToLandlordService.getCurrentOrganisationLandlordForUser(),
         )
-        // TODO PDJB-1761: Send the invitation email to the invited user
     }
 
     override fun resolveNextDestination(
