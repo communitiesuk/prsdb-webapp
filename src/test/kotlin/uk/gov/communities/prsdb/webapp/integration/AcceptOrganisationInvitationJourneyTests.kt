@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AcceptOrganisationInvitationJourneyTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-mockuser-is-not-a-landlord.sql")) {
+    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-invitation-mockuser-not-landlord.sql")) {
     private val validToken = "1234abcd-5678-abcd-1234-567abcd2222a"
 
     private val expiredToken = "1234abcd-5678-abcd-1234-567abcd2222d"
@@ -115,6 +115,7 @@ class AcceptOrganisationInvitationJourneyTests :
             BaseComponent
                 .assertThat(userIsAlreadyLandlordPage.heading)
                 .containsText("You need to use a different GOV.UK One Login to accept this invitation")
+            BaseComponent.assertThat(userIsAlreadyLandlordPage.signOutLink).isVisible()
 
             // The invitation is untouched, so the correct account can still accept it
             val invitation = invitationRepository.findByToken(UUID.fromString(validToken))!!
@@ -126,8 +127,8 @@ class AcceptOrganisationInvitationJourneyTests :
     inner class UserIsAlreadyAnOrganisationalLandlordUser : NestedIntegrationTestWithMutableData(
         listOf(
             "data-local.sql",
-            "data-mockuser-is-not-a-landlord.sql",
-            "data-mockuser-is-org-landlord-user.sql",
+            "data-org-invitation-mockuser-not-landlord.sql",
+            "data-org-invitation-mockuser-is-org-landlord-user.sql",
         ),
     ) {
         @Test

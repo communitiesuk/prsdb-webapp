@@ -45,11 +45,6 @@ class CheckUserIsLandlordStepConfig(
         }
 }
 
-// This step must stay requestable. Unlike the preceding validate token step, its route is not permitAll'd in
-// LandlordSecurityConfig, so it is the first authenticated URL in the journey and is what redirects an anonymous
-// invitee to One Login. An InternalStep has no URL, so it would never hit the security filter chain and the invitee
-// would reach the rest of the journey unauthenticated. A RedirectingStepLifecycleOrchestrator keeps the URL, and so
-// the authentication trigger, while never rendering a page.
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckUserIsLandlordStep")
 final class CheckUserIsLandlordStep(
     stepConfig: CheckUserIsLandlordStepConfig,

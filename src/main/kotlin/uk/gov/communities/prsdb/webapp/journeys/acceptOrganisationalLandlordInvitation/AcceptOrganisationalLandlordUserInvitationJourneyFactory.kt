@@ -76,8 +76,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             step(journey.userIsAlreadyLandlordStep) {
                 routeSegment(UserIsAlreadyLandlordStep.ROUTE_SEGMENT)
                 parents { journey.checkUserIsLandlordStep.hasOutcome(LandlordAccountStatus.ALREADY_A_LANDLORD) }
-                backDestination { Destination.Nowhere() }
-                nextDestination { Destination.Nowhere() }
+                noNextDestination()
             }
             step(journey.joinOrganisationStep) {
                 routeSegment(JoinOrganisationStep.ROUTE_SEGMENT)

@@ -200,21 +200,4 @@ class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutable
             assertPageIs(page, EmailAddressPage::class)
         }
     }
-
-    @Nested
-    inner class AcceptOrganisationInvitationStepUserIsAlreadyLandlord {
-        @Test
-        fun `user is already landlord page shows the heading, body and sign out link`() {
-            // Arrange and Act
-            val userIsAlreadyLandlordPage =
-                navigator.goToAcceptOrganisationalLandlordInvitationUserIsAlreadyLandlordPage()
-
-            // Assert
-            assertEquals(
-                "You need to use a different GOV.UK One Login to accept this invitation",
-                userIsAlreadyLandlordPage.heading.getText().trim(),
-            )
-            BaseComponent.assertThat(userIsAlreadyLandlordPage.signOutLink).isVisible()
-        }
-    }
 }
