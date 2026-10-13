@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -35,6 +36,9 @@ class DeregisterStepConfigTests {
 
     @Mock
     lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
+    @Mock
+    lateinit var mockCurrentUserService: CurrentUserService
 
     @Mock
     lateinit var mockConfirmationEmailSender: EmailNotificationService<OrganisationalLandlordDeregistrationConfirmationEmail>
@@ -71,6 +75,7 @@ class DeregisterStepConfigTests {
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(orgLandlord, coLandlord))
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        setupCurrentUser()
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -78,25 +83,24 @@ class DeregisterStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends the confirmation email to the registrant email`() {
+    fun `afterStepIsReached sends the confirmation email to the current user`() {
         val stepConfig = setupStepConfig()
         val landlord =
             MockLandlordData.createOrgLandlord(
                 name = "Example Housing Association",
                 email = "organisation@example.com",
-                registrantName = "Sam Smith",
-                registrantEmail = "sam.smith@example.com",
             )
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(landlord)
+        setupCurrentUser()
 
         stepConfig.afterStepIsReached(mockState)
 
         val emailCaptor = argumentCaptor<OrganisationalLandlordDeregistrationConfirmationEmail>()
-        verify(mockConfirmationEmailSender).sendEmail(eq("sam.smith@example.com"), emailCaptor.capture())
+        verify(mockConfirmationEmailSender).sendEmail(eq(CURRENT_EMAIL), emailCaptor.capture())
 
         assertEquals(
             OrganisationalLandlordDeregistrationConfirmationEmail(
-                registrantName = "Sam Smith",
+                registrantName = CURRENT_USERNAME,
                 organisationName = "Example Housing Association",
             ),
             emailCaptor.firstValue,
@@ -109,6 +113,7 @@ class DeregisterStepConfigTests {
         val organisationName = "Keystone Living Group"
         val orgLandlord = MockLandlordData.createOrgLandlord(name = organisationName)
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        setupCurrentUser()
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -130,14 +135,26 @@ class DeregisterStepConfigTests {
     private fun setupMocks() =
         MockLandlordData.createOrgLandlord().also { orgLandlord ->
             whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+            setupCurrentUser()
         }
+
+    private fun setupCurrentUser() {
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = CURRENT_USERNAME, email = CURRENT_EMAIL))
+    }
 
     private fun setupStepConfig() =
         DeregisterStepConfig(
             mockLandlordDeregistrationService,
             mockUserToLandlordService,
             mockSecurityContextService,
+            mockCurrentUserService,
             mockSwapToIndividualNudgeEmailService,
             mockConfirmationEmailSender,
         )
+
+    companion object {
+        private const val CURRENT_USERNAME = "Sam Smith"
+        private const val CURRENT_EMAIL = "sam.smith@example.com"
+    }
 }

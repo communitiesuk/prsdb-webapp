@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationInviteeEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwitchToIndividualConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -39,6 +40,9 @@ class CompleteSwitchToIndividualStepConfigTests {
     lateinit var mockSwitchToIndividualConfirmationEmailSender: EmailNotificationService<SwitchToIndividualConfirmationEmail>
 
     @Mock
+    lateinit var mockCurrentUserService: CurrentUserService
+
+    @Mock
     lateinit var mockSession: HttpSession
 
     @Mock
@@ -50,6 +54,7 @@ class CompleteSwitchToIndividualStepConfigTests {
             mockJointLandlordInvitationService,
             mockInviteCancellationEmailSender,
             mockSwitchToIndividualConfirmationEmailSender,
+            mockCurrentUserService,
             mockSession,
         )
 
@@ -73,6 +78,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(listOf(invitation1, invitation2))
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -88,6 +95,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -103,6 +112,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -141,6 +152,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(listOf(invitation1, invitation2))
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -153,23 +166,24 @@ class CompleteSwitchToIndividualStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends confirmation email to the landlord`() {
+    fun `afterStepIsReached sends confirmation email to the current user`() {
         val stepConfig = setupStepConfig()
         val propertyOwnershipId = 1L
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        val currentUser = CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com")
         val emailCaptor = argumentCaptor<SwitchToIndividualConfirmationEmail>()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
+        whenever(mockCurrentUserService.getCurrentUserDetails()).thenReturn(currentUser)
 
         stepConfig.afterStepIsReached(mockState)
 
-        val landlord = propertyOwnership.landlords.first()
         verify(mockSwitchToIndividualConfirmationEmailSender).sendEmail(
-            eq(landlord.email),
+            eq(currentUser.email),
             emailCaptor.capture(),
         )
-        assertEquals(landlord.name, emailCaptor.firstValue.landlordName)
+        assertEquals(currentUser.name, emailCaptor.firstValue.landlordName)
     }
 }
