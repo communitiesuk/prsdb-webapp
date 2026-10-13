@@ -11,18 +11,23 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlor
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    private val validToken = "1234abcd-5678-abcd-1234-567abcd2222a"
+
+    private val expiredToken = "1234abcd-5678-abcd-1234-567abcd2222d"
+
+    private val unrecognisedToken = "1234abcd-5678-abcd-1234-567abcd9999a"
+
     @Autowired
     private lateinit var invitationRepository: OrganisationalLandlordInvitationRepository
 
@@ -36,12 +41,13 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
     @Test
     fun `Invitees can successfully accept an invitation to join an organisation`(page: Page) {
-        // 1. Go to the start of accept invitation journey (Validate Token page)
-        val validateTokenPage = navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
-        assertPageIs(page, ValidateTokenPage::class)
-        // TODO PDJB-1822: Validate token step
-        validateTokenPage.form.radios.selectValue(TokenValidity.VALID)
-        validateTokenPage.form.submit()
+        // 1. Go to the start of accept invitation journey - a valid token redirects past the validate token step
+        // TODO PDJB-1829: CheckUserIsLandlordStep is a placeholder, so step 1 currently stops here. Once it decides whether the
+        // invitee is already a landlord user, a valid token should arrive at the join organisation page and this step can go.
+        val checkUserIsLandlordPage =
+            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(validToken)
+        assertPageIs(page, CheckUserIsLandlordPage::class)
+        checkUserIsLandlordPage.form.submit()
 
         // 1b. Join Organisation page
         val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
@@ -69,28 +75,34 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertTrue(confirmationPage.heading.getText().contains("TODO PDJB-1775"))
     }
 
-    // TODO PDJB-1822: Update test once validate token step is in place
     @Test
-    fun `Invitees are redirected to invalid link page when token validation placeholder is invalid`(page: Page) {
-        // 1. Go to the start of accept invitation journey (Validate Token page)
-        val validateTokenPage = navigator.goToAcceptOrganisationalLandlordInvitationJourney("1234abcd-5678-abcd-1234-567abcd2222a")
-        assertPageIs(page, ValidateTokenPage::class)
-        // TODO PDJB-1822: Validate token step
-        validateTokenPage.form.radios.selectValue(TokenValidity.INVALID)
-        validateTokenPage.form.submit()
+    fun `Invitees are redirected to the invalid link page when their invitation has expired`(page: Page) {
+        // Go to the start of accept invitation journey with an expired invitation token
+        val invalidLinkPage =
+            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(expiredToken)
 
-        // 2. Invalid link page
-        val invalidLinkPage = assertPageIs(page, InvalidLinkPage::class)
+        assertPageIs(page, InvalidLinkPage::class)
         BaseComponent.assertThat(invalidLinkPage.heading)
             .containsText("There was a problem with this invitation link")
         BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
     }
 
     @Test
+    fun `Invitees are redirected to the invalid link page when their invitation token is not recognised`(page: Page) {
+        // Go to the start of accept invitation journey with a token that matches no invitation
+        val invalidLinkPage =
+            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(unrecognisedToken)
+
+        assertPageIs(page, InvalidLinkPage::class)
+        BaseComponent.assertThat(invalidLinkPage.heading)
+            .containsText("There was a problem with this invitation link")
+    }
+
+    @Test
     fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
         featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
 
-        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=1234abcd-5678-abcd-1234-567abcd2222a")
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=$validToken")
         assertEquals(404, response?.status())
     }
 }
