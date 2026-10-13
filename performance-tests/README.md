@@ -102,7 +102,10 @@ Before enabling the workflow:
 3. Keep the GitHub `nft` environment's deployment branches restricted to `nft` (as for normal NFT deploys),
    without required reviewers, before granting the expanded role. The workflow also rejects dispatches
    from other refs.
-4. Merge the workflow/scripts into `main` (so the scheduler and workflow are registered) and release them to `nft` before dispatching. Do not run NFT infra applies, manual
+4. Merge the workflow/scripts into `main` (so the scheduler and workflow are registered) and release them to `nft` before dispatching.
+   The scheduler is live as soon as it reaches `main`, and its dispatch fails until `nft` has the workflow, so
+   run `gh workflow disable schedule-performance-tests.yml` straight after merging to `main`, and
+   `gh workflow enable schedule-performance-tests.yml` once the changes are released to `nft`. Do not run NFT infra applies, manual
    ECS changes, or network changes while it is running. The shared non-cancelling concurrency group
    serializes this action with the **webapp** NFT deploy workflow, not the separate infra repository.
 
