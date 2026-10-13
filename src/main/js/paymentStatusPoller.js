@@ -23,8 +23,6 @@ export function createPaymentStatusPoller(
         schedule = (callback, delayMs) => setTimeout(callback, delayMs),
     } = {},
 ) {
-    let attempts = 0;
-
     const showJavaScriptContent = () => {
         jsContent.hidden = false;
     };
@@ -34,30 +32,27 @@ export function createPaymentStatusPoller(
         noJsContent.classList.remove(JS_HIDDEN_CLASS);
     };
 
+    const postForm = () => fetchFn(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) });
+
     const wasRedirectedToAnotherPage = (response) => new URL(response.url).pathname !== window.location.pathname;
 
-    async function checkPaymentStatus() {
-        attempts += 1;
-        try {
-            const response = await fetchFn(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) });
-            if (!response.ok) {
-                showNoJavaScriptContent();
-            } else if (wasRedirectedToAnotherPage(response)) {
-                navigate(response.url);
-            } else if (attempts >= MAX_ATTEMPTS) {
-                showNoJavaScriptContent();
-            } else {
-                schedule(checkPaymentStatus, POLL_INTERVAL_MS);
-            }
-        } catch {
+    const checkPaymentStatus = async (attempt = 1) => {
+        const response = await postForm().catch(() => null);
+        if (!response?.ok) {
+            showNoJavaScriptContent();
+        } else if (wasRedirectedToAnotherPage(response)) {
+            navigate(response.url);
+        } else if (attempt < MAX_ATTEMPTS) {
+            schedule(() => checkPaymentStatus(attempt + 1), POLL_INTERVAL_MS);
+        } else {
             showNoJavaScriptContent();
         }
-    }
+    };
 
-    function start() {
+    const start = () => {
         showJavaScriptContent();
         return checkPaymentStatus();
-    }
+    };
 
     return { start };
 }
