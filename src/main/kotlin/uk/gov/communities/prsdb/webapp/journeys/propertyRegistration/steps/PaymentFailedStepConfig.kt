@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class RetryablePaymentFailedStepConfig :
+class PaymentFailedStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-1703: Replace this stub with the real retryable payment failed page. Continuing retries the payment.
+    // TODO PDJB-1703: Replace this stub with the real payment failed page. Continuing retries the payment.
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "Payment failed - retryable (TODO PDJB-1703)")
+        mapOf("todoComment" to "Payment failed (TODO PDJB-1703)")
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todo"
 
@@ -22,8 +22,8 @@ class RetryablePaymentFailedStepConfig :
 }
 
 @JourneyFrameworkComponent
-final class RetryablePaymentFailedStep(
-    stepConfig: RetryablePaymentFailedStepConfig,
+final class PaymentFailedStep(
+    stepConfig: PaymentFailedStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, PropertyRegistrationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "payment-failed"

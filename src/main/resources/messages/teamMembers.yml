@@ -1,6 +1,10 @@
 title: Team members
 heading: Team members
 currentUserName: '{0,,name} (You)'
+inviteTeamMemberButton: Invite a team member
+successBanner:
+  title: Success
+  invitationSent: Invitation sent
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators

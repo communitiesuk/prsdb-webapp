@@ -70,9 +70,8 @@ class PropertyRegistrationPaymentQuoteStateTests {
             savePropertyRegistrationDataStep = mock(),
             paymentSummaryStep = mock(),
             paymentReturnStep = mock(),
-            paymentRoutingStep = mock(),
-            retryablePaymentFailedStep = mock(),
-            nonRetryablePaymentFailedStep = mock(),
+            paymentStatusCheckStep = mock(),
+            paymentFailedStep = mock(),
             journeyStateService = service,
             stateFactory = mock(),
         )

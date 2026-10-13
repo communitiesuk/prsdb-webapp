@@ -38,6 +38,7 @@ class PropertyRegistrationService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val featureFlagManager: FeatureFlagManager,
+    private val currentUserService: CurrentUserService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -182,7 +183,7 @@ class PropertyRegistrationService(
     ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
-            landlord.email,
+            currentUserService.getCurrentEmail(),
             PropertyRegistrationConfirmationEmail(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)

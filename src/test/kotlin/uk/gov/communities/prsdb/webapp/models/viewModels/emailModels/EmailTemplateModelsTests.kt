@@ -51,6 +51,13 @@ class EmailTemplateModelsTests {
                     "/emails/OrganisationalLandlordDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
+                    OrganisationalLandlordInvitationEmail(
+                        organisationName = "Example Housing Association",
+                        invitationUri = URI("https://example.com/landlord/accept-invitation?token=abc123"),
+                    ),
+                    "/emails/OrganisationalLandlordInvitation.md",
+                ),
+                EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
                         "1 Street Name\nAB1 2CD",

@@ -2,18 +2,31 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import java.net.URI
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -24,6 +37,15 @@ class OrganisationalLandlordInvitationServiceTests {
     @Mock
     private lateinit var mockHttpSession: HttpSession
 
+    @Mock
+    private lateinit var mockOrganisationalLandlordUserService: OrganisationalLandlordUserService
+
+    @Mock
+    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockInvitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
+
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     private val journeyId = "test-journey-id"
@@ -31,7 +53,14 @@ class OrganisationalLandlordInvitationServiceTests {
 
     @BeforeEach
     fun setup() {
-        invitationService = OrganisationalLandlordInvitationService(mockInvitationRepository, mockHttpSession)
+        invitationService =
+            OrganisationalLandlordInvitationService(
+                mockInvitationRepository,
+                mockHttpSession,
+                mockOrganisationalLandlordUserService,
+                mockAbsoluteUrlProvider,
+                mockInvitationEmailSender,
+            )
     }
 
     @Test
@@ -125,5 +154,115 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         assertNull(result)
+    }
+
+    @Test
+    fun `createInvitation saves an invitation for the organisation with the given email, role and a token`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
+            .thenReturn(URI("https://example.com/accept-invitation"))
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        val invitationCaptor = argumentCaptor<OrganisationalLandlordInvitation>()
+        verify(mockInvitationRepository).save(invitationCaptor.capture())
+        val savedInvitation = invitationCaptor.firstValue
+        assertEquals("invitee@example.com", savedInvitation.invitedEmail)
+        assertEquals(EDITOR, savedInvitation.role)
+        assertEquals(organisation, savedInvitation.organisationalLandlord)
+        assertNotNull(savedInvitation.token)
+    }
+
+    @Test
+    fun `createInvitation emails the invitee a link to accept the saved invitation`() {
+        // Arrange
+        val organisation = createOrgLandlord(name = "Example Housing Association")
+        val invitationUri = URI("https://example.com/landlord/accept-invitation?token=abc")
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any())).thenReturn(invitationUri)
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        val invitationCaptor = argumentCaptor<OrganisationalLandlordInvitation>()
+        verify(mockInvitationRepository).save(invitationCaptor.capture())
+        verify(mockAbsoluteUrlProvider).buildOrganisationalLandlordInvitationUri(invitationCaptor.firstValue.token.toString())
+        verify(mockInvitationEmailSender).sendEmail(
+            "invitee@example.com",
+            OrganisationalLandlordInvitationEmail(
+                organisationName = "Example Housing Association",
+                invitationUri = invitationUri,
+            ),
+        )
+    }
+
+    @Test
+    fun `createInvitation propagates the exception when the invitation email fails to send`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
+            .thenReturn(URI("https://example.com/accept-invitation"))
+        doThrow(TransientEmailSentException("Email failed to send"))
+            .whenever(mockInvitationEmailSender)
+            .sendEmail(any(), any())
+
+        // Act & Assert
+        assertThrows<TransientEmailSentException> {
+            invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+        }
+    }
+
+    @Test
+    fun `createInvitation does not save an invitation when the email address has already been invited`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(OrganisationalLandlordInvitation(UUID.randomUUID(), "invitee@example.com", organisation, EDITOR)),
+        )
+
+        // Act
+        invitationService.createInvitation("Invitee@Example.com", EDITOR, organisation)
+
+        // Assert
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `createInvitation does not save an invitation when the email address belongs to a team member`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
+            listOf(OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Team Member", "invitee@example.com", EDITOR)),
+        )
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `getInvitedAndMemberEmails returns the organisation's invited and team member email addresses`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(
+                OrganisationalLandlordInvitation(UUID.randomUUID(), "first@example.com", organisation, EDITOR),
+                OrganisationalLandlordInvitation(UUID.randomUUID(), "second@example.com", organisation, EDITOR),
+            ),
+        )
+        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
+            listOf(OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Team Member", "member@example.com", EDITOR)),
+        )
+
+        // Act
+        val emails = invitationService.getInvitedAndMemberEmails(organisation)
+
+        // Assert
+        assertEquals(listOf("first@example.com", "second@example.com", "member@example.com"), emails)
     }
 }

@@ -48,6 +48,9 @@ class PaymentSummaryStepConfig(
     override fun mode(state: PropertyRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
+        state.paymentOutcome = null
+        state.paymentReference = null
+
         val addressTask = state.propertyDetailsTask.addressTask
         val uprn = addressTask.getAddress().uprn
         if (uprn != null && addressAvailabilityService.isAddressOwned(uprn)) {
