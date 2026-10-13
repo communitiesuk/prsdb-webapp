@@ -932,6 +932,7 @@ inviteLocalCouncilAdminUser:
   fieldSetHint: 'This will allow them to view, edit, invite and delete local council users in their local council as well as view landlord and property records.'
   selectLabel: Select their local council
 inviteLocalCouncilAdminUserConfirmation:
+  pageTitle: Local council admin invitation sent
   banner:
     body: 'You’ve sent {0,,invitedEmailAddress} an invite to be an admin for {1,,localCouncilName}.'
   whatHappensNext:

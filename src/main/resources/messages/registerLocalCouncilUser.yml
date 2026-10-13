@@ -14,6 +14,7 @@ invalidLink:
   heading: There was a problem with this invitation link
   description: Ask your manager or admin user to invite you again.
 checkAnswers:
+  pageTitle: Check your registration answers
   summaryName: Your details
   rowHeading:
     localCouncil: Local council

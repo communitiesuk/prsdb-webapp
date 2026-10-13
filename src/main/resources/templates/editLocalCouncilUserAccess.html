@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<th:block id="page-content" th:replace="~{fragments/layout :: layout(#{manageLocalCouncilUsers.title}, ~{::#page-content/content()}, false)}">
+<th:block id="page-content" th:replace="~{fragments/layout :: layout(#{editLocalCouncilUserAccess.pageTitle(${localCouncilUser.name})}, ~{::#page-content/content()}, false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content">
         <div id="form-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#form-content/content()})}">
