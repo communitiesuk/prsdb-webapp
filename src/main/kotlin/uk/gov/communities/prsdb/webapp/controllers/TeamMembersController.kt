@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TeamMembersViewModel
@@ -44,6 +45,7 @@ class TeamMembersController(
         model.addAttribute("teamMembers", teamMembers)
         model.addAttribute("administratorsTabId", ADMINISTRATORS_FRAGMENT)
         model.addAttribute("editorsTabId", EDITORS_FRAGMENT)
+        model.addAttribute("inviteTeamMemberUrl", INVITE_ORGANISATIONAL_LANDLORD_USER_PATH)
 
         return "teamMembers"
     }

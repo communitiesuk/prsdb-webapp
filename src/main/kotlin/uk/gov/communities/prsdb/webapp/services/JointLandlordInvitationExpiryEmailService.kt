@@ -53,10 +53,9 @@ class JointLandlordInvitationExpiryEmailService(
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUri = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { recipient ->
-            expiryEmailNotificationService.sendEmail(
-                recipient.email,
+            expiryEmailNotificationService.sendEmailToLandlord(
+                recipient,
                 JointLandlordInvitationExpiryEmail(
                     recipientName = recipient.name,
                     invitedEmail = invitation.invitedEmail,

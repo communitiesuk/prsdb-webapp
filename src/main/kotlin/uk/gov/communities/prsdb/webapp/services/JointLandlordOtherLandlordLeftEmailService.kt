@@ -14,10 +14,9 @@ class JointLandlordOtherLandlordLeftEmailService(
         propertyOwnership: PropertyOwnership,
         previousLandlord: Landlord,
     ) {
-        // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { otherLandlord ->
-            otherLandlordLeftEmailService.sendEmail(
-                otherLandlord.email,
+            otherLandlordLeftEmailService.sendEmailToLandlord(
+                otherLandlord,
                 JointLandlordOtherLandlordLeftNotification(
                     leavingLandlord = previousLandlord.name,
                     notifiedLandlord = otherLandlord.name,

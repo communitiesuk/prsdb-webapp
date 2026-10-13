@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import java.util.UUID
 
 class AbsoluteUrlProviderTests {
@@ -51,6 +52,15 @@ class AbsoluteUrlProviderTests {
         val uri = provider.buildJointLandlordInvitationUri("token-123")
 
         assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT?token=token-123")
+    }
+
+    @Test
+    fun `buildOrganisationalLandlordInvitationUri returns the accept invitation url with the token`() {
+        val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildOrganisationalLandlordInvitationUri("token-123")
+
+        assertThat(uri.toString()).isEqualTo("https://example.test$ACCEPT_INVITATION_ROUTE?token=token-123")
     }
 
     @Test

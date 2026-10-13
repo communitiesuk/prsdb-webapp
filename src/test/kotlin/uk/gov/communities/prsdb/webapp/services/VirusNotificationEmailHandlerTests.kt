@@ -9,8 +9,10 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -102,7 +104,7 @@ class VirusNotificationEmailHandlerTests {
     fun `handleCallback for send owner email sends email to every landlord on the property`(testType: CertificateType) {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com", "landlord3@example.com")
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(testType),
                 landlordEmails,
@@ -116,7 +118,8 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(landlordEmails, expectedEmail)
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService, never()).sendEmail(any(), any())
     }
 
     @Test
@@ -124,7 +127,7 @@ class VirusNotificationEmailHandlerTests {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com")
         val lettingAgentEmail = "agent@example.com"
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(CertificateType.GasSafetyCert),
                 landlordEmails,
@@ -140,19 +143,11 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
-        val emailAddressCaptor = argumentCaptor<String>()
-
-        verify(emailNotificationService, times(2)).sendEmail(
-            emailAddressCaptor.capture(),
-            emailModelCaptor.capture(),
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService).sendEmail(
+            eq(lettingAgentEmail),
+            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
         )
-
-        assertEquals("landlord1@example.com", emailAddressCaptor.allValues[0])
-        assertEquals(expectedEmail, emailModelCaptor.allValues[0])
-
-        assertEquals(lettingAgentEmail, emailAddressCaptor.allValues[1])
-        assertEquals(expectedEmail.copy(recipientName = lettingAgentEmail), emailModelCaptor.allValues[1])
     }
 
     @Test
@@ -160,7 +155,7 @@ class VirusNotificationEmailHandlerTests {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com", "landlord3@example.com")
         val lettingAgentEmail = "agent@example.com"
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(CertificateType.GasSafetyCert),
                 landlordEmails,
@@ -176,21 +171,11 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
-        val emailAddressCaptor = argumentCaptor<String>()
-
-        verify(emailNotificationService, times(landlordEmails.size + 1)).sendEmail(
-            emailAddressCaptor.capture(),
-            emailModelCaptor.capture(),
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService).sendEmail(
+            eq(lettingAgentEmail),
+            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
         )
-
-        landlordEmails.forEachIndexed { index, email ->
-            assertEquals(email, emailAddressCaptor.allValues[index])
-            assertEquals(expectedEmail, emailModelCaptor.allValues[index])
-        }
-
-        assertEquals(lettingAgentEmail, emailAddressCaptor.allValues[landlordEmails.size])
-        assertEquals(expectedEmail.copy(recipientName = lettingAgentEmail), emailModelCaptor.allValues[landlordEmails.size])
     }
 
     @Test
@@ -198,7 +183,7 @@ class VirusNotificationEmailHandlerTests {
         // Arrange
         val orgEmail = "org-registrant@example.com"
         val orgLandlord = MockLandlordData.createOrgLandlord(registrantEmail = orgEmail)
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallbackForLandlords(
                 expectedCertType(CertificateType.GasSafetyCert),
                 listOf(orgLandlord),
@@ -213,7 +198,8 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(listOf(orgEmail), expectedEmail)
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService, never()).sendEmail(any(), any())
     }
 
     @Test
@@ -222,7 +208,7 @@ class VirusNotificationEmailHandlerTests {
         val individualLandlord = MockLandlordData.createIndividualLandlord(email = "landlord1@example.com")
         val orgLandlord = MockLandlordData.createOrgLandlord(registrantEmail = "org-registrant@example.com")
         val lettingAgentEmail = "agent@example.com"
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallbackForLandlords(
                 expectedCertType(CertificateType.GasSafetyCert),
                 listOf(individualLandlord, orgLandlord),
@@ -238,28 +224,17 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
-        val emailAddressCaptor = argumentCaptor<String>()
-
-        verify(emailNotificationService, times(3)).sendEmail(
-            emailAddressCaptor.capture(),
-            emailModelCaptor.capture(),
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService).sendEmail(
+            eq(lettingAgentEmail),
+            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
         )
-
-        assertEquals(individualLandlord.email, emailAddressCaptor.allValues[0])
-        assertEquals(expectedEmail.copy(recipientName = individualLandlord.name), emailModelCaptor.allValues[0])
-
-        assertEquals(orgLandlord.email, emailAddressCaptor.allValues[1])
-        assertEquals(expectedEmail.copy(recipientName = orgLandlord.name), emailModelCaptor.allValues[1])
-
-        assertEquals(lettingAgentEmail, emailAddressCaptor.allValues[2])
-        assertEquals(expectedEmail.copy(recipientName = lettingAgentEmail), emailModelCaptor.allValues[2])
     }
 
     @Test
     fun `handleCallback does not email letting agent when delegation feature is disabled`() {
         // Arrange
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(CertificateType.GasSafetyCert),
                 listOf("landlord1@example.com"),
@@ -276,7 +251,8 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(listOf("landlord1@example.com"), expectedEmail)
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService, never()).sendEmail(any(), any())
         verify(lettingAgentAccessRepository, never()).findByPropertyOwnershipId(ownershipId)
     }
 
@@ -284,7 +260,7 @@ class VirusNotificationEmailHandlerTests {
     fun `handleCallback does not email letting agent for joint landlords when delegation feature is disabled`() {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
-        val (ownershipId, expectedEmail) =
+        val (ownershipId, expectedEmail, landlords) =
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(CertificateType.GasSafetyCert),
                 landlordEmails,
@@ -301,7 +277,8 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(landlordEmails, expectedEmail)
+        assertEmailSentToLandlords(landlords, expectedEmail)
+        verify(emailNotificationService, never()).sendEmail(any(), any())
         verify(lettingAgentAccessRepository, never()).findByPropertyOwnershipId(ownershipId)
     }
 
@@ -394,7 +371,7 @@ class VirusNotificationEmailHandlerTests {
         bodyCertificateType: String,
         emailAddresses: List<String>,
         recipientName: String = "name",
-    ): Pair<Long, VirusScanUnsuccessfulEmail> =
+    ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> =
         arrangeOwnedPropertyUploadCallbackForLandlords(
             bodyCertificateType,
             emailAddresses.map { MockLandlordData.createIndividualLandlord(email = it) },
@@ -405,7 +382,7 @@ class VirusNotificationEmailHandlerTests {
         bodyCertificateType: String,
         landlords: List<Landlord>,
         recipientName: String = "name",
-    ): Pair<Long, VirusScanUnsuccessfulEmail> {
+    ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 landlords = landlords.toMutableSet(),
@@ -415,7 +392,7 @@ class VirusNotificationEmailHandlerTests {
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
 
-        return Pair(
+        return Triple(
             ownership.id,
             VirusScanUnsuccessfulEmail(
                 certificateType = bodyCertificateType,
@@ -423,7 +400,20 @@ class VirusNotificationEmailHandlerTests {
                 propertyAddress = "123 Main St\nAnytown",
                 landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
             ),
+            landlords,
         )
+    }
+
+    private fun assertEmailSentToLandlords(
+        landlords: List<Landlord>,
+        expectedEmail: VirusScanUnsuccessfulEmail,
+    ) {
+        landlords.forEach { landlord ->
+            verify(emailNotificationService).sendEmailToLandlord(
+                eq(landlord),
+                eq(expectedEmail.copy(recipientName = landlord.name)),
+            )
+        }
     }
 
     private fun assertEmailSentToAddress(

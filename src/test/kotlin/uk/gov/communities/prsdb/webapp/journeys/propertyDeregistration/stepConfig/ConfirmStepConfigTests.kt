@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
@@ -38,6 +39,9 @@ class ConfirmStepConfigTests {
     lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
+    lateinit var mockCurrentUserService: CurrentUserService
+
+    @Mock
     lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
 
     @Mock
@@ -54,6 +58,8 @@ class ConfirmStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -69,6 +75,8 @@ class ConfirmStepConfigTests {
             .thenReturn(
                 MockLandlordData.createPropertyOwnership(address = MockLandlordData.createAddress(singleLineAddress = propertyAddress)),
             )
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -79,12 +87,13 @@ class ConfirmStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email to the landlord`() {
+    fun `afterStepDataIsAdded sends confirmation email to the current user`() {
         val stepConfig = setupStepConfig()
-        val james = MockLandlordData.createIndividualLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-            .thenReturn(MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(james)))
+            .thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -95,18 +104,18 @@ class ConfirmStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email with correct landlord name and address`() {
+    fun `afterStepDataIsAdded sends confirmation email with correct current user name and address`() {
         val stepConfig = setupStepConfig()
         val multiLineAddress = "123 Test Street\nAB1 2CD"
-        val james = MockLandlordData.createIndividualLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(
                 MockLandlordData.createPropertyOwnership(
-                    landlords = mutableSetOf(james),
                     address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, AB1 2CD"),
                 ),
             )
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -137,6 +146,8 @@ class ConfirmStepConfigTests {
                 ),
             )
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(signInUrl))
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -160,6 +171,8 @@ class ConfirmStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(mockCurrentUserService.getCurrentUserDetails())
+            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -173,6 +186,7 @@ class ConfirmStepConfigTests {
                 mockPropertyDeregistrationService,
                 mockJointLandlordInvitationService,
                 mockAbsoluteUrlProvider,
+                mockCurrentUserService,
                 mockConfirmationEmailSender,
                 mockInviteeCancellationEmailSender,
             )
