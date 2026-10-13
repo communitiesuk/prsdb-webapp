@@ -12,9 +12,7 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class InviteOrganisationalLandlordUserFormModel : FormModel {
-    var invitedEmailAddresses: MutableList<String> = mutableListOf()
-
-    var memberEmailAddresses: MutableList<String> = mutableListOf()
+    var invitedAndMemberEmailAddresses: List<String> = emptyList()
 
     @ValidatedBy(
         constraints = [
@@ -47,6 +45,6 @@ class InviteOrganisationalLandlordUserFormModel : FormModel {
 
     fun isEmailNotAlreadyInvitedOrAMember(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return !invitedEmailAddresses.containsEmail(submittedEmail) && !memberEmailAddresses.containsEmail(submittedEmail)
+        return !invitedAndMemberEmailAddresses.containsEmail(submittedEmail)
     }
 }

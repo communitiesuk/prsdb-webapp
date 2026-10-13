@@ -51,10 +51,7 @@ class OrganisationalLandlordInvitationService(
         organisationalLandlord: OrganisationalLandlord,
     ) {
         // Re-check against the database when saving, as another admin may have invited the same email since validation ran
-        val existingEmails =
-            getInvitedEmails(organisationalLandlord) +
-                organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
-        if (existingEmails.containsEmail(invitedEmail)) return
+        if (getInvitedAndMemberEmails(organisationalLandlord).containsEmail(invitedEmail)) return
 
         invitationRepository.save(
             OrganisationalLandlordInvitation(
@@ -67,8 +64,9 @@ class OrganisationalLandlordInvitationService(
     }
 
     // TODO PDJB-1822: Only count PENDING invitations once the invitation status model is available
-    fun getInvitedEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
-        invitationRepository.findByOrganisationalLandlord(organisationalLandlord).map { it.invitedEmail }
+    fun getInvitedAndMemberEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
+        invitationRepository.findByOrganisationalLandlord(organisationalLandlord).map { it.invitedEmail } +
+            organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

@@ -50,17 +50,8 @@ class InviteOrganisationalLandlordUserFormModelTests {
     }
 
     @Test
-    fun `is invalid with the already invited message when the email address has already been invited`() {
-        val formModel = validFormModel().apply { invitedEmailAddresses = mutableListOf("invitee@example.com") }
-
-        val violations = validator.validate(formModel)
-
-        assertEquals(listOf("inviteOrganisationalLandlordUser.email.error.alreadyInvited"), violations.map { it.message })
-    }
-
-    @Test
-    fun `is invalid with the already invited message when the email address belongs to a team member`() {
-        val formModel = validFormModel().apply { memberEmailAddresses = mutableListOf("invitee@example.com") }
+    fun `is invalid with the already invited message when the email address has already been invited or is a team member`() {
+        val formModel = validFormModel().apply { invitedAndMemberEmailAddresses = listOf("invitee@example.com") }
 
         val violations = validator.validate(formModel)
 
@@ -72,7 +63,7 @@ class InviteOrganisationalLandlordUserFormModelTests {
         val formModel =
             validFormModel().apply {
                 emailAddress = "Invitee@Example.COM"
-                invitedEmailAddresses = mutableListOf("invitee@example.com")
+                invitedAndMemberEmailAddresses = listOf("invitee@example.com")
             }
 
         val violations = validator.validate(formModel)
@@ -84,8 +75,7 @@ class InviteOrganisationalLandlordUserFormModelTests {
     fun `is valid when the email address has not been invited and is not a team member`() {
         val formModel =
             validFormModel().apply {
-                invitedEmailAddresses = mutableListOf("someone.else@example.com")
-                memberEmailAddresses = mutableListOf("member@example.com")
+                invitedAndMemberEmailAddresses = listOf("someone.else@example.com", "member@example.com")
             }
 
         val violations = validator.validate(formModel)

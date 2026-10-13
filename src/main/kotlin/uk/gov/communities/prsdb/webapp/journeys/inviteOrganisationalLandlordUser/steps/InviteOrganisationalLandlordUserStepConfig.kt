@@ -10,14 +10,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteOrganisationalLandlordUserFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class InviteOrganisationalLandlordUserStepConfig(
     private val userToLandlordService: UserToLandlordService,
     private val invitationService: OrganisationalLandlordInvitationService,
-    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) : AbstractRequestableStepConfig<Complete, InviteOrganisationalLandlordUserFormModel, InviteOrganisationalLandlordUserJourneyState>() {
     override val formModelClass = InviteOrganisationalLandlordUserFormModel::class
 
@@ -48,12 +46,8 @@ class InviteOrganisationalLandlordUserStepConfig(
         val organisationalLandlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
         return super.enrichSubmittedDataBeforeValidation(state, formData) +
             (
-                InviteOrganisationalLandlordUserFormModel::invitedEmailAddresses.name to
-                    invitationService.getInvitedEmails(organisationalLandlord)
-            ) +
-            (
-                InviteOrganisationalLandlordUserFormModel::memberEmailAddresses.name to
-                    organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
+                InviteOrganisationalLandlordUserFormModel::invitedAndMemberEmailAddresses.name to
+                    invitationService.getInvitedAndMemberEmails(organisationalLandlord)
             )
     }
 

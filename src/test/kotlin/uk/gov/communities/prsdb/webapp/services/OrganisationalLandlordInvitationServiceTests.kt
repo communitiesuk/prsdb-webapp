@@ -188,7 +188,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getInvitedEmails returns the invited email addresses for the organisation`() {
+    fun `getInvitedAndMemberEmails returns the organisation's invited and team member email addresses`() {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
@@ -197,11 +197,14 @@ class OrganisationalLandlordInvitationServiceTests {
                 OrganisationalLandlordInvitation(UUID.randomUUID(), "second@example.com", organisation, EDITOR),
             ),
         )
+        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
+            listOf(OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Team Member", "member@example.com", EDITOR)),
+        )
 
         // Act
-        val invitedEmails = invitationService.getInvitedEmails(organisation)
+        val emails = invitationService.getInvitedAndMemberEmails(organisation)
 
         // Assert
-        assertEquals(listOf("first@example.com", "second@example.com"), invitedEmails)
+        assertEquals(listOf("first@example.com", "second@example.com", "member@example.com"), emails)
     }
 }
