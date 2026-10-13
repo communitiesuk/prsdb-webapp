@@ -44,6 +44,9 @@ class OrganisationalLandlord() : Landlord() {
     @Column(name = "organisation_registrant_date_of_birth")
     lateinit var registrantDateOfBirth: LocalDate
 
+    /**
+     * This should not be used for sending emails. This is captured for the SI.
+     */
     @Column(name = "organisation_registrant_email")
     lateinit var registrantEmail: String
 
@@ -77,6 +80,9 @@ class OrganisationalLandlord() : Landlord() {
     @Column(name = "organisation_lead_trustee_date_of_birth")
     var leadTrusteeDateOfBirth: LocalDate? = null
 
+    /**
+     * This should not be used for sending emails. This is captured for the SI.
+     */
     @Column(name = "organisation_lead_trustee_email")
     var leadTrusteeEmail: String? = null
 
@@ -90,6 +96,9 @@ class OrganisationalLandlord() : Landlord() {
     @Column(name = "organisation_main_contact_name")
     lateinit var mainContactName: String
 
+    /**
+     * This should not be used for sending emails. This is captured for the SI.
+     */
     @Column(name = "organisation_main_contact_email")
     lateinit var mainContactEmail: String
 

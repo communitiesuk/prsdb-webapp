@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSectionList
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -21,6 +22,7 @@ class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val userToLandlordService: UserToLandlordService,
     private val securityContextService: SecurityContextService,
+    private val currentUserService: CurrentUserService,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
@@ -35,24 +37,24 @@ class DeregisterStepConfig(
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
         val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
+        val currentUser = currentUserService.getCurrentUserDetails()
+
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
-
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        val landlordEmailAddress = landlord.email
 
         if (landlordHadActiveSoloProperties) {
             val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(soleLandlordProperties)
             confirmationWithPropertiesEmailSender.sendEmail(
-                landlordEmailAddress,
-                LandlordWithPropertiesDeregistrationConfirmationEmail(landlord.name, propertySectionList),
+                currentUser.email,
+                LandlordWithPropertiesDeregistrationConfirmationEmail(currentUser.name, propertySectionList),
             )
         } else {
             confirmationWithNoPropertiesEmailSender.sendEmail(
-                landlordEmailAddress,
-                LandlordNoPropertiesDeregistrationConfirmationEmail(landlord.name),
+                currentUser.email,
+                LandlordNoPropertiesDeregistrationConfirmationEmail(currentUser.name),
             )
         }
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         jointlyOwnedProperties.forEach {
             swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)

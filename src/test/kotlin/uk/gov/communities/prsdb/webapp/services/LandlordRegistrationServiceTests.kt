@@ -55,6 +55,9 @@ class LandlordRegistrationServiceTests {
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var mockCurrentUserService: CurrentUserService
+
     private lateinit var landlordRegistrationService: LandlordRegistrationService
 
     private val baseUser = PrsdbUser("user-123")
@@ -73,6 +76,7 @@ class LandlordRegistrationServiceTests {
                 mockRegistrationConfirmationSender,
                 mockOrgRegistrationConfirmationSender,
                 mockAbsoluteUrlProvider,
+                mockCurrentUserService,
             )
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser("user-123")).thenReturn(baseUser)
     }
@@ -336,6 +340,8 @@ class LandlordRegistrationServiceTests {
                 ),
             ).thenReturn(organisationalLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
+            whenever(mockCurrentUserService.getCurrentUserDetails())
+                .thenReturn(CurrentUserService.CurrentUserDetails("Org Admin", "admin@example.com"))
         }
 
         @Test
@@ -507,14 +513,14 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord sends a registration confirmation email to the registrant email`() {
+        fun `registerOrganisationLandlord sends a registration confirmation email to the acting user`() {
             registerOrganisationLandlord()
 
             verify(mockOrgRegistrationConfirmationSender).sendEmail(
-                eq("alice@test.com"),
+                eq("admin@example.com"),
                 eq(
                     OrganisationalLandlordRegistrationConfirmationEmail(
-                        registrantName = "Alice",
+                        registrantName = "Org Admin",
                         organisationName = "Test Org",
                         lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
                         prsdURL = orgDashboardUri.toString(),

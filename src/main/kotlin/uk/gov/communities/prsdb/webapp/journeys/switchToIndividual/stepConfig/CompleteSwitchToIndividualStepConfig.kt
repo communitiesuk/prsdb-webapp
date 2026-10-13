@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationInviteeEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwitchToIndividualConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -22,6 +23,7 @@ class CompleteSwitchToIndividualStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val inviteCancellationEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
     private val switchToIndividualConfirmationEmailSender: EmailNotificationService<SwitchToIndividualConfirmationEmail>,
+    private val currentUserService: CurrentUserService,
     private val session: HttpSession,
 ) : AbstractInternalStepConfig<Complete, SwitchToIndividualJourneyState>() {
     override fun mode(state: SwitchToIndividualJourneyState): Complete = Complete.COMPLETE
@@ -38,14 +40,14 @@ class CompleteSwitchToIndividualStepConfig(
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
+        val currentUser = currentUserService.getCurrentUserDetails()
+
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
         jointLandlordInvitationService.removeInvitations(pendingInvitations)
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        val landlord = propertyOwnership.landlords.first()
         switchToIndividualConfirmationEmailSender.sendEmail(
-            landlord.email,
-            SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),
+            currentUser.email,
+            SwitchToIndividualConfirmationEmail(landlordName = currentUser.name, propertyAddress = propertyAddress),
         )
 
         for (invitation in pendingInvitations) {

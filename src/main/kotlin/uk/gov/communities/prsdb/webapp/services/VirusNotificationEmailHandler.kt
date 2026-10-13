@@ -33,9 +33,7 @@ class VirusNotificationEmailHandler(
     fun handleCallback(callback: VirusScanCallback) =
         when (val callbackData = Json.decodeFromString<EmailNotificationData>(callback.encodedCallbackData)) {
             is OwnerEmailNotification -> sendAlertToOwners(callbackData)
-
             is VirusMonitoringEmailNotification -> sendAlertToMonitoringTeam(callbackData)
-
             is IncompletePropertyEmailNotification -> sendAlertForIncompleteProperty(callbackData)
         }
 
@@ -51,10 +49,9 @@ class VirusNotificationEmailHandler(
                 buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.toMultiLineAddress()),
             )
         } else {
-            // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
-                emailNotificationService.sendEmail(
-                    landlord.email,
+                emailNotificationService.sendEmailToLandlord(
+                    landlord,
                     buildAlertEmail(notification.certificateType, landlord.name, ownership.address.toMultiLineAddress()),
                 )
             }
