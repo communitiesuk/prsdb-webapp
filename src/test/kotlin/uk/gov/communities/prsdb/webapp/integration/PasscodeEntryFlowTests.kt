@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -10,12 +11,22 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InvalidPasscodePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 
 @ActiveProfiles("require-passcode")
 class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql") {
+    @Nested
+    inner class RegisteredLandlord : NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-no-properties.sql") {
+        @Test
+        fun `Registered landlords can access restricted landlord pages outside registration without a passcode`(page: Page) {
+            navigator.navigateToLandlordDashboard()
+            assertPageIs(page, LandlordDashboardPage::class)
+        }
+    }
+
     @Test
     fun `Passcode entry is not required for non-landlord pages`(page: Page) {
         val cookiesPage = navigator.goToCookiesPage()
@@ -127,6 +138,9 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         passcodeEntryPage.submitPasscode(passcode)
     }
 
+    // Not a real user flow: a real user authenticates via One Login and would not visit the dashboard before
+    // registering. Under the local-no-auth test profile, visiting an authenticated route (the dashboard) simply logs
+    // the mock user in, which is all we need here. The mock user isn't a registered landlord, so access is denied.
     private fun goToDashboardAndAssertAccessDenied(page: Page) {
         navigator.navigateToLandlordDashboard()
         assertAccessDeniedOnDashboard(page)
