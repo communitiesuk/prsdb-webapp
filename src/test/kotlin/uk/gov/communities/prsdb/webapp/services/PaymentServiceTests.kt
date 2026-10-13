@@ -365,6 +365,28 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class PropertyRegistrationPaymentSummaryDetailsTests {
+        @Test
+        fun `getAnnualFeeInPence returns the configured annual fee`() {
+            assertEquals(3000, createPaymentService(annualFeeInPence = 3000).getAnnualFeeInPence())
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the gratis period when the quote date is within it`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 14), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the quote date when the gratis period has ended`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2028, 1, 10), service.getFirstChargeableDate(LocalDate.of(2028, 1, 10)))
+        }
+    }
+
+    @Nested
     inner class PropertyRegistrationPaymentQuoteTests {
         @Test
         fun `getPropertyRegistrationPaymentQuote uses the existing proration rules and quote date`() {

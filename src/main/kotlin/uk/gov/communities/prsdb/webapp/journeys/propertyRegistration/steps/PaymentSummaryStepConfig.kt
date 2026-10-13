@@ -10,7 +10,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @JourneyFrameworkComponent
 class PaymentSummaryStepConfig(
@@ -19,15 +22,24 @@ class PaymentSummaryStepConfig(
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-996: Replace this stub with the real payment summary page (shows the amount the user has to pay).
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val quote = paymentService.getPropertyRegistrationPaymentQuote()
         state.paymentQuote = quote
 
-        return mapOf("todoComment" to "Payment summary (TODO PDJB-996)")
+        val firstChargeableDate = paymentService.getFirstChargeableDate(quote.quoteDate)
+
+        return mapOf(
+            "annualFee" to formatPence(paymentService.getAnnualFeeInPence()),
+            "amount" to formatPence(quote.amountInPence),
+            "paymentDate" to quote.quoteDate.format(DATE_FORMATTER),
+            "renewalDate" to quote.renewalDate.format(DATE_FORMATTER),
+            "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
+            "isInFreePeriod" to firstChargeableDate.isAfter(quote.quoteDate),
+            "addressParts" to state.propertyDetailsTask.addressTask.getAddress().toMultiLineAddress().split("\n"),
+        )
     }
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todo"
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentSummary"
 
     override fun mode(state: PropertyRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
@@ -69,6 +81,15 @@ class PaymentSummaryStepConfig(
                 quote,
             )
         return Destination.ExternalUrl(nextUrl)
+    }
+
+    private fun formatPence(pence: Int): String {
+        val pounds = BigDecimal(pence).movePointLeft(2)
+        return if (pence % 100 == 0) "£${pounds.toBigInteger()}" else "£${pounds.setScale(2)}"
+    }
+
+    companion object {
+        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }
 

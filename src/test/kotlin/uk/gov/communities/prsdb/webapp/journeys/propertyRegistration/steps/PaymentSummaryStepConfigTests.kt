@@ -23,6 +23,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPay
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
@@ -65,14 +67,48 @@ class PaymentSummaryStepConfigTests {
     fun `getStepSpecificContent stores a newly calculated quote in journey state`() {
         // Arrange
         val quote = createQuote(today)
-        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
+        stubSummaryContent(quote, firstChargeableDate = LocalDate.of(2027, 1, 1))
 
         // Act
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals("Payment summary (TODO PDJB-996)", content["todoComment"])
         verify(mockState).paymentQuote = quote
+        assertEquals("£20", content["annualFee"])
+        assertEquals("£12.34", content["amount"])
+        assertEquals(today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)), content["paymentDate"])
+        assertEquals("1 March 2028", content["renewalDate"])
+        assertEquals("1 January 2027", content["firstChargeableDate"])
+        assertEquals(listOf("1 Example Road", "EG1 2AB"), content["addressParts"])
+    }
+
+    @Test
+    fun `getStepSpecificContent flags the free period when the first chargeable date is after the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today.plusDays(1))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(true, content["isInFreePeriod"])
+    }
+
+    @Test
+    fun `getStepSpecificContent does not flag the free period when charging starts on the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(false, content["isInFreePeriod"])
+    }
+
+    @Test
+    fun `chooseTemplate selects the payment summary template`() {
+        assertEquals("forms/paymentSummary", stepConfig.chooseTemplate(mockState))
     }
 
     @Test
@@ -196,6 +232,19 @@ class PaymentSummaryStepConfigTests {
     private fun stubAddressTask() {
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
+    }
+
+    private fun stubSummaryContent(
+        quote: PropertyRegistrationPaymentQuote,
+        firstChargeableDate: LocalDate,
+    ) {
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(
+            AddressDataModel("1 Example Road, EG1 2AB", streetName = "1 Example Road", postcode = "EG1 2AB"),
+        )
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
+        whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
+        whenever(mockPaymentService.getFirstChargeableDate(quote.quoteDate)).thenReturn(firstChargeableDate)
     }
 
     private fun stubSummaryDestination() {

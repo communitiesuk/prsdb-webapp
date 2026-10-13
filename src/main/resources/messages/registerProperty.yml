@@ -196,6 +196,20 @@ correspondenceEmail:
             missing: Enter an email address
             invalidFormat: Enter an email address in the correct format, like name@example.com
 paymentDescription: Register your rental property
+paymentSummary:
+  heading: Property fee
+  annualFee: The annual property fee is {0}. You are paying an adjusted (pro-rated) fee.
+  freePeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
+  chargePeriod: You are paying for {0} to your renewal date.
+  renewalDateExplanation: Your renewal date is 1 year from when you registered your first property.
+  summary:
+    heading: Payment summary
+    address: Property address
+    payment: Payment
+    paymentDate: Payment date
+    renewalDate: Renewal date
+  prnHint: Your property will be registered when you pay and you will be given a Property Registration Number.
+  button: Go to payment
 paymentOutcome:
   # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
   fieldSetHeading: TODO PDJB-993 payment outcome internal step
