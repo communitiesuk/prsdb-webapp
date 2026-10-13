@@ -2,12 +2,21 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import java.util.regex.Pattern
 
 @WithOrgLandlordProfile
 class InviteOrganisationalLandlordUserSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Autowired
+    private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
+
+    @Autowired
+    private lateinit var organisationalLandlordInvitationRepository: OrganisationalLandlordInvitationRepository
+
     @Test
     fun `the invite page names the admin's organisation`() {
         // Act
@@ -49,10 +58,17 @@ class InviteOrganisationalLandlordUserSinglePageTests : IntegrationTestWithImmut
     @Test
     fun `an email address that has already been invited shows the already invited error`() {
         // Arrange
+        val organisationalLandlord =
+            organisationalLandlordUserRepository
+                .findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG01")
+                .single()
+                .organisationalLandlord
+        val invitedEmail =
+            organisationalLandlordInvitationRepository.findByOrganisationalLandlord(organisationalLandlord).first().invitedEmail
         val invitePage = navigator.goToInviteOrganisationalLandlordUserPage()
 
         // Act
-        invitePage.submitInvitation("pending-org-invite-a@example.com", OrganisationalLandlordUserRole.EDITOR)
+        invitePage.submitInvitation(invitedEmail, OrganisationalLandlordUserRole.EDITOR)
 
         // Assert
         assertThat(invitePage.form.getErrorMessage("emailAddress")).containsText("This email address has already been invited")
