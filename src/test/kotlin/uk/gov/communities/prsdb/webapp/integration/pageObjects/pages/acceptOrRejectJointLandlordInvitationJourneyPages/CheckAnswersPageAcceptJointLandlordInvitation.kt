@@ -12,7 +12,13 @@ class CheckAnswersPageAcceptJointLandlordInvitation(
         page,
         "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
-    override val expectedTitleHeading = "Check your landlord registration answers"
+    override val expectedTitleHeading
+        get() =
+            if (page.locator(".govuk-summary-card").count() > 0) {
+                "Check your organisation registration answers"
+            } else {
+                "Check your landlord registration answers"
+            }
 
     val form = PostForm(page)
 
