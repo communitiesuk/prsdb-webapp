@@ -928,7 +928,7 @@ landlordResponsibilities:
         six: any proof that the smoke and carbon monoxide alarms work at the start of the tenancy
 inviteLocalCouncilAdminUser:
   title: Invite Local Council Admin
-  fieldSetHeading: Invite someone to be a Local Council Admin on the database.
+  fieldSetHeading: Invite someone to be a Local Council Admin on the database
   fieldSetHint: 'This will allow them to view, edit, invite and delete local council users in their local council as well as view landlord and property records.'
   selectLabel: Select their local council
 inviteLocalCouncilAdminUserConfirmation:
