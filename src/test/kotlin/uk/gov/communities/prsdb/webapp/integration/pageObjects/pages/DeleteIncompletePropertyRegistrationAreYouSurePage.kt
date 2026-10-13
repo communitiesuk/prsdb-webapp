@@ -17,5 +17,5 @@ class DeleteIncompletePropertyRegistrationAreYouSurePage(
     ) {
     override val expectedTitleHeading = "Are you sure you want to delete this property from the database?"
 
-    val heading = Heading(page.locator("h1.govuk-heading-l"))
+    val heading = Heading(page.locator("h1"))
 }
