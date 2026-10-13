@@ -35,7 +35,11 @@ class PaymentSummaryStepConfig(
             "renewalDate" to quote.renewalDate.format(DATE_FORMATTER),
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
             "isInFreePeriod" to firstChargeableDate.isAfter(quote.quoteDate),
-            "addressParts" to state.propertyDetailsTask.addressTask.getAddress().toMultiLineAddress().split("\n"),
+            "addressParts" to
+                state.propertyDetailsTask.addressTask
+                    .getAddress()
+                    .toMultiLineAddress()
+                    .split("\n"),
         )
     }
 
@@ -67,10 +71,8 @@ class PaymentSummaryStepConfig(
         //  the page is open in several tabs), and explain to the user when the quoted amount has changed.
         if (quote == null || quote.quoteDate != today) {
             state.paymentQuote = paymentService.getPropertyRegistrationPaymentQuote(today)
-            // TODO PDJB-996: Confirm how to explain to the user when an overnight refresh changes the quoted amount.
-            //  This will most likely be a rare occurrence, but we should still handle it gracefully and inform the user of what has happened.
-            //  For now, we will just redirect them back to the payment summary page. If no design decision is made before PDJB-996 is completed
-            //  we will raise another ticket to handle this scenario and point this at it.
+            // TODO PDJB-1869: Inform the user about the updated payment total when a stale quote redirects them back to the payment summary
+            //  page. For now, we will just redirect them back to the payment summary page with the updated total and no info text.
             return Destination(state.paymentSummaryStep)
         }
 
