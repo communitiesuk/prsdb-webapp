@@ -27,10 +27,7 @@ class ValidateTokenStepConfig(
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState): String = ""
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        val organisationName = invitationService.getOrganisationNameForInvitationIfValid(state.journeyId)
-
-        state.tokenIsValid = organisationName != null
-        state.organisationName = organisationName
+        state.tokenIsValid = invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId) != null
     }
 
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): TokenValidity? =

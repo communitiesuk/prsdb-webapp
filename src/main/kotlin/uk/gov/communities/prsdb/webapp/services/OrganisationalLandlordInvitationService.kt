@@ -40,11 +40,9 @@ class OrganisationalLandlordInvitationService(
         return invitationRepository.findByToken(tokenUuid)
     }
 
-    fun getOrganisationNameForInvitationIfValid(journeyId: String): String? =
+    fun getPendingInvitationForJourneyIdOrNull(journeyId: String): OrganisationalLandlordInvitation? =
         getInvitationForJourneyIdOrNull(journeyId)
             ?.takeIf { it.status == OrganisationalLandlordInvitationStatus.PENDING }
-            ?.organisationalLandlord
-            ?.name
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

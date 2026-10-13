@@ -14,7 +14,6 @@ class AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder :
         fun beforeFullName(): AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder =
             AcceptOrganisationalLandlordUserInvitationJourneyStateSessionBuilder()
                 .withAdditionalData("tokenIsValid", "true")
-                .withAdditionalData("organisationName", "\"Local Organisation Landlord\"")
                 .withSubmittedValue(CheckUserIsLandlordStep.ROUTE_SEGMENT, NoInputFormModel())
                 .withSubmittedValue(JoinOrganisationStep.ROUTE_SEGMENT, NoInputFormModel())
 

@@ -10,10 +10,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrganisationInvitationEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckAnswersStepConfig")
-class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig :
-    AbstractCheckYourAnswersStepConfig<AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
+    private val invitationService: OrganisationalLandlordInvitationService,
+) : AbstractCheckYourAnswersStepConfig<AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+    override fun beforeAttemptingToReachStep(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Boolean =
+        invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId) != null
+
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
         mapOf(
             "summaryName" to "acceptOrganisationInvitation.checkAnswers.summaryName",
@@ -24,11 +29,8 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig :
     override fun afterStepDataIsAdded(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
         // TODO PDJB-1774: Add a separate internal step to save the submitted details as an organisational landlord user with the role from the invitation,
         // delete the invitation, clear its session token, and refresh the security context so the invitee receives their new role.
-        // That step should also re-check the invitation is still valid before saving, as it may have been cancelled or accepted elsewhere since
-        // validateTokenStep ran. This is now the only place that needs to handle a missing invitation, as the rest of the journey reads the cached
-        // state.organisationName rather than the invitation itself. Follow the joint landlord pattern in ConfirmYouAreALandlordForThisPropertyStepConfig:
-        // refresh state.tokenIsValid and route to invalidLinkStep when it is false, instead of surfacing a generic error page. Note that invalidLinkStep's
-        // parents rule currently only admits validateTokenStep.hasOutcome(INVALID), so it will need widening to be reachable from here.
+        // That step should also re-check the invitation is still pending before saving, as it may have been cancelled or accepted elsewhere since
+        // beforeAttemptingToReachStep ran. If it is no longer valid, the invitee should end up at invalidLinkStep rather than a generic error page.
     }
 
     // override this as the next step will handle deleting the journey (TODO PDJB-1774)
@@ -39,9 +41,14 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig :
 
     private fun getSummaryList(state: AcceptOrganisationalLandlordUserInvitationJourneyState): List<SummaryListRowViewModel> {
         val organisationName =
-            state.organisationName
+            invitationService
+                .getPendingInvitationForJourneyIdOrNull(state.journeyId)
+                ?.organisationalLandlord
+                ?.name
+                // beforeAttemptingToReachStep has already checked for a pending invitation, so this is only reachable if the
+                // invitation stopped being pending between that check and this one.
                 ?: throw PrsdbWebException(
-                    "Could not find an organisation name in the journey state for invitation journey ${state.journeyId}",
+                    "Could not find a pending invitation for invitation journey ${state.journeyId}",
                 )
         val name = state.fullNameStep.formModel.notNullValue(NameFormModel::name)
         val email = state.emailAddressStep.formModel.notNullValue(AcceptOrganisationInvitationEmailFormModel::emailAddress)

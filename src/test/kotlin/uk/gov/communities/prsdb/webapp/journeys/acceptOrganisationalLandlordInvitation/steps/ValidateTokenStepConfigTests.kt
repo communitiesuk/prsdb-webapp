@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import kotlin.test.assertEquals
@@ -20,26 +22,24 @@ class ValidateTokenStepConfigTests {
     lateinit var mockState: AcceptOrganisationalLandlordUserInvitationJourneyState
 
     @Test
-    fun `afterStepIsReached records a valid token and caches the organisation name for a valid invitation`() {
+    fun `afterStepIsReached records a valid token when the journey has a pending invitation`() {
         whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
-        whenever(mockInvitationService.getOrganisationNameForInvitationIfValid(JOURNEY_ID))
-            .thenReturn("Test Organisation")
+        whenever(mockInvitationService.getPendingInvitationForJourneyIdOrNull(JOURNEY_ID))
+            .thenReturn(mock<OrganisationalLandlordInvitation>())
 
         ValidateTokenStepConfig(mockInvitationService).afterStepIsReached(mockState)
 
         verify(mockState).tokenIsValid = true
-        verify(mockState).organisationName = "Test Organisation"
     }
 
     @Test
-    fun `afterStepIsReached records an invalid token when there is no valid invitation for the journey`() {
+    fun `afterStepIsReached records an invalid token when the journey has no pending invitation`() {
         whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
-        whenever(mockInvitationService.getOrganisationNameForInvitationIfValid(JOURNEY_ID)).thenReturn(null)
+        whenever(mockInvitationService.getPendingInvitationForJourneyIdOrNull(JOURNEY_ID)).thenReturn(null)
 
         ValidateTokenStepConfig(mockInvitationService).afterStepIsReached(mockState)
 
         verify(mockState).tokenIsValid = false
-        verify(mockState).organisationName = null
     }
 
     @Test

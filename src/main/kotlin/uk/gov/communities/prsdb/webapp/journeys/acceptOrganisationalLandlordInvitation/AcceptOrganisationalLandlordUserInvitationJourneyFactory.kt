@@ -139,8 +139,6 @@ class AcceptInvitationJourney(
 
     override var tokenIsValid: Boolean? by delegateProvider.nullableDelegate("tokenIsValid")
 
-    override var organisationName: String? by delegateProvider.nullableDelegate("organisationName")
-
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         val tokenDescription = token?.let { " for token $it" }.orEmpty()
@@ -165,5 +163,4 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>
 
     var tokenIsValid: Boolean?
-    var organisationName: String?
 }
