@@ -15,8 +15,6 @@ export function initPaymentStatusPoller() {
     createPaymentStatusPoller({ jsContent, noJsContent, form }).start();
 }
 
-// Submits the payment status form in the background. The server redirects to the outcome page once the payment has
-// finished, or back to this page while it is still processing.
 export function createPaymentStatusPoller(
     { jsContent, noJsContent, form },
     {
@@ -31,26 +29,25 @@ export function createPaymentStatusPoller(
         jsContent.hidden = false;
     };
 
-    // Falls back to the manual check, e.g. when automatic checks give up. MoJ Frontend's moj-js-hidden class is what
-    // hides the manual check when JavaScript is enabled.
     const showNoJavaScriptContent = () => {
         jsContent.hidden = true;
         noJsContent.classList.remove(JS_HIDDEN_CLASS);
     };
 
-    async function poll() {
+    const wasRedirectedToAnotherPage = (response) => new URL(response.url).pathname !== window.location.pathname;
+
+    async function checkPaymentStatus() {
         attempts += 1;
         try {
-            // Sent URL-encoded, as the browser submits the form, because multipart requests are handled as file uploads
             const response = await fetchFn(form.action, { method: 'POST', body: new URLSearchParams(new FormData(form)) });
             if (!response.ok) {
                 showNoJavaScriptContent();
-            } else if (new URL(response.url).pathname !== window.location.pathname) {
+            } else if (wasRedirectedToAnotherPage(response)) {
                 navigate(response.url);
             } else if (attempts >= MAX_ATTEMPTS) {
                 showNoJavaScriptContent();
             } else {
-                schedule(poll, POLL_INTERVAL_MS);
+                schedule(checkPaymentStatus, POLL_INTERVAL_MS);
             }
         } catch {
             showNoJavaScriptContent();
@@ -59,8 +56,8 @@ export function createPaymentStatusPoller(
 
     function start() {
         showJavaScriptContent();
-        return poll();
+        return checkPaymentStatus();
     }
 
-    return { start, poll };
+    return { start };
 }

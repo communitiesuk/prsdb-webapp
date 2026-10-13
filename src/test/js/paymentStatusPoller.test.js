@@ -92,7 +92,7 @@ describe('Payment status poller', () => {
         assert.strictEqual(fetchCalls[0].url, PAGE_URL);
     });
 
-    test('checking posts the form URL-encoded, including its CSRF token, to the form action', async () => {
+    test('checking posts the form, including its CSRF token, URL-encoded as multipart posts are handled as file uploads', async () => {
         await createPoller().start();
 
         assert.strictEqual(fetchCalls.length, 1);

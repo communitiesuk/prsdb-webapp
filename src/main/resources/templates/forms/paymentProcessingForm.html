@@ -32,10 +32,9 @@
                     </form>
                 </div>
             </div>
-            <!--/* Shows the manual check if the JS bundle did not start the payment status poller, e.g. it failed to load.
-                   ES5 so it also runs in browsers without module support. */-->
+            <!--/* ES5 so it also runs in browsers without module support */-->
             <script th:nonce="${serverGeneratedNonce}">
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function showNoJavaScriptContentIfPollerDidNotStart() {
                     if (document.getElementById('payment-status-js-content').hasAttribute('hidden')) {
                         document.getElementById('payment-status-no-js-content').classList.remove('moj-js-hidden');
                     }
