@@ -641,7 +641,7 @@ update:
   billsIncluded:
     fieldSetHeading: Update which of these you include in the rent
   furnishedStatus:
-    fieldSetHeading: Update whether the property is furnished
+    fieldSetHeading: Update is the property furnished
   rentFrequency:
     heading: Update when you charge rent
   rentAmount:
