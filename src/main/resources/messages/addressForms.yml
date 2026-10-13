@@ -49,8 +49,6 @@ lookupAddress:
       missing: Enter a house name or number
 selectAddress:
   fieldSetHeading: Select your address
-  trusteeRegistration:
-    fieldSetHeading: Select the lead trustee’s address
   govBodyMemberRegistration:
     fieldSetHeading: Select their address
   organisationLandlordRegistration:
