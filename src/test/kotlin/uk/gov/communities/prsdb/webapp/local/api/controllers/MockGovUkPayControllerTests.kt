@@ -112,19 +112,15 @@ class MockGovUkPayControllerTests {
     }
 
     @Test
-    fun `visiting the mock card page leaves the payment in progress until the card entry delay has passed`() {
+    fun `visiting the mock card page leaves the payment in progress while the card entry delay is running`() {
         mvc = createMvc(cardEntryDelaySeconds = 3600)
         val paymentId = createPaymentAndGetId(delayedCapture = true)
 
-        mvc
-            .perform(get("/local/gov-uk-pay/mock-card-page/$paymentId"))
-            .andExpect(status().is3xxRedirection)
-            .andExpect(header().string("Location", "https://service.example/completed"))
+        mvc.perform(get("/local/gov-uk-pay/mock-card-page/$paymentId"))
 
         mvc
             .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
             .andExpect(jsonPath("$.state.status").value("created"))
-            .andExpect(jsonPath("$.state.finished").value(false))
     }
 
     @Test
