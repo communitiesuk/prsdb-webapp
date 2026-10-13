@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.BrowserContext
+import com.microsoft.playwright.Browser
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
@@ -27,6 +27,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
@@ -142,6 +143,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -246,6 +248,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     private val loggedInUserId = "urn:fdc:gov.uk:2022:UVWXY"
 
+    // Read by the stubbed GOV.UK Pay client on server threads, so changes made by a test are seen by in-flight status checks
+    @Volatile
+    private var govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
@@ -275,13 +281,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 nextUrl = request.returnUrl,
             )
         }
-        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+        govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
+        }
     }
 
     private fun stubGovUkPayPaymentStatus(status: GovUkPayPaymentStatus) {
-        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
-            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = status)
-        }
+        govUkPayPaymentStatus = status
     }
 
     // Journeys seeded through the test session controller never create a LandlordIncompleteProperty, which the
@@ -301,9 +308,20 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
-        val paymentReturnPage = submitPaymentSummary(page)
-        paymentReturnPage.form.submit()
+        submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
         return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    // With JavaScript enabled, the payment return page checks the payment status in the background and redirects to the
+    // outcome page without the user doing anything
+    private fun submitPaymentSummaryAndWaitForRedirectTo(
+        page: Page,
+        routeSegment: String,
+    ) {
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        ensureIncompletePropertyExistsForCurrentJourney(page)
+        paymentSummaryPage.form.submit()
+        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$routeSegment") }
     }
 
     private fun submitPaymentSummary(page: Page): PaymentReturnFormPagePropertyRegistration {
@@ -341,13 +359,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `a failed payment shows the payment failed page and continuing returns to the payment summary`(page: Page) {
+        fun `with JavaScript enabled, a failed payment redirects to the payment failed page and continuing returns to the payment summary`(
+            page: Page,
+        ) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
-            val paymentReturnPage = submitPaymentSummary(page)
 
-            paymentReturnPage.form.submit()
+            submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
 
             val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
@@ -356,57 +375,123 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `a payment that has not finished returns the user to the payment return page`(page: Page) {
+        fun `with JavaScript enabled, an unfinished payment shows the processing message then redirects once the payment completes`(
+            page: Page,
+        ) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
             val paymentReturnPage = submitPaymentSummary(page)
+            assertThat(paymentReturnPage.heading).containsText("Your payment is processing")
+            assertThat(paymentReturnPage.doNotCloseParagraph).isVisible()
+            assertThat(paymentReturnPage.notConfirmedParagraph).isHidden()
+            assertThat(paymentReturnPage.checkPaymentStatusButton).isHidden()
 
-            paymentReturnPage.form.submit()
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-            assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-            assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
-            verify(govUkPayClient, never()).capturePayment(any())
+            page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") }
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
 
         @Test
-        fun `a payment that finishes after the user is sent back to the payment return page reaches the confirmation page`(page: Page) {
+        fun `with JavaScript enabled but the payment status poller unable to load, the user can check the payment status manually`(
+            page: Page,
+        ) {
+            page.route("**/assets/js/index.js") { route -> route.abort() }
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
-            submitPaymentSummary(page).form.submit()
-            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            val paymentReturnPage = submitPaymentSummary(page)
+            assertThat(paymentReturnPage.notConfirmedParagraph).isVisible()
+            assertThat(paymentReturnPage.doNotCloseParagraph).isHidden()
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-            paymentReturnPage.form.submit()
+            paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
             assertPageIs(page, ConfirmationPagePropertyRegistration::class)
             assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
 
         @Test
-        fun `a user whose session expires while paying can resume from the GOV UK Pay return URL after signing in again`(
-            page: Page,
-            browserContext: BrowserContext,
+        fun `with JavaScript disabled, a failed payment shows the payment failed page after checking the payment status`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentReturnPage = submitPaymentSummary(page)
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
+                paymentFailedPage.form.submit()
+                assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, checking an unfinished payment returns the user to the payment processing page`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentReturnPage = submitPaymentSummary(page)
+                assertThat(paymentReturnPage.heading).containsText("Your payment is processing")
+                assertThat(paymentReturnPage.notConfirmedParagraph).isVisible()
+                assertThat(paymentReturnPage.doNotCloseParagraph).isHidden()
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
+                verify(govUkPayClient, never()).capturePayment(any())
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, checking a payment that has since finished reaches the confirmation page`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                submitPaymentSummary(page).checkPaymentStatusButton.clickAndWait()
+                val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, a user can resume from the GOV UK Pay return URL after their session expires while paying`(
+            browser: Browser,
         ) {
-            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            checkAnswersPage.confirm()
-            submitPaymentSummary(page)
-            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
-            verify(govUkPayClient).createPayment(requestCaptor.capture())
+            withJavaScriptDisabled(browser) { page, navigator ->
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                submitPaymentSummary(page)
+                val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+                verify(govUkPayClient).createPayment(requestCaptor.capture())
 
-            // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
-            browserContext.clearCookies()
-            page.navigate(requestCaptor.firstValue.returnUrl)
+                // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
+                page.context().clearCookies()
+                page.navigate(requestCaptor.firstValue.returnUrl)
 
-            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-            paymentReturnPage.form.submit()
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+                val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+                assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+            }
         }
 
         @Test
         fun `submitting the payment summary creates a GOV UK Pay payment and returns to the payment return page`(page: Page) {
+            // Keeps the payment in progress, so the payment status poller leaves the user on the payment return page
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
             val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)

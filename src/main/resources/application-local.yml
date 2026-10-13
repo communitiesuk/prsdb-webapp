@@ -105,6 +105,9 @@ gov-uk-pay:
   api-key: local-gov-uk-pay-api-key
   annual-payment-amount-in-pence: 2000
   gratis-period-end-date: 2020-01-01
+  # How long a payment stays in progress after the mock card page, so the payment processing page can be seen. Set it
+  # above 60 to see the page stop checking automatically and show the manual check instead.
+  mock-card-entry-delay-seconds: ${MOCK_GOV_UK_PAY_CARD_ENTRY_DELAY_SECONDS:2}
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
