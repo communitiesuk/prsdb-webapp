@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -24,7 +24,7 @@ class IncompletePropertiesService(
     fun getIncompletePropertiesDueReminderPage(
         cutoffDate: Instant,
         page: Int = 0,
-    ): List<LandlordIncompleteProperties> =
+    ): List<LandlordIncompleteProperty> =
         landlordIncompletePropertiesRepository
             .findBySavedJourneyState_CreatedDateBefore(
                 cutoffDate,

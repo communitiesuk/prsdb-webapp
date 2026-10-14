@@ -98,7 +98,9 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '2026-08-25 00:00:00+00'),          -- Katrina.DiMuro@communities.gov.uk
        ('2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', '2026-08-25 00:00:00+00'),          -- Katrina.DiMuro@communities.gov.uk
        ('urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E', '2026-09-09 00:00:00+00'),          -- Victoria.Greenwell@communities.gov.uk
-       ('782a604de0129b1a297f6b557d342b3a677ed786b93ddebe703583fa2f8307b5', '2026-09-09 00:00:00+00')           -- Victoria.Greenwell@communities.gov.uk
+       ('782a604de0129b1a297f6b557d342b3a677ed786b93ddebe703583fa2f8307b5', '2026-09-09 00:00:00+00'),          -- Victoria.Greenwell@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00'),          -- Team-PRSDB+orglandlord@softwire.com (org landlord admin)
+       ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '2026-07-30 00:00:00+00')           -- Team-PRSDB+orglandlordeditor@softwire.com (org landlord editor)
     ON CONFLICT DO NOTHING;
 
 
@@ -215,7 +217,9 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (52, '2026-07-21 00:00:00+00', 210000000052, 1), -- Sarah Warren
        (53, '2026-08-13 00:00:00+00', 210000000053, 1), -- Aimie Robinson
        (54, '2026-08-25 00:00:00+00', 210000000054, 1), -- Katrina DiMuro
-       (55, '2026-09-09 00:00:00+00', 210000000055, 1) ON CONFLICT DO NOTHING; -- Victoria Greenwell
+       (55, '2026-09-09 00:00:00+00', 210000000055, 1), -- Victoria Greenwell
+       (900, '2026-07-30 00:00:00+00', 210000000900, 1), -- Org landlord (Team-PRSDB+orglandlord)
+       (901, '2026-07-30 00:00:00+00', 210000000901, 1) ON CONFLICT DO NOTHING; -- Editor org landlord (Team-PRSDB+orglandlordeditor)
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -327,28 +331,93 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
+-- Org landlord setup (Team-PRSDB+orglandlord admin + orglandlordeditor editor)
+INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
+                      organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+                      organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+                      organisation_is_company, organisation_is_charity, organisation_is_trust,
+                      organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+                      organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+                      organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+                      organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
+SELECT id, registration_number_id, landlord_type, created_date,
+       organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+       organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+       organisation_is_company, organisation_is_charity, organisation_is_trust,
+       organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone
+FROM (VALUES (100, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
+        'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
+        'Test Registrant', '1980-01-01'::date, 'Team-PRSDB+orglandlord@softwire.com', '07777777778',
+        true, false, false,
+        '12345678', null, null,
+        null, null, null,
+        null, null,
+        'Main Contact Name', 'main.contact@example.com', '07777777780',
+        'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'),
+       (101, 901, 1, '2026-07-30 00:00:00+00'::timestamptz,
+        'Test Editor Organisation Landlord', 1, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777781',
+        'Test Editor', '1985-01-01'::date, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777782',
+        true, false, false,
+        '87654322', null, null,
+        null, null, null,
+        null, null,
+        'Editor Main Contact', 'editor.main.contact@example.com', '07777777783',
+        'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk')) AS v (
+           id, registration_number_id, landlord_type, created_date,
+           organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+           organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+           organisation_is_company, organisation_is_charity, organisation_is_trust,
+           organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+           organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+           organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone,
+           user_subject_identifier)
+-- Skip creating an organisation landlord if its user is already registered as an individual landlord: the user link
+-- below would be skipped for the same reason, so creating the landlord would leave an organisation landlord with no users.
+WHERE NOT EXISTS (
+    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.user_subject_identifier
+)
+ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
+
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+SELECT * FROM (VALUES (1, 100, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '2026-07-30 00:00:00+00'::timestamptz),
+                      (2, 101, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+-- Skip linking a user as an organisation landlord user if they are already registered as an individual landlord,
+-- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
+WHERE NOT EXISTS (
+    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.subject_identifier
+)
+ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
+
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date,
                                 property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
-                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id)
-VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001),
-       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
-       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
-       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001) ON CONFLICT DO NOTHING;
+                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
+       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -356,8 +425,8 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 18-25.
--- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- For manual QA of the notification banners and "Provide this later"
+-- rows in the property record. Each property takes one
 -- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
@@ -397,12 +466,12 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
-                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id)
+                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
        9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
        np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
-       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001
+       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001, current_date + 365
 FROM new_properties np
 ON CONFLICT DO NOTHING;
 

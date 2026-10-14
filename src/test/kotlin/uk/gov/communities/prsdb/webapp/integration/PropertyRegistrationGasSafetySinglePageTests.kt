@@ -9,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
@@ -19,13 +18,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import java.util.regex.Pattern
 
 class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun enableRestructureAndSkippingFlag() {
-        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    }
-
     @Nested
     inner class BeforePdjb1022HasGasSupplyStep {
         @Test
@@ -161,7 +156,57 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     }
 
     @Nested
+    inner class CheckGasCertUploadsStep {
+        @Test
+        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page)
+
+            assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
+            assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
+        }
+
+        @Test
+        fun `The remove link includes the file name as visually hidden text`(page: Page) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page)
+
+            assertThat(checkUploadsPage.table.getClickableCell(0, 2).link).hasText("Remove gas-safety-cert.pdf")
+            assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("gas-safety-cert.pdf")
+        }
+
+        private fun navigateToCheckUploadsPage(page: Page): CheckGasCertUploadsFormPagePropertyRegistration {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            return assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class CheckGasSafetyAnswersStep {
+        @Test
+        fun `Uploaded cert - issue date change link includes the row heading as visually hidden text`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.firstActionLink).hasText("Change Issue date")
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.firstActionLinkVisuallyHiddenText).hasText("Issue date")
+        }
+
+        @Test
+        fun `Uploaded cert - issue date change link is not wrapped in an actions list`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.firstActionLink).isVisible()
+            assertThat(cyaPage.certSummaryList.issueDateRow.actions.actionsList).hasCount(0)
+        }
+
         @Test
         fun `No gas supply - gas supply change link navigates to has gas supply page`(page: Page) {
             val cyaPage =

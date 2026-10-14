@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PerformanceTestFormSubmissionController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -49,6 +50,8 @@ class DefaultSecurityConfig(
                     .requestMatchers(HEALTHCHECK_ROUTE)
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
+                    .permitAll()
+                    .requestMatchers(PerformanceTestFormSubmissionController.PERFORMANCE_TEST_FORM_SUBMISSION_ROUTE)
                     .permitAll()
                     .requestMatchers("/$SIGN_OUT_PATH_SEGMENT")
                     .permitAll()

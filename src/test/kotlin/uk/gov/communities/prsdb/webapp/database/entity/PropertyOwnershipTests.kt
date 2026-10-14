@@ -13,6 +13,13 @@ import java.time.LocalDate
 
 class PropertyOwnershipTests {
     @Test
+    fun `renewalDate is exposed on the entity`() {
+        val property = MockLandlordData.createPropertyOwnership(renewalDate = LocalDate.of(2027, 2, 1))
+
+        assertEquals(LocalDate.of(2027, 2, 1), property.renewalDate)
+    }
+
+    @Test
     fun `isSolelyOwnedBy is true when the landlord is the only owner`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))

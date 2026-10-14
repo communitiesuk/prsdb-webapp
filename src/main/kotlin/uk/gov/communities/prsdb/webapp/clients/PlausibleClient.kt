@@ -7,6 +7,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.models.dataModels.plausible.PlausibleQuery
 import uk.gov.communities.prsdb.webapp.models.dataModels.plausible.PlausibleQueryResponse
 
+/**
+ * Locally, requests are served by [uk.gov.communities.prsdb.webapp.local.api.controllers.MockPlausibleController].
+ */
 @PrsdbWebService
 class PlausibleClient(
     @Qualifier("plausible-stats-client") private val client: RestClient,

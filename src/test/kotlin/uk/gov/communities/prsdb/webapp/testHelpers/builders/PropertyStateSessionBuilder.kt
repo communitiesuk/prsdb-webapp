@@ -90,7 +90,10 @@ class PropertyStateSessionBuilder(
             }
         withSubmittedValue("$addressScope/${LookupAddressStep.ROUTE_SEGMENT}", lookupAddressFormModel)
         additionalDataMap["$addressScope/cachedAddresses"] =
-            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = null, uprn = null)))
+            Json.encodeToString(
+                serializer(),
+                listOf(AddressDataModel(singleLineAddress, localCouncilId = null, uprn = null, postcode = postcode)),
+            )
 
         val selectAddressFormModel =
             SelectAddressFormModel().apply {
@@ -126,17 +129,6 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
 
-        fun beforePropertyRegistrationSelectiveLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
-
-        fun beforePropertyRegistrationHmoMandatoryLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-
-        fun beforePropertyRegistrationHmoAdditionalLicence() =
-            beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-
-        fun beforePropertyRegistrationOccupancy() = beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.NO_LICENSING)
-
         fun beforePropertyRegistrationOccupiedLicensingType() =
             beforePropertyRegistrationOwnershipType()
                 .withBedrooms()
@@ -145,7 +137,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
 
-        fun beforePropertyRegistrationRestructuredOccupancy() =
+        fun beforePropertyRegistrationOccupancy() =
             beforePropertyRegistrationOwnershipType()
                 .withBedrooms()
                 .withOwnershipType()
@@ -161,7 +153,10 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
 
         fun beforePropertyRegistrationHouseholds() =
-            beforePropertyRegistrationOccupancy().withOccupancyStatus(true).withLandlordProvidesRentalDetails()
+            beforePropertyRegistrationLicensingType()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withOccupancyStatus(true)
+                .withLandlordProvidesRentalDetails()
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
 
@@ -429,6 +424,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
                 .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
@@ -437,21 +433,13 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withProvideTenancyDetailsLater()
                 .withBedrooms()
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
-
-        fun beforePropertyRegistrationCheckAnswersWithJointLandlords(
-            invitedEmails: MutableList<String> = mutableListOf("email@address.com"),
-        ) = beforePropertyRegistrationOccupancy()
-            .withOccupancyStatus(false)
-            .withCheckedJointLandlords(invitedEmails)
-            .withGasSafetyTaskCompletedWithNoGasSupply()
-            .withElectricalSafetyCertificateMissing()
-            .withCompliantEpc()
 
         fun beforePropertyRegistrationCheckAnswersWithSelectiveLicence() =
             beforePropertyRegistrationLicensingType()
@@ -486,6 +474,7 @@ class PropertyStateSessionBuilder(
                 includesBills = billsIncluded,
             ).withLandlordProvidesRentalDetails()
             .withHasNoJointLandlords()
+            .withLicensingType(LicensingType.NO_LICENSING)
             .withGasSafetyTaskCompletedWithNoGasSupply()
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()
@@ -495,6 +484,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withBedrooms()
                 .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithUploadedCert()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
@@ -504,6 +494,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withBedrooms()
                 .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
                 .withElectricalCertExpiryDate()
@@ -520,6 +511,7 @@ class PropertyStateSessionBuilder(
             .withOccupancyStatus(false)
             .withBedrooms()
             .withHasNoJointLandlords()
+            .withLicensingType(LicensingType.NO_LICENSING)
             .withGasSafetyTaskCompletedWithNoGasSupply()
             .withElectricalSafetyCertificateMissing()
             .withEpcLowEnergyRating()
@@ -534,6 +526,7 @@ class PropertyStateSessionBuilder(
                 .withProvideTenancyDetailsLater()
                 .withBedrooms()
                 .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
@@ -545,6 +538,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withBedrooms()
                 .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withPropertyHasNoEpc()

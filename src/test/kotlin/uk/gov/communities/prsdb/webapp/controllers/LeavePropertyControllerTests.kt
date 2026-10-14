@@ -64,7 +64,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for a landlord who cannot leave this property`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -78,7 +78,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord who can leave this property`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -98,7 +98,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -115,7 +115,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
@@ -135,7 +135,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when property ownership does not match`() {
         val journeyId = "test-journey-id"
 
@@ -176,7 +176,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for a landlord who cannot leave this property`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -191,7 +191,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns the step's model and view for a landlord who can leave this property`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -212,7 +212,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for an unknown step name`() {
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
@@ -230,7 +230,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
@@ -251,7 +251,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData redirects to initialize journey when property ownership does not match`() {
         val journeyId = "test-journey-id"
 
@@ -272,7 +272,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 if the property was left in the session`() {
         whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf(testPropertyOwnershipId to "1 Example Road, EG1 1AA"))
@@ -285,7 +285,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 404 if no properties were left in the session`() {
         whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf())
@@ -298,7 +298,7 @@ class LeavePropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 404 if this propertyOwnershipId was not left in the session`() {
         whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf((2L to ""), (3L to "")))

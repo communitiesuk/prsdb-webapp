@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
@@ -27,16 +28,17 @@ class PropertyDetailsViewModel(
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
     val ownershipSection: List<SummaryListRowViewModel> =
-        listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
+        listOf(ownershipTypeRow())
 
     val correspondenceSection: List<SummaryListRowViewModel>? =
         if (showCorrespondenceSection) {
             listOf(
-                SummaryListRowViewModel(
-                    fieldHeading = "propertyDetails.propertyRecord.correspondence.emailAddress",
-                    fieldValue = propertyOwnership.correspondenceEmail,
-                    // TODO PDJB-1595: when adding the landlord change link, build this row via
-                    //  PropertyDetailsViewModelBase.rowWithViewTypeSpecificChangeLink
+                rowWithViewTypeSpecificChangeLink(
+                    key = "propertyDetails.propertyRecord.correspondence.emailAddress",
+                    value = propertyOwnership.correspondenceEmail,
+                    landlordActionLink =
+                        LandlordUpdateCorrespondenceEmailController
+                            .getUpdateCorrespondenceEmailFirstStepRoute(propertyOwnership.id),
                 ),
                 rowWithViewTypeSpecificChangeLink(
                     key = "propertyDetails.propertyRecord.correspondence.address",
@@ -51,7 +53,7 @@ class PropertyDetailsViewModel(
         }
 
     val occupiedSection: List<SummaryListRowViewModel> =
-        listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
+        listOf(occupiedRow())
 
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 

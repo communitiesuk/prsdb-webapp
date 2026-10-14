@@ -229,10 +229,12 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 
 -- Org landlord setup
 INSERT INTO prsdb_user (id, created_date)
-VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00'),
+       ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
-VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1) ON CONFLICT DO NOTHING;
+VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1), -- Org landlord (Team-PRSDB+orglandlord)
+       (901, '2026-07-30 00:00:00+00', 210000000901, 1) ON CONFLICT DO NOTHING; -- Editor org landlord (Team-PRSDB+orglandlordeditor)
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -244,14 +246,32 @@ INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
                       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
                       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
                       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
-SELECT * FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
+SELECT id, registration_number_id, landlord_type, created_date,
+       organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+       organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+       organisation_is_company, organisation_is_charity, organisation_is_trust,
+       organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone
+FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
         'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
         'Test Registrant', '1980-01-01'::date, 'Team-PRSDB+orglandlord@softwire.com', '07777777778',
         true, true, true,
         '12345678', 0, '1234567',
         'Lead Trustee Name', '1975-06-15'::date, 'lead.trustee@example.com',
         '07777777779', 1,
-        'Main Contact Name', 'main.contact@example.com', '07777777780')) AS v (
+        'Main Contact Name', 'main.contact@example.com', '07777777780',
+        'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'),
+       (100, 901, 1, '2026-07-30 00:00:00+00'::timestamptz,
+        'Test Editor Organisation Landlord', 1, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777781',
+        'Test Editor', '1985-01-01'::date, 'Team-PRSDB+orglandlordeditor@softwire.com', '07777777782',
+        true, false, false,
+        '87654322', null, null,
+        null, null, null,
+        null, null,
+        'Editor Main Contact', 'editor.main.contact@example.com', '07777777783',
+        'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk')) AS v (
            id, registration_number_id, landlord_type, created_date,
            organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
            organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
@@ -259,19 +279,21 @@ SELECT * FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
            organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
            organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
            organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
-           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
--- Skip creating this organisation landlord if its user is already registered as an individual landlord: the user link
+           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone,
+           user_subject_identifier)
+-- Skip creating an organisation landlord if its user is already registered as an individual landlord: the user link
 -- below would be skipped for the same reason, so creating the landlord would leave an organisation landlord with no users.
 WHERE NOT EXISTS (
-    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'
+    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.user_subject_identifier
 )
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
-SELECT * FROM (VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, created_date)
--- Skip linking this user as an organisation landlord user if they are already registered as an individual landlord,
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+SELECT * FROM (VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '2026-07-30 00:00:00+00'::timestamptz),
+                      (2, 100, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, subject_identifier, name, email, role, created_date)
+-- Skip linking a user as an organisation landlord user if they are already registered as an individual landlord,
 -- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
 WHERE NOT EXISTS (
     SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = v.subject_identifier
@@ -291,103 +313,103 @@ SELECT setval(pg_get_serial_sequence('organisation_governing_body_member', 'id')
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
-                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id)
+                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
 VALUES (1, true, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (2, true, 0, 0, 0, 10, 2, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (3, true, 0, 0, 0, 11, 3, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (4, true, 0, 0, 0, 12, 4, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (5, true, 1, 1, 2, 13, 5, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (6, true, 1, 1, 2, 14, 6, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (7, true, 1, 1, 2, 15, 7, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (8, true, 1, 1, 2, 16, 8, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (9, true, 1, 1, 2, 17, 9, '2025-07-24 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (10, true, 1, 1, 2, 18, 10, '2026-02-27 00:00:00+00', null, 4,
-        1, null, null, 2, 1, null, 123.12, 'End terrace', true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, 'End terrace', true, 'email@example.com', 9000000001, current_date + 365),
        (11, true, 1, 1, 2, 19, 7449159, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (12, true, 1, 1, 2, 20, 7449160, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (13, true, 1, 1, 2, 21, 7449165, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (14, true, 1, 1, 2, 22, 7449169, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (15, true, 1, 1, 2, 23, 7449173, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (16, true, 1, 1, 2, 24, 7449174, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (17, true, 1, 1, 2, 25, 7449179, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (18, true, 1, 1, 2, 26, 7449180, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (19, true, 1, 1, 2, 27, 7449185, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (20, true, 1, 1, 2, 28, 7449193, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (21, true, 1, 1, 2, 29, 7449194, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (22, true, 1, 1, 2, 30, 7449198, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (23, true, 1, 1, 2, 31, 7449199, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (24, true, 1, 1, 2, 32, 7449203, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (25, true, 1, 1, 2, 33, 7449206, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (26, true, 1, 1, 2, 34, 7449208, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (27, true, 1, 1, 2, 35, 7449213, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (28, true, 1, 1, 2, 36, 7449214, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (29, true, 1, 1, 2, 37, 7449217, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (30, true, 1, 1, 2, 38, 7449222, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (31, true, 1, 1, 2, 39, 7449226, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (32, true, 1, 1, 2, 40, 7449227, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (33, true, 1, 1, 2, 41, 7449231, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (34, true, 1, 1, 2, 42, 7449235, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (35, true, 1, 1, 2, 43, 7449239, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (36, true, 1, 1, 2, 44, 7449250, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (37, true, 1, 1, 2, 45, 7449252, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (38, true, 1, 1, 2, 46, 7449253, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (39, true, 1, 1, 2, 47, 7449254, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (40, true, 1, 1, 2, 48, 7449161, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (41, true, 1, 1, 2, 49, 7449162, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (42, true, 1, 1, 2, 50, 7449163, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001),
+        1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (43, true, 0, 0, 0, 51, 7449166, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (44, true, 0, 0, 0, 52, 7449167, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (45, true, 0, 0, 0, 53, 7449170, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (46, true, 0, 0, 0, 54, 7449175, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (47, true, 0, 0, 0, 55, 7449181, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001),
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (48, true, 0, 0, 0, 56, 7449182, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001) ON CONFLICT DO NOTHING;
+        null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -395,8 +417,8 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 49-56.
--- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- For manual QA of the notification banners and "Provide this later"
+-- rows in the property record. Each property takes one
 -- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
@@ -436,12 +458,12 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
-                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id)
+                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
        9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
        np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
-       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001
+       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001, current_date + 365
 FROM new_properties np
 ON CONFLICT DO NOTHING;
 
@@ -699,10 +721,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
-                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id)
+                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
 SELECT 1200 + i, true, 1, 1, 2, 1200 + i, 9000001000 + i,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
-       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true, 'email@example.com', 9000000001
+       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true, 'email@example.com', 9000000001, current_date + 365
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -767,7 +789,7 @@ ON CONFLICT DO NOTHING;
 -- These exact boundary values make median/p90/p95 land on 22 minutes / 1 day / 2 days.
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
-                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id)
+                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
 WITH p AS (
     SELECT i,
            TIMESTAMPTZ '2028-01-01 00:00:00+00'
@@ -780,7 +802,7 @@ WITH p AS (
                  END)::int) AS created
     FROM generate_series(1, 100) AS s(i)
 )
-SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 9000002000 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 9000000001
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 9000002000 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 9000000001, current_date + 365
 FROM p
 ON CONFLICT DO NOTHING;
 

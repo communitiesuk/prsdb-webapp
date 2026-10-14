@@ -53,6 +53,9 @@ Client beans are created in dedicated config classes (e.g. `EpcRegisterConfig.kt
 For local development, stub implementations replace real API calls:
 - Stub services go in `local/services/`, annotated with `@Profile("local")` and `@Primary`
 - Stub API controllers go in `local/api/controllers/`, annotated with `@Profile("local")`
+- Name stub API controllers `Mock<Service>Controller` to match the `<Service>Client` they stand in for, and map them to
+  `/local/<service>` (e.g. `GovUkPayClient` → `MockGovUkPayController` at `/local/gov-uk-pay`)
+- Add a KDoc link from the client to its stub controller so it can be found from the client
 - Configure `application-local.yml` to point API URLs to `http://localhost:8080/...`
 
 When adding a new external API integration:

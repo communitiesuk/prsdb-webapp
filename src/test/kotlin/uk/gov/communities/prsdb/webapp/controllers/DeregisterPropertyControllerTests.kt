@@ -58,7 +58,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep for the initial step returns 200 for the landlord who owns this property`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
@@ -80,7 +80,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
@@ -101,7 +101,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when property ownership does not match`() {
         // Arrange
         val propertyOwnershipId = 1.toLong()
@@ -122,7 +122,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 if the property ownership was deregistered in the session`() {
         val propertyOwnershipId = 1.toLong()
         whenever(
@@ -138,7 +138,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 404 if no deregistered property ownerships are in the session`() {
         val propertyOwnershipId = 1.toLong()
 
@@ -150,7 +150,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 404 if the propertyOwnershipId is not in the list of deregistered propertyOwnershipIds in the session`() {
         val propertyOwnershipId = 1.toLong()
         whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession())
@@ -164,7 +164,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 500 if the property ownership is found in the database`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -183,7 +183,7 @@ class DeregisterPropertyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns the confirmation view with the address`() {
         val propertyOwnershipId = 1.toLong()
         whenever(

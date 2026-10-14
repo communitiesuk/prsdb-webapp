@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Primary
+import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.WebServerOnly
 import uk.gov.communities.prsdb.webapp.config.featureFlags.DisabledFeatureFlagSelector
 import uk.gov.communities.prsdb.webapp.config.featureFlags.EnabledFeatureFlagSelector
 import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagSelector
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
+// Implementations use @Service rather than @PrsdbWebService so FF4J can read their bean names without creating every bean
 @PrsdbFlip(name = DELEGATE_TO_LETTING_AGENT, alterBean = "gas-supply-provide-later-flag-on")
 interface GasSupplyProvideLaterStrategy : FeatureFlagSelector {
     fun gasSupplyOutcome(state: GasSafetyDetailState): GasSupplyOutcome?
@@ -28,7 +31,8 @@ interface GasSupplyProvideLaterStrategy : FeatureFlagSelector {
 }
 
 @Primary
-@PrsdbWebService("gas-supply-provide-later-flag-off")
+@Conditional(WebServerOnly::class)
+@Service("gas-supply-provide-later-flag-off")
 class GasSupplyProvideLaterStrategyImplFlagOff :
     DisabledFeatureFlagSelector(),
     GasSupplyProvideLaterStrategy {
@@ -52,7 +56,8 @@ class GasSupplyProvideLaterStrategyImplFlagOff :
     override fun gasCertOutcomeStep(state: GasSafetyDetailState) = state.beforePdjb1022HasGasCertStep
 }
 
-@PrsdbWebService("gas-supply-provide-later-flag-on")
+@Conditional(WebServerOnly::class)
+@Service("gas-supply-provide-later-flag-on")
 class GasSupplyProvideLaterStrategyImplFlagOn :
     EnabledFeatureFlagSelector(),
     GasSupplyProvideLaterStrategy {

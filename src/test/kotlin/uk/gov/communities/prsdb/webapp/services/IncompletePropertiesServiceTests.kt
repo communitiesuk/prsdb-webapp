@@ -18,7 +18,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -63,11 +63,11 @@ class IncompletePropertiesServiceTests {
             // Arrange
             val landlordIncompleteProperties =
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user,
                         MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
                     ),
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user,
                         MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
                     ),
@@ -97,14 +97,14 @@ class IncompletePropertiesServiceTests {
             // Arrange
             val landlordIncompleteProperties =
                 listOf(
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user,
                         MockSavedJourneyStateData.createSavedJourneyState(
                             createdDate = incompletePropertyCreatedDate,
                             reminderEmailSent = MockSavedJourneyStateData.createReminderEmailSent(),
                         ),
                     ),
-                    LandlordIncompleteProperties(
+                    LandlordIncompleteProperty(
                         user,
                         MockSavedJourneyStateData.createSavedJourneyState(createdDate = incompletePropertyCreatedDate),
                     ),
@@ -197,8 +197,8 @@ class IncompletePropertiesServiceTests {
                     .findBySavedJourneyState_CreatedDateBefore(cutoffDate, pageRequest),
             ).thenReturn(
                 listOf(
-                    LandlordIncompleteProperties(user, savedJourneyState),
-                    LandlordIncompleteProperties(user, savedJourneyState2),
+                    LandlordIncompleteProperty(user, savedJourneyState),
+                    LandlordIncompleteProperty(user, savedJourneyState2),
                 ),
             )
 
@@ -228,18 +228,18 @@ class IncompletePropertiesServiceTests {
                 when (call++) {
                     0 -> {
                         (1..MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE).map {
-                            LandlordIncompleteProperties(user, savedJourneyState)
+                            LandlordIncompleteProperty(user, savedJourneyState)
                         }
                     }
 
                     1 -> {
                         (1..5).map {
-                            LandlordIncompleteProperties(user, savedJourneyState)
+                            LandlordIncompleteProperty(user, savedJourneyState)
                         }
                     }
 
                     else -> {
-                        emptyList<LandlordIncompleteProperties>()
+                        emptyList<LandlordIncompleteProperty>()
                     }
                 }
             }

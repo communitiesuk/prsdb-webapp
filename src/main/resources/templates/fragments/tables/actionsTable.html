@@ -1,0 +1,14 @@
+<table th:fragment="actionsTable(theadFields, tbodyFragment, caption)" class="govuk-table">
+    <caption th:if="${caption != null}" class="govuk-table__caption govuk-table__caption--m"
+             th:text="${caption}"></caption>
+    <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+        <th scope="col" class="govuk-table__header" th:each="heading: ${theadFields}"
+            th:with="headingText=${!#strings.isEmpty(heading)} ? #{${heading}}">
+            <span th:classappend="${heading == 'common.table.actions'} ? 'govuk-visually-hidden'" th:text="${headingText}"></span>
+        </th>
+    </tr>
+    </thead>
+    <tbody th:replace="${tbodyFragment}">
+    </tbody>
+</table>

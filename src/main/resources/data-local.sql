@@ -40,6 +40,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
        ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'), -- benjamin.johnson@madetech.com
        ('urn:fdc:gov.uk:2022:ORG01', '07/23/26'),
+       ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '07/23/26'), -- Team-PRSDB+orglandlord@softwire.com
+       ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '07/23/26'), -- Team-PRSDB+orglandlordeditor@softwire.com
        ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '08/25/26'); -- Katrina.DiMuro@communities.gov.uk
 
 
@@ -162,7 +164,10 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (83, '07/23/26', 1502423345, 0),
        (84, '08/19/26', 1502423346, 0),
        (85, '08/25/26', 1502423347, 1),
-       (86, '01/15/25', 1502423348, 0);
+       (86, '01/15/25', 1502423348, 0),
+       (87, '01/15/25', 1502423351, 0),
+       (900, '07/23/26', 1502423349, 1), -- Test org landlord (Team-PRSDB+orglandlord)
+       (901, '07/23/26', 1502423350, 1); -- Test editor org landlord (Team-PRSDB+orglandlordeditor)
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -226,7 +231,8 @@ VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB
        (55, '07/23/26', '07/23/26', 5009, 'Org Landlord House, PRSDB Road, OL1 1AA', 1, 'OL1 1AA', 'Org Landlord House', 'PRSDB Road'),
        (56, '07/23/26', '07/23/26', 5010, 'Joint Org House, PRSDB Road, JO1 1AA', 1, 'JO1 1AA', 'Joint Org House', 'PRSDB Road'),
        (57, '08/19/26', '08/19/26', 5011, 'Letting Agent House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Letting Agent House', 'PRSDB Road'),
-       (58, '08/19/26', '08/19/26', 5012, 'Delegated At Registration House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Delegated At Registration House', 'PRSDB Road');
+       (58, '08/19/26', '08/19/26', 5012, 'Delegated At Registration House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Delegated At Registration House', 'PRSDB Road'),
+       (59, '01/15/25', '01/15/25', 5013, 'Succeeded Payment House, PRSDB Road, SP1 1AA', 1, 'SP1 1AA', 'Succeeded Payment House', 'PRSDB Road');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
@@ -291,10 +297,32 @@ INSERT INTO landlord (id, created_date, last_modified_date, registration_number_
 VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
         'local-org-landlord@example.com', '07111111111', 'Local Registrant', '01/01/1990',
         'local-registrant@example.com', '07111111112', true, false, false, '12345678',
-        'Local Main Contact', 'local-main-contact@example.com', '07111111113');
+        'Local Main Contact', 'local-main-contact@example.com', '07111111113'),
+       (100, '07/23/26', '07/23/26', 900, 1, 'Test Organisation Landlord', 5,
+        'Team-PRSDB+orglandlord@softwire.com', '07777777777', 'Test Registrant', '01/01/1980',
+        'Team-PRSDB+orglandlord@softwire.com', '07777777778', true, false, false, '87654321',
+        'Main Contact Name', 'main.contact@example.com', '07777777780'),
+       (101, '07/23/26', '07/23/26', 901, 1, 'Test Editor Organisation Landlord', 5,
+        'Team-PRSDB+orglandlordeditor@softwire.com', '07777777781', 'Test Editor', '01/01/1985',
+        'Team-PRSDB+orglandlordeditor@softwire.com', '07777777782', true, false, false, '87654322',
+        'Editor Main Contact', 'editor.main.contact@example.com', '07777777783');
 
-INSERT INTO organisational_landlord_user (organisation_landlord_id, subject_identifier, name, email, created_date)
-VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', '07/23/26');
+INSERT INTO organisational_landlord_user (organisation_landlord_id, subject_identifier, name, email, role, created_date)
+VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', 0, '07/23/26'),
+       (100, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '07/23/26'),
+       (101, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '07/23/26');
+
+INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,
+                                               role, invitation_expired_email_sent, is_hidden)
+VALUES ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222a', 'pending-org-invite-a@example.com', 36,
+        0, false, false),
+       ('07/23/26', '07/23/26', '1234abcd-5678-abcd-1234-567abcd2222b', 'pending-org-invite-b@example.com', 36,
+        1, false, false),
+       ('08/25/26', '08/25/26', '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
+        0, false, false);
+
+SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),
+              (SELECT MAX(id) FROM organisational_landlord_invitation));
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -313,60 +341,61 @@ VALUES (1, 1, 'L12345678'),
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id)
-VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', 1, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (8, true, 1, 1, 1, 40, 13, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, 'email@example.com', 1),
-       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (10, true, 1, 1, 1, 42, 15, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1),
-       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, true, false, 'email@example.com', 1),
-       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', 2, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', 3, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', 4, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', 5, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', 6, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 7, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 8, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (33, true, 0, 0, 0, 65, 38, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (34, true, 0, 0, 0, 66, 39, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (35, true, 0, 0, 0, 67, 40, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (36, true, 0, 0, 0, 68, 41, '2025-01-15', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1),
-       (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null, null, null, null, null, null, null, 'End terrace', false, false, 'email@example.com', 1),
-       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, 'email@example.com', 1);
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', 1, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (8, true, 1, 1, 1, 40, 13, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, 'email@example.com', 1, current_date + 365),
+       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (10, true, 1, 1, 1, 42, 15, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, 'email@example.com', 1, current_date + 365),
+       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, true, false, 'email@example.com', 1, current_date + 365),
+       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', 2, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', 3, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', 4, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', 5, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', 6, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 7, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 8, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (33, true, 0, 0, 0, 65, 38, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (34, true, 0, 0, 0, 66, 39, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (35, true, 0, 0, 0, 67, 40, '2025-01-15 00:00:00+00', null, null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (36, true, 0, 0, 0, 68, 41, '2025-01-15', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, 'email@example.com', 1, current_date + 365),
+       (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null, null, null, null, null, null, null, 'End terrace', false, false, 'email@example.com', 1, current_date + 365),
+       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, 'email@example.com', 1, current_date + 365);
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id)
-VALUES (39, true, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1),
-       (40, true, 1, 1, 2, 80, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', null, null, 'email@example.com', 1),
-       (41, true, 1, 0, 0, 73, 49, '05/02/25', '05/02/25', 10, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', null, true, 'email@example.com', 1),
-       (42, true, 1, 1, 2, 74, 50, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, null, 'email@example.com', 1),
-       (43, true, 1, 0, 0, 75, 51, '05/02/25', '05/02/25', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1),
-       (44, true, 1, 1, 2, 76, 52, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1),
-       (45, true, 1, 1, 2, 77, 53, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1),
-       (46, true, 1, 1, 2, 78, 54, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1),
-       (47, true, 1, 0, 0, 82, 55, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, false, false, null, false, false, 'email@example.com', 1),
-       (48, true, 1, 0, 0, 83, 56, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, true, false, null, false, false, 'email@example.com', 1),
-       (49, true, 1, 1, 2, 84, 57, '08/19/26', '08/19/26', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1),
-       (50, true, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1);
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (39, true, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
+       (40, true, 1, 1, 2, 80, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', null, null, 'email@example.com', 1, current_date + 365),
+       (41, true, 1, 0, 0, 73, 49, '05/02/25', '05/02/25', 10, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', null, true, 'email@example.com', 1, current_date + 365),
+       (42, true, 1, 1, 2, 74, 50, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, null, 'email@example.com', 1, current_date + 365),
+       (43, true, 1, 0, 0, 75, 51, '05/02/25', '05/02/25', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
+       (44, true, 1, 1, 2, 76, 52, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1, current_date + 365),
+       (45, true, 1, 1, 2, 77, 53, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1, current_date + 365),
+       (46, true, 1, 1, 2, 78, 54, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false, 'email@example.com', 1, current_date + 365),
+       (47, true, 1, 0, 0, 82, 55, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, false, false, null, false, false, 'email@example.com', 1, current_date + 365),
+       (48, true, 1, 0, 0, 83, 56, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, true, false, null, false, false, 'email@example.com', 1, current_date + 365),
+       (49, true, 1, 1, 2, 84, 57, '08/19/26', '08/19/26', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365),
+       (50, true, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
+       (51, true, 1, 1, 2, 87, 59, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -429,7 +458,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 48, '2025-07-23'),
        (36, 48, '2025-07-23'),
        (1, 49, '2026-08-19'),
-       (1, 50, '2025-01-15')
+       (1, 50, '2025-01-15'),
+       (1, 51, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
@@ -517,7 +547,10 @@ VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, false, false, false),
        (49, 49, '08/19/26', '08/19/26', null, false, null, null, null, null,
-        null, null, null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
+        null, null, null, null, true, true, true, false, false, false),
+       (50, 51, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
@@ -546,7 +579,8 @@ VALUES (1, current_date-22,current_date-22, 'example-incomplete-journey1', '{"jo
        (2, current_date-22,current_date-29, 'example-incomplete-journey2', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
        (3, current_date-9,current_date-9, 'example-incomplete-journey3', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
        (4, current_date-29,current_date-29, 'example-incomplete-journey4', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', 2),
-       (5, current_date-23,current_date-23, 'example-incomplete-journey5', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null);
+       (5, current_date-23,current_date-23, 'example-incomplete-journey5', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R1LA"},"select-address":{"address":"1,SAVOYCOURT,LONDON,WC2R0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1,SAVOYCOURT,LONDON,WC2R0EX\",\"localCouncilId\":1,\"uprn\":1038,\"buildingNumber\":\"1\",\"streetName\":\"SAVOYCOURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R0EX\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null),
+       (6, current_date, current_date, 'example-incomplete-journey-with-payments', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"1","postcode":"PP1 1AA"},"select-address":{"address":"1, Pending Payments Road, PP1 1AA"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}},"cachedAddresses":"[{\"singleLineAddress\":\"1, Pending Payments Road, PP1 1AA\",\"localCouncilId\":1,\"uprn\":5014,\"buildingNumber\":\"1\",\"streetName\":\"Pending Payments Road\",\"postcode\":\"PP1 1AA\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY', null);
 
 SELECT setval(pg_get_serial_sequence('saved_journey_state', 'id'), (SELECT MAX(id) FROM saved_journey_state));
 
@@ -555,7 +589,18 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
        ('urn:fdc:gov.uk:2022:UVWXY', 2),
        ('urn:fdc:gov.uk:2022:UVWXY', 3),
        ('urn:fdc:gov.uk:2022:UVWXY', 4),
-       ('urn:fdc:gov.uk:2022:UVWXY', 5);
+       ('urn:fdc:gov.uk:2022:UVWXY', 5),
+       ('urn:fdc:gov.uk:2022:UVWXY', 6);
+
+-- Payments in each status. The local GOV.UK Pay mock restores these from the database when they're first requested.
+INSERT INTO payment (payment_id, created_date, amount_in_pence, reference, payment_created_at, for_period_ending, status,
+                     paying_user_id, associated_property_id, associated_incomplete_property_user_id,
+                     associated_incomplete_property_saved_journey_state_id)
+VALUES ('created-payment', current_date, 2000, 'created-payment-reference', current_date, current_date + 365, 0, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('capturable-payment', current_date, 2000, 'capturable-payment-reference', current_date, current_date + 365, 1, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('failed-payment', current_date, 2000, 'failed-payment-reference', current_date, current_date + 365, 3, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('cancelled-payment', current_date, 2000, 'cancelled-payment-reference', current_date, current_date + 365, 4, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('succeeded-payment', '01/15/25', 2000, 'succeeded-payment-reference', '01/15/25', current_date + 365, 2, 'urn:fdc:gov.uk:2022:UVWXY', 51, null, null);
 
 INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),

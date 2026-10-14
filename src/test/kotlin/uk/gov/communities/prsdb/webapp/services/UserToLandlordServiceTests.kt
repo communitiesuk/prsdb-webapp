@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -57,7 +58,13 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
             listOf(
-                OrganisationalLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
+                OrganisationalLandlordUser(
+                    landlord,
+                    baseUser,
+                    "Alice Registrant",
+                    "alice@example.com",
+                    OrganisationalLandlordUserRole.EDITOR,
+                ),
             ),
         )
 
@@ -126,6 +133,7 @@ class UserToLandlordServiceTests {
                 baseUser = baseUser,
                 name = "Alice Registrant",
                 email = "alice@example.com",
+                role = OrganisationalLandlordUserRole.EDITOR,
             )
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
             listOf(organisationalLandlordUser),

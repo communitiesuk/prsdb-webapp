@@ -59,7 +59,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 404 for a landlord who does not own this property`() {
             val propertyOwnershipId = 1L
             whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(false)
@@ -72,7 +72,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 200 for the landlord who owns this property`() {
             val propertyOwnershipId = 1L
             whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
@@ -89,7 +89,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `redirects to initialize journey when no journey state exists`() {
             val propertyOwnershipId = 1L
             val journeyId = "test-journey-id"
@@ -107,7 +107,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `redirects to initialize journey when property ownership mismatch`() {
             val propertyOwnershipId = 1L
             val journeyId = "test-journey-id"
@@ -137,7 +137,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 404 for a landlord who does not own this property`() {
             val propertyOwnershipId = 1L
             whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(false)
@@ -150,7 +150,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 404 when session property id does not match`() {
             val propertyOwnershipId = 1L
             whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
@@ -164,7 +164,7 @@ class SwitchToIndividualControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 200 with address and property details url when session matches`() {
             val propertyOwnershipId = 1L
             val address = "123 Test Street, AB1 2CD"

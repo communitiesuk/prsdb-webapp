@@ -44,7 +44,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
         doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
@@ -55,7 +55,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 200 for a landlord user`() {
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.getStepModelAndView())
@@ -92,7 +92,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `postUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
         doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
@@ -108,7 +108,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `postUpdateStep redirects for a valid landlord request`() {
         val redirectUrl = "/landlord/property-details/$propertyOwnershipId"
 

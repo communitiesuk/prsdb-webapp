@@ -111,7 +111,7 @@ class LandlordUpdateGasSafetyControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 404 for a landlord user not authorised to edit the property`() {
             doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
                 .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
@@ -128,7 +128,7 @@ class LandlordUpdateGasSafetyControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 400 for a valid user without a cookie`() {
             mvc
                 .post(validFileUploadUrl) {
@@ -141,7 +141,7 @@ class LandlordUpdateGasSafetyControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep delegates to the certificate upload helper and redirects`() {
             whenever(certificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
                 .thenReturn(mapOf<String, Any>())

@@ -73,12 +73,35 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `index returns a redirect for authorised user`() {
         mvc
             .get("/$LANDLORD_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    fun `index returns a redirect for an org admin`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"])
+    fun `index returns a redirect for an org editor`() {
+        mvc
+            .get("/$LANDLORD_PATH_SEGMENT")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(LANDLORD_DASHBOARD_URL)
             }
     }
 
@@ -102,7 +125,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard returns 200 for authorised landlord user`() {
         val landlord = createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -114,7 +137,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard returns 200 for an org landlord user`() {
         val landlord = createOrgLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -127,7 +150,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user-123")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user-123")
     fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an individual landlord`() {
         val landlord = createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -147,7 +170,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "org-user-123")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "org-user-123")
     fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an org landlord`() {
         val landlord = createOrgLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -167,7 +190,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard shows the useful links section and sets privacyNoticeUrl when the dashboard update flag is disabled`() {
         val landlord = createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -185,7 +208,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard hides the useful links section when the dashboard update flag is enabled`() {
         val landlord = createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -219,7 +242,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getComplianceActions returns 200 for authorised landlord user`() {
         val nonCompliantDataModel =
             ComplianceStatusDataModel(
@@ -259,7 +282,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
@@ -275,7 +298,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getComplianceActions redirects to first page when requested page exceeds total pages`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
@@ -290,7 +313,7 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getComplianceActions includes paginationViewModel`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(

@@ -54,7 +54,7 @@ class SystemOperatorDashboardControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `systemOperatorDashboard returns 403 for a landlord`() {
         mvc.get(SYSTEM_OPERATOR_DASHBOARD_URL).andExpect {
             status { isForbidden() }

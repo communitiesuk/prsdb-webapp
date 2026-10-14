@@ -51,7 +51,7 @@ class IncompletePropertiesControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
         whenever(
             usersIncompletePropertyService.getCurrentUsersIncompleteProperties(0),
@@ -64,7 +64,7 @@ class IncompletePropertiesControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `landlordIncompleteProperties redirects when page exceeds total pages`() {
         whenever(
             usersIncompletePropertyService.getCurrentUsersIncompleteProperties(2),
@@ -78,7 +78,7 @@ class IncompletePropertiesControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordIncompleteProperties returns 404 when page is less than 1`() {
         mvc
             .get("${LandlordController.INCOMPLETE_PROPERTIES_URL}?page=0")
@@ -92,7 +92,7 @@ class IncompletePropertiesControllerTests(
         private val defaultContextId = "1"
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `Posting Yes to AreYouSure deletes the form context, adds the id to the session and redirects to the confirmation page`() {
             mvc
                 .post(IncompletePropertiesController.getDeleteIncompletePropertyPath(defaultContextId.toString())) {
@@ -109,7 +109,7 @@ class IncompletePropertiesControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `Posting No to deleteIncompletePropertyAreYouSure redirects to Incomplete Properties page without deleting`() {
             mvc
                 .post(IncompletePropertiesController.getDeleteIncompletePropertyPath(defaultContextId)) {
@@ -127,7 +127,7 @@ class IncompletePropertiesControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 404 if the requested form context id is not in the session`() {
             whenever(confirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId))
                 .thenReturn(false)
@@ -143,7 +143,7 @@ class IncompletePropertiesControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 500 if the requested form context is still in the database`() {
             whenever(confirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId))
                 .thenReturn(true)
@@ -161,7 +161,7 @@ class IncompletePropertiesControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `deleteIncompletePropertyConfirmation returns 200 if the requested form context was deleted in this session`() {
             whenever(confirmationService.wasIncompletePropertyDeletedThisSession(defaultContextId))
                 .thenReturn(true)

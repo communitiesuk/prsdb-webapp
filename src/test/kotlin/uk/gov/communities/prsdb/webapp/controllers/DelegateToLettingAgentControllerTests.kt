@@ -88,7 +88,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 
@@ -98,7 +98,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -111,7 +111,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -122,7 +122,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -137,7 +137,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when property ownership does not match`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -173,7 +173,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 
@@ -186,7 +186,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns the step's model and view for an authorised landlord`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -202,7 +202,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for an unknown step name`() {
         mockAuthorizedProperty()
         mockJourneySteps()
@@ -216,7 +216,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -234,7 +234,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `postJourneyData redirects to initialize journey when property ownership does not match`() {
         val journeyId = "test-journey-id"
         mockAuthorizedProperty()
@@ -252,7 +252,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 200 for an authorised landlord who has just delegated to a letting agent`() {
         mockAuthorizedProperty()
         mockCompletedDelegation()
@@ -263,7 +263,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 when the property was not delegated in this session`() {
         mockAuthorizedProperty()
         whenever(lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession()).thenReturn(mutableMapOf())
@@ -274,7 +274,7 @@ class DelegateToLettingAgentControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 for a landlord not authorised for this property`() {
         mockUnauthorizedProperty()
 

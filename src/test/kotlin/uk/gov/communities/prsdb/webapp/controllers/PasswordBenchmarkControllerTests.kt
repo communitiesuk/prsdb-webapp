@@ -19,7 +19,7 @@ class PasswordBenchmarkControllerTests : FeatureFlagTestCallingEndpoints() {
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `endpoint returns 403 for a non system operator when the feature flag is enabled`() {
         featureFlagManager.enableFeature(PASSWORD_BENCHMARK_ENDPOINT)
 

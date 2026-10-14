@@ -4,17 +4,18 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CorrespondenceEmailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, CorrespondenceEmailFormModel, CorrespondenceState>() {
+class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, CorrespondenceEmailFormModel, CorrespondenceEmailState>() {
     override val formModelClass = CorrespondenceEmailFormModel::class
 
-    override fun getStepSpecificContent(state: CorrespondenceState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: CorrespondenceEmailState): Map<String, Any?> =
         mapOf(
+            "submitButtonText" to "forms.buttons.saveAndContinue",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
@@ -30,15 +31,15 @@ class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, Co
                 ),
         )
 
-    override fun chooseTemplate(state: CorrespondenceState) = "forms/correspondenceEmailForm"
+    override fun chooseTemplate(state: CorrespondenceEmailState) = "forms/correspondenceEmailForm"
 
-    override fun mode(state: CorrespondenceState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: CorrespondenceEmailState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class CorrespondenceEmailStep(
     stepConfig: CorrespondenceEmailStepConfig,
-) : RequestableStep<Complete, CorrespondenceEmailFormModel, CorrespondenceState>(stepConfig) {
+) : RequestableStep<Complete, CorrespondenceEmailFormModel, CorrespondenceEmailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "correspondence-email"
     }

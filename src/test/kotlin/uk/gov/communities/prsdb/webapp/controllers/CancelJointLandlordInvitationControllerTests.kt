@@ -54,7 +54,7 @@ class CancelJointLandlordInvitationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
             journeyFactory.createJourneySteps(testInvitationId),
@@ -71,7 +71,7 @@ class CancelJointLandlordInvitationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
             journeyFactory.createJourneySteps(testInvitationId),
@@ -85,7 +85,7 @@ class CancelJointLandlordInvitationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
@@ -105,7 +105,7 @@ class CancelJointLandlordInvitationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 when a cancellation exists in the session`() {
         whenever(jointLandlordInvitationService.getCancelledInvitationEmailFromSession())
             .thenReturn("test@example.com")
@@ -118,7 +118,7 @@ class CancelJointLandlordInvitationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation throws error when no cancellation exists in the session`() {
         whenever(jointLandlordInvitationService.getCancelledInvitationEmailFromSession())
             .thenReturn(null)

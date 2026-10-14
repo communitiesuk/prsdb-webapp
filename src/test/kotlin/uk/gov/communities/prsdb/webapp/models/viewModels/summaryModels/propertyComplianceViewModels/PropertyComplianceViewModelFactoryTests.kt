@@ -32,12 +32,12 @@ class PropertyComplianceViewModelFactoryTests {
     }
 
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource, mock())
-    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mock())
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
-            EpcViewModelFactory(mockMessageSource, mock()),
+            EpcViewModelFactory(mockMessageSource),
         )
 
     private val propertyOwnershipId = 1L

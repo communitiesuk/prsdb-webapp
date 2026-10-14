@@ -76,7 +76,7 @@ class InviteJointLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 404 for a landlord user not authorised to edit the property`() {
         doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
@@ -87,7 +87,7 @@ class InviteJointLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 200 for an authorised landlord user`() {
         mvc.get(confirmationRoute).andExpect {
             status { isOk() }
@@ -115,7 +115,7 @@ class InviteJointLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation returns 404 for a landlord user not authorised to edit the property`() {
         doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
@@ -128,7 +128,7 @@ class InviteJointLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation redirects to property details with flash attribute for authorised user`() {
         val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val mockLandlord = MockLandlordData.createIndividualLandlord()

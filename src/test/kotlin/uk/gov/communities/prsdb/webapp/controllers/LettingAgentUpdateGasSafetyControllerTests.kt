@@ -118,7 +118,7 @@ class LettingAgentUpdateGasSafetyControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "landlord-user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "landlord-user")
     fun `getUpdateStep returns 403 when a landlord is logged in`() {
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }

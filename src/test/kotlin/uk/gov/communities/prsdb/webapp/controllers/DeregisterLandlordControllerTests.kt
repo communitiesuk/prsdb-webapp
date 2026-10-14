@@ -54,7 +54,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
             landlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -71,7 +71,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
             landlordDeregistrationJourneyFactory.createJourneySteps(),
@@ -85,7 +85,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
@@ -102,7 +102,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 200 if the landlord was deregistered in the session`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
         whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(false)
@@ -115,7 +115,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 404 if the landlord has not deregistered in the session`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(false)
 
@@ -127,7 +127,7 @@ class DeregisterLandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation returns 500 if the landlord is still found in the database`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
         whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(true)

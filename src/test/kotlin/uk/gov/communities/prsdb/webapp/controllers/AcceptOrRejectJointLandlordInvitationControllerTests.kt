@@ -153,7 +153,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
+            whenever(userRolesService.getUserHasLandlordRole("user")).thenReturn(true)
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
@@ -162,13 +162,13 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 }
         }
 
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         @Test
         fun `getJourneyStep for CheckUserRole is accessible for a landlord user`() {
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
+            whenever(userRolesService.getUserHasLandlordRole("user")).thenReturn(true)
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
@@ -251,7 +251,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 }
         }
 
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         @Test
         fun `getConfirmation returns 200 and individual survey URL for an individual landlord user`() {
             whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
@@ -275,7 +275,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 }
         }
 
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         @Test
         fun `getConfirmation returns 200 and org survey URL for an org landlord user`() {
             whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
@@ -299,7 +299,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 }
         }
 
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         @Test
         fun `getConfirmation returns 400 when no accepted property details in session`() {
             whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(null)

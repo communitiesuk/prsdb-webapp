@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.title}, ~{::#page/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
+
+        <!--/* TODO PDJB-1760: add the "Invite a team member" button for admins, linking to the invite team member journey */-->
+
+        <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
+            <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${administratorsTabId}, #{teamMembers.administrators.tab(${teamMembers.adminRows.size()})})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${editorsTabId}, #{teamMembers.editors.tab(${teamMembers.editorRows.size()})})}"></li>
+                <!--/* TODO PDJB-1757: add the Invitations tab */-->
+            </ul>
+
+            <div id="administrators-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${administratorsTabId}, ~{::#administrators-panel/content()})}">
+                <h2 class="govuk-heading-m" th:text="#{teamMembers.administrators.heading}">teamMembers.administrators.heading</h2>
+                <p class="govuk-body" th:text="#{teamMembers.administrators.description}">teamMembers.administrators.description</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{teamMembers.administrators.bullet.one}">teamMembers.administrators.bullet.one</li>
+                    <li th:text="#{teamMembers.administrators.bullet.two}">teamMembers.administrators.bullet.two</li>
+                    <li th:text="#{teamMembers.administrators.bullet.three}">teamMembers.administrators.bullet.three</li>
+                    <li th:text="#{teamMembers.administrators.bullet.four}">teamMembers.administrators.bullet.four</li>
+                </ul>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${teamMembers.adminRows})}"></dl>
+            </div>
+
+            <div id="editors-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${editorsTabId}, ~{::#editors-panel/content()})}">
+                <h2 class="govuk-heading-m" th:text="#{teamMembers.editors.heading}">teamMembers.editors.heading</h2>
+                <p class="govuk-body" th:text="#{teamMembers.editors.description}">teamMembers.editors.description</p>
+                <th:block th:if="${!#lists.isEmpty(teamMembers.editorRows)}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${teamMembers.editorRows})}"></dl>
+                </th:block>
+                <th:block th:if="${#lists.isEmpty(teamMembers.editorRows)}">
+                    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+                    <p class="govuk-body" th:text="#{teamMembers.editors.noEditors}">teamMembers.editors.noEditors</p>
+                </th:block>
+            </div>
+        </div>
+    </th:block>
+</main>
+</html>

@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
 @Entity
 @Table(
@@ -31,19 +32,25 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     @Column(nullable = false)
     lateinit var name: String
 
+    // See CurrentUserService on getting the name/email of the user that's currently logged in
     @Column(nullable = false)
     lateinit var email: String
+
+    @Column(nullable = false)
+    lateinit var role: OrganisationalLandlordUserRole
 
     constructor(
         organisationalLandlord: OrganisationalLandlord,
         baseUser: PrsdbUser,
         name: String,
         email: String,
+        role: OrganisationalLandlordUserRole,
     ) : this() {
         this.organisationalLandlord = organisationalLandlord
         this.baseUser = baseUser
         this.name = name
         this.email = email
+        this.role = role
         organisationalLandlord.addOrganisationalLandlordUser(this)
     }
 }

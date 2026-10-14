@@ -4,8 +4,6 @@ import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -20,7 +18,6 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
@@ -65,7 +62,6 @@ class PropertyDetailsControllerTests(
 
     @BeforeEach
     fun setUp() {
-        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
         whenever(
@@ -77,8 +73,6 @@ class PropertyDetailsControllerTests(
                 any(),
             ),
         ).thenReturn(PropertyDetailsNotificationBannerViewModel.fromState(true, false, false, false, emptyList()))
-        whenever(notificationBannerViewModelService.getBeforePdjb939NotificationBanner(anyOrNull(), any()))
-            .thenReturn(emptyList())
     }
 
     @Nested
@@ -120,7 +114,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails returns 200 for a valid request from a landlord`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -139,7 +133,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails fetches invitations`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -159,37 +153,26 @@ class PropertyDetailsControllerTests(
             verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
 
-        @ParameterizedTest(name = "when the provide later feature is {0}")
-        @ValueSource(booleans = [true, false])
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails selects the property details view`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(
-                isFeatureEnabled,
-            )
-
-            val expectedView =
-                if (isFeatureEnabled) {
-                    PropertyDetailsController.PROPERTY_DETAILS_VIEW
-                } else {
-                    PropertyDetailsController.PROPERTY_DETAILS_BEFORE_PDJB939_VIEW
-                }
 
             mvc
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    view { name(expectedView) }
+                    view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
                 }
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows correspondence section when CORRESPONDENCE_ADDRESS flag is enabled`() {
             val propertyOwnership =
                 createPropertyOwnership(
@@ -201,7 +184,6 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
 
             mvc
@@ -216,7 +198,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails hides correspondence section when CORRESPONDENCE_ADDRESS flag is disabled`() {
             val propertyOwnership = createPropertyOwnership(correspondenceEmail = "correspondence@example.com")
 
@@ -224,7 +206,6 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
             mvc
@@ -236,7 +217,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows invite joint landlord button`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -254,7 +235,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails passes markedJointLandlord false when property is individual`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
 
@@ -272,7 +253,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails passes markedJointLandlord true when property is joint`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
 
@@ -290,7 +271,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows switch to individual inset if the property is marked as JL and there is only one landlord`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
 
@@ -313,7 +294,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails does not show switch to individual inset when property is not marked as joint landlord`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
 
@@ -331,7 +312,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails does not show switch to individual inset when property has multiple landlords`() {
             val propertyOwnership =
                 createPropertyOwnership(
@@ -357,7 +338,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails adds landlordSummaryCards to model`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -376,7 +357,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails includes correct landlord count`() {
             val landlord1 = createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
             val landlord2 = createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
@@ -396,7 +377,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails returns 200 for an org landlord`() {
             val orgLandlord = createOrgLandlord()
             val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(orgLandlord))
@@ -416,7 +397,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails returns 200 for a property with mixed individual and org landlords`() {
             val individualLandlord = createIndividualLandlord()
             val orgLandlord = createOrgLandlord()
@@ -437,7 +418,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails includes letting agent panel when flag enabled and agent exists`() {
             val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
             val lettingAgentAccess = LettingAgentAccess(UUID.randomUUID(), "agent@example.com", propertyOwnership)
@@ -462,7 +443,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails does not include letting agent panel when flag disabled`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -483,7 +464,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows delegate panel when flag enabled and no agent assigned`() {
             val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
 
@@ -505,7 +486,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows the delegate to letting agent link when the feature flag is enabled`() {
             val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
 
@@ -522,7 +503,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails hides the delegate to letting agent link when the feature flag is disabled`() {
             val propertyOwnership = createPropertyOwnership()
 
@@ -539,7 +520,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails does not include letting agent panel link when property is unoccupied`() {
             val propertyOwnership = createPropertyOwnership(isOccupied = false)
 
@@ -560,7 +541,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails includes letting agent panel link when property is occupied and not delegated`() {
             val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
 
@@ -599,7 +580,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user with only the landlord role`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isForbidden() } }
@@ -689,7 +670,6 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
@@ -710,7 +690,6 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
@@ -738,7 +717,7 @@ class PropertyDetailsControllerTests(
         }
 
         @Test
-        @WithMockUser(roles = ["LANDLORD"])
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `removeExpiredInvite redirects to property details with flash attribute on success`() {
             mvc.get(PropertyDetailsController.getRemoveExpiredInvitePath(1L, 1L)).andExpect {
                 status { is3xxRedirection() }

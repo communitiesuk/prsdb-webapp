@@ -6,15 +6,22 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CorrespondenceEmailState
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class CorrespondenceEmailStepConfigTests {
     @Test
+    fun `getStepSpecificContent defaults to the registration submit button text`() {
+        val content = CorrespondenceEmailStepConfig().getStepSpecificContent(mock<CorrespondenceEmailState>())
+
+        assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
+    }
+
+    @Test
     fun `getStepSpecificContent uses the landlord email that was snapshotted at the start of the journey for the account email option`() {
-        val mockJourneyState = mock<CorrespondenceState>()
+        val mockJourneyState = mock<CorrespondenceEmailState>()
         whenever(mockJourneyState.loggedInLandlordEmailAtStartOfJourney).thenReturn("original.landlord@example.com")
         val stepConfig = CorrespondenceEmailStepConfig()
 

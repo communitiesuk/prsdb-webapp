@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -13,7 +16,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
@@ -29,13 +31,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.net.URI
-import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import java.util.UUID
@@ -97,39 +100,42 @@ class PropertyRegistrationServiceTests {
         val errorThrown =
             assertThrows<EntityExistsException> {
                 propertyRegistrationService.registerProperty(
-                    addressModel = registeredAddress,
-                    propertyType = PropertyType.DETACHED_HOUSE,
-                    licenseType = LicensingType.NO_LICENSING,
-                    licenceNumber = "license number",
-                    ownershipType = OwnershipType.FREEHOLD,
-                    isOccupied = true,
-                    numberOfHouseholds = 1,
-                    numberOfPeople = 1,
-                    numBedrooms = null,
-                    billsIncludedList = null,
-                    customBillsIncluded = null,
-                    furnishedStatus = null,
-                    rentFrequency = RentFrequency.MONTHLY,
-                    customRentFrequency = null,
-                    rentAmount = 123.toBigDecimal(),
-                    customPropertyType = null,
+                    MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                        addressModel = registeredAddress,
+                        propertyType = PropertyType.DETACHED_HOUSE,
+                        licenseType = LicensingType.NO_LICENSING,
+                        licenceNumber = "license number",
+                        ownershipType = OwnershipType.FREEHOLD,
+                        isOccupied = true,
+                        numberOfHouseholds = 1,
+                        numberOfPeople = 1,
+                        numBedrooms = null,
+                        billsIncludedList = null,
+                        customBillsIncluded = null,
+                        furnishedStatus = null,
+                        rentFrequency = RentFrequency.MONTHLY,
+                        customRentFrequency = null,
+                        rentAmount = 123.toBigDecimal(),
+                        customPropertyType = null,
+                    ),
                 )
             }
 
         assertEquals("Address already registered", errorThrown.message)
     }
 
-    @Test
-    fun `registerProperty delegates to setAnniversaryIfAbsent with the property's registration date`() {
-        val landlord = spy(MockLandlordData.createIndividualLandlord())
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ["--03-15"])
+    fun `registerProperty uses the landlord's anniversary, or today if they have none, for the renewal date and the landlord`(
+        existingAnniversary: MonthDay?,
+    ) {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        existingAnniversary?.let { landlord.setAnniversaryIfAbsent(it) }
+        val expectedAnniversary = existingAnniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
-        val expectedPropertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord),
-                address = address,
-                createdDate = Instant.parse("2024-05-10T09:00:00Z"),
-            )
+        val expectedPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), address = address)
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -139,7 +145,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = expectedAnniversary,
                 propertyBuildType = PropertyType.DETACHED_HOUSE,
                 customPropertyType = null,
                 address = address,
@@ -152,36 +159,40 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 1,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+            ),
         )
 
-        verify(landlord).setAnniversaryIfAbsent(MonthDay.of(5, 10))
+        assertEquals(expectedAnniversary, landlord.anniversary)
     }
 
     @Test
-    fun `registerProperty creates the property ownership if all property fields are populated`() {
+    fun `registerProperty creates and returns the property ownership if all property fields are populated`() {
         // Arrange
+        val correspondenceEmail = "chosen.contact@example.com"
+        val correspondenceAddressModel = AddressDataModel.fromManualAddressData("12 Contact Road", "Leeds", "LS1 1AA")
         val ownershipType = OwnershipType.FREEHOLD
         val isOccupied = true
         val numberOfHouseholds = 1
@@ -229,11 +240,14 @@ class PropertyRegistrationServiceTests {
         whenever(mockLicenseService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                correspondenceEmail = correspondenceEmail,
+                correspondenceAddressModel = correspondenceAddressModel,
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -246,38 +260,47 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
-        propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = licenceNumber,
-            ownershipType = ownershipType,
-            isOccupied = isOccupied,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = numberOfBedrooms,
-            billsIncludedList = billsIncludedList,
-            customBillsIncluded = customBillsIncluded,
-            furnishedStatus = furnishedStatus,
-            rentFrequency = rentFrequency,
-            customRentFrequency = customRentFrequency,
-            rentAmount = rentAmount,
-            customPropertyType = customPropertyType,
-        )
+        val propertyOwnership =
+            propertyRegistrationService.registerProperty(
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                    addressModel = addressDataModel,
+                    propertyType = propertyType,
+                    licenseType = licenceType,
+                    licenceNumber = licenceNumber,
+                    correspondenceEmail = correspondenceEmail,
+                    correspondenceAddressModel = correspondenceAddressModel,
+                    ownershipType = ownershipType,
+                    isOccupied = isOccupied,
+                    numberOfHouseholds = numberOfHouseholds,
+                    numberOfPeople = numberOfPeople,
+                    numBedrooms = numberOfBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                    customPropertyType = customPropertyType,
+                ),
+            )
 
         // Assert
+        assertEquals(expectedPropertyOwnership, propertyOwnership)
         verify(mockPropertyOwnershipService).createPropertyOwnership(
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceAddressModel,
             ownershipType = ownershipType,
             isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -290,10 +313,13 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = false,
-            tenancyProvideLater = null,
+            tenancyProvideLater = false,
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumber.number,
+            gasSafetyCertProvideLater = false,
+            electricalSafetyCertProvideLater = false,
+            epcProvideLater = false,
         )
     }
 
@@ -327,7 +353,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -343,40 +370,44 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-            hasGasSupply = true,
-            gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-            gasSafetyFileUploadIds = listOf(10L, 20L),
-            electricalSafetyFileUploadIds = listOf(30L),
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
-            electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
-            epcCertificateUrl = epcUrl,
-            epcExpiryDate = epcExpiryDate,
-            epcEnergyRating = epcEnergyRating,
-            tenancyStartedBeforeEpcExpiry = true,
-            epcExemptionReason = epcExemptionReason,
-            epcMeesExemptionReason = meesExemptionReason,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 1,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+                gasSafetyFileUploadIds = listOf(10L, 20L),
+                electricalSafetyFileUploadIds = listOf(30L),
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+                epcCertificateUrl = epcUrl,
+                epcExpiryDate = epcExpiryDate,
+                epcEnergyRating = epcEnergyRating,
+                tenancyStartedBeforeEpcExpiry = true,
+                epcExemptionReason = epcExemptionReason,
+                epcMeesExemptionReason = meesExemptionReason,
+            ),
         )
 
         // Assert
@@ -385,15 +416,18 @@ class PropertyRegistrationServiceTests {
             hasGasSupply = true,
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyFileUploadIds = listOf(10L, 20L),
+            gasSafetyCertProvideLater = false,
             electricalSafetyFileUploadIds = listOf(30L),
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+            electricalSafetyCertProvideLater = false,
             epcCertificateUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
             epcEnergyRating = epcEnergyRating,
             tenancyStartedBeforeEpcExpiry = true,
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = meesExemptionReason,
+            epcProvideLater = false,
         )
     }
 
@@ -418,7 +452,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -434,6 +469,8 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -442,22 +479,24 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.SELECTIVE_LICENCE,
-            licenceNumber = "Licence",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 2,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.SELECTIVE_LICENCE,
+                licenceNumber = "Licence",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 2,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+            ),
         )
 
         // Assert
@@ -522,7 +561,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -535,28 +575,30 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = numberOfBedrooms,
-            billsIncludedList = billsIncludedList,
-            customBillsIncluded = customBillsIncluded,
-            furnishedStatus = furnishedStatus,
-            rentFrequency = rentFrequency,
-            customRentFrequency = customRentFrequency,
-            rentAmount = rentAmount,
-            customPropertyType = customPropertyType,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+                customPropertyType = customPropertyType,
+            ),
         )
 
         verify(mockLicenseService, never()).createLicense(any(), any())
@@ -565,7 +607,8 @@ class PropertyRegistrationServiceTests {
             isOccupied = true,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -578,6 +621,7 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = false,
+            tenancyProvideLater = false,
         )
     }
 
@@ -628,7 +672,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -641,29 +686,32 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 licenseProvideLater = true,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = LicensingType.PROVIDE_LATER,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = numberOfBedrooms,
-            billsIncludedList = billsIncludedList,
-            customBillsIncluded = customBillsIncluded,
-            furnishedStatus = furnishedStatus,
-            rentFrequency = rentFrequency,
-            customRentFrequency = customRentFrequency,
-            rentAmount = rentAmount,
-            customPropertyType = customPropertyType,
-            licenseProvideLater = true,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = LicensingType.PROVIDE_LATER,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+                customPropertyType = customPropertyType,
+                licenseProvideLater = true,
+            ),
         )
 
         // Assert
@@ -673,7 +721,8 @@ class PropertyRegistrationServiceTests {
             isOccupied = true,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -686,7 +735,7 @@ class PropertyRegistrationServiceTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             licenseProvideLater = true,
-            tenancyProvideLater = null,
+            tenancyProvideLater = false,
         )
     }
 
@@ -727,7 +776,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -741,30 +791,32 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = licenceNumber,
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-            jointLandlordEmails = jointLandlordEmails,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = licenceNumber,
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+                jointLandlordEmails = jointLandlordEmails,
+            ),
         )
 
         // Assert
@@ -808,7 +860,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -822,30 +875,32 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-            jointLandlordEmails = null,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+                jointLandlordEmails = null,
+            ),
         )
 
         // Assert
@@ -886,7 +941,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -900,7 +956,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -910,23 +966,25 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-            lettingAgentEmail = lettingAgentEmail,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+                lettingAgentEmail = lettingAgentEmail,
+            ),
         )
 
         // Assert
@@ -973,7 +1031,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -987,29 +1046,31 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+            ),
         )
 
         // Assert
@@ -1050,7 +1111,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                landlords = mutableSetOf(landlord),
+                registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -1064,30 +1126,32 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
-                tenancyProvideLater = null,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = propertyType,
-            licenseType = licenceType,
-            licenceNumber = "",
-            ownershipType = ownershipType,
-            isOccupied = true,
-            numberOfHouseholds = numberOfHouseholds,
-            numberOfPeople = numberOfPeople,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-            jointLandlordEmails = jointLandlordEmails,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = propertyType,
+                licenseType = licenceType,
+                licenceNumber = "",
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+                rentAmount = 123.toBigDecimal(),
+                customPropertyType = null,
+                jointLandlordEmails = jointLandlordEmails,
+            ),
         )
 
         // Assert
@@ -1117,7 +1181,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1133,29 +1198,33 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = false,
-            numberOfHouseholds = 0,
-            numberOfPeople = 0,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = null,
-            customPropertyType = null,
-            markedJointLandlord = true,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = false,
+                numberOfHouseholds = 0,
+                numberOfPeople = 0,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                markedJointLandlord = true,
+            ),
         )
 
         // Assert
@@ -1164,7 +1233,8 @@ class PropertyRegistrationServiceTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            landlords = any(),
+            registeringLandlord = any(),
+            anniversary = any(),
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
@@ -1180,6 +1250,8 @@ class PropertyRegistrationServiceTests {
             markedJointLandlord = eq(true),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = anyOrNull(),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
         )
     }
 
@@ -1206,7 +1278,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1222,29 +1295,33 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = any(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = false,
-            numberOfHouseholds = 0,
-            numberOfPeople = 0,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = null,
-            customPropertyType = null,
-            tenancyProvideLater = true,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = false,
+                numberOfHouseholds = 0,
+                numberOfPeople = 0,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                tenancyProvideLater = true,
+            ),
         )
 
         // Assert
@@ -1253,7 +1330,8 @@ class PropertyRegistrationServiceTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            landlords = any(),
+            registeringLandlord = any(),
+            anniversary = any(),
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
@@ -1269,6 +1347,8 @@ class PropertyRegistrationServiceTests {
             markedJointLandlord = any(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
         )
     }
 
@@ -1290,7 +1370,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1306,28 +1387,32 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = null,
-            customPropertyType = null,
-            isDelegatedToLettingAgent = true,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 1,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                isDelegatedToLettingAgent = true,
+            ),
         )
 
         verify(mockConfirmationEmailSender).sendEmail(
@@ -1354,7 +1439,8 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1370,34 +1456,38 @@ class PropertyRegistrationServiceTests {
                 markedJointLandlord = any(),
                 licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
 
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = null,
-            customPropertyType = null,
-            licenseProvideLater = true,
-            gasSafetyCertProvideLater = true,
-            electricalSafetyCertProvideLater = true,
-            epcProvideLater = true,
-            tenancyProvideLater = true,
-            isDelegatedToLettingAgent = false,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+                propertyType = PropertyType.DETACHED_HOUSE,
+                licenseType = LicensingType.NO_LICENSING,
+                licenceNumber = "",
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = true,
+                numberOfHouseholds = 1,
+                numberOfPeople = 1,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                licenseProvideLater = true,
+                gasSafetyCertProvideLater = true,
+                electricalSafetyCertProvideLater = true,
+                epcProvideLater = true,
+                tenancyProvideLater = true,
+                isDelegatedToLettingAgent = false,
+            ),
         )
 
         verify(mockConfirmationEmailSender).sendEmail(

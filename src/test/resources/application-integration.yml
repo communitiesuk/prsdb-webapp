@@ -6,9 +6,6 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-restructure-and-skipping"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-phase-two"
       enabled: true
       expiry-date: "2026-12-31"
@@ -21,6 +18,9 @@ features:
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-238-gatling-post-endpoint"
+      enabled: false
+      expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
       enabled: true
       expiry-date: "2026-12-31"
@@ -30,6 +30,9 @@ features:
     - name: "pdjb-926-landlord-dashboard-update"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-1210-multi-user-organisations"
+      enabled: true
+      expiry-date: "2026-11-01"
 
 argon2:
   iterations: 2

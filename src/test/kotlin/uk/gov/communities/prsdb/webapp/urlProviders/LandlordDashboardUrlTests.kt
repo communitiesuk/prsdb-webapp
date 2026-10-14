@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.time.LocalDate
 import kotlin.test.Test
 
@@ -109,7 +110,7 @@ class LandlordDashboardUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val prsdbUserService = mock<PrsdbUserService>()
@@ -158,7 +159,7 @@ class LandlordDashboardUrlTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
         // Arrange
         val landlord = createIndividualLandlord()
@@ -204,6 +205,9 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
             ),
         ).thenReturn(propertyOwnership)
 
@@ -215,22 +219,24 @@ class LandlordDashboardUrlTests(
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
-            propertyType = propertyOwnership.propertyBuildType,
-            customPropertyType = propertyOwnership.customPropertyType,
-            licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
-            licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
-            ownershipType = propertyOwnership.ownershipType,
-            isOccupied = propertyOwnership.isOccupied,
-            numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-            numberOfPeople = propertyOwnership.currentNumTenants,
-            numBedrooms = propertyOwnership.numBedrooms,
-            billsIncludedList = propertyOwnership.billsIncludedList,
-            customBillsIncluded = propertyOwnership.customBillsIncluded,
-            furnishedStatus = propertyOwnership.furnishedStatus,
-            rentFrequency = propertyOwnership.rentFrequency,
-            customRentFrequency = propertyOwnership.customRentFrequency,
-            rentAmount = propertyOwnership.rentAmount,
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
+                propertyType = propertyOwnership.propertyBuildType,
+                customPropertyType = propertyOwnership.customPropertyType,
+                licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
+                licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
+                ownershipType = propertyOwnership.ownershipType,
+                isOccupied = propertyOwnership.isOccupied,
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                numberOfPeople = propertyOwnership.currentNumTenants,
+                numBedrooms = propertyOwnership.numBedrooms,
+                billsIncludedList = propertyOwnership.billsIncludedList,
+                customBillsIncluded = propertyOwnership.customBillsIncluded,
+                furnishedStatus = propertyOwnership.furnishedStatus,
+                rentFrequency = propertyOwnership.rentFrequency,
+                customRentFrequency = propertyOwnership.customRentFrequency,
+                rentAmount = propertyOwnership.rentAmount,
+            ),
         )
 
         // Assert

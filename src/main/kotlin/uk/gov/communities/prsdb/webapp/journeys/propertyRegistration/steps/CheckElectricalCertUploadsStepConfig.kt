@@ -22,6 +22,7 @@ class CheckElectricalCertUploadsStepConfig(
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getUploadCount(state),
+            "pageTitleOverride" to "uploads.checkUploads.electricalSafety.pageTitle",
             "summaryText" to "uploads.checkUploads.paragraph",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",

@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
@@ -501,6 +502,7 @@ class LandlordRegistrationServiceTests {
                 eq(baseUser),
                 eq("Alice"),
                 eq("alice@test.com"),
+                eq(OrganisationalLandlordUserRole.ADMIN),
             )
         }
 

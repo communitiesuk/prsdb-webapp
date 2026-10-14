@@ -77,16 +77,6 @@ confirmation:
 taskList:
   heading: Register a rental property
   subtitle: Your answers are saved as you go. You can return and finish this later.
-  register:
-    heading: Add property details
-    restructureAndSkipping:
-      heading: Tenancy details
-    addAddress: Property address
-    selectType: Property type
-    selectOwnership: How you own the property (leasehold, freehold)
-    addLicensing: If the property has a license
-    addTenancyInfo: Tenancy and rental information
-    inviteJointLandlords: Invite joint landlords
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
   epc: Energy performance certificate (EPC)
@@ -110,19 +100,16 @@ taskList:
     heading: Submit your registration
     headingWithPayment: Submit and pay
   checkAndSubmit:
-    heading: Check and submit your property details
     checkAnswers: Check and submit your answers
     checkAnswersWithPayment: Submit and pay
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
-checkAnswers:
-  complianceCertificates:
-    heading: Compliance certificates
 deleteIncompleteProperties:
   incompleteProperties:
     title: Delete incomplete property
   areYouSure:
     heading: 'Are you sure you want to delete {0,,address} from the database?'
+    pageTitle: Are you sure you want to delete this property from the database?
     radios:
       error:
         missing: Select whether you want to delete this property from the database
@@ -208,6 +195,7 @@ correspondenceEmail:
           error:
             missing: Enter an email address
             invalidFormat: Enter an email address in the correct format, like name@example.com
+paymentDescription: Register your rental property
 paymentOutcome:
   # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
   fieldSetHeading: TODO PDJB-993 payment outcome internal step
@@ -234,6 +222,7 @@ whoProvidesRentalDetails:
         hint: Give them access to provide these details
   changeToLettingAgent:
     heading: Are you sure you want to change this?
+    pageTitle: Are you sure you want your letting agent to provide details?
     paragraph:
       one: You’ve selected for your letting agent or property manager to provide details about how your property’s rented out.
       two: 'This means we’ll remove the details you’ve already provided about:'
@@ -259,6 +248,7 @@ lettingAgentEmail:
   submitButton: Save and continue
 occupancyChangeInterruption:
   heading: Are you sure you want to change this?
+  pageTitle: Are you sure you want to change this property to unoccupied?
   paragraph:
     one: You’ve changed this property to being unoccupied.
     two: This means you cannot ask your letting agent or property manager to provide this property’s details.
