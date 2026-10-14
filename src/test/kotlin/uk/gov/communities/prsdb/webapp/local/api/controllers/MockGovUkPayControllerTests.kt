@@ -30,8 +30,13 @@ class MockGovUkPayControllerTests {
 
     @BeforeEach
     fun setup() {
-        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080", objectMapper, mockPaymentRepository)).build()
+        mvc = createMvc(cardEntryDelaySeconds = 0)
     }
+
+    private fun createMvc(cardEntryDelaySeconds: Long) =
+        MockMvcBuilders
+            .standaloneSetup(MockGovUkPayController("8080", cardEntryDelaySeconds, objectMapper, mockPaymentRepository))
+            .build()
 
     private fun createBody(
         amount: Int = 12000,
@@ -104,6 +109,18 @@ class MockGovUkPayControllerTests {
         mvc
             .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
             .andExpect(jsonPath("$.state.status").value("capturable"))
+    }
+
+    @Test
+    fun `visiting the mock card page leaves the payment in progress while the card entry delay is running`() {
+        mvc = createMvc(cardEntryDelaySeconds = 3600)
+        val paymentId = createPaymentAndGetId(delayedCapture = true)
+
+        mvc.perform(get("/local/gov-uk-pay/mock-card-page/$paymentId"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("created"))
     }
 
     @Test
