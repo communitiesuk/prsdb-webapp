@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<body th:replace="~{fragments/layout :: layout(#{addLocalCouncilUser.title}, ~{::body/content()}, ${#fields.hasErrors('${confirmedEmailRequestModel.*}')})}">
+<body th:replace="~{fragments/layout :: layout(#{addLocalCouncilUser.heading}, ~{::body/content()}, ${#fields.hasErrors('${confirmedEmailRequestModel.*}')})}">
 <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"

@@ -27,6 +27,30 @@ class ExampleTests : IntegrationTestWithMutableData("seed-data-script.sql") {
 }
 ```
 
+### Overlay Scripts
+
+The base classes also accept a list of scripts, applied in order. Prefer a small **overlay** script on top of an
+existing base seed (usually `data-local.sql`) over copying a large base script just to change a few rows:
+
+```kotlin
+class ExampleTests : IntegrationTestWithMutableData(
+    listOf("data-local.sql", "data-overlay-mockuser-is-not-a-landlord.sql"),
+)
+```
+
+Overlay scripts are named `data-overlay-<description>.sql`, start with a header comment explaining what they change
+and what to apply them on top of, and only contain the `INSERT`/`UPDATE`/`DELETE` statements needed for that change.
+Existing overlays include:
+
+- `data-overlay-mockuser-is-not-a-landlord.sql` — removes the signed-in mock user's landlord role
+- `data-overlay-mockuser-is-org-landlord-user.sql` — makes the signed-in mock user an organisational landlord user
+
+Most older tests predate this pattern and use a bespoke standalone base script instead. Follow the overlay pattern for
+new tests, and check for an existing overlay before writing a new one.
+
+Note that the signed-in mock user's One Login subject is fixed (`urn:fdc:gov.uk:2022:UVWXY`), so changing what that
+user is requires a seed data change rather than a different login.
+
 ## Page Objects
 
 ### Structure

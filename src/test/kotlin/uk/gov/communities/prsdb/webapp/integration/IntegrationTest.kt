@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Browser
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
@@ -183,6 +184,21 @@ abstract class IntegrationTest {
         val page = browserContext.newPage()
         val navigator = Navigator(page, port)
         return Pair(page, navigator)
+    }
+
+    /**
+     * Runs [test] in a new browser context with JavaScript disabled, for testing the no-JavaScript version of pages.
+     * The context has its own cookies, so the user signs in again (via the mock One Login) on their first request.
+     */
+    fun withJavaScriptDisabled(
+        browser: Browser,
+        test: (page: Page, navigator: Navigator) -> Unit,
+    ) {
+        browser.newContext(Browser.NewContextOptions().setJavaScriptEnabled(false)).use { browserContext ->
+            blockRequestsToExternalHosts(browserContext)
+            val (page, navigator) = createPageAndNavigator(browserContext)
+            test(page, navigator)
+        }
     }
 
     companion object {

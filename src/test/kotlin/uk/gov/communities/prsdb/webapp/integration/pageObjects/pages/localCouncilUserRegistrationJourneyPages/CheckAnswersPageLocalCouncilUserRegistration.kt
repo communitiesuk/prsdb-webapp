@@ -21,6 +21,8 @@ class CheckAnswersPageLocalCouncilUserRegistration(
 
     val summaryList = CheckAnswersLocalCouncilUserRegistrationSummaryList(page)
 
+    override val expectedTitleHeading = "Check your registration answers"
+
     class CheckAnswersLocalCouncilUserRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {

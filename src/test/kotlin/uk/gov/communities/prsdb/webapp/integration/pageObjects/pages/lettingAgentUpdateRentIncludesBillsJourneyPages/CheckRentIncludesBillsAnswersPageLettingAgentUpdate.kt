@@ -13,4 +13,6 @@ class CheckRentIncludesBillsAnswersPageLettingAgentUpdate(
         page,
         LettingAgentUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(UUID.fromString(urlArguments["token"]!!)) +
             "/${UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your bills answers"
+}

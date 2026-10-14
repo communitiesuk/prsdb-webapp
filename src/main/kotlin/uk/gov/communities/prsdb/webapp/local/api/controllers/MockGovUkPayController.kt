@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import java.net.URI
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -40,12 +41,16 @@ import kotlin.random.Random
  * GOV.UK Pay's own record of each payment is mocked in memory, so it only covers payments created through this mock
  * since the app started. Any other payment (e.g. seeded by data-local.sql) is rebuilt from our payment table, using
  * the status we last recorded for it.
+ *
+ * After the mock card page, a payment stays in progress for `gov-uk-pay.mock-card-entry-delay-seconds`, as a real
+ * payment can while GOV.UK Pay finishes processing it, so that our payment processing page can be seen locally.
  */
 @Profile("local")
 @PrsdbRestController
 @RequestMapping("/local/gov-uk-pay")
 class MockGovUkPayController(
     @Value("\${server.port}") private val serverPort: String,
+    @Value("\${gov-uk-pay.mock-card-entry-delay-seconds}") private val cardEntryDelaySeconds: Long,
     private val objectMapper: ObjectMapper,
     private val paymentRepository: PaymentRepository,
 ) {
@@ -93,17 +98,14 @@ class MockGovUkPayController(
     }
 
     // Stands in for GOV.UK Pay's hosted card page: handed to the client as next_url, it "completes" card entry and
-    // redirects back to the return_url, moving the payment to capturable (delayed capture) or success.
+    // redirects back to the return_url. Once the card entry delay has passed, the payment moves to capturable (delayed
+    // capture) or success.
     @GetMapping("/mock-card-page/{paymentId}")
     fun mockCardPage(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
-        if (payment.delayedCapture) {
-            payment.markCapturable()
-        } else {
-            payment.markCaptured()
-        }
+        payment.enterCardDetails(completesAt = Instant.now().plus(Duration.ofSeconds(cardEntryDelaySeconds)))
         val redirect = payment.returnUrl.ifBlank { "$baseUrl/v1/payments/$paymentId" }
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirect)).build()
     }
@@ -144,9 +146,12 @@ class MockGovUkPayController(
     }
 
     private fun findPayment(paymentId: String): StoredPayment? {
-        payments[paymentId]?.let { return it }
-        val savedPayment = paymentRepository.findByIdOrNull(paymentId) ?: return null
-        return payments.computeIfAbsent(paymentId) { savedPayment.toStoredPayment() }
+        val payment =
+            payments[paymentId]
+                ?: paymentRepository.findByIdOrNull(paymentId)?.let { savedPayment ->
+                    payments.computeIfAbsent(paymentId) { savedPayment.toStoredPayment() }
+                }
+        return payment?.also { it.completeCardEntryIfDue() }
     }
 
     private fun Payment.toStoredPayment(): StoredPayment {
@@ -344,6 +349,32 @@ class MockGovUkPayController(
 
         val finished: Boolean
             get() = status in GovUkPayPaymentStatus.FINISHED_STATUSES
+
+        private var cardEntryCompletesAt: Instant? = null
+
+        @Synchronized
+        fun enterCardDetails(completesAt: Instant) {
+            cardEntryCompletesAt = completesAt
+            completeCardEntryIfDue()
+        }
+
+        @Synchronized
+        fun completeCardEntryIfDue() {
+            val completesAt = cardEntryCompletesAt ?: return
+            if (Instant.now().isBefore(completesAt)) {
+                return
+            }
+            cardEntryCompletesAt = null
+            // The payment may have been cancelled while card entry was completing
+            if (status != GovUkPayPaymentStatus.CREATED) {
+                return
+            }
+            if (delayedCapture) {
+                markCapturable()
+            } else {
+                markCaptured()
+            }
+        }
 
         fun markCapturable() {
             status = GovUkPayPaymentStatus.CAPTURABLE
