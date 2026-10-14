@@ -217,7 +217,7 @@ paymentProcessing:
     redirect: When your payment is processed you will be automatically redirected.
   noJs:
     notConfirmed: We have not yet received confirmation that your payment was successful.
-    checkStatus: Click Check payment status to see if your payment has been completed.
+    checkStatus: Select Check payment status to see if your payment has been completed.
     button: Check payment status
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
