@@ -654,6 +654,15 @@ update:
     fieldSetHeading: Update the type of licensing you have for your property
   checkCharity:
     summaryName: Charity details
+    pageTitle: Check your charity answers
+  checkCompaniesHouse:
+    pageTitle: Check your Companies House answers
+  checkGoverningBody:
+    pageTitle: Check your governing body answers
+  checkLeadTrustee:
+    pageTitle: Check your lead trustee answers
+  checkOrganisationType:
+    pageTitle: Check your organisation type answers
   checkLicensing:
     update:
       summaryName: You have updated the property licence

@@ -1,10 +1,9 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="selectedOrgTypeLabels" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.pageTitle}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <div id="interruption-card"
          th:replace="~{fragments/interruptionCard :: interruptionCard(heading=#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.heading}, bodyContent=~{::#interruption-card-body}, buttonText=#{forms.buttons.continueWithChange}, backUrl=${backUrl})}">

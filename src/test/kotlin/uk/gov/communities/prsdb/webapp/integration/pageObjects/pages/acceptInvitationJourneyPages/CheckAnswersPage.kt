@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 class CheckAnswersPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your answers before joining your organisation"
+
     val heading = Heading(page.locator("h1"))
     val backLink = BackLink.default(page)
     val form = PostForm(page)

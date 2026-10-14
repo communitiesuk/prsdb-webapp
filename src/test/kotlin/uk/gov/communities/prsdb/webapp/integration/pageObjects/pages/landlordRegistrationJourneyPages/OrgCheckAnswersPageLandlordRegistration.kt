@@ -15,6 +15,8 @@ class OrgCheckAnswersPageLandlordRegistration(
         page,
         "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your organisation registration answers"
+
     fun confirmAndSubmit() = form.submit()
 
     val form = PostForm(page)
