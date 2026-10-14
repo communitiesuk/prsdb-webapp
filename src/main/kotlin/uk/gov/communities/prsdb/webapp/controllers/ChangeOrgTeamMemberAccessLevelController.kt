@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.CHANGE_ACCESS_LEVEL_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -76,7 +76,7 @@ class ChangeOrgTeamMemberAccessLevelController(
             createRoutingMap = { journeyFactory.createJourneySteps(otherOrganisationalLandlordUserId) },
             initialiseJourney = { journeyFactory.initializeJourneyState(otherOrganisationalLandlordUserId) },
             dispatch = dispatch,
-            startNewJourneyOn = { it is PrsdbWebException },
+            startNewJourneyOn = { it is OrganisationalLandlordUserMismatchException },
         )
 
     companion object {

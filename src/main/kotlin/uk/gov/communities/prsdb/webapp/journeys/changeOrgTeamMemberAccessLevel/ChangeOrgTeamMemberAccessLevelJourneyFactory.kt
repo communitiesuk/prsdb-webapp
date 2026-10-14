@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -27,7 +27,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
         }
 
         if (state.otherOrganisationalLandlordUserId != otherOrganisationalLandlordUserId) {
-            throw PrsdbWebException(
+            throw OrganisationalLandlordUserMismatchException(
                 "Journey was initialized for organisational landlord user ${state.otherOrganisationalLandlordUserId} " +
                     "but request is for organisational landlord user $otherOrganisationalLandlordUserId",
             )

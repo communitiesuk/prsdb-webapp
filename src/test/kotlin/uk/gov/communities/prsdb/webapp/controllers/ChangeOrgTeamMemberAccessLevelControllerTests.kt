@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelPath
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
@@ -149,7 +149,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     fun `getJourneyStep redirects to initialize journey when the member does not match`() {
         val journeyId = "test-journey-id"
         whenever(journeyFactory.createJourneySteps(testUserId))
-            .thenThrow(PrsdbWebException("mismatch"))
+            .thenThrow(OrganisationalLandlordUserMismatchException("mismatch"))
         whenever(journeyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
         mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
