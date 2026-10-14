@@ -32,9 +32,12 @@ class OrganisationalLandlordUserService(
     fun getOrganisationalLandlordUserOrNull(id: Long): OrganisationalLandlordUser? =
         organisationalLandlordUserRepository.findById(id).orElse(null)
 
-    fun getCurrentUserIsAuthorizedToEditRecord(otherOrganisationalLandlordUserId: Long): Boolean {
+    fun getCurrentUserIsAuthorizedToEditRecordOfOtherUser(otherOrganisationalLandlordUserId: Long): Boolean {
         val currentUser = userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser() ?: return false
         if (currentUser.role != OrganisationalLandlordUserRole.ADMIN) {
+            return false
+        }
+        if (currentUser.id == otherOrganisationalLandlordUserId) {
             return false
         }
 

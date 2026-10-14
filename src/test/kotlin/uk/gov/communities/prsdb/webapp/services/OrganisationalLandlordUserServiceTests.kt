@@ -107,14 +107,14 @@ class OrganisationalLandlordUserServiceTests {
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecord returns false when the current user is not an org team member`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is not an org team member`() {
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
 
-        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
+        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(5))
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecord returns false when the current user is not an admin of the organisation`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is not an admin of the organisation`() {
         val currentUser =
             MockLandlordData.createOrganisationalLandlordUser(
                 organisationalLandlord = mockOrganisationLandlord,
@@ -122,11 +122,11 @@ class OrganisationalLandlordUserServiceTests {
             )
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
 
-        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
+        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(5))
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecord returns false when the member does not exist`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the member does not exist`() {
         val currentUser =
             MockLandlordData.createOrganisationalLandlordUser(
                 organisationalLandlord = mockOrganisationLandlord,
@@ -135,11 +135,11 @@ class OrganisationalLandlordUserServiceTests {
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
         whenever(mockOrganisationalLandlordUserRepository.findById(5)).thenReturn(Optional.empty())
 
-        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
+        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(5))
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecord returns false when the member belongs to a different organisation`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the member belongs to a different organisation`() {
         val currentUser =
             MockLandlordData.createOrganisationalLandlordUser(
                 organisationalLandlord = mockOrganisationLandlord,
@@ -151,11 +151,11 @@ class OrganisationalLandlordUserServiceTests {
         whenever(mockOtherOrganisationLandlord.id).thenReturn(2L)
         whenever(mockOrganisationalLandlordUserRepository.findById(5)).thenReturn(Optional.of(member))
 
-        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
+        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(5))
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecord returns true when the member belongs to the current user's organisation`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns true when the member belongs to the current user's organisation`() {
         val currentUser =
             MockLandlordData.createOrganisationalLandlordUser(
                 organisationalLandlord = mockOrganisationLandlord,
@@ -166,6 +166,18 @@ class OrganisationalLandlordUserServiceTests {
         val member = MockLandlordData.createOrganisationalLandlordUser(organisationalLandlord = mockOrganisationLandlord)
         whenever(mockOrganisationalLandlordUserRepository.findById(5)).thenReturn(Optional.of(member))
 
-        assertTrue(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
+        assertTrue(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(5))
+    }
+
+    @Test
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is editing themselves`() {
+        val currentUser =
+            MockLandlordData.createOrganisationalLandlordUser(
+                organisationalLandlord = mockOrganisationLandlord,
+                role = OrganisationalLandlordUserRole.ADMIN,
+            )
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
+
+        assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(currentUser.id))
     }
 }

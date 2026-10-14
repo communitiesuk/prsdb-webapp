@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
-import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
 
 @PreAuthorize("hasRole('ORG_ADMIN')")
 @PrsdbController
@@ -29,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
 class ChangeOrgTeamMemberAccessLevelController(
     private val journeyFactory: ChangeOrgTeamMemberAccessLevelJourneyFactory,
     private val organisationalLandlordUserService: OrganisationalLandlordUserService,
-    private val userToOrgLandlordUserService: UserToOrgLandlordUserService,
 ) {
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     @GetMapping("/{*stepPath}")
@@ -53,16 +51,11 @@ class ChangeOrgTeamMemberAccessLevelController(
     }
 
     private fun checkCurrentUserCanEditMember(otherOrganisationalLandlordUserId: Long) {
-        if (!organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(otherOrganisationalLandlordUserId)) {
+        if (!organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(otherOrganisationalLandlordUserId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "No team member with id $otherOrganisationalLandlordUserId found in the current organisation",
             )
-        }
-
-        val currentMember = userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()
-        if (currentMember?.id == otherOrganisationalLandlordUserId) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Admins cannot change their own access level")
         }
     }
 

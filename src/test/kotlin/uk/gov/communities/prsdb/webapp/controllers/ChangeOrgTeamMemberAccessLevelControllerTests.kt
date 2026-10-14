@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -18,15 +17,12 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelPath
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
-import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordUser
 
 @WebMvcTest(ChangeOrgTeamMemberAccessLevelController::class)
 class ChangeOrgTeamMemberAccessLevelControllerTests(
@@ -37,9 +33,6 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
 
     @MockitoBean
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
-
-    @MockitoBean
-    private lateinit var userToOrgLandlordUserService: UserToOrgLandlordUserService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -53,9 +46,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     @BeforeEach
     fun enableFeatureFlagAndAuthoriseMember() {
         whenever(featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(true)
-        whenever(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(testUserId)).thenReturn(true)
-        whenever(userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser())
-            .thenReturn(createOrganisationalLandlordUser())
+        whenever(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(testUserId)).thenReturn(true)
     }
 
     private fun mockJourneySteps() {
@@ -91,7 +82,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getJourneyStep returns 404 when the current user is not authorized to edit the member`() {
-        whenever(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(testUserId)).thenReturn(false)
+        whenever(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(testUserId)).thenReturn(false)
 
         mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
             status { isNotFound() }
@@ -116,18 +107,6 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
 
         mvc.get("${getChangeAccessLevelBasePath(testUserId)}/unknown-step").andExpect {
             status { isNotFound() }
-        }
-    }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getJourneyStep returns 400 when an admin tries to change their own access level`() {
-        val currentMember = mock<OrganisationalLandlordUser>()
-        whenever(currentMember.id).thenReturn(testUserId)
-        whenever(userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentMember)
-
-        mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
-            status { isBadRequest() }
         }
     }
 
