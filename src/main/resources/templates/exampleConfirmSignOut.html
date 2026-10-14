@@ -3,9 +3,7 @@
 <main class="govuk-main-wrapper" id="main-content">
     <form method="post" th:action="@{/logout}">
         <h1 class="govuk-heading-l" th:text="#{signOut.confirm.heading}">signOut.confirm.heading</h1>
-        <button type="submit" class="govuk-button" data-module="govuk-button">
-            Log Out
-        </button>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{signOut.confirm.buttonText})}"></button>
     </form>
 </main>
 </html>
