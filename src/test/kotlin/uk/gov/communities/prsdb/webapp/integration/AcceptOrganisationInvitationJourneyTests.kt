@@ -185,7 +185,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         page.reload()
         confirmationPage = assertPageIs(page, ConfirmationPage::class)
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
-        
+
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
 
