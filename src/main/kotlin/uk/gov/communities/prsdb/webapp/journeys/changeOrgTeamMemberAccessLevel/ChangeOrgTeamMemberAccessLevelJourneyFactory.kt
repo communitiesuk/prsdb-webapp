@@ -7,7 +7,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUse
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -16,10 +18,12 @@ import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.s
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.CompleteChangeAccessLevelStep
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ChangeOrgTeamMemberAccessLevelFormModel
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 
 @PrsdbWebService
 class ChangeOrgTeamMemberAccessLevelJourneyFactory(
     private val stateFactory: ObjectFactory<ChangeOrgTeamMemberAccessLevelJourney>,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
 ) {
     fun createJourneySteps(otherOrganisationalLandlordUserId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -47,13 +51,32 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
             // TODO PDJB-1764: Add a split here for the remove journey
             step(journey.completeChangeAccessLevelStep) {
                 parents { journey.accessLevelStep.isComplete() }
-                nextUrl { TeamMembersController.TEAM_MEMBERS_ROUTE }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
+                        .withFlashAttribute("accessLevelChangedMemberName", getMemberName(journey.otherOrganisationalLandlordUserId))
+                        .withFlashAttribute("accessLevelChangedBannerContentKey", getBannerContentKey(journey.selectedRole))
+                }
             }
         }
     }
 
     fun initializeJourneyState(otherOrganisationalLandlordUserId: Long): String =
         stateFactory.getObject().initializeState(otherOrganisationalLandlordUserId)
+
+    private fun getMemberName(otherOrganisationalLandlordUserId: Long): String =
+        organisationalLandlordUserService
+            .getOrganisationalLandlordUserOrNull(otherOrganisationalLandlordUserId)
+            ?.name
+            ?: throw PrsdbWebException(
+                "Could not determine the name of organisational landlord user $otherOrganisationalLandlordUserId",
+            )
+
+    private fun getBannerContentKey(role: OrganisationalLandlordUserRole): String =
+        when (role) {
+            OrganisationalLandlordUserRole.ADMIN -> "teamMembers.accessLevelChangedBanner.content.administrator"
+            OrganisationalLandlordUserRole.EDITOR -> "teamMembers.accessLevelChangedBanner.content.editor"
+        }
 }
 
 @JourneyFrameworkComponent
