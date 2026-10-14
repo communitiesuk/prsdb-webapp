@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
-import jakarta.servlet.RequestDispatcher
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.MessageSource
@@ -86,12 +85,12 @@ class GlobalModelAttributes(
 
         // Service name — LC/system operator routes use a different name from the default
         val uri = request.requestURI
-        // Forwarded error pages are rendered under /error, so use the originally requested URI for the service name
-        val originalUri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI) as? String ?: uri
-        val serviceNameKey = if (originalUri.isLocalCouncilOrSystemOperatorPage()) "localCouncilServiceName" else "serviceName"
+        val isCustomServiceName =
+            uri.isServicePage(LOCAL_COUNCIL_PATH_SEGMENT) || uri.isServicePage(SYSTEM_OPERATOR_PATH_SEGMENT)
+        val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
         val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
         model.addAttribute("serviceName", serviceName)
-        if (uri.isLocalCouncilOrSystemOperatorPage() || uri.startsWith(LETTING_AGENT_ROUTES_PREFIX)) {
+        if (isCustomServiceName || uri.startsWith(LETTING_AGENT_ROUTES_PREFIX)) {
             model.addAttribute("showServiceNavigation", true)
         }
 
@@ -107,8 +106,7 @@ class GlobalModelAttributes(
         }
     }
 
-    private fun String.isLocalCouncilOrSystemOperatorPage(): Boolean =
-        startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT/") || startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")
+    private fun String.isServicePage(pathSegment: String): Boolean = this.startsWith("/$pathSegment/")
 
     private fun getCurrentNonce(): String {
         val context = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?
