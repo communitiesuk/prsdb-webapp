@@ -20,7 +20,10 @@ class InviteJointLandlordsTask(
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
 ) : Task<InviteJointLandlordState, InviteJointLandlordsTaskDependencies>(journeyStateService),
     InviteJointLandlordState {
-    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate(
+        "invitedJointLandlordEmails",
+        isCyaAnswer = true,
+    )
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
 
     override val taskState get() = this

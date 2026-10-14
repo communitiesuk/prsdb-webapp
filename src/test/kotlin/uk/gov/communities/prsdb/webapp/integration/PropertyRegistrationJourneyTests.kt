@@ -150,6 +150,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -530,6 +531,36 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val otherTab = browserContext.newPage()
             otherTab.navigate(checkAnswersUrl.replace(PropertyRegistrationCyaStep.ROUTE_SEGMENT, OwnershipTypeStep.ROUTE_SEGMENT))
             assertPageIs(otherTab, OwnershipTypeFormPagePropertyRegistration::class).submitOwnershipType(OwnershipType.SHARE_OF_FREEHOLD)
+
+            ownershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+
+            assertPageIs(page, ErrorPage::class)
+            assertContains(page.url(), CustomErrorController.CYA_ERROR_ROUTE)
+        }
+
+        @Test
+        fun `changing an answer from a CYA page after a joint landlord was invited in another tab shows the CYA error page`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withCheckedJointLandlords(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val checkAnswersUrl = page.url()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+                .summaryList.ownershipRow.actions.firstActionLink
+                .clickAndWait()
+            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+
+            val otherTab = browserContext.newPage()
+            otherTab.navigate(checkAnswersUrl.replace(PropertyRegistrationCyaStep.ROUTE_SEGMENT, CheckJointLandlordsStep.ROUTE_SEGMENT))
+            assertPageIs(otherTab, CheckJointLandlordsFormPagePropertyRegistration::class)
+                .form.addAnotherButton
+                .clickAndWait()
+            assertPageIs(otherTab, InviteAnotherJointLandlordFormPagePropertyRegistration::class).submitEmail("another@example.com")
+            assertPageIs(otherTab, CheckJointLandlordsFormPagePropertyRegistration::class)
 
             ownershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
 

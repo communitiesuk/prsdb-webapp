@@ -74,6 +74,47 @@ class AbstractJourneyStateTests {
         // Assert
         assertEquals("testJourneyId", result)
     }
+
+    @Test
+    fun `cyaAnswerDelegateKeys returns the CYA answer keys for the whole journey`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        val journeyState =
+            object : AbstractJourneyState(journeyStateService) {
+                var answer: String? by delegateProvider.nullableDelegate("answer", isCyaAnswer = true)
+                var notAnAnswer: String? by delegateProvider.nullableDelegate("notAnAnswer")
+            }
+        val task =
+            object : AbstractJourneyState(journeyStateService) {
+                val taskAnswer: Map<Int, String> by delegateProvider.requiredDelegate("taskAnswer", mapOf(), isCyaAnswer = true)
+
+                init {
+                    delegateProvider.bindRoutePrefix("task-route")
+                }
+            }
+        val registry = DelegateKeyRegistry()
+
+        // Act
+        journeyState.bindKeyRegistry(registry)
+        task.bindKeyRegistry(registry)
+
+        // Assert
+        assertEquals(setOf("answer", "task-route/taskAnswer"), journeyState.cyaAnswerDelegateKeys)
+    }
+
+    @Test
+    fun `getEncodedDelegateValue retrieves the raw value from the JourneyStateService`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getValue("task-route/taskAnswer")).thenReturn("{\"1\":\"value\"}")
+        val journeyState = object : AbstractJourneyState(journeyStateService) {}
+
+        // Act
+        val result = journeyState.getEncodedDelegateValue("task-route/taskAnswer")
+
+        // Assert
+        assertEquals("{\"1\":\"value\"}", result)
+    }
 }
 
 class JourneyStateDelegateProviderTests {
@@ -221,6 +262,44 @@ class JourneyStateDelegateProviderTests {
         provider.registerKey("addedLater")
 
         assertThrows<JourneyInitialisationException> { registry.register("addedLater") }
+    }
+
+    @Test
+    fun `bindKeyRegistry registers route-scoped CYA answer keys as CYA answers`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        var answer: String? by provider.nullableDelegate("answer", isCyaAnswer = true)
+        var notAnAnswer: String? by provider.nullableDelegate("notAnAnswer")
+        provider.bindRoutePrefix("route")
+
+        provider.bindKeyRegistry(registry)
+
+        assertEquals(setOf("route/answer"), registry.cyaAnswerKeys)
+        assertEquals(setOf("route/answer"), provider.cyaAnswerKeys)
+    }
+
+    @Test
+    fun `a CYA answer key registered after bindKeyRegistry is registered as a CYA answer`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        provider.bindKeyRegistry(registry)
+
+        provider.registerKey("addedLater", isCyaAnswer = true)
+
+        assertEquals(setOf("addedLater"), registry.cyaAnswerKeys)
+    }
+
+    @Test
+    fun `cyaAnswerKeys returns the provider's own scoped CYA answer keys when no registry is bound`() {
+        val journeyStateService: JourneyStateService = mock()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        var answer: String? by provider.nullableDelegate("answer", isCyaAnswer = true)
+        var notAnAnswer: String? by provider.nullableDelegate("notAnAnswer")
+        provider.bindRoutePrefix("route")
+
+        assertEquals(setOf("route/answer"), provider.cyaAnswerKeys)
     }
 
     @Test

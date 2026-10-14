@@ -27,6 +27,11 @@ abstract class AbstractJourneyState(
 
     override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
+    override val cyaAnswerDelegateKeys: Set<String>
+        get() = delegateProvider.cyaAnswerKeys
+
+    override fun getEncodedDelegateValue(key: String): Any? = journeyStateService.getValue(key)
+
     override fun initializeState(seed: Any?): String {
         val journeyId = generateJourneyId(seed)
 

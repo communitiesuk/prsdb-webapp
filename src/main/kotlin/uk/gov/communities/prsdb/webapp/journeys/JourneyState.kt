@@ -14,6 +14,12 @@ interface JourneyState : DelegateKeysOwner {
 
     fun getSubmittedStepData(): Map<String, Any?>
 
+    /** The scoped keys of every delegate in the journey that holds an answer shown on a check your answers page. */
+    val cyaAnswerDelegateKeys: Set<String>
+
+    /** The value stored for the delegate with the given scoped key, in its encoded form. */
+    fun getEncodedDelegateValue(key: String): Any?
+
     val journeyId: String
     val journeyMetadata: JourneyMetadata
 

@@ -46,15 +46,20 @@ interface CheckYourAnswersJourneyState : JourneyState {
     }
 
     fun getCyaAnswersSnapshot(): String {
-        val cyaAnswerKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }.toSet()
-        return serializeCyaAnswers(cyaAnswerKeys)
+        val stepKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }
+        val delegateKeys = cyaAnswerDelegateKeys.map { CYA_ANSWER_DELEGATE_KEY_PREFIX + it }
+        return serializeCyaAnswers((stepKeys + delegateKeys).toSet())
     }
 
     fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
         serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot
 
-    private fun serializeCyaAnswers(keys: Set<String>): String =
-        CheckAnswersFormModel.serializeJourneyData(getSubmittedStepData().filterKeys { it in keys }.toSortedMap())
+    private fun serializeCyaAnswers(keys: Set<String>): String {
+        val (delegateKeys, stepKeys) = keys.partition { it.startsWith(CYA_ANSWER_DELEGATE_KEY_PREFIX) }
+        val stepAnswers = getSubmittedStepData().filterKeys { it in stepKeys }
+        val delegateAnswers = delegateKeys.associateWith { getEncodedDelegateValue(it.removePrefix(CYA_ANSWER_DELEGATE_KEY_PREFIX)) }
+        return CheckAnswersFormModel.serializeJourneyData((stepAnswers + delegateAnswers).toSortedMap())
+    }
 
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
         if (!cyaJourneys.containsKey(checkableStep.urlPath)) {
@@ -90,6 +95,9 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
+        // Distinguishes delegate entries from step data entries (keyed by URL path) in the CYA answers snapshot
+        const val CYA_ANSWER_DELEGATE_KEY_PREFIX = "delegate:"
+
         @Suppress("ktlint:standard:max-line-length")
         fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
             task: Task<TTaskState, *>,

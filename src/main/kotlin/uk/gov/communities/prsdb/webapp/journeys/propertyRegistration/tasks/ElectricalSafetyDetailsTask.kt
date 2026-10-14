@@ -46,7 +46,11 @@ class ElectricalSafetyDetailsTask(
     override val propertyOwnershipId: Long?
         get() = dependencies.propertyOwnershipId
 
-    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
+    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate(
+        "electricalUploadMap",
+        mapOf(),
+        isCyaAnswer = true,
+    )
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
 
     override fun makeSubJourney(state: ElectricalSafetyDetailState) =

@@ -11,16 +11,23 @@ class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) : DelegateKeysOwner {
     private val keysInUse = mutableSetOf<String>()
+    private val cyaAnswerKeysInUse = mutableSetOf<String>()
 
     private var registry: DelegateKeyRegistry? = null
 
-    fun registerKey(propertyKey: String) {
+    fun registerKey(
+        propertyKey: String,
+        isCyaAnswer: Boolean = false,
+    ) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }
-        registry?.register(scopedKey(propertyKey))
+        if (isCyaAnswer) {
+            cyaAnswerKeysInUse.add(propertyKey)
+        }
+        registry?.register(scopedKey(propertyKey), isCyaAnswer)
     }
 
     private var routePrefix: String? = null
@@ -31,15 +38,32 @@ class JourneyStateDelegateProvider(
 
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
         this.registry = registry
-        keysInUse.forEach { registry.register(scopedKey(it)) }
+        keysInUse.forEach { registry.register(scopedKey(it), it in cyaAnswerKeysInUse) }
     }
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
+    /**
+     * The scoped keys of delegates holding answers shown on a check your answers page.
+     *
+     * Once a registry is bound this covers the whole journey, otherwise only this provider's own delegates.
+     */
+    val cyaAnswerKeys: Set<String>
+        get() = registry?.cyaAnswerKeys ?: cyaAnswerKeysInUse.map(::scopedKey).toSet()
+
+    /**
+     * Creates a delegate for a nullable journey state property.
+     *
+     * @param propertyKey Unique key to store this property in the journey state
+     * @param isCyaAnswer Whether this property holds an answer shown on a check your answers page that is not also
+     * stored as step data, so changes to it are detected by the CYA answers snapshot
+     * @throws JourneyInitialisationException if the propertyKey is already in use
+     */
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
+        isCyaAnswer: Boolean = false,
     ): NullableJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey)
+        registerKey(propertyKey, isCyaAnswer)
         return NullableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 
@@ -57,14 +81,17 @@ class JourneyStateDelegateProvider(
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)
      * @param propertyKey Unique key to store this property in the journey state
+     * @param isCyaAnswer Whether this property holds an answer shown on a check your answers page that is not also
+     * stored as step data, so changes to it are detected by the CYA answers snapshot
      * @return A delegate that manages getting and setting the property value
      * @throws JourneyInitialisationException if the propertyKey is already in use
      */
     final inline fun <TJourney, reified TProperty : Any> requiredDelegate(
         propertyKey: String,
         defaultValue: TProperty? = null,
+        isCyaAnswer: Boolean = false,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey)
+        registerKey(propertyKey, isCyaAnswer)
         val delegate =
             RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, { scopedKey(propertyKey) }, serializer(), defaultValue)
         return delegate

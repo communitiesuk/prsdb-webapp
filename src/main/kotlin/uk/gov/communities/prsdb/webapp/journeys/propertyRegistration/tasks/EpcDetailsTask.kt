@@ -82,7 +82,7 @@ class EpcDetailsTask(
         by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
     override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider
         .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
-    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
+    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc", isCyaAnswer = true)
 
     override fun makeSubJourney(state: EpcDetailState) =
         subJourney(state) {
