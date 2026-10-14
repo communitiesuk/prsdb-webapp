@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps
 
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -28,13 +29,13 @@ class CompleteInvitationAcceptanceStepConfig(
     // rather than saving an invalid organisational landlord user.
     override fun beforeAttemptingToReachStep(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Boolean =
         invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId) != null &&
-            !userRolesService.getUserHasLandlordRole(SecurityContextHolder.getContext().authentication.name)
+            !userRolesService.getUserHasLandlordRole(getPrincipalName())
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
         val acceptedToken =
             invitationService.acceptInvitation(
                 journeyId = state.journeyId,
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = getPrincipalName(),
                 name = state.fullNameStep.formModel.notNullValue(NameFormModel::name),
                 email =
                     state.emailAddressStep.formModel.notNullValue(
@@ -44,6 +45,10 @@ class CompleteInvitationAcceptanceStepConfig(
         invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(acceptedToken)
         securityContextService.refreshContext()
     }
+
+    private fun getPrincipalName(): String = (SecurityContextHolder.getContext().authentication.principal as OidcUser).name
+
+    // TODO: PDJB-1775: If this step becomes the final step in the journey, add a standard end of journey > delete block here
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCompleteInvitationAcceptanceStep")

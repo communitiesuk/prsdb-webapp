@@ -21,6 +21,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
@@ -492,6 +493,7 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
         whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
         whenever(invitation.role).thenReturn(OrganisationalLandlordUserRole.EDITOR)
+        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
         whenever(invitation.token).thenReturn(token)
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(baseUserId)).thenReturn(baseUser)
         whenever(
@@ -534,6 +536,7 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
         whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
         whenever(invitation.role).thenReturn(OrganisationalLandlordUserRole.ADMIN)
+        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(baseUserId)).thenReturn(baseUser)
         whenever(
             mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
