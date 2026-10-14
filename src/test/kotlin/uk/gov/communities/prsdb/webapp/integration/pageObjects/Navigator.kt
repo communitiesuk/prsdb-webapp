@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
+import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
@@ -105,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbac
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.AreYouSurePageCancelLettingAgentDelegation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
@@ -1227,6 +1229,11 @@ class Navigator(
     fun goToInviteOrganisationalLandlordUserPage(): InviteOrganisationalLandlordUserFormPage {
         navigate(InviteOrganisationalLandlordUserController.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH)
         return createValidPage(page, InviteOrganisationalLandlordUserFormPage::class)
+    }
+
+    fun goToChangeOrgTeamMemberAccessLevelPage(otherOrganisationalLandlordUserId: Long): AccessLevelPage {
+        navigate(ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelPath(otherOrganisationalLandlordUserId))
+        return createValidPage(page, AccessLevelPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
