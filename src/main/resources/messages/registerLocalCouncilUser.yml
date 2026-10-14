@@ -1,5 +1,6 @@
 title: Register as a Local Council user
-journeyName: Registering as a local council user
+landingPage:
+  heading: Registering as a local council user
 requirementsList:
   intro: 'When registering as a local council user, you’ll be asked for:'
   personalDetails: 'your personal details, like your name'
