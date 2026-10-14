@@ -145,6 +145,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -155,13 +156,16 @@ import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileDownloader
 import uk.gov.communities.prsdb.webapp.services.PaymentReferenceParameterService
+import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
 import java.net.URI
 import java.nio.file.Path
+import java.time.LocalDate
 import java.time.MonthDay
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -237,6 +241,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoSpyBean
     private lateinit var addressAvailabilityService: AddressAvailabilityService
 
+    @MockitoSpyBean
+    private lateinit var paymentService: PaymentService
+
     @Autowired
     private lateinit var paymentRepository: PaymentRepository
 
@@ -295,7 +302,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     // payment service needs to link the payment to the journey
     private fun ensureIncompletePropertyExistsForCurrentJourney(page: Page): String {
         val journeyId =
-            UriComponentsBuilder.fromUriString(page.url()).build().queryParams.getFirst(JourneyIdProvider.PARAMETER_NAME)
+            UriComponentsBuilder
+                .fromUriString(page.url())
+                .build()
+                .queryParams
+                .getFirst(JourneyIdProvider.PARAMETER_NAME)
                 ?: error("No journey ID in ${page.url()}")
         if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
             val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
@@ -487,6 +498,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             paymentSummaryPage.form.submit()
 
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+            verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `submitting the payment summary with a quote from a previous day refreshes the summary without creating a payment`(
+            page: Page,
+        ) {
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            val staleQuote =
+                PropertyRegistrationPaymentQuote(
+                    amountInPence = 1000,
+                    quoteDate = today.minusDays(1),
+                    renewalDate = today.plusYears(1),
+                )
+            doReturn(staleQuote).doCallRealMethod().whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
+
+            paymentSummaryPage.form.submit()
+
+            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
         }
 
@@ -2440,6 +2476,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `registering a property does not update the registering landlord's anniversary when it is already set`(page: Page) {
             val existingAnniversary = MonthDay.of(1, 1)
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            val chargeableQuote =
+                PropertyRegistrationPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
+            doReturn(chargeableQuote).whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
             jdbcTemplate.update(
                 "UPDATE landlord SET anniversary_day = ?, anniversary_month = ?" +
                     " WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:UVWXY'",

@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -92,9 +93,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ValidateTokenPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -104,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJoint
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.AreYouSurePageCancelLettingAgentDelegation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1220,6 +1223,11 @@ class Navigator(
         return createValidPage(page, TeamMembersPage::class)
     }
 
+    fun goToInviteOrganisationalLandlordUserPage(): InviteOrganisationalLandlordUserFormPage {
+        navigate(InviteOrganisationalLandlordUserController.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH)
+        return createValidPage(page, InviteOrganisationalLandlordUserFormPage::class)
+    }
+
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
         navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
         return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
@@ -1711,9 +1719,16 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
-    fun goToAcceptOrganisationalLandlordInvitationJourney(token: String): ValidateTokenPage {
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): CheckUserIsLandlordPage {
+        // TODO PDJB-1829: CheckUserIsLandlordStep is currently a placeholder, so a valid token lands here. Once that step decides
+        // whether the invitee is already a landlord user, this should navigate on to the journey's start page and return that instead.
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
-        return createValidPage(page, ValidateTokenPage::class)
+        return createValidPage(page, CheckUserIsLandlordPage::class)
+    }
+
+    fun goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(token: String): InvalidLinkPage {
+        navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
+        return createValidPage(page, InvalidLinkPage::class)
     }
 
     fun goToAcceptOrganisationalLandlordInvitationFullNamePage(): FullNamePage {

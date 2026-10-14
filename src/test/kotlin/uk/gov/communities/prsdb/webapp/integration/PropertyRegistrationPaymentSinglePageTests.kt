@@ -26,7 +26,8 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         checkAnswersPage.confirm()
 
         val paymentSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-        assertThat(paymentSummaryPage.heading).containsText("Payment summary")
+        assertThat(paymentSummaryPage.heading).containsText("Property fee")
+        assertThat(paymentSummaryPage.form.submitButton).containsText("Go to payment")
     }
 
     @Test
