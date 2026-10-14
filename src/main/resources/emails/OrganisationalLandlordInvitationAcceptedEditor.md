@@ -4,7 +4,7 @@ You’ve joined ((organisation name)).
 
 # What you can do
 
-Your access level is ((access level)).
+Your access level is editor.
 
 You can:
 

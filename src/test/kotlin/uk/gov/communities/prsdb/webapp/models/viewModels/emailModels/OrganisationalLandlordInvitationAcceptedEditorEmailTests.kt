@@ -19,7 +19,6 @@ class OrganisationalLandlordInvitationAcceptedEditorEmailTests {
             hashMapOf(
                 "recipient name" to "Jane Smith",
                 "organisation name" to "Example Organisation",
-                "access level" to "editor",
                 "dashboard url" to "https://www.prsd.gov.uk/landlord/dashboard",
             ),
             email.toHashMap(),

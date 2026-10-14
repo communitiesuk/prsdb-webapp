@@ -9,7 +9,6 @@ data class OrganisationalLandlordInvitationAcceptedEditorEmail(
 ) : EmailTemplateModel {
     private val recipientNameKey = "recipient name"
     private val organisationNameKey = "organisation name"
-    private val accessLevelKey = "access level"
     private val dashboardUrlKey = "dashboard url"
 
     override val template = EmailTemplate.ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EDITOR_EMAIL
@@ -18,7 +17,6 @@ data class OrganisationalLandlordInvitationAcceptedEditorEmail(
         hashMapOf(
             recipientNameKey to recipientName,
             organisationNameKey to organisationName,
-            accessLevelKey to "editor",
             dashboardUrlKey to dashboardUrl.toASCIIString(),
         )
 }
