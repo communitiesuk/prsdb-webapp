@@ -609,6 +609,44 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         verify(mockGovUkPayClient, never()).getPayment(any())
     }
 
+    @Test
+    fun `getLatestSucceededPaymentForProperty returns the property's most recent succeeded payment`() {
+        // Arrange
+        val property = propertyOwnershipRepository.findById(SUCCEEDED_PAYMENT_PROPERTY_OWNERSHIP_ID).get()
+        val incompleteProperty = landlordIncompletePropertiesRepository.findById(INCOMPLETE_PROPERTY_ID).get()
+        paymentRepository.save(
+            createPayment(
+                paymentId = NEWER_SUCCEEDED_PAYMENT_ID,
+                paymentCreatedAt = Instant.now(),
+                status = PaymentStatus.SUCCEEDED,
+                incompleteProperty = incompleteProperty,
+            ).apply { associateWithProperty(property) },
+        )
+        paymentRepository.save(
+            createPayment(
+                paymentId = NEWEST_FAILED_PAYMENT_ID,
+                paymentCreatedAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                status = PaymentStatus.FAILED,
+                incompleteProperty = incompleteProperty,
+            ).apply { associateWithProperty(property) },
+        )
+
+        // Act
+        val latestPayment = paymentService.getLatestSucceededPaymentForProperty(property)
+
+        // Assert
+        assertEquals(NEWER_SUCCEEDED_PAYMENT_ID, latestPayment?.paymentId)
+    }
+
+    @Test
+    fun `getLatestSucceededPaymentForProperty returns null when the property has no succeeded payment`() {
+        // Act
+        val latestPayment = paymentService.getLatestSucceededPaymentForProperty(getProperty())
+
+        // Assert
+        assertNull(latestPayment)
+    }
+
     private fun getProperty(): PropertyOwnership = propertyOwnershipRepository.findById(PROPERTY_OWNERSHIP_ID).get()
 
     private fun deleteJourney() = savedJourneyStateRepository.deleteByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID)
@@ -636,8 +674,11 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         private const val FAILED_PAYMENT_ID = "failed-payment"
         private const val CANCELLED_PAYMENT_ID = "cancelled-payment"
         private const val LATEST_PAYMENT_ID = "latest-payment"
+        private const val NEWER_SUCCEEDED_PAYMENT_ID = "newer-succeeded-payment"
+        private const val NEWEST_FAILED_PAYMENT_ID = "newest-failed-payment"
         private const val LANDLORD_ID = 1L
         private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val SUCCEEDED_PAYMENT_PROPERTY_OWNERSHIP_ID = 51L
         private const val USER_ID = "urn:fdc:gov.uk:2022:UVWXY"
         private const val JOURNEY_ID = "example-incomplete-journey-with-payments"
         private val INCOMPLETE_PROPERTY_ID = LandlordIncompletePropertyId(USER_ID, 6L)
