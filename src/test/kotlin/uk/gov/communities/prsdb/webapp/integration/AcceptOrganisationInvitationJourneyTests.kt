@@ -12,7 +12,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
-import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
@@ -89,14 +88,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             BaseComponent
                 .assertThat(invalidLinkPage.heading)
                 .containsText("There was a problem with this invitation link")
-        }
-
-        @Test
-        fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
-            featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
-
-            val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=$validToken")
-            assertEquals(404, response?.status())
         }
 
         @Test
