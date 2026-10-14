@@ -36,7 +36,9 @@ userIsAlreadyLandlord:
     paragraph:
       one: To accept this invitation you create a GOV.UK One Login with a different email address.
       two: This might be your work email instead of your personal email.
-  signOutLink: Sign out of GOV.UK One Login.
+  signOutLink:
+    link: Sign out of GOV.UK One Login
+    afterLink: .
 email:
   error:
     missing: Enter your email address

@@ -30,8 +30,9 @@
                 </p>
                 <p class="govuk-body">
                     <a class="govuk-link" th:href="@{${confirmSignOutUrl}}"
-                       th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink}">
-                        acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink</a>
+                       th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link}">
+                        acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link</a><span
+                        th:remove="tag" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink}">acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink</span>
                 </p>
             </div>
         </div>

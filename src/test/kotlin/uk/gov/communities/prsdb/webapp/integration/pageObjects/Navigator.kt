@@ -1720,6 +1720,8 @@ class Navigator(
         return createValidPage(page, EnterPasswordPage::class)
     }
 
+    // The two functions below navigate identically. Which page the journey lands on is decided by the check user is
+    // landlord step, and so by whether the test's seed data gives the signed-in mock user a landlord role.
     fun goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token: String): JoinOrganisationPage {
         navigate("${AcceptOrganisationalLandlordUserInvitationController.ACCEPT_INVITATION_ROUTE}?token=$token")
         return createValidPage(page, JoinOrganisationPage::class)

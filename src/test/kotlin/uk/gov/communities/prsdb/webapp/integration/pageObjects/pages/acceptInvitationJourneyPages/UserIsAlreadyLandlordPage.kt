@@ -11,5 +11,5 @@ class UserIsAlreadyLandlordPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${UserIsAlreadyLandlordStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val signOutLink = Link.byText(page, "Sign out of GOV.UK One Login.")
+    val signOutLink = Link.byText(page, "Sign out of GOV.UK One Login")
 }

@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AcceptOrganisationInvitationJourneyTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-invitation-mockuser-not-landlord.sql")) {
+    IntegrationTestWithMutableData(listOf("data-local.sql", "data-overlay-mockuser-is-not-a-landlord.sql")) {
     private val validToken = "1234abcd-5678-abcd-1234-567abcd2222a"
 
     private val expiredToken = "1234abcd-5678-abcd-1234-567abcd2222d"
@@ -127,8 +127,8 @@ class AcceptOrganisationInvitationJourneyTests :
     inner class UserIsAlreadyAnOrganisationalLandlordUser : NestedIntegrationTestWithMutableData(
         listOf(
             "data-local.sql",
-            "data-org-invitation-mockuser-not-landlord.sql",
-            "data-org-invitation-mockuser-is-org-landlord-user.sql",
+            "data-overlay-mockuser-is-not-a-landlord.sql",
+            "data-overlay-mockuser-is-org-landlord-user.sql",
         ),
     ) {
         @Test

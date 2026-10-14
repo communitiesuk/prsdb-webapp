@@ -45,6 +45,8 @@ class CheckUserIsLandlordStepConfig(
         }
 }
 
+// This step stays requestable because its route, unlike the preceding validate token step's, is not permitAll'd, making
+// it the first authenticated URL in the journey and so what redirects an anonymous invitee to One Login.
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckUserIsLandlordStep")
 final class CheckUserIsLandlordStep(
     stepConfig: CheckUserIsLandlordStepConfig,
