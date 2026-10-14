@@ -13,6 +13,7 @@ class UpdateOccupancyCheckYourAnswersStepConfig(
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.checkOccupancy.notOccupied.pageTitle",
             "insetText" to true,
             "summaryName" to "forms.update.checkOccupancy.notOccupied.summaryName",
             "summaryListData" to occupancyDetailsHelper.getOccupancyStatusSummaryList(state),
