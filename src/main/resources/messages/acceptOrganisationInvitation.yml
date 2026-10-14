@@ -41,12 +41,12 @@ confirmation:
   emailSent: We’ve sent a confirmation email to {0,,emailAddress}
   whatYouCanDo:
     heading: What you can do
+    registerProperty: register rental properties
     administrator:
       paragraph: 'Your access level is administrator, you can:'
       updateProperty: update your rental property information
+      manageTeamMembers: manage team member’s accounts
     editor:
       paragraph: 'Your access level is editor, you can:'
       updateProperty: update rental property information
-    registerProperty: register rental properties
-    manageTeamMembers: manage team member’s accounts
   goToDashboard: Go to dashboard
