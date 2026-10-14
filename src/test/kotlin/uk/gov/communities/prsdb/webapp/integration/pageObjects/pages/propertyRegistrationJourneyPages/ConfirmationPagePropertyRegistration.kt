@@ -26,8 +26,7 @@ class ConfirmationPagePropertyRegistration(
     class PaymentSummaryList(
         page: Page,
     ) : SummaryList(page) {
-        // A pattern is used so that this row's key does not also match "Payment date"
-        val paymentRow = getRow(Pattern.compile("^\\s*Payment\\s*$"))
+        val paymentRow = getRow(Pattern.compile("^Payment$"))
         val paymentDateRow = getRow("Payment date")
         val renewalDateRow = getRow("Renewal date")
     }
