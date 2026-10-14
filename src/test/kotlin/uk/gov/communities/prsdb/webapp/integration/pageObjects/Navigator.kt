@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.C
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
@@ -62,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
@@ -1218,6 +1220,11 @@ class Navigator(
     fun goToTeamMembers(): TeamMembersPage {
         navigate(TeamMembersController.TEAM_MEMBERS_ROUTE)
         return createValidPage(page, TeamMembersPage::class)
+    }
+
+    fun goToChangeOrgTeamMemberAccessLevelPage(otherOrganisationalLandlordUserId: Long): AccessLevelPage {
+        navigate(ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelPath(otherOrganisationalLandlordUserId))
+        return createValidPage(page, AccessLevelPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
