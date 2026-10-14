@@ -40,7 +40,7 @@ class InviteOrganisationalLandlordUserStepConfigTests {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(organisation)
-        whenever(mockInvitationService.getInvitedAndMemberEmails(organisation))
+        whenever(mockInvitationService.getPendingInvitedAndMemberEmails(organisation))
             .thenReturn(listOf("invited@example.com", "member@example.com"))
 
         // Act

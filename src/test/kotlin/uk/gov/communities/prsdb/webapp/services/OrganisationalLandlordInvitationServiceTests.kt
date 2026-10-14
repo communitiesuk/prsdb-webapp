@@ -17,6 +17,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
@@ -25,8 +26,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.net.URI
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -157,6 +161,102 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns the invitation when it is pending`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        val organisationalLandlord = MockLandlordData.createOrgLandlord(name = "Test Organisation")
+        val invitation =
+            MockLandlordData.createOrganisationalLandlordInvitation(organisationalLandlord = organisationalLandlord)
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertEquals(invitation, result)
+    }
+
+    @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns null when the invitation has expired`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        val expiredInvitation =
+            MockLandlordData.createOrganisationalLandlordInvitation(
+                createdDate =
+                    Instant.now().minus(
+                        (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
+                        ChronoUnit.DAYS,
+                    ),
+            )
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(expiredInvitation)
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertNull(result)
+    }
+
+    @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns null when the invitation is hidden`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        val hiddenInvitation = MockLandlordData.createOrganisationalLandlordInvitation(isHidden = true)
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(hiddenInvitation)
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertNull(result)
+    }
+
+    @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns null when no invitation matches the stored token`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(null)
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertNull(result)
+    }
+
+    @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns null when the journey has no stored token`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(null)
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertNull(result)
+        verifyNoInteractions(mockInvitationRepository)
+    }
+
+    @Test
+    fun `getPendingInvitationForJourneyIdOrNull returns null when the stored token is malformed`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to "not-a-uuid"))
+
+        // Act
+        val result = invitationService.getPendingInvitationForJourneyIdOrNull(journeyId)
+
+        // Assert
+        assertNull(result)
+        verifyNoInteractions(mockInvitationRepository)
+    }
+
+    @Test
     fun `createInvitation saves an invitation for the organisation with the given email, role and a token`() {
         // Arrange
         val organisation = createOrgLandlord()
@@ -220,7 +320,13 @@ class OrganisationalLandlordInvitationServiceTests {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
-            listOf(OrganisationalLandlordInvitation(UUID.randomUUID(), "invitee@example.com", organisation, EDITOR)),
+            listOf(
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "invitee@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                ),
+            ),
         )
 
         // Act
@@ -228,6 +334,34 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `createInvitation saves an invitation when the email address's previous invitation has expired`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "invitee@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                    createdDate =
+                        Instant.now().minus(
+                            (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
+                            ChronoUnit.DAYS,
+                        ),
+                ),
+            ),
+        )
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
+            .thenReturn(URI("https://example.com/accept-invitation"))
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        verify(mockInvitationRepository).save(any())
     }
 
     @Test
@@ -246,13 +380,21 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getInvitedAndMemberEmails returns the organisation's invited and team member email addresses`() {
+    fun `getPendingInvitedAndMemberEmails returns the organisation's invited and team member email addresses`() {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
             listOf(
-                OrganisationalLandlordInvitation(UUID.randomUUID(), "first@example.com", organisation, EDITOR),
-                OrganisationalLandlordInvitation(UUID.randomUUID(), "second@example.com", organisation, EDITOR),
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "first@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                ),
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "second@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                ),
             ),
         )
         whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
@@ -260,9 +402,47 @@ class OrganisationalLandlordInvitationServiceTests {
         )
 
         // Act
-        val emails = invitationService.getInvitedAndMemberEmails(organisation)
+        val emails = invitationService.getPendingInvitedAndMemberEmails(organisation)
 
         // Assert
         assertEquals(listOf("first@example.com", "second@example.com", "member@example.com"), emails)
+    }
+
+    @Test
+    fun `getPendingInvitedAndMemberEmails excludes expired and hidden invitations`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
+            listOf(
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "pending@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                ),
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "expired@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                    createdDate =
+                        Instant.now().minus(
+                            (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
+                            ChronoUnit.DAYS,
+                        ),
+                ),
+                MockLandlordData.createOrganisationalLandlordInvitation(
+                    invitedEmail = "hidden@example.com",
+                    organisationalLandlord = organisation,
+                    role = EDITOR,
+                    isHidden = true,
+                ),
+            ),
+        )
+        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(emptyList())
+
+        // Act
+        val emails = invitationService.getPendingInvitedAndMemberEmails(organisation)
+
+        // Assert
+        assertEquals(listOf("pending@example.com"), emails)
     }
 }

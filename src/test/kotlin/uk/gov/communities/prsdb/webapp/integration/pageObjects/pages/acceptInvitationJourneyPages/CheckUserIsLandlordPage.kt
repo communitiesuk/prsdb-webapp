@@ -2,14 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvi
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithRadios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
 
-class ValidateTokenPage(
+class CheckUserIsLandlordPage(
     page: Page,
-) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${CheckUserIsLandlordStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val form = FormWithRadios(page)
+    val form = PostForm(page)
 }
