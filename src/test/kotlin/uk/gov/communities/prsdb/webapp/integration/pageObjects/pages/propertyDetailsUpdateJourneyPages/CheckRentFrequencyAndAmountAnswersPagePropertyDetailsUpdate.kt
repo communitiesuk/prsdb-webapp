@@ -13,4 +13,6 @@ class CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate(
         LandlordUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(
             urlArguments["propertyOwnershipId"]!!.toLong(),
         ) + "/${UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your rent answers"
+}

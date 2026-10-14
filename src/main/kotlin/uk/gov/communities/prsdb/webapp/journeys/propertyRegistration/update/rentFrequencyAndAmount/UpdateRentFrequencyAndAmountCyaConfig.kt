@@ -23,6 +23,7 @@ class UpdateRentFrequencyAndAmountCyaConfig(
     override fun getStepSpecificContent(state: UpdateRentFrequencyAndAmountJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.checkRentFrequencyAndAmount.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,

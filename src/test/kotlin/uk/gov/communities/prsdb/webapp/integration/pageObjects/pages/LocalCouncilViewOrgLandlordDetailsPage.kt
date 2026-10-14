@@ -10,4 +10,7 @@ class LocalCouncilViewOrgLandlordDetailsPage(
 ) : OrgLandlordDetailsBasePage(
         page,
         LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(urlArguments["id"]!!.toLong()),
-    )
+    ) {
+    override val expectedTitleHeading
+        get() = "Landlord record for ${page.locator("h1").first().textContent().trim()}"
+}

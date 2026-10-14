@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <th:block id="main-content"
-              th:replace="~{fragments/layout :: layout(#{switchToIndividual.title}, ~{::#main-content/content()}, false)}">
+              th:replace="~{fragments/layout :: layout(#{switchToIndividual.success.banner.heading}, ~{::#main-content/content()}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">

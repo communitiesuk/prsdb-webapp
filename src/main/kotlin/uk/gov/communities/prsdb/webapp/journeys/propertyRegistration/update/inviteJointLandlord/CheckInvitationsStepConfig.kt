@@ -19,6 +19,7 @@ class CheckInvitationsStepConfig :
 
     override fun getStepSpecificContent(state: InviteJointLandlordJourneyState) =
         mapOf(
+            "pageTitleOverride" to "inviteJointLandlord.checkInvitations.pageTitle",
             "summaryName" to "inviteJointLandlord.checkInvitations.summaryName",
             "summaryListData" to getInvitationsSummaryRow(state),
             "submitButtonText" to "inviteJointLandlord.checkInvitations.submitButtonText",

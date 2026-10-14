@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 class OrgCharityCyaPageUpdateLandlordDetails(
     page: Page,
 ) : BasePage(page, "$UPDATE_ORG_CHARITY_ROUTE/${UpdateOrganisationCharityCyaStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your charity answers"
+
     val form = PostForm(page)
     val summaryList = CharityCyaSummaryList(page)
     val mainContent: Locator = page.locator("main")

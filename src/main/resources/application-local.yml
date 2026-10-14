@@ -103,8 +103,8 @@ plausible:
 gov-uk-pay:
   base-url: http://localhost:${server.port}/local/gov-uk-pay
   api-key: local-gov-uk-pay-api-key
-  annual-payment-amount-in-pence: 2000
-  gratis-period-end-date: 2020-01-01
+  annual-payment-amount-in-pence: 6500
+  gratis-period-end-date: 2026-10-14
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com

@@ -11,4 +11,6 @@ class LeadTrusteeSelectAddressPageUpdateLeadTrustee(
 ) : SelectAddressFormPage(
         page,
         "$UPDATE_LEAD_TRUSTEE_ROUTE/${TrusteeAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Select the lead trustee’s address"
+}

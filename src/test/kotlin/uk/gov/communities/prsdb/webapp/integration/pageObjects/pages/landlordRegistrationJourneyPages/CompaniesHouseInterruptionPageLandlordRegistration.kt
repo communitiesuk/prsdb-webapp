@@ -7,4 +7,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 
 class CompaniesHouseInterruptionPageLandlordRegistration(
     page: Page,
-) : InterruptionPage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgCompaniesHouseInterruptionStep.ROUTE_SEGMENT}")
+) : InterruptionPage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgCompaniesHouseInterruptionStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading
+        get() =
+            when (heading.textContent().trim()) {
+                "Are you sure you want to change this?" -> "Are you sure you want to change your Companies House status?"
+                else -> null
+            }
+}

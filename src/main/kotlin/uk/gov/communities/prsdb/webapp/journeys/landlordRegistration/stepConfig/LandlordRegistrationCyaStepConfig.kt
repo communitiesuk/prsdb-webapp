@@ -170,6 +170,7 @@ class LandlordRegistrationCyaStepConfig(
     // Individual landlord content
     private fun getIndividualStepContent(state: LandlordRegistrationState): Map<String, Any?> =
         mapOf(
+            "pageTitleOverride" to "registerAsALandlord.checkAnswers.pageTitle",
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndContinue",
