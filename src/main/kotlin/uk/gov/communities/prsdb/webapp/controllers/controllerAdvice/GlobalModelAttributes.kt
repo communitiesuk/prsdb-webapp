@@ -88,10 +88,10 @@ class GlobalModelAttributes(
         val uri = request.requestURI
         // Forwarded error pages are rendered under /error, so use the originally requested URI for the service name
         val originalUri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI) as? String ?: uri
-        val serviceNameKey = if (originalUri.isLocalCouncilServicePage()) "localCouncilServiceName" else "serviceName"
+        val serviceNameKey = if (originalUri.isLocalCouncilOrSystemOperatorPage()) "localCouncilServiceName" else "serviceName"
         val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
         model.addAttribute("serviceName", serviceName)
-        if (uri.isLocalCouncilServicePage() || uri.startsWith(LETTING_AGENT_ROUTES_PREFIX)) {
+        if (uri.isLocalCouncilOrSystemOperatorPage() || uri.startsWith(LETTING_AGENT_ROUTES_PREFIX)) {
             model.addAttribute("showServiceNavigation", true)
         }
 
@@ -107,7 +107,7 @@ class GlobalModelAttributes(
         }
     }
 
-    private fun String.isLocalCouncilServicePage(): Boolean =
+    private fun String.isLocalCouncilOrSystemOperatorPage(): Boolean =
         startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT/") || startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")
 
     private fun getCurrentNonce(): String {
