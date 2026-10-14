@@ -161,14 +161,14 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
         assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
         assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
-        
+
         val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
         assertThat(confirmationPage.accessLevel)
             .containsText("Your access level is ${if (isAdmin) "administrator" else "editor"}")
         assertThat(confirmationPage.permissions).hasCount(if (isAdmin) 3 else 2)
         assertThat(confirmationPage.permissions.nth(1))
-        
-        BaseComponent.assertThat(confirmationPage.dashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
+
+        BaseComponent.assertThat(confirmationPage.goToDashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
 
         val user = organisationalLandlordUserRepository.findByBaseUser_Id(INVITATION_TEST_USER_ID).single()
         assertEquals("Jane Smith", user.name)
@@ -178,7 +178,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
 
-        confirmationPage.dashboardLink.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
 
         val response = page.navigate("http://localhost:$port$TEAM_MEMBERS_ROUTE")

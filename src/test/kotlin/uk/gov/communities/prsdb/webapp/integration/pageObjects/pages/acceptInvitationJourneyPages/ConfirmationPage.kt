@@ -15,5 +15,5 @@ class ConfirmationPage(
     val confirmationEmail = page.locator("#confirmation-email")
     val accessLevel = page.locator("#access-level")
     val permissions = page.locator("#permissions li")
-    val dashboardLink = Link(page.locator("#go-to-dashboard"))
+    val goToDashboardLink = Link(page.locator("#go-to-dashboard"))
 }
