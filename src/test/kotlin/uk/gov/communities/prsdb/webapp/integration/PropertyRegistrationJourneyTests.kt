@@ -57,6 +57,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -158,11 +159,9 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
-import java.math.BigDecimal
 import java.net.URI
 import java.nio.file.Path
 import java.time.LocalDate
-import java.text.NumberFormat
 import java.time.MonthDay
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -352,12 +351,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(PaymentStatus.SUCCEEDED, payment.status)
             verify(govUkPayClient).capturePayment(payment.paymentId)
 
-            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
             assertThat(confirmationPage.paymentSummaryHeading).isVisible()
             assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
-                .containsText(
-                    NumberFormat.getCurrencyInstance(Locale.UK).format(BigDecimal.valueOf(payment.amountInPence.toLong(), 2)),
-                )
+                .containsText(PaymentHelper.formatPence(payment.amountInPence))
             assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
                 .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
             assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)

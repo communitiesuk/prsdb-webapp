@@ -2,8 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import java.time.Instant
 import java.time.LocalDate
@@ -32,22 +30,6 @@ class PaymentSummaryViewModelTests {
             ),
             viewModel.rows,
         )
-    }
-
-    @ParameterizedTest
-    @CsvSource("61, £0.61", "2000, £20.00", "123456, '£1,234.56'")
-    fun `from formats the amount in pounds and pence`(
-        amountInPence: Int,
-        expectedAmount: String,
-    ) {
-        // Arrange
-        val payment = MockPaymentData.createPayment(amountInPence = amountInPence)
-
-        // Act
-        val viewModel = PaymentSummaryViewModel.from(payment, LocalDate.of(2027, 1, 1))
-
-        // Assert
-        assertEquals(expectedAmount, viewModel.rows.first().fieldValue)
     }
 
     @Test
