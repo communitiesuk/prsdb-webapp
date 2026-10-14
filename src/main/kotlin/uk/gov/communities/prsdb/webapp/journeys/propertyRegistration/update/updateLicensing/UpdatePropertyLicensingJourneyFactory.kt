@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -182,7 +181,7 @@ class UpdateLicensingJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val allowProvideLicensingLaterRoute: Boolean = false

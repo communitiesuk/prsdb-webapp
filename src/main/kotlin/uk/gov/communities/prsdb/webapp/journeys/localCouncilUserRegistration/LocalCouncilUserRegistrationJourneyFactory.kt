@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -122,7 +121,7 @@ class LocalCouncilUserRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
     override var cyaJourneys: Map<String, String> = mapOf()
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)

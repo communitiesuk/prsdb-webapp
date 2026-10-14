@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tenancyDetails
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -196,7 +195,7 @@ class UpdateTenancyDetailsJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "tenancy details"),
     UpdateTenancyDetailsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
