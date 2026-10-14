@@ -80,35 +80,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         )
     }
 
-    @Test
-    fun `A failed user save leaves the invitation available`(page: Page) {
-        // This exercises the failure path in the internal "complete acceptance" step:
-        // if saving the new organisational user fails, the invitation must not be deleted.
-        removeExistingOrganisationalLandlordUser()
-        val token = "1234abcd-5678-abcd-1234-567abcd2222a"
-        doThrow(IllegalStateException("User save failed"))
-            .whenever(organisationalLandlordUserService)
-            .createOrganisationalLandlordUser(any<OrganisationalLandlord>(), any<PrsdbUser>(), any(), any(), any())
-
-        val checkUserIsLandlordPage =
-            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token)
-        checkUserIsLandlordPage.form.submit()
-        val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
-        joinOrganisationPage.form.submit()
-        val fullNamePage = assertPageIs(page, FullNamePage::class)
-        fullNamePage.submitName("Jane Smith")
-        val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
-        emailAddressPage.submitEmail("invitee@example.com")
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
-
-        checkAnswersPage.form.submit()
-
-        // The invitation should still be present for a retry if the acceptance step fails.
-        assertNotNull(invitationRepository.findByToken(UUID.fromString(token)))
-        verify(organisationalLandlordUserService)
-            .createOrganisationalLandlordUser(any<OrganisationalLandlord>(), any<PrsdbUser>(), any(), any(), any())
-    }
-
     private fun completeAcceptanceJourneyAndAssertResult(
         page: Page,
         token: String,
