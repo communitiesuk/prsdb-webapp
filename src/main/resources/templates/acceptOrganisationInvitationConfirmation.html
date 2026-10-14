@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{acceptOrganisationInvitation.confirmation.banner.heading}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{acceptOrganisationInvitation.confirmation.banner.heading}, null)}">
+        </div>
+        <p id="joined-organisation" class="govuk-body"
+           th:text="#{acceptOrganisationInvitation.confirmation.joinedOrganisation(${organisationName})}">
+            acceptOrganisationInvitation.confirmation.joinedOrganisation
+        </p>
+        <p id="confirmation-email" class="govuk-body"
+           th:text="#{acceptOrganisationInvitation.confirmation.emailSent(${emailAddress})}">
+            acceptOrganisationInvitation.confirmation.emailSent
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.heading}">
+            acceptOrganisationInvitation.confirmation.whatYouCanDo.heading
+        </h2>
+        <th:block th:with="role=${isAdmin ? 'administrator' : 'editor'}">
+            <p id="access-level" class="govuk-body"
+               th:text="#{${'acceptOrganisationInvitation.confirmation.whatYouCanDo.' + role + '.paragraph'}}">
+                acceptOrganisationInvitation.confirmation.whatYouCanDo.paragraph
+            </p>
+            <ul id="permissions" class="govuk-list govuk-list--bullet">
+                <li th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty}">
+                    acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty
+                </li>
+                <li th:text="#{${'acceptOrganisationInvitation.confirmation.whatYouCanDo.' + role + '.updateProperty'}}">
+                    acceptOrganisationInvitation.confirmation.whatYouCanDo.updateProperty
+                </li>
+                <li th:if="${isAdmin}" th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.manageTeamMembers}">
+                    acceptOrganisationInvitation.confirmation.whatYouCanDo.manageTeamMembers
+                </li>
+            </ul>
+        </th:block>
+        <p class="govuk-body">
+            <a id="go-to-dashboard" class="govuk-link" th:href="@{${dashboardUrl}}"
+               th:text="#{acceptOrganisationInvitation.confirmation.goToDashboard}">acceptOrganisationInvitation.confirmation.goToDashboard</a>
+        </p>
+    </div>
+</main>
+</html>
