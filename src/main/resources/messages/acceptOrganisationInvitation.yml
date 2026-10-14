@@ -34,3 +34,19 @@ checkAnswers:
     organisation: Organisation
     name: Name
     emailAddress: Email address
+confirmation:
+  banner:
+    heading: Invitation accepted
+  joinedOrganisation: You have joined {0,,organisationName} on the service.
+  emailSent: We’ve sent a confirmation email to {0,,emailAddress}
+  whatYouCanDo:
+    heading: What you can do
+    administrator:
+      paragraph: 'Your access level is administrator, you can:'
+      updateProperty: update your rental property information
+    editor:
+      paragraph: 'Your access level is editor, you can:'
+      updateProperty: update rental property information
+    registerProperty: register rental properties
+    manageTeamMembers: manage team member’s accounts
+  goToDashboard: Go to dashboard
