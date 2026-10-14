@@ -10,4 +10,7 @@ class LocalCouncilViewLandlordDetailsPage(
     urlArguments: Map<String, String>,
 ) : LandlordDetailsBasePage(page, LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(urlArguments["id"]!!.toLong())) {
     val insetText = InsetText(page)
+
+    override val expectedTitleHeading
+        get() = "Landlord record for ${page.locator("h1").first().textContent().trim()}"
 }
