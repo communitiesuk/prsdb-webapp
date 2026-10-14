@@ -373,14 +373,14 @@
     "bodyLocation": "/emails/OrganisationalLandlordInvitation.md"
   },
   {
-    "test_id": "todo",
+    "test_id": "6d59d741-bb70-4d19-8539-c410fbf9e71a",
     "prod_id": "todo",
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EDITOR_EMAIL",
     "subject": "You’ve joined an organisation on Register your rental property",
     "bodyLocation": "/emails/OrganisationalLandlordInvitationAcceptedEditor.md"
   },
   {
-    "test_id": "todo",
+    "test_id": "97c8c8c8-24c7-4038-a94a-bd14edc2063f",
     "prod_id": "todo",
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_ADMIN_EMAIL",
     "subject": "You’ve joined an organisation on Register your rental property",
