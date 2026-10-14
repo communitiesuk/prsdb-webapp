@@ -17,23 +17,21 @@
         <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.heading}">
             acceptOrganisationInvitation.confirmation.whatYouCanDo.heading
         </h2>
-        <th:block th:with="role=${isAdmin ? 'administrator' : 'editor'}">
-            <p id="access-level" class="govuk-body"
-               th:text="#{${'acceptOrganisationInvitation.confirmation.whatYouCanDo.' + role + '.paragraph'}}">
-                acceptOrganisationInvitation.confirmation.whatYouCanDo.paragraph
-            </p>
-            <ul id="permissions" class="govuk-list govuk-list--bullet">
-                <li th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty}">
-                    acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty
-                </li>
-                <li th:text="#{${'acceptOrganisationInvitation.confirmation.whatYouCanDo.' + role + '.updateProperty'}}">
-                    acceptOrganisationInvitation.confirmation.whatYouCanDo.updateProperty
-                </li>
-                <li th:if="${isAdmin}" th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.administrator.manageTeamMembers}">
-                    acceptOrganisationInvitation.confirmation.whatYouCanDo.administrator.manageTeamMembers
-                </li>
-            </ul>
-        </th:block>
+        <p id="access-level" class="govuk-body"
+           th:text="${isAdmin} ? #{acceptOrganisationInvitation.confirmation.whatYouCanDo.administrator.paragraph} : #{acceptOrganisationInvitation.confirmation.whatYouCanDo.editor.paragraph}">
+            acceptOrganisationInvitation.confirmation.whatYouCanDo.paragraph
+        </p>
+        <ul id="permissions" class="govuk-list govuk-list--bullet">
+            <li th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty}">
+                acceptOrganisationInvitation.confirmation.whatYouCanDo.registerProperty
+            </li>
+            <li th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.updateProperty}">
+                acceptOrganisationInvitation.confirmation.whatYouCanDo.updateProperty
+            </li>
+            <li th:if="${isAdmin}" th:text="#{acceptOrganisationInvitation.confirmation.whatYouCanDo.administrator.manageTeamMembers}">
+                acceptOrganisationInvitation.confirmation.whatYouCanDo.administrator.manageTeamMembers
+            </li>
+        </ul>
         <p class="govuk-body">
             <a id="go-to-dashboard" class="govuk-link" th:href="@{${dashboardUrl}}"
                th:text="#{acceptOrganisationInvitation.confirmation.goToDashboard}">acceptOrganisationInvitation.confirmation.goToDashboard</a>

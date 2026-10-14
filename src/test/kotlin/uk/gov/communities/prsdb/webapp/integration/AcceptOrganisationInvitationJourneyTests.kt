@@ -153,12 +153,21 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
         assertThat(confirmationPage.accessLevel)
-            .containsText("Your access level is ${if (isAdmin) "administrator" else "editor"}")
-        assertThat(confirmationPage.permissions).hasCount(if (isAdmin) 3 else 2)
-        assertThat(confirmationPage.permissions.nth(1))
-            .hasText(if (isAdmin) "update your rental property information" else "update rental property information")
-        assertThat(page.getByText("manage team member’s accounts", Page.GetByTextOptions().setExact(true)))
-            .hasCount(if (isAdmin) 1 else 0)
+            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}, you can:")
+        val expectedPermissions =
+            if (isAdmin) {
+                arrayOf(
+                    "register rental properties",
+                    "update rental property information",
+                    "manage team member’s accounts",
+                )
+            } else {
+                arrayOf(
+                    "register rental properties",
+                    "update rental property information",
+                )
+            }
+        assertThat(confirmationPage.permissions).hasText(expectedPermissions)
 
         BaseComponent.assertThat(confirmationPage.goToDashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
 
