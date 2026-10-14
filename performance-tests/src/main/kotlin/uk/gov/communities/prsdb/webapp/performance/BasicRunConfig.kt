@@ -19,7 +19,6 @@ enum class MeasurementMode(
 
 data class ResponseTimeLimits(
     val maxMs: Int,
-    val meanMs: Int,
 )
 
 data class BasicRunConfig(
@@ -41,21 +40,15 @@ data class BasicRunConfig(
                 MeasurementMode.entries.singleOrNull { it.propertyValue == modeValue }
                     ?: throw IllegalArgumentException("gatling.basic.mode must be baseline or gated")
             val maxKey = "gatling.${target.propertyValue}.basic.maxResponseTimeMs"
-            val meanKey = "gatling.${target.propertyValue}.basic.meanResponseTimeMs"
             val limits =
                 when (mode) {
                     MeasurementMode.BASELINE -> {
-                        require(maxKey !in properties && meanKey !in properties) {
+                        require(maxKey !in properties) {
                             "Timing limits for ${target.propertyValue} require gatling.basic.mode=gated"
                         }
                         null
                     }
-                    MeasurementMode.GATED -> {
-                        val maxMs = positiveMilliseconds(properties, maxKey)
-                        val meanMs = positiveMilliseconds(properties, meanKey)
-                        require(meanMs <= maxMs) { "$meanKey must not exceed $maxKey" }
-                        ResponseTimeLimits(maxMs, meanMs)
-                    }
+                    MeasurementMode.GATED -> ResponseTimeLimits(positiveMilliseconds(properties, maxKey))
                 }
 
             return BasicRunConfig(

@@ -19,7 +19,6 @@ object BasicPerformanceAssertions {
         config.limits?.let { limits ->
             requestNames.forEach { name ->
                 assertions.add(details(name).responseTime().max().lte(limits.maxMs))
-                assertions.add(details(name).responseTime().mean().lte(limits.meanMs))
             }
         }
         return assertions

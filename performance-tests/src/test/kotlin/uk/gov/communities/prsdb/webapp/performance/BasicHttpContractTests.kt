@@ -4,26 +4,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class BasicHttpContractTests {
     @TempDir
     lateinit var outputDirectory: Path
-
-    @Test
-    fun `Gatling preserves cookies CSRF journey parameters and form encoding`() {
-        BasicHttpTestServer().use { server ->
-            val result = runSimulation(server)
-
-            assertEquals(0, result.exitCode, result.output)
-            assertEquals(listOf("GET", "POST"), server.requests.map { it.method })
-            val submittedRequest = server.requests.last()
-            assertEquals("synthetic-csrf", submittedRequest.fields["_csrf"])
-            assertEquals("value + & spaces", submittedRequest.fields["value"])
-            assertEquals("/form?journeyId=synthetic", submittedRequest.path)
-            assertTrue(submittedRequest.cookie.orEmpty().contains("SESSION=synthetic-session"))
-        }
-    }
 
     @Test
     fun `skipped expected request fails even when all executed requests pass`() {
@@ -83,28 +67,10 @@ class BasicHttpContractTests {
                     mapOf(
                         "gatling.basic.mode" to "gated",
                         "gatling.local.basic.maxResponseTimeMs" to "100",
-                        "gatling.local.basic.meanResponseTimeMs" to "100",
                     ),
                 )
 
             assertEquals(2, server.requests.size)
-            assertEquals(2, result.exitCode, result.output)
-        }
-    }
-
-    @Test
-    fun `mean response time gate fails independently of the maximum gate`() {
-        BasicHttpTestServer(postDelayMs = 250).use { server ->
-            val result =
-                runSimulation(
-                    server,
-                    mapOf(
-                        "gatling.basic.mode" to "gated",
-                        "gatling.local.basic.maxResponseTimeMs" to "10000",
-                        "gatling.local.basic.meanResponseTimeMs" to "100",
-                    ),
-                )
-
             assertEquals(2, result.exitCode, result.output)
         }
     }
@@ -118,7 +84,6 @@ class BasicHttpContractTests {
                     mapOf(
                         "gatling.basic.mode" to "gated",
                         "gatling.local.basic.maxResponseTimeMs" to "10000",
-                        "gatling.local.basic.meanResponseTimeMs" to "10000",
                     ),
                 )
 

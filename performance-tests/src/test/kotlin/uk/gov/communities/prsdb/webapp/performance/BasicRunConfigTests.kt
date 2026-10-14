@@ -44,11 +44,10 @@ class BasicRunConfigTests {
                     mapOf(
                         "gatling.basic.mode" to "gated",
                         "gatling.local.basic.maxResponseTimeMs" to "2000",
-                        "gatling.local.basic.meanResponseTimeMs" to "1000",
                     ),
             )
 
-        assertEquals(ResponseTimeLimits(2000, 1000), config.limits)
+        assertEquals(ResponseTimeLimits(2000), config.limits)
     }
 
     @Test
@@ -59,7 +58,6 @@ class BasicRunConfigTests {
                     "gatling.target" to "nft",
                     "gatling.basic.mode" to "gated",
                     "gatling.local.basic.maxResponseTimeMs" to "2000",
-                    "gatling.local.basic.meanResponseTimeMs" to "1000",
                 )
 
         val exception = assertFailsWith<IllegalArgumentException> { BasicRunConfig.from(properties) }
@@ -78,13 +76,12 @@ class BasicRunConfigTests {
                         "gatling.simulatorUrl" to "https://simulator.example.test",
                         "gatling.basic.mode" to "gated",
                         "gatling.nft.basic.maxResponseTimeMs" to "4000",
-                        "gatling.nft.basic.meanResponseTimeMs" to "1500",
                     ),
             )
 
         assertEquals(PerformanceTarget.NFT, config.target)
         assertEquals("https://app.example.test", config.baseUrl)
-        assertEquals(ResponseTimeLimits(4000, 1500), config.limits)
+        assertEquals(ResponseTimeLimits(4000), config.limits)
     }
 
     @Test
@@ -157,37 +154,18 @@ class BasicRunConfigTests {
                     mapOf(
                         "gatling.basic.mode" to "gated",
                         "gatling.local.basic.maxResponseTimeMs" to value,
-                        "gatling.local.basic.meanResponseTimeMs" to "1",
                     )
             assertFailsWith<IllegalArgumentException> { BasicRunConfig.from(properties) }
         }
     }
 
     @Test
-    fun `gated mode requires both maximum and mean limits`() {
-        val properties =
-            localProperties +
-                mapOf(
-                    "gatling.basic.mode" to "gated",
-                    "gatling.local.basic.maxResponseTimeMs" to "2000",
-                )
+    fun `gated mode requires the maximum limit`() {
+        val properties = localProperties + ("gatling.basic.mode" to "gated")
 
         val exception = assertFailsWith<IllegalArgumentException> { BasicRunConfig.from(properties) }
 
-        assertTrue(exception.message.orEmpty().contains("meanResponseTimeMs"))
-    }
-
-    @Test
-    fun `mean response time limit cannot exceed maximum`() {
-        val properties =
-            localProperties +
-                mapOf(
-                    "gatling.basic.mode" to "gated",
-                    "gatling.local.basic.maxResponseTimeMs" to "1000",
-                    "gatling.local.basic.meanResponseTimeMs" to "2000",
-                )
-
-        assertFailsWith<IllegalArgumentException> { BasicRunConfig.from(properties) }
+        assertTrue(exception.message.orEmpty().contains("maxResponseTimeMs"))
     }
 
     @Test

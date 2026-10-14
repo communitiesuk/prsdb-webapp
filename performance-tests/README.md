@@ -15,9 +15,9 @@ performance-tests/
     RegisterAsLandlordGetSimulation.kt # GET-only example
     FormSubmissionPostSimulation.kt    # GET -> extract CSRF -> POST example
     BasicJourneysSimulation.kt         # Serial one-user populations: phone/email updates -> registration
-  src/gatling/resources/fixtures/       # Synthetic One Login identity-verification claims
+  src/main/resources/fixtures/         # Synthetic One Login identity-verification claims
   src/main/kotlin/                     # Reusable HTTP chains and run configuration
-  src/test/kotlin/                     # Deterministic Gatling contract tests
+  src/test/kotlin/                     # Unit tests and Gatling assertion tests
   scripts/start-local.mjs              # Local official-simulator application bootstrap
 ```
 
@@ -69,23 +69,20 @@ check fails, also register a simulation assertion such as `global().failedReques
 
 ### Developing the basic suite locally
 
-The basic-suite foundations have independent module tests. These execute Gatling against a disposable loopback
-HTTP server, with one virtual user, and do not need the webapp, Docker, AWS credentials or NFT:
+The basic-suite foundations have independent module tests. The run configuration and `HttpDestination` have unit
+tests, and a small set of tests execute Gatling against a disposable loopback HTTP server, with one virtual user.
+None of them need the webapp, Docker, AWS credentials or NFT:
 
 ```bash
 ./gradlew :performance-tests:test --console=plain
 ```
 
-The contracts prove cookie continuity, CSRF extraction, form encoding and preservation of `journeyId`.
-They also prove that incorrect bodies/content types, missing CSRF tokens, incomplete journeys and unsaved updates
-fail the runner, and that maximum/mean timing gates reject deliberately delayed responses. Authentication
-contracts preserve authorization queries, hidden fields, JSON textarea defaults and cookies, reject off-origin
-destinations, and prevent mutation after failed login. Identity-verification contracts check the VTR and claims,
-synthetic identity fields, verified/unverified outcomes, rejected authentication, and cookie separation between
-the app and simulator. Registration contracts check each form's CSRF token and journey ID, fail before mutation
-when the subject is already registered, and require a registration number plus dashboard access. A sequential
-authentication contract proves the phone-update and registration populations use distinct subjects and fresh
-app/simulator cookies. These fixtures do **not** measure application performance; use the real local run below.
+Build and Test runs these in the separate "Performance module tests" job.
+
+The Gatling tests prove that incorrect bodies/content types, missing CSRF tokens and skipped requests fail the
+runner, and that the maximum timing gate rejects deliberately delayed responses while a correct run within the
+limit passes. They do **not** prove that the journey chains still work against the application, and they do
+not measure performance: only running the simulation against the real app (below) does that.
 
 `BasicRunConfig` separates the target from the measurement mode. Both targets use the same HTTP journey logic;
 the existing toy simulations continue to use `BaseUrlConfig` unchanged.
@@ -98,32 +95,40 @@ the existing toy simulations continue to use `BaseUrlConfig` unchanged.
 | `gatling.basic.landlordSubject` | Seeded synthetic landlord for the phone and email update slices |
 | `gatling.basic.registrationSubject` | Fresh, unregistered synthetic subject for registration; must differ from `landlordSubject` |
 | `gatling.basic.mode` | `baseline` records timings; `gated` applies explicit timing limits |
-| `gatling.local.basic.maxResponseTimeMs` / `meanResponseTimeMs` | Local gated limits, positive integer milliseconds |
-| `gatling.nft.basic.maxResponseTimeMs` / `meanResponseTimeMs` | Separately agreed NFT gated limits |
+| `gatling.local.basic.maxResponseTimeMs` | Local gated per-request limit, positive integer milliseconds |
+| `gatling.nft.basic.maxResponseTimeMs` | Separately agreed NFT gated per-request limit |
 
 URLs must be HTTP/HTTPS origins, without credentials, paths, query strings or fragments. Baseline mode rejects
-limits for its target rather than ignoring them. Gated mode requires both limits, with mean no greater than
-maximum; NFT never inherits local timing limits.
+limits for its target rather than ignoring them. Gated mode requires the limit for its target; NFT never
+inherits local timing limits.
 
 `BasicPerformanceAssertions` always requires zero failed requests and exactly one execution of each named
-application request. This also detects skipped requests and request-building failures. In gated mode it applies maximum and mean
-limits to each explicitly named application request, so a fast page cannot hide a slow one in a global average.
+application request. This also detects skipped requests and request-building failures. In gated mode it applies the
+maximum limit to each explicitly named application request, so a fast page cannot hide a slow one in a global average.
+There is deliberately no mean limit: the basic profile is a single user making each request once (see ADRs
+0035-0040), so the mean would always equal the maximum. Mean or percentile limits belong in future load
+simulations that make repeated requests.
 Local limits prove the gates work; they are not NFT acceptance limits. Future load simulations can reuse journey
 chains, but must define their own workload rather than changing the single-user basic profile.
 
-Build and Test does not run performance-module contracts or simulations. Its webapp test shards explicitly
-invoke `:test` to avoid selecting the performance module's tests. Automated performance execution belongs in
-the dedicated PDJB-430 performance-testing action, which is still to be implemented; the commands here remain
-available for explicit local development runs.
+Build and Test runs the module's unit and assertion tests (`:performance-tests:test`) in their own job, but never
+the simulations. Its webapp test shards explicitly invoke `:test` to avoid selecting the performance module's
+tests. Automated performance execution belongs in the dedicated PDJB-430 performance-testing action; the
+commands here remain available for explicit local development runs.
 
-### Real local basic journey (macOS/Linux)
+### Real local basic journey
 
-Requires Docker, Node 22+, OpenSSL, JDK 21 and the usual gitignored `.env` configuration. Run commands from the
-repository root. This uses the standard local database and Redis, **not** a deployed environment.
+Requires Docker, Node 22+, JDK 21 and the usual gitignored `.env` configuration. Run commands from the
+repository root. Commands are shown for macOS/Linux (bash) and Windows (PowerShell). This uses the standard
+local database and Redis, **not** a deployed environment.
 
 Start the usual dependencies:
 
 ```bash
+docker compose -f docker-compose.local.yml up -d --wait
+```
+
+```powershell
 docker compose -f docker-compose.local.yml up -d --wait
 ```
 
@@ -135,12 +140,23 @@ docker run --rm --name prsdb-performance-simulator \
   ghcr.io/govuk-one-login/simulator@sha256:0d5e62c1db1c400c4881be2270b3f08aeb55c72ca3d9eb9a6e5196becef6f5e5
 ```
 
+```powershell
+docker run --rm --name prsdb-performance-simulator `
+  -p 127.0.0.1:13000:3000 -e INTERACTIVE_MODE=true `
+  ghcr.io/govuk-one-login/simulator@sha256:0d5e62c1db1c400c4881be2270b3f08aeb55c72ca3d9eb9a6e5196becef6f5e5
+```
+
 **Destructive local reset:** stop the application first, and only run the following against a disposable local
 database. It deletes the local schema; application startup then migrates and loads `data-local.sql` again.
 The Gradle Flyway task reads the database port from `.env`.
 
 ```bash
 FLYWAY_CLEAN_DISABLED=false ./gradlew flywayClean --console=plain
+node --env-file=.env performance-tests/scripts/start-local.mjs
+```
+
+```powershell
+$env:FLYWAY_CLEAN_DISABLED = "false"; .\gradlew.bat flywayClean --console=plain; Remove-Item Env:FLYWAY_CLEAN_DISABLED
 node --env-file=.env performance-tests/scripts/start-local.mjs
 ```
 
@@ -164,7 +180,16 @@ In another terminal, run:
   -Dgatling.baseUrl=http://localhost:8080 \
   -Dgatling.simulatorUrl=http://127.0.0.1:13000 \
   -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:UVWXY \
-  -Dgatling.basic.registrationSubject=urn:fdc:gov.uk:2026:PERF-REGISTRATION-001
+```
+
+```powershell
+.\gradlew.bat :performance-tests:gatlingRun --non-interactive `
+  --simulation uk.gov.communities.prsdb.webapp.performance.BasicJourneysSimulation `
+  "-Dgatling.target=local" "-Dgatling.basic.mode=baseline" `
+  "-Dgatling.baseUrl=http://localhost:8080" `
+  "-Dgatling.simulatorUrl=http://127.0.0.1:13000" `
+  "-Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:UVWXY" `
+  "-Dgatling.basic.registrationSubject=urn:fdc:gov.uk:2026:PERF-REGISTRATION-001"
 ```
 
 Match the URLs to the ports used by the bootstrap. The Gradle module forwards `gatling.*` properties to the
@@ -188,9 +213,9 @@ and no load injection.
 
 Reset/reseed between comparable baselines so the seeded phone/email values and registration subject return to their
 initial state. The registration fixtures are synthetic and do not contain real identity data.
-For a local timing-gate experiment, change the mode to `gated` and supply both
-`gatling.local.basic.maxResponseTimeMs` and `gatling.local.basic.meanResponseTimeMs`. These are explicit local
-limits, not agreed NFT SLAs. Simulator front-channel requests are checked for correctness but excluded from
+For a local timing-gate experiment, change the mode to `gated` and supply
+`gatling.local.basic.maxResponseTimeMs`. This is an explicit local
+limit, not an agreed NFT SLA. Simulator front-channel requests are checked for correctness but excluded from
 application timing gates; the application callback includes its back-channel authentication work.
 
 The local basic slice now covers seeded phone and email updates and individual registration through the manual-address

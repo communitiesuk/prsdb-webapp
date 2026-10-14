@@ -1,7 +1,9 @@
-import {mkdtemp, readFile, rm, rmdir} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, rmdir, writeFile} from 'node:fs/promises';
+import {generateKeyPairSync} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {spawn, spawnSync} from 'node:child_process';
+import {spawn} from 'node:child_process';
+import {pathToFileURL} from 'node:url';
 
 function port(name, fallback) {
   const value = process.env[name] ?? fallback;
@@ -20,14 +22,13 @@ const directory = await mkdtemp(join(tmpdir(), 'prsdb-performance-keys-'));
 const publicKeyPath = join(directory, 'public-key.pem');
 const privateKeyPath = join(directory, 'private-key.pem');
 try {
-  for (const args of [
-    ['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', privateKeyPath],
-    ['pkey', '-in', privateKeyPath, '-pubout', '-out', publicKeyPath],
-  ]) {
-    const result = spawnSync('openssl', args, {stdio: ['ignore', 'ignore', 'pipe']});
-    if (result.error) throw result.error;
-    if (result.status !== 0) throw new Error(`OpenSSL failed: ${result.stderr.toString()}`);
-  }
+  const {publicKey, privateKey} = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: {type: 'spki', format: 'pem'},
+    privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+  });
+  await writeFile(privateKeyPath, privateKey, {mode: 0o600});
+  await writeFile(publicKeyPath, publicKey);
 
   const response = await fetch(`${simulatorUrl}/config`, {
     method: 'POST',
@@ -67,10 +68,13 @@ try {
     // Keep unused council-provider discovery local too; this does not implement council authentication.
     'spring.security.oauth2.client.provider.internal-access.issuer-uri': `${simulatorUrl}/`,
     'one-login.did.uri': `${simulatorUrl}/.well-known/did.json`,
-    'one-login.jwt.public.key': `file:${publicKeyPath}`,
-    'one-login.jwt.private.key': `file:${privateKeyPath}`,
+    'one-login.jwt.public.key': pathToFileURL(publicKeyPath).href,
+    'one-login.jwt.private.key': pathToFileURL(privateKeyPath).href,
   };
-  const child = spawn('./gradlew', [':bootRun', '--no-daemon', '--console=plain'], {
+  // Windows needs the batch wrapper, which can only be spawned through a shell.
+  const isWindows = process.platform === 'win32';
+  const child = spawn(isWindows ? 'gradlew.bat' : './gradlew', [':bootRun', '--no-daemon', '--console=plain'], {
+    shell: isWindows,
     stdio: 'inherit',
     env: {
       ...process.env,

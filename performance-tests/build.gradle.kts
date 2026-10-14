@@ -36,15 +36,13 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-sourceSets {
-    test {
-        resources.srcDir("src/gatling/resources")
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
-    systemProperty("performance.test.classpath", sourceSets.test.get().runtimeClasspath.asPath)
+    // The root project's webapp test selectors (e.g. `./gradlew test --tests <webapp test>`) also reach this module.
+    filter.isFailOnNoMatchingTests = false
+    // Provided lazily so the test runtime classpath is only resolved when tests actually run.
+    val testClasspath = sourceSets.test.get().runtimeClasspath
+    jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-Dperformance.test.classpath=${testClasspath.asPath}") })
 }
 
 gatling {
