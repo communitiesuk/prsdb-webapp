@@ -374,10 +374,24 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `getFirstChargeableDate returns the gratis period when the quote date is within it`() {
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is within it`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
-            assertEquals(LocalDate.of(2027, 11, 14), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is the last gratis day`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 14)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the quote date when it is the day after the gratis period ends`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 15)))
         }
 
         @Test

@@ -64,7 +64,7 @@ class PaymentService(
 
     fun getAnnualFeeInPence(): Int = annualFeeInPence
 
-    fun getFirstChargeableDate(quoteDate: LocalDate): LocalDate = maxOf(quoteDate, gratisPeriodEndDate)
+    fun getFirstChargeableDate(quoteDate: LocalDate): LocalDate = maxOf(quoteDate, gratisPeriodEndDate.plusDays(1))
 
     fun createPropertyRegistrationPayment(
         journeyId: String,
