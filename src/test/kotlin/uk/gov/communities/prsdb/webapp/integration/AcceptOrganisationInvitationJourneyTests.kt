@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -35,7 +36,6 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @TestPropertySource(properties = ["local.one-login-user-id=urn:fdc:gov.uk:2022:INVITEE"])
 class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -156,7 +156,17 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 5. Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPage::class)
-        assertTrue(confirmationPage.heading.getText().contains("TODO PDJB-1775"))
+        assertEquals("Invitation accepted", confirmationPage.heading.getText())
+        assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
+        assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
+        
+        val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
+        assertThat(confirmationPage.accessLevel)
+            .containsText("Your access level is ${if (isAdmin) "administrator" else "editor"}")
+        assertThat(confirmationPage.permissions).hasCount(if (isAdmin) 3 else 2)
+        assertThat(confirmationPage.permissions.nth(1))
+        
+        BaseComponent.assertThat(confirmationPage.dashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
 
         val user = organisationalLandlordUserRepository.findByBaseUser_Id(INVITATION_TEST_USER_ID).single()
         assertEquals("Jane Smith", user.name)
