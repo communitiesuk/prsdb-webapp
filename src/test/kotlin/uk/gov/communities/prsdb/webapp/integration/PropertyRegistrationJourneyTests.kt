@@ -390,7 +390,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
-            val paymentReturnPage = submitPaymentSummary(page)
+            page.waitForResponse({ it.request().method() == "POST" && it.url().contains(PaymentReturnStep.ROUTE_SEGMENT) }) {
+                submitPaymentSummary(page)
+            }
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
             assertThat(paymentReturnPage.doNotCloseParagraph).isVisible()
             assertThat(paymentReturnPage.notConfirmedParagraph).isHidden()
 
