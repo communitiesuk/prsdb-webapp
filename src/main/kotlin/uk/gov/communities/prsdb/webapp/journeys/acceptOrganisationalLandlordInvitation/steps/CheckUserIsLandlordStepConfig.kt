@@ -1,37 +1,56 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps
 
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
+
+enum class LandlordAccountStatus {
+    ALREADY_A_LANDLORD,
+    NOT_A_LANDLORD,
+}
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckUserIsLandlordStepConfig")
-class CheckUserIsLandlordStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+class CheckUserIsLandlordStepConfig(
+    private val userRolesService: UserRolesService,
+) : AbstractRequestableStepConfig<
+        LandlordAccountStatus,
+        NoInputFormModel,
+        AcceptOrganisationalLandlordUserInvitationJourneyState,
+        >() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-1829: Check whether the invited user is already a landlord user and branch accordingly
-    override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "Check if the user is already a landlord user (TODO PDJB-1829)")
+    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = RedirectingStepLifecycleOrchestrator(journeyStep)
 
-    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "forms/todo"
+    override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> = emptyMap()
 
-    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
-        getFormModelFromStateOrNull(state)?.let {
-            Complete.COMPLETE
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState): String = ""
+
+    override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
+        val principal = SecurityContextHolder.getContext().authentication.principal as OidcUser
+        state.userIsLandlord = userRolesService.getUserHasLandlordRole(principal.name)
+    }
+
+    override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): LandlordAccountStatus? =
+        when (state.userIsLandlord) {
+            true -> LandlordAccountStatus.ALREADY_A_LANDLORD
+            false -> LandlordAccountStatus.NOT_A_LANDLORD
+            null -> null
         }
 }
 
-// This step must stay requestable, even once PDJB-1829 replaces the placeholder page with a real branch. Unlike the
-// preceding validate token step, its route is not permitAll'd in LandlordSecurityConfig, so it is the first
-// authenticated URL in the journey and is what redirects an anonymous invitee to One Login. An InternalStep has no URL,
-// so it would never hit the security filter chain and the invitee would reach the rest of the journey unauthenticated.
+// This step stays requestable because its route, unlike the preceding validate token step's, is not permitAll'd, making
+// it the first authenticated URL in the journey and so what redirects an anonymous invitee to One Login.
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCheckUserIsLandlordStep")
 final class CheckUserIsLandlordStep(
     stepConfig: CheckUserIsLandlordStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
+) : RequestableStep<LandlordAccountStatus, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-if-user-is-landlord"
     }

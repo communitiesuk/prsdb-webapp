@@ -25,6 +25,21 @@ invalidLink:
   stillNeedAccess:
     heading: If you still need access
     paragraph: Ask someone at your organisation with administrator access to invite you again.
+userIsAlreadyLandlord:
+  heading: You need to use a different GOV.UK One Login to accept this invitation
+  whatsHappened:
+    heading: What’s happened
+    paragraph:
+      one: You’ve already used this GOV.UK One Login to register as a landlord.
+      two: You can only have one landlord account associated with a GOV.UK One Login.
+  whatToDo:
+    heading: What you need to do
+    paragraph:
+      one: To accept this invitation you create a GOV.UK One Login with a different email address.
+      two: This might be your work email instead of your personal email.
+  signOutLink:
+    link: Sign out of GOV.UK One Login
+    afterLink: .
 email:
   error:
     missing: Enter your email address
