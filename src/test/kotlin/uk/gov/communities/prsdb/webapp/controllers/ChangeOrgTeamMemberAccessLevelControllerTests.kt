@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordUser
 
 @WebMvcTest(ChangeOrgTeamMemberAccessLevelController::class)
@@ -39,7 +39,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     @MockitoBean
-    private lateinit var userToLandlordService: UserToLandlordService
+    private lateinit var userToOrgLandlordUserService: UserToOrgLandlordUserService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -54,7 +54,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     fun enableFeatureFlagAndAuthoriseMember() {
         whenever(featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(true)
         whenever(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(testUserId)).thenReturn(true)
-        whenever(userToLandlordService.getCurrentOrganisationalLandlordTeamMember())
+        whenever(userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser())
             .thenReturn(createOrganisationalLandlordUser())
     }
 
@@ -124,7 +124,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
     fun `getJourneyStep returns 400 when an admin tries to change their own access level`() {
         val currentMember = mock<OrganisationalLandlordUser>()
         whenever(currentMember.id).thenReturn(testUserId)
-        whenever(userToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(currentMember)
+        whenever(userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentMember)
 
         mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
             status { isBadRequest() }

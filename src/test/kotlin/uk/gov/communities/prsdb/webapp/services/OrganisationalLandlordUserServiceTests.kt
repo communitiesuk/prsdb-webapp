@@ -38,7 +38,7 @@ class OrganisationalLandlordUserServiceTests {
     private lateinit var mockOtherOrganisationLandlord: OrganisationalLandlord
 
     @Mock
-    private lateinit var mockUserToLandlordService: UserToLandlordService
+    private lateinit var mockUserToOrgLandlordUserService: UserToOrgLandlordUserService
 
     @Test
     fun `createOrganisationalLandlordUser saves and returns an OrganisationalLandlordUser linking landlord to user`() {
@@ -108,7 +108,7 @@ class OrganisationalLandlordUserServiceTests {
 
     @Test
     fun `getCurrentUserIsAuthorizedToEditRecord returns false when the current user is not an org team member`() {
-        whenever(mockUserToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(null)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
 
         assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
     }
@@ -120,7 +120,7 @@ class OrganisationalLandlordUserServiceTests {
                 organisationalLandlord = mockOrganisationLandlord,
                 role = OrganisationalLandlordUserRole.EDITOR,
             )
-        whenever(mockUserToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(currentUser)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
 
         assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
     }
@@ -132,7 +132,7 @@ class OrganisationalLandlordUserServiceTests {
                 organisationalLandlord = mockOrganisationLandlord,
                 role = OrganisationalLandlordUserRole.ADMIN,
             )
-        whenever(mockUserToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(currentUser)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
         whenever(mockOrganisationalLandlordUserRepository.findById(5)).thenReturn(Optional.empty())
 
         assertFalse(organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(5))
@@ -145,7 +145,7 @@ class OrganisationalLandlordUserServiceTests {
                 organisationalLandlord = mockOrganisationLandlord,
                 role = OrganisationalLandlordUserRole.ADMIN,
             )
-        whenever(mockUserToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(currentUser)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
         whenever(mockOrganisationLandlord.id).thenReturn(1L)
         val member = MockLandlordData.createOrganisationalLandlordUser(organisationalLandlord = mockOtherOrganisationLandlord)
         whenever(mockOtherOrganisationLandlord.id).thenReturn(2L)
@@ -161,7 +161,7 @@ class OrganisationalLandlordUserServiceTests {
                 organisationalLandlord = mockOrganisationLandlord,
                 role = OrganisationalLandlordUserRole.ADMIN,
             )
-        whenever(mockUserToLandlordService.getCurrentOrganisationalLandlordTeamMember()).thenReturn(currentUser)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
         whenever(mockOrganisationLandlord.id).thenReturn(1L)
         val member = MockLandlordData.createOrganisationalLandlordUser(organisationalLandlord = mockOrganisationLandlord)
         whenever(mockOrganisationalLandlordUserRepository.findById(5)).thenReturn(Optional.of(member))

@@ -162,29 +162,6 @@ class UserToLandlordServiceTests {
         assertEquals("Expected organisation landlord, but got INDIVIDUAL", exception.message)
     }
 
-    @Test
-    fun `getCurrentOrganisationalLandlordTeamMember returns the team member record for the authenticated user`() {
-        val baseUserId = "organisation-user"
-        setMockPrincipal(baseUserId)
-        val organisationalLandlordUser = MockLandlordData.createOrganisationalLandlordUser()
-        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
-            listOf(organisationalLandlordUser),
-        )
-
-        val result = service.getCurrentOrganisationalLandlordTeamMember()
-
-        assertEquals(organisationalLandlordUser, result)
-    }
-
-    @Test
-    fun `getCurrentOrganisationalLandlordTeamMember returns null when the authenticated user is not a team member`() {
-        val baseUserId = "non-team-member"
-        setMockPrincipal(baseUserId)
-        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
-
-        assertNull(service.getCurrentOrganisationalLandlordTeamMember())
-    }
-
     private fun setMockPrincipal(name: String) {
         val authentication = mock<Authentication>()
         whenever(authentication.name).thenReturn(name)

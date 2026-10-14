@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 @PrsdbWebService
 class OrganisationalLandlordUserService(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
-    private val userToLandlordService: UserToLandlordService,
+    private val userToOrgLandlordUserService: UserToOrgLandlordUserService,
 ) {
     @Transactional
     fun createOrganisationalLandlordUser(
@@ -33,7 +33,7 @@ class OrganisationalLandlordUserService(
         organisationalLandlordUserRepository.findById(id).orElse(null)
 
     fun getCurrentUserIsAuthorizedToEditRecord(organisationalLandlordUserId: Long): Boolean {
-        val currentUser = userToLandlordService.getCurrentOrganisationalLandlordTeamMember() ?: return false
+        val currentUser = userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser() ?: return false
         if (currentUser.role != OrganisationalLandlordUserRole.ADMIN) {
             return false
         }
