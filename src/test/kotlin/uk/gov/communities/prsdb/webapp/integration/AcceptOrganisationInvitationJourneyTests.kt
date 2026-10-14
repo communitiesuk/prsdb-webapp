@@ -157,7 +157,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         checkAnswersPage.form.submit()
 
         // 5. Confirmation page
-        val confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        var confirmationPage = assertPageIs(page, ConfirmationPage::class)
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
         assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
         assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
@@ -167,6 +167,9 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             .containsText("Your access level is ${if (isAdmin) "administrator" else "editor"}")
         assertThat(confirmationPage.permissions).hasCount(if (isAdmin) 3 else 2)
         assertThat(confirmationPage.permissions.nth(1))
+            .hasText(if (isAdmin) "update your rental property information" else "update rental property information")
+        assertThat(page.getByText("manage team member’s accounts", Page.GetByTextOptions().setExact(true)))
+            .hasCount(if (isAdmin) 1 else 0)
 
         BaseComponent.assertThat(confirmationPage.goToDashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
 
@@ -178,6 +181,11 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
 
+        // Confirmation must still render after acceptance has deleted the invitation.
+        page.reload()
+        confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        assertEquals("Invitation accepted", confirmationPage.heading.getText())
+        
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
 

@@ -56,6 +56,5 @@ class ConfirmationStepConfigTests {
         assertEquals(Complete.COMPLETE, createStepConfig().mode(state))
     }
 
-    private fun createStepConfig() =
-        ConfirmationStepConfig(userToLandlordService, currentUserService, organisationPermissionsProvider)
+    private fun createStepConfig() = ConfirmationStepConfig(userToLandlordService, currentUserService, organisationPermissionsProvider)
 }

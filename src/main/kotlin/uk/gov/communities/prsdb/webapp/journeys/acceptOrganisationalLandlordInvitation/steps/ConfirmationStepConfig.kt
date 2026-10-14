@@ -28,8 +28,7 @@ class ConfirmationStepConfig(
             "dashboardUrl" to LANDLORD_DASHBOARD_URL,
         )
 
-    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) =
-        "acceptOrganisationInvitationConfirmation"
+    override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState) = "acceptOrganisationInvitationConfirmation"
 
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Complete = Complete.COMPLETE
 }
