@@ -21,7 +21,7 @@ class AccessLevelStepConfig(
     override val formModelClass = ChangeOrgTeamMemberAccessLevelFormModel::class
 
     override fun getStepSpecificContent(state: ChangeOrgTeamMemberAccessLevelJourneyState): Map<String, Any?> {
-        val member = organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.organisationalLandlordUserId)
+        val member = organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
         val currentRole = member?.role
         return mapOf(
             "memberName" to member?.name,

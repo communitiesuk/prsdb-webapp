@@ -35,46 +35,46 @@ class ChangeOrgTeamMemberAccessLevelController(
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
-        @PathVariable organisationalLandlordUserId: Long,
+        @PathVariable otherOrganisationalLandlordUserId: Long,
     ): ModelAndView {
-        checkCurrentUserCanEditMember(organisationalLandlordUserId)
-        return dispatchJourneyStep(stepPath, organisationalLandlordUserId) { getStepModelAndView() }
+        checkCurrentUserCanEditMember(otherOrganisationalLandlordUserId)
+        return dispatchJourneyStep(stepPath, otherOrganisationalLandlordUserId) { getStepModelAndView() }
     }
 
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
-        @PathVariable organisationalLandlordUserId: Long,
+        @PathVariable otherOrganisationalLandlordUserId: Long,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        checkCurrentUserCanEditMember(organisationalLandlordUserId)
-        return dispatchJourneyStep(stepPath, organisationalLandlordUserId) { postStepModelAndView(formData) }
+        checkCurrentUserCanEditMember(otherOrganisationalLandlordUserId)
+        return dispatchJourneyStep(stepPath, otherOrganisationalLandlordUserId) { postStepModelAndView(formData) }
     }
 
-    private fun checkCurrentUserCanEditMember(organisationalLandlordUserId: Long) {
-        if (!organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(organisationalLandlordUserId)) {
+    private fun checkCurrentUserCanEditMember(otherOrganisationalLandlordUserId: Long) {
+        if (!organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecord(otherOrganisationalLandlordUserId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "No team member with id $organisationalLandlordUserId found in the current organisation",
+                "No team member with id $otherOrganisationalLandlordUserId found in the current organisation",
             )
         }
 
         val currentMember = userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()
-        if (currentMember?.id == organisationalLandlordUserId) {
+        if (currentMember?.id == otherOrganisationalLandlordUserId) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Admins cannot change their own access level")
         }
     }
 
     private fun dispatchJourneyStep(
         stepPath: String,
-        organisationalLandlordUserId: Long,
+        otherOrganisationalLandlordUserId: Long,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(organisationalLandlordUserId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(organisationalLandlordUserId) },
+            createRoutingMap = { journeyFactory.createJourneySteps(otherOrganisationalLandlordUserId) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(otherOrganisationalLandlordUserId) },
             dispatch = dispatch,
             startNewJourneyOn = { it is PrsdbWebException },
         )
@@ -82,12 +82,12 @@ class ChangeOrgTeamMemberAccessLevelController(
     companion object {
         const val CHANGE_ACCESS_LEVEL_PATH_SEGMENT = "change-access-level"
         const val CHANGE_ACCESS_LEVEL_ROUTE =
-            "${TeamMembersController.TEAM_MEMBERS_ROUTE}/{organisationalLandlordUserId}/$CHANGE_ACCESS_LEVEL_PATH_SEGMENT"
+            "${TeamMembersController.TEAM_MEMBERS_ROUTE}/{otherOrganisationalLandlordUserId}/$CHANGE_ACCESS_LEVEL_PATH_SEGMENT"
 
-        fun getChangeAccessLevelBasePath(organisationalLandlordUserId: Long): String =
-            UriTemplate(CHANGE_ACCESS_LEVEL_ROUTE).expand(organisationalLandlordUserId).toASCIIString()
+        fun getChangeAccessLevelBasePath(otherOrganisationalLandlordUserId: Long): String =
+            UriTemplate(CHANGE_ACCESS_LEVEL_ROUTE).expand(otherOrganisationalLandlordUserId).toASCIIString()
 
-        fun getChangeAccessLevelPath(organisationalLandlordUserId: Long): String =
-            "${getChangeAccessLevelBasePath(organisationalLandlordUserId)}/${AccessLevelStep.ROUTE_SEGMENT}"
+        fun getChangeAccessLevelPath(otherOrganisationalLandlordUserId: Long): String =
+            "${getChangeAccessLevelBasePath(otherOrganisationalLandlordUserId)}/${AccessLevelStep.ROUTE_SEGMENT}"
     }
 }

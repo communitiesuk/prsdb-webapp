@@ -18,7 +18,7 @@ class CompleteChangeAccessLevelStepConfig(
 
     override fun afterStepIsReached(state: ChangeOrgTeamMemberAccessLevelJourneyState) {
         val newRole = state.accessLevelStep.formModel.notNullValue(ChangeOrgTeamMemberAccessLevelFormModel::role)
-        organisationalLandlordUserService.updateRole(state.organisationalLandlordUserId, newRole)
+        organisationalLandlordUserService.updateRole(state.otherOrganisationalLandlordUserId, newRole)
         // TODO PDJB-1765: show a success banner on the team members page
         // TODO PDJB-1766: send a confirmation email to the member
     }

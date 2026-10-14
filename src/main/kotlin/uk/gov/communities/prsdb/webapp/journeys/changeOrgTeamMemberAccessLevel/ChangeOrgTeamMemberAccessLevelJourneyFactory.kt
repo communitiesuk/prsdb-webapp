@@ -18,18 +18,18 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 class ChangeOrgTeamMemberAccessLevelJourneyFactory(
     private val stateFactory: ObjectFactory<ChangeOrgTeamMemberAccessLevelJourney>,
 ) {
-    fun createJourneySteps(organisationalLandlordUserId: Long): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(otherOrganisationalLandlordUserId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            state.organisationalLandlordUserId = organisationalLandlordUserId
+            state.otherOrganisationalLandlordUserId = otherOrganisationalLandlordUserId
             state.isStateInitialized = true
         }
 
-        if (state.organisationalLandlordUserId != organisationalLandlordUserId) {
+        if (state.otherOrganisationalLandlordUserId != otherOrganisationalLandlordUserId) {
             throw PrsdbWebException(
-                "Journey was initialized for organisational landlord user ${state.organisationalLandlordUserId} " +
-                    "but request is for organisational landlord user $organisationalLandlordUserId",
+                "Journey was initialized for organisational landlord user ${state.otherOrganisationalLandlordUserId} " +
+                    "but request is for organisational landlord user $otherOrganisationalLandlordUserId",
             )
         }
 
@@ -49,8 +49,8 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(organisationalLandlordUserId: Long): String =
-        stateFactory.getObject().initializeState(organisationalLandlordUserId)
+    fun initializeJourneyState(otherOrganisationalLandlordUserId: Long): String =
+        stateFactory.getObject().initializeState(otherOrganisationalLandlordUserId)
 }
 
 @JourneyFrameworkComponent
@@ -61,18 +61,18 @@ class ChangeOrgTeamMemberAccessLevelJourney(
 ) : AbstractJourneyState(journeyStateService),
     ChangeOrgTeamMemberAccessLevelJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var organisationalLandlordUserId: Long by delegateProvider.requiredImmutableDelegate("organisationalLandlordUserId")
+    override var otherOrganisationalLandlordUserId: Long by delegateProvider.requiredImmutableDelegate("otherOrganisationalLandlordUserId")
 
     override fun generateJourneyId(seed: Any?): String {
-        val organisationalLandlordUserId = seed as? Long
+        val otherOrganisationalLandlordUserId = seed as? Long
         return super<AbstractJourneyState>.generateJourneyId(
-            organisationalLandlordUserId?.let { generateSeedForMember(it) },
+            otherOrganisationalLandlordUserId?.let { generateSeedForMember(it) },
         )
     }
 
     companion object {
-        private fun generateSeedForMember(organisationalLandlordUserId: Long): String =
-            "Change access level journey for organisational landlord user $organisationalLandlordUserId " +
+        private fun generateSeedForMember(otherOrganisationalLandlordUserId: Long): String =
+            "Change access level journey for organisational landlord user $otherOrganisationalLandlordUserId " +
                 "at time ${System.currentTimeMillis()}"
     }
 }
@@ -80,6 +80,6 @@ class ChangeOrgTeamMemberAccessLevelJourney(
 interface ChangeOrgTeamMemberAccessLevelJourneyState : JourneyState {
     val accessLevelStep: AccessLevelStep
     val completeChangeAccessLevelStep: CompleteChangeAccessLevelStep
-    var organisationalLandlordUserId: Long
+    var otherOrganisationalLandlordUserId: Long
     var isStateInitialized: Boolean
 }
