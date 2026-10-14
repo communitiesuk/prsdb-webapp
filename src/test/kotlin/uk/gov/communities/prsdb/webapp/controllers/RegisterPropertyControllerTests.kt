@@ -642,7 +642,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getConfirmation includes the payment summary when payments is enabled`() {
+    fun `getConfirmation includes the payment summary`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -672,6 +672,7 @@ class RegisterPropertyControllerTests(
             )
     }
 
+    // TODO PDJB-1734: Remove this test when we remove the PAYMENTS flag
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `getConfirmation does not include the payment summary when payments is disabled`() {
@@ -700,7 +701,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getConfirmation throws when payments is enabled but the property has no succeeded payment`() {
+    fun `getConfirmation throws when the property has no succeeded payment`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(

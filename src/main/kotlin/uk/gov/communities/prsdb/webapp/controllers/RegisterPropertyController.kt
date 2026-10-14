@@ -117,6 +117,7 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
 
+        // TODO PDJB-1734: Remove this check when we remove the PAYMENTS flag
         if (featureFlagManager.checkFeature(PAYMENTS)) {
             val payment =
                 checkNotNull(paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)) {
