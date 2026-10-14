@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
@@ -30,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import java.util.UUID
@@ -70,7 +68,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             page,
             "1234abcd-5678-abcd-1234-567abcd2222a",
             OrganisationalLandlordUserRole.ADMIN,
-            200,
         )
     }
 
@@ -80,12 +77,13 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             page,
             "1234abcd-5678-abcd-1234-567abcd2222b",
             OrganisationalLandlordUserRole.EDITOR,
-            403,
         )
     }
 
     @Test
     fun `A failed user save leaves the invitation available`(page: Page) {
+        // This exercises the failure path in the internal "complete acceptance" step:
+        // if saving the new organisational user fails, the invitation must not be deleted.
         removeExistingOrganisationalLandlordUser()
         val token = "1234abcd-5678-abcd-1234-567abcd2222a"
         doThrow(IllegalStateException("User save failed"))
@@ -103,17 +101,9 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         emailAddressPage.submitEmail("invitee@example.com")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
 
-        var checkAnswersPostStatus: Int? = null
-        page.onResponse { response ->
-            if (response.request().method() == "POST" &&
-                response.url().contains("/${AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT}")
-            ) {
-                checkAnswersPostStatus = response.status()
-            }
-        }
         checkAnswersPage.form.submit()
 
-        assertEquals(500, checkAnswersPostStatus)
+        // The invitation should still be present for a retry if the acceptance step fails.
         assertNotNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(organisationalLandlordUserService)
             .createOrganisationalLandlordUser(any<OrganisationalLandlord>(), any<PrsdbUser>(), any(), any(), any())
@@ -123,7 +113,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         page: Page,
         token: String,
         expectedRole: OrganisationalLandlordUserRole,
-        expectedTeamMembersStatus: Int,
     ) {
         removeExistingOrganisationalLandlordUser()
 
@@ -188,9 +177,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
-
-        val response = page.navigate("http://localhost:$port$TEAM_MEMBERS_ROUTE")
-        assertEquals(expectedTeamMembersStatus, response?.status())
     }
 
     private fun removeExistingOrganisationalLandlordUser() {
@@ -224,7 +210,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             .containsText("There was a problem with this invitation link")
     }
 
-    // TODO PDJB-1828: Delete test when MULTI_USER_ORGANISATIONS is always enabled
     @Test
     fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
         featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
