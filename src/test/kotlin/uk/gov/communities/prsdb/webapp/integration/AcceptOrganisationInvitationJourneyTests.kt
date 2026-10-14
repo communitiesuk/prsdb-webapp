@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
@@ -177,6 +178,9 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
 
+        confirmationPage.dashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+
         val response = page.navigate("http://localhost:$port$TEAM_MEMBERS_ROUTE")
         assertEquals(expectedTeamMembersStatus, response?.status())
     }
@@ -212,6 +216,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             .containsText("There was a problem with this invitation link")
     }
 
+    // TODO PDJB-1828: Delete test when MULTI_USER_ORGANISATIONS is always enabled
     @Test
     fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
         featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
