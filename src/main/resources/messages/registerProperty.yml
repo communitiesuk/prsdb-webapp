@@ -210,12 +210,6 @@ paymentSummary:
     renewalDate: Renewal date
   prnHint: Your property will be registered when you pay and you will be given a Property Registration Number.
   button: Go to payment
-paymentOutcome:
-  # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
-  fieldSetHeading: TODO PDJB-993 payment outcome internal step
-  radios:
-    error:
-      missing: Select a payment outcome
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
