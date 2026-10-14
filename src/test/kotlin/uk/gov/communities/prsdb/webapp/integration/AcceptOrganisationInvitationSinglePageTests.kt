@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     private val validToken = "1234abcd-5678-abcd-1234-567abcd2222a"
 
+    // TODO PDJB-1828: Delete enable feature flag when MULTI_USER_ORGANISATIONS is always enabled
     @BeforeEach
     fun enableFeatureFlag() {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)

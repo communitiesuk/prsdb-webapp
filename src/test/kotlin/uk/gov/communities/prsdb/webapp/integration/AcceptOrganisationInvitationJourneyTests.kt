@@ -57,6 +57,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
     @MockitoSpyBean
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
+    // TODO PDJB-1828: Delete enable feature flag when MULTI_USER_ORGANISATIONS is always enabled
     @BeforeEach
     fun enableFeatureFlag() {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
