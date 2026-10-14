@@ -1,10 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,8 +14,10 @@ import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 class CheckYourAnswersJourneyStateTests {
     @Nested
@@ -116,7 +117,7 @@ class CheckYourAnswersJourneyStateTests {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
             whenever(mockStep.urlPath).thenReturn("new-step")
 
-            val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
+            val mockCyaStep = mockCyaStep()
 
             val state = createTestState(cyaJourneys = mutableMapOf(), cyaStep = mockCyaStep)
             val result = state.getCyaJourneyId(mockStep)
@@ -130,8 +131,7 @@ class CheckYourAnswersJourneyStateTests {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
             whenever(mockStep.urlPath).thenReturn("new-step")
 
-            val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockCyaStep.urlPath).thenReturn("check-answers")
+            val mockCyaStep = mockCyaStep()
 
             val state = createTestState(cyaJourneys = mutableMapOf(), cyaStep = mockCyaStep)
             state.getCyaJourneyId(mockStep)
@@ -144,8 +144,7 @@ class CheckYourAnswersJourneyStateTests {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
             whenever(mockStep.urlPath).thenReturn("new-step")
 
-            val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockCyaStep.urlPath).thenReturn("check-answers")
+            val mockCyaStep = mockCyaStep()
 
             val originalJourneyId = "base-id"
 
@@ -165,6 +164,119 @@ class CheckYourAnswersJourneyStateTests {
                 assertEquals(originalJourneyId, journeyId)
             }
         }
+
+        @Test
+        fun `sets originalCyaAnswers on the child journey state to the answers shown on the CYA page`() {
+            val state =
+                createTestState(
+                    cyaJourneys = mutableMapOf(),
+                    cyaStep = mockCyaStep(mockRequestableStep("step-a")),
+                    submittedStepData = mapOf("step-a" to mapOf("field" to "a"), "check-answers" to mapOf<String, Any?>()),
+                )
+
+            state.getCyaJourneyId(mockRequestableStep("step-a"))
+
+            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+            assertEquals(expectedSnapshot, state.childState?.originalCyaAnswers)
+        }
+    }
+
+    @Nested
+    inner class ClearCyaFields {
+        @Test
+        fun `clears originalCyaAnswers`() {
+            val state = createTestState()
+            state.originalCyaAnswers = "snapshot"
+
+            state.clearCyaFields()
+
+            assertNull(state.originalCyaAnswers)
+        }
+    }
+
+    @Nested
+    inner class GetCyaAnswersSnapshot {
+        @Test
+        fun `contains only the submitted data of the CYA step's ancestors, sorted by key`() {
+            val state =
+                createTestState(
+                    cyaStep = mockCyaStep(mockRequestableStep("step-b"), mockRequestableStep("step-a")),
+                    submittedStepData =
+                        mapOf(
+                            "step-b" to mapOf("field" to "b"),
+                            "check-answers" to mapOf<String, Any?>(),
+                            "step-a" to mapOf("field" to "a"),
+                            "payment-summary" to mapOf("field" to "later progress"),
+                        ),
+                )
+
+            val expectedSnapshot =
+                CheckAnswersFormModel.serializeJourneyData(
+                    linkedMapOf("step-a" to mapOf("field" to "a"), "step-b" to mapOf("field" to "b")),
+                )
+            assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
+        }
+
+        @Test
+        fun `ignores ancestors that are internal steps`() {
+            val state =
+                createTestState(
+                    cyaStep = mockCyaStep(mock<JourneyStep.InternalStep<*, *>>(), mockRequestableStep("step-a")),
+                    submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
+                )
+
+            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+            assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
+        }
+    }
+
+    @Nested
+    inner class CyaAnswersMatchSnapshot {
+        private val snapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+
+        @Test
+        fun `returns true when only data outside the snapshot has changed`() {
+            val state =
+                createTestState(
+                    submittedStepData =
+                        mapOf(
+                            "step-a" to mapOf("field" to "a"),
+                            "check-answers" to mapOf<String, Any?>(),
+                            "payment-summary" to mapOf("field" to "later progress"),
+                        ),
+                )
+
+            assertTrue(state.cyaAnswersMatchSnapshot(snapshot))
+        }
+
+        @Test
+        fun `returns false when an answer in the snapshot has changed`() {
+            val state = createTestState(submittedStepData = mapOf("step-a" to mapOf("field" to "changed")))
+
+            assertFalse(state.cyaAnswersMatchSnapshot(snapshot))
+        }
+
+        @Test
+        fun `returns false when an answer in the snapshot has been removed`() {
+            val state = createTestState(submittedStepData = emptyMap())
+
+            assertFalse(state.cyaAnswersMatchSnapshot(snapshot))
+        }
+    }
+
+    private fun mockRequestableStep(urlPath: String): JourneyStep.RequestableStep<*, *, *> {
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        whenever(step.urlPath).thenReturn(urlPath)
+        whenever(step.getUrlPathOrNull()).thenReturn(urlPath)
+        return step
+    }
+
+    private fun mockCyaStep(vararg ancestors: JourneyStep<*, *, *>): JourneyStep.RequestableStep<*, *, *> {
+        val parentage = mock<Parentage>()
+        whenever(parentage.ancestry).thenReturn(ancestors.toList())
+        val cyaStep = mockRequestableStep("check-answers")
+        whenever(cyaStep.parentage).thenReturn(parentage)
+        return cyaStep
     }
 
     private fun createTestState(
@@ -173,7 +285,8 @@ class CheckYourAnswersJourneyStateTests {
         checkingAnswersFor: String? = null,
         cyaRouteSegment: String? = null,
         cyaJourneys: MutableMap<String, String> = mutableMapOf(),
-        cyaStep: JourneyStep.RequestableStep<*, *, *> = mock(),
+        cyaStep: JourneyStep.RequestableStep<*, *, *> = mockCyaStep(),
+        submittedStepData: Map<String, Any?> = emptyMap(),
     ): TestCheckYourAnswersJourneyState =
         TestCheckYourAnswersJourneyState(
             testJourneyId = journeyId,
@@ -182,6 +295,7 @@ class CheckYourAnswersJourneyStateTests {
             initialCyaRouteSegment = cyaRouteSegment,
             initialCyaJourneys = cyaJourneys,
             testCyaStep = cyaStep,
+            testSubmittedStepData = submittedStepData,
         )
 
     class TestCheckYourAnswersJourneyState(
@@ -191,10 +305,11 @@ class CheckYourAnswersJourneyStateTests {
         initialCyaRouteSegment: String? = null,
         initialCyaJourneys: MutableMap<String, String> = mutableMapOf(),
         private val testCyaStep: JourneyStep.RequestableStep<*, *, *> = mock(),
+        private val testSubmittedStepData: Map<String, Any?> = emptyMap(),
     ) : CheckYourAnswersJourneyState {
         override val finishCyaStep: FinishCyaJourneyStep = mock()
         override val cyaStep: JourneyStep.RequestableStep<*, *, *> = testCyaStep
-        override var originalJourneyUpdated: Instant? = Clock.System.now()
+        override var originalCyaAnswers: String? = null
         override var cyaJourneys: Map<String, String> = initialCyaJourneys
         override var cyaUrlPath: String? = initialCyaRouteSegment
         override var checkingAnswersFor: String? = initialCheckingAnswersFor
@@ -236,11 +351,12 @@ class CheckYourAnswersJourneyStateTests {
         override fun addStepData(
             key: String,
             value: Map<String, Any?>,
-        ) {}
+        ) {
+        }
 
         override fun clearStepData(key: String) {}
 
-        override fun getSubmittedStepData(): Map<String, Any?> = emptyMap()
+        override fun getSubmittedStepData(): Map<String, Any?> = testSubmittedStepData
 
         override fun deleteJourney() {}
 

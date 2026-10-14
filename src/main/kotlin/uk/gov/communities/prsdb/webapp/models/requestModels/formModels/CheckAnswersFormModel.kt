@@ -10,5 +10,8 @@ class CheckAnswersFormModel : FormModel {
             val journeyDataWithStringValues = journeyData.mapValues { (_, value) -> value.toString() }
             return Json.encodeToString(journeyDataWithStringValues)
         }
+
+        fun deserializeJourneyDataKeys(serializedJourneyData: String): Set<String> =
+            Json.decodeFromString<Map<String, String>>(serializedJourneyData).keys
     }
 }

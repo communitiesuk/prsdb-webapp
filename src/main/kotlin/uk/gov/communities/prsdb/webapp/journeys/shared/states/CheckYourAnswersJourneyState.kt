@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -11,12 +10,13 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
 
-    var originalJourneyUpdated: Instant?
+    var originalCyaAnswers: String?
 
     var cyaJourneys: Map<String, String>
 
@@ -45,6 +45,17 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return stateFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
+    fun getCyaAnswersSnapshot(): String {
+        val cyaAnswerKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }.toSet()
+        return serializeCyaAnswers(cyaAnswerKeys)
+    }
+
+    fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
+        serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot
+
+    private fun serializeCyaAnswers(keys: Set<String>): String =
+        CheckAnswersFormModel.serializeJourneyData(getSubmittedStepData().filterKeys { it in keys }.toSortedMap())
+
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
         if (!cyaJourneys.containsKey(checkableStep.urlPath)) {
             cyaJourneys += makePair(checkableStep)
@@ -59,7 +70,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = urlPath
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
-        childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
+        childJourney.originalCyaAnswers = getCyaAnswersSnapshot()
 
         return (urlPath to cyaJourneyId)
     }
@@ -71,7 +82,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     fun clearCyaFields() {
         checkingAnswersFor = null
-        originalJourneyUpdated = null
+        originalCyaAnswers = null
         cyaUrlPath = null
     }
 

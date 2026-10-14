@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Browser
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
@@ -43,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
@@ -60,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -143,8 +146,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -167,6 +172,7 @@ import java.time.MonthDay
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
+import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -459,6 +465,86 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, ConfirmationPagePropertyRegistration::class)
                 assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
             }
+        }
+
+        @Test
+        fun `submitting a CYA page loaded before the CYA was submitted in another tab continues to the payment summary`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            submitCheckAnswersInAnotherTab(browserContext, page.url())
+
+            staleCheckAnswersPage.confirm()
+
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `changing an answer from a CYA page loaded before the CYA was submitted in another tab returns to CYA with the new answer`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            submitCheckAnswersInAnotherTab(browserContext, page.url())
+
+            staleCheckAnswersPage.summaryList.ownershipRow.actions.firstActionLink
+                .clickAndWait()
+            assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class).submitOwnershipType(OwnershipType.LEASEHOLD)
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.ownershipRow.value).containsText("Leasehold")
+        }
+
+        @Test
+        fun `submitting a CYA page after its answers were changed in another tab shows the CYA error page`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            val otherTab = browserContext.newPage()
+            otherTab.navigate(page.url())
+            assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class)
+                .summaryList.ownershipRow.actions.firstActionLink
+                .clickAndWait()
+            assertPageIs(otherTab, OwnershipTypeFormPagePropertyRegistration::class).submitOwnershipType(OwnershipType.LEASEHOLD)
+            assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class)
+
+            staleCheckAnswersPage.confirm()
+
+            assertPageIs(page, ErrorPage::class)
+            assertContains(page.url(), CustomErrorController.CYA_ERROR_ROUTE)
+        }
+
+        @Test
+        fun `changing an answer from a CYA page after that answer was changed in another tab shows the CYA error page`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            val checkAnswersUrl = page.url()
+            staleCheckAnswersPage.summaryList.ownershipRow.actions.firstActionLink
+                .clickAndWait()
+            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+
+            val otherTab = browserContext.newPage()
+            otherTab.navigate(checkAnswersUrl.replace(PropertyRegistrationCyaStep.ROUTE_SEGMENT, OwnershipTypeStep.ROUTE_SEGMENT))
+            assertPageIs(otherTab, OwnershipTypeFormPagePropertyRegistration::class).submitOwnershipType(OwnershipType.SHARE_OF_FREEHOLD)
+
+            ownershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+
+            assertPageIs(page, ErrorPage::class)
+            assertContains(page.url(), CustomErrorController.CYA_ERROR_ROUTE)
+        }
+
+        private fun submitCheckAnswersInAnotherTab(
+            browserContext: BrowserContext,
+            checkAnswersUrl: String,
+        ) {
+            val otherTab = browserContext.newPage()
+            otherTab.navigate(checkAnswersUrl)
+            assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class).confirm()
+            assertPageIs(otherTab, PaymentSummaryFormPagePropertyRegistration::class)
         }
 
         @Test

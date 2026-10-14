@@ -52,19 +52,44 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
     }
 
+    @Nested
+    inner class DeserializeJourneyDataKeys {
+        @Test
+        fun `returns the keys of serialized journey data`() {
+            val serializedData =
+                CheckAnswersFormModel.serializeJourneyData(
+                    mapOf("step-b" to mapOf("field" to "value"), "step-a" to null),
+                )
+
+            assertEquals(setOf("step-a", "step-b"), CheckAnswersFormModel.deserializeJourneyDataKeys(serializedData))
+        }
+    }
+
     private enum class TestEnum {
         TEST_VALUE,
     }
 
     @Nested
+    inner class ResolvePageContent {
+        @Test
+        fun `adds the snapshot of the answers shown on the CYA page as submittedFilteredJourneyData`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("cya-answers-snapshot")
+
+            val content = stepConfig.resolvePageContent(mockState, mapOf("existingKey" to "existingValue"))
+
+            assertEquals(
+                mapOf("existingKey" to "existingValue", "submittedFilteredJourneyData" to "cya-answers-snapshot"),
+                content,
+            )
+        }
+    }
+
+    @Nested
     inner class EnrichSubmittedDataBeforeValidation {
         @Test
-        fun `throws CyaDataHasChangedException when journey data has changed`() {
-            val originalStepData = mapOf("step1" to mapOf("field" to "original"))
-            val modifiedStepData = mapOf("step1" to mapOf("field" to "modified"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(modifiedStepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(originalStepData))
+        fun `throws CyaDataHasChangedException when the answers shown on the CYA page have changed since it loaded`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("current-snapshot")
+            val formData = mapOf("submittedFilteredJourneyData" to "snapshot-when-page-loaded")
 
             assertThrows<CyaDataHasChangedException> {
                 stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
@@ -72,11 +97,9 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when journey data is unchanged`() {
-            val stepData = mapOf("step1" to mapOf("field" to "value"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(stepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(stepData))
+        fun `does not throw when the answers shown on the CYA page are unchanged`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("snapshot")
+            val formData = mapOf("submittedFilteredJourneyData" to "snapshot")
 
             assertDoesNotThrow {
                 stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
@@ -84,14 +107,9 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when data was changed and page was re-rendered with the new data`() {
-            val updatedStepData = mapOf("step1" to mapOf("field" to "newValue"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(updatedStepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(updatedStepData))
-
+        fun `does not throw when no snapshot was submitted`() {
             assertDoesNotThrow {
-                stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
+                stepConfig.enrichSubmittedDataBeforeValidation(mockState, emptyMap())
             }
         }
     }

@@ -16,7 +16,8 @@ class FinishCyaJourneyConfig : AbstractInternalStepConfig<Complete, CheckYourAns
     override fun afterStepIsReached(state: CheckYourAnswersJourneyState) {
         val originalId = state.baseJourneyId
         val originalState = state.getBaseJourneyState()
-        if (originalState.journeyMetadata.lastUpdated == state.originalJourneyUpdated) {
+        val originalCyaAnswers = state.originalCyaAnswers
+        if (originalCyaAnswers != null && originalState.cyaAnswersMatchSnapshot(originalCyaAnswers)) {
             state.copyJourneyTo(originalId)
             originalState.clearCyaFields()
         } else {

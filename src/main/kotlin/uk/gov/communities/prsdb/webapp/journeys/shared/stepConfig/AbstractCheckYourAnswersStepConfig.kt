@@ -20,8 +20,7 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
     override fun resolvePageContent(
         state: TState,
         defaultContent: Map<String, Any?>,
-    ): Map<String, Any?> =
-        defaultContent + ("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()))
+    ): Map<String, Any?> = defaultContent + ("submittedFilteredJourneyData" to state.getCyaAnswersSnapshot())
 
     override fun enrichSubmittedDataBeforeValidation(
         state: TState,
@@ -44,8 +43,7 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
         formData: FormData,
     ) {
         val submittedData = formData["submittedFilteredJourneyData"] as? String ?: return
-        val currentData = CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData())
-        if (submittedData != currentData) {
+        if (submittedData != state.getCyaAnswersSnapshot()) {
             throw CyaDataHasChangedException("Journey data has changed since the page was loaded")
         }
     }
