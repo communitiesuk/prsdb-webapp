@@ -17,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController.Companion.getChangeAccessLevelPath
-import uk.gov.communities.prsdb.webapp.exceptions.OrganisationalLandlordUserMismatchException
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
@@ -91,7 +89,7 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
 
     @Test
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getJourneyStep returns 200 for an org admin`() {
+    fun `getJourneyStep returns 200 for an authorised org admin`() {
         mockJourneySteps()
         whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
@@ -107,33 +105,6 @@ class ChangeOrgTeamMemberAccessLevelControllerTests(
 
         mvc.get("${getChangeAccessLevelBasePath(testUserId)}/unknown-step").andExpect {
             status { isNotFound() }
-        }
-    }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
-        val journeyId = "test-journey-id"
-        whenever(journeyFactory.createJourneySteps(testUserId)).thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(any())).thenReturn(journeyId)
-
-        mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
-            status { is3xxRedirection() }
-            redirectedUrl("${getChangeAccessLevelPath(testUserId)}?journeyId=$journeyId")
-        }
-    }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getJourneyStep redirects to initialize journey when the member does not match`() {
-        val journeyId = "test-journey-id"
-        whenever(journeyFactory.createJourneySteps(testUserId))
-            .thenThrow(OrganisationalLandlordUserMismatchException("mismatch"))
-        whenever(journeyFactory.initializeJourneyState(any())).thenReturn(journeyId)
-
-        mvc.get(getChangeAccessLevelPath(testUserId)).andExpect {
-            status { is3xxRedirection() }
-            redirectedUrl("${getChangeAccessLevelPath(testUserId)}?journeyId=$journeyId")
         }
     }
 

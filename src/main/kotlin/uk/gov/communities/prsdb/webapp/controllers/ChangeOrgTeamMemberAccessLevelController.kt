@@ -54,7 +54,7 @@ class ChangeOrgTeamMemberAccessLevelController(
         if (!organisationalLandlordUserService.getCurrentUserIsAuthorizedToEditRecordOfOtherUser(otherOrganisationalLandlordUserId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "No team member with id $otherOrganisationalLandlordUserId found in the current organisation",
+                "No org team member with id $otherOrganisationalLandlordUserId that the user is authorised to edit found",
             )
         }
     }

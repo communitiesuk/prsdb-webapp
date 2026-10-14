@@ -29,7 +29,7 @@ class UserToOrgLandlordUserServiceTests {
     }
 
     @Test
-    fun `getOrganisationalLandlordUserForCurrentUser returns the team member record for the authenticated user`() {
+    fun `getOrganisationalLandlordUserForCurrentUser returns the record for the authenticated user`() {
         val baseUserId = "organisation-user"
         setMockPrincipal(baseUserId)
         val organisationalLandlordUser = MockLandlordData.createOrganisationalLandlordUser()
@@ -43,8 +43,8 @@ class UserToOrgLandlordUserServiceTests {
     }
 
     @Test
-    fun `getOrganisationalLandlordUserForCurrentUser returns null when the authenticated user is not a team member`() {
-        val baseUserId = "non-team-member"
+    fun `getOrganisationalLandlordUserForCurrentUser returns null when the authenticated user is not an org landlord user`() {
+        val baseUserId = "non-org-landlord-user"
         setMockPrincipal(baseUserId)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 

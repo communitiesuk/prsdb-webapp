@@ -114,7 +114,7 @@ class OrganisationalLandlordUserServiceTests {
     }
 
     @Test
-    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is not an admin of the organisation`() {
+    fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is not an admin`() {
         val currentUser =
             MockLandlordData.createOrganisationalLandlordUser(
                 organisationalLandlord = mockOrganisationLandlord,
