@@ -1,3 +1,5 @@
 title: Signed out
 header: You have been signed out
 buttonText: Sign in
+confirm:
+  heading: Are you sure you want to log out?
