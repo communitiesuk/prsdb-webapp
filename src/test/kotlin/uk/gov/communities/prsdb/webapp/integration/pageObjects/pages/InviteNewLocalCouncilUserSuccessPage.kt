@@ -20,5 +20,5 @@ class InviteNewLocalCouncilUserSuccessPage(
     val confirmationBanner = ConfirmationBanner(page)
     val returnToDashboardButton = Button.byText(page, "Return to dashboard")
 
-    override val expectedTitleHeading = "Local council user invitation sent"
+    override val expectedTitleHeading = "Local Council user invitation sent"
 }
