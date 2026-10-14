@@ -20,9 +20,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
@@ -65,14 +68,56 @@ class PaymentSummaryStepConfigTests {
     fun `getStepSpecificContent stores a newly calculated quote in journey state`() {
         // Arrange
         val quote = createQuote(today)
-        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
+        stubSummaryContent(quote, firstChargeableDate = LocalDate.of(2027, 1, 1))
 
         // Act
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals("Payment summary (TODO PDJB-996)", content["todoComment"])
         verify(mockState).paymentQuote = quote
+        assertEquals("£20", content["annualFee"])
+        assertEquals("1 January 2027", content["firstChargeableDate"])
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", "£12.34"),
+                SummaryListRowViewModel(
+                    "registerProperty.paymentSummary.summary.paymentDate",
+                    today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
+                ),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", "1 March 2028"),
+            ),
+            content["summaryListRows"],
+        )
+    }
+
+    @Test
+    fun `getStepSpecificContent flags the pre-gratis period when the first chargeable date is after the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today.plusDays(1))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(true, content["isPreGratisPeriod"])
+    }
+
+    @Test
+    fun `getStepSpecificContent does not flag the pre-gratis period when charging starts on the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(false, content["isPreGratisPeriod"])
+    }
+
+    @Test
+    fun `chooseTemplate selects the payment summary template`() {
+        assertEquals("forms/paymentSummary", stepConfig.chooseTemplate(mockState))
     }
 
     @Test
@@ -210,6 +255,19 @@ class PaymentSummaryStepConfigTests {
     private fun stubAddressTask() {
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
+    }
+
+    private fun stubSummaryContent(
+        quote: PropertyRegistrationPaymentQuote,
+        firstChargeableDate: LocalDate,
+    ) {
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(
+            AddressDataModel("1 Example Road, EG1 2AB", streetName = "1 Example Road", postcode = "EG1 2AB"),
+        )
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
+        whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
+        whenever(mockPaymentService.getFirstChargeableDate(quote.quoteDate)).thenReturn(firstChargeableDate)
     }
 
     private fun stubSummaryDestination() {

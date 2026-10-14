@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
@@ -47,6 +48,10 @@ class OrganisationalLandlordInvitationService(
         return invitationRepository.findByToken(tokenUuid)
     }
 
+    fun getPendingInvitationForJourneyIdOrNull(journeyId: String): OrganisationalLandlordInvitation? =
+        getInvitationForJourneyIdOrNull(journeyId)
+            ?.takeIf { it.status == OrganisationalLandlordInvitationStatus.PENDING }
+
     @Transactional
     fun createInvitation(
         invitedEmail: String,
@@ -54,7 +59,7 @@ class OrganisationalLandlordInvitationService(
         organisationalLandlord: OrganisationalLandlord,
     ) {
         // Re-check against the database when saving, as another admin may have invited the same email since validation ran
-        if (getInvitedAndMemberEmails(organisationalLandlord).containsEmail(invitedEmail)) return
+        if (getPendingInvitedAndMemberEmails(organisationalLandlord).containsEmail(invitedEmail)) return
 
         val invitation =
             OrganisationalLandlordInvitation(
@@ -74,9 +79,12 @@ class OrganisationalLandlordInvitationService(
         )
     }
 
-    // TODO PDJB-1822: Only count PENDING invitations once the invitation status model is available
-    fun getInvitedAndMemberEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
-        invitationRepository.findByOrganisationalLandlord(organisationalLandlord).map { it.invitedEmail } +
+    // Expired and hidden invitations can no longer be accepted, so they must not block re-inviting that email address
+    fun getPendingInvitedAndMemberEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
+        invitationRepository
+            .findByOrganisationalLandlord(organisationalLandlord)
+            .filter { it.status == OrganisationalLandlordInvitationStatus.PENDING }
+            .map { it.invitedEmail } +
             organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
 
     @Suppress("UNCHECKED_CAST")

@@ -47,7 +47,7 @@ class InviteOrganisationalLandlordUserStepConfig(
         return super.enrichSubmittedDataBeforeValidation(state, formData) +
             (
                 InviteOrganisationalLandlordUserFormModel::invitedAndMemberEmailAddresses.name to
-                    invitationService.getInvitedAndMemberEmails(organisationalLandlord)
+                    invitationService.getPendingInvitedAndMemberEmails(organisationalLandlord)
             )
     }
 
