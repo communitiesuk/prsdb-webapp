@@ -114,6 +114,8 @@ gov-uk-pay:
   api-key: ${GOV_UK_PAY_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
+  connect-timeout: 5s
+  read-timeout: 10s
 
 cloudwatch-metrics:
   ecs:
@@ -164,13 +166,13 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1040-correspondence-address"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-926-landlord-dashboard-update"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: false

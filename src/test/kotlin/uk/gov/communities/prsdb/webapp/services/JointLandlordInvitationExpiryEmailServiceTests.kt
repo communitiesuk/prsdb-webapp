@@ -69,7 +69,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         expiryService.sendExpiryEmailsForExpiredInvitations()
 
         val emailModelCaptor = argumentCaptor<JointLandlordInvitationExpiryEmail>()
-        verify(mockExpiryEmailNotificationService).sendEmail(eq("lois@example.com"), emailModelCaptor.capture())
+        verify(mockExpiryEmailNotificationService).sendEmailToLandlord(eq(primaryLandlord), emailModelCaptor.capture())
 
         val sentEmail = emailModelCaptor.firstValue
         assertEquals("Lois", sentEmail.recipientName)
@@ -107,7 +107,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
 
-        verify(mockExpiryEmailNotificationService, times(3)).sendEmail(any(), any())
+        verify(mockExpiryEmailNotificationService, times(3)).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -146,7 +146,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
 
-        verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockExpiryEmailNotificationService, never()).sendEmailToLandlord(any(), any())
         verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 
@@ -169,7 +169,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
-        whenever(mockExpiryEmailNotificationService.sendEmail(any(), any()))
+        whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
             .thenThrow(PersistentEmailSendException("boom"))
             .thenAnswer { /* succeed on the second call */ }
 
@@ -200,7 +200,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
-        whenever(mockExpiryEmailNotificationService.sendEmail(any(), any()))
+        whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
             .thenThrow(PersistentEmailSendException("boom"))
             .thenAnswer { /* succeed on the second call */ }
 
@@ -265,7 +265,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
             .thenReturn(listOf(invitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
-        whenever(mockExpiryEmailNotificationService.sendEmail(any(), any()))
+        whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
             .thenThrow(PersistentEmailSendException("boom"))
 
         expiryService.sendExpiryEmailsForExpiredInvitations()

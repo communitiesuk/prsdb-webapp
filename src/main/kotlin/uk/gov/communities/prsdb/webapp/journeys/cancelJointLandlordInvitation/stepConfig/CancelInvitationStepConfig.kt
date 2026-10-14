@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationInviteeEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
@@ -20,6 +21,7 @@ class CancelInvitationStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val userToLandlordService: UserToLandlordService,
+    private val currentUserService: CurrentUserService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val inviteeEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
     private val cancellerEmailSender: EmailNotificationService<JointLandlordInvitationCancellationCancellerEmail>,
@@ -49,24 +51,24 @@ class CancelInvitationStepConfig(
         )
 
         // Email the canceller
-        // TODO: PDJB-1274: Update emails to account for org landlord
+        val currentUser = currentUserService.getCurrentUserDetails()
         cancellerEmailSender.sendEmail(
-            cancellerLandlord.email,
+            currentUser.email,
             JointLandlordInvitationCancellationCancellerEmail(
-                recipientName = cancellerLandlord.name,
+                recipientName = currentUser.name,
                 invitedEmail = state.invitedEmail,
                 propertyAddress = propertyAddress,
                 propertyRecordUrl = propertyRecordUrl,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         // Email the other landlords
         propertyOwnership.landlords
             .filterNot { cancellerLandlord.id == it.id }
-            // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach {
-                otherLandlordEmailSender.sendEmail(
-                    it.email,
+                otherLandlordEmailSender.sendEmailToLandlord(
+                    it,
                     JointLandlordInvitationCancellationOtherLandlordEmail(
                         recipientName = it.name,
                         invitedEmail = state.invitedEmail,

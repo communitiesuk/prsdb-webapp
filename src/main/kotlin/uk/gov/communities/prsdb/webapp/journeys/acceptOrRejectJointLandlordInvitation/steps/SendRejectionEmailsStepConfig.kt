@@ -26,10 +26,9 @@ class SendRejectionEmailsStepConfig(
 
         invitationService.addRejectedPropertyAddressToSession(propertyAddress)
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
         invitation.registeredOwnership.landlords.forEach { landlord ->
-            rejectionEmailSender.sendEmail(
-                landlord.email,
+            rejectionEmailSender.sendEmailToLandlord(
+                landlord,
                 JointLandlordInvitationRejectionEmail(
                     recipientName = landlord.name,
                     inviteeEmail = invitation.invitedEmail,

@@ -45,6 +45,7 @@ class LandlordService(
     private val orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
+    private val currentUserService: CurrentUserService,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
@@ -257,20 +258,18 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationLandlordName(orgName: String) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(name = orgName),
-            )
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(name = orgName),
+        )
+        sendOrgUpdateConfirmationEmail("organisation name")
     }
 
     @Transactional
     fun updateOrganisationLandlordEmail(email: String) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(email = email),
-            )
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation email address")
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(email = email),
+        )
+        sendOrgUpdateConfirmationEmail("organisation email address")
     }
 
     @Transactional
@@ -278,7 +277,7 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
         landlordEntity.companyNumber = companyNumber
         organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
-        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information")
+        sendOrgUpdateConfirmationEmail("company registration information")
     }
 
     @Transactional
@@ -287,7 +286,7 @@ class LandlordService(
         landlordEntity.companyNumber = null
         organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
         organisationGoverningBodyMemberService.createGoverningBodyMembers(landlordEntity, governingBodyMembers)
-        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
+        sendOrgUpdateConfirmationEmail("company registration information and governing body details")
     }
 
     @Transactional
@@ -296,26 +295,24 @@ class LandlordService(
         email: String,
         phone: String,
     ) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(
-                    mainContactName = name,
-                    mainContactEmail = email,
-                    mainContactPhone = phone,
-                ),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                mainContactName = name,
+                mainContactEmail = email,
+                mainContactPhone = phone,
+            ),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
+        sendOrgUpdateConfirmationEmail("main contact")
     }
 
     @Transactional
     fun updateOrganisationLandlordPhoneNumber(phoneNumber: String) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(phoneNumber = phoneNumber),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(phoneNumber = phoneNumber),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation phone number")
+        sendOrgUpdateConfirmationEmail("organisation phone number")
     }
 
     @Transactional
@@ -324,16 +321,15 @@ class LandlordService(
         isCharity: Boolean,
         isTrust: Boolean,
     ) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(
-                    isCompany = isCompany,
-                    isCharity = isCharity,
-                    isTrust = isTrust,
-                ),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                isCompany = isCompany,
+                isCharity = isCharity,
+                isTrust = isTrust,
+            ),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type")
+        sendOrgUpdateConfirmationEmail("organisation type")
     }
 
     @Transactional
@@ -347,21 +343,20 @@ class LandlordService(
         leadTrusteePhone: String? = null,
         leadTrusteeAddress: AddressDataModel? = null,
     ) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(
-                    isCompany = isCompany,
-                    isCharity = isCharity,
-                    isTrust = isTrust,
-                    leadTrusteeName = leadTrusteeName,
-                    leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
-                    leadTrusteeEmail = leadTrusteeEmail,
-                    leadTrusteePhone = leadTrusteePhone,
-                    leadTrusteeAddress = leadTrusteeAddress,
-                ),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                isCompany = isCompany,
+                isCharity = isCharity,
+                isTrust = isTrust,
+                leadTrusteeName = leadTrusteeName,
+                leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
+                leadTrusteeEmail = leadTrusteeEmail,
+                leadTrusteePhone = leadTrusteePhone,
+                leadTrusteeAddress = leadTrusteeAddress,
+            ),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
+        sendOrgUpdateConfirmationEmail("organisation type and lead trustee details")
     }
 
     @Transactional
@@ -381,16 +376,15 @@ class LandlordService(
         charityRegisteredWith: CharityRegulator?,
         charityNumber: String?,
     ) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(
-                    isRegisteredCharity = charityRegisteredWith != null,
-                    charityRegisteredWith = charityRegisteredWith,
-                    charityNumber = charityNumber,
-                ),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                isRegisteredCharity = charityRegisteredWith != null,
+                charityRegisteredWith = charityRegisteredWith,
+                charityNumber = charityNumber,
+            ),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "charity registration details")
+        sendOrgUpdateConfirmationEmail("charity registration details")
     }
 
     @Transactional
@@ -401,27 +395,25 @@ class LandlordService(
         phone: String,
         addressDataModel: AddressDataModel,
     ) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(
-                    leadTrusteeName = name,
-                    leadTrusteeDateOfBirth = dateOfBirth,
-                    leadTrusteeEmail = email,
-                    leadTrusteePhone = phone,
-                    leadTrusteeAddress = addressDataModel,
-                ),
-            )
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                leadTrusteeName = name,
+                leadTrusteeDateOfBirth = dateOfBirth,
+                leadTrusteeEmail = email,
+                leadTrusteePhone = phone,
+                leadTrusteeAddress = addressDataModel,
+            ),
+        )
 
-        sendOrgUpdateConfirmationEmail(landlord.email, "lead trustee details")
+        sendOrgUpdateConfirmationEmail("lead trustee details")
     }
 
     @Transactional
     fun updateOrganisationLandlordAddress(address: AddressDataModel) {
-        val landlord =
-            updateOrganisationLandlordForUser(
-                OrganisationLandlordUpdateModel(address = address),
-            )
-        sendOrgUpdateConfirmationEmail(landlord.email, "organisation address")
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(address = address),
+        )
+        sendOrgUpdateConfirmationEmail("organisation address")
     }
 
     fun searchForLandlords(
@@ -502,19 +494,17 @@ class LandlordService(
         val landlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
         organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlord)
         organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, members)
-        sendOrgUpdateConfirmationEmail(landlord.email, "governing body members")
+        sendOrgUpdateConfirmationEmail("governing body members")
     }
 
-    private fun sendOrgUpdateConfirmationEmail(
-        emailAddress: String,
-        updatedDetail: String,
-    ) {
+    private fun sendOrgUpdateConfirmationEmail(updatedDetail: String) {
         orgUpdateConfirmationSender.sendEmail(
-            emailAddress,
+            currentUserService.getCurrentEmail(),
             OrganisationalLandlordUpdateConfirmation(
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                 updatedDetail = "The $updatedDetail.",
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
     }
 }

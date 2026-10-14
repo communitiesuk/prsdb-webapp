@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
@@ -44,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -115,8 +117,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentFailedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentReturnFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentRoutingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
@@ -140,10 +142,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -151,13 +154,16 @@ import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileDownloader
 import uk.gov.communities.prsdb.webapp.services.PaymentReferenceParameterService
+import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData
 import java.net.URI
 import java.nio.file.Path
+import java.time.LocalDate
 import java.time.MonthDay
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -233,6 +239,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoSpyBean
     private lateinit var addressAvailabilityService: AddressAvailabilityService
 
+    @MockitoSpyBean
+    private lateinit var paymentService: PaymentService
+
     @Autowired
     private lateinit var paymentRepository: PaymentRepository
 
@@ -273,13 +282,24 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 nextUrl = request.returnUrl,
             )
         }
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+    }
+
+    private fun stubGovUkPayPaymentStatus(status: GovUkPayPaymentStatus) {
+        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = status)
+        }
     }
 
     // Journeys seeded through the test session controller never create a LandlordIncompleteProperty, which the
     // payment service needs to link the payment to the journey
     private fun ensureIncompletePropertyExistsForCurrentJourney(page: Page): String {
         val journeyId =
-            UriComponentsBuilder.fromUriString(page.url()).build().queryParams.getFirst(JourneyIdProvider.PARAMETER_NAME)
+            UriComponentsBuilder
+                .fromUriString(page.url())
+                .build()
+                .queryParams
+                .getFirst(JourneyIdProvider.PARAMETER_NAME)
                 ?: error("No journey ID in ${page.url()}")
         if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
             val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
@@ -292,17 +312,22 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
+        val paymentReturnPage = submitPaymentSummary(page)
+        paymentReturnPage.form.submit()
+        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    private fun submitPaymentSummary(page: Page): PaymentReturnFormPagePropertyRegistration {
         val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
         ensureIncompletePropertyExistsForCurrentJourney(page)
         paymentSummaryPage.form.submit()
-        val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
-        paymentReturnPage.form.submit()
-        // TODO PDJB-993: Replace this radio selection with the real payment outcome once PaymentRoutingStep becomes an
-        //  internal step - the success outcome will then come from the payment status rather than a user-submitted radio.
-        val paymentRoutingPage = createValidPage(page, PaymentRoutingFormPagePropertyRegistration::class)
-        paymentRoutingPage.form.radios.selectValue(PaymentOutcome.SUCCESS)
-        paymentRoutingPage.form.submit()
-        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+        return createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
+    }
+
+    private fun getCreatedPayment(): Payment {
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(govUkPayClient).createPayment(requestCaptor.capture())
+        return paymentRepository.findAll().single { it.reference == requestCaptor.firstValue.reference }
     }
 
     @Nested
@@ -321,6 +346,74 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkAnswersPage.confirm()
 
             completePropertyRegistrationPaymentSuccessfully(page)
+            val payment = getCreatedPayment()
+            assertEquals(PaymentStatus.SUCCEEDED, payment.status)
+            verify(govUkPayClient).capturePayment(payment.paymentId)
+        }
+
+        @Test
+        fun `a failed payment shows the payment failed page and continuing returns to the payment summary`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentReturnPage = submitPaymentSummary(page)
+
+            paymentReturnPage.form.submit()
+
+            val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
+            paymentFailedPage.form.submit()
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `a payment that has not finished returns the user to the payment return page`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentReturnPage = submitPaymentSummary(page)
+
+            paymentReturnPage.form.submit()
+
+            assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
+            verify(govUkPayClient, never()).capturePayment(any())
+        }
+
+        @Test
+        fun `a payment that finishes after the user is sent back to the payment return page reaches the confirmation page`(page: Page) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page).form.submit()
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+            paymentReturnPage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+        }
+
+        @Test
+        fun `a user whose session expires while paying can resume from the GOV UK Pay return URL after signing in again`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page)
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient).createPayment(requestCaptor.capture())
+
+            // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
+            browserContext.clearCookies()
+            page.navigate(requestCaptor.firstValue.returnUrl)
+
+            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            paymentReturnPage.form.submit()
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
 
         @Test
@@ -361,6 +454,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             paymentSummaryPage.form.submit()
 
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+            verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `submitting the payment summary with a quote from a previous day refreshes the summary without creating a payment`(
+            page: Page,
+        ) {
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            val staleQuote =
+                PropertyRegistrationPaymentQuote(
+                    amountInPence = 1000,
+                    quoteDate = today.minusDays(1),
+                    renewalDate = today.plusYears(1),
+                )
+            doReturn(staleQuote).doCallRealMethod().whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
+
+            paymentSummaryPage.form.submit()
+
+            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
         }
 
@@ -2314,6 +2432,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `registering a property does not update the registering landlord's anniversary when it is already set`(page: Page) {
             val existingAnniversary = MonthDay.of(1, 1)
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            val chargeableQuote =
+                PropertyRegistrationPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
+            doReturn(chargeableQuote).whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
             jdbcTemplate.update(
                 "UPDATE landlord SET anniversary_day = ?, anniversary_month = ?" +
                     " WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:UVWXY'",

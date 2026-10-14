@@ -69,8 +69,8 @@ class SendRejectionEmailsStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockRejectionEmailSender).sendEmail(
-            eq(individualLandlord.email),
+        verify(mockRejectionEmailSender).sendEmailToLandlord(
+            eq(individualLandlord),
             eq(
                 JointLandlordInvitationRejectionEmail(
                     recipientName = individualLandlord.name,
@@ -80,8 +80,8 @@ class SendRejectionEmailsStepConfigTests {
                 ),
             ),
         )
-        verify(mockRejectionEmailSender).sendEmail(
-            eq(organisationalLandlord.email),
+        verify(mockRejectionEmailSender).sendEmailToLandlord(
+            eq(organisationalLandlord),
             eq(
                 JointLandlordInvitationRejectionEmail(
                     recipientName = organisationalLandlord.name,

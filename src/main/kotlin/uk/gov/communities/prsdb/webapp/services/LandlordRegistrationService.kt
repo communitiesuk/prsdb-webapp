@@ -23,6 +23,7 @@ class LandlordRegistrationService(
     private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     private val organisationalRegistrationConfirmationSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val currentUserService: CurrentUserService,
 ) {
     @Transactional
     fun registerIndividualLandlord(
@@ -145,11 +146,11 @@ class LandlordRegistrationService(
     }
 
     private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationalLandlord) {
-        // TODO: PDJB-1274: reassess which address and name to send to once there is a general way to email a landlord
+        val currentUser = currentUserService.getCurrentUserDetails()
         organisationalRegistrationConfirmationSender.sendEmail(
-            landlord.registrantEmail,
+            currentUser.email,
             OrganisationalLandlordRegistrationConfirmationEmail(
-                registrantName = landlord.registrantName,
+                registrantName = currentUser.name,
                 organisationName = landlord.name,
                 lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),

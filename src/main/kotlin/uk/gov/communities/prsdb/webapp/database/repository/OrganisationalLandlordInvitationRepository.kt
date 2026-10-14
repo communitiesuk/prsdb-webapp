@@ -8,5 +8,7 @@ import java.util.UUID
 interface OrganisationalLandlordInvitationRepository : JpaRepository<OrganisationalLandlordInvitation, Long> {
     fun findByToken(token: UUID): OrganisationalLandlordInvitation?
 
+    fun findByOrganisationalLandlord(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordInvitation>
+
     fun deleteByOrganisationalLandlord(organisationalLandlord: OrganisationalLandlord)
 }
