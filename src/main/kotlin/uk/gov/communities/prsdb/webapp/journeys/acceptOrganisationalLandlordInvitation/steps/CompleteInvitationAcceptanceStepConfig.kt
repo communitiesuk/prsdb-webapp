@@ -50,7 +50,7 @@ class CompleteInvitationAcceptanceStepConfig(
         return defaultDestination
     }
 
-    private fun getPrincipalName(): String = (SecurityContextHolder.getContext().authentication.principal as OidcUser).name
+    private fun getPrincipalName(): String = (SecurityContextHolder.getContext().authentication!!.principal as OidcUser).name
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCompleteInvitationAcceptanceStep")

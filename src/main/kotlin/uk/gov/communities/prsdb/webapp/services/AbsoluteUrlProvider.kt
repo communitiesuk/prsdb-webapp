@@ -99,7 +99,7 @@ class AbsoluteUrlProvider(
         return UriComponentsBuilder
             .fromUriString(baseUrl)
             .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
-            .query(methodCallUriComponents.query)
+            .replaceQuery(methodCallUriComponents.query)
             .fragment(methodCallUriComponents.fragment)
             .build()
             .toUri()

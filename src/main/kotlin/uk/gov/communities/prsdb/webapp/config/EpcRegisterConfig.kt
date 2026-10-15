@@ -18,6 +18,7 @@ class EpcRegisterConfig(
     fun epcWebClient(): RestClient =
         RestClient
             .builder()
+            .bufferContent { _, _ -> true }
             .requestInterceptor { request, body, execution ->
                 val authRequest =
                     OAuth2AuthorizeRequest
