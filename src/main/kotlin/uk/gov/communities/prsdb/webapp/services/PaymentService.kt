@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -186,6 +187,12 @@ class PaymentService(
             failureType = failureType,
         )
     }
+
+    fun getLatestSucceededPaymentForProperty(propertyOwnership: PropertyOwnership): Payment? =
+        paymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+            propertyOwnership,
+            PaymentStatus.SUCCEEDED,
+        )
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun finalisePayment(

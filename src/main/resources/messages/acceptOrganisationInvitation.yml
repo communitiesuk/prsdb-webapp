@@ -35,7 +35,7 @@ userIsAlreadyLandlord:
   whatToDo:
     heading: What you need to do
     paragraph:
-      one: To accept this invitation you create a GOV.UK One Login with a different email address.
+      one: To accept this invitation you can create a GOV.UK One Login with a different email address.
       two: This might be your work email instead of your personal email.
   signOutLink:
     link: Sign out of GOV.UK One Login

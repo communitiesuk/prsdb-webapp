@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -106,6 +107,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
+
+    @MockitoBean
+    private lateinit var mockPaymentService: PaymentService
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider

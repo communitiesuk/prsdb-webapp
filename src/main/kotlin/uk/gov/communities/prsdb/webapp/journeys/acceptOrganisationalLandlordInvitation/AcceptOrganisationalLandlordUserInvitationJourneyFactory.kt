@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CompleteInvitationAcceptanceStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
@@ -96,11 +97,15 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.emailAddressStep.isComplete() }
+                nextStep { journey.completeInvitationAcceptanceStep }
+            }
+            step(journey.completeInvitationAcceptanceStep) {
+                parents { journey.checkAnswersStep.isComplete() }
                 nextStep { journey.confirmationStep }
             }
             step(journey.confirmationStep) {
                 routeSegment(ConfirmationStep.ROUTE_SEGMENT)
-                parents { journey.checkAnswersStep.isComplete() }
+                parents { journey.completeInvitationAcceptanceStep.isComplete() }
                 backDestination { Destination.Nowhere() }
                 nextDestination { Destination.Nowhere() }
             }
@@ -139,6 +144,7 @@ class AcceptInvitationJourney(
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
     override val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep,
+    override val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep,
     override val confirmationStep: ConfirmationStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>,
@@ -172,6 +178,7 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep
     val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
+    val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep
     val confirmationStep: ConfirmationStep
     override val cyaStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
         get() = checkAnswersStep
