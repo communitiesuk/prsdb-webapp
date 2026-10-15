@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
@@ -535,7 +536,7 @@ class OrganisationalLandlordInvitationServiceTests {
     @Test
     fun `acceptInvitation finds or creates a PRSDB user for the accepting user`() {
         // Arrange
-        arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+        arrangePendingInvitationAcceptance(EDITOR)
 
         // Act
         invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
@@ -544,99 +545,31 @@ class OrganisationalLandlordInvitationServiceTests {
         verify(mockPrsdbUserService).findOrCreatePrsdbUser(acceptingUserId)
     }
 
-    @Test
-    fun `acceptInvitation sends Editor confirmation to the accepted invitee`() {
+    @ParameterizedTest
+    @CsvSource(
+        "EDITOR, editor, false",
+        "ADMIN, administrator, true",
+    )
+    fun `acceptInvitation sends confirmation with the invited role to the accepted invitee`(
+        role: OrganisationalLandlordUserRole,
+        expectedRoleName: String,
+        expectedIsAdmin: Boolean,
+    ) {
         // Arrange
-        val baseUser = PrsdbUser(acceptingUserId)
-        val invitedLandlord = mock<OrganisationalLandlord>()
-        val dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard")
-        val invitation = mock<OrganisationalLandlordInvitation>()
-        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-            .thenReturn(mutableListOf(journeyId to token.toString()))
-        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
-        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitedLandlord.name).thenReturn("Example Organisation")
-        whenever(invitation.role).thenReturn(EDITOR)
-        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
-        whenever(invitation.token).thenReturn(token)
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
-        whenever(
-            mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
-                invitedLandlord,
-                baseUser,
-                inviteeName,
-                inviteeEmail,
-                EDITOR,
-            ),
-        ).thenReturn(mock())
-
-        // Act
-        val acceptedToken = invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
-
-        // Assert
-        assertEquals(token.toString(), acceptedToken)
-        verify(mockOrganisationalLandlordUserService)
-            .createOrganisationalLandlordUser(
-                invitedLandlord,
-                baseUser,
-                inviteeName,
-                inviteeEmail,
-                EDITOR,
-            )
-        verify(mockInvitationRepository).delete(invitation)
-        verify(mockAcceptedEmailSender).sendEmail(
-            inviteeEmail,
-            OrganisationalLandlordInvitationAcceptedEmail(
-                recipientName = inviteeName,
-                roleName = "editor",
-                organisationName = "Example Organisation",
-                isAdmin = false,
-                dashboardUrl = dashboardUrl,
-            ),
-        )
-    }
-
-    @Test
-    fun `acceptInvitation sends the Admin confirmation email to the accepted invitee`() {
-        // Arrange
-        val baseUser = PrsdbUser(acceptingUserId)
-        val invitedLandlord = mock<OrganisationalLandlord>()
-        val dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard")
-        val invitation = mock<OrganisationalLandlordInvitation>()
-        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-            .thenReturn(mutableListOf(journeyId to token.toString()))
-        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
-        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitedLandlord.name).thenReturn("Example Organisation")
-        whenever(invitation.role).thenReturn(ADMIN)
-        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
-        whenever(invitation.token).thenReturn(token)
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
-        whenever(
-            mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
-                invitedLandlord,
-                baseUser,
-                inviteeName,
-                inviteeEmail,
-                ADMIN,
-            ),
-        ).thenReturn(mock())
+        arrangePendingInvitationAcceptance(role)
 
         // Act
         invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
 
         // Assert
-        verify(mockInvitationRepository).delete(invitation)
         verify(mockAcceptedEmailSender).sendEmail(
             inviteeEmail,
             OrganisationalLandlordInvitationAcceptedEmail(
                 recipientName = inviteeName,
-                roleName = "administrator",
+                roleName = expectedRoleName,
                 organisationName = "Example Organisation",
-                isAdmin = true,
-                dashboardUrl = dashboardUrl,
+                isAdmin = expectedIsAdmin,
+                dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
             ),
         )
     }
@@ -694,7 +627,7 @@ class OrganisationalLandlordInvitationServiceTests {
     @Test
     fun `acceptInvitation saves a user using the invitation organisation and role`() {
         // Arrange
-        val mocks = arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+        val mocks = arrangePendingInvitationAcceptance(EDITOR)
 
         // Act
         invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
@@ -706,14 +639,14 @@ class OrganisationalLandlordInvitationServiceTests {
                 mocks.baseUser,
                 inviteeName,
                 inviteeEmail,
-                OrganisationalLandlordUserRole.EDITOR,
+                EDITOR,
             )
     }
 
     @Test
     fun `acceptInvitation deletes the invitation`() {
         // Arrange
-        val mocks = arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+        val mocks = arrangePendingInvitationAcceptance(EDITOR)
 
         // Act
         invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
@@ -725,7 +658,7 @@ class OrganisationalLandlordInvitationServiceTests {
     @Test
     fun `acceptInvitation returns the accepted invitation's token`() {
         // Arrange
-        arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+        arrangePendingInvitationAcceptance(EDITOR)
 
         // Act
         val acceptedToken = invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
@@ -744,7 +677,7 @@ class OrganisationalLandlordInvitationServiceTests {
             .thenReturn(mutableListOf(journeyId to token.toString()))
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
         whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitation.role).thenReturn(OrganisationalLandlordUserRole.ADMIN)
+        whenever(invitation.role).thenReturn(ADMIN)
         whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
         whenever(
@@ -753,7 +686,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 baseUser,
                 inviteeName,
                 inviteeEmail,
-                OrganisationalLandlordUserRole.ADMIN,
+                ADMIN,
             ),
         ).thenThrow(IllegalStateException("User save failed"))
 
