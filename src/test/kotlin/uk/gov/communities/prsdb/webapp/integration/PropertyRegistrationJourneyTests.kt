@@ -368,9 +368,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `with JavaScript enabled, a failed payment redirects to the payment failed page and continuing returns to the payment summary`(
-            page: Page,
-        ) {
+        fun `with JavaScript enabled, a failed payment shows the payment failed page with a link back to payment summary`(page: Page) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
@@ -379,7 +377,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
-            paymentFailedPage.form.submit()
+            assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
+            assertThat(paymentFailedPage.backLink).isHidden()
+            paymentFailedPage.tryAgainLink.clickAndWait()
             assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
         }
 
