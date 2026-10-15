@@ -14,15 +14,17 @@
     <p class="govuk-body" th:text="#{registerProperty.paymentFailed.notRegistered}">
         registerProperty.paymentFailed.notRegistered
     </p>
-    <p class="govuk-body">
+    <p class="govuk-body govuk-!-margin-bottom-6">
         <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentFailed.tryAgainLink}">
             registerProperty.paymentFailed.tryAgainLink
         </a>
     </p>
     <details id="details" th:replace="~{fragments/details :: details(#{registerProperty.paymentFailed.getHelp}, ~{::#details/content()})}">
         <div class="govuk-details__text">
-            <p class="govuk-body" th:text="#{common.contactDetails.phone}">common.contactDetails.phone</p>
-            <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">common.contactDetails.phoneHours</p>
+            <p class="govuk-body">
+                <span th:text="#{common.contactDetails.phone}">common.contactDetails.phone</span><br>
+                <span th:text="#{common.contactDetails.phoneHours}">common.contactDetails.phoneHours</span>
+            </p>
             <p class="govuk-body">
                 <span th:text="#{common.contactDetails.emailLabel}">common.contactDetails.emailLabel</span>
                 <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}"
