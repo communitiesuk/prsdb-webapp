@@ -62,7 +62,7 @@ class GasSafetyDetailsTask(
     override val propertyOwnershipId: Long?
         get() = dependencies.propertyOwnershipId
 
-    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf(), isCyaAnswer = true)
+    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
 
     override val gasSupplyOutcome: GasSupplyOutcome?

@@ -781,10 +781,16 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
-    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
 
-    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
-    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
+    // Payment progress is recorded after the CYA page is submitted, so it is excluded from the CYA snapshot to allow
+    // the user to go back to the CYA page and change their answers
+    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate(
+        "paymentQuote",
+        excludeFromCyaSnapshot = true,
+    )
+
+    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference", excludeFromCyaSnapshot = true)
+    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome", excludeFromCyaSnapshot = true)
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
@@ -797,7 +803,8 @@ class PropertyRegistrationJourney(
             return addressTask.getMatchingAddress(submittedAddress)?.uprn
         }
 
-    override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
+    // Navigation state that can be set by viewing the task list after the CYA page is loaded
+    override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey", excludeFromCyaSnapshot = true)
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true

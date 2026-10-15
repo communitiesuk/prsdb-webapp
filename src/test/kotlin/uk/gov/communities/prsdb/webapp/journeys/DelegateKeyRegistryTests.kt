@@ -44,28 +44,28 @@ class DelegateKeyRegistryTests {
     }
 
     @Test
-    fun `cyaAnswerKeys contains only the keys registered as CYA answers`() {
+    fun `cyaSnapshotKeys contains only the keys registered as included in the CYA snapshot`() {
         val registry =
             DelegateKeyRegistry().apply {
-                register("answer", isCyaAnswer = true)
-                register("notAnAnswer")
-                register("route/answer", isCyaAnswer = true)
+                register("answer", includeInCyaSnapshot = true)
+                register("excluded")
+                register("route/answer", includeInCyaSnapshot = true)
             }
 
-        assertEquals(setOf("answer", "route/answer"), registry.cyaAnswerKeys)
+        assertEquals(setOf("answer", "route/answer"), registry.cyaSnapshotKeys)
     }
 
     @Test
-    fun `registerAll keeps whether each key is a CYA answer`() {
+    fun `registerAll keeps whether each key is included in the CYA snapshot`() {
         val source =
             DelegateKeyRegistry().apply {
-                register("answer", isCyaAnswer = true)
-                register("notAnAnswer")
+                register("answer", includeInCyaSnapshot = true)
+                register("excluded")
             }
-        val target = DelegateKeyRegistry().apply { register("targetAnswer", isCyaAnswer = true) }
+        val target = DelegateKeyRegistry().apply { register("targetAnswer", includeInCyaSnapshot = true) }
 
         target.registerAll(source)
 
-        assertEquals(setOf("answer", "targetAnswer"), target.cyaAnswerKeys)
+        assertEquals(setOf("answer", "targetAnswer"), target.cyaSnapshotKeys)
     }
 }

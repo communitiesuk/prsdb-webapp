@@ -33,7 +33,12 @@ class PropertyRegistrationAddressTask(
     PropertyRegistrationAddressState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+
+    // Set by the payment steps after the CYA page is submitted
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(
+        "isAddressAlreadyRegistered",
+        excludeFromCyaSnapshot = true,
+    )
 
     override val taskState get() = this
 

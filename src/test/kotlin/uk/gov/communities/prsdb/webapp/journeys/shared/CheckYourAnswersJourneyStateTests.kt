@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.CYA_ANSWER_DELEGATE_KEY_PREFIX
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.CYA_SNAPSHOT_DELEGATE_KEY_PREFIX
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 class CheckYourAnswersJourneyStateTests {
@@ -231,20 +231,20 @@ class CheckYourAnswersJourneyStateTests {
         }
 
         @Test
-        fun `contains the encoded values of CYA answer delegates, including unset ones, sorted by key`() {
+        fun `contains the encoded values of CYA snapshot delegates, including unset ones, sorted by key`() {
             val state =
                 createTestState(
                     cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                    cyaAnswerDelegateKeys = setOf("task/unsetAnswer", "task/answer"),
+                    cyaSnapshotDelegateKeys = setOf("task/unsetAnswer", "task/answer"),
                     delegateValues = mapOf("task/answer" to "{\"1\":\"value\"}", "paymentQuote" to "later progress"),
                 )
 
             val expectedSnapshot =
                 CheckAnswersFormModel.serializeJourneyData(
                     linkedMapOf(
-                        "${CYA_ANSWER_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
-                        "${CYA_ANSWER_DELEGATE_KEY_PREFIX}task/unsetAnswer" to null,
+                        "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
+                        "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/unsetAnswer" to null,
                         "step-a" to mapOf("field" to "a"),
                     ),
                 )
@@ -273,34 +273,34 @@ class CheckYourAnswersJourneyStateTests {
         }
 
         @Test
-        fun `returns true when the CYA answer delegates are unchanged`() {
-            val snapshotWithDelegates = createStateWithAnswerDelegate("{\"1\":\"value\"}").getCyaAnswersSnapshot()
-            val state = createStateWithAnswerDelegate("{\"1\":\"value\"}")
+        fun `returns true when the CYA snapshot delegates are unchanged`() {
+            val snapshotWithDelegates = createStateWithSnapshotDelegate("{\"1\":\"value\"}").getCyaAnswersSnapshot()
+            val state = createStateWithSnapshotDelegate("{\"1\":\"value\"}")
 
             assertTrue(state.cyaAnswersMatchSnapshot(snapshotWithDelegates))
         }
 
         @Test
-        fun `returns false when a CYA answer delegate has changed`() {
-            val snapshotWithDelegates = createStateWithAnswerDelegate("{\"1\":\"value\"}").getCyaAnswersSnapshot()
-            val state = createStateWithAnswerDelegate("{\"1\":\"value\",\"2\":\"another value\"}")
+        fun `returns false when a CYA snapshot delegate has changed`() {
+            val snapshotWithDelegates = createStateWithSnapshotDelegate("{\"1\":\"value\"}").getCyaAnswersSnapshot()
+            val state = createStateWithSnapshotDelegate("{\"1\":\"value\",\"2\":\"another value\"}")
 
             assertFalse(state.cyaAnswersMatchSnapshot(snapshotWithDelegates))
         }
 
         @Test
-        fun `returns false when an unset CYA answer delegate has been set`() {
-            val snapshotWithDelegates = createStateWithAnswerDelegate(null).getCyaAnswersSnapshot()
-            val state = createStateWithAnswerDelegate("{\"1\":\"value\"}")
+        fun `returns false when an unset CYA snapshot delegate has been set`() {
+            val snapshotWithDelegates = createStateWithSnapshotDelegate(null).getCyaAnswersSnapshot()
+            val state = createStateWithSnapshotDelegate("{\"1\":\"value\"}")
 
             assertFalse(state.cyaAnswersMatchSnapshot(snapshotWithDelegates))
         }
 
-        private fun createStateWithAnswerDelegate(answerValue: String?) =
+        private fun createStateWithSnapshotDelegate(answerValue: String?) =
             createTestState(
                 cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                 submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                cyaAnswerDelegateKeys = setOf("task/answer"),
+                cyaSnapshotDelegateKeys = setOf("task/answer"),
                 delegateValues = mapOf("task/answer" to answerValue),
             )
 
@@ -342,7 +342,7 @@ class CheckYourAnswersJourneyStateTests {
         cyaJourneys: MutableMap<String, String> = mutableMapOf(),
         cyaStep: JourneyStep.RequestableStep<*, *, *> = mockCyaStep(),
         submittedStepData: Map<String, Any?> = emptyMap(),
-        cyaAnswerDelegateKeys: Set<String> = emptySet(),
+        cyaSnapshotDelegateKeys: Set<String> = emptySet(),
         delegateValues: Map<String, Any?> = emptyMap(),
     ): TestCheckYourAnswersJourneyState =
         TestCheckYourAnswersJourneyState(
@@ -353,7 +353,7 @@ class CheckYourAnswersJourneyStateTests {
             initialCyaJourneys = cyaJourneys,
             testCyaStep = cyaStep,
             testSubmittedStepData = submittedStepData,
-            testCyaAnswerDelegateKeys = cyaAnswerDelegateKeys,
+            testCyaSnapshotDelegateKeys = cyaSnapshotDelegateKeys,
             testDelegateValues = delegateValues,
         )
 
@@ -365,7 +365,7 @@ class CheckYourAnswersJourneyStateTests {
         initialCyaJourneys: MutableMap<String, String> = mutableMapOf(),
         private val testCyaStep: JourneyStep.RequestableStep<*, *, *> = mock(),
         private val testSubmittedStepData: Map<String, Any?> = emptyMap(),
-        private val testCyaAnswerDelegateKeys: Set<String> = emptySet(),
+        private val testCyaSnapshotDelegateKeys: Set<String> = emptySet(),
         private val testDelegateValues: Map<String, Any?> = emptyMap(),
     ) : CheckYourAnswersJourneyState {
         override val finishCyaStep: FinishCyaJourneyStep = mock()
@@ -419,7 +419,7 @@ class CheckYourAnswersJourneyStateTests {
 
         override fun getSubmittedStepData(): Map<String, Any?> = testSubmittedStepData
 
-        override val cyaAnswerDelegateKeys: Set<String> = testCyaAnswerDelegateKeys
+        override val cyaSnapshotDelegateKeys: Set<String> = testCyaSnapshotDelegateKeys
 
         override fun getEncodedDelegateValue(key: String): Any? = testDelegateValues[key]
 

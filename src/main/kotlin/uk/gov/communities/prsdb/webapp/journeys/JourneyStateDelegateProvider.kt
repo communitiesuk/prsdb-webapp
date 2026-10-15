@@ -11,23 +11,23 @@ class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) : DelegateKeysOwner {
     private val keysInUse = mutableSetOf<String>()
-    private val cyaAnswerKeysInUse = mutableSetOf<String>()
+    private val cyaSnapshotKeysInUse = mutableSetOf<String>()
 
     private var registry: DelegateKeyRegistry? = null
 
     fun registerKey(
         propertyKey: String,
-        isCyaAnswer: Boolean = false,
+        includeInCyaSnapshot: Boolean = true,
     ) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }
-        if (isCyaAnswer) {
-            cyaAnswerKeysInUse.add(propertyKey)
+        if (includeInCyaSnapshot) {
+            cyaSnapshotKeysInUse.add(propertyKey)
         }
-        registry?.register(scopedKey(propertyKey), isCyaAnswer)
+        registry?.register(scopedKey(propertyKey), includeInCyaSnapshot)
     }
 
     private var routePrefix: String? = null
@@ -38,32 +38,34 @@ class JourneyStateDelegateProvider(
 
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
         this.registry = registry
-        keysInUse.forEach { registry.register(scopedKey(it), it in cyaAnswerKeysInUse) }
+        keysInUse.forEach { registry.register(scopedKey(it), it in cyaSnapshotKeysInUse) }
     }
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
     /**
-     * The scoped keys of delegates holding answers shown on a check your answers page.
+     * The scoped keys of delegates included in the check your answers snapshot.
      *
      * Once a registry is bound this covers the whole journey, otherwise only this provider's own delegates.
      */
-    val cyaAnswerKeys: Set<String>
-        get() = registry?.cyaAnswerKeys ?: cyaAnswerKeysInUse.map(::scopedKey).toSet()
+    val cyaSnapshotKeys: Set<String>
+        get() = registry?.cyaSnapshotKeys ?: cyaSnapshotKeysInUse.map(::scopedKey).toSet()
 
     /**
      * Creates a delegate for a nullable journey state property.
      *
      * @param propertyKey Unique key to store this property in the journey state
-     * @param isCyaAnswer Whether this property holds an answer shown on a check your answers page that is not also
-     * stored as step data, so changes to it are detected by the CYA answers snapshot
+     * @param excludeFromCyaSnapshot Whether to leave this property out of the check your answers snapshot. Mutable
+     * properties are included by default, so changes to them made after a CYA page is loaded are detected. Only exclude
+     * properties that are written after the CYA page is submitted (e.g. payment progress), as otherwise going back to
+     * the CYA page and changing an answer will fail
      * @throws JourneyInitialisationException if the propertyKey is already in use
      */
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
-        isCyaAnswer: Boolean = false,
+        excludeFromCyaSnapshot: Boolean = false,
     ): NullableJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey, isCyaAnswer)
+        registerKey(propertyKey, !excludeFromCyaSnapshot)
         return NullableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 
@@ -81,17 +83,19 @@ class JourneyStateDelegateProvider(
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)
      * @param propertyKey Unique key to store this property in the journey state
-     * @param isCyaAnswer Whether this property holds an answer shown on a check your answers page that is not also
-     * stored as step data, so changes to it are detected by the CYA answers snapshot
+     * @param excludeFromCyaSnapshot Whether to leave this property out of the check your answers snapshot. Mutable
+     * properties are included by default, so changes to them made after a CYA page is loaded are detected. Only exclude
+     * properties that are written after the CYA page is submitted (e.g. payment progress), as otherwise going back to
+     * the CYA page and changing an answer will fail
      * @return A delegate that manages getting and setting the property value
      * @throws JourneyInitialisationException if the propertyKey is already in use
      */
     final inline fun <TJourney, reified TProperty : Any> requiredDelegate(
         propertyKey: String,
         defaultValue: TProperty? = null,
-        isCyaAnswer: Boolean = false,
+        excludeFromCyaSnapshot: Boolean = false,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey, isCyaAnswer)
+        registerKey(propertyKey, !excludeFromCyaSnapshot)
         val delegate =
             RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, { scopedKey(propertyKey) }, serializer(), defaultValue)
         return delegate
@@ -110,6 +114,8 @@ class JourneyStateDelegateProvider(
      *
      * If the property is set multiple times, the first value will be kept and other writes will be ignored.
      *
+     * As the property cannot change, it is not included in the check your answers snapshot.
+     *
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)
      * @param propertyKey Unique key to store this property in the journey state
@@ -119,7 +125,7 @@ class JourneyStateDelegateProvider(
     final inline fun <TJourney, reified TProperty : Any> requiredImmutableDelegate(
         propertyKey: String,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey)
+        registerKey(propertyKey, includeInCyaSnapshot = false)
         return RequiredImmutableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 

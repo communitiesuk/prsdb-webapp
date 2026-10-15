@@ -29,10 +29,14 @@ class OrgGovBodyTask(
 
     override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>? by delegateProvider.nullableDelegate(
         "governingBodyMembersMap",
-        isCyaAnswer = true,
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
-    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
+
+    // Navigation state set by following a member's change link, rather than an answer
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate(
+        "editingGovBodyMemberId",
+        excludeFromCyaSnapshot = true,
+    )
     override var orgGovBodyDetailsMode: OrgGovBodyDetailsMode? by delegateProvider.nullableDelegate("orgGovBodyDetailsMode")
 
     override fun makeSubJourney(state: OrgGovBodyState) =
