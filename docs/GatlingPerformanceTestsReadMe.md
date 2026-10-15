@@ -98,9 +98,8 @@ None of them need the webapp, Docker, AWS credentials or NFT:
 .\gradlew.bat performanceTest --console=plain
 ```
 
-These run only on demand and in the NFT performance-test workflow, never in the Build and Test pull request
-workflow. Like any build of the webapp, they need Node and `npm ci` because compiling the root project builds the
-frontend assets.
+Build and Test runs these in the separate "Performance tests" job. Like any build of the webapp, they need Node
+and `npm ci` because compiling the root project builds the frontend assets.
 
 The Gatling tests prove that incorrect bodies/content types, missing CSRF tokens and skipped requests fail the
 runner; warm-up requests are excluded from measured request counts; repeated samples are aggregated; and mean
@@ -143,8 +142,8 @@ repeat requests to measure averages and maxima.
 Local limits prove the gates work; they are not NFT acceptance limits. Future load, spike, or stress profiles can
 reuse journey chains while defining their own concurrent workload.
 
-Build and Test runs neither the simulations nor the performance tests (`performanceTest`); the webapp test shards run
-only the root `test` task. Automated performance execution belongs in the dedicated PDJB-430 performance-testing action; the
+Build and Test runs the unit and assertion tests (`performanceTest`) in their own job, but never the simulations.
+The webapp test shards run only the root `test` task. Automated performance execution belongs in the dedicated PDJB-430 performance-testing action; the
 commands here remain available for explicit local development runs.
 
 ### Real local basic journey
