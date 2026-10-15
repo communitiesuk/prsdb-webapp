@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -17,13 +16,11 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -41,13 +38,10 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
-import java.net.URI
 import java.time.LocalDate
 import java.time.MonthDay
 import java.util.UUID
@@ -70,10 +64,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-
-    @Mock
-    private lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+    private lateinit var mockConfirmationSender: PropertyRegistrationConfirmationSender
 
     @Mock
     private lateinit var mockPropertyRegistrationConfirmationService: PropertyRegistrationConfirmationService
@@ -90,34 +81,8 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
 
-    @Mock
-    private lateinit var mockFeatureFlagManager: uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-
-    @Mock
-    private lateinit var mockCurrentUserService: CurrentUserService
-
     @InjectMocks
-    private lateinit var confirmationSender: PropertyRegistrationConfirmationSender
-
     private lateinit var propertyRegistrationService: PropertyRegistrationService
-
-    @BeforeEach
-    fun setUp() {
-        propertyRegistrationService =
-            PropertyRegistrationService(
-                mockAddressService,
-                mockLicenseService,
-                mockPropertyOwnershipService,
-                mockUserToLandlordService,
-                mockPropertyOwnershipRepository,
-                mockPropertyRegistrationConfirmationService,
-                mockJointLandlordInvitationService,
-                mockPropertyComplianceService,
-                mockLettingAgentAccessService,
-                mockDelegateToLettingAgentEmailService,
-                confirmationSender,
-            )
-    }
 
     @AfterEach
     fun tearDown() {
@@ -221,7 +186,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
             MockPropertyRegistrationData
@@ -324,7 +288,6 @@ class PropertyRegistrationServiceTests {
                 tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         val propertyOwnership =
@@ -437,7 +400,6 @@ class PropertyRegistrationServiceTests {
                 renewalDate = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -495,10 +457,9 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sends confirmation email to current user and caches the registration number when it registers the property`() {
+    fun `registerProperty sends confirmation email and caches the registration number when it registers the property`() {
         // Arrange
         val landlord = MockLandlordData.createOrgLandlord()
-        val currentUserEmail = "admin@example.com"
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 5678)
 
         val expectedPropertyOwnership =
@@ -507,7 +468,6 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
@@ -540,11 +500,8 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
 
-        val dashboardUri = URI("https:gov.uk")
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
-
         // Act
-        propertyRegistrationService.registerProperty(
+        val registrationData =
             MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
                 propertyType = PropertyType.DETACHED_HOUSE,
@@ -562,19 +519,11 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
                 customPropertyType = null,
-            ),
-        )
+            )
+        propertyRegistrationService.registerProperty(registrationData)
 
         // Assert
-        verify(mockConfirmationEmailSender).sendEmail(
-            eq(currentUserEmail),
-            argThat<PropertyRegistrationConfirmationEmail> { email ->
-                email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
-                    email.multiLineAddress == expectedPropertyOwnership.address.toMultiLineAddress() &&
-                    email.prsdUrl == dashboardUri.toString() &&
-                    email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
-            },
-        )
+        verify(mockConfirmationSender).sendConfirmationEmail(registrationData, landlord, expectedPropertyOwnership)
 
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(eq(registrationNumber.number))
     }
@@ -647,7 +596,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
             MockPropertyRegistrationData.createPropertyRegistrationDataModel(
@@ -764,7 +712,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -875,7 +822,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
         val jointLandlordInvitations =
             jointLandlordEmails.map { email ->
                 MockJointLandlordData.createJointLandlordInvitation(email = email, propertyOwnership = expectedPropertyOwnership)
@@ -971,7 +917,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -1055,7 +1000,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
         val expectedToken = UUID.randomUUID()
         whenever(mockLettingAgentAccessService.createInvitation(expectedPropertyOwnership, lettingAgentEmail))
             .thenReturn(
@@ -1154,7 +1098,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -1237,7 +1180,6 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -1311,7 +1253,6 @@ class PropertyRegistrationServiceTests {
                 renewalDate = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -1410,7 +1351,6 @@ class PropertyRegistrationServiceTests {
                 renewalDate = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -1465,164 +1405,6 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sends confirmation email with isDelegatedToLettingAgent when delegated`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val currentUserEmail = "admin@example.com"
-        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 9999)
-        val expectedPropertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord),
-                registrationNumber = registrationNumber,
-            )
-
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(
-            mockPropertyOwnershipService.createPropertyOwnership(
-                ownershipType = any(),
-                isOccupied = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                registeringLandlord = any(),
-                anniversary = any(),
-                propertyBuildType = any(),
-                address = any(),
-                license = anyOrNull(),
-                isActive = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                markedJointLandlord = any(),
-                licenseProvideLater = anyOrNull(),
-                tenancyProvideLater = anyOrNull(),
-                correspondenceEmail = anyOrNull(),
-                correspondenceAddressModel = anyOrNull(),
-                renewalDate = any(),
-            ),
-        ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
-
-        propertyRegistrationService.registerProperty(
-            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
-                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-                propertyType = PropertyType.DETACHED_HOUSE,
-                licenseType = LicensingType.NO_LICENSING,
-                licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
-                isOccupied = true,
-                numberOfHouseholds = 1,
-                numberOfPeople = 1,
-                numBedrooms = null,
-                billsIncludedList = null,
-                customBillsIncluded = null,
-                furnishedStatus = null,
-                rentFrequency = null,
-                customRentFrequency = null,
-                rentAmount = null,
-                customPropertyType = null,
-                isDelegatedToLettingAgent = true,
-            ),
-        )
-
-        verify(mockConfirmationEmailSender).sendEmail(
-            eq(currentUserEmail),
-            argThat<PropertyRegistrationConfirmationEmail> { isDelegatedToLettingAgent },
-        )
-    }
-
-    @Test
-    fun `registerProperty sends confirmation email with provide-later flags for a non-delegated occupied property`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val currentUserEmail = "admin@example.com"
-        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 8888)
-        val expectedPropertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord),
-                registrationNumber = registrationNumber,
-            )
-
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(
-            mockPropertyOwnershipService.createPropertyOwnership(
-                ownershipType = any(),
-                isOccupied = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                registeringLandlord = any(),
-                anniversary = any(),
-                propertyBuildType = any(),
-                address = any(),
-                license = anyOrNull(),
-                isActive = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                markedJointLandlord = any(),
-                licenseProvideLater = anyOrNull(),
-                tenancyProvideLater = anyOrNull(),
-                correspondenceEmail = anyOrNull(),
-                correspondenceAddressModel = anyOrNull(),
-                renewalDate = any(),
-            ),
-        ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
-
-        propertyRegistrationService.registerProperty(
-            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
-                addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-                propertyType = PropertyType.DETACHED_HOUSE,
-                licenseType = LicensingType.NO_LICENSING,
-                licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
-                isOccupied = true,
-                numberOfHouseholds = 1,
-                numberOfPeople = 1,
-                numBedrooms = null,
-                billsIncludedList = null,
-                customBillsIncluded = null,
-                furnishedStatus = null,
-                rentFrequency = null,
-                customRentFrequency = null,
-                rentAmount = null,
-                customPropertyType = null,
-                licenseProvideLater = true,
-                gasSafetyCertProvideLater = true,
-                electricalSafetyCertProvideLater = true,
-                epcProvideLater = true,
-                tenancyProvideLater = true,
-                isDelegatedToLettingAgent = false,
-            ),
-        )
-
-        verify(mockConfirmationEmailSender).sendEmail(
-            eq(currentUserEmail),
-            argThat<PropertyRegistrationConfirmationEmail> {
-                isPdjb939PhaseTwoEnabled &&
-                    licenseProvideLater &&
-                    gasSafetyCertProvideLater &&
-                    electricalSafetyCertProvideLater &&
-                    epcProvideLater &&
-                    tenancyProvideLater &&
-                    !isDelegatedToLettingAgent
-            },
-        )
-    }
-
-    @Test
     fun `registerProperty creates the invitations but neither sets the last PRN registered this session nor sends emails before commit`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1642,7 +1424,7 @@ class PropertyRegistrationServiceTests {
         verify(mockJointLandlordInvitationService).createInvitations(JOINT_LANDLORD_EMAILS, propertyOwnership, landlord)
         verifyNoMoreInteractions(mockJointLandlordInvitationService)
         verifyNoInteractions(
-            mockConfirmationEmailSender,
+            mockConfirmationSender,
             mockDelegateToLettingAgentEmailService,
             mockPropertyRegistrationConfirmationService,
         )
@@ -1654,9 +1436,6 @@ class PropertyRegistrationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
-        val currentUserEmail = "admin@example.com"
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
         val lettingAgentInvitation = createLettingAgentInvitation(propertyOwnership)
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(lettingAgentInvitation)
@@ -1671,7 +1450,7 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-        verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
+        verify(mockConfirmationSender).sendConfirmationEmail(registrationDataWithInvitations, landlord, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -1695,13 +1474,12 @@ class PropertyRegistrationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(createLettingAgentInvitation(propertyOwnership))
         val jointLandlordInvitations = createJointLandlordInvitations(propertyOwnership)
         whenever(mockJointLandlordInvitationService.createInvitations(JOINT_LANDLORD_EMAILS, propertyOwnership, landlord))
             .thenReturn(jointLandlordInvitations)
-        whenever(mockConfirmationEmailSender.sendEmail(any(), any())).thenThrow(RuntimeException("Email failed to send"))
+        whenever(mockConfirmationSender.sendConfirmationEmail(any(), any(), any())).thenThrow(RuntimeException("Email failed to send"))
         whenever(mockJointLandlordInvitationService.sendInvitationEmail(any()))
             .thenThrow(RuntimeException("Email failed to send"))
             .thenAnswer { }
