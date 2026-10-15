@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -19,6 +21,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
@@ -31,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInv
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
@@ -637,38 +641,53 @@ class OrganisationalLandlordInvitationServiceTests {
         )
     }
 
-    @Test
-    fun `acceptInvitation propagates the exception when the confirmation email fails to send`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `acceptInvitation succeeds when the confirmation email fails to send`(isPersistentFailure: Boolean) {
         // Arrange
-        val baseUser = PrsdbUser(acceptingUserId)
-        val invitedLandlord = mock<OrganisationalLandlord>()
-        val invitation = mock<OrganisationalLandlordInvitation>()
-        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-            .thenReturn(mutableListOf(journeyId to token.toString()))
-        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
-        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitedLandlord.name).thenReturn("Example Organisation")
-        whenever(invitation.role).thenReturn(EDITOR)
-        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("https://www.prsd.gov.uk/landlord/dashboard"))
-        whenever(
-            mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
-                invitedLandlord,
-                baseUser,
-                inviteeName,
-                inviteeEmail,
-                EDITOR,
-            ),
-        ).thenReturn(mock())
-        doThrow(TransientEmailSentException("Email failed to send"))
+        val mocks = arrangePendingInvitationAcceptance(EDITOR)
+        val exception =
+            if (isPersistentFailure) {
+                PersistentEmailSendException("Email failed to send")
+            } else {
+                TransientEmailSentException("Email failed to send")
+            }
+        doThrow(exception)
             .whenever(mockAcceptedEmailSender)
             .sendEmail(any(), any())
 
-        // Act & Assert
-        assertThrows<TransientEmailSentException> {
+        // Act
+        val acceptedToken = invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+        // Assert
+        assertEquals(token.toString(), acceptedToken)
+        verify(mockOrganisationalLandlordUserService)
+            .createOrganisationalLandlordUser(
+                mocks.invitedLandlord,
+                mocks.baseUser,
+                inviteeName,
+                inviteeEmail,
+                EDITOR,
+            )
+        verify(mockInvitationRepository).delete(mocks.invitation)
+        verify(mockAcceptedEmailSender).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `acceptInvitation sends the confirmation email only after the transaction commits`() {
+        // Arrange
+        arrangePendingInvitationAcceptance(ADMIN)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            // Act
             invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+            // Assert
+            verifyNoInteractions(mockAcceptedEmailSender)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(mockAcceptedEmailSender).sendEmail(any(), any())
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
         }
     }
 

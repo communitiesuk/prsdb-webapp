@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
@@ -71,16 +73,19 @@ class OrganisationalLandlordInvitationService(
         invitationRepository.delete(invitation)
 
         val isAdmin = invitation.role == OrganisationalLandlordUserRole.ADMIN
-        acceptedEmailSender.sendEmail(
-            email,
+        val confirmationEmail =
             OrganisationalLandlordInvitationAcceptedEmail(
                 recipientName = name,
                 roleName = if (isAdmin) "administrator" else "editor",
                 organisationName = invitation.organisationalLandlord.name,
                 isAdmin = isAdmin,
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-            ),
-        )
+            )
+        runAfterTransactionCommits {
+            sendEmailAndLogFailures("the organisational landlord invitation acceptance confirmation email") {
+                acceptedEmailSender.sendEmail(email, confirmationEmail)
+            }
+        }
 
         return invitation.token.toString()
     }
