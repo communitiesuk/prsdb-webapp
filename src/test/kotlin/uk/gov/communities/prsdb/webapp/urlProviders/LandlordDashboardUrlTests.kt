@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationSender
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
@@ -59,7 +60,7 @@ import kotlin.test.Test
     ],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
-@Import(AbsoluteUrlProvider::class)
+@Import(AbsoluteUrlProvider::class, PropertyRegistrationConfirmationSender::class)
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
@@ -113,6 +114,12 @@ class LandlordDashboardUrlTests(
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    private lateinit var mockCurrentUserService: CurrentUserService
+
+    @Autowired
+    lateinit var registrationConfirmationSender: PropertyRegistrationConfirmationSender
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
@@ -172,23 +179,19 @@ class LandlordDashboardUrlTests(
         val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockUserToLandlordService = mock<UserToLandlordService>()
-        val mockCurrentUserService = mock<CurrentUserService>()
         val propertyRegistrationService =
             PropertyRegistrationService(
                 addressService = mock(),
                 licenseService = mock(),
                 propertyOwnershipService = mockPropertyOwnershipService,
                 userToLandlordService = mockUserToLandlordService,
-                absoluteUrlProvider = absoluteUrlProvider,
-                confirmationEmailSender = mockEmailNotificationService,
+                confirmationEmailSender = registrationConfirmationSender,
                 propertyOwnershipRepository = mock(),
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
                 propertyComplianceService = mock(),
                 lettingAgentAccessService = mock(),
                 delegateToLettingAgentEmailService = mock(),
-                featureFlagManager = mock(),
-                currentUserService = mockCurrentUserService,
             )
 
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(landlord.email)

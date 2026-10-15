@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -16,8 +14,6 @@ import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAn
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.format.DateTimeFormatter
@@ -29,16 +25,13 @@ class PropertyRegistrationService(
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val userToLandlordService: UserToLandlordService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyComplianceService: PropertyComplianceService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
-    private val featureFlagManager: FeatureFlagManager,
-    private val currentUserService: CurrentUserService,
+    private val confirmationEmailSender: PropertyRegistrationConfirmationSender,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -150,7 +143,7 @@ class PropertyRegistrationService(
         jointLandlordInvitations: List<JointLandlordInvitation>,
     ) {
         sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
-            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
+            confirmationEmailSender.sendConfirmationEmail(registrationData, landlord, propertyOwnership)
         }
 
         lettingAgentInvitation?.let { invitation ->
@@ -174,33 +167,6 @@ class PropertyRegistrationService(
                 )
             }
         }
-    }
-
-    private fun sendConfirmationEmail(
-        registrationData: PropertyRegistrationDataModel,
-        landlord: Landlord,
-        propertyOwnership: PropertyOwnership,
-    ) = with(registrationData) {
-        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
-        confirmationEmailSender.sendEmail(
-            currentUserService.getCurrentEmail(),
-            PropertyRegistrationConfirmationEmail(
-                RegistrationNumberDataModel
-                    .fromRegistrationNumber(propertyOwnership.registrationNumber)
-                    .toString(),
-                propertyOwnership.address.toMultiLineAddress(),
-                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                propertyOwnership.isOccupied,
-                jointLandlordEmails,
-                isDelegatedToLettingAgent,
-                isPdjb939PhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO),
-                licenseProvideLater = licenseProvideLater,
-                gasSafetyCertProvideLater = gasSafetyCertProvideLater,
-                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
-                epcProvideLater = epcProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            ),
-        )
     }
 
     private fun sendLettingAgentInvitationEmail(

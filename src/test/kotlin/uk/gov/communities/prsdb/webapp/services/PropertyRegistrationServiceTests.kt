@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -96,7 +97,27 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockCurrentUserService: CurrentUserService
 
     @InjectMocks
+    private lateinit var confirmationSender: PropertyRegistrationConfirmationSender
+
     private lateinit var propertyRegistrationService: PropertyRegistrationService
+
+    @BeforeEach
+    fun setUp() {
+        propertyRegistrationService =
+            PropertyRegistrationService(
+                mockAddressService,
+                mockLicenseService,
+                mockPropertyOwnershipService,
+                mockUserToLandlordService,
+                mockPropertyOwnershipRepository,
+                mockPropertyRegistrationConfirmationService,
+                mockJointLandlordInvitationService,
+                mockPropertyComplianceService,
+                mockLettingAgentAccessService,
+                mockDelegateToLettingAgentEmailService,
+                confirmationSender,
+            )
+    }
 
     @AfterEach
     fun tearDown() {
