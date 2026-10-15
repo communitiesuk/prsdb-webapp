@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,16 +15,21 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -50,10 +56,16 @@ class OrganisationalLandlordInvitationServiceTests {
     @Mock
     private lateinit var mockInvitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
 
+    @Mock
+    private lateinit var mockPrsdbUserService: PrsdbUserService
+
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     private val journeyId = "test-journey-id"
     private val token = UUID.fromString("1234abcd-5678-abcd-1234-567abcd2222a")
+    private val acceptingUserId = "signed-in-user"
+    private val inviteeName = "Jane Smith"
+    private val inviteeEmail = "invitee@example.com"
 
     @BeforeEach
     fun setup() {
@@ -64,6 +76,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 mockOrganisationalLandlordUserService,
                 mockAbsoluteUrlProvider,
                 mockInvitationEmailSender,
+                mockPrsdbUserService,
             )
     }
 
@@ -445,4 +458,158 @@ class OrganisationalLandlordInvitationServiceTests {
         // Assert
         assertEquals(listOf("pending@example.com"), emails)
     }
+
+    @Test
+    fun `clearJourneyIdInvitationTokenPairsForTokenFromSession removes only pairs for the accepted token`() {
+        // Arrange
+        val unrelatedPair = "unrelated-journey-id" to "unrelated-token"
+        val sessionPairs =
+            mutableListOf(
+                journeyId to token.toString(),
+                "another-journey-id" to token.toString(),
+                unrelatedPair,
+            )
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(sessionPairs)
+
+        // Act
+        invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(token.toString())
+
+        // Assert
+        verify(mockHttpSession)
+            .setAttribute(
+                ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS,
+                mutableListOf(unrelatedPair),
+            )
+    }
+
+    @Test
+    fun `acceptInvitation throws when there is no pending invitation for the journey`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf<Pair<String, String>>())
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> {
+            invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+        }
+        verifyNoInteractions(mockPrsdbUserService, mockOrganisationalLandlordUserService)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
+    @Test
+    fun `acceptInvitation finds or creates a PRSDB user for the accepting user`() {
+        // Arrange
+        arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+
+        // Act
+        invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+        // Assert
+        verify(mockPrsdbUserService).findOrCreatePrsdbUser(acceptingUserId)
+    }
+
+    @Test
+    fun `acceptInvitation saves a user using the invitation organisation and role`() {
+        // Arrange
+        val mocks = arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+
+        // Act
+        invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+        // Assert
+        verify(mockOrganisationalLandlordUserService)
+            .createOrganisationalLandlordUser(
+                mocks.invitedLandlord,
+                mocks.baseUser,
+                inviteeName,
+                inviteeEmail,
+                OrganisationalLandlordUserRole.EDITOR,
+            )
+    }
+
+    @Test
+    fun `acceptInvitation deletes the invitation`() {
+        // Arrange
+        val mocks = arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+
+        // Act
+        invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+        // Assert
+        verify(mockInvitationRepository).delete(mocks.invitation)
+    }
+
+    @Test
+    fun `acceptInvitation returns the accepted invitation's token`() {
+        // Arrange
+        arrangePendingInvitationAcceptance(OrganisationalLandlordUserRole.EDITOR)
+
+        // Act
+        val acceptedToken = invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+
+        // Assert
+        assertEquals(token.toString(), acceptedToken)
+    }
+
+    @Test
+    fun `acceptInvitation does not delete the invitation when saving the user fails`() {
+        // Arrange
+        val baseUser = PrsdbUser(acceptingUserId)
+        val invitedLandlord = mock<OrganisationalLandlord>()
+        val invitation = mock<OrganisationalLandlordInvitation>()
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
+        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
+        whenever(invitation.role).thenReturn(OrganisationalLandlordUserRole.ADMIN)
+        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
+        whenever(
+            mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
+                invitedLandlord,
+                baseUser,
+                inviteeName,
+                inviteeEmail,
+                OrganisationalLandlordUserRole.ADMIN,
+            ),
+        ).thenThrow(IllegalStateException("User save failed"))
+
+        // Act, Assert
+        assertThrows(IllegalStateException::class.java) {
+            invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
+        }
+        verify(mockInvitationRepository, never()).delete(invitation)
+    }
+
+    private fun arrangePendingInvitationAcceptance(role: OrganisationalLandlordUserRole): AcceptInvitationMocks {
+        val baseUser = PrsdbUser(acceptingUserId)
+        val invitedLandlord = mock<OrganisationalLandlord>()
+        val invitation = mock<OrganisationalLandlordInvitation>()
+        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+            .thenReturn(mutableListOf(journeyId to token.toString()))
+        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
+        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
+        whenever(invitation.role).thenReturn(role)
+        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
+        whenever(invitation.token).thenReturn(token)
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
+        whenever(
+            mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
+                invitedLandlord,
+                baseUser,
+                inviteeName,
+                inviteeEmail,
+                role,
+            ),
+        ).thenReturn(mock())
+
+        return AcceptInvitationMocks(invitation, invitedLandlord, baseUser)
+    }
+
+    private data class AcceptInvitationMocks(
+        val invitation: OrganisationalLandlordInvitation,
+        val invitedLandlord: OrganisationalLandlord,
+        val baseUser: PrsdbUser,
+    )
 }
