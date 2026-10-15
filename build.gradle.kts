@@ -35,8 +35,16 @@ repositories {
 // Third-party clients still use Jackson 2 alongside Spring Boot's Jackson 3 mapper.
 extra["jackson-2-bom.version"] = "2.21.7"
 
+// CVE-2026-19032, -68497, -83557: jackson-databind advisories (fixed in 3.1.6).
+// CVE-2026-89407, -89425, -91776, -91777: jackson-core / jackson-databind DoS advisories (fixed in 3.1.7).
+extra["jackson-bom.version"] = "3.1.7"
+
 // CVE-2026-107314 and CVE-2026-107315 (fixed in 42.7.14).
 extra["postgresql.version"] = "42.7.14"
+
+// CVE-2026-65182 / GHSA-gcx9-497g-6cp6, CVE-2026-65905 / GHSA-9xv2-5v5q-p794,
+// CVE-2026-68525 / GHSA-h3x4-894j-xpx5: Tomcat authentication vulnerabilities (fixed in 11.0.25).
+extra["tomcat.version"] = "11.0.25"
 
 dependencies {
     // Spring Boot Web
@@ -320,6 +328,7 @@ buildscript {
             // Application dependency management does not apply to the build classpath.
             force("org.apache.commons:commons-lang3:3.18.0")
             force("com.fasterxml.jackson:jackson-bom:2.21.7")
+            force("tools.jackson:jackson-bom:3.1.7")
             force("org.apache.httpcomponents.client5:httpclient5:5.6.4")
             force("org.apache.httpcomponents.core5:httpcore5:5.4.3")
             force("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3")
