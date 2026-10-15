@@ -54,18 +54,16 @@ class JourneyStateDelegateProvider(
     /**
      * Creates a delegate for a nullable journey state property.
      *
+     * The property is included in the check your answers snapshot, unless the journey excludes it via
+     * [uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.cyaSnapshotExcludedDelegateKeys].
+     *
      * @param propertyKey Unique key to store this property in the journey state
-     * @param excludeFromCyaSnapshot Whether to leave this property out of the check your answers snapshot. Mutable
-     * properties are included by default, so changes to them made after a CYA page is loaded are detected. Only exclude
-     * properties that are written after the CYA page is submitted (e.g. payment progress), as otherwise going back to
-     * the CYA page and changing an answer will fail
      * @throws JourneyInitialisationException if the propertyKey is already in use
      */
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
-        excludeFromCyaSnapshot: Boolean = false,
     ): NullableJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey, !excludeFromCyaSnapshot)
+        registerKey(propertyKey)
         return NullableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 
@@ -80,22 +78,20 @@ class JourneyStateDelegateProvider(
      * If the property is accessed and no value is found in the journey state, the entire
      * journey state will be deleted and an [IllegalStateException] will be thrown.
      *
+     * The property is included in the check your answers snapshot, unless the journey excludes it via
+     * [uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.cyaSnapshotExcludedDelegateKeys].
+     *
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)
      * @param propertyKey Unique key to store this property in the journey state
-     * @param excludeFromCyaSnapshot Whether to leave this property out of the check your answers snapshot. Mutable
-     * properties are included by default, so changes to them made after a CYA page is loaded are detected. Only exclude
-     * properties that are written after the CYA page is submitted (e.g. payment progress), as otherwise going back to
-     * the CYA page and changing an answer will fail
      * @return A delegate that manages getting and setting the property value
      * @throws JourneyInitialisationException if the propertyKey is already in use
      */
     final inline fun <TJourney, reified TProperty : Any> requiredDelegate(
         propertyKey: String,
         defaultValue: TProperty? = null,
-        excludeFromCyaSnapshot: Boolean = false,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey, !excludeFromCyaSnapshot)
+        registerKey(propertyKey)
         val delegate =
             RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, { scopedKey(propertyKey) }, serializer(), defaultValue)
         return delegate

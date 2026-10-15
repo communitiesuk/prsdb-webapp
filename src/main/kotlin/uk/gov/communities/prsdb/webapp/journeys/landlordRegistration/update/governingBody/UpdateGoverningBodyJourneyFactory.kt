@@ -108,12 +108,7 @@ class UpdateGoverningBodyJourney(
         "governingBodyMembersMap",
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
-
-    // Navigation state set by following a member's change link, rather than an answer
-    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate(
-        "editingGovBodyMemberId",
-        excludeFromCyaSnapshot = true,
-    )
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
     override var governingBodyMembersInitialised: Boolean? by delegateProvider.nullableDelegate("governingBodyMembersInitialised")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

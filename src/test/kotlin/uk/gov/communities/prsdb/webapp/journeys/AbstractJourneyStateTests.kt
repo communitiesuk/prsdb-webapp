@@ -82,7 +82,6 @@ class AbstractJourneyStateTests {
         val journeyState =
             object : AbstractJourneyState(journeyStateService) {
                 var answer: String? by delegateProvider.nullableDelegate("answer")
-                var excluded: String? by delegateProvider.nullableDelegate("excluded", excludeFromCyaSnapshot = true)
                 val immutable: String by delegateProvider.requiredImmutableDelegate("immutable")
             }
         val task =
@@ -277,17 +276,6 @@ class JourneyStateDelegateProviderTests {
     }
 
     @Test
-    fun `delegates marked excludeFromCyaSnapshot are not included in the CYA snapshot`() {
-        val journeyStateService: JourneyStateService = mock()
-        val provider = JourneyStateDelegateProvider(journeyStateService)
-
-        var nullable: String? by provider.nullableDelegate("nullable", excludeFromCyaSnapshot = true)
-        var required: String by provider.requiredDelegate("required", "default", excludeFromCyaSnapshot = true)
-
-        assertEquals(emptySet<String>(), provider.cyaSnapshotKeys)
-    }
-
-    @Test
     fun `immutable delegates are not included in the CYA snapshot`() {
         val journeyStateService: JourneyStateService = mock()
         val provider = JourneyStateDelegateProvider(journeyStateService)
@@ -303,7 +291,7 @@ class JourneyStateDelegateProviderTests {
         val registry = DelegateKeyRegistry()
         val provider = JourneyStateDelegateProvider(journeyStateService)
         var answer: String? by provider.nullableDelegate("answer")
-        var excluded: String? by provider.nullableDelegate("excluded", excludeFromCyaSnapshot = true)
+        val immutable: String by provider.requiredImmutableDelegate("immutable")
         provider.bindRoutePrefix("route")
 
         provider.bindKeyRegistry(registry)
@@ -330,7 +318,7 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         val provider = JourneyStateDelegateProvider(journeyStateService)
         var answer: String? by provider.nullableDelegate("answer")
-        var excluded: String? by provider.nullableDelegate("excluded", excludeFromCyaSnapshot = true)
+        val immutable: String by provider.requiredImmutableDelegate("immutable")
         provider.bindRoutePrefix("route")
 
         assertEquals(setOf("route/answer"), provider.cyaSnapshotKeys)

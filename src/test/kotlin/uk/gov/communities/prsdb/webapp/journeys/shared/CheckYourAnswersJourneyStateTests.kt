@@ -250,6 +250,32 @@ class CheckYourAnswersJourneyStateTests {
                 )
             assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
         }
+
+        @Test
+        fun `leaves out delegates excluded by the journey, whichever task owns them`() {
+            val state =
+                createTestState(
+                    cyaStep = mockCyaStep(mockRequestableStep("step-a")),
+                    submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
+                    cyaSnapshotDelegateKeys = setOf("task/answer", "paymentQuote", "other-task/isAddressAlreadyRegistered"),
+                    cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "isAddressAlreadyRegistered"),
+                    delegateValues =
+                        mapOf(
+                            "task/answer" to "{\"1\":\"value\"}",
+                            "paymentQuote" to "later progress",
+                            "other-task/isAddressAlreadyRegistered" to "false",
+                        ),
+                )
+
+            val expectedSnapshot =
+                CheckAnswersFormModel.serializeJourneyData(
+                    linkedMapOf(
+                        "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
+                        "step-a" to mapOf("field" to "a"),
+                    ),
+                )
+            assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
+        }
     }
 
     @Nested
@@ -343,6 +369,7 @@ class CheckYourAnswersJourneyStateTests {
         cyaStep: JourneyStep.RequestableStep<*, *, *> = mockCyaStep(),
         submittedStepData: Map<String, Any?> = emptyMap(),
         cyaSnapshotDelegateKeys: Set<String> = emptySet(),
+        cyaSnapshotExcludedDelegateKeys: Set<String> = emptySet(),
         delegateValues: Map<String, Any?> = emptyMap(),
     ): TestCheckYourAnswersJourneyState =
         TestCheckYourAnswersJourneyState(
@@ -354,6 +381,7 @@ class CheckYourAnswersJourneyStateTests {
             testCyaStep = cyaStep,
             testSubmittedStepData = submittedStepData,
             testCyaSnapshotDelegateKeys = cyaSnapshotDelegateKeys,
+            testCyaSnapshotExcludedDelegateKeys = cyaSnapshotExcludedDelegateKeys,
             testDelegateValues = delegateValues,
         )
 
@@ -366,6 +394,7 @@ class CheckYourAnswersJourneyStateTests {
         private val testCyaStep: JourneyStep.RequestableStep<*, *, *> = mock(),
         private val testSubmittedStepData: Map<String, Any?> = emptyMap(),
         private val testCyaSnapshotDelegateKeys: Set<String> = emptySet(),
+        private val testCyaSnapshotExcludedDelegateKeys: Set<String> = emptySet(),
         private val testDelegateValues: Map<String, Any?> = emptyMap(),
     ) : CheckYourAnswersJourneyState {
         override val finishCyaStep: FinishCyaJourneyStep = mock()
@@ -420,6 +449,8 @@ class CheckYourAnswersJourneyStateTests {
         override fun getSubmittedStepData(): Map<String, Any?> = testSubmittedStepData
 
         override val cyaSnapshotDelegateKeys: Set<String> = testCyaSnapshotDelegateKeys
+
+        override val cyaSnapshotExcludedDelegateKeys: Set<String> = testCyaSnapshotExcludedDelegateKeys
 
         override fun getEncodedDelegateValue(key: String): Any? = testDelegateValues[key]
 

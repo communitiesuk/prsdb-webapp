@@ -512,8 +512,8 @@ The journey factory picks which routing map to serve based on `state.someTask.ch
 changes made elsewhere (e.g. in another browser tab) can be detected. It contains:
 
 - the submitted data of every step the CYA step depends on (its parentage ancestry), and
-- the stored value of every delegate in the journey (including those owned by tasks) that is included in the CYA
-  snapshot.
+- the stored value of every mutable delegate in the journey (including those owned by tasks), apart from any the
+  journey excludes.
 
 The snapshot is used in two places:
 
@@ -522,16 +522,23 @@ The snapshot is used in two places:
 - Following a change link stores it on the child CYA journey, and `finishCyaStep` refuses to copy the child journey
   back over the base journey if the base journey's answers have changed since the change link was followed.
 
-Mutable delegates created with `nullableDelegate` or `requiredDelegate` are **included in the snapshot by default**,
-so any answers stored in them are protected. Delegates created with `requiredImmutableDelegate` are excluded
-automatically, because they can't change.
+Delegates created with `nullableDelegate` or `requiredDelegate` are **included in the snapshot by default**, so any
+answers stored in them are protected. Delegates created with `requiredImmutableDelegate` are left out automatically,
+because they can't change.
 
-Pass `excludeFromCyaSnapshot = true` for delegates that are written **after** the CYA page is submitted (e.g. payment
-progress) or while navigating rather than answering questions:
+If the journey writes to a delegate **after** its CYA page is submitted (e.g. payment progress), list that delegate's
+key in the journey state's `cyaSnapshotExcludedDelegateKeys`. Keys are matched whichever task owns the delegate. Where
+possible, declare these delegates on the journey state itself, next to the exclusion list, and use the same constant
+for the delegate and the exclusion so they can't drift apart:
 
 ```kotlin
-override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference", excludeFromCyaSnapshot = true)
+override var paymentReference: String? by delegateProvider.nullableDelegate(PAYMENT_REFERENCE_KEY)
+
+override val cyaSnapshotExcludedDelegateKeys = setOf(PAYMENT_REFERENCE_KEY)
 ```
+
+A delegate that is only rewritten after CYA with the value it already has (or with a value that sends the user
+elsewhere) can stay in the snapshot.
 
 If one of these delegates is left in the snapshot, a user who returns to a CYA page that was loaded before the delegate
 was written (e.g. with the browser back button) will be unable to submit it.

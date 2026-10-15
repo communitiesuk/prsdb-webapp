@@ -45,11 +45,27 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return stateFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
+    /**
+     * Keys of delegates to leave out of the CYA answers snapshot, matched against the key passed to the delegate
+     * provider whichever task owns the delegate. Use the same constants as the delegates, so the keys can't drift apart.
+     *
+     * Only exclude delegates that are written after the CYA page is submitted (e.g. payment progress) or while navigating
+     * rather than answering questions. Otherwise, going back to the CYA page and submitting it will fail.
+     */
+    val cyaSnapshotExcludedDelegateKeys: Set<String>
+        get() = emptySet()
+
     fun getCyaAnswersSnapshot(): String {
         val stepKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }
-        val delegateKeys = cyaSnapshotDelegateKeys.map { CYA_SNAPSHOT_DELEGATE_KEY_PREFIX + it }
+        val delegateKeys =
+            cyaSnapshotDelegateKeys
+                .filter { unscopedDelegateKey(it) !in cyaSnapshotExcludedDelegateKeys }
+                .map { CYA_SNAPSHOT_DELEGATE_KEY_PREFIX + it }
         return serializeCyaAnswers((stepKeys + delegateKeys).toSet())
     }
+
+    // Removes the route prefix that task-owned delegate keys are scoped with
+    private fun unscopedDelegateKey(scopedKey: String) = scopedKey.substringAfterLast('/')
 
     fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
         serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot
