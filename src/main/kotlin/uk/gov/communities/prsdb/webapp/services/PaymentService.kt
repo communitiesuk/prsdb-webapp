@@ -201,7 +201,7 @@ class PaymentService(
         registrationData: PropertyRegistrationDataModel,
     ): PaymentStatus =
         when (govUkPayStatus) {
-            PaymentStatus.CREATED -> {
+            PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {
                 throw IllegalArgumentException("Payment $paymentId cannot be finalised while in progress")
             }
 
@@ -228,7 +228,7 @@ class PaymentService(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
     ): PaymentStatus {
-        recordPaymentAsCapturable(paymentId)
+        recordPaymentAsIndeterminate(paymentId)
 
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
@@ -238,8 +238,13 @@ class PaymentService(
         }
     }
 
-    private fun recordPaymentAsCapturable(paymentId: String) {
-        paymentRepository.updateStatusIfCurrentStatusIn(paymentId, listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE, Instant.now())
+    private fun recordPaymentAsIndeterminate(paymentId: String) {
+        paymentRepository.updateStatusIfCurrentStatusIn(
+            paymentId,
+            listOf(PaymentStatus.CREATED),
+            PaymentStatus.INDETERMINATE,
+            Instant.now(),
+        )
     }
 
     private fun registerPropertyAndCapturePayment(
@@ -255,7 +260,7 @@ class PaymentService(
                 val isClaimed =
                     paymentRepository.updateStatusIfCurrentStatusIn(
                         paymentId,
-                        listOf(PaymentStatus.CAPTURABLE),
+                        listOf(PaymentStatus.INDETERMINATE),
                         PaymentStatus.SUCCEEDED,
                         Instant.now(),
                     ) == 1
@@ -340,7 +345,7 @@ class PaymentService(
 
         paymentRepository.updateStatusIfCurrentStatusIn(
             paymentId,
-            listOf(PaymentStatus.CAPTURABLE),
+            listOf(PaymentStatus.INDETERMINATE),
             govUkPayStatus,
             Instant.now(),
         )
