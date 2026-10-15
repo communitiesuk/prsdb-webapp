@@ -110,7 +110,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         @Test
         fun `Invitees are redirected to the invalid link page if their invitation is cancelled before they submit`(page: Page) {
-            val checkAnswersPage = navigateToCheckAnswersPage(page, validToken)
+            val checkAnswersPage = completeStepsUpToCheckAnswers(page, validToken)
 
             // The invitation is cancelled after the invitee reaches check answers but before they submit
             invitationRepository.delete(invitationRepository.findByToken(UUID.fromString(validToken))!!)
@@ -123,7 +123,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         @Test
         fun `Invitees are redirected to the already landlord page if they become a landlord before they submit`(page: Page) {
-            val checkAnswersPage = navigateToCheckAnswersPage(page, validToken)
+            val checkAnswersPage = completeStepsUpToCheckAnswers(page, validToken)
 
             // The invitee becomes a landlord after reaching check answers but before they submit
             doReturn(true).whenever(userRolesService).getUserHasLandlordRole(INVITATION_TEST_USER_ID)
@@ -187,28 +187,8 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         token: String,
         expectedRole: OrganisationalLandlordUserRole,
     ) {
-        // 1. Go to the start of accept invitation journey - a valid token for a non-landlord redirects past the
-        // validate token and check user is landlord steps
-        val joinOrganisationPage =
-            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token)
-        assertPageIs(page, JoinOrganisationPage::class)
-        assertEquals("Join your organisation", joinOrganisationPage.heading.getText())
-        assertEquals(
-            true,
-            joinOrganisationPage.introductionText.textContent()?.contains("Local Organisation Landlord."),
-        )
-        joinOrganisationPage.form.submit()
-
-        // 2. Full Name page
-        val fullNamePage = assertPageIs(page, FullNamePage::class)
-        fullNamePage.submitName("Jane Smith")
-
-        // 3. Email Address page
-        val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
-        emailAddressPage.submitEmail("invitee@example.com")
-
-        // 4. Submit Check Answers
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
+        // 1-4. Complete the journey up to check answers
+        val checkAnswersPage = completeStepsUpToCheckAnswers(page, token)
         checkAnswersPage.form.submit()
 
         // 5. Confirmation page
@@ -224,13 +204,30 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
     }
 
-    private fun navigateToCheckAnswersPage(
+    private fun completeStepsUpToCheckAnswers(
         page: Page,
         token: String,
     ): CheckAnswersPage {
-        navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token).form.submit()
-        assertPageIs(page, FullNamePage::class).submitName("Jane Smith")
-        assertPageIs(page, EmailAddressPage::class).submitEmail("invitee@example.com")
+        // 1. Join organisation page - a valid token for a non-landlord redirects past the validate token and check
+        // user is landlord steps
+        val joinOrganisationPage = navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token)
+        assertPageIs(page, JoinOrganisationPage::class)
+        assertEquals("Join your organisation", joinOrganisationPage.heading.getText())
+        assertEquals(
+            true,
+            joinOrganisationPage.introductionText.textContent()?.contains("Local Organisation Landlord."),
+        )
+        joinOrganisationPage.form.submit()
+
+        // 2. Full name page
+        val fullNamePage = assertPageIs(page, FullNamePage::class)
+        fullNamePage.submitName("Jane Smith")
+
+        // 3. Email address page
+        val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
+        emailAddressPage.submitEmail("invitee@example.com")
+
+        // 4. Check answers page
         return assertPageIs(page, CheckAnswersPage::class)
     }
 
