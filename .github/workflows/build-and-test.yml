@@ -60,8 +60,8 @@ jobs:
           EMAILNOTIFICATIONS_PRODUCTION_APIKEY: ${{ secrets.NOTIFY_PRODUCTION_KEY }}
         run: ./gradlew clean :test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
 
-  performance-module-test:
-    name: Performance module tests
+  performance-test:
+    name: Performance tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -74,8 +74,16 @@ jobs:
           java-version: 21
           cache: 'gradle'
 
-      - name: Run performance module tests
-        run: ./gradlew :performance-tests:test --no-daemon
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run performance tests
+        run: ./gradlew performanceTest --no-daemon
 
   lint:
     name: Lint
@@ -111,7 +119,7 @@ jobs:
   # count can be tuned without touching it. The individual shards report as "Test shard (1)" etc.
   all-tests:
     name: Build and test
-    needs: [test, performance-module-test, lint]
+    needs: [test, performance-test, lint]
     # Without always() this job is skipped when a shard fails, and a skipped required check does not block
     # merging, so the result of the jobs it depends on has to be asserted explicitly.
     if: always()
@@ -119,7 +127,7 @@ jobs:
     steps:
       - name: Check test and lint results
         run: |
-          echo "test=${{ needs.test.result }} performance-module-test=${{ needs.performance-module-test.result }} lint=${{ needs.lint.result }}"
-          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.performance-module-test.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
+          echo "test=${{ needs.test.result }} performance-test=${{ needs.performance-test.result }} lint=${{ needs.lint.result }}"
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.performance-test.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
             exit 1
           fi

@@ -10,6 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.noarg") version "2.3.21"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("io.gatling.gradle") version "3.16.0"
     id("org.flywaydb.flyway") version "12.4.0"
 }
 
@@ -117,6 +118,10 @@ dependencies {
     // Fake data generation
     implementation("net.datafaker:datafaker:2.4.2")
 
+    // Gatling performance tests (src/gatling)
+    gatlingImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    gatlingRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     // Ktlint's parser must use its own compiler rather than the application-managed version.
     "ktlint"("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.10")
 
@@ -143,6 +148,37 @@ val frontendAssetsSpec: CopySpec =
         from("dist")
         include("**/*")
     }
+
+// The Gatling performance code lives in src/gatling and drives the running webapp over HTTP, reusing its route
+// constants. The One Login simulator fixtures are shared with the simulator integration tests.
+sourceSets.named("gatling") {
+    resources.srcDir("src/test/resources")
+    resources.include("one-login-simulator/*.json")
+}
+
+gatling {
+    includeTestOutput = false
+    // Test-only simulation used by the performance unit tests; it must not be offered as a real simulation.
+    excludes = listOf("uk.gov.communities.prsdb.webapp.performance.BasicContractSimulation")
+    systemProperties =
+        System
+            .getProperties()
+            .stringPropertyNames()
+            .filter { it.startsWith("gatling.") }
+            .associateWith { System.getProperty(it) }
+}
+
+tasks.register<Test>("performanceTest") {
+    group = "verification"
+    description = "Runs the unit and assertion tests for the Gatling performance code in src/gatling (no app, Docker or NFT needed)"
+    val gatlingSourceSet = sourceSets["gatling"]
+    testClassesDirs = gatlingSourceSet.output.classesDirs
+    classpath = gatlingSourceSet.runtimeClasspath
+    include("**/*Tests.class")
+    // Provided lazily so the classpath is only resolved when the tests actually run.
+    val gatlingClasspath = gatlingSourceSet.runtimeClasspath
+    jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-Dperformance.test.classpath=${gatlingClasspath.asPath}") })
+}
 
 tasks.register<Exec>("buildFrontendAssets") {
     group = "build"
