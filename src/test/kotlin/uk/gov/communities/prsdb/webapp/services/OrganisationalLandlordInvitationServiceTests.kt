@@ -670,20 +670,14 @@ class OrganisationalLandlordInvitationServiceTests {
     @Test
     fun `acceptInvitation does not delete the invitation when saving the user fails`() {
         // Arrange
-        val baseUser = PrsdbUser(acceptingUserId)
-        val invitedLandlord = mock<OrganisationalLandlord>()
-        val invitation = mock<OrganisationalLandlordInvitation>()
-        whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-            .thenReturn(mutableListOf(journeyId to token.toString()))
-        whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
-        whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitation.role).thenReturn(ADMIN)
-        whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
+        val mocks = arrangePendingInvitationAcceptance(
+            role = ADMIN,
+            stubConfirmationEmailDetails = false,
+        )
         whenever(
             mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
-                invitedLandlord,
-                baseUser,
+                mocks.invitedLandlord,
+                mocks.baseUser,
                 inviteeName,
                 inviteeEmail,
                 ADMIN,
@@ -694,25 +688,30 @@ class OrganisationalLandlordInvitationServiceTests {
         assertThrows(IllegalStateException::class.java) {
             invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
         }
-        verify(mockInvitationRepository, never()).delete(invitation)
+        verify(mockInvitationRepository, never()).delete(mocks.invitation)
         verify(mockAcceptedEmailSender, never()).sendEmail(any(), any())
     }
 
-    private fun arrangePendingInvitationAcceptance(role: OrganisationalLandlordUserRole): AcceptInvitationMocks {
+    private fun arrangePendingInvitationAcceptance(
+        role: OrganisationalLandlordUserRole,
+        stubConfirmationEmailDetails: Boolean = true,
+    ): AcceptInvitationMocks {
         val baseUser = PrsdbUser(acceptingUserId)
         val invitedLandlord = mock<OrganisationalLandlord>()
-        val dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard")
         val invitation = mock<OrganisationalLandlordInvitation>()
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
         whenever(invitation.organisationalLandlord).thenReturn(invitedLandlord)
-        whenever(invitedLandlord.name).thenReturn("Example Organisation")
         whenever(invitation.role).thenReturn(role)
         whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
-        whenever(invitation.token).thenReturn(token)
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        if (stubConfirmationEmailDetails) {
+            val dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard")
+            whenever(invitedLandlord.name).thenReturn("Example Organisation")
+            whenever(invitation.token).thenReturn(token)
+            whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        }
         whenever(
             mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
                 invitedLandlord,
