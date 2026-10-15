@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationSender
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationSenderImplFlagOff
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
@@ -60,7 +61,7 @@ import kotlin.test.Test
     ],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
-@Import(AbsoluteUrlProvider::class, PropertyRegistrationConfirmationSender::class)
+@Import(AbsoluteUrlProvider::class, PropertyRegistrationConfirmationSenderImplFlagOff::class)
 class LandlordDashboardUrlTests(
     context: WebApplicationContext,
 ) : ControllerTest(context) {
