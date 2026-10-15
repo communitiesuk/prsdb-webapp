@@ -33,8 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedAdminEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEditorEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
@@ -61,10 +60,7 @@ class OrganisationalLandlordInvitationServiceTests {
     private lateinit var mockInvitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
 
     @Mock
-    private lateinit var mockAcceptedEditorEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEditorEmail>
-
-    @Mock
-    private lateinit var mockAcceptedAdminEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedAdminEmail>
+    private lateinit var mockAcceptedEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEmail>
 
     @Mock
     private lateinit var mockPrsdbUserService: PrsdbUserService
@@ -86,8 +82,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 mockOrganisationalLandlordUserService,
                 mockAbsoluteUrlProvider,
                 mockInvitationEmailSender,
-                mockAcceptedEditorEmailSender,
-                mockAcceptedAdminEmailSender,
+                mockAcceptedEmailSender,
                 mockPrsdbUserService,
             )
     }
@@ -586,15 +581,16 @@ class OrganisationalLandlordInvitationServiceTests {
                 EDITOR,
             )
         verify(mockInvitationRepository).delete(invitation)
-        verify(mockAcceptedEditorEmailSender).sendEmail(
+        verify(mockAcceptedEmailSender).sendEmail(
             inviteeEmail,
-            OrganisationalLandlordInvitationAcceptedEditorEmail(
+            OrganisationalLandlordInvitationAcceptedEmail(
                 recipientName = inviteeName,
+                roleName = "editor",
                 organisationName = "Example Organisation",
+                isAdmin = false,
                 dashboardUrl = dashboardUrl,
             ),
         )
-        verify(mockAcceptedAdminEmailSender, never()).sendEmail(any(), any())
     }
 
     @Test
@@ -629,15 +625,16 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         verify(mockInvitationRepository).delete(invitation)
-        verify(mockAcceptedAdminEmailSender).sendEmail(
+        verify(mockAcceptedEmailSender).sendEmail(
             inviteeEmail,
-            OrganisationalLandlordInvitationAcceptedAdminEmail(
+            OrganisationalLandlordInvitationAcceptedEmail(
                 recipientName = inviteeName,
+                roleName = "administrator",
                 organisationName = "Example Organisation",
+                isAdmin = true,
                 dashboardUrl = dashboardUrl,
             ),
         )
-        verify(mockAcceptedEditorEmailSender, never()).sendEmail(any(), any())
     }
 
     @Test
@@ -666,7 +663,7 @@ class OrganisationalLandlordInvitationServiceTests {
             ),
         ).thenReturn(mock())
         doThrow(TransientEmailSentException("Email failed to send"))
-            .whenever(mockAcceptedEditorEmailSender)
+            .whenever(mockAcceptedEmailSender)
             .sendEmail(any(), any())
 
         // Act & Assert
@@ -746,8 +743,7 @@ class OrganisationalLandlordInvitationServiceTests {
             invitationService.acceptInvitation(journeyId, acceptingUserId, inviteeName, inviteeEmail)
         }
         verify(mockInvitationRepository, never()).delete(invitation)
-        verify(mockAcceptedEditorEmailSender, never()).sendEmail(any(), any())
-        verify(mockAcceptedAdminEmailSender, never()).sendEmail(any(), any())
+        verify(mockAcceptedEmailSender, never()).sendEmail(any(), any())
     }
 
     private fun arrangePendingInvitationAcceptance(role: OrganisationalLandlordUserRole): AcceptInvitationMocks {

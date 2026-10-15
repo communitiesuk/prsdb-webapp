@@ -12,8 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInv
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedAdminEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEditorEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
 
@@ -24,8 +23,7 @@ class OrganisationalLandlordInvitationService(
     private val organisationalLandlordUserService: OrganisationalLandlordUserService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>,
-    private val acceptedEditorEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEditorEmail>,
-    private val acceptedAdminEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedAdminEmail>,
+    private val acceptedEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEmail>,
     private val prsdbUserService: PrsdbUserService,
 ) {
     fun addJourneyIdInvitationTokenPairToSession(
@@ -72,20 +70,17 @@ class OrganisationalLandlordInvitationService(
         )
         invitationRepository.delete(invitation)
 
-        val organisationName = invitation.organisationalLandlord.name
-        val dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri()
-        when (invitation.role) {
-            OrganisationalLandlordUserRole.EDITOR ->
-                acceptedEditorEmailSender.sendEmail(
-                    email,
-                    OrganisationalLandlordInvitationAcceptedEditorEmail(name, organisationName, dashboardUrl),
-                )
-            OrganisationalLandlordUserRole.ADMIN ->
-                acceptedAdminEmailSender.sendEmail(
-                    email,
-                    OrganisationalLandlordInvitationAcceptedAdminEmail(name, organisationName, dashboardUrl),
-                )
-        }
+        val isAdmin = invitation.role == OrganisationalLandlordUserRole.ADMIN
+        acceptedEmailSender.sendEmail(
+            email,
+            OrganisationalLandlordInvitationAcceptedEmail(
+                recipientName = name,
+                roleName = if (isAdmin) "administrator" else "editor",
+                organisationName = invitation.organisationalLandlord.name,
+                isAdmin = isAdmin,
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+            ),
+        )
 
         return invitation.token.toString()
     }
