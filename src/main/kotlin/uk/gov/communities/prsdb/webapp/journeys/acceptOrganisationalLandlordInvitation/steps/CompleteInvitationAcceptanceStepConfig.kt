@@ -4,6 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -20,18 +21,25 @@ class CompleteInvitationAcceptanceStepConfig(
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
+        val email = state.emailAddressStep.formModel.notNullValue(AcceptOrganisationInvitationEmailFormModel::emailAddress)
         val acceptedToken =
             invitationService.acceptInvitation(
                 journeyId = state.journeyId,
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 name = state.fullNameStep.formModel.notNullValue(NameFormModel::name),
-                email =
-                    state.emailAddressStep.formModel.notNullValue(
-                        AcceptOrganisationInvitationEmailFormModel::emailAddress,
-                    ),
+                email = email,
             )
         invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(acceptedToken)
         securityContextService.refreshContext()
+        invitationService.storeAcceptedInvitationEmailInSession(email)
+    }
+
+    override fun resolveNextDestination(
+        state: AcceptOrganisationalLandlordUserInvitationJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        state.deleteJourney()
+        return defaultDestination
     }
 }
 

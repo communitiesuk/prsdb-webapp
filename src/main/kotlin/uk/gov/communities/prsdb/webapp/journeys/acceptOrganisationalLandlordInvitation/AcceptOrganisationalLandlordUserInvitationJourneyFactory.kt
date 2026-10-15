@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -11,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CompleteInvitationAcceptanceStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
@@ -89,13 +89,7 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             }
             step(journey.completeInvitationAcceptanceStep) {
                 parents { journey.checkAnswersStep.isComplete() }
-                nextStep { journey.confirmationStep }
-            }
-            step(journey.confirmationStep) {
-                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
-                parents { journey.completeInvitationAcceptanceStep.isComplete() }
-                backDestination { Destination.Nowhere() }
-                nextDestination { Destination.Nowhere() }
+                nextDestination { Destination.ExternalUrl(ACCEPT_INVITATION_CONFIRMATION_ROUTE) }
             }
         }
 
@@ -132,7 +126,6 @@ class AcceptInvitationJourney(
     override val emailAddressStep: EmailAddressStep,
     override val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep,
     override val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep,
-    override val confirmationStep: ConfirmationStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>,
     journeyStateService: JourneyStateService,
@@ -163,7 +156,6 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     val emailAddressStep: EmailAddressStep
     val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
     val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep
-    val confirmationStep: ConfirmationStep
     override val cyaStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
         get() = checkAnswersStep
     override val finishCyaStep: FinishCyaJourneyStep

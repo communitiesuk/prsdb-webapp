@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
@@ -25,9 +26,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
+import java.net.URI
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 @TestPropertySource(properties = ["local.one-login-user-id=urn:fdc:gov.uk:2022:INVITEE"])
@@ -46,9 +48,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
     @MockitoSpyBean
     private lateinit var invitationService: OrganisationalLandlordInvitationService
-
-    @MockitoSpyBean
-    private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     // TODO PDJB-1828: Delete enable feature flag when MULTI_USER_ORGANISATIONS is always enabled
     @BeforeEach
@@ -112,6 +111,8 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 5. Confirmation page
         var confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        assertEquals(ACCEPT_INVITATION_CONFIRMATION_ROUTE, URI(page.url()).path)
+        assertFalse(URI(page.url()).query.orEmpty().contains("journeyId="))
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
         assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
         assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
@@ -185,11 +186,21 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
             .containsText("There was a problem with this invitation link")
     }
 
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
     @Test
     fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
         featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
 
         val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=$validToken")
+        assertEquals(404, response?.status())
+    }
+
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
+    @Test
+    fun `Confirmation page is unavailable when multi user organisations is disabled`(page: Page) {
+        featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
+
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_CONFIRMATION_ROUTE")
         assertEquals(404, response?.status())
     }
 
