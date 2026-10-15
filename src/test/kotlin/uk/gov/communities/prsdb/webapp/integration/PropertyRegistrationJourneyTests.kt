@@ -482,6 +482,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `submitting a CYA page loaded before a payment failed in another tab continues to the payment summary`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+            navigator
+                .goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withIsAddressAlreadyRegistered(false),
+                ).clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val staleCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val otherTab = submitCheckAnswersInAnotherTab(browserContext, page.url())
+            submitPaymentSummaryAndWaitForRedirectTo(otherTab, PaymentFailedStep.ROUTE_SEGMENT)
+
+            staleCheckAnswersPage.confirm()
+
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        }
+
+        @Test
         fun `changing an answer from a CYA page loaded before the CYA was submitted in another tab returns to CYA with the new answer`(
             page: Page,
             browserContext: BrowserContext,
@@ -571,11 +590,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         private fun submitCheckAnswersInAnotherTab(
             browserContext: BrowserContext,
             checkAnswersUrl: String,
-        ) {
+        ): Page {
             val otherTab = browserContext.newPage()
             otherTab.navigate(checkAnswersUrl)
             assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class).confirm()
             assertPageIs(otherTab, PaymentSummaryFormPagePropertyRegistration::class)
+            return otherTab
         }
 
         @Test

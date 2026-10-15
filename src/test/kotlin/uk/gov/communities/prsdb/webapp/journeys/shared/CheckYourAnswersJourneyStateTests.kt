@@ -257,13 +257,13 @@ class CheckYourAnswersJourneyStateTests {
                 createTestState(
                     cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                    cyaSnapshotDelegateKeys = setOf("task/answer", "paymentQuote", "other-task/isAddressAlreadyRegistered"),
-                    cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "isAddressAlreadyRegistered"),
+                    cyaSnapshotDelegateKeys = setOf("task/answer", "paymentQuote", "other-task/paymentReference"),
+                    cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference"),
                     delegateValues =
                         mapOf(
                             "task/answer" to "{\"1\":\"value\"}",
                             "paymentQuote" to "later progress",
-                            "other-task/isAddressAlreadyRegistered" to "false",
+                            "other-task/paymentReference" to "\"reference\"",
                         ),
                 )
 
