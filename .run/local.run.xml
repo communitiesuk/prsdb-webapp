@@ -7,7 +7,6 @@
       <option value="$PROJECT_DIR$/.env" />
     </option>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-    <option name="PROGRAM_PARAMETERS" value="--local.one-login-user-id=urn:fdc:gov.uk:2022:INVITEE" />
     <module name="prsdb-webapp.main" />
     <selectedOptions>
       <option name="environmentVariables" />
