@@ -42,7 +42,8 @@ class OrganisationalLandlordInvitationService(
         session.setAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL, email)
     }
 
-    fun getAcceptedInvitationEmailFromSession(): String? = session.getAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL) as? String
+    fun getAcceptedInvitationEmailFromSession(): String? =
+        session.getAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL) as? String
 
     @Transactional
     fun acceptInvitation(
