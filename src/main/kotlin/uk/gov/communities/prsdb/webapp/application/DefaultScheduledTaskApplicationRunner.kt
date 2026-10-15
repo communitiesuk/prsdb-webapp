@@ -12,7 +12,7 @@ import kotlin.system.exitProcess
 class DefaultScheduledTaskApplicationRunner(
     private val context: ApplicationContext,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("The application was not configured for this scheduled task. Application will exit now.")
 
         val code =

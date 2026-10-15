@@ -13,7 +13,7 @@ class NftDataSeedingTaskApplicationRunner(
     private val context: ApplicationContext,
     private val nftDataSeeder: NftDataSeeder,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("Executing NFT data seeding task")
         nftDataSeeder.seedDatabase()
         println("NFT data seeding task executed successfully. Application will exit now.")

@@ -174,9 +174,9 @@ abstract class IntegrationTest {
     abstract class NestedIntegrationTest
 
     class IntegrationTestOrderer : ClassOrderer {
-        override fun orderClasses(context: ClassOrdererContext?) {
+        override fun orderClasses(context: ClassOrdererContext) {
             // Makes NestedIntegrationTests run last
-            context?.classDescriptors?.sortBy { it.testClass.kotlin.isSubclassOf(NestedIntegrationTest::class) }
+            context.classDescriptors.sortBy { it.testClass.kotlin.isSubclassOf(NestedIntegrationTest::class) }
         }
     }
 

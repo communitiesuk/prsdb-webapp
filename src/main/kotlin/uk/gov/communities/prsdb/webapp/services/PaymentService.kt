@@ -351,7 +351,7 @@ class PaymentService(
         checkNotNull(paymentRepository.findStatusByPaymentId(paymentId)) { "Payment $paymentId not found" }
 
     private fun getIncompletePropertyForCurrentUser(journeyId: String): LandlordIncompleteProperty {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
             "No incomplete property found for journey $journeyId and user $baseUserId"
         }

@@ -414,10 +414,10 @@ class NftDataSeederTests(
         )
 
     private data class SeedSnapshot(
-        val landlords: List<Map<String, Any>>,
-        val properties: List<Map<String, Any>>,
-        val incompleteProperties: List<Map<String, Any>>,
-        val compliance: List<Map<String, Any>>,
-        val uploads: List<Map<String, Any>>,
+        val landlords: List<Map<String, Any?>>,
+        val properties: List<Map<String, Any?>>,
+        val incompleteProperties: List<Map<String, Any?>>,
+        val compliance: List<Map<String, Any?>>,
+        val uploads: List<Map<String, Any?>>,
     )
 }
