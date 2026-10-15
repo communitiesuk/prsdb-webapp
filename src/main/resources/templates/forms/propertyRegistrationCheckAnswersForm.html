@@ -39,7 +39,7 @@
 <!--/*@thymesVar id="showLettingAgentDelegationUnoccupiedPanel" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="hideDelegatedSections" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.checkPropertyAnswers.pageTitle}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.checkPropertyAnswers.headingPrefix} + ' ' + ${propertyName}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <h1 class="govuk-heading-xl">
             <span th:text="#{forms.checkPropertyAnswers.headingPrefix}"></span>
