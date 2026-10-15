@@ -60,7 +60,7 @@ class PaymentStatusCheckDataModelTests {
     }
 
     @ParameterizedTest
-    @EnumSource(PaymentStatus::class, names = ["CREATED", "CAPTURABLE"])
+    @EnumSource(PaymentStatus::class, names = ["CREATED", "INDETERMINATE", "CAPTURABLE"])
     fun `isInProgress returns true for in-progress statuses`(status: PaymentStatus) {
         // Arrange
         val paymentStatusCheck = PaymentStatusCheckDataModel(PAYMENT_ID, status, isCancellable = false)
@@ -73,7 +73,7 @@ class PaymentStatusCheckDataModelTests {
     }
 
     @ParameterizedTest
-    @EnumSource(PaymentStatus::class, names = ["CREATED", "CAPTURABLE"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(PaymentStatus::class, names = ["CREATED", "INDETERMINATE", "CAPTURABLE"], mode = EnumSource.Mode.EXCLUDE)
     fun `isInProgress returns false for non-in-progress statuses`(status: PaymentStatus) {
         // Arrange
         val paymentStatusCheck = PaymentStatusCheckDataModel(PAYMENT_ID, status, isCancellable = false)
