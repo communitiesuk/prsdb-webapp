@@ -13,7 +13,7 @@ class NgdAddressUpdateTaskApplicationRunner(
     private val context: ApplicationContext,
     private val ngdAddressLoader: NgdAddressLoader,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("Executing NGD address update scheduled task")
 
         ngdAddressLoader.loadNewDataPackageVersions()

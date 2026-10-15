@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
@@ -72,7 +72,7 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
         fun `getConfirmation redirects an unauthenticated user to login`() {
             mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
                 status { is3xxRedirection() }
-                redirectedUrlPattern("**/oauth2/authorization/one-login")
+                redirectedUrl("/oauth2/authorization/one-login")
             }
         }
 
@@ -243,7 +243,7 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
                 .get("$ACCEPT_INVITATION_ROUTE/${JoinOrganisationStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrlPattern("**/oauth2/authorization/one-login")
+                    redirectedUrl("/oauth2/authorization/one-login")
                 }
         }
 

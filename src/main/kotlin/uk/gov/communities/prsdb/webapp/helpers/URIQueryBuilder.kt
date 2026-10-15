@@ -30,7 +30,7 @@ class URIQueryBuilder private constructor(
         name: String,
         values: Collection<Any>,
     ): URIQueryBuilder {
-        uriComponentsBuilder.replaceQueryParam(name, values)
+        uriComponentsBuilder.replaceQueryParam(name, *values.toTypedArray())
         return this
     }
 

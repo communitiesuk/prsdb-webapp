@@ -3,14 +3,14 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.5.16"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
+    kotlin("plugin.serialization") version "2.3.21"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.noarg") version "2.3.21"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
-    id("org.flywaydb.flyway") version "10.18.0"
+    id("org.flywaydb.flyway") version "12.4.0"
 }
 
 group = "uk.gov.communities.prsdb"
@@ -32,32 +32,17 @@ repositories {
     mavenCentral()
 }
 
-// Override Spring Boot 3.5.16 managed versions to pick up security fixes ahead of the next Spring Boot release.
-extra["commons-lang3.version"] = "3.18.0"
-// CVE-2026-65182 / GHSA-gcx9-497g-6cp6, CVE-2026-65905 / GHSA-9xv2-5v5q-p794,
-// CVE-2026-68525 / GHSA-h3x4-894j-xpx5: Tomcat authentication vulnerabilities (fixed in 10.1.58; 10.1.59 is available).
-extra["tomcat.version"] = "10.1.59"
-// GHSA-jhq6-gfmj-v8fx: logback object injection via HardenedObjectInputStream (fixed in 1.5.35).
-extra["logback.version"] = "1.5.35"
-// CVE-2026-54515 / GHSA-5jmj-h7xm-6q6v: jackson-databind case-insensitive @JsonIgnoreProperties bypass (fixed in 2.21.5).
-// CVE-2026-19032, -68497, -83557: jackson-databind advisories (fixed in 2.21.6).
-// CVE-2026-89407, -89425, -91776, -91777: jackson-core / jackson-databind DoS advisories (fixed in 2.21.7).
-extra["jackson-bom.version"] = "2.21.7"
-// Multiple netty-codec / netty-codec-http / netty-codec-http2 advisories fixed in 4.1.136.Final
-// (CVE-2026-55831, -55833, -56745, -56746, -59898, -59899, -59900, -59901, -59921), plus
-// GHSA-8c42-7qj2-3j46: netty-codec-http CORS Vary header overwrite cache poisoning (fixed in 4.1.137.Final).
-extra["netty.version"] = "4.1.137.Final"
-// CVE-2026-54291 / GHSA-j92g-9f8w-j867: PostgreSQL JDBC silent channel-binding auth downgrade (fixed in 42.7.12).
-extra["postgresql.version"] = "42.7.12"
-// CVE-2026-49844 / GHSA-qv9r-c865-cp47: log4j-api improper encoding of non-finite floating-point values
-// during MapMessage JSON serialization (fixed in 2.25.5).
-extra["log4j2.version"] = "2.25.5"
+// Third-party clients still use Jackson 2 alongside Spring Boot's Jackson 3 mapper.
+extra["jackson-2-bom.version"] = "2.21.7"
+
+// CVE-2026-107314 and CVE-2026-107315 (fixed in 42.7.14).
+extra["postgresql.version"] = "42.7.14"
 
 dependencies {
     // Spring Boot Web
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
@@ -66,15 +51,15 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
     // Migrations
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
 
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.springframework.session:spring-session-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-session-data-redis")
 
     // Auth
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
     implementation("org.bouncycastle:bcprov-jdk18on:1.85.2")
 
     // Templating
@@ -83,7 +68,7 @@ dependencies {
 
     // Observability
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.2"))
+    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:4.1.1"))
     implementation("io.awspring.cloud:spring-cloud-aws-starter-metrics")
     implementation("io.micrometer:micrometer-registry-cloudwatch2")
 
@@ -99,11 +84,12 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-client-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -111,7 +97,7 @@ dependencies {
     testImplementation("com.deque.html.axe-core:playwright:4.4.1")
 
     // Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 
     // PhoneNumbers
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.49")
@@ -131,6 +117,9 @@ dependencies {
     // Fake data generation
     implementation("net.datafaker:datafaker:2.4.2")
 
+    // Ktlint's parser must use its own compiler rather than the application-managed version.
+    "ktlint"("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.10")
+
     // Force commons-compress (transitive of Testcontainers and axe-core/playwright) to a version without known CVEs.
     constraints {
         testImplementation("org.apache.commons:commons-compress:1.26.0")
@@ -141,6 +130,12 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
     }
+}
+
+noArg {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.MappedSuperclass")
 }
 
 val frontendAssetsSpec: CopySpec =
@@ -317,25 +312,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.12")
-        classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
+        classpath("org.postgresql:postgresql:42.7.14")
+        classpath("org.flywaydb:flyway-database-postgresql:12.4.0")
     }
     configurations.classpath {
         resolutionStrategy {
-            // spring-boot-buildpack-platform pulls a vulnerable commons-lang3 transitively onto the
-            // build classpath; GitHub's dependency submission reports it even though it is build-time only.
+            // Application dependency management does not apply to the build classpath.
             force("org.apache.commons:commons-lang3:3.18.0")
-            // The Flyway and Spring Boot plugins pull jackson 2.21.4 onto the build classpath. The
-            // extra["jackson-bom.version"] override above only applies to the project's dependency
-            // management, not here, so the jackson advisories listed above are also reported against it.
             force("com.fasterxml.jackson:jackson-bom:2.21.7")
-            // spring-boot-buildpack-platform also pulls a vulnerable httpclient5 onto the build classpath.
-            // CVE-2026-64607 / GHSA-hjcp-jmpx-g3qm: connection leak on Content-Encoding decode error
-            // leading to pool exhaustion (fixed in 5.6.3).
-            force("org.apache.httpcomponents.client5:httpclient5:5.6.3")
-            // CVE-2026-54399 / GHSA-hf6x-8p5f-cgmf: httpcore5 HTTP/1 header parsing memory-exhaustion DoS
-            // (fixed in 5.4.3). Pulled transitively via spring-boot-buildpack-platform -> httpclient5 onto
-            // the build classpath, so it is reported even though it is build-time only.
+            force("org.apache.httpcomponents.client5:httpclient5:5.6.4")
             force("org.apache.httpcomponents.core5:httpcore5:5.4.3")
             force("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3")
         }

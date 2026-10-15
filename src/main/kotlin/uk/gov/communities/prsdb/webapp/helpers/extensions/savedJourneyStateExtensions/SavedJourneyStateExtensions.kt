@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.serialization.json.Json
+import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.collections.get
