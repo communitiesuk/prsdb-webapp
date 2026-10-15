@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUse
     name = "organisational_landlord_user",
     uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_landlord_id", "subject_identifier"])],
 )
-class OrganisationalLandlordUser() : AuditableEntity() {
+class OrganisationalLandlordUser() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0

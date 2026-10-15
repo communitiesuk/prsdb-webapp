@@ -17,7 +17,9 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -25,7 +27,10 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(AcceptOrganisationalLandlordUserInvitationController::class)
 class AcceptOrganisationalLandlordUserInvitationControllerTests(
@@ -38,6 +43,12 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var organisationPermissionsProvider: OrganisationPermissionsProvider
+
+    @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     @MockitoBean
@@ -46,9 +57,69 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
     private val journeyId = "test-accept-invitation-journey-id"
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
 
+    // TODO PDJB-1828: Remove this setup when the MULTI_USER_ORGANISATIONS feature flag is removed
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(true)
+    }
+
+    @Nested
+    inner class GetConfirmation {
+        @Test
+        fun `getConfirmation redirects an unauthenticated user to login`() {
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
+                status { is3xxRedirection() }
+                redirectedUrlPattern("**/oauth2/authorization/one-login")
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getConfirmation returns forbidden for a user without a landlord role`() {
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getConfirmation returns bad request when no invitation has been accepted in the session`() {
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
+                status { isBadRequest() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getConfirmation returns organisation details and admin permissions for an admin`() {
+            assertConfirmationModel(isAdmin = true)
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_EDITOR"])
+        fun `getConfirmation returns organisation details and editor permissions for an editor`() {
+            assertConfirmationModel(isAdmin = false)
+        }
+
+        private fun assertConfirmationModel(isAdmin: Boolean) {
+            // Arrange
+            whenever(invitationService.getAcceptedInvitationEmailFromSession()).thenReturn("invitee@example.com")
+            whenever(userToLandlordService.getCurrentOrganisationLandlordForUser())
+                .thenReturn(MockLandlordData.createOrgLandlord(name = "Test Organisation"))
+            whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(isAdmin)
+
+            // Act & Assert
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
+                status { isOk() }
+                view { name("acceptOrganisationInvitationConfirmation") }
+                model {
+                    attribute("organisationName", "Test Organisation")
+                    attribute("emailAddress", "invitee@example.com")
+                    attribute("isAdmin", isAdmin)
+                    attribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
+                }
+            }
+        }
     }
 
     @Nested

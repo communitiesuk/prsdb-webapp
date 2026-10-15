@@ -3,34 +3,41 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
+import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckUserIsLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.FullNamePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.InvalidLinkPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.JoinOrganisationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.UserIsAlreadyLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
+import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import java.net.URI
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
-@TestPropertySource(properties = ["local.one-login-user-id=urn:fdc:gov.uk:2022:INVITEE"])
 class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val validToken = "1234abcd-5678-abcd-1234-567abcd2222a"
 
@@ -48,30 +55,133 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     @MockitoSpyBean
-    private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
+    private lateinit var userRolesService: UserRolesService
 
-    // TODO PDJB-1828: Delete enable feature flag when MULTI_USER_ORGANISATIONS is always enabled
     @BeforeEach
     fun enableFeatureFlag() {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)
     }
 
-    @Test
-    fun `Invitees accepting an admin invitation get an admin organisational user`(page: Page) {
-        completeAcceptanceJourneyAndAssertResult(
-            page,
-            "1234abcd-5678-abcd-1234-567abcd2222a",
-            OrganisationalLandlordUserRole.ADMIN,
-        )
+    @Nested
+    inner class UserIsNotYetAnOrganisationalUser :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-local.sql", "data-overlay-mockuser-is-not-a-landlord.sql"),
+        ) {
+        @Test
+        fun `Invitees are redirected to the invalid link page when their invitation has expired`(page: Page) {
+            // Go to the start of accept invitation journey with an expired invitation token
+            val invalidLinkPage =
+                navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(expiredToken)
+
+            assertPageIs(page, InvalidLinkPage::class)
+            BaseComponent
+                .assertThat(invalidLinkPage.heading)
+                .containsText("There was a problem with this invitation link")
+            BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
+        }
+
+        @Test
+        fun `Invitees are redirected to the invalid link page when their invitation token is not recognised`(page: Page) {
+            // Go to the start of accept invitation journey with a token that matches no invitation
+            val invalidLinkPage =
+                navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(unrecognisedToken)
+
+            assertPageIs(page, InvalidLinkPage::class)
+            BaseComponent
+                .assertThat(invalidLinkPage.heading)
+                .containsText("There was a problem with this invitation link")
+        }
+
+        @Test
+        fun `Invitees accepting an admin invitation get an admin organisational user`(page: Page) {
+            completeAcceptanceJourneyAndAssertResult(
+                page,
+                "1234abcd-5678-abcd-1234-567abcd2222a",
+                OrganisationalLandlordUserRole.ADMIN,
+            )
+        }
+
+        @Test
+        fun `Invitees accepting an editor invitation get an editor organisational user`(page: Page) {
+            completeAcceptanceJourneyAndAssertResult(
+                page,
+                "1234abcd-5678-abcd-1234-567abcd2222b",
+                OrganisationalLandlordUserRole.EDITOR,
+            )
+        }
+
+        @Test
+        fun `Invitees are redirected to the invalid link page if their invitation is cancelled before they submit`(page: Page) {
+            val checkAnswersPage = completeStepsUpToCheckAnswers(page, validToken)
+
+            // The invitation is cancelled after the invitee reaches check answers but before they submit
+            invitationRepository.delete(invitationRepository.findByToken(UUID.fromString(validToken))!!)
+
+            checkAnswersPage.form.submit()
+
+            assertPageIs(page, InvalidLinkPage::class)
+            assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(INVITATION_TEST_USER_ID).isEmpty())
+        }
+
+        @Test
+        fun `Invitees are redirected to the already landlord page if they become a landlord before they submit`(page: Page) {
+            val checkAnswersPage = completeStepsUpToCheckAnswers(page, validToken)
+
+            // The invitee becomes a landlord after reaching check answers but before they submit
+            doReturn(true).whenever(userRolesService).getUserHasLandlordRole(INVITATION_TEST_USER_ID)
+
+            checkAnswersPage.form.submit()
+
+            assertPageIs(page, UserIsAlreadyLandlordPage::class)
+            assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(INVITATION_TEST_USER_ID).isEmpty())
+            // The invitation is untouched, so the correct account can still accept it
+            val invitation = invitationRepository.findByToken(UUID.fromString(validToken))!!
+            assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
+        }
     }
 
-    @Test
-    fun `Invitees accepting an editor invitation get an editor organisational user`(page: Page) {
-        completeAcceptanceJourneyAndAssertResult(
-            page,
-            "1234abcd-5678-abcd-1234-567abcd2222b",
-            OrganisationalLandlordUserRole.EDITOR,
-        )
+    @Nested
+    inner class UserIsAlreadyAnIndividualLandlord : NestedIntegrationTestWithMutableData("data-local.sql") {
+        @Test
+        fun `Invitees who are already an individual landlord are shown the already landlord page`(page: Page) {
+            // Act
+            val userIsAlreadyLandlordPage =
+                navigator.goToAcceptOrganisationalLandlordInvitationJourneyAsExistingLandlord(validToken)
+
+            // Assert
+            assertPageIs(page, UserIsAlreadyLandlordPage::class)
+            BaseComponent
+                .assertThat(userIsAlreadyLandlordPage.heading)
+                .containsText("You need to use a different GOV.UK One Login to accept this invitation")
+            BaseComponent.assertThat(userIsAlreadyLandlordPage.signOutLink).isVisible()
+
+            // The invitation is untouched, so the correct account can still accept it
+            val invitation = invitationRepository.findByToken(UUID.fromString(validToken))!!
+            assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
+        }
+    }
+
+    @Nested
+    inner class UserIsAlreadyAnOrganisationalLandlordUser :
+        NestedIntegrationTestWithMutableData(
+            listOf(
+                "data-local.sql",
+                "data-overlay-mockuser-is-not-a-landlord.sql",
+                "data-overlay-mockuser-is-org-landlord-user.sql",
+            ),
+        ) {
+        @Test
+        fun `Invitees who are already an organisational landlord user are shown the already landlord page`(page: Page) {
+            // Act
+            val userIsAlreadyLandlordPage =
+                navigator.goToAcceptOrganisationalLandlordInvitationJourneyAsExistingLandlord(validToken)
+
+            // Assert
+            assertPageIs(page, UserIsAlreadyLandlordPage::class)
+            BaseComponent
+                .assertThat(userIsAlreadyLandlordPage.heading)
+                .containsText("You need to use a different GOV.UK One Login to accept this invitation")
+        }
     }
 
     private fun completeAcceptanceJourneyAndAssertResult(
@@ -79,39 +189,14 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         token: String,
         expectedRole: OrganisationalLandlordUserRole,
     ) {
-        removeExistingOrganisationalLandlordUser()
-
-        // 1. Go to the start of accept invitation journey - a valid token redirects past the validate token step
-        // TODO PDJB-1829: CheckUserIsLandlordStep is a placeholder, so step 1 currently stops here. Once it decides whether the
-        // invitee is already a landlord user, a valid token should arrive at the join organisation page and this step can go.
-        val checkUserIsLandlordPage =
-            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token)
-        assertPageIs(page, CheckUserIsLandlordPage::class)
-        checkUserIsLandlordPage.form.submit()
-
-        // 1b. Join Organisation page
-        val joinOrganisationPage = assertPageIs(page, JoinOrganisationPage::class)
-        assertEquals("Join your organisation", joinOrganisationPage.heading.getText())
-        assertEquals(
-            true,
-            joinOrganisationPage.introductionText.textContent()?.contains("Local Organisation Landlord."),
-        )
-        joinOrganisationPage.form.submit()
-
-        // 2. Full Name page
-        val fullNamePage = assertPageIs(page, FullNamePage::class)
-        fullNamePage.submitName("Jane Smith")
-
-        // 3. Email Address page
-        val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
-        emailAddressPage.submitEmail("invitee@example.com")
-
-        // 4. Submit Check Answers
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPage::class)
+        // 1-4. Complete the journey up to check answers
+        val checkAnswersPage = completeStepsUpToCheckAnswers(page, token)
         checkAnswersPage.form.submit()
 
         // 5. Confirmation page
         var confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        assertEquals(ACCEPT_INVITATION_CONFIRMATION_ROUTE, URI(page.url()).path)
+        assertFalse(URI(page.url()).query.orEmpty().contains("journeyId="))
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
         assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
         assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
@@ -144,47 +229,42 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
 
-        // Confirmation must still render after acceptance has deleted the invitation.
         page.reload()
         confirmationPage = assertPageIs(page, ConfirmationPage::class)
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
 
-        // 5. Landlord Dashboard page
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
-    private fun removeExistingOrganisationalLandlordUser() {
-        organisationalLandlordUserRepository
-            .findByBaseUser_Id(INVITATION_TEST_USER_ID)
-            .forEach(organisationalLandlordUserRepository::delete)
+    private fun completeStepsUpToCheckAnswers(
+        page: Page,
+        token: String,
+    ): CheckAnswersPage {
+        // 1. Join organisation page - a valid token for a non-landlord redirects past the validate token and check
+        // user is landlord steps
+        val joinOrganisationPage = navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithValidToken(token)
+        assertPageIs(page, JoinOrganisationPage::class)
+        assertEquals("Join your organisation", joinOrganisationPage.heading.getText())
+        assertEquals(
+            true,
+            joinOrganisationPage.introductionText.textContent()?.contains("Local Organisation Landlord."),
+        )
+        joinOrganisationPage.form.submit()
+
+        // 2. Full name page
+        val fullNamePage = assertPageIs(page, FullNamePage::class)
+        fullNamePage.submitName("Jane Smith")
+
+        // 3. Email address page
+        val emailAddressPage = assertPageIs(page, EmailAddressPage::class)
+        emailAddressPage.submitEmail("invitee@example.com")
+
+        // 4. Check answers page
+        return assertPageIs(page, CheckAnswersPage::class)
     }
 
-    @Test
-    fun `Invitees are redirected to the invalid link page when their invitation has expired`(page: Page) {
-        // Go to the start of accept invitation journey with an expired invitation token
-        val invalidLinkPage =
-            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(expiredToken)
-
-        assertPageIs(page, InvalidLinkPage::class)
-        BaseComponent
-            .assertThat(invalidLinkPage.heading)
-            .containsText("There was a problem with this invitation link")
-        BaseComponent.assertThat(invalidLinkPage.signInLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
-    }
-
-    @Test
-    fun `Invitees are redirected to the invalid link page when their invitation token is not recognised`(page: Page) {
-        // Go to the start of accept invitation journey with a token that matches no invitation
-        val invalidLinkPage =
-            navigator.goToAcceptOrganisationalLandlordInvitationJourneyWithInvalidToken(unrecognisedToken)
-
-        assertPageIs(page, InvalidLinkPage::class)
-        BaseComponent
-            .assertThat(invalidLinkPage.heading)
-            .containsText("There was a problem with this invitation link")
-    }
-
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
     @Test
     fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
         featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
@@ -193,7 +273,16 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertEquals(404, response?.status())
     }
 
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
+    @Test
+    fun `Confirmation page is unavailable when multi user organisations is disabled`(page: Page) {
+        featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
+
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_CONFIRMATION_ROUTE")
+        assertEquals(404, response?.status())
+    }
+
     companion object {
-        private const val INVITATION_TEST_USER_ID = "urn:fdc:gov.uk:2022:INVITEE"
+        private const val INVITATION_TEST_USER_ID = "urn:fdc:gov.uk:2022:UVWXY"
     }
 }

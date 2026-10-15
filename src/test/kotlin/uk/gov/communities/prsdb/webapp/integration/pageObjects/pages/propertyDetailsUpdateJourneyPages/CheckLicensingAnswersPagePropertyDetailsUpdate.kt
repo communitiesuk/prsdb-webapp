@@ -16,6 +16,8 @@ class CheckLicensingAnswersPagePropertyDetailsUpdate(
         LandlordUpdateLicensingController.getUpdateLicensingBaseRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdateLicensingCyaStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your licensing answers"
+
     val form = Form(page)
 
     val summaryName = Heading(page.locator("#summary-name"))

@@ -22,6 +22,25 @@ See the `branch-and-commit-naming` skill for full naming conventions.
 
 Use the repository PR template at `.github/pull_request_template.md`. Fill in each section as follows:
 
+### AI-written text must be hidden in comments
+
+Whenever the AI fills in a paragraph or free-text section (e.g. Goal of change, Description of main change(s),
+Anything you'd like to highlight), it MUST wrap its own wording in an HTML comment so it is hidden in the rendered
+PR description:
+
+For multiline wording, use a multiline comment:
+
+```
+<!--
+Multiline comment placed under a header.
+e.g. This PR makes the project work.
+-->
+```
+
+The PR author will review the description and uncomment the wording they want to keep. Do not leave AI-written
+prose uncommented. Keep the template's own headings and hint comments intact, and place the AI's comment beneath
+the relevant heading. This does not apply to the ticket number, title, or checklist ticks.
+
 ### Brevity Principle
 
 Be as concise as possible. The reviewer has the diff — the description explains

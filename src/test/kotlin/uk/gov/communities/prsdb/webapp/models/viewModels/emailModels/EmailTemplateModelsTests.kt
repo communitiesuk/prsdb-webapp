@@ -451,6 +451,17 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/LettingAgentComplianceUpdateNotification.md",
                 ),
+                EmailTemplateTestData(
+                    ChangeOrgTeamMemberAccessLevelEmail(
+                        memberName = "Anita Locke",
+                        roleName = "administrator",
+                        organisationName = "Test Organisation Name",
+                        isAdmin = true,
+                        dashboardUrl = URI("dashboardUrl"),
+                    ),
+                    "/emails/ChangeOrgTeamMemberAccessLevel.md",
+                    allowExtraKeys = true,
+                ),
             )
     }
 

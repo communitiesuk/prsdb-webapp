@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
 <!DOCTYPE html>
 <html id="form-content"
-      th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+      th:replace="~{fragments/forms/questionPage :: questionPage(#{lettingAgentInvitation.confirmation.banner.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
 
     <div id="confirmation-banner"
          th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{lettingAgentInvitation.confirmation.banner.heading}, null)}">

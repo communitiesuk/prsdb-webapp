@@ -16,6 +16,8 @@ class CheckInvitationsPageInviteJointLandlord(
         InviteJointLandlordController.getInviteJointLandlordRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${CheckInvitationsStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your joint landlord invitations"
+
     val form = Form(page)
     val summaryName = Heading(page.locator("#summary-name"))
     val summaryList = CheckInvitationsSummaryList(page)

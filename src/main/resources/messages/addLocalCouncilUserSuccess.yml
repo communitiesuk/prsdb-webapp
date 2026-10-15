@@ -1,4 +1,5 @@
 title: Invitation sent
+pageTitle: Local Council user invitation sent
 banner:
   heading: Invitation sent
   body: 'You’ve invited {0,,invitedEmailAddress}'

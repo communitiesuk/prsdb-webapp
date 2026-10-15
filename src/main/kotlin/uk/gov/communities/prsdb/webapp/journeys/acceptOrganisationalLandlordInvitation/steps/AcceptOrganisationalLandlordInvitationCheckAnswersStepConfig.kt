@@ -21,6 +21,7 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
 
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
         mapOf(
+            "pageTitleOverride" to "acceptOrganisationInvitation.checkAnswers.pageTitle",
             "summaryName" to "acceptOrganisationInvitation.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirmAndContinue",
             "summaryListData" to getSummaryList(state),

@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.comp
 class CompaniesHouseUpdateCheckAnswersPage(
     page: Page,
 ) : BasePage(page, "$UPDATE_COMPANIES_HOUSE_ROUTE/${CompaniesHouseUpdateCheckAnswersStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your Companies House answers"
+
     val form = PostForm(page)
 
     val companyDetails = CompanyDetailsSummaryList(page)
