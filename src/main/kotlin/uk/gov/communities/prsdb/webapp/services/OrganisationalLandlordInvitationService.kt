@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
@@ -148,6 +150,28 @@ class OrganisationalLandlordInvitationService(
 
     fun getInvitationsForOrganisation(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordInvitation> =
         invitationRepository.findByOrganisationalLandlord(organisationalLandlord)
+
+    @Transactional
+    fun hideExpiredInvitation(
+        invitationId: Long,
+        organisationalLandlord: OrganisationalLandlord,
+    ) {
+        val invitation =
+            invitationRepository.findById(invitationId).orElseThrow {
+                ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+            }
+
+        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invitation does not belong to this organisation")
+        }
+
+        if (invitation.status != OrganisationalLandlordInvitationStatus.EXPIRED) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only expired invitations can be hidden")
+        }
+
+        invitation.isHidden = true
+        invitationRepository.save(invitation)
+    }
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

@@ -179,6 +179,7 @@ class MockLandlordData {
             )
 
         fun createOrganisationalLandlordInvitation(
+            id: Long = 0,
             token: UUID = UUID.randomUUID(),
             invitedEmail: String = "organisation.invitee@example.com",
             organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),
@@ -188,6 +189,7 @@ class MockLandlordData {
         ): OrganisationalLandlordInvitation {
             val invitation =
                 OrganisationalLandlordInvitation(
+                    id = id,
                     token = token,
                     invitedEmail = invitedEmail,
                     organisationalLandlord = organisationalLandlord,

@@ -31,7 +31,9 @@ class TeamMembersViewModelTests {
         email: String,
         daysAgo: Long,
         isHidden: Boolean = false,
+        id: Long = 0,
     ) = MockLandlordData.createOrganisationalLandlordInvitation(
+        id = id,
         invitedEmail = email,
         organisationalLandlord = organisation,
         createdDate = Instant.now().minus(daysAgo, ChronoUnit.DAYS),
@@ -144,9 +146,9 @@ class TeamMembersViewModelTests {
         // Arrange
         val invitations =
             listOf(
-                invitation("pending@example.com", daysAgo = 1),
-                invitation("expired-newer@example.com", daysAgo = 40),
-                invitation("expired-older@example.com", daysAgo = 60),
+                invitation("pending@example.com", daysAgo = 1, id = 1),
+                invitation("expired-newer@example.com", daysAgo = 40, id = 2),
+                invitation("expired-older@example.com", daysAgo = 60, id = 3),
             )
 
         // Act
@@ -163,9 +165,17 @@ class TeamMembersViewModelTests {
         assertEquals(
             listOf(
                 SummaryListRowActionsViewModel("forms.links.resend", "#"),
-                SummaryListRowActionsViewModel("forms.links.remove", "#"),
+                SummaryListRowActionsViewModel("forms.links.remove", "/landlord/team-members/remove-expired-invite/3"),
             ),
             viewModel.expiredInvitationRows.first().actions,
+        )
+        assertEquals(
+            "/landlord/team-members/remove-expired-invite/2",
+            viewModel.expiredInvitationRows
+                .last()
+                .actions
+                .last()
+                .url,
         )
     }
 
