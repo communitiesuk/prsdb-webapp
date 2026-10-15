@@ -43,23 +43,9 @@ class JourneyStateDelegateProvider(
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
-    /**
-     * The scoped keys of delegates included in the check your answers snapshot.
-     *
-     * Once a registry is bound this covers the whole journey, otherwise only this provider's own delegates.
-     */
     val cyaSnapshotKeys: Set<String>
         get() = registry?.cyaSnapshotKeys ?: cyaSnapshotKeysInUse.map(::scopedKey).toSet()
 
-    /**
-     * Creates a delegate for a nullable journey state property.
-     *
-     * The property is included in the check your answers snapshot, unless the journey excludes it via
-     * [uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.cyaSnapshotExcludedDelegateKeys].
-     *
-     * @param propertyKey Unique key to store this property in the journey state
-     * @throws JourneyInitialisationException if the propertyKey is already in use
-     */
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
     ): NullableJourneyStateDelegate<TJourney, TProperty> {
@@ -77,9 +63,6 @@ class JourneyStateDelegateProvider(
      *
      * If the property is accessed and no value is found in the journey state, the entire
      * journey state will be deleted and an [IllegalStateException] will be thrown.
-     *
-     * The property is included in the check your answers snapshot, unless the journey excludes it via
-     * [uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.cyaSnapshotExcludedDelegateKeys].
      *
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)
@@ -109,8 +92,6 @@ class JourneyStateDelegateProvider(
      * journey state will be deleted and an [IllegalStateException] will be thrown.
      *
      * If the property is set multiple times, the first value will be kept and other writes will be ignored.
-     *
-     * As the property cannot change, it is not included in the check your answers snapshot.
      *
      * @param TJourney The journey class type
      * @param TProperty The property type (must be serializable)

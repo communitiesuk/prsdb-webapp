@@ -45,13 +45,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return stateFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
-    /**
-     * Keys of delegates to leave out of the CYA answers snapshot, matched against the key passed to the delegate
-     * provider whichever task owns the delegate. Use the same constants as the delegates, so the keys can't drift apart.
-     *
-     * Only exclude delegates that are written after the CYA page is submitted (e.g. payment progress) or while navigating
-     * rather than answering questions. Otherwise, going back to the CYA page and submitting it will fail.
-     */
     val cyaSnapshotExcludedDelegateKeys: Set<String>
         get() = emptySet()
 
@@ -64,7 +57,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return serializeCyaAnswers((stepKeys + delegateKeys).toSet())
     }
 
-    // Removes the route prefix that task-owned delegate keys are scoped with
     private fun unscopedDelegateKey(scopedKey: String) = scopedKey.substringAfterLast('/')
 
     fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
@@ -111,7 +103,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
-        // Distinguishes delegate entries from step data entries (keyed by URL path) in the CYA answers snapshot
         const val CYA_SNAPSHOT_DELEGATE_KEY_PREFIX = "delegate:"
 
         @Suppress("ktlint:standard:max-line-length")

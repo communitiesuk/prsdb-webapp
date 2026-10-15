@@ -8,9 +8,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
  * All delegate keys for a journey must be registered with a single KeyRegistry to ensure there are no collisions.
  * A single DelegateKeyRegistry should be created for the entire journey and all tasks and other sub-journeys that
  * own their own property delegate keys must register with it.
- *
- * The registry also records which keys are included in the check your answers snapshot, so the whole journey's
- * delegates can be checked for changes made since a CYA page was loaded.
  */
 class DelegateKeyRegistry {
     private val resolvedKeys = mutableSetOf<String>()
