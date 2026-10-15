@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfOrgLandlordUser
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -68,7 +68,7 @@ class AcceptOrganisationalLandlordUserInvitationController(
     // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
-    @AllowIfLandlord
+    @AllowIfOrgLandlordUser
     fun getConfirmation(): ModelAndView {
         val emailAddress =
             invitationService.getAcceptedInvitationEmailFromSession()

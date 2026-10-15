@@ -82,6 +82,14 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
         }
 
         @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getConfirmation returns forbidden for an individual landlord`() {
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
         @WithMockUser(roles = ["ORG_ADMIN"])
         fun `getConfirmation returns not found when no invitation has been accepted in the session`() {
             mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
