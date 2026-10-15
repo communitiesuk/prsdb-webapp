@@ -35,6 +35,7 @@ class AcceptOrganisationalLandlordUserInvitationController(
     private val userToLandlordService: UserToLandlordService,
     private val organisationPermissionsProvider: OrganisationPermissionsProvider,
 ) {
+    // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
     @GetMapping
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     fun startJourney(
@@ -56,6 +57,7 @@ class AcceptOrganisationalLandlordUserInvitationController(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
+    // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
     @PostMapping("/{*stepPath}")
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     fun postJourneyData(
@@ -63,6 +65,7 @@ class AcceptOrganisationalLandlordUserInvitationController(
         @RequestParam formData: FormData,
     ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
+    // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     @AllowIfLandlord
@@ -70,7 +73,7 @@ class AcceptOrganisationalLandlordUserInvitationController(
         val emailAddress =
             invitationService.getAcceptedInvitationEmailFromSession()
                 ?: throw ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
+                    HttpStatus.NOT_FOUND,
                     "No accepted organisational landlord invitation email was found in the session",
                 )
 

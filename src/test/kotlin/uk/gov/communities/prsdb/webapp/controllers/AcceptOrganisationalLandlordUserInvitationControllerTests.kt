@@ -83,9 +83,9 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
 
         @Test
         @WithMockUser(roles = ["ORG_ADMIN"])
-        fun `getConfirmation returns bad request when no invitation has been accepted in the session`() {
+        fun `getConfirmation returns not found when no invitation has been accepted in the session`() {
             mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
-                status { isBadRequest() }
+                status { isNotFound() }
             }
         }
 
