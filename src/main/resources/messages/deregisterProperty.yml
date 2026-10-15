@@ -1,7 +1,6 @@
 title: Deregister a Property
 info:
   heading: "Deregister {0,,address}"
-  pageTitle: Deregister this property
   body: Tell us that this property will no longer be rented out.
   prnHeading: What happens to the Property Registration Number
   prn:
@@ -10,7 +9,6 @@ info:
       two: If you rent this property out in the future, you must register it again to get a new Property Registration Number.
   cancelLink: Cancel (go back to property record)
 checkInvitations:
-  pageTitle: "Check these actions before you deregister this property"
   heading: "Check these actions before you deregister {0,,address}"
   body: "To deregister this property, we’ll need to do the following:"
   invitations:
@@ -26,7 +24,6 @@ confirm:
   confirmButton: Confirm and deregister property
   cancelLink: Cancel (go back to property record)
 confirmation:
-  pageTitle: Property deregistered
   panel:
     title: "Deregistered {0}"
     body: This property is no longer registered as a rental property

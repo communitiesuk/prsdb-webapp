@@ -3,12 +3,15 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -81,11 +84,21 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
             }
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = ["INDIVIDUAL_LANDLORD", "LOCAL_COUNCIL_ADMIN", "LOCAL_COUNCIL_USER", "SYSTEM_OPERATOR"])
+        fun `getConfirmation returns forbidden for roles other than organisation user roles`(role: String) {
+            mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE) {
+                with(user("user").roles(role))
+            }.andExpect {
+                status { isForbidden() }
+            }
+        }
+
         @Test
         @WithMockUser(roles = ["ORG_ADMIN"])
-        fun `getConfirmation returns bad request when no invitation has been accepted in the session`() {
+        fun `getConfirmation returns not found when no invitation has been accepted in the session`() {
             mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
-                status { isBadRequest() }
+                status { isNotFound() }
             }
         }
 
