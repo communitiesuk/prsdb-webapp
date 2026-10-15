@@ -72,7 +72,7 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
         fun `getConfirmation redirects an unauthenticated user to login`() {
             mvc.get(ACCEPT_INVITATION_CONFIRMATION_ROUTE).andExpect {
                 status { is3xxRedirection() }
-                redirectedUrlPattern("**/oauth2/authorization/one-login")
+                redirectedUrl("/oauth2/authorization/one-login")
             }
         }
 
