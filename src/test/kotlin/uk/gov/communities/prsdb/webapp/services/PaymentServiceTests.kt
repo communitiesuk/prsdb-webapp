@@ -367,6 +367,42 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class PropertyRegistrationPaymentSummaryDetailsTests {
+        @Test
+        fun `getAnnualFeeInPence returns the configured annual fee`() {
+            assertEquals(3000, createPaymentService(annualFeeInPence = 3000).getAnnualFeeInPence())
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is within it`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is the last gratis day`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 14)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the quote date when it is the day after the gratis period ends`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 15)))
+        }
+
+        @Test
+        fun `getFirstChargeableDate returns the quote date when the gratis period has ended`() {
+            val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
+
+            assertEquals(LocalDate.of(2028, 1, 10), service.getFirstChargeableDate(LocalDate.of(2028, 1, 10)))
+        }
+    }
+
+    @Nested
     inner class PropertyRegistrationPaymentQuoteTests {
         @Test
         fun `getPropertyRegistrationPaymentQuote uses the existing proration rules and quote date`() {
@@ -1606,6 +1642,46 @@ class PaymentServiceTests {
             assertContains(exception.message!!, journeyId)
             assertContains(exception.message!!, PAYMENT_REFERENCE)
             verifyNoInteractions(mockGovUkPayClient)
+        }
+    }
+
+    @Nested
+    inner class GetLatestSucceededPaymentForPropertyTests {
+        @Test
+        fun `getLatestSucceededPaymentForProperty returns the latest succeeded payment associated with the property`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val payment = createPayment(paymentId = PAYMENT_ID, status = PaymentStatus.SUCCEEDED)
+            whenever(
+                mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    propertyOwnership,
+                    PaymentStatus.SUCCEEDED,
+                ),
+            ).thenReturn(payment)
+
+            // Act
+            val latestPayment = paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)
+
+            // Assert
+            assertSame(payment, latestPayment)
+        }
+
+        @Test
+        fun `getLatestSucceededPaymentForProperty returns null when the property has no succeeded payment`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(
+                mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    propertyOwnership,
+                    PaymentStatus.SUCCEEDED,
+                ),
+            ).thenReturn(null)
+
+            // Act
+            val latestPayment = paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)
+
+            // Assert
+            assertNull(latestPayment)
         }
     }
 

@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.gove
 class GoverningBodyCyaPageUpdateGoverningBody(
     page: Page,
 ) : BasePage(page, "$UPDATE_GOVERNING_BODY_ROUTE/${UpdateGoverningBodyCyaStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your governing body answers"
+
     val form = PostForm(page)
     val warning = Warning.default(page)
 

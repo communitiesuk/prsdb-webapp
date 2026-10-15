@@ -16,7 +16,9 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.LandlordAccountStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.UserIsAlreadyLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -65,11 +67,21 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             step(journey.checkUserIsLandlordStep) {
                 routeSegment(CheckUserIsLandlordStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidity.VALID) }
-                nextStep { journey.joinOrganisationStep }
+                nextStep { outcome ->
+                    when (outcome) {
+                        LandlordAccountStatus.NOT_A_LANDLORD -> journey.joinOrganisationStep
+                        LandlordAccountStatus.ALREADY_A_LANDLORD -> journey.userIsAlreadyLandlordStep
+                    }
+                }
+            }
+            step(journey.userIsAlreadyLandlordStep) {
+                routeSegment(UserIsAlreadyLandlordStep.ROUTE_SEGMENT)
+                parents { journey.checkUserIsLandlordStep.hasOutcome(LandlordAccountStatus.ALREADY_A_LANDLORD) }
+                noNextDestination()
             }
             step(journey.joinOrganisationStep) {
                 routeSegment(JoinOrganisationStep.ROUTE_SEGMENT)
-                parents { journey.checkUserIsLandlordStep.isComplete() }
+                parents { journey.checkUserIsLandlordStep.hasOutcome(LandlordAccountStatus.NOT_A_LANDLORD) }
                 nextStep { journey.fullNameStep }
             }
             step(journey.fullNameStep) {
@@ -121,6 +133,7 @@ class AcceptInvitationJourney(
     override val validateTokenStep: ValidateTokenStep,
     override val invalidLinkStep: InvalidLinkStep,
     override val checkUserIsLandlordStep: CheckUserIsLandlordStep,
+    override val userIsAlreadyLandlordStep: UserIsAlreadyLandlordStep,
     override val joinOrganisationStep: JoinOrganisationStep,
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
@@ -138,6 +151,8 @@ class AcceptInvitationJourney(
 
     override var tokenIsValid: Boolean? by delegateProvider.nullableDelegate("tokenIsValid")
 
+    override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
+
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         val tokenDescription = token?.let { " for token $it" }.orEmpty()
@@ -151,6 +166,7 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     val validateTokenStep: ValidateTokenStep
     val invalidLinkStep: InvalidLinkStep
     val checkUserIsLandlordStep: CheckUserIsLandlordStep
+    val userIsAlreadyLandlordStep: UserIsAlreadyLandlordStep
     val joinOrganisationStep: JoinOrganisationStep
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep
@@ -162,4 +178,5 @@ interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnsw
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>
 
     var tokenIsValid: Boolean?
+    var userIsLandlord: Boolean?
 }

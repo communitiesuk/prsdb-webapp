@@ -22,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 class OrgLandlordDetailsPage(
     page: Page,
 ) : OrgLandlordDetailsBasePage(page, LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE) {
+    override val expectedTitleHeading = "Your landlord record"
+
     val organisationNameChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
     val organisationAddressChangeLink =

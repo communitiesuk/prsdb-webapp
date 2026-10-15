@@ -6,17 +6,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockOidcPrincipal
 
 @ExtendWith(MockitoExtension::class)
 class CheckUserRoleStepConfigTests {
@@ -67,7 +64,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets userIsLandlord to false when user does not have landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockPrincipal(username)
+        setMockOidcPrincipal(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(false)
 
         // Act
@@ -81,7 +78,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets userIsLandlord to true when user has landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockPrincipal(username)
+        setMockOidcPrincipal(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(true)
 
         // Act
@@ -92,14 +89,4 @@ class CheckUserRoleStepConfigTests {
     }
 
     private fun setupStepConfig(): CheckUserRoleStepConfig = CheckUserRoleStepConfig(mockUserRolesService)
-
-    private fun setMockPrincipal(name: String) {
-        val oidcUser = mock<OidcUser>()
-        whenever(oidcUser.name).thenReturn(name)
-        val authentication = mock<Authentication>()
-        whenever(authentication.principal).thenReturn(oidcUser)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
-    }
 }

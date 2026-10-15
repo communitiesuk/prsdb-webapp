@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{passcodeEntry.title}, ~{::main}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
+<html th:replace="~{fragments/layout :: layout(#{passcodeEntry.heading}, ~{::main}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
     <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
         <!--/*/ <th:block th:object="${passcodeRequestModel}" th:if="passcodeRequestModel != null"> /*/-->
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>

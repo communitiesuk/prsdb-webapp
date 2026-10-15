@@ -52,9 +52,9 @@ class OrganisationalLandlordInvitationService(
         email: String,
     ): String {
         val invitation =
-            getInvitationForJourneyIdOrNull(journeyId)
+            getPendingInvitationForJourneyIdOrNull(journeyId)
                 ?: throw PrsdbWebException(
-                    "Could not find an organisational landlord invitation associated with journey $journeyId",
+                    "Could not find a pending organisational landlord invitation associated with journey $journeyId",
                 )
 
         val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)

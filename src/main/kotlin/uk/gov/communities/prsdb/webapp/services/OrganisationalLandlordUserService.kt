@@ -7,10 +7,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @PrsdbWebService
 class OrganisationalLandlordUserService(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
+    private val userToOrgLandlordUserService: UserToOrgLandlordUserService,
 ) {
     @Transactional
     fun createOrganisationalLandlordUser(
@@ -26,4 +28,32 @@ class OrganisationalLandlordUserService(
 
     fun getOrganisationalLandlordUsers(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordUser> =
         organisationalLandlordUserRepository.findByOrganisationalLandlord(organisationalLandlord)
+
+    fun getOrganisationalLandlordUserOrNull(id: Long): OrganisationalLandlordUser? =
+        organisationalLandlordUserRepository.findById(id).orElse(null)
+
+    fun getCurrentUserIsAuthorizedToEditRecordOfOtherUser(otherOrganisationalLandlordUserId: Long): Boolean {
+        val currentUser = userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser() ?: return false
+        if (currentUser.role != OrganisationalLandlordUserRole.ADMIN) {
+            return false
+        }
+        if (currentUser.id == otherOrganisationalLandlordUserId) {
+            return false
+        }
+
+        val member = getOrganisationalLandlordUserOrNull(otherOrganisationalLandlordUserId) ?: return false
+        return member.organisationalLandlord.id == currentUser.organisationalLandlord.id
+    }
+
+    @Transactional
+    fun updateRole(
+        id: Long,
+        role: OrganisationalLandlordUserRole,
+    ) {
+        val user =
+            getOrganisationalLandlordUserOrNull(id)
+                ?: throw PrsdbWebException("No organisational landlord user found with id $id")
+        user.role = role
+        organisationalLandlordUserRepository.save(user)
+    }
 }
