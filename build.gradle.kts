@@ -35,6 +35,9 @@ repositories {
 // Third-party clients still use Jackson 2 alongside Spring Boot's Jackson 3 mapper.
 extra["jackson-2-bom.version"] = "2.21.7"
 
+// CVE-2026-107314 and CVE-2026-107315 (fixed in 42.7.14).
+extra["postgresql.version"] = "42.7.14"
+
 dependencies {
     // Spring Boot Web
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -309,7 +312,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.13")
+        classpath("org.postgresql:postgresql:42.7.14")
         classpath("org.flywaydb:flyway-database-postgresql:12.4.0")
     }
     configurations.classpath {
