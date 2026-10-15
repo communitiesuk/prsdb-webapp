@@ -528,13 +528,13 @@ because they can't change.
 
 If the journey writes to a delegate **after** its CYA page is submitted (e.g. payment progress), list that delegate's
 key in the journey state's `cyaSnapshotExcludedDelegateKeys`. Keys are matched whichever task owns the delegate. Where
-possible, declare these delegates on the journey state itself, next to the exclusion list, and use the same constant
-for the delegate and the exclusion so they can't drift apart:
+possible, declare these delegates on the journey state itself, next to the exclusion list, so it's easy to see they
+match:
 
 ```kotlin
-override var paymentReference: String? by delegateProvider.nullableDelegate(PAYMENT_REFERENCE_KEY)
+override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
 
-override val cyaSnapshotExcludedDelegateKeys = setOf(PAYMENT_REFERENCE_KEY)
+override val cyaSnapshotExcludedDelegateKeys = setOf("paymentReference")
 ```
 
 A delegate that is only rewritten after CYA with the value it already has (or with a value that sends the user

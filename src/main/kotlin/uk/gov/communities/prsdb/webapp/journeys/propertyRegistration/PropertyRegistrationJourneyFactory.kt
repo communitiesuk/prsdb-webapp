@@ -781,10 +781,10 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
-    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate(PAYMENT_QUOTE_KEY)
+    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
 
-    override var paymentReference: String? by delegateProvider.nullableDelegate(PAYMENT_REFERENCE_KEY)
-    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate(PAYMENT_OUTCOME_KEY)
+    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
+    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
@@ -800,7 +800,7 @@ class PropertyRegistrationJourney(
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
     // Payment progress is recorded after the CYA page is submitted, so it shouldn't stop the user changing their answers
-    override val cyaSnapshotExcludedDelegateKeys = setOf(PAYMENT_QUOTE_KEY, PAYMENT_REFERENCE_KEY, PAYMENT_OUTCOME_KEY)
+    override val cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference", "paymentOutcome")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true
@@ -812,10 +812,6 @@ class PropertyRegistrationJourney(
     }
 
     companion object {
-        private const val PAYMENT_QUOTE_KEY = "paymentQuote"
-        private const val PAYMENT_REFERENCE_KEY = "paymentReference"
-        private const val PAYMENT_OUTCOME_KEY = "paymentOutcome"
-
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
 }
