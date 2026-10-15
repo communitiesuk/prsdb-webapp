@@ -523,7 +523,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `changing an answer from a CYA page after a joint landlord was invited in another tab shows the CYA error page`(
+        fun `changing an answer after a joint landlord was invited in another tab shows the CYA error page instead of losing the invite`(
             page: Page,
             browserContext: BrowserContext,
         ) {
