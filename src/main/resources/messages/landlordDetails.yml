@@ -1,5 +1,8 @@
 title: Landlord record
 heading: Landlord record
+pageTitle: Your landlord record
+localCouncilView:
+  pageTitle: "Landlord record for {0,,landlordName}"
 removeRecord: Delete account
 personalDetails:
   heading: Personal details

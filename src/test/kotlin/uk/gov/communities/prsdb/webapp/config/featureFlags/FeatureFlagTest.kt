@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
+import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
@@ -33,10 +33,10 @@ class FeatureFlagTest {
     lateinit var mockClientRegistrationRepository: ClientRegistrationRepository
 
     @MockitoBean
-    lateinit var mockDefaultAuthorizationCodeTokenResponseClient: DefaultAuthorizationCodeTokenResponseClient
+    lateinit var mockDefaultAuthorizationCodeTokenResponseClient: RestClientAuthorizationCodeTokenResponseClient
 
     @MockitoBean
-    lateinit var jwtDecoderFactory: JwtDecoderFactory<ClientRegistration?>
+    lateinit var jwtDecoderFactory: JwtDecoderFactory<ClientRegistration>
 
     @MockitoBean
     lateinit var oneLoginConfig: OneLoginConfig

@@ -142,6 +142,17 @@ class CheckElectricalCertUploadsStepConfigTests {
         }
 
         @Test
+        fun `getStepSpecificContent returns electrical safety page title override`() {
+            setupStepMocks(includeRemoveStep = false)
+            whenever(mockState.electricalUploadMap).thenReturn(emptyMap())
+            whenever(mockMemberIdService.createParameterPair(anyOrNull())).thenReturn("memberId" to "0")
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("uploads.checkUploads.electricalSafety.pageTitle", content["pageTitleOverride"])
+        }
+
+        @Test
         fun `getStepSpecificContent returns empty upload rows when map is empty`() {
             setupStepMocks(includeRemoveStep = false)
             whenever(mockState.electricalUploadMap).thenReturn(emptyMap())

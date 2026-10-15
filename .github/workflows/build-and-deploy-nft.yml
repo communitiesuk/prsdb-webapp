@@ -4,6 +4,14 @@ on:
     branches:
       - nft
 
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: nft-app-service-operation
+  cancel-in-progress: false
+
 jobs:
   simulator-contract-test:
     name: One Login simulator contract test

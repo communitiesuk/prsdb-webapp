@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerProperty.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.confirmation.banner.heading}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
 
@@ -34,6 +34,14 @@
                th:text="#{registerProperty.confirmation.useInAdverts}">
                 registerProperty.confirmation.useInAdverts
             </p>
+
+            <th:block th:if="${paymentSummaryViewModel != null}">
+                <h2 class="govuk-heading-m"
+                    th:text="#{registerProperty.confirmation.paymentSummary.heading}">
+                    registerProperty.confirmation.paymentSummary.heading
+                </h2>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${paymentSummaryViewModel.rows})}"></dl>
+            </th:block>
 
             <!--/* TODO: PDJB-1742: Remove this entire block when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag */-->
             <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !propertyRegistrationPhaseTwoEnabled}">

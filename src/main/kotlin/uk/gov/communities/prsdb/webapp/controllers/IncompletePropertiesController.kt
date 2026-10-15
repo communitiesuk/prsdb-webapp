@@ -90,7 +90,7 @@ class IncompletePropertiesController(
     ): String {
         populateDeleteIncompletePropertyRegistrationModel(model, journeyId, principal.name)
         model.addAttribute(
-            "deleteIncompletePropertyRegistrationAreYouSureFormModel",
+            "formModel",
             DeleteIncompletePropertyRegistrationAreYouSureFormModel(),
         )
 
@@ -103,7 +103,7 @@ class IncompletePropertiesController(
         principal: Principal,
         @RequestParam(value = CONTEXT_ID_URL_PARAMETER, required = true) contextId: String,
         @Valid
-        @ModelAttribute
+        @ModelAttribute("formModel")
         formModel: DeleteIncompletePropertyRegistrationAreYouSureFormModel,
         bindingResult: BindingResult,
     ): String {

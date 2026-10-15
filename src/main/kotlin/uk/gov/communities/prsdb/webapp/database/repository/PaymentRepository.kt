@@ -7,10 +7,21 @@ import org.springframework.data.jpa.repository.Query
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.Instant
 
 interface PaymentRepository : JpaRepository<Payment, String> {
     fun findAllByAssociatedIncompleteProperty(associatedIncompleteProperty: LandlordIncompleteProperty): List<Payment>
+
+    fun findByReferenceAndAssociatedIncompleteProperty(
+        reference: String,
+        associatedIncompleteProperty: LandlordIncompleteProperty,
+    ): Payment?
+
+    fun findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+        associatedProperty: PropertyOwnership,
+        status: PaymentStatus,
+    ): Payment?
 
     @Modifying
     @Transactional

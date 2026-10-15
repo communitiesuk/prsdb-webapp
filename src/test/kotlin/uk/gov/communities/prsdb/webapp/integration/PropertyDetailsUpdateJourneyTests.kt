@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occu
 import java.util.UUID
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
@@ -116,6 +117,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
+            // The ownership type update below must change the data, otherwise the last-modified date is not bumped
+            assertNotEquals(
+                OwnershipType.FREEHOLD,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.ownershipType,
+            )
+
             // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
             // step the second step is reachable and its URL is stored in the session
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
@@ -131,7 +138,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage =
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
             assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the

@@ -15,7 +15,7 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
     private val context: ApplicationContext,
     private val taskLogic: DeleteExpiredJointLandlordInvitationsTaskLogic,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("Executing delete expired joint landlord invitations scheduled task")
 
         taskLogic.deleteExpiredJointLandlordInvitations()

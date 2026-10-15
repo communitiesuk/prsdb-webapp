@@ -8,5 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class InvitationRejectedConfirmationPage(
     page: Page,
 ) : BasePage(page, JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE) {
+    override val expectedTitleHeading = "Joint landlord invitation rejected"
+
     val heading = Heading(page.locator("main h1"))
 }

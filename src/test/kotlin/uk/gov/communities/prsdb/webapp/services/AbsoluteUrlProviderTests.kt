@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import java.util.UUID
 
 class AbsoluteUrlProviderTests {
@@ -36,6 +37,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
+    fun `buildLandlordDashboardUri clears base URL query parameters when the controller URI has none`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test/landlord?source=base")
+
+        val uri = provider.buildLandlordDashboardUri()
+
+        assertThat(uri.query).isNull()
+    }
+
+    @Test
     fun `buildLocalCouncilDashboardUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(localCouncilBaseUrl = "example.test/local-council")
 
@@ -47,6 +57,24 @@ class AbsoluteUrlProviderTests {
     @Test
     fun `buildJointLandlordInvitationUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildJointLandlordInvitationUri("token-123")
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT?token=token-123")
+    }
+
+    @Test
+    fun `buildOrganisationalLandlordInvitationUri returns the accept invitation url with the token`() {
+        val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildOrganisationalLandlordInvitationUri("token-123")
+
+        assertThat(uri.toString()).isEqualTo("https://example.test$ACCEPT_INVITATION_ROUTE?token=token-123")
+    }
+
+    @Test
+    fun `buildJointLandlordInvitationUri replaces base URL query parameters with the controller query`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test/landlord?source=base&token=old")
 
         val uri = provider.buildJointLandlordInvitationUri("token-123")
 
@@ -66,13 +94,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
-    fun `buildPropertyRegistrationPaymentReturnUri returns the payment return step url for the journey`() {
+    fun `buildPropertyRegistrationPaymentReturnUri returns the payment return step url for the journey and payment`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")
 
-        val uri = provider.buildPropertyRegistrationPaymentReturnUri("journey-123")
+        val uri = provider.buildPropertyRegistrationPaymentReturnUri("journey-123", "payment-reference")
 
         assertThat(uri.toString())
-            .isEqualTo("https://example.test/landlord/register-property/payment-return?journeyId=journey-123")
+            .isEqualTo(
+                "https://example.test/landlord/register-property/payment-return?journeyId=journey-123&paymentReference=payment-reference",
+            )
     }
 
     private fun createProvider(

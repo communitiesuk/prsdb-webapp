@@ -8,7 +8,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -30,11 +30,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -106,6 +108,9 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
 
+    @MockitoBean
+    private lateinit var mockPaymentService: PaymentService
+
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
@@ -124,6 +129,7 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
                 mock(),
                 absoluteUrlProvider,
+                mock(),
             )
 
         whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
@@ -165,6 +171,7 @@ class LandlordDashboardUrlTests(
         val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockUserToLandlordService = mock<UserToLandlordService>()
+        val mockCurrentUserService = mock<CurrentUserService>()
         val propertyRegistrationService =
             PropertyRegistrationService(
                 addressService = mock(),
@@ -180,8 +187,10 @@ class LandlordDashboardUrlTests(
                 lettingAgentAccessService = mock(),
                 delegateToLettingAgentEmailService = mock(),
                 featureFlagManager = mock(),
+                currentUserService = mockCurrentUserService,
             )
 
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(landlord.email)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -208,6 +217,7 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
+                renewalDate = any(),
             ),
         ).thenReturn(propertyOwnership)
 

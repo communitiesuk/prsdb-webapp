@@ -14,4 +14,6 @@ class CheckRentFrequencyAndAmountAnswersPageLettingAgentUpdate(
         LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(
             UUID.fromString(urlArguments["token"]!!),
         ) + "/${UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your rent answers"
+}

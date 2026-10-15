@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
@@ -46,6 +47,9 @@ class AbsoluteUrlProvider(
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
+    fun buildOrganisationalLandlordInvitationUri(token: String): URI =
+        uriFromMethodCall(on(AcceptOrganisationalLandlordUserInvitationController::class.java).startJourney(token))
+
     fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
@@ -53,11 +57,15 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
-    fun buildPropertyRegistrationPaymentReturnUri(journeyId: String): URI =
+    fun buildPropertyRegistrationPaymentReturnUri(
+        journeyId: String,
+        paymentReference: String,
+    ): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
             .replacePath("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}")
             .queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
+            .queryParam(PaymentReferenceParameterService.PARAMETER_NAME, paymentReference)
             .build()
             .toUri()
 
@@ -91,7 +99,7 @@ class AbsoluteUrlProvider(
         return UriComponentsBuilder
             .fromUriString(baseUrl)
             .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
-            .query(methodCallUriComponents.query)
+            .replaceQuery(methodCallUriComponents.query)
             .fragment(methodCallUriComponents.fragment)
             .build()
             .toUri()

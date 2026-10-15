@@ -1,4 +1,3 @@
-title: Property record
 heading: Property record
 occupationStatus:
   occupied: Occupied
@@ -16,7 +15,6 @@ lettingAgentPanel:
     body: They can keep this property’s licensing, compliance certificates and tenancy details up to date.
     link: Remove your letting agent or property manager
 lettingAgentView:
-  title: Property details
   caption: Provide details for a landlord’s rental property
   provideDetailsInset: Provide all details before <strong>{0}</strong> to keep this property registered.
   licensing:

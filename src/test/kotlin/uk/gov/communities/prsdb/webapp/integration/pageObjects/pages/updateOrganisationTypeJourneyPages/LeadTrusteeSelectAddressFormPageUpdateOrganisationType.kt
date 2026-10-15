@@ -11,4 +11,6 @@ class LeadTrusteeSelectAddressFormPageUpdateOrganisationType(
 ) : SelectAddressFormPage(
         page,
         "$UPDATE_ORG_TYPE_ROUTE/${TrusteeAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Select the lead trustee’s address"
+}

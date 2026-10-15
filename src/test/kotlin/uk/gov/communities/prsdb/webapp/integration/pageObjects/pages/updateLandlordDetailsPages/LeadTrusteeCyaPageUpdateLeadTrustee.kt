@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.lead
 class LeadTrusteeCyaPageUpdateLeadTrustee(
     page: Page,
 ) : BasePage(page, "$UPDATE_LEAD_TRUSTEE_ROUTE/${UpdateLeadTrusteeCyaStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "Check your lead trustee answers"
+
     val form = Form(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)
 

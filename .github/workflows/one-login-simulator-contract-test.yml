@@ -2,6 +2,9 @@ name: One Login Simulator Contract Test
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   simulator-contract-test:
     name: One Login simulator contract test

@@ -10,4 +10,6 @@ class WhoProvidesChangeInterruptionPagePropertyRegistration(
 ) : InterruptionPage(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ConfirmChangeToLettingAgentStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Are you sure you want your letting agent to provide details?"
+}

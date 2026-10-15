@@ -19,6 +19,7 @@ class UpdateCorrespondenceAddressCyaConfig(
     override fun getStepSpecificContent(state: UpdateCorrespondenceAddressJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.checkCorrespondenceAddress.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,

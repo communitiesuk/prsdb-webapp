@@ -3,12 +3,13 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
+import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -76,6 +77,18 @@ class TeamMembersControllerTests(
                 status { isOk() }
                 view { name("teamMembers") }
                 model { attributeExists("teamMembers") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `getTeamMembers adds the invite team member url to the model`() {
+        stubOrgLandlordWithCurrentUser()
+
+        mvc
+            .get(TEAM_MEMBERS_ROUTE)
+            .andExpect {
+                model { attribute("inviteTeamMemberUrl", INVITE_ORGANISATIONAL_LANDLORD_USER_PATH) }
             }
     }
 }

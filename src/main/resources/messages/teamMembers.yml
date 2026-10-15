@@ -1,6 +1,10 @@
 title: Team members
 heading: Team members
 currentUserName: '{0,,name} (You)'
+inviteTeamMemberButton: Invite a team member
+successBanner:
+  title: Success
+  invitationSent: Invitation sent
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators
@@ -17,3 +21,9 @@ editors:
   description: Editors can register and update properties.
   rowHeading: Editor {0,,number}
   noEditors: There are currently no editors.
+accessLevelChangedBanner:
+  title: Success
+  heading: Access level changed
+  content:
+    administrator: '{0,,name} is now an administrator.'
+    editor: '{0,,name} is now an editor.'

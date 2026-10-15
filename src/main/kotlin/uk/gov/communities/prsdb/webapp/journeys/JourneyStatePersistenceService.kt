@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.transaction.Transactional
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
@@ -15,7 +15,7 @@ class JourneyStatePersistenceService(
     private val prsdbUserRepository: PrsdbUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    private val user: Authentication get() = SecurityContextHolder.getContext().authentication
+    private val user: Authentication get() = SecurityContextHolder.getContext().authentication!!
 
     fun saveJourneyStateData(
         stateData: Any,

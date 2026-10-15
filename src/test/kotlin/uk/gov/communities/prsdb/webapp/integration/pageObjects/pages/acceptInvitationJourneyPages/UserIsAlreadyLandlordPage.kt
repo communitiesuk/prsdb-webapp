@@ -2,14 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvi
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithRadios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.UserIsAlreadyLandlordStep
 
-class ValidateTokenPage(
+class UserIsAlreadyLandlordPage(
     page: Page,
-) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${UserIsAlreadyLandlordStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val form = FormWithRadios(page)
+    val signOutLink = Link.byText(page, "Sign out of GOV.UK One Login")
 }

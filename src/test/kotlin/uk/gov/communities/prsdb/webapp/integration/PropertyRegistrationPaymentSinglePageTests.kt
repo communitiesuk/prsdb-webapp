@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
@@ -26,7 +27,8 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         checkAnswersPage.confirm()
 
         val paymentSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-        assertThat(paymentSummaryPage.heading).containsText("Payment summary")
+        assertThat(paymentSummaryPage.heading).containsText("Property fee")
+        assertThat(paymentSummaryPage.form.submitButton).containsText("Go to payment")
     }
 
     @Test
@@ -39,7 +41,8 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
 
         checkAnswersPage.confirm()
 
-        assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+        assertThat(confirmationPage.paymentSummaryHeading).isHidden()
     }
 
     @Test

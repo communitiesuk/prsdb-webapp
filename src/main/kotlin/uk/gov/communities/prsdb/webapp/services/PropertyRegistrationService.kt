@@ -6,10 +6,15 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -33,31 +38,35 @@ class PropertyRegistrationService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val featureFlagManager: FeatureFlagManager,
+    private val currentUserService: CurrentUserService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
         with(registrationData) {
             val landlord = userToLandlordService.getCurrentLandlordForUser()
+            // TODO PDJB-1860: Derive a landlord's first anniversary from the paid renewal date when available;                                                                                                                                                                                                                                                                      ┃
+            //  retain the existing anniversary, and use today's UK date when registering without payment.
             val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
-            val propertyOwnership = createPropertyOwnershipAndRelatedEntities(registrationData, landlord, anniversary)
+            val propertyOwnership =
+                createPropertyOwnershipAndRelatedEntities(
+                    registrationData,
+                    landlord,
+                    anniversary,
+                    renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
+                )
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
-            if (lettingAgentEmail != null) {
-                val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
-                val deadlineDate =
-                    LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
-                        DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
-                    )
-                delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
-                    propertyOwnership,
-                    landlord.name,
-                    lettingAgentEmail,
-                    deadlineDate,
-                    invitationToken = invitation.token,
-                )
-            }
+            val lettingAgentInvitation =
+                lettingAgentEmail?.let { email -> lettingAgentAccessService.createInvitation(propertyOwnership, email) }
+
+            val jointLandlordInvitations =
+                if (jointLandlordEmails.isNullOrEmpty()) {
+                    emptyList()
+                } else {
+                    jointLandlordInvitationService.createInvitations(jointLandlordEmails, propertyOwnership, landlord)
+                }
 
             propertyComplianceService.saveRegistrationComplianceData(
                 propertyOwnership.registrationNumber.number,
@@ -78,19 +87,10 @@ class PropertyRegistrationService(
                 epcProvideLater = epcProvideLater,
             )
 
-            confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-
-            sendConfirmationEmails(
-                landlord,
-                propertyOwnership,
-                jointLandlordEmails,
-                isDelegatedToLettingAgent,
-                licenseProvideLater = licenseProvideLater,
-                gasSafetyCertProvideLater = gasSafetyCertProvideLater,
-                electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
-                epcProvideLater = epcProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            )
+            runAfterTransactionCommits {
+                confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+                sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
+            }
 
             propertyOwnership
         }
@@ -99,6 +99,7 @@ class PropertyRegistrationService(
         registrationData: PropertyRegistrationDataModel,
         registeringLandlord: Landlord,
         anniversary: MonthDay,
+        renewalDate: LocalDate,
     ): PropertyOwnership =
         with(registrationData) {
             if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -128,6 +129,7 @@ class PropertyRegistrationService(
                 rentAmount = rentAmount,
                 registeringLandlord = registeringLandlord,
                 anniversary = anniversary,
+                renewalDate = renewalDate,
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 markedJointLandlord = markedJointLandlord,
@@ -140,20 +142,48 @@ class PropertyRegistrationService(
             )
         }
 
-    private fun sendConfirmationEmails(
+    private fun sendRegistrationEmails(
+        registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
-        jointLandlordEmails: List<String>?,
-        isDelegatedToLettingAgent: Boolean,
-        licenseProvideLater: Boolean,
-        gasSafetyCertProvideLater: Boolean,
-        electricalSafetyCertProvideLater: Boolean,
-        epcProvideLater: Boolean,
-        tenancyProvideLater: Boolean,
+        lettingAgentInvitation: LettingAgentAccess?,
+        jointLandlordInvitations: List<JointLandlordInvitation>,
     ) {
+        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
+            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
+        }
+
+        lettingAgentInvitation?.let { invitation ->
+            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
+                sendLettingAgentInvitationEmail(invitation, landlord)
+            }
+        }
+
+        jointLandlordInvitations.forEach { invitation ->
+            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
+                jointLandlordInvitationService.sendInvitationEmail(invitation)
+            }
+        }
+
+        if (jointLandlordInvitations.isNotEmpty()) {
+            sendEmailAndLogFailures("the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}") {
+                jointLandlordInvitationService.sendInvitationConfirmationEmails(
+                    jointLandlordInvitations.map { it.invitedEmail },
+                    propertyOwnership,
+                    landlord,
+                )
+            }
+        }
+    }
+
+    private fun sendConfirmationEmail(
+        registrationData: PropertyRegistrationDataModel,
+        landlord: Landlord,
+        propertyOwnership: PropertyOwnership,
+    ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
-            landlord.email,
+            currentUserService.getCurrentEmail(),
             PropertyRegistrationConfirmationEmail(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
@@ -171,9 +201,22 @@ class PropertyRegistrationService(
                 tenancyProvideLater = tenancyProvideLater,
             ),
         )
+    }
 
-        if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
-        }
+    private fun sendLettingAgentInvitationEmail(
+        invitation: LettingAgentAccess,
+        landlord: Landlord,
+    ) {
+        val deadlineDate =
+            LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
+                DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
+            )
+        delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
+            invitation.propertyOwnership,
+            landlord.name,
+            invitation.invitedEmail,
+            deadlineDate,
+            invitationToken = invitation.token,
+        )
     }
 }

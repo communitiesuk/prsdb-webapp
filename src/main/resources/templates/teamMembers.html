@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.title}, ~{::#page/content()}, false)}">
+<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::#page/content()}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <th:block th:if="${successBanner != null}" th:with="isSuccess=true">
+            <div id="success-banner"
+                 th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{teamMembers.successBanner.title}, ~{::#success-banner/content()})}">
+                <p class="govuk-notification-banner__heading" th:text="#{${successBanner}}">teamMembers.successBanner</p>
+            </div>
+        </th:block>
+
+        <th:block th:if="${accessLevelChangedBannerContentKey != null}" th:with="isSuccess=true">
+            <div id="access-level-changed-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{teamMembers.accessLevelChangedBanner.title}, ~{::#access-level-changed-banner/content()})}"
+                 th:with="isSuccess=true">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{teamMembers.accessLevelChangedBanner.heading}">teamMembers.accessLevelChangedBanner.heading</h3>
+                <p class="govuk-body"
+                   th:text="#{${accessLevelChangedBannerContentKey}(${accessLevelChangedMemberName})}">content</p>
+            </div>
+        </th:block>
+
         <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
 
-        <!--/* TODO PDJB-1760: add the "Invite a team member" button for admins, linking to the invite team member journey */-->
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${inviteTeamMemberUrl}, #{teamMembers.inviteTeamMemberButton})}"></a>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">

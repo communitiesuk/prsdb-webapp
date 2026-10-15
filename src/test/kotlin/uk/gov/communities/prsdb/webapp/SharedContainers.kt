@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp
 
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
 // The containers are shared by every Spring test context in the JVM, so they must outlive any one context.
@@ -9,7 +9,7 @@ import org.testcontainers.utility.DockerImageName
 // other cached context, so closing is suppressed here. Testcontainers' own reaper stops them when the JVM exits.
 class SharedPostgresContainer(
     image: DockerImageName,
-) : PostgreSQLContainer<SharedPostgresContainer>(image) {
+) : PostgreSQLContainer(image) {
     override fun stop() = Unit
 
     override fun close() = Unit

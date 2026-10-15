@@ -51,6 +51,13 @@ class EmailTemplateModelsTests {
                     "/emails/OrganisationalLandlordDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
+                    OrganisationalLandlordInvitationEmail(
+                        organisationName = "Example Housing Association",
+                        invitationUri = URI("https://example.com/landlord/accept-invitation?token=abc123"),
+                    ),
+                    "/emails/OrganisationalLandlordInvitation.md",
+                ),
+                EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
                         "1 Street Name\nAB1 2CD",
@@ -427,6 +434,17 @@ class EmailTemplateModelsTests {
                         propertyRecordUrl = "https://example.com/property/1",
                     ),
                     "/emails/LettingAgentComplianceUpdateNotification.md",
+                ),
+                EmailTemplateTestData(
+                    ChangeOrgTeamMemberAccessLevelEmail(
+                        memberName = "Anita Locke",
+                        roleName = "administrator",
+                        organisationName = "Test Organisation Name",
+                        isAdmin = true,
+                        dashboardUrl = URI("dashboardUrl"),
+                    ),
+                    "/emails/ChangeOrgTeamMemberAccessLevel.md",
+                    allowExtraKeys = true,
                 ),
             )
     }
