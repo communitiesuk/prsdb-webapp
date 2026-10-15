@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 
@@ -89,8 +90,10 @@ data class TeamMembersViewModel(
                 listOf(
                     // TODO PDJB-1758: replace "#" with the resend invitation URL
                     SummaryListRowActionsViewModel("forms.links.resend", "#"),
-                    // TODO PDJB-1854: replace "#" with the remove expired invitation URL
-                    SummaryListRowActionsViewModel("forms.links.remove", "#"),
+                    SummaryListRowActionsViewModel(
+                        "forms.links.remove",
+                        TeamMembersController.getRemoveExpiredInvitationPath(invitation.id),
+                    ),
                 ),
         )
     }

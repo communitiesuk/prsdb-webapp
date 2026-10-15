@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.ADMINISTRATORS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
@@ -69,13 +70,20 @@ class TeamMembersTests :
             }
 
         val expiredInvitations = teamMembersPage.expiredInvitationsSummaryList
-        assertThat(expiredInvitations.rows).hasCount(1)
-        val expiredRow = expiredInvitations.getRowByIndex(0)
-        assertThat(expiredRow.key).hasText("Expired invite 1")
-        assertThat(expiredRow.value).hasText("expired-org-invite-d@example.com")
-        assertThat(expiredRow.actions.getActionLink("Resend")).isVisible()
-        assertThat(expiredRow.actions.getActionLink("Remove")).isVisible()
-        // TODO PDJB-1854: assert the Remove link goes to the remove expired invitation page
+        assertThat(expiredInvitations.rows).hasCount(2)
+        listOf(
+            "expired-org-invite-f@example.com",
+            "expired-org-invite-d@example.com",
+        ).forEachIndexed { index, email ->
+            val expiredRow = expiredInvitations.getRowByIndex(index)
+            assertThat(expiredRow.key).hasText("Expired invite ${index + 1}")
+            assertThat(expiredRow.value).hasText(email)
+            assertThat(expiredRow.actions.getActionLink("Resend")).isVisible()
+            assertThat(expiredRow.actions.getActionLink("Remove")).isVisible()
+            assertThat(expiredRow.actions.getActionLink("Remove"))
+                .hasAttribute("href", Pattern.compile("""/landlord/team-members/remove-expired-invite/\d+"""))
+            // TODO PDJB-1758: assert the Resend link goes to the resend invitation page
+        }
 
         assertThat(teamMembersPage.invitationsPanel).not().containsText("hidden-org-invite-e@example.com")
     }
