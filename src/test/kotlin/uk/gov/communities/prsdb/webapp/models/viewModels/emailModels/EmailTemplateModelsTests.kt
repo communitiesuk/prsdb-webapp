@@ -93,6 +93,20 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
+                    PropertyRegistrationConfirmationWithPaymentEmail(
+                        "P-XXX-YYY",
+                        "1 Street Name\nAB1 2CD",
+                        "prsdUrl",
+                        isOccupied = true,
+                        paymentAmount = "£0.61",
+                        paymentDate = "16 December 2026",
+                        renewalDate = "16 December 2027",
+                        jointLandlordEmails = listOf("joint1@example.com", "joint2@example.com"),
+                    ),
+                    "/emails/PropertyRegistrationConfirmationWithPayment.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
                     PropertyDeregistrationConfirmationEmail("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
                     "/emails/PropertyDeregistrationConfirmation.md",
                 ),
