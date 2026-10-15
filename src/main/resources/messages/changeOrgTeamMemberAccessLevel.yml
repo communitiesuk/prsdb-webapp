@@ -13,7 +13,7 @@ radios:
       hint: Can register or edit properties, manage team members, and change organisation information
     editor:
       label: Editor
-      hint: Can register or edit properties
+      hint: Can register or edit property information
   error:
     missing: Select the access level
 buttons:
