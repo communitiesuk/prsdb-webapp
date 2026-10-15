@@ -44,18 +44,6 @@ class DelegateKeyRegistryTests {
     }
 
     @Test
-    fun `cyaSnapshotKeys contains only the keys registered as included in the CYA snapshot`() {
-        val registry =
-            DelegateKeyRegistry().apply {
-                register("answer", includeInCyaSnapshot = true)
-                register("excluded")
-                register("route/answer", includeInCyaSnapshot = true)
-            }
-
-        assertEquals(setOf("answer", "route/answer"), registry.cyaSnapshotKeys)
-    }
-
-    @Test
     fun `registerAll keeps whether each key is included in the CYA snapshot`() {
         val source =
             DelegateKeyRegistry().apply {

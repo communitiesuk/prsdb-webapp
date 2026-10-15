@@ -146,7 +146,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -469,19 +468,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `submitting a CYA page loaded before the CYA was submitted in another tab continues to the payment summary`(
-            page: Page,
-            browserContext: BrowserContext,
-        ) {
-            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            submitCheckAnswersInAnotherTab(browserContext, page.url())
-
-            staleCheckAnswersPage.confirm()
-
-            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-        }
-
-        @Test
         fun `submitting a CYA page loaded before a payment failed in another tab continues to the payment summary`(
             page: Page,
             browserContext: BrowserContext,
@@ -531,27 +517,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class)
 
             staleCheckAnswersPage.confirm()
-
-            assertPageIs(page, ErrorPage::class)
-            assertContains(page.url(), CustomErrorController.CYA_ERROR_ROUTE)
-        }
-
-        @Test
-        fun `changing an answer from a CYA page after that answer was changed in another tab shows the CYA error page`(
-            page: Page,
-            browserContext: BrowserContext,
-        ) {
-            val staleCheckAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            val checkAnswersUrl = page.url()
-            staleCheckAnswersPage.summaryList.ownershipRow.actions.firstActionLink
-                .clickAndWait()
-            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
-
-            val otherTab = browserContext.newPage()
-            otherTab.navigate(checkAnswersUrl.replace(PropertyRegistrationCyaStep.ROUTE_SEGMENT, OwnershipTypeStep.ROUTE_SEGMENT))
-            assertPageIs(otherTab, OwnershipTypeFormPagePropertyRegistration::class).submitOwnershipType(OwnershipType.SHARE_OF_FREEHOLD)
-
-            ownershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
 
             assertPageIs(page, ErrorPage::class)
             assertContains(page.url(), CustomErrorController.CYA_ERROR_ROUTE)

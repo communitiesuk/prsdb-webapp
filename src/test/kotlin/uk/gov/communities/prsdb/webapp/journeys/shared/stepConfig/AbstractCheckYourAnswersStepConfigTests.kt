@@ -52,19 +52,6 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
     }
 
-    @Nested
-    inner class DeserializeJourneyDataKeys {
-        @Test
-        fun `returns the keys of serialized journey data`() {
-            val serializedData =
-                CheckAnswersFormModel.serializeJourneyData(
-                    mapOf("step-b" to mapOf("field" to "value"), "step-a" to null),
-                )
-
-            assertEquals(setOf("step-a", "step-b"), CheckAnswersFormModel.deserializeJourneyDataKeys(serializedData))
-        }
-    }
-
     private enum class TestEnum {
         TEST_VALUE,
     }

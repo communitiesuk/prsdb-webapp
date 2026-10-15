@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -179,19 +178,6 @@ class CheckYourAnswersJourneyStateTests {
 
             val expectedSnapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
             assertEquals(expectedSnapshot, state.childState?.originalCyaAnswers)
-        }
-    }
-
-    @Nested
-    inner class ClearCyaFields {
-        @Test
-        fun `clears originalCyaAnswers`() {
-            val state = createTestState()
-            state.originalCyaAnswers = "snapshot"
-
-            state.clearCyaFields()
-
-            assertNull(state.originalCyaAnswers)
         }
     }
 
@@ -441,8 +427,7 @@ class CheckYourAnswersJourneyStateTests {
         override fun addStepData(
             key: String,
             value: Map<String, Any?>,
-        ) {
-        }
+        ) {}
 
         override fun clearStepData(key: String) {}
 

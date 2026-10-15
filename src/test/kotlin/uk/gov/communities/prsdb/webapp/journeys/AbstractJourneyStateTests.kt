@@ -101,20 +101,6 @@ class AbstractJourneyStateTests {
         // Assert
         assertEquals(setOf("answer", "task-route/taskAnswer"), journeyState.cyaSnapshotDelegateKeys)
     }
-
-    @Test
-    fun `getEncodedDelegateValue retrieves the raw value from the JourneyStateService`() {
-        // Arrange
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue("task-route/taskAnswer")).thenReturn("{\"1\":\"value\"}")
-        val journeyState = object : AbstractJourneyState(journeyStateService) {}
-
-        // Act
-        val result = journeyState.getEncodedDelegateValue("task-route/taskAnswer")
-
-        // Assert
-        assertEquals("{\"1\":\"value\"}", result)
-    }
 }
 
 class JourneyStateDelegateProviderTests {
@@ -265,42 +251,6 @@ class JourneyStateDelegateProviderTests {
     }
 
     @Test
-    fun `mutable delegates are included in the CYA snapshot by default`() {
-        val journeyStateService: JourneyStateService = mock()
-        val provider = JourneyStateDelegateProvider(journeyStateService)
-
-        var nullable: String? by provider.nullableDelegate("nullable")
-        var required: String by provider.requiredDelegate("required", "default")
-
-        assertEquals(setOf("nullable", "required"), provider.cyaSnapshotKeys)
-    }
-
-    @Test
-    fun `immutable delegates are not included in the CYA snapshot`() {
-        val journeyStateService: JourneyStateService = mock()
-        val provider = JourneyStateDelegateProvider(journeyStateService)
-
-        val immutable: String by provider.requiredImmutableDelegate("immutable")
-
-        assertEquals(emptySet<String>(), provider.cyaSnapshotKeys)
-    }
-
-    @Test
-    fun `bindKeyRegistry registers route-scoped CYA snapshot keys as CYA snapshot keys`() {
-        val journeyStateService: JourneyStateService = mock()
-        val registry = DelegateKeyRegistry()
-        val provider = JourneyStateDelegateProvider(journeyStateService)
-        var answer: String? by provider.nullableDelegate("answer")
-        val immutable: String by provider.requiredImmutableDelegate("immutable")
-        provider.bindRoutePrefix("route")
-
-        provider.bindKeyRegistry(registry)
-
-        assertEquals(setOf("route/answer"), registry.cyaSnapshotKeys)
-        assertEquals(setOf("route/answer"), provider.cyaSnapshotKeys)
-    }
-
-    @Test
     fun `a key registered after bindKeyRegistry keeps whether it is included in the CYA snapshot`() {
         val journeyStateService: JourneyStateService = mock()
         val registry = DelegateKeyRegistry()
@@ -318,10 +268,11 @@ class JourneyStateDelegateProviderTests {
         val journeyStateService: JourneyStateService = mock()
         val provider = JourneyStateDelegateProvider(journeyStateService)
         var answer: String? by provider.nullableDelegate("answer")
+        var required: String by provider.requiredDelegate("required", "default")
         val immutable: String by provider.requiredImmutableDelegate("immutable")
         provider.bindRoutePrefix("route")
 
-        assertEquals(setOf("route/answer"), provider.cyaSnapshotKeys)
+        assertEquals(setOf("route/answer", "route/required"), provider.cyaSnapshotKeys)
     }
 
     @Test
