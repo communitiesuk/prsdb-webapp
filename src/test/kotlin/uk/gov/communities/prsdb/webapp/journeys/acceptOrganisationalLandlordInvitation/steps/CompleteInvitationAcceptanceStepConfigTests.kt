@@ -9,7 +9,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrganisationInvitationEmailFormModel
@@ -20,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockOidcPrincipal
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
@@ -77,7 +80,7 @@ class CompleteInvitationAcceptanceStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached accepts the invitation, clears the stored token and refreshes the security context`() {
+    fun `afterStepIsReached accepts the invitation and stores the email before refreshing the security context`() {
         setMockOidcPrincipal(USERNAME)
         val mockFullNameStep = mock<FullNameStep>()
         val mockEmailAddressStep = mock<EmailAddressStep>()
@@ -92,7 +95,18 @@ class CompleteInvitationAcceptanceStepConfigTests {
 
         verify(mockInvitationService).acceptInvitation(JOURNEY_ID, USERNAME, NAME, EMAIL)
         verify(mockInvitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(TOKEN)
+        verify(mockInvitationService).storeAcceptedInvitationEmailInSession(EMAIL)
         verify(mockSecurityContextService).refreshContext()
+    }
+
+    @Test
+    fun `resolveNextDestination deletes the journey before returning the confirmation destination`() {
+        val destination = Destination.ExternalUrl(ACCEPT_INVITATION_CONFIRMATION_ROUTE)
+
+        val result = setupStepConfig().resolveNextDestination(mockState, destination)
+
+        verify(mockState).deleteJourney()
+        assertSame(destination, result)
     }
 
     private fun setupStepConfig(): CompleteInvitationAcceptanceStepConfig =

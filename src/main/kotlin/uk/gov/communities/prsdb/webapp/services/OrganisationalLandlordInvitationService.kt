@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
@@ -36,6 +37,13 @@ class OrganisationalLandlordInvitationService(
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS, remainingPairs)
     }
+
+    fun storeAcceptedInvitationEmailInSession(email: String) {
+        session.setAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL, email)
+    }
+
+    fun getAcceptedInvitationEmailFromSession(): String? =
+        session.getAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL) as? String
 
     @Transactional
     fun acceptInvitation(

@@ -19,6 +19,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
@@ -81,6 +82,30 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
+    fun `storeAcceptedInvitationEmailInSession records the submitted email`() {
+        // Act
+        invitationService.storeAcceptedInvitationEmailInSession("invitee@example.com")
+
+        // Assert
+        verify(mockHttpSession).setAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL, "invitee@example.com")
+    }
+
+    @Test
+    fun `getAcceptedInvitationEmailFromSession returns null without an accepted invitation`() {
+        // Act & Assert
+        assertNull(invitationService.getAcceptedInvitationEmailFromSession())
+    }
+
+    @Test
+    fun `getAcceptedInvitationEmailFromSession returns the saved email`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL)).thenReturn("invitee@example.com")
+
+        // Act & Assert
+        assertEquals("invitee@example.com", invitationService.getAcceptedInvitationEmailFromSession())
+    }
+
+    @Test
     fun `addJourneyIdInvitationTokenPairToSession adds the journey id and invitation token to the session`() {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
@@ -121,7 +146,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
-        val invitation = org.mockito.kotlin.mock<OrganisationalLandlordInvitation>()
+        val invitation = mock<OrganisationalLandlordInvitation>()
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)
 
         // Act
@@ -178,7 +203,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Arrange
         whenever(mockHttpSession.getAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS))
             .thenReturn(mutableListOf(journeyId to token.toString()))
-        val organisationalLandlord = MockLandlordData.createOrgLandlord(name = "Test Organisation")
+        val organisationalLandlord = createOrgLandlord(name = "Test Organisation")
         val invitation =
             MockLandlordData.createOrganisationalLandlordInvitation(organisationalLandlord = organisationalLandlord)
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(invitation)

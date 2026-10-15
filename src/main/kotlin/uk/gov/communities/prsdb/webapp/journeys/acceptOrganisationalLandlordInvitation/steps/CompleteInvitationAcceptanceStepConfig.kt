@@ -5,6 +5,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.AcceptOrganisationalLandlordUserInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -22,33 +23,34 @@ class CompleteInvitationAcceptanceStepConfig(
 ) : AbstractInternalStepConfig<Complete, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override fun mode(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Complete = Complete.COMPLETE
 
-    // The validity and landlord checks ran earlier in the journey, but the invitation may since have been cancelled or
-    // accepted elsewhere, and the invitee may since have become a landlord. Re-check before saving: if either is now the
-    // case the step is treated as unreachable, redirecting the invitee back to the start of the journey where the
-    // validate token and check user is landlord steps re-run, update the journey state, and show the relevant error page
-    // rather than saving an invalid organisational landlord user.
+    // Re-check the invitation and account status before saving, as either may have changed while the invitee was in the journey.
     override fun beforeAttemptingToReachStep(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Boolean =
         invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId) != null &&
             !userRolesService.getUserHasLandlordRole(getPrincipalName())
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
+        val email = state.emailAddressStep.formModel.notNullValue(AcceptOrganisationInvitationEmailFormModel::emailAddress)
         val acceptedToken =
             invitationService.acceptInvitation(
                 journeyId = state.journeyId,
                 baseUserId = getPrincipalName(),
                 name = state.fullNameStep.formModel.notNullValue(NameFormModel::name),
-                email =
-                    state.emailAddressStep.formModel.notNullValue(
-                        AcceptOrganisationInvitationEmailFormModel::emailAddress,
-                    ),
+                email = email,
             )
         invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(acceptedToken)
         securityContextService.refreshContext()
+        invitationService.storeAcceptedInvitationEmailInSession(email)
+    }
+
+    override fun resolveNextDestination(
+        state: AcceptOrganisationalLandlordUserInvitationJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        state.deleteJourney()
+        return defaultDestination
     }
 
     private fun getPrincipalName(): String = (SecurityContextHolder.getContext().authentication.principal as OidcUser).name
-
-    // TODO: PDJB-1775: If this step becomes the final step in the journey, add a standard end of journey > delete block here
 }
 
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationCompleteInvitationAcceptanceStep")
