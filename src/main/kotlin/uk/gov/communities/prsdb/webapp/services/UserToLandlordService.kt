@@ -21,7 +21,7 @@ class UserToLandlordService(
 ) {
     fun getCurrentLandlordForUser(): Landlord {
         // TODO: PDJB-1477: Improve this method with caching
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return getLandlordForBaseUserId(baseUserId)
     }
 
@@ -33,7 +33,7 @@ class UserToLandlordService(
 
     fun getCurrentLandlordForUserOrNull(): Landlord? {
         // TODO: PDJB-1477: Improve this method with caching
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return getLandlordForBaseUserIdOrNull(baseUserId)
     }
 

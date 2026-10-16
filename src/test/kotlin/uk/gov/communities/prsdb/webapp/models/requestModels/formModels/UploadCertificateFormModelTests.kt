@@ -100,8 +100,8 @@ class UploadCertificateFormModelTests {
         @JvmStatic
         private fun provideUploadCertificateFormModelClasses() =
             listOf(
-                Named.of(GasSafetyUploadCertificateFormModel::class.simpleName, GasSafetyUploadCertificateFormModel::class),
-                Named.of(ElectricalUploadCertificateFormModel::class.simpleName, ElectricalUploadCertificateFormModel::class),
+                Named.of(GasSafetyUploadCertificateFormModel::class.java.simpleName, GasSafetyUploadCertificateFormModel::class),
+                Named.of(ElectricalUploadCertificateFormModel::class.java.simpleName, ElectricalUploadCertificateFormModel::class),
             )
 
         private class UnsupportedUploadCertificateFormModel(

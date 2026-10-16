@@ -17,7 +17,7 @@ class SecurityContextService(
     fun refreshContext() {
         val attributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
         val request = attributes.request
-        val response = attributes.response
+        val response = attributes.response!!
 
         securityContextRepository.saveContext(SecurityContextHolder.createEmptyContext(), request, response)
     }

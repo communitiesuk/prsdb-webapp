@@ -50,7 +50,7 @@ class EpcRegisterClient(
                     errorString = json.toString()
                 }
                 // This parses the response body and depending on the content either sets a fallback value as a side
-                // effect or throws a custom exception. We read the body stream without closing it as it will be read
+                // effect or throws a custom exception. The buffered response body can be read again
                 // by the `body<String>` below.
                 .onStatus({ it == HttpStatus.BAD_REQUEST }) { request, response ->
                     val bodyString = response.body.reader().readText()
@@ -62,7 +62,7 @@ class EpcRegisterClient(
                     }
                 }.body<String>()
 
-        return bodyString ?: errorString
+        return errorString ?: bodyString
     }
 
     private fun getErrorCode(bodyString: String): String? = EpcLookupService.getErrorCode(JSONObject(bodyString))

@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import kotlin.test.assertEquals
 
 class AcceptOrganisationInvitationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    // TODO PDJB-1828: Delete enable feature flag when MULTI_USER_ORGANISATIONS is always enabled
     @BeforeEach
     fun enableFeatureFlag() {
         featureFlagManager.enable(MULTI_USER_ORGANISATIONS)

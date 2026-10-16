@@ -29,7 +29,7 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     private val context: ApplicationContext,
     private val taskLogic: IncompletePropertiesReminderTaskLogic,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("Executing incomplete properties reminder scheduled task")
 
         val failureCount = taskLogic.sendIncompletePropertyReminders()

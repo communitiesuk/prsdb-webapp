@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
@@ -10,7 +11,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
 
@@ -21,6 +25,7 @@ class OrganisationalLandlordInvitationService(
     private val organisationalLandlordUserService: OrganisationalLandlordUserService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>,
+    private val acceptedEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEmail>,
     private val prsdbUserService: PrsdbUserService,
 ) {
     fun addJourneyIdInvitationTokenPairToSession(
@@ -36,6 +41,13 @@ class OrganisationalLandlordInvitationService(
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS, remainingPairs)
     }
+
+    fun storeAcceptedInvitationEmailInSession(email: String) {
+        session.setAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL, email)
+    }
+
+    fun getAcceptedInvitationEmailFromSession(): String? =
+        session.getAttribute(ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL) as? String
 
     @Transactional
     fun acceptInvitation(
@@ -59,6 +71,21 @@ class OrganisationalLandlordInvitationService(
             role = invitation.role,
         )
         invitationRepository.delete(invitation)
+
+        val isAdmin = invitation.role == OrganisationalLandlordUserRole.ADMIN
+        val confirmationEmail =
+            OrganisationalLandlordInvitationAcceptedEmail(
+                recipientName = name,
+                roleName = if (isAdmin) "administrator" else "editor",
+                organisationName = invitation.organisationalLandlord.name,
+                isAdmin = isAdmin,
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+            )
+        runAfterTransactionCommits {
+            sendEmailAndLogFailures("the organisational landlord invitation acceptance confirmation email") {
+                acceptedEmailSender.sendEmail(email, confirmationEmail)
+            }
+        }
 
         return invitation.token.toString()
     }

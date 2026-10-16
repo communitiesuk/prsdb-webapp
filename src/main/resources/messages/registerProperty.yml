@@ -223,6 +223,12 @@ paymentProcessing:
     notConfirmed: We have not yet received confirmation that your payment was successful.
     checkStatus: Select Check payment status to see if your payment has been completed.
     button: Check payment status
+paymentFailed:
+  heading: Your payment has been declined
+  contactBank: Contact your bank for more details. No money has been taken from your account.
+  notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
+  tryAgainLink: Go back to try the payment again.
+  getHelp: Get help with payment
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'

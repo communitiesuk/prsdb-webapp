@@ -378,5 +378,12 @@
     "enumName": "CHANGE_ORG_TEAM_MEMBER_ACCESS_LEVEL",
     "subject": "Your access level has changed",
     "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
+  },
+  {
+    "test_id": "6d59d741-bb70-4d19-8539-c410fbf9e71a",
+    "prod_id": "f873de04-c276-4852-ba63-5d2f20d7c517",
+    "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EMAIL",
+    "subject": "You’ve joined an organisation on Register your rental property",
+    "bodyLocation": "/emails/OrganisationalLandlordInvitationAccepted.md"
   }
 ]

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -12,11 +13,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.ConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -26,10 +30,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvit
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.UserIsAlreadyLandlordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import java.net.URI
 import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -48,9 +53,6 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
     @MockitoSpyBean
     private lateinit var invitationService: OrganisationalLandlordInvitationService
-
-    @MockitoSpyBean
-    private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     @MockitoSpyBean
     private lateinit var userRolesService: UserRolesService
@@ -192,8 +194,32 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         checkAnswersPage.form.submit()
 
         // 5. Confirmation page
-        val confirmationPage = assertPageIs(page, ConfirmationPage::class)
-        assertTrue(confirmationPage.heading.getText().contains("TODO PDJB-1775"))
+        var confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        assertEquals(ACCEPT_INVITATION_CONFIRMATION_ROUTE, URI(page.url()).path)
+        assertFalse(URI(page.url()).query.orEmpty().contains("journeyId="))
+        assertEquals("Invitation accepted", confirmationPage.heading.getText())
+        assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
+        assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
+
+        val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
+        assertThat(confirmationPage.accessLevel)
+            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}.")
+        val expectedPermissions =
+            if (isAdmin) {
+                arrayOf(
+                    "register rental properties",
+                    "update rental property information",
+                    "manage team member’s accounts",
+                )
+            } else {
+                arrayOf(
+                    "register rental properties",
+                    "update rental property information",
+                )
+            }
+        assertThat(confirmationPage.permissions).hasText(expectedPermissions)
+
+        BaseComponent.assertThat(confirmationPage.goToDashboardLink).hasAttribute("href", LANDLORD_DASHBOARD_URL)
 
         val user = organisationalLandlordUserRepository.findByBaseUser_Id(INVITATION_TEST_USER_ID).single()
         assertEquals("Jane Smith", user.name)
@@ -202,6 +228,13 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertEquals(expectedRole, user.role)
         assertNull(invitationRepository.findByToken(UUID.fromString(token)))
         verify(invitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
+
+        page.reload()
+        confirmationPage = assertPageIs(page, ConfirmationPage::class)
+        assertEquals("Invitation accepted", confirmationPage.heading.getText())
+
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     private fun completeStepsUpToCheckAnswers(
@@ -229,6 +262,24 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         // 4. Check answers page
         return assertPageIs(page, CheckAnswersPage::class)
+    }
+
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
+    @Test
+    fun `Validate token page is unavailable when multi user organisations is disabled`(page: Page) {
+        featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
+
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_ROUTE?token=$validToken")
+        assertEquals(404, response?.status())
+    }
+
+    // TODO PDJB-1828: Remove this test when the MULTI_USER_ORGANISATIONS feature flag is removed
+    @Test
+    fun `Confirmation page is unavailable when multi user organisations is disabled`(page: Page) {
+        featureFlagManager.disable(MULTI_USER_ORGANISATIONS)
+
+        val response = page.navigate("http://localhost:$port$ACCEPT_INVITATION_CONFIRMATION_ROUTE")
+        assertEquals(404, response?.status())
     }
 
     companion object {

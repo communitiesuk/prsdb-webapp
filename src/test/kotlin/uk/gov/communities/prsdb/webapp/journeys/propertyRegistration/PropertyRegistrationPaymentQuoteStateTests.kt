@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -9,6 +8,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
+import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStatePersistenceService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote

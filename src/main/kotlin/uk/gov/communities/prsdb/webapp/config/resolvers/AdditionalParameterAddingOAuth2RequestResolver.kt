@@ -14,14 +14,14 @@ class AdditionalParameterAddingOAuth2RequestResolver(
     private val innerResolver =
         DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, authorizationRequestBaseUri)
 
-    override fun resolve(request: HttpServletRequest?): OAuth2AuthorizationRequest? {
+    override fun resolve(request: HttpServletRequest): OAuth2AuthorizationRequest? {
         val authRequest = innerResolver.resolve(request) ?: return null
         return authRequestWithAdditionalParameters(authRequest)
     }
 
     override fun resolve(
-        request: HttpServletRequest?,
-        clientRegistrationId: String?,
+        request: HttpServletRequest,
+        clientRegistrationId: String,
     ): OAuth2AuthorizationRequest? {
         val authRequest = innerResolver.resolve(request, clientRegistrationId) ?: return null
         return authRequestWithAdditionalParameters(authRequest)
