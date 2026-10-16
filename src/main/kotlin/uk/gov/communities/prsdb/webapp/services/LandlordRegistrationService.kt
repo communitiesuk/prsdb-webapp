@@ -157,7 +157,7 @@ class LandlordRegistrationService(
                 organisationName = landlord.name,
                 lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                // TODO: PDJB-1887: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
+                // TODO: PDJB-1828: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
                 isMultiUserOrganisationsEnabled = featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS),
             ),
         )

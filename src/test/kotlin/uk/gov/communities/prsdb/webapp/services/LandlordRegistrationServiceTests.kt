@@ -525,7 +525,7 @@ class LandlordRegistrationServiceTests {
         fun `registerOrganisationLandlord sends a registration confirmation email to the acting user`(
             isMultiUserOrganisationsEnabled: Boolean,
         ) {
-            // TODO: PDJB-1887: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
+            // TODO: PDJB-1828: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
             whenever(mockFeatureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(isMultiUserOrganisationsEnabled)
 
             registerOrganisationLandlord()
