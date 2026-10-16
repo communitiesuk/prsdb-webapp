@@ -86,7 +86,7 @@ class RegisterLandlordController(
             }
         model.addAttribute("landlordRegistrationSurveyUrl", surveyUrl)
 
-        // PDJB-1828 remove this and set showOrgAdminContent to isOrganisation
+        // TODO PDJB-1828 remove this and set showOrgAdminContent to isOrganisation
         val showOrgAdminContent = isOrganisation && featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)
         model.addAttribute("showOrgAdminContent", showOrgAdminContent)
 

@@ -162,6 +162,7 @@ class RegisterLandlordControllerTests(
             }
     }
 
+    // TODO: PDJB-1828: Remove the FF checks from these tests and remove mention in test names
     @Test
     @WithMockUser
     fun `getConfirmation sets showOrgAdminContent true for org landlord when multi-user orgs enabled`() {

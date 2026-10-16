@@ -73,7 +73,8 @@ confirmation:
     heading: Registered as a landlord
     body:
       beforeRegistrationNumber: Landlord Registration Number
-  emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  individual:
+    emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
   organisation:
     emailParagraph: We’ve emailed you a copy of your organisation’s Landlord Registration Number.
     whatYouCanDoNow:
