@@ -9,8 +9,11 @@ import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLeve
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TeamMembersViewModelTests {
     private val currentUserId = "current-user"
@@ -23,6 +26,17 @@ class TeamMembersViewModelTests {
         entityId: Long = 0,
     ) = OrganisationalLandlordUser(organisation, PrsdbUser(id), name, "$id@example.com", role)
         .also { ReflectionTestUtils.setField(it, "id", entityId) }
+
+    private fun invitation(
+        email: String,
+        daysAgo: Long,
+        isHidden: Boolean = false,
+    ) = MockLandlordData.createOrganisationalLandlordInvitation(
+        invitedEmail = email,
+        organisationalLandlord = organisation,
+        createdDate = Instant.now().minus(daysAgo, ChronoUnit.DAYS),
+        isHidden = isHidden,
+    )
 
     @Test
     fun `members are split by role, sorted alphabetically ignoring case and numbered in order`() {
@@ -37,7 +51,7 @@ class TeamMembersViewModelTests {
             )
 
         // Act
-        val viewModel = TeamMembersViewModel.fromOrganisationalLandlordUsers(members, currentUserId)
+        val viewModel = TeamMembersViewModel.fromMembersAndInvitations(members, emptyList(), currentUserId)
 
         // Assert
         assertEquals(
@@ -53,8 +67,9 @@ class TeamMembersViewModelTests {
     @Test
     fun `the current user's row shows their name with a You suffix`() {
         val viewModel =
-            TeamMembersViewModel.fromOrganisationalLandlordUsers(
+            TeamMembersViewModel.fromMembersAndInvitations(
                 listOf(member("Current User", ADMIN, currentUserId)),
+                emptyList(),
                 currentUserId,
             )
 
@@ -66,11 +81,12 @@ class TeamMembersViewModelTests {
     @Test
     fun `another member's row has a Change access level link to the change journey`() {
         val viewModel =
-            TeamMembersViewModel.fromOrganisationalLandlordUsers(
+            TeamMembersViewModel.fromMembersAndInvitations(
                 listOf(
                     member("Current User", ADMIN, currentUserId),
                     member("Other Admin", ADMIN, "other-user", entityId = 42L),
                 ),
+                emptyList(),
                 currentUserId,
             )
 
@@ -83,13 +99,90 @@ class TeamMembersViewModelTests {
     @Test
     fun `the current user's row has no change link`() {
         val viewModel =
-            TeamMembersViewModel.fromOrganisationalLandlordUsers(
+            TeamMembersViewModel.fromMembersAndInvitations(
                 listOf(member("Current User", ADMIN, currentUserId)),
+                emptyList(),
                 currentUserId,
             )
 
         val row = viewModel.adminRows.single()
         assertEquals(emptyList(), row.actions)
         assertNull(row.withAriaLabelForAction)
+    }
+
+    @Test
+    fun `pending invitations are listed oldest first, numbered, with Resend and Cancel actions`() {
+        // Arrange
+        val invitations =
+            listOf(
+                invitation("newer@example.com", daysAgo = 1),
+                invitation("older@example.com", daysAgo = 10),
+            )
+
+        // Act
+        val viewModel = TeamMembersViewModel.fromMembersAndInvitations(emptyList(), invitations, currentUserId)
+
+        // Assert
+        assertEquals(
+            listOf("older@example.com", "newer@example.com"),
+            viewModel.pendingInvitationRows.map { it.fieldValue },
+        )
+        assertEquals(listOf(1, 2), viewModel.pendingInvitationRows.map { it.optionalFieldHeadingParam })
+        assertEquals("teamMembers.invitations.rowHeading", viewModel.pendingInvitationRows.first().fieldHeading)
+        assertEquals(
+            listOf(
+                SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                SummaryListRowActionsViewModel("forms.links.cancel", "#"),
+            ),
+            viewModel.pendingInvitationRows.first().actions,
+        )
+        assertTrue(viewModel.expiredInvitationRows.isEmpty())
+    }
+
+    @Test
+    fun `expired invitations are listed separately, oldest first, with Resend and Remove actions`() {
+        // Arrange
+        val invitations =
+            listOf(
+                invitation("pending@example.com", daysAgo = 1),
+                invitation("expired-newer@example.com", daysAgo = 40),
+                invitation("expired-older@example.com", daysAgo = 60),
+            )
+
+        // Act
+        val viewModel = TeamMembersViewModel.fromMembersAndInvitations(emptyList(), invitations, currentUserId)
+
+        // Assert
+        assertEquals(listOf("pending@example.com"), viewModel.pendingInvitationRows.map { it.fieldValue })
+        assertEquals(
+            listOf("expired-older@example.com", "expired-newer@example.com"),
+            viewModel.expiredInvitationRows.map { it.fieldValue },
+        )
+        assertEquals(listOf(1, 2), viewModel.expiredInvitationRows.map { it.optionalFieldHeadingParam })
+        assertEquals("teamMembers.invitations.expired.rowHeading", viewModel.expiredInvitationRows.first().fieldHeading)
+        assertEquals(
+            listOf(
+                SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                SummaryListRowActionsViewModel("forms.links.remove", "#"),
+            ),
+            viewModel.expiredInvitationRows.first().actions,
+        )
+    }
+
+    @Test
+    fun `hidden invitations are not listed`() {
+        // Arrange
+        val invitations =
+            listOf(
+                invitation("hidden-pending@example.com", daysAgo = 1, isHidden = true),
+                invitation("hidden-expired@example.com", daysAgo = 60, isHidden = true),
+            )
+
+        // Act
+        val viewModel = TeamMembersViewModel.fromMembersAndInvitations(emptyList(), invitations, currentUserId)
+
+        // Assert
+        assertTrue(viewModel.pendingInvitationRows.isEmpty())
+        assertTrue(viewModel.expiredInvitationRows.isEmpty())
     }
 }

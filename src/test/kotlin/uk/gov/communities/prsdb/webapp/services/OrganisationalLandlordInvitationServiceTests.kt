@@ -42,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.Organisatio
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordInvitation
 import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -493,6 +494,20 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         assertEquals(listOf("pending@example.com"), emails)
+    }
+
+    @Test
+    fun `getInvitationsForOrganisation returns the organisation's invitations from the repository`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val invitations = listOf(createOrganisationalLandlordInvitation(organisationalLandlord = organisation))
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(invitations)
+
+        // Act
+        val result = invitationService.getInvitationsForOrganisation(organisation)
+
+        // Assert
+        assertEquals(invitations, result)
     }
 
     @Test

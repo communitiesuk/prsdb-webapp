@@ -11,7 +11,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
@@ -32,6 +34,9 @@ class RegisterLandlordControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index redirects to start page for unauthenticated user`() {
@@ -153,6 +158,57 @@ class RegisterLandlordControllerTests(
                         "landlordRegistrationSurveyUrl",
                         ORG_LANDLORD_REGISTRATION_SURVEY_URL,
                     )
+                }
+            }
+    }
+
+    // TODO: PDJB-1828: Remove the FF checks from these tests and remove mention in test names
+    @Test
+    @WithMockUser
+    fun `getConfirmation sets showOrgAdminContent true for org landlord when multi-user orgs enabled`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(true)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("showOrgAdminContent", true)
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation sets showOrgAdminContent false for org landlord when multi-user orgs disabled`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(false)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("showOrgAdminContent", false)
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation sets showOrgAdminContent false for individual landlord`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("showOrgAdminContent", false)
                 }
             }
     }

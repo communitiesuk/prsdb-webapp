@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
@@ -33,6 +35,7 @@ class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
     private val userRolesService: UserRolesService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun redirectToStart(): String = "redirect:$LANDLORD_REGISTRATION_START_PAGE_ROUTE"
@@ -72,13 +75,20 @@ class RegisterLandlordController(
             RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
         )
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        val isOrganisation = landlord.landlordType == LandlordType.ORGANISATION
+
         val surveyUrl =
-            if (landlord.landlordType == LandlordType.ORGANISATION) {
+            if (isOrganisation) {
                 ORG_LANDLORD_REGISTRATION_SURVEY_URL
             } else {
                 INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
             }
         model.addAttribute("landlordRegistrationSurveyUrl", surveyUrl)
+
+        // TODO PDJB-1828 remove this and set showOrgAdminContent to isOrganisation
+        val showOrgAdminContent = isOrganisation && featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)
+        model.addAttribute("showOrgAdminContent", showOrgAdminContent)
 
         return "registerAsALandlordConfirmation"
     }

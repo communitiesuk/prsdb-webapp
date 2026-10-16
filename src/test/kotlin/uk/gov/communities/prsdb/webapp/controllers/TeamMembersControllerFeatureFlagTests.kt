@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Compani
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
@@ -23,6 +24,9 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
 
     @MockitoBean
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
+
+    @MockitoBean
+    private lateinit var organisationalLandlordInvitationService: OrganisationalLandlordInvitationService
 
     @MockitoBean
     private lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
