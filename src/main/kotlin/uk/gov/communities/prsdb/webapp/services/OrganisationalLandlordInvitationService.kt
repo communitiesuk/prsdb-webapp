@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS
@@ -17,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @PrsdbWebService
 class OrganisationalLandlordInvitationService(
@@ -129,13 +132,42 @@ class OrganisationalLandlordInvitationService(
             )
         invitationRepository.save(invitation)
 
-        invitationEmailSender.sendEmail(
-            invitedEmail,
-            OrganisationalLandlordInvitationEmail(
-                organisationName = organisationalLandlord.name,
-                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(invitation.token.toString()),
-            ),
-        )
+        sendInvitationEmail(invitedEmail, organisationalLandlord, invitation.token)
+    }
+
+    @Transactional
+    fun resendInvitation(
+        invitationId: Long,
+        organisationalLandlord: OrganisationalLandlord,
+    ): String? {
+        val invitation =
+            invitationRepository
+                .findById(invitationId)
+                .getOrNull()
+                ?.takeIf {
+                    it.organisationalLandlord.id == organisationalLandlord.id &&
+                        it.status != OrganisationalLandlordInvitationStatus.HIDDEN
+                }
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation $invitationId not found for this organisation")
+
+        // Resending would duplicate an invitation that is already pending or an existing membership, so hide this one instead
+        if (getOtherPendingInvitedAndMemberEmails(invitation).containsEmail(invitation.invitedEmail)) {
+            invitation.isHidden = true
+            invitationRepository.save(invitation)
+            return null
+        }
+
+        val token = invitation.token
+        val invitedEmail = invitation.invitedEmail
+        val role = invitation.role
+
+        // Flush the delete before saving the replacement, as the token must be unique
+        invitationRepository.delete(invitation)
+        invitationRepository.flush()
+        invitationRepository.save(OrganisationalLandlordInvitation(token, invitedEmail, organisationalLandlord, role))
+
+        sendInvitationEmail(invitedEmail, organisationalLandlord, token)
+        return invitedEmail
     }
 
     // Expired and hidden invitations can no longer be accepted, so they must not block re-inviting that email address
@@ -148,6 +180,27 @@ class OrganisationalLandlordInvitationService(
 
     fun getInvitationsForOrganisation(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordInvitation> =
         invitationRepository.findByOrganisationalLandlord(organisationalLandlord)
+
+    private fun sendInvitationEmail(
+        invitedEmail: String,
+        organisationalLandlord: OrganisationalLandlord,
+        token: UUID,
+    ) {
+        invitationEmailSender.sendEmail(
+            invitedEmail,
+            OrganisationalLandlordInvitationEmail(
+                organisationName = organisationalLandlord.name,
+                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(token.toString()),
+            ),
+        )
+    }
+
+    private fun getOtherPendingInvitedAndMemberEmails(invitation: OrganisationalLandlordInvitation): List<String> =
+        invitationRepository
+            .findByOrganisationalLandlord(invitation.organisationalLandlord)
+            .filter { it.id != invitation.id && it.status == OrganisationalLandlordInvitationStatus.PENDING }
+            .map { it.invitedEmail } +
+            organisationalLandlordUserService.getOrganisationalLandlordUsers(invitation.organisationalLandlord).map { it.email }
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

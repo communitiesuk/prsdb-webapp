@@ -22,6 +22,17 @@
             </div>
         </th:block>
 
+        <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
+            <div id="resend-invitation-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{teamMembers.resendInvitationBanner.title}, ~{::#resend-invitation-banner/content()})}">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{teamMembers.resendInvitationBanner.heading}">teamMembers.resendInvitationBanner.heading</h3>
+                <p class="govuk-body"
+                   th:text="#{teamMembers.resendInvitationBanner.content(${resendInvitationEmail})}">teamMembers.resendInvitationBanner.content</p>
+            </div>
+        </th:block>
+
         <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
 
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${inviteTeamMemberUrl}, #{teamMembers.inviteTeamMemberButton})}"></a>
