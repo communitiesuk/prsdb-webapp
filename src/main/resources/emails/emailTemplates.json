@@ -378,5 +378,12 @@
     "enumName": "CHANGE_ORG_TEAM_MEMBER_ACCESS_LEVEL",
     "subject": "Your access level has changed",
     "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
+  },
+  {
+    "test_id": "TODO-PDJB-1853-create-notify-integration-template",
+    "prod_id": "TODO-PDJB-1853-create-notify-prod-template",
+    "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
+    "subject": "A property registration payment needs checking",
+    "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
   }
 ]
