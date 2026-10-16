@@ -270,6 +270,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
+        assertThat(confirmationPage.whatYouCanDoNowHeading).not().isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
@@ -368,6 +369,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", ORG_LANDLORD_REGISTRATION_SURVEY_URL)
+        assertThat(confirmationPage.whatYouCanDoNowHeading).isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
 
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
