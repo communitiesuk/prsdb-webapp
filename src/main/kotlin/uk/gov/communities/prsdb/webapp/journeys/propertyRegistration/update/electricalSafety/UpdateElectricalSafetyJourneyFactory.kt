@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -176,7 +175,7 @@ class UpdateElectricalSafetyJourney(
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")

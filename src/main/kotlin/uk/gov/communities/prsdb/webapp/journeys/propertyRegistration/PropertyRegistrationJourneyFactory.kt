@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -757,7 +756,7 @@ class PropertyRegistrationJourney(
     override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
         delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
     override var cyaJourneys: Map<String, String> = mapOf()
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
 
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
@@ -799,6 +798,10 @@ class PropertyRegistrationJourney(
         }
 
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
+
+    // These aren't answers: payment progress is recorded after the CYA page is submitted, and the back link changes with how the
+    // user reaches the task list, so neither should stop the user changing their answers
+    override val cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference", "paymentOutcome", "backUrlKey")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -14,7 +13,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
 class FinishCyaJourneyConfigTests {
@@ -23,7 +21,6 @@ class FinishCyaJourneyConfigTests {
     private val mockOriginalState = mock<CheckYourAnswersJourneyState>()
 
     private val baseJourneyId = "base-journey-id"
-    private val timestamp = Instant.fromEpochMilliseconds(1000)
     private val cyaRouteSegment = "lookup-address"
 
     @BeforeEach
@@ -35,11 +32,12 @@ class FinishCyaJourneyConfigTests {
 
     @Nested
     inner class AfterStepIsReached {
+        private val snapshot = "cya-answers-snapshot"
+
         @Test
-        fun `copies CYA journey data to the base journey when journey data has not changed since the user started cya`() {
-            val metadata = JourneyMetadata(baseJourneyId, timestamp)
-            whenever(mockOriginalState.journeyMetadata).thenReturn(metadata)
-            whenever(mockState.originalJourneyUpdated).thenReturn(timestamp)
+        fun `copies CYA journey data to the base journey when the answers shown on CYA have not changed`() {
+            whenever(mockState.originalCyaAnswers).thenReturn(snapshot)
+            whenever(mockOriginalState.cyaAnswersMatchSnapshot(snapshot)).thenReturn(true)
 
             config.afterStepIsReached(mockState)
 
@@ -47,38 +45,34 @@ class FinishCyaJourneyConfigTests {
         }
 
         @Test
-        fun `throws CyaDataHasChangedException when journey data has changed since the user started cya`() {
-            val metadata = JourneyMetadata(baseJourneyId, timestamp)
-            val differentTimestamp = Instant.fromEpochMilliseconds(2000)
-            whenever(mockOriginalState.journeyMetadata).thenReturn(metadata)
-            whenever(mockState.originalJourneyUpdated).thenReturn(differentTimestamp)
-
-            assertThrows<CyaDataHasChangedException> {
-                config.afterStepIsReached(mockState)
-            }
-        }
-
-        @Test
-        fun `does not copy journey data when journey data has changed since the user started cya`() {
-            val metadata = JourneyMetadata(baseJourneyId, timestamp)
-            val differentTimestamp = Instant.fromEpochMilliseconds(2000)
-            whenever(mockOriginalState.journeyMetadata).thenReturn(metadata)
-            whenever(mockState.originalJourneyUpdated).thenReturn(differentTimestamp)
-
-            runCatching { config.afterStepIsReached(mockState) }
-
-            verify(mockState, never()).copyJourneyTo(baseJourneyId)
-        }
-
-        @Test
         fun `ensures CYA fields are not present in the parent state that will be saved`() {
-            val metadata = JourneyMetadata(baseJourneyId, timestamp)
-            whenever(mockOriginalState.journeyMetadata).thenReturn(metadata)
-            whenever(mockState.originalJourneyUpdated).thenReturn(timestamp)
+            whenever(mockState.originalCyaAnswers).thenReturn(snapshot)
+            whenever(mockOriginalState.cyaAnswersMatchSnapshot(snapshot)).thenReturn(true)
 
             config.afterStepIsReached(mockState)
 
             verify(mockOriginalState).clearCyaFields()
+        }
+
+        @Test
+        fun `throws CyaDataHasChangedException and does not copy when the answers shown on CYA have changed`() {
+            whenever(mockState.originalCyaAnswers).thenReturn(snapshot)
+            whenever(mockOriginalState.cyaAnswersMatchSnapshot(snapshot)).thenReturn(false)
+
+            assertThrows<CyaDataHasChangedException> {
+                config.afterStepIsReached(mockState)
+            }
+            verify(mockState, never()).copyJourneyTo(baseJourneyId)
+        }
+
+        @Test
+        fun `throws CyaDataHasChangedException and does not copy when there is no CYA answers snapshot`() {
+            whenever(mockState.originalCyaAnswers).thenReturn(null)
+
+            assertThrows<CyaDataHasChangedException> {
+                config.afterStepIsReached(mockState)
+            }
+            verify(mockState, never()).copyJourneyTo(baseJourneyId)
         }
     }
 

@@ -74,6 +74,33 @@ class AbstractJourneyStateTests {
         // Assert
         assertEquals("testJourneyId", result)
     }
+
+    @Test
+    fun `delegateKeys returns the delegate keys for the whole journey`() {
+        // Arrange
+        val journeyStateService: JourneyStateService = mock()
+        val journeyState =
+            object : AbstractJourneyState(journeyStateService) {
+                var answer: String? by delegateProvider.nullableDelegate("answer")
+                val immutable: String by delegateProvider.requiredImmutableDelegate("immutable")
+            }
+        val task =
+            object : AbstractJourneyState(journeyStateService) {
+                val taskAnswer: Map<Int, String> by delegateProvider.requiredDelegate("taskAnswer", mapOf())
+
+                init {
+                    delegateProvider.bindRoutePrefix("task-route")
+                }
+            }
+        val registry = DelegateKeyRegistry()
+
+        // Act
+        journeyState.bindKeyRegistry(registry)
+        task.bindKeyRegistry(registry)
+
+        // Assert
+        assertEquals(setOf("answer", "immutable", "task-route/taskAnswer"), journeyState.delegateKeys)
+    }
 }
 
 class JourneyStateDelegateProviderTests {
@@ -221,6 +248,18 @@ class JourneyStateDelegateProviderTests {
         provider.registerKey("addedLater")
 
         assertThrows<JourneyInitialisationException> { registry.register("addedLater") }
+    }
+
+    @Test
+    fun `delegateKeys returns the provider's own scoped keys when no registry is bound`() {
+        val journeyStateService: JourneyStateService = mock()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        var answer: String? by provider.nullableDelegate("answer")
+        var required: String by provider.requiredDelegate("required", "default")
+        val immutable: String by provider.requiredImmutableDelegate("immutable")
+        provider.bindRoutePrefix("route")
+
+        assertEquals(setOf("route/answer", "route/required", "route/immutable"), provider.delegateKeys)
     }
 
     @Test

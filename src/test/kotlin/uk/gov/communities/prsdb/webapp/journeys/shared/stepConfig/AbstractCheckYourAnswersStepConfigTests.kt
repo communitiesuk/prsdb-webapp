@@ -12,7 +12,9 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import java.security.MessageDigest
 import java.time.LocalDate
+import java.util.Base64
 
 class AbstractCheckYourAnswersStepConfigTests {
     private val mockState = mock<CheckYourAnswersJourneyState>()
@@ -22,7 +24,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
     @Nested
-    inner class SerializeJourneyData {
+    inner class SerializeJourneyDataHashes {
         private val testJourneyData =
             mapOf(
                 "stringKey" to "stringValue",
@@ -42,11 +44,14 @@ class AbstractCheckYourAnswersStepConfigTests {
             )
 
         @Test
-        fun `turns journeyData's values into strings, then serializes it`() {
-            val journeyDataWithStringValues = testJourneyData.mapValues { (_, value) -> value.toString() }
-            val expectedSerializedData = Json.encodeToString(journeyDataWithStringValues)
+        fun `replaces journeyData's values with SHA-256 hashes of them as strings, then serializes it`() {
+            val journeyDataHashes =
+                testJourneyData.mapValues { (_, value) ->
+                    Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(value.toString().toByteArray()))
+                }
+            val expectedSerializedData = Json.encodeToString(journeyDataHashes)
 
-            val returnedSerializedData = CheckAnswersFormModel.serializeJourneyData(testJourneyData)
+            val returnedSerializedData = CheckAnswersFormModel.serializeJourneyDataHashes(testJourneyData)
 
             assertEquals(expectedSerializedData, returnedSerializedData)
         }
@@ -57,14 +62,26 @@ class AbstractCheckYourAnswersStepConfigTests {
     }
 
     @Nested
+    inner class ResolvePageContent {
+        @Test
+        fun `adds the snapshot of the answers shown on the CYA page as submittedFilteredJourneyData`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("cya-answers-snapshot")
+
+            val content = stepConfig.resolvePageContent(mockState, mapOf("existingKey" to "existingValue"))
+
+            assertEquals(
+                mapOf("existingKey" to "existingValue", "submittedFilteredJourneyData" to "cya-answers-snapshot"),
+                content,
+            )
+        }
+    }
+
+    @Nested
     inner class EnrichSubmittedDataBeforeValidation {
         @Test
-        fun `throws CyaDataHasChangedException when journey data has changed`() {
-            val originalStepData = mapOf("step1" to mapOf("field" to "original"))
-            val modifiedStepData = mapOf("step1" to mapOf("field" to "modified"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(modifiedStepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(originalStepData))
+        fun `throws CyaDataHasChangedException when the answers shown on the CYA page have changed since it loaded`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("current-snapshot")
+            val formData = mapOf("submittedFilteredJourneyData" to "snapshot-when-page-loaded")
 
             assertThrows<CyaDataHasChangedException> {
                 stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
@@ -72,11 +89,9 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when journey data is unchanged`() {
-            val stepData = mapOf("step1" to mapOf("field" to "value"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(stepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(stepData))
+        fun `does not throw when the answers shown on the CYA page are unchanged`() {
+            whenever(mockState.getCyaAnswersSnapshot()).thenReturn("snapshot")
+            val formData = mapOf("submittedFilteredJourneyData" to "snapshot")
 
             assertDoesNotThrow {
                 stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
@@ -84,14 +99,9 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when data was changed and page was re-rendered with the new data`() {
-            val updatedStepData = mapOf("step1" to mapOf("field" to "newValue"))
-            whenever(mockState.getSubmittedStepData()).thenReturn(updatedStepData)
-
-            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(updatedStepData))
-
+        fun `does not throw when no snapshot was submitted`() {
             assertDoesNotThrow {
-                stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
+                stepConfig.enrichSubmittedDataBeforeValidation(mockState, emptyMap())
             }
         }
     }

@@ -14,6 +14,10 @@ interface JourneyState : DelegateKeysOwner {
 
     fun getSubmittedStepData(): Map<String, Any?>
 
+    val delegateKeys: Set<String>
+
+    fun getEncodedDelegateValue(key: String): Any?
+
     val journeyId: String
     val journeyMetadata: JourneyMetadata
 

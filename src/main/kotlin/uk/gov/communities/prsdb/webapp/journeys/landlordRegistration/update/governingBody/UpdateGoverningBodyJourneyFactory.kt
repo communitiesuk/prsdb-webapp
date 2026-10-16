@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -113,7 +112,7 @@ class UpdateGoverningBodyJourney(
     override var governingBodyMembersInitialised: Boolean? by delegateProvider.nullableDelegate("governingBodyMembersInitialised")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
-    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override fun generateJourneyId(seed: Any?): String {

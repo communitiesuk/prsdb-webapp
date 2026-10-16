@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Browser
+import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
@@ -469,6 +470,27 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, ConfirmationPagePropertyRegistration::class)
                 assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
             }
+        }
+
+        @Test
+        fun `submitting a CYA page loaded before a payment failed in another tab continues to the payment summary`(
+            page: Page,
+            browserContext: BrowserContext,
+        ) {
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+            navigator
+                .goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withIsAddressAlreadyRegistered(false),
+                ).clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val staleCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val otherTab = browserContext.newPage()
+            otherTab.navigate(page.url())
+            assertPageIs(otherTab, CheckAnswersPagePropertyRegistration::class).confirm()
+            submitPaymentSummaryAndWaitForRedirectTo(otherTab, PaymentFailedStep.ROUTE_SEGMENT)
+
+            staleCheckAnswersPage.confirm()
+
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
         }
 
         @Test

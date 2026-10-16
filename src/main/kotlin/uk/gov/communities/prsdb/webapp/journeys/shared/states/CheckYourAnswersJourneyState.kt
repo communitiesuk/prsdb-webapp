@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
-import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -11,12 +10,13 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
 
-    var originalJourneyUpdated: Instant?
+    var originalCyaAnswers: String?
 
     var cyaJourneys: Map<String, String>
 
@@ -45,6 +45,31 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return stateFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
+    val cyaSnapshotExcludedDelegateKeys: Set<String>
+        get() = emptySet()
+
+    fun getCyaAnswersSnapshot(): String {
+        val stepKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }
+        val snapshotDelegateKeys =
+            delegateKeys
+                .filter { unscopedDelegateKey(it) !in cyaSnapshotExcludedDelegateKeys }
+                .map { CYA_SNAPSHOT_DELEGATE_KEY_PREFIX + it }
+        return serializeCyaAnswers((stepKeys + snapshotDelegateKeys).toSet())
+    }
+
+    private fun unscopedDelegateKey(scopedKey: String) = scopedKey.substringAfterLast('/')
+
+    fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
+        serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot
+
+    private fun serializeCyaAnswers(keys: Set<String>): String {
+        val (snapshotDelegateKeys, stepKeys) = keys.partition { it.startsWith(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
+        val stepAnswers = getSubmittedStepData().filterKeys { it in stepKeys }
+        val delegateAnswers =
+            snapshotDelegateKeys.associateWith { getEncodedDelegateValue(it.removePrefix(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX)) }
+        return CheckAnswersFormModel.serializeJourneyDataHashes((stepAnswers + delegateAnswers).toSortedMap())
+    }
+
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
         if (!cyaJourneys.containsKey(checkableStep.urlPath)) {
             cyaJourneys += makePair(checkableStep)
@@ -59,7 +84,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = urlPath
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
-        childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
+        childJourney.originalCyaAnswers = getCyaAnswersSnapshot()
 
         return (urlPath to cyaJourneyId)
     }
@@ -71,7 +96,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     fun clearCyaFields() {
         checkingAnswersFor = null
-        originalJourneyUpdated = null
+        originalCyaAnswers = null
         cyaUrlPath = null
     }
 
@@ -79,6 +104,8 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
+        const val CYA_SNAPSHOT_DELEGATE_KEY_PREFIX = "delegate:"
+
         @Suppress("ktlint:standard:max-line-length")
         fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
             task: Task<TTaskState, *>,

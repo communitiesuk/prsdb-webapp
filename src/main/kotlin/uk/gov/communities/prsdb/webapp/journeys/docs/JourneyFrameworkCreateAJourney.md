@@ -506,6 +506,25 @@ companion object {
 
 The journey factory picks which routing map to serve based on `state.someTask.checkingAnswersFor`.
 
+### The CYA answers snapshot
+
+`getCyaAnswersSnapshot()` records a hash of each answer behind a CYA page: the data of every step the CYA step depends
+on, plus every delegate. Submitting the CYA page, or finishing a change-link journey, fails if the journey no longer
+matches it, which catches changes made in another tab.
+
+If a delegate isn't an answer and can change while the user is on the CYA page (e.g. payment progress, or a back link
+set by another page), add its key to `cyaSnapshotExcludedDelegateKeys` and declare the delegate next to it. Otherwise,
+the CYA page will fail to submit. Exclusions match the delegate's key, not its property name:
+
+```kotlin
+override var paymentRef: String? by delegateProvider.nullableDelegate("paymentReference")
+
+override val cyaSnapshotExcludedDelegateKeys = setOf("paymentReference")
+```
+
+`PropertyRegistrationCheckAnswersJourneyTests` lists every delegate in the property registration snapshot, so adding a
+delegate to that journey fails the test until you decide whether it's an answer.
+
 ## Define the Journey State
 
 Each journey has an associated `JourneyState` interface and implementing class that specifies:
