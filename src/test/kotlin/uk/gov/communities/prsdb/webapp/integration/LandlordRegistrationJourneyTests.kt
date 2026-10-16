@@ -81,7 +81,7 @@ import kotlin.test.assertNotNull
 
 class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     @Autowired
     private lateinit var userToLandlordService: UserToLandlordService

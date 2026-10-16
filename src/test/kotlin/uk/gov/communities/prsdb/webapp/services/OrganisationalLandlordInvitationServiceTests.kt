@@ -311,7 +311,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
-            .thenReturn(URI("https://www.prsd.gov.uk/landlord/accept-invitation"))
+            .thenReturn(URI("https://www.example.com/landlord/accept-invitation"))
 
         // Act
         invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
@@ -330,7 +330,7 @@ class OrganisationalLandlordInvitationServiceTests {
     fun `createInvitation emails the invitee a link to accept the saved invitation`() {
         // Arrange
         val organisation = createOrgLandlord(name = "Example Housing Association")
-        val invitationUri = URI("https://www.prsd.gov.uk/landlord/accept-invitation?token=abc")
+        val invitationUri = URI("https://www.example.com/landlord/accept-invitation?token=abc")
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any())).thenReturn(invitationUri)
 
         // Act
@@ -354,7 +354,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Arrange
         val organisation = createOrgLandlord()
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
-            .thenReturn(URI("https://www.prsd.gov.uk/landlord/accept-invitation"))
+            .thenReturn(URI("https://www.example.com/landlord/accept-invitation"))
         doThrow(TransientEmailSentException("Email failed to send"))
             .whenever(mockInvitationEmailSender)
             .sendEmail(any(), any())
@@ -405,7 +405,7 @@ class OrganisationalLandlordInvitationServiceTests {
             ),
         )
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
-            .thenReturn(URI("https://www.prsd.gov.uk/landlord/accept-invitation"))
+            .thenReturn(URI("https://www.example.com/landlord/accept-invitation"))
 
         // Act
         invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
@@ -584,7 +584,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 roleName = expectedRoleName,
                 organisationName = "Example Organisation",
                 isAdmin = expectedIsAdmin,
-                dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
+                dashboardUrl = URI("https://www.example.com/landlord/dashboard"),
             ),
         )
     }
@@ -723,7 +723,7 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(invitation.status).thenReturn(OrganisationalLandlordInvitationStatus.PENDING)
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(acceptingUserId)).thenReturn(baseUser)
         if (stubConfirmationEmailDetails) {
-            val dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard")
+            val dashboardUrl = URI("https://www.example.com/landlord/dashboard")
             whenever(invitedLandlord.name).thenReturn("Example Organisation")
             whenever(invitation.token).thenReturn(token)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)

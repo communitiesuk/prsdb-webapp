@@ -210,7 +210,7 @@ class LandlordRegistrationServiceTests {
                 nonEnglandOrWalesAddress = null,
                 dateOfBirth = LocalDate.of(1990, 1, 1),
             )
-        private val dashboardUri = URI("https://www.prsd.gov.uk/landlord/dashboard")
+        private val dashboardUri = URI("https://www.example.com/landlord/dashboard")
 
         @BeforeEach
         fun stubIndividualLandlord() {
@@ -290,7 +290,7 @@ class LandlordRegistrationServiceTests {
     @Nested
     inner class OrganisationLandlordRegistration {
         private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
-        private val orgDashboardUri = URI("https://www.prsd.gov.uk/landlord/dashboard")
+        private val orgDashboardUri = URI("https://www.example.com/landlord/dashboard")
 
         private val organisationalLandlord =
             OrganisationalLandlord(

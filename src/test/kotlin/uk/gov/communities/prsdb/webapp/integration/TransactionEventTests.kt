@@ -31,7 +31,7 @@ import java.time.LocalDate
 private const val TAGGED_BUTTON_SELECTOR = "button[data-plausible-event='Transaction']"
 
 class LandlordRegistrationTransactionEventTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
