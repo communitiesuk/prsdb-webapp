@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
-class TeamMembersTests : IntegrationTestWithImmutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+class TeamMembersTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `the administrators tab is shown by default, listing administrators alphabetically and marking the current user`() {
         // Act

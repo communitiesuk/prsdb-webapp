@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class AllowLettingAgentEmailFormModel : FormModel {
-    var landlordEmail: String? = null
+    var currentUserEmail: String? = null
 
     @ValidatedBy(
         constraints = [
@@ -23,16 +23,16 @@ class AllowLettingAgentEmailFormModel : FormModel {
                 validatorType = EmailConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "delegateToLettingAgent.allowLettingAgent.error.cannotUseLandlordEmail",
+                messageKey = "delegateToLettingAgent.allowLettingAgent.error.cannotUseYourEmail",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isEmailNotLandlord",
+                targetMethod = "isEmailNotCurrentUser",
             ),
         ],
     )
     var emailAddress: String? = null
 
-    fun isEmailNotLandlord(): Boolean {
+    fun isEmailNotCurrentUser(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return !submittedEmail.isSameEmailAs(landlordEmail)
+        return !submittedEmail.isSameEmailAs(currentUserEmail)
     }
 }

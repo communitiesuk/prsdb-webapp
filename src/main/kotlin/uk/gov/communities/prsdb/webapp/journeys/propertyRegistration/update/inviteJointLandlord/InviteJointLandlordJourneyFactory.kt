@@ -183,9 +183,8 @@ class InviteJointLandlordJourney(
     override val existingInvitedEmails: List<String>
         get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
 
-    // TODO: PDJB-1274: Update emails to account for org landlord
     override val existingLandlordEmails: List<String>
-        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { it.email }
+        get() = jointLandlordInvitationService.getInUseEmailsForProperty(propertyOwnershipService.getPropertyOwnership(propertyId))
 }
 
 interface InviteJointLandlordJourneyState :
