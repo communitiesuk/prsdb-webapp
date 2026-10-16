@@ -11,23 +11,16 @@ class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) : DelegateKeysOwner {
     private val keysInUse = mutableSetOf<String>()
-    private val cyaSnapshotKeysInUse = mutableSetOf<String>()
 
     private var registry: DelegateKeyRegistry? = null
 
-    fun registerKey(
-        propertyKey: String,
-        includeInCyaSnapshot: Boolean = true,
-    ) {
+    fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }
-        if (includeInCyaSnapshot) {
-            cyaSnapshotKeysInUse.add(propertyKey)
-        }
-        registry?.register(scopedKey(propertyKey), includeInCyaSnapshot)
+        registry?.register(scopedKey(propertyKey))
     }
 
     private var routePrefix: String? = null
@@ -38,13 +31,13 @@ class JourneyStateDelegateProvider(
 
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
         this.registry = registry
-        keysInUse.forEach { registry.register(scopedKey(it), it in cyaSnapshotKeysInUse) }
+        keysInUse.forEach { registry.register(scopedKey(it)) }
     }
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
     val cyaSnapshotKeys: Set<String>
-        get() = registry?.cyaSnapshotKeys ?: cyaSnapshotKeysInUse.map(::scopedKey).toSet()
+        get() = registry?.keys ?: keysInUse.map(::scopedKey).toSet()
 
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
@@ -102,7 +95,7 @@ class JourneyStateDelegateProvider(
     final inline fun <TJourney, reified TProperty : Any> requiredImmutableDelegate(
         propertyKey: String,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
-        registerKey(propertyKey, includeInCyaSnapshot = false)
+        registerKey(propertyKey)
         return RequiredImmutableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 

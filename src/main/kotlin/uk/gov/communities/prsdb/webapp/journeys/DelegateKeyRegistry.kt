@@ -11,24 +11,17 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
  */
 class DelegateKeyRegistry {
     private val resolvedKeys = mutableSetOf<String>()
-    private val resolvedCyaSnapshotKeys = mutableSetOf<String>()
 
-    val cyaSnapshotKeys: Set<String>
-        get() = resolvedCyaSnapshotKeys.toSet()
+    val keys: Set<String>
+        get() = resolvedKeys.toSet()
 
-    fun register(
-        key: String,
-        includeInCyaSnapshot: Boolean = false,
-    ) {
+    fun register(key: String) {
         if (!resolvedKeys.add(key)) {
             throw JourneyInitialisationException("Delegate key '$key' is already in use in this journey")
-        }
-        if (includeInCyaSnapshot) {
-            resolvedCyaSnapshotKeys.add(key)
         }
     }
 
     fun registerAll(other: DelegateKeyRegistry) {
-        other.resolvedKeys.forEach { register(it, it in other.resolvedCyaSnapshotKeys) }
+        other.resolvedKeys.forEach { register(it) }
     }
 }

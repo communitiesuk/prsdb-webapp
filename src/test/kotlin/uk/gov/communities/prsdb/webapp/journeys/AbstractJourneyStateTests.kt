@@ -99,7 +99,7 @@ class AbstractJourneyStateTests {
         task.bindKeyRegistry(registry)
 
         // Assert
-        assertEquals(setOf("answer", "task-route/taskAnswer"), journeyState.cyaSnapshotDelegateKeys)
+        assertEquals(setOf("answer", "immutable", "task-route/taskAnswer"), journeyState.cyaSnapshotDelegateKeys)
     }
 }
 
@@ -251,19 +251,6 @@ class JourneyStateDelegateProviderTests {
     }
 
     @Test
-    fun `a key registered after bindKeyRegistry keeps whether it is included in the CYA snapshot`() {
-        val journeyStateService: JourneyStateService = mock()
-        val registry = DelegateKeyRegistry()
-        val provider = JourneyStateDelegateProvider(journeyStateService)
-        provider.bindKeyRegistry(registry)
-
-        provider.registerKey("addedLater")
-        provider.registerKey("excludedLater", includeInCyaSnapshot = false)
-
-        assertEquals(setOf("addedLater"), registry.cyaSnapshotKeys)
-    }
-
-    @Test
     fun `cyaSnapshotKeys returns the provider's own scoped CYA snapshot keys when no registry is bound`() {
         val journeyStateService: JourneyStateService = mock()
         val provider = JourneyStateDelegateProvider(journeyStateService)
@@ -272,7 +259,7 @@ class JourneyStateDelegateProviderTests {
         val immutable: String by provider.requiredImmutableDelegate("immutable")
         provider.bindRoutePrefix("route")
 
-        assertEquals(setOf("route/answer", "route/required"), provider.cyaSnapshotKeys)
+        assertEquals(setOf("route/answer", "route/required", "route/immutable"), provider.cyaSnapshotKeys)
     }
 
     @Test
