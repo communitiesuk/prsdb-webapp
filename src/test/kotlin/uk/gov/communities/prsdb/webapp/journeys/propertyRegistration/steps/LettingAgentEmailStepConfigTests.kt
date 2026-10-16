@@ -19,7 +19,7 @@ class LettingAgentEmailStepConfigTests {
     lateinit var mockJourneyState: WhoProvidesDetailsState
 
     @Test
-    fun `enrichSubmittedDataBeforeValidation injects the landlord email`() {
+    fun `enrichSubmittedDataBeforeValidation injects the current user's email`() {
         val stepConfig = LettingAgentEmailStepConfig(mockCurrentUserService)
         stepConfig.urlPath = LettingAgentEmailStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()

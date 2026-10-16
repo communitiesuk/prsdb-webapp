@@ -64,6 +64,7 @@ class JointLandlordInvitationService(
      */
     fun getInUseEmailsForProperty(propertyOwnership: PropertyOwnership): List<String> =
         propertyOwnership.landlords
+            // TODO: PDJB-1892: Decide how to handle org LLs in this check
             .filterIsInstance<IndividualLandlord>()
             .map { it.email }
 

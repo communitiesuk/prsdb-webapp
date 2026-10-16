@@ -16,7 +16,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyState
@@ -68,6 +67,8 @@ class CancelInvitationStepConfigTests {
     private val cancellerName = "Canceller Name"
     private val otherLandlordEmail = "other@example.com"
     private val otherLandlordName = "Other Landlord"
+    private val cancellerLandlordId = 1L
+    private val otherLandlordId = 2L
     private val invitationId = 1L
     private val propertyOwnershipId = 2L
 
@@ -113,7 +114,7 @@ class CancelInvitationStepConfigTests {
             landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
-        assertEquals(otherLandlordEmail, (landlordCaptor.firstValue as IndividualLandlord).email)
+        assertEquals(otherLandlordId, landlordCaptor.firstValue.id)
     }
 
     @Test
@@ -128,7 +129,7 @@ class CancelInvitationStepConfigTests {
             landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
-        assertNotEquals(cancellerEmail, (landlordCaptor.firstValue as IndividualLandlord).email)
+        assertNotEquals(cancellerLandlordId, landlordCaptor.firstValue.id)
     }
 
     @Test
@@ -175,7 +176,7 @@ class CancelInvitationStepConfigTests {
 
     private fun setupMocks(includeOtherLandlord: Boolean = true): uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation {
         val cancellerLandlord = MockLandlordData.createIndividualLandlord(name = cancellerName, email = cancellerEmail)
-        ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
+        ReflectionTestUtils.setField(cancellerLandlord, "id", cancellerLandlordId)
 
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -186,7 +187,7 @@ class CancelInvitationStepConfigTests {
         if (includeOtherLandlord) {
             val otherLandlord =
                 MockLandlordData.createIndividualLandlord(name = otherLandlordName, email = otherLandlordEmail)
-            ReflectionTestUtils.setField(otherLandlord, "id", 2L)
+            ReflectionTestUtils.setField(otherLandlord, "id", otherLandlordId)
             propertyOwnership.addLandlord(otherLandlord)
         }
 
