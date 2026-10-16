@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
@@ -38,6 +39,7 @@ import java.util.UUID
 class PaymentService(
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
     @Value("\${gov-uk-pay.gratis-period-end-date}") gratisPeriodEndDate: String,
+    @Value("\${gov-uk-pay.capture-check-delay}") private val captureCheckDelay: Duration,
     private val govUkPayClient: GovUkPayClient,
     private val paymentRepository: PaymentRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
@@ -301,6 +303,15 @@ class PaymentService(
             } catch (captureFailure: GovUkPayException) {
                 PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
             }
+
+        // GOV.UK Pay may be briefly unavailable, so wait before checking whether the capture went through
+        try {
+            Thread.sleep(captureCheckDelay)
+        } catch (exception: InterruptedException) {
+            Thread.currentThread().interrupt()
+            outcomeUnknownException.addSuppressed(exception)
+            throw outcomeUnknownException
+        }
 
         try {
             when (val govUkPayStatus = getGovUkPayPaymentStatus(paymentId).status) {
