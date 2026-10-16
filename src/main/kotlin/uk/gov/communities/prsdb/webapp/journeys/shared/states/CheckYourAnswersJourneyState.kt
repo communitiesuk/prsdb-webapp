@@ -50,11 +50,11 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     fun getCyaAnswersSnapshot(): String {
         val stepKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }
-        val delegateKeys =
-            cyaSnapshotDelegateKeys
+        val snapshotDelegateKeys =
+            delegateKeys
                 .filter { unscopedDelegateKey(it) !in cyaSnapshotExcludedDelegateKeys }
                 .map { CYA_SNAPSHOT_DELEGATE_KEY_PREFIX + it }
-        return serializeCyaAnswers((stepKeys + delegateKeys).toSet())
+        return serializeCyaAnswers((stepKeys + snapshotDelegateKeys).toSet())
     }
 
     private fun unscopedDelegateKey(scopedKey: String) = scopedKey.substringAfterLast('/')
@@ -63,9 +63,10 @@ interface CheckYourAnswersJourneyState : JourneyState {
         serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot
 
     private fun serializeCyaAnswers(keys: Set<String>): String {
-        val (delegateKeys, stepKeys) = keys.partition { it.startsWith(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
+        val (snapshotDelegateKeys, stepKeys) = keys.partition { it.startsWith(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
         val stepAnswers = getSubmittedStepData().filterKeys { it in stepKeys }
-        val delegateAnswers = delegateKeys.associateWith { getEncodedDelegateValue(it.removePrefix(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX)) }
+        val delegateAnswers =
+            snapshotDelegateKeys.associateWith { getEncodedDelegateValue(it.removePrefix(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX)) }
         return CheckAnswersFormModel.serializeJourneyDataHashes((stepAnswers + delegateAnswers).toSortedMap())
     }
 

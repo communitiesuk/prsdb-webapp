@@ -36,7 +36,7 @@ class JourneyStateDelegateProvider(
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
-    val cyaSnapshotKeys: Set<String>
+    val delegateKeys: Set<String>
         get() = registry?.keys ?: keysInUse.map(::scopedKey).toSet()
 
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(

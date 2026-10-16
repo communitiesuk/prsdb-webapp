@@ -27,8 +27,8 @@ abstract class AbstractJourneyState(
 
     override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
 
-    override val cyaSnapshotDelegateKeys: Set<String>
-        get() = delegateProvider.cyaSnapshotKeys
+    override val delegateKeys: Set<String>
+        get() = delegateProvider.delegateKeys
 
     override fun getEncodedDelegateValue(key: String): Any? = journeyStateService.getValue(key)
 

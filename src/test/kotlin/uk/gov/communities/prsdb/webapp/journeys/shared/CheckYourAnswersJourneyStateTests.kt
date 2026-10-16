@@ -222,7 +222,7 @@ class CheckYourAnswersJourneyStateTests {
                 createTestState(
                     cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                    cyaSnapshotDelegateKeys = setOf("task/unsetAnswer", "task/answer"),
+                    delegateKeys = setOf("task/unsetAnswer", "task/answer"),
                     delegateValues = mapOf("task/answer" to "{\"1\":\"value\"}", "paymentQuote" to "later progress"),
                 )
 
@@ -243,7 +243,7 @@ class CheckYourAnswersJourneyStateTests {
                 createTestState(
                     cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                    cyaSnapshotDelegateKeys = setOf("task/answer", "paymentQuote", "other-task/paymentReference"),
+                    delegateKeys = setOf("task/answer", "paymentQuote", "other-task/paymentReference"),
                     cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference"),
                     delegateValues =
                         mapOf(
@@ -312,7 +312,7 @@ class CheckYourAnswersJourneyStateTests {
             createTestState(
                 cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                 submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                cyaSnapshotDelegateKeys = setOf("task/answer"),
+                delegateKeys = setOf("task/answer"),
                 delegateValues = mapOf("task/answer" to answerValue),
             )
 
@@ -354,7 +354,7 @@ class CheckYourAnswersJourneyStateTests {
         cyaJourneys: MutableMap<String, String> = mutableMapOf(),
         cyaStep: JourneyStep.RequestableStep<*, *, *> = mockCyaStep(),
         submittedStepData: Map<String, Any?> = emptyMap(),
-        cyaSnapshotDelegateKeys: Set<String> = emptySet(),
+        delegateKeys: Set<String> = emptySet(),
         cyaSnapshotExcludedDelegateKeys: Set<String> = emptySet(),
         delegateValues: Map<String, Any?> = emptyMap(),
     ): TestCheckYourAnswersJourneyState =
@@ -366,7 +366,7 @@ class CheckYourAnswersJourneyStateTests {
             initialCyaJourneys = cyaJourneys,
             testCyaStep = cyaStep,
             testSubmittedStepData = submittedStepData,
-            testCyaSnapshotDelegateKeys = cyaSnapshotDelegateKeys,
+            testDelegateKeys = delegateKeys,
             testCyaSnapshotExcludedDelegateKeys = cyaSnapshotExcludedDelegateKeys,
             testDelegateValues = delegateValues,
         )
@@ -379,7 +379,7 @@ class CheckYourAnswersJourneyStateTests {
         initialCyaJourneys: MutableMap<String, String> = mutableMapOf(),
         private val testCyaStep: JourneyStep.RequestableStep<*, *, *> = mock(),
         private val testSubmittedStepData: Map<String, Any?> = emptyMap(),
-        private val testCyaSnapshotDelegateKeys: Set<String> = emptySet(),
+        private val testDelegateKeys: Set<String> = emptySet(),
         private val testCyaSnapshotExcludedDelegateKeys: Set<String> = emptySet(),
         private val testDelegateValues: Map<String, Any?> = emptyMap(),
     ) : CheckYourAnswersJourneyState {
@@ -433,7 +433,7 @@ class CheckYourAnswersJourneyStateTests {
 
         override fun getSubmittedStepData(): Map<String, Any?> = testSubmittedStepData
 
-        override val cyaSnapshotDelegateKeys: Set<String> = testCyaSnapshotDelegateKeys
+        override val delegateKeys: Set<String> = testDelegateKeys
 
         override val cyaSnapshotExcludedDelegateKeys: Set<String> = testCyaSnapshotExcludedDelegateKeys
 
