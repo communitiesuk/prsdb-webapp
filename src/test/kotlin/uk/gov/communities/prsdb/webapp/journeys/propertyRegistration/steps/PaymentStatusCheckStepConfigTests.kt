@@ -17,6 +17,7 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -127,7 +128,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLED"])
+    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLED", "MANUAL_INTERVENTION"])
     fun `afterStepIsReached marks the address as already registered when the payment failed and the address has been registered`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
@@ -208,6 +209,26 @@ class PaymentStatusCheckStepConfigTests {
 
         // Assert
         verify(mockPaymentService).getPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+    }
+
+    @Test
+    fun `afterStepIsReached finalises the payment selected by the status check rather than the one the user returned from`() {
+        // Arrange
+        val selectedPaymentId = "selected-payment-456"
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        whenever(mockState.paymentReference).thenReturn(paymentReference)
+        whenever(mockPaymentService.getPropertyRegistrationPaymentStatus(journeyId, paymentReference))
+            .thenReturn(PaymentStatusCheckDataModel(paymentId = selectedPaymentId, status = PaymentStatus.SUCCEEDED, isCancellable = false))
+        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
+        whenever(mockPaymentService.finalisePayment(selectedPaymentId, PaymentStatus.SUCCEEDED, registrationData))
+            .thenReturn(PaymentStatus.SUCCEEDED)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = PaymentOutcome.SUCCESS
+        verify(mockPaymentService, never()).finalisePayment(eq(paymentId), any(), any())
     }
 
     @Test
@@ -347,6 +368,7 @@ class PaymentStatusCheckStepConfigTests {
                 Arguments.of(PaymentStatus.CAPTURABLE, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
                 Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.FAILURE),
+                Arguments.of(PaymentStatus.MANUAL_INTERVENTION, PaymentOutcome.FAILURE),
             )
     }
 }

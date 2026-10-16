@@ -10,6 +10,7 @@ enum class PaymentStatus {
     FAILED, // Includes payments cancelled by the user
     CANCELLED, // Only payments cancelled by our service
     CAPTURABLE, // Only reported by GOV.UK Pay, never stored
+    MANUAL_INTERVENTION, // Never reported by GOV.UK Pay; support must check whether the payment was taken
     ;
 
     fun isFailedOrCancelled() = this == FAILED || this == CANCELLED
