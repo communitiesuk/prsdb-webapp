@@ -56,7 +56,7 @@ abstract class BasePage(
         validateTitle()
     }
 
-    protected open fun validateTitle() {
+    private fun validateTitle() {
         val title = page.title()
         val expectedHeading = expectedTitleHeading ?: h1Text
         assertTrue(

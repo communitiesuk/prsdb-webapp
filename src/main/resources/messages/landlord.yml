@@ -1,5 +1,4 @@
 dashboard:
-  pageTitle: Landlord dashboard
   banner:
     subheading: 'Landlord registration number:'
   registerProperties:
