@@ -83,7 +83,9 @@ Template conventions:
 - Layouts extend `layout.html`
 - Fragments are in `components/` subdirectories
 - Form pages use `formPageWrapper.html` fragment
-- Page titles follow `<page> - <service> - GOV.UK` pattern
+- Page titles are `<h1 text> - <service> - GOV.UK`: the layout adds the service name and suffix, so the spec should
+  note that the template passes its h1 expression as the title. Only propose a different title if the h1 is not
+  unique or not descriptive out of context (see "Page Titles" in `.github/instructions/frontend.instructions.md`)
 
 ## Taking Screenshots for Validation
 

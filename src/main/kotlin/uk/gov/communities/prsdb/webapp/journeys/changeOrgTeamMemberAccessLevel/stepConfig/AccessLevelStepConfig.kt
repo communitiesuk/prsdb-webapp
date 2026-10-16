@@ -47,7 +47,6 @@ class AccessLevelStepConfig(
                         hintMsgKey = "changeOrgTeamMemberAccessLevel.radios.option.editor.hint",
                     ),
                 ),
-            "title" to "changeOrgTeamMemberAccessLevel.title",
         )
     }
 

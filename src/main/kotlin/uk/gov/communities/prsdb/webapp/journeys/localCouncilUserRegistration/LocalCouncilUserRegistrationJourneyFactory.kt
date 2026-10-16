@@ -57,9 +57,6 @@ class LocalCouncilUserRegistrationJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 "name" -> checkAnswerStep(journey.nameStep, "name")
@@ -74,9 +71,6 @@ class LocalCouncilUserRegistrationJourneyFactory(
     private fun mainJourneyMap(state: LocalCouncilUserRegistrationJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.privacyNoticeStep }
-            configure {
-                withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             step(journey.privacyNoticeStep) {
                 routeSegment(PRIVACY_NOTICE_PATH_SEGMENT)

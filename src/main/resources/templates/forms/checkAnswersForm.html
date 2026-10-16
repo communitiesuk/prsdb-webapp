@@ -7,9 +7,9 @@
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
-<!--/*@thymesVar id="pageTitleOverride" type="java.lang.String"*/-->
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${pageTitleOverride ?: 'forms.checkAnswers.heading'}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title ?: 'forms.checkAnswers.heading'}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>
     <th:block th:if="${insetText == true}">

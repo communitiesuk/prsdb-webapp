@@ -149,7 +149,7 @@ class CheckElectricalCertUploadsStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("uploads.checkUploads.electricalSafety.pageTitle", content["pageTitleOverride"])
+            assertEquals("uploads.checkUploads.electricalSafety.pageTitle", content["title"])
         }
 
         @Test

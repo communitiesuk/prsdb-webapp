@@ -1,4 +1,3 @@
-title: Register as a Local Council user
 landingPage:
   heading: Registering as a local council user
 requirementsList:
@@ -11,7 +10,6 @@ email:
   fieldSetHint: This is the email you use for work at the local council
   label: Email address
 invalidLink:
-  title: Invalid link
   heading: There was a problem with this invitation link
   description: Ask your manager or admin user to invite you again.
 checkAnswers:

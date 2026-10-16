@@ -51,16 +51,18 @@ class PropertyComplianceJourneyFactory(
 ```
 
 ### Page Titles
-Each step's `<title>` is built from its h1 by the layout (see `frontend.instructions.md`), so do not add a journey-wide
-`"title"` content property. Step templates pass their h1 expression as the layout `title` argument.
+Each step's `<title>` is built from its h1 by the layout (see `frontend.instructions.md`). Step templates pass their
+h1 expression as the layout `title` argument.
 
-Where a step on a shared form template needs a title different from its h1, set a `"pageTitleOverride"` content
-property (a message key) — via `withAdditionalContentProperty` in the journey factory for a single step, or in the
-step config's `getStepSpecificContent` if every use of that step needs it, e.g.
-`"pageTitleOverride" to "uploads.checkUploads.gasSafety.pageTitle"` in `CheckGasCertUploadsStepConfig`. Have the
-template fall back to its h1 expression: `#{${pageTitleOverride ?: addAnotherTitle}(${optionalAddAnotherTitleParam})}`.
-Only add the fallback to templates that have an override, and override `expectedTitleHeading` on the step's page
-object.
+Never set a journey-wide `"title"` content property (e.g. `withAdditionalContentProperty { "title" to ... }` on a
+whole journey, task or `configure { }` block): every step would share one title instead of using its own h1.
+
+Where a single step on a shared form template needs a title different from its h1, set a `"title"` content property
+(a `pageTitle` message key) on that step only — via `withAdditionalContentProperty` on the step in the journey
+factory, or in the step config's `getStepSpecificContent` if every use of that step needs it, e.g.
+`"title" to "uploads.checkUploads.gasSafety.pageTitle"` in `CheckGasCertUploadsStepConfig`. Have the template fall
+back to its h1 expression: `#{${title ?: addAnotherTitle}(${optionalAddAnotherTitleParam})}`. Only add the fallback
+to templates that have an override, and override `expectedTitleHeading` on the step's page object.
 
 ### Transaction Metric Tagging
 A journey's final commit step must render its submit button via `transactionSubmitButton` (or `transactionWarningButton` for destructive actions) so the completion is counted in the transaction metric — either hardcoded in a commit-only template, or opted into with `"submitButton" to "transactionSubmitButton"` in `withAdditionalContentProperties` where the template is shared with non-commit steps. Tag exactly one button per completed journey; where that is not possible, record the gap in [MetricsReadMe](../../docs/MetricsReadMe.md) rather than risk double-counting.

@@ -21,6 +21,9 @@ class AccessLevelPage(
 
     val currentLevelHint: Locator = page.locator("main p.govuk-body").first()
 
+    override val expectedTitleHeading
+        get() = "Change access level for ${currentLevelHint.textContent().trim().substringBefore(" is currently ")}"
+
     fun submitAccessLevel(role: String) {
         form.accessLevelRadios.selectValue(role)
         form.submit()

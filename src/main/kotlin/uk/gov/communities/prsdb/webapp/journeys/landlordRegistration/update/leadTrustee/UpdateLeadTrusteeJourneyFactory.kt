@@ -46,9 +46,6 @@ class UpdateLeadTrusteeJourneyFactory(
                 initialStep()
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
                 nextStep { journey.cyaStep }
-                withAdditionalContentProperty {
-                    "title" to "landlordDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateLeadTrusteeCyaStep.ROUTE_SEGMENT)
@@ -65,9 +62,6 @@ class UpdateLeadTrusteeJourneyFactory(
         journey(state) {
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            configure {
-                withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
-            }
             when (state.checkingAnswersFor) {
                 LeadTrusteeNameStep.ROUTE_SEGMENT -> {
                     checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
