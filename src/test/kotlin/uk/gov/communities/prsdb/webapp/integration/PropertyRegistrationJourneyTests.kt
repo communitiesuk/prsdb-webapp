@@ -174,7 +174,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     private fun verifyConfirmationEmailSent(
         expectedPrn: String,
