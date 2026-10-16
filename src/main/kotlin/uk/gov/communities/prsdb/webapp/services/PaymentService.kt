@@ -302,30 +302,28 @@ class PaymentService(
                 PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
             }
 
-        repeat(1 + CAPTURE_RETRIES) {
-            try {
-                when (val govUkPayStatus = getGovUkPayPaymentStatus(paymentId).status) {
-                    PaymentStatus.SUCCEEDED -> {
-                        return
-                    }
-
-                    PaymentStatus.CAPTURABLE -> {
-                        govUkPayClient.capturePayment(paymentId)
-                        return
-                    }
-
-                    PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
-                        throw IllegalStateException(
-                            "GOV.UK Pay reports payment $paymentId as $govUkPayStatus after it failed to capture",
-                            outcomeUnknownException.cause,
-                        )
-                    }
-
-                    PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
+        try {
+            when (val govUkPayStatus = getGovUkPayPaymentStatus(paymentId).status) {
+                PaymentStatus.SUCCEEDED -> {
+                    return
                 }
-            } catch (exception: GovUkPayException) {
-                outcomeUnknownException.addSuppressed(exception)
+
+                PaymentStatus.CAPTURABLE -> {
+                    govUkPayClient.capturePayment(paymentId)
+                    return
+                }
+
+                PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
+                    throw IllegalStateException(
+                        "GOV.UK Pay reports payment $paymentId as $govUkPayStatus after it failed to capture",
+                        outcomeUnknownException.cause,
+                    )
+                }
+
+                PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
             }
+        } catch (exception: GovUkPayException) {
+            outcomeUnknownException.addSuppressed(exception)
         }
 
         throw outcomeUnknownException
@@ -428,8 +426,4 @@ class PaymentService(
             .filter { Year.isLeap(it.toLong()) }
             .map { LocalDate.of(it, Month.FEBRUARY, 29) }
             .any { !it.isBefore(today) && it.isBefore(renewalDate) }
-
-    companion object {
-        private const val CAPTURE_RETRIES = 1
-    }
 }
