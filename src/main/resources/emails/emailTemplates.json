@@ -275,8 +275,8 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
   },
   {
-    "test_id": "a977fa79-3068-4a12-909c-8f5b3c90a41b",
-    "prod_id": "7c8f98da-6c20-4224-93c8-7ad654539c85",
+    "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
+    "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Confirmation of landlord registration",
     "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"

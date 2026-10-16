@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -13,6 +15,8 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -58,6 +62,9 @@ class LandlordRegistrationServiceTests {
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
     private lateinit var landlordRegistrationService: LandlordRegistrationService
 
     private val baseUser = PrsdbUser("user-123")
@@ -77,6 +84,7 @@ class LandlordRegistrationServiceTests {
                 mockOrgRegistrationConfirmationSender,
                 mockAbsoluteUrlProvider,
                 mockCurrentUserService,
+                mockFeatureFlagManager,
             )
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser("user-123")).thenReturn(baseUser)
     }
@@ -202,7 +210,7 @@ class LandlordRegistrationServiceTests {
                 nonEnglandOrWalesAddress = null,
                 dateOfBirth = LocalDate.of(1990, 1, 1),
             )
-        private val dashboardUri = URI("http://example.com/landlord-dashboard")
+        private val dashboardUri = URI("https://www.prsd.gov.uk/landlord/dashboard")
 
         @BeforeEach
         fun stubIndividualLandlord() {
@@ -282,7 +290,7 @@ class LandlordRegistrationServiceTests {
     @Nested
     inner class OrganisationLandlordRegistration {
         private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
-        private val orgDashboardUri = URI("http://example.com/landlord-dashboard")
+        private val orgDashboardUri = URI("https://www.prsd.gov.uk/landlord/dashboard")
 
         private val organisationalLandlord =
             OrganisationalLandlord(
@@ -512,8 +520,14 @@ class LandlordRegistrationServiceTests {
             )
         }
 
-        @Test
-        fun `registerOrganisationLandlord sends a registration confirmation email to the acting user`() {
+        @ParameterizedTest
+        @ValueSource(booleans = [true, false])
+        fun `registerOrganisationLandlord sends a registration confirmation email to the acting user`(
+            isMultiUserOrganisationsEnabled: Boolean,
+        ) {
+            // TODO: PDJB-1887: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
+            whenever(mockFeatureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(isMultiUserOrganisationsEnabled)
+
             registerOrganisationLandlord()
 
             verify(mockOrgRegistrationConfirmationSender).sendEmail(
@@ -524,6 +538,7 @@ class LandlordRegistrationServiceTests {
                         organisationName = "Test Org",
                         lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
                         prsdURL = orgDashboardUri.toString(),
+                        isMultiUserOrganisationsEnabled = isMultiUserOrganisationsEnabled,
                     ),
                 ),
             )

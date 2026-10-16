@@ -130,6 +130,7 @@ class LandlordDashboardUrlTests(
                 mock(),
                 absoluteUrlProvider,
                 mock(),
+                featureFlagManager,
             )
 
         whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
