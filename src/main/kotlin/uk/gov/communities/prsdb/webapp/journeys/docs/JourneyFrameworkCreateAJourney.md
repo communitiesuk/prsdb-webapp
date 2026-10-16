@@ -508,8 +508,8 @@ The journey factory picks which routing map to serve based on `state.someTask.ch
 
 ### The CYA answers snapshot
 
-`getCyaAnswersSnapshot()` records the answers behind a CYA page: the data of every step the CYA step depends on, plus
-every delegate. Submitting the CYA page, or finishing a change-link journey, fails if the journey no longer
+`getCyaAnswersSnapshot()` records a hash of each answer behind a CYA page: the data of every step the CYA step depends
+on, plus every delegate. Submitting the CYA page, or finishing a change-link journey, fails if the journey no longer
 matches it, which catches changes made in another tab.
 
 If the journey writes to a delegate after the CYA page is submitted (e.g. payment progress), add its key to `cyaSnapshotExcludedDelegateKeys` and declare the delegate next to

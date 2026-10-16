@@ -12,7 +12,9 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import java.security.MessageDigest
 import java.time.LocalDate
+import java.util.Base64
 
 class AbstractCheckYourAnswersStepConfigTests {
     private val mockState = mock<CheckYourAnswersJourneyState>()
@@ -22,7 +24,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
     @Nested
-    inner class SerializeJourneyData {
+    inner class SerializeJourneyDataHashes {
         private val testJourneyData =
             mapOf(
                 "stringKey" to "stringValue",
@@ -42,11 +44,14 @@ class AbstractCheckYourAnswersStepConfigTests {
             )
 
         @Test
-        fun `turns journeyData's values into strings, then serializes it`() {
-            val journeyDataWithStringValues = testJourneyData.mapValues { (_, value) -> value.toString() }
-            val expectedSerializedData = Json.encodeToString(journeyDataWithStringValues)
+        fun `replaces journeyData's values with SHA-256 hashes of them as strings, then serializes it`() {
+            val journeyDataHashes =
+                testJourneyData.mapValues { (_, value) ->
+                    Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(value.toString().toByteArray()))
+                }
+            val expectedSerializedData = Json.encodeToString(journeyDataHashes)
 
-            val returnedSerializedData = CheckAnswersFormModel.serializeJourneyData(testJourneyData)
+            val returnedSerializedData = CheckAnswersFormModel.serializeJourneyDataHashes(testJourneyData)
 
             assertEquals(expectedSerializedData, returnedSerializedData)
         }

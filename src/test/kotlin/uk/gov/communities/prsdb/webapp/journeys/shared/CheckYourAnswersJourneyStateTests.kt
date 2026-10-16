@@ -176,7 +176,7 @@ class CheckYourAnswersJourneyStateTests {
 
             state.getCyaJourneyId(mockRequestableStep("step-a"))
 
-            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyDataHashes(mapOf("step-a" to mapOf("field" to "a")))
             assertEquals(expectedSnapshot, state.childState?.originalCyaAnswers)
         }
     }
@@ -198,7 +198,7 @@ class CheckYourAnswersJourneyStateTests {
                 )
 
             val expectedSnapshot =
-                CheckAnswersFormModel.serializeJourneyData(
+                CheckAnswersFormModel.serializeJourneyDataHashes(
                     linkedMapOf("step-a" to mapOf("field" to "a"), "step-b" to mapOf("field" to "b")),
                 )
             assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
@@ -212,7 +212,7 @@ class CheckYourAnswersJourneyStateTests {
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
                 )
 
-            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+            val expectedSnapshot = CheckAnswersFormModel.serializeJourneyDataHashes(mapOf("step-a" to mapOf("field" to "a")))
             assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
         }
 
@@ -227,7 +227,7 @@ class CheckYourAnswersJourneyStateTests {
                 )
 
             val expectedSnapshot =
-                CheckAnswersFormModel.serializeJourneyData(
+                CheckAnswersFormModel.serializeJourneyDataHashes(
                     linkedMapOf(
                         "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
                         "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/unsetAnswer" to null,
@@ -254,7 +254,7 @@ class CheckYourAnswersJourneyStateTests {
                 )
 
             val expectedSnapshot =
-                CheckAnswersFormModel.serializeJourneyData(
+                CheckAnswersFormModel.serializeJourneyDataHashes(
                     linkedMapOf(
                         "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
                         "step-a" to mapOf("field" to "a"),
@@ -266,7 +266,7 @@ class CheckYourAnswersJourneyStateTests {
 
     @Nested
     inner class CyaAnswersMatchSnapshot {
-        private val snapshot = CheckAnswersFormModel.serializeJourneyData(mapOf("step-a" to mapOf("field" to "a")))
+        private val snapshot = CheckAnswersFormModel.serializeJourneyDataHashes(mapOf("step-a" to mapOf("field" to "a")))
 
         @Test
         fun `returns true when only data outside the snapshot has changed`() {

@@ -66,7 +66,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         val (delegateKeys, stepKeys) = keys.partition { it.startsWith(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
         val stepAnswers = getSubmittedStepData().filterKeys { it in stepKeys }
         val delegateAnswers = delegateKeys.associateWith { getEncodedDelegateValue(it.removePrefix(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX)) }
-        return CheckAnswersFormModel.serializeJourneyData((stepAnswers + delegateAnswers).toSortedMap())
+        return CheckAnswersFormModel.serializeJourneyDataHashes((stepAnswers + delegateAnswers).toSortedMap())
     }
 
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
