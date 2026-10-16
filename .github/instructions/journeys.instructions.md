@@ -51,13 +51,12 @@ class PropertyComplianceJourneyFactory(
 ```
 
 ### Page Titles
-Each step's `<title>` is built from its h1 by the layout (see `frontend.instructions.md`). Step templates pass their
-h1 expression as the layout `title` argument.
+Step templates pass their h1 expression as the title (see "Page Titles" in `frontend.instructions.md`).
 
-Never set a journey-wide `"title"` content property (e.g. `withAdditionalContentProperty { "title" to ... }` on a
+Never set a journey-wide `title` content property (e.g. `withAdditionalContentProperty { "title" to ... }` on a
 whole journey, task or `configure { }` block): every step would share one title instead of using its own h1.
 
-Where a single step on a shared form template needs a title different from its h1, set a `"title"` content property
+Where a single step on a shared form template needs a title different from its h1, set a `title` content property
 (a `pageTitle` message key) on that step only — via `withAdditionalContentProperty` on the step in the journey
 factory, or in the step config's `getStepSpecificContent` if every use of that step needs it, e.g.
 `"title" to "uploads.checkUploads.gasSafety.pageTitle"` in `CheckGasCertUploadsStepConfig`. Have the template fall

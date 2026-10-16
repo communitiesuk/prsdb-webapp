@@ -160,12 +160,8 @@ Plans must account for these patterns:
 - Journey factories annotated `@PrsdbWebService`
 
 ### Page Titles
-- Every new page's template passes its h1 expression as the first `layout(...)` / `questionPage(...)` /
-  `complexQuestionPage(...)` argument, so the title is `[Error: ]<h1> - <service name> - GOV.UK`.
-- Never set a journey-wide `"title"` content property or pass `#{${title}}` from a template without a fallback.
-- Only plan a different title (a `pageTitle` key, or a per-step `"title"` override on shared form templates) when the
-  h1 is not unique or not descriptive out of context, and list it as a question for the user.
-- See "Page Titles" in `.github/instructions/frontend.instructions.md` and `journeys.instructions.md`.
+- Title = the page's h1. Only plan a different title when the h1 isn't unique or descriptive out of context, and list
+  it as a question for the user. See "Page Titles" in `.github/instructions/frontend.instructions.md`.
 
 ### Validation
 - Form models annotated `@IsValidPrioritised`
