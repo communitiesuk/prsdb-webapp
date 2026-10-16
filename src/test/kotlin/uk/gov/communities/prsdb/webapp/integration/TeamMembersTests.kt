@@ -2,14 +2,22 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.ADMINISTRATORS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import java.util.UUID
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @WithOrgLandlordProfile
 class TeamMembersTests :
     IntegrationTestWithImmutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    @Autowired
+    private lateinit var invitationRepository: OrganisationalLandlordInvitationRepository
+
     @Test
     fun `the administrators tab is shown by default, listing administrators alphabetically and marking the current user`() {
         // Act
@@ -78,5 +86,8 @@ class TeamMembersTests :
         // TODO PDJB-1854: assert the Remove link goes to the remove expired invitation page
 
         assertThat(teamMembersPage.invitationsPanel).not().containsText("hidden-org-invite-e@example.com")
+        val hiddenInvitation = invitationRepository.findByToken(UUID.fromString("1234abcd-5678-abcd-1234-567abcd2222e"))
+        assertNotNull(hiddenInvitation)
+        assertTrue(hiddenInvitation.isHidden)
     }
 }
