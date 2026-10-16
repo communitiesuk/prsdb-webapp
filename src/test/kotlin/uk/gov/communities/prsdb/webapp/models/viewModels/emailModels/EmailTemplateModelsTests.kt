@@ -58,6 +58,26 @@ class EmailTemplateModelsTests {
                     "/emails/OrganisationalLandlordInvitation.md",
                 ),
                 EmailTemplateTestData(
+                    OrganisationalLandlordInvitationAcceptedEmail(
+                        recipientName = "Jane Smith",
+                        roleName = "editor",
+                        organisationName = "Example Organisation",
+                        isAdmin = false,
+                        dashboardUrl = URI("dashboardUrl"),
+                    ),
+                    "/emails/OrganisationalLandlordInvitationAccepted.md",
+                ),
+                EmailTemplateTestData(
+                    OrganisationalLandlordInvitationAcceptedEmail(
+                        recipientName = "Jane Smith",
+                        roleName = "administrator",
+                        organisationName = "Example Organisation",
+                        isAdmin = true,
+                        dashboardUrl = URI("dashboardUrl"),
+                    ),
+                    "/emails/OrganisationalLandlordInvitationAccepted.md",
+                ),
+                EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
                         "1 Street Name\nAB1 2CD",
