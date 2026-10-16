@@ -98,6 +98,21 @@ if (-not $Force) {
     }
 }
 
+# Stop the worktree's local Docker containers so their ports are freed for future worktrees
+$composeFile = Join-Path $WorktreePath "docker-compose.local.yml"
+if ((Test-Path $composeFile) -and (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Host "`nStopping local Docker containers..." -ForegroundColor Cyan
+    Push-Location $WorktreePath
+    try {
+        docker compose -f docker-compose.local.yml down
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Warning: Failed to stop Docker containers." -ForegroundColor Yellow
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
 # Clean up directories with deeply nested paths that can exceed Windows MAX_PATH (260 chars)
 Write-Host "`nCleaning up long-path directories..." -ForegroundColor Cyan
 $longPathDirs = @('node_modules', 'build', '.gradle', 'dist')

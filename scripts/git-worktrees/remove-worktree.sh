@@ -97,6 +97,15 @@ if ! $FORCE; then
     fi
 fi
 
+# Stop the worktree's local Docker containers so their ports are freed for future worktrees
+if [ -f "$WORKTREE_PATH/docker-compose.local.yml" ] && command -v docker >/dev/null 2>&1; then
+    echo ""
+    echo "Stopping local Docker containers..."
+    if ! (cd "$WORKTREE_PATH" && docker compose -f docker-compose.local.yml down); then
+        echo "WARNING: Failed to stop Docker containers."
+    fi
+fi
+
 # Clean up directories with deeply nested paths that can exceed Windows MAX_PATH (260 chars)
 echo ""
 echo "Cleaning up long-path directories..."
