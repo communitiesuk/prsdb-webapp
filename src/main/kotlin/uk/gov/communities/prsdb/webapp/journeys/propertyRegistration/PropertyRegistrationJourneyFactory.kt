@@ -799,8 +799,9 @@ class PropertyRegistrationJourney(
 
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
-    // Payment progress is recorded after the CYA page is submitted, so it shouldn't stop the user changing their answers
-    override val cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference", "paymentOutcome")
+    // These aren't answers: payment progress is recorded after the CYA page is submitted, and the back link changes with how the
+    // user reaches the task list, so neither should stop the user changing their answers
+    override val cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference", "paymentOutcome", "backUrlKey")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true

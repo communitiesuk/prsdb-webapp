@@ -24,6 +24,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val form = PostForm(page)
 
+    val answersSnapshot: String
+        get() = page.locator("input[name='submittedFilteredJourneyData']").inputValue()
+
     val sectionHeader = SectionHeader(page.locator("main"))
 
     val heading = Heading(page.locator("h1.govuk-heading-xl"))
