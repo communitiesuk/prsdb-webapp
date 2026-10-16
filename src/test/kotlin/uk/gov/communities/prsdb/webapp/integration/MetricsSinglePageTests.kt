@@ -91,7 +91,7 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
     fun `date error messages include a visually hidden error prefix`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()
 
-        metricsPage.submitDateRange("10", "1", "2025", "31", "2", "2025")
+        metricsPage.submitDateRange("10", "1", "2025", "40", "2", "2025")
 
         val reloadedPage = assertPageIs(page, MetricsPage::class)
         assertThat(reloadedPage.form.getErrorMessage("toDate").locator(".govuk-visually-hidden")).containsText("Error:")
