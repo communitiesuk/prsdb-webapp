@@ -4,7 +4,9 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.ADMINISTRATORS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
@@ -13,6 +15,9 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlor
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import java.util.UUID
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
@@ -24,6 +29,12 @@ class TeamMembersTests :
     IntegrationTestWithImmutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
     @Autowired
     private lateinit var invitationRepository: OrganisationalLandlordInvitationRepository
+
+    @Autowired
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    private lateinit var invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
 
     @Test
     fun `the administrators tab is shown by default, listing administrators alphabetically and marking the current user`() {
@@ -103,7 +114,9 @@ class TeamMembersTests :
             listOf("data-local.sql", "data-org-landlord-team-members.sql"),
         ) {
         @Test
-        fun `resending a pending invitation shows the invitation resent banner on the invitations tab`(page: Page) {
+        fun `resending a pending invitation emails the invitee, shows a banner and moves the invitation to the end of the list`(
+            page: Page,
+        ) {
             // Arrange
             val teamMembersPage = navigator.goToTeamMembers()
             teamMembersPage.tabs.goToInvitations(pendingInvitationCount = 3)
@@ -122,6 +135,13 @@ class TeamMembersTests :
             assertThat(resultPage.successBanner.content).containsText("An invitation has been sent to pending-org-invite-c@example.com")
             assertEquals(INVITATIONS_FRAGMENT, resultPage.tabs.activeTabPanelId)
             assertThat(resultPage.pendingInvitationsSummaryList.getRowByIndex(2).value).hasText("pending-org-invite-c@example.com")
+            verify(invitationEmailSender).sendEmail(
+                "pending-org-invite-c@example.com",
+                OrganisationalLandlordInvitationEmail(
+                    organisationName = "Local Organisation Landlord",
+                    invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri("1234abcd-5678-abcd-1234-567abcd2222c"),
+                ),
+            )
         }
 
         @Test
@@ -141,7 +161,7 @@ class TeamMembersTests :
             val resultPage = BasePage.assertPageIs(page, TeamMembersPage::class)
             assertThat(resultPage.successBanner.content).containsText("An invitation has been sent to expired-org-invite-d@example.com")
             assertThat(resultPage.pendingInvitationsSummaryList.rows).hasCount(4)
-            assertThat(resultPage.invitationsPanel).not().containsText("Expired invitations")
+            assertThat(resultPage.expiredInvitationsSummaryList).isHidden()
         }
     }
 

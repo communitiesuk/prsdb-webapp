@@ -154,6 +154,16 @@ class TeamMembersControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["ORG_EDITOR"])
+    fun `resendInvitation returns 403 for an organisation editor`() {
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `resendInvitation returns 403 for a non-organisation landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())

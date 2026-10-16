@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
 
 @PrsdbWebService
 class OrganisationalLandlordInvitationService(
@@ -143,15 +142,20 @@ class OrganisationalLandlordInvitationService(
         val invitation =
             invitationRepository
                 .findById(invitationId)
-                .getOrNull()
-                ?.takeIf {
-                    it.organisationalLandlord.id == organisationalLandlord.id &&
-                        it.status != OrganisationalLandlordInvitationStatus.HIDDEN
-                }
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation $invitationId not found for this organisation")
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
+
+        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this organisation")
+        }
+
+        if (invitation.status == OrganisationalLandlordInvitationStatus.HIDDEN) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation has been hidden")
+        }
 
         // Resending would duplicate an invitation that is already pending or an existing membership, so hide this one instead
-        if (getOtherPendingInvitedAndMemberEmails(invitation).containsEmail(invitation.invitedEmail)) {
+        if (getPendingInvitedAndMemberEmails(organisationalLandlord, excludingInvitationId = invitation.id)
+                .containsEmail(invitation.invitedEmail)
+        ) {
             invitation.isHidden = true
             invitationRepository.save(invitation)
             return null
@@ -171,10 +175,13 @@ class OrganisationalLandlordInvitationService(
     }
 
     // Expired and hidden invitations can no longer be accepted, so they must not block re-inviting that email address
-    fun getPendingInvitedAndMemberEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
+    fun getPendingInvitedAndMemberEmails(
+        organisationalLandlord: OrganisationalLandlord,
+        excludingInvitationId: Long? = null,
+    ): List<String> =
         invitationRepository
             .findByOrganisationalLandlord(organisationalLandlord)
-            .filter { it.status == OrganisationalLandlordInvitationStatus.PENDING }
+            .filter { it.status == OrganisationalLandlordInvitationStatus.PENDING && it.id != excludingInvitationId }
             .map { it.invitedEmail } +
             organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
 
@@ -194,13 +201,6 @@ class OrganisationalLandlordInvitationService(
             ),
         )
     }
-
-    private fun getOtherPendingInvitedAndMemberEmails(invitation: OrganisationalLandlordInvitation): List<String> =
-        invitationRepository
-            .findByOrganisationalLandlord(invitation.organisationalLandlord)
-            .filter { it.id != invitation.id && it.status == OrganisationalLandlordInvitationStatus.PENDING }
-            .map { it.invitedEmail } +
-            organisationalLandlordUserService.getOrganisationalLandlordUsers(invitation.organisationalLandlord).map { it.email }
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
