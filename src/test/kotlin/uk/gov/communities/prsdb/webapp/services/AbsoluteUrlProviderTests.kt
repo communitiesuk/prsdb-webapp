@@ -46,6 +46,15 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
+    fun `buildTeamMembersUri builds the landlord team members URL`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test")
+
+        val uri = provider.buildTeamMembersUri()
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/team-members")
+    }
+
+    @Test
     fun `buildLocalCouncilDashboardUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(localCouncilBaseUrl = "example.test/local-council")
 
