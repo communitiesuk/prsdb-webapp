@@ -127,7 +127,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLED"])
+    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLED", "MANUAL_INTERVENTION"])
     fun `afterStepIsReached marks the address as already registered when the payment failed and the address has been registered`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
@@ -347,6 +347,7 @@ class PaymentStatusCheckStepConfigTests {
                 Arguments.of(PaymentStatus.CAPTURABLE, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
                 Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.FAILURE),
+                Arguments.of(PaymentStatus.MANUAL_INTERVENTION, PaymentOutcome.FAILURE),
             )
     }
 }
