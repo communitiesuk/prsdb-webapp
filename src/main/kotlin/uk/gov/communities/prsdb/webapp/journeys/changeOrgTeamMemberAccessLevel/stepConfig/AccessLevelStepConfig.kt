@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyState
@@ -21,15 +22,17 @@ class AccessLevelStepConfig(
     override val formModelClass = ChangeOrgTeamMemberAccessLevelFormModel::class
 
     override fun getStepSpecificContent(state: ChangeOrgTeamMemberAccessLevelJourneyState): Map<String, Any?> {
-        val member = organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
-        val currentRole = member?.role
+        val member =
+            organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
+                ?: throw PrsdbWebException(
+                    "No organisational landlord user found with id ${state.otherOrganisationalLandlordUserId}",
+                )
         return mapOf(
-            "memberName" to member?.name,
+            "memberName" to member.name,
             "currentLevelHintKey" to
-                when (currentRole) {
+                when (member.role) {
                     OrganisationalLandlordUserRole.ADMIN -> "changeOrgTeamMemberAccessLevel.hint.currentLevel.administrator"
                     OrganisationalLandlordUserRole.EDITOR -> "changeOrgTeamMemberAccessLevel.hint.currentLevel.editor"
-                    null -> null
                 },
             "submitButtonText" to "forms.buttons.saveAndContinue",
             // TODO PDJB-1764: link to the remove-access journey
@@ -47,7 +50,6 @@ class AccessLevelStepConfig(
                         hintMsgKey = "changeOrgTeamMemberAccessLevel.radios.option.editor.hint",
                     ),
                 ),
-            "title" to "changeOrgTeamMemberAccessLevel.title",
         )
     }
 

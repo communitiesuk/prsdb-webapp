@@ -17,7 +17,6 @@ class UpdateLeadTrusteeCyaStepConfig : AbstractCheckYourAnswersStepConfig<Update
 
     override fun getStepSpecificContent(state: UpdateLeadTrusteeJourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "landlordDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "leadTrusteeCard" to getLeadTrusteeCard(state),

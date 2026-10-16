@@ -1,5 +1,5 @@
-title: Change access level
 heading: Change access level
+pageTitle: 'Change access level for {0,,name}'
 hint:
   currentLevel:
     administrator: '{0,,name} is currently an administrator.'

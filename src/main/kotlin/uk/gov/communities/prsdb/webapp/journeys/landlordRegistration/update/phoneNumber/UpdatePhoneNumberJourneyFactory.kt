@@ -29,7 +29,6 @@ class UpdatePhoneNumberJourneyFactory(
                 initialStep()
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.phoneNumber.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",

@@ -25,7 +25,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
 
         // Act
-        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class, mapOf("memberName" to "Beth Admin"))
         assertThat(accessLevelPage.currentLevelHint).hasText("Beth Admin is currently an administrator.")
         accessLevelPage.submitAccessLevel(OrganisationalLandlordUserRole.EDITOR.name)
 
@@ -45,7 +45,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         teamMembersPage.editorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
 
         // Act
-        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class, mapOf("memberName" to "Carl Editor"))
         assertThat(accessLevelPage.currentLevelHint).hasText("Carl Editor is currently an editor.")
         accessLevelPage.submitAccessLevel(OrganisationalLandlordUserRole.ADMIN.name)
 

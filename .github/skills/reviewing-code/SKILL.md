@@ -72,6 +72,21 @@ Key patterns to check:
 New journey code that does not follow this hierarchy, or that skips the builder DSL in favour of manual wiring,
 is a review finding.
 
+## Page Titles
+
+Every page's title should match its h1 (see "Page Titles" in `.github/instructions/frontend.instructions.md`).
+Review findings:
+
+- A new template whose title argument is not its h1 expression, e.g. `#{${title}}` with no fallback, or a different
+  message key without a reason (the h1 not being unique or descriptive out of context).
+- A new page whose h1 isn't suitable as a title, i.e. it isn't unique (another page a user can reach has the same
+  title) or doesn't describe the page out of context, and which has no title override.
+- A journey-wide `title` content property, e.g. `withAdditionalContentProperty { "title" to ... }` on a whole
+  journey, task or `configure { }` block. `title` is only for a single step's override on a shared form template.
+- A title override without a matching `expectedTitleHeading` override on the page object.
+
+Long titles are fine. Matching the h1 matters more than length.
+
 ## Validation
 
 The project uses a custom prioritised validation framework rather than standard Bean Validation annotations like

@@ -14,7 +14,6 @@ class HasMeesExemptionStepConfig : AbstractRequestableStepConfig<HasMeesExemptio
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "propertyCompliance.epcTask.meesExemptionCheck.heading",
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "radioOptions" to
                 yesOrNoRadios(

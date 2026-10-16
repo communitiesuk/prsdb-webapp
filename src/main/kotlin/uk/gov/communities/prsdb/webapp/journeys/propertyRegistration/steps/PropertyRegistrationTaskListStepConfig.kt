@@ -45,7 +45,6 @@ class PropertyRegistrationTaskListStepConfig(
                 ?.let { backUrlStorageService.getBackUrl(it) }
 
         return TaskListViewModel(
-            "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,

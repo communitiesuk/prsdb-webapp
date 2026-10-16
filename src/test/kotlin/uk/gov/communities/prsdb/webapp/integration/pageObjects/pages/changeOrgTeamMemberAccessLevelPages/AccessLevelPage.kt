@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.s
 
 class AccessLevelPage(
     page: Page,
+    urlArguments: Map<String, String>,
 ) : BasePage(page, "/$CHANGE_ACCESS_LEVEL_PATH_SEGMENT/${AccessLevelStep.ROUTE_SEGMENT}") {
     val form = AccessLevelForm(page)
 
@@ -20,6 +21,8 @@ class AccessLevelPage(
     val errorSummary = ErrorSummary(page)
 
     val currentLevelHint: Locator = page.locator("main p.govuk-body").first()
+
+    override val expectedTitleHeading = "Change access level for ${urlArguments.getValue("memberName")}"
 
     fun submitAccessLevel(role: String) {
         form.accessLevelRadios.selectValue(role)

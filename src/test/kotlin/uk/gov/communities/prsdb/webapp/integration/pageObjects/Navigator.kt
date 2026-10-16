@@ -1231,9 +1231,12 @@ class Navigator(
         return createValidPage(page, InviteOrganisationalLandlordUserFormPage::class)
     }
 
-    fun goToChangeOrgTeamMemberAccessLevelPage(otherOrganisationalLandlordUserId: Long): AccessLevelPage {
+    fun goToChangeOrgTeamMemberAccessLevelPage(
+        otherOrganisationalLandlordUserId: Long,
+        memberName: String,
+    ): AccessLevelPage {
         navigate(ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelPath(otherOrganisationalLandlordUserId))
-        return createValidPage(page, AccessLevelPage::class)
+        return createValidPage(page, AccessLevelPage::class, mapOf("memberName" to memberName))
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {

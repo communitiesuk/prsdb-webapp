@@ -176,7 +176,7 @@ class LandlordDetailsController(
         )
         model.addAttribute("isLandlordView", false)
         model.addAttribute("showDeleteLandlordRecordLink", false)
-        model.addAttribute("pageTitleOverride", "landlordDetails.localCouncilView.pageTitle")
+        model.addAttribute("title", "landlordDetails.localCouncilView.pageTitle")
 
         addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
 

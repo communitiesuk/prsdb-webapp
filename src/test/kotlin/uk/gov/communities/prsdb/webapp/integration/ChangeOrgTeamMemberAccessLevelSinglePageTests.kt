@@ -18,7 +18,7 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     @Test
     fun `the page loads and shows the correct heading`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
-        val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
+        val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId, "Beth Admin")
 
         BaseComponent.assertThat(accessLevelPage.heading).containsText("Change access level")
     }
@@ -26,11 +26,11 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     @Test
     fun `submitting without selecting an access level shows a validation error`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
-        val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
+        val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId, "Beth Admin")
 
         accessLevelPage.submitWithoutSelectingAccessLevel()
 
-        val errorPage = assertPageIs(page, AccessLevelPage::class)
+        val errorPage = assertPageIs(page, AccessLevelPage::class, mapOf("memberName" to "Beth Admin"))
         assertThat(errorPage.errorSummary.errorLinks("Select the access level")).hasCount(1)
     }
 }

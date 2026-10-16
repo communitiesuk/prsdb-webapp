@@ -1,4 +1,3 @@
-title: Feature flag overrides
 heading: Feature flag overrides
 description: These overrides apply only to your own browser session and are cleared when it ends.
 releasesHeading: Releases

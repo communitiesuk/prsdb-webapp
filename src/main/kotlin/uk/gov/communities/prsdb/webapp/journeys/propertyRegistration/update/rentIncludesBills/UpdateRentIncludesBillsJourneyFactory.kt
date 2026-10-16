@@ -60,9 +60,6 @@ class UpdateRentIncludesBillsJourneyFactory(
                 initialStep()
                 backUrl { returnUrl }
                 nextStep { journey.cyaStep }
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT)
@@ -105,11 +102,6 @@ class UpdateRentIncludesBillsJourneyFactory(
                 nextDestination { Destination.Nowhere() }
             }
             replaceHeadingsAndButtons()
-            configure {
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
-            }
         }
 
     private fun JourneyBuilder<UpdateRentIncludesBillsJourney>.replaceHeadingsAndButtons() {
