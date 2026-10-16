@@ -209,7 +209,7 @@ class LandlordDetailsController(
 
         fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =
             UriTemplate(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
-                .expand(landlordId)
+                .expand(mapOf("id" to landlordId))
                 .toASCIIString()
     }
 }

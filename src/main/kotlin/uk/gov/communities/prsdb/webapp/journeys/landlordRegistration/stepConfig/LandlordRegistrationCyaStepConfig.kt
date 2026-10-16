@@ -84,7 +84,7 @@ class LandlordRegistrationCyaStepConfig(
                 }
 
             landlordRegistrationService.registerOrganisationLandlord(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 organisationTypes = organisationTypes,
                 organisationHasCompanyNumber = hasCompanyNumber,
                 orgIsRegisteredCharity = isRegisteredCharity,
@@ -134,7 +134,7 @@ class LandlordRegistrationCyaStepConfig(
             )
         } else {
             landlordRegistrationService.registerIndividualLandlord(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 name = state.identityTask.getName(),
                 email =
                     state.emailStep.formModel

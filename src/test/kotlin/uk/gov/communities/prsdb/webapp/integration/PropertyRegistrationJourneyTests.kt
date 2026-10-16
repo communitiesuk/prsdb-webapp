@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -362,10 +363,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkAnswersPage.confirm()
 
-            completePropertyRegistrationPaymentSuccessfully(page)
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
             val payment = getCreatedPayment()
             assertEquals(PaymentStatus.SUCCEEDED, payment.status)
             verify(govUkPayClient).capturePayment(payment.paymentId)
+
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(confirmationPage.paymentSummaryHeading).isVisible()
+            assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
+                .containsText(PaymentHelper.formatPence(payment.amountInPence))
+            assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
+                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+            assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
+                .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
 
         @Test

@@ -33,7 +33,7 @@ class CheckUserIsLandlordStepConfig(
     override fun chooseTemplate(state: AcceptOrganisationalLandlordUserInvitationJourneyState): String = ""
 
     override fun afterStepIsReached(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        val principal = SecurityContextHolder.getContext().authentication.principal as OidcUser
+        val principal = SecurityContextHolder.getContext().authentication!!.principal as OidcUser
         state.userIsLandlord = userRolesService.getUserHasLandlordRole(principal.name)
     }
 

@@ -13,13 +13,17 @@ import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.security.oauth2.client.endpoint.NimbusJwtClientAuthenticationParametersConverter
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException
+import org.springframework.security.oauth2.core.OAuth2Error
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClient
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import java.security.interfaces.RSAPrivateKey
@@ -63,14 +67,19 @@ class OneLoginConfig {
     @Bean
     fun oneloginAuthorizationCodeTokenResponseClient() =
         RestClientAuthorizationCodeTokenResponseClient().apply {
-            addParametersConverter(NimbusJwtClientAuthenticationParametersConverter(::oneloginJWKResolver))
+            val converter =
+                NimbusJwtClientAuthenticationParametersConverter<OAuth2AuthorizationCodeGrantRequest> { clientRegistration ->
+                    oneloginJWKResolver(clientRegistration)
+                        ?: throw OAuth2AuthorizationException(OAuth2Error("invalid_key"))
+                }
+            addParametersConverter { request -> converter.convert(request) ?: LinkedMultiValueMap() }
         }
 
     @Bean
-    fun idTokenDecoderFactory(): JwtDecoderFactory<ClientRegistration?> {
+    fun idTokenDecoderFactory(): JwtDecoderFactory<ClientRegistration> {
         val idTokenDecoderFactory = OidcIdTokenDecoderFactory()
         idTokenDecoderFactory.setJwsAlgorithmResolver { clientRegistration ->
-            if (clientRegistration?.registrationId == "internal-access") {
+            if (clientRegistration.registrationId == "internal-access") {
                 SignatureAlgorithm.RS256
             } else {
                 SignatureAlgorithm.ES256

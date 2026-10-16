@@ -10,6 +10,4 @@ class NoAddressFoundFormPagePropertyRegistration(
 ) : NoAddressFoundFormPage(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${NoAddressFoundStep.ROUTE_SEGMENT}",
-    ) {
-    override val expectedTitleHeading = "No matching address in England found"
-}
+    )
