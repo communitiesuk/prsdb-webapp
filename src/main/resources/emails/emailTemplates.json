@@ -378,5 +378,12 @@
     "enumName": "CHANGE_ORG_TEAM_MEMBER_ACCESS_LEVEL",
     "subject": "Your access level has changed",
     "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
+  },
+  {
+    "test_id": "ee9c5038-048f-49a9-bc56-1550436308d5",
+    "prod_id": "e3ce9bac-e5ec-42ef-8693-70b66db7cc06",
+    "enumName": "REMOVE_ORG_TEAM_MEMBER_CONFIRMATION",
+    "subject": "Access removed for ((member name)) to ((organisation name))",
+    "bodyLocation": "/emails/RemoveOrgTeamMemberConfirmation.md"
   }
 ]
