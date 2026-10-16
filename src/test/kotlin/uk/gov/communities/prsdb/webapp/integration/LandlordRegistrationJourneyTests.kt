@@ -365,7 +365,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
                 organisationName = "Test Organisation Name",
                 lrn = createdOrgLandlordRegNum.toString(),
                 prsdURL = absoluteLandlordUrl,
-                // TODO: PDJB-1887: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+                // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
                 isMultiUserOrganisationsEnabled = true,
             ),
         )

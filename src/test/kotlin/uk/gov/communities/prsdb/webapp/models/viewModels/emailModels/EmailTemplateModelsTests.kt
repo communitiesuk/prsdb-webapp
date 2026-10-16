@@ -41,7 +41,7 @@ class EmailTemplateModelsTests {
                         organisationName = "Test Organisation Name",
                         lrn = "L-CCCC-CCCC",
                         prsdURL = "prsdUrl",
-                        // TODO: PDJB-1887: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+                        // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
                         isMultiUserOrganisationsEnabled = true,
                     ),
                     "/emails/OrganisationalLandlordRegistrationConfirmation.md",
