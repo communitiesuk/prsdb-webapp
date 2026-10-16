@@ -18,6 +18,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -368,7 +369,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `with JavaScript enabled, a failed payment shows the payment failed page with a link back to payment summary`(page: Page) {
+        fun `with JavaScript enabled, a failed payment shows the payment failed page and the payment can then be retried`(page: Page) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
@@ -380,7 +381,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
             assertThat(paymentFailedPage.backLink).isHidden()
             paymentFailedPage.tryAgainLink.clickAndWait()
-            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient, times(2)).createPayment(requestCaptor.capture())
+            val retriedPayment = paymentRepository.findAll().single { it.reference == requestCaptor.secondValue.reference }
+            assertEquals(PaymentStatus.SUCCEEDED, retriedPayment.status)
+            verify(govUkPayClient).capturePayment(retriedPayment.paymentId)
         }
 
         @Test
