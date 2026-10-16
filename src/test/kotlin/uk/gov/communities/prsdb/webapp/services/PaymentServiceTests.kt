@@ -1381,37 +1381,34 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment rolls back without checking GOV UK Pay when interrupted while waiting to check a failed capture`() {
+        fun `finalisePayment requires manual intervention without checking GOV UK Pay when interrupted while waiting`() {
             // Arrange
             val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = CAPTURE_CHECK_DELAY)
-            val captureFailure = GovUkPayException("Capture timed out")
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
             stubTransaction()
             whenever(mockPropertyRegistrationService.registerProperty(any()))
                 .thenReturn(MockLandlordData.createPropertyOwnership())
             stubStoredPayment()
             doAnswer {
                 Thread.currentThread().interrupt()
-                throw captureFailure
+                throw GovUkPayException("Capture timed out")
             }.whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
 
             // Act
             var wasInterrupted = false
-            val exception =
+            val status =
                 try {
-                    assertThrows<PaymentCaptureOutcomeUnknownException> {
-                        paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-                    }
+                    paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 } finally {
                     // Clears the flag so it can't leak into other tests
                     wasInterrupted = Thread.interrupted()
                 }
 
             // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             assertTrue(wasInterrupted)
-            assertSame(captureFailure, exception.cause)
-            assertIs<InterruptedException>(exception.suppressed.single())
             verify(mockGovUkPayClient, never()).getPayment(any())
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
