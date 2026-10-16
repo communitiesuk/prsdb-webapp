@@ -670,10 +670,11 @@ class OrganisationalLandlordInvitationServiceTests {
     @Test
     fun `acceptInvitation does not delete the invitation when saving the user fails`() {
         // Arrange
-        val mocks = arrangePendingInvitationAcceptance(
-            role = ADMIN,
-            stubConfirmationEmailDetails = false,
-        )
+        val mocks =
+            arrangePendingInvitationAcceptance(
+                role = ADMIN,
+                stubConfirmationEmailDetails = false,
+            )
         whenever(
             mockOrganisationalLandlordUserService.createOrganisationalLandlordUser(
                 mocks.invitedLandlord,
