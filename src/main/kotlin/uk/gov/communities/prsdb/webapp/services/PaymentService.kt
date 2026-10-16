@@ -136,6 +136,13 @@ class PaymentService(
                 govUkPayStatusBeforeCancellation.status
             }
 
+        if (govUkPayStatus == PaymentStatus.SUCCEEDED) {
+            return requireManualIntervention(
+                paymentId,
+                "GOV.UK Pay reports it succeeded, but it was not finalised before creating a new payment for journey $journeyId",
+            )
+        }
+
         if (govUkPayStatus !in PaymentStatus.IN_PROGRESS_STATUSES) {
             paymentRepository.updateStatusIfCurrentStatusIn(paymentId, PaymentStatus.IN_PROGRESS_STATUSES, govUkPayStatus, Instant.now())
         }
@@ -209,7 +216,12 @@ class PaymentService(
             }
 
             PaymentStatus.SUCCEEDED -> {
-                getStoredPaymentStatus(paymentId)
+                val storedStatus = getStoredPaymentStatus(paymentId)
+                if (storedStatus in PaymentStatus.IN_PROGRESS_STATUSES) {
+                    requireManualIntervention(paymentId, "GOV.UK Pay reports it succeeded, but it was not finalised")
+                } else {
+                    storedStatus
+                }
             }
 
             PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
@@ -225,6 +237,10 @@ class PaymentService(
             PaymentStatus.CAPTURABLE -> {
                 finaliseCapturablePayment(paymentId, registrationData)
             }
+
+            PaymentStatus.MANUAL_INTERVENTION -> {
+                throw IllegalArgumentException("Payment $paymentId cannot be finalised with $govUkPayStatus: it is not a GOV.UK Pay status")
+            }
         }
 
     private fun finaliseCapturablePayment(
@@ -233,13 +249,38 @@ class PaymentService(
     ): PaymentStatus {
         recordPaymentAsIndeterminate(paymentId)
 
+        var hasCaptured = false
         return try {
-            registerPropertyAndCapturePayment(paymentId, registrationData)
+            registerPropertyForPayment(paymentId, registrationData) {
+                captureAndConfirmPayment(paymentId)
+                hasCaptured = true
+            }
         } catch (exception: PaymentCaptureOutcomeUnknownException) {
-            throw exception
+            requireManualIntervention(paymentId, "could not confirm whether GOV.UK Pay captured it", exception)
         } catch (exception: Exception) {
-            println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
-            cancelUnfinalisedPayment(paymentId, exception)
+            if (hasCaptured) {
+                registerCapturedPaymentAgain(paymentId, registrationData, exception)
+            } else {
+                println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
+                cancelUnfinalisedPayment(paymentId, exception)
+            }
+        }
+    }
+
+    private fun registerCapturedPaymentAgain(
+        paymentId: String,
+        registrationData: PropertyRegistrationDataModel,
+        failure: Exception,
+    ): PaymentStatus {
+        println(
+            "GOV.UK Pay captured payment $paymentId but registering its property failed, so retrying without capturing: " +
+                failure.stackTraceToString(),
+        )
+        return try {
+            registerPropertyForPayment(paymentId, registrationData) {}
+        } catch (retryFailure: Exception) {
+            retryFailure.addSuppressed(failure)
+            requireManualIntervention(paymentId, "GOV.UK Pay captured it but its property could not be registered", retryFailure)
         }
     }
 
@@ -252,9 +293,10 @@ class PaymentService(
         )
     }
 
-    private fun registerPropertyAndCapturePayment(
+    private fun registerPropertyForPayment(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
+        capturePayment: () -> Unit,
     ): PaymentStatus =
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
@@ -290,7 +332,7 @@ class PaymentService(
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                captureAndConfirmPayment(paymentId)
+                capturePayment()
                 PaymentStatus.SUCCEEDED
             },
         )
@@ -331,7 +373,7 @@ class PaymentService(
                     )
                 }
 
-                PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
+                PaymentStatus.CREATED, PaymentStatus.INDETERMINATE, PaymentStatus.MANUAL_INTERVENTION -> {}
             }
         } catch (exception: GovUkPayException) {
             outcomeUnknownException.addSuppressed(exception)
@@ -399,6 +441,32 @@ class PaymentService(
             Instant.now(),
         )
         return paymentRepository.findStatusByPaymentId(paymentId) ?: govUkPayStatus
+    }
+
+    private fun requireManualIntervention(
+        paymentId: String,
+        reason: String,
+        cause: Exception? = null,
+    ): PaymentStatus {
+        val alert = "Payment requires manual intervention: $paymentId ($reason)"
+        val isFlagged =
+            try {
+                paymentRepository.updateStatusIfCurrentStatusIn(
+                    paymentId,
+                    PaymentStatus.IN_PROGRESS_STATUSES,
+                    PaymentStatus.MANUAL_INTERVENTION,
+                    Instant.now(),
+                ) == 1
+            } catch (exception: Exception) {
+                cause?.let { exception.addSuppressed(it) }
+                println("$alert, but recording this failed: ${exception.stackTraceToString()}")
+                throw exception
+            }
+        // Another request finished the payment first
+        if (!isFlagged) return getStoredPaymentStatus(paymentId)
+
+        println(if (cause == null) alert else "$alert: ${cause.stackTraceToString()}")
+        return PaymentStatus.MANUAL_INTERVENTION
     }
 
     private fun getStoredPaymentStatus(paymentId: String): PaymentStatus =

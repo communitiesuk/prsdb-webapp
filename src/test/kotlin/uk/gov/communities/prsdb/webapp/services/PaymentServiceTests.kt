@@ -33,6 +33,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
@@ -831,7 +832,65 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `createPropertyRegistrationPayment records an in-progress payment that has already succeeded and does not create another`() {
+        fun `createPropertyRegistrationPayment requires manual intervention for a succeeded in-progress payment and creates another`() {
+            // Arrange
+            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+            val incompleteProperty = setUpIncompletePropertyAndLandlord()
+            val existingPayment = createPayment(incompleteProperty = incompleteProperty)
+            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
+                .thenReturn(listOf(existingPayment))
+            whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
+                .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS))
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION, existingPayment.paymentId)
+            stubGovUkPayCreatePayment(nextUrl = "https://pay.example.test/next")
+
+            // Act
+            val nextUrl =
+                paymentService.createPropertyRegistrationPayment(
+                    journeyId,
+                    email,
+                    paymentService.getPropertyRegistrationPaymentQuote(),
+                )
+
+            // Assert
+            assertEquals("https://pay.example.test/next", nextUrl)
+            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), eq(PaymentStatus.SUCCEEDED), any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verify(mockPaymentRepository).save(any<Payment>())
+        }
+
+        @Test
+        fun `createPropertyRegistrationPayment requires manual intervention for a payment that succeeds before it can be cancelled`() {
+            // Arrange
+            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+            val incompleteProperty = setUpIncompletePropertyAndLandlord()
+            val existingPayment = createPayment(status = PaymentStatus.INDETERMINATE, incompleteProperty = incompleteProperty)
+            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
+                .thenReturn(listOf(existingPayment))
+            whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId)).thenReturn(
+                createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.CAPTURABLE),
+                createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS),
+            )
+            doThrow(GovUkPayException(HttpStatus.BAD_REQUEST, "P0501", "Cancellation of payment failed", RuntimeException()))
+                .whenever(mockGovUkPayClient)
+                .cancelPayment(existingPayment.paymentId)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION, existingPayment.paymentId)
+            stubGovUkPayCreatePayment()
+
+            // Act
+            paymentService.createPropertyRegistrationPayment(
+                journeyId,
+                email,
+                paymentService.getPropertyRegistrationPaymentQuote(),
+            )
+
+            // Assert
+            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), eq(PaymentStatus.SUCCEEDED), any())
+            verify(mockGovUkPayClient).createPayment(any())
+        }
+
+        @Test
+        fun `createPropertyRegistrationPayment does not create another payment when a succeeded payment is finalised before flagging`() {
             // Arrange
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
             val incompleteProperty = setUpIncompletePropertyAndLandlord()
@@ -853,53 +912,7 @@ class PaymentServiceTests {
                 }
 
             // Assert
-            verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
-                eq(existingPayment.paymentId),
-                eq(PaymentStatus.IN_PROGRESS_STATUSES),
-                eq(PaymentStatus.SUCCEEDED),
-                any(),
-            )
             assertContains(exception.message!!, existingPayment.paymentId)
-            assertContains(exception.message!!, journeyId)
-            verify(mockGovUkPayClient, never()).cancelPayment(any())
-            verify(mockGovUkPayClient, never()).createPayment(any())
-        }
-
-        @Test
-        fun `createPropertyRegistrationPayment records a payment that succeeds before it can be cancelled and does not create another`() {
-            // Arrange
-            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
-            val incompleteProperty = setUpIncompletePropertyAndLandlord()
-            val existingPayment = createPayment(status = PaymentStatus.INDETERMINATE, incompleteProperty = incompleteProperty)
-            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
-                .thenReturn(listOf(existingPayment))
-            whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId)).thenReturn(
-                createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.CAPTURABLE),
-                createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS),
-            )
-            doThrow(GovUkPayException(HttpStatus.BAD_REQUEST, "P0501", "Cancellation of payment failed", RuntimeException()))
-                .whenever(mockGovUkPayClient)
-                .cancelPayment(existingPayment.paymentId)
-            whenever(mockPaymentRepository.findStatusByPaymentId(existingPayment.paymentId)).thenReturn(PaymentStatus.SUCCEEDED)
-
-            // Act
-            val exception =
-                assertThrows<IllegalStateException> {
-                    paymentService.createPropertyRegistrationPayment(
-                        journeyId,
-                        email,
-                        paymentService.getPropertyRegistrationPaymentQuote(),
-                    )
-                }
-
-            // Assert
-            assertContains(exception.message!!, existingPayment.paymentId)
-            verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
-                eq(existingPayment.paymentId),
-                eq(PaymentStatus.IN_PROGRESS_STATUSES),
-                eq(PaymentStatus.SUCCEEDED),
-                any(),
-            )
             verify(mockGovUkPayClient, never()).createPayment(any())
         }
 
@@ -1046,6 +1059,20 @@ class PaymentServiceTests {
             )
         }
 
+        @Test
+        fun `finalisePayment throws when given a status GOV UK Pay never reports`() {
+            // Act, Assert
+            assertThrows<IllegalArgumentException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.MANUAL_INTERVENTION, registrationData)
+            }
+            verifyNoInteractions(
+                mockPaymentRepository,
+                mockGovUkPayClient,
+                mockPropertyRegistrationService,
+                mockSavedJourneyStateRepository,
+            )
+        }
+
         @ParameterizedTest
         @EnumSource(PaymentStatus::class, names = ["FAILED", "CANCELLED"])
         fun `finalisePayment sets an unsuccessful status if the payment is in progress and returns the current status`(
@@ -1068,18 +1095,51 @@ class PaymentServiceTests {
             verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService, mockSavedJourneyStateRepository)
         }
 
-        @Test
-        fun `finalisePayment returns the current status without updating it when GOV UK Pay reports the payment succeeded`() {
+        @ParameterizedTest
+        @EnumSource(PaymentStatus::class, names = ["CREATED", "INDETERMINATE"])
+        fun `finalisePayment requires manual intervention when GOV UK Pay reports an unfinalised payment succeeded`(
+            storedStatus: PaymentStatus,
+        ) {
             // Arrange
-            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(storedStatus)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService, mockSavedJourneyStateRepository)
+        }
+
+        @ParameterizedTest
+        @EnumSource(PaymentStatus::class, names = ["CREATED", "INDETERMINATE", "CAPTURABLE"], mode = EnumSource.Mode.EXCLUDE)
+        fun `finalisePayment returns the current status without updating it when GOV UK Pay reports a finished payment succeeded`(
+            storedStatus: PaymentStatus,
+        ) {
+            // Arrange
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(storedStatus)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
+
+            // Assert
+            assertEquals(storedStatus, status)
+            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
+            verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService, mockSavedJourneyStateRepository)
+        }
+
+        @Test
+        fun `finalisePayment returns the current status when a succeeded payment is finalised before it can be flagged`() {
+            // Arrange
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID))
+                .thenReturn(PaymentStatus.INDETERMINATE, PaymentStatus.SUCCEEDED)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
-            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
-            verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService, mockSavedJourneyStateRepository)
         }
 
         @Test
@@ -1381,40 +1441,39 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment rolls back without cancelling when it cannot confirm whether GOV UK Pay captured the payment`() {
+        fun `finalisePayment requires manual intervention without cancelling when it cannot confirm GOV UK Pay captured the payment`() {
             // Arrange
-            val captureFailure = GovUkPayException("Capture timed out")
-            val statusCheckFailure = GovUkPayException("GOV.UK Pay unavailable")
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
             stubTransaction()
             whenever(mockPropertyRegistrationService.registerProperty(any()))
                 .thenReturn(MockLandlordData.createPropertyOwnership())
             stubStoredPayment()
-            doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(statusCheckFailure)
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
 
             // Act
-            val exception =
-                assertThrows<PaymentCaptureOutcomeUnknownException> {
-                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-                }
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
-            assertSame(captureFailure, exception.cause)
-            assertEquals(listOf(statusCheckFailure), exception.suppressed.toList())
-            verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
-            // Only recording the payment as indeterminate and the rolled-back claim update the status
-            verify(mockPaymentRepository, times(2)).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
+            verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
+                eq(PAYMENT_ID),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
+                eq(PaymentStatus.MANUAL_INTERVENTION),
+                any(),
+            )
         }
 
         @Test
-        fun `finalisePayment captures the payment again only once when GOV UK Pay keeps rejecting the capture`() {
+        fun `finalisePayment requires manual intervention when GOV UK Pay keeps rejecting the capture`() {
             // Arrange
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
             stubTransaction()
             whenever(mockPropertyRegistrationService.registerProperty(any()))
                 .thenReturn(MockLandlordData.createPropertyOwnership())
@@ -1424,15 +1483,114 @@ class PaymentServiceTests {
                 .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
 
             // Act
-            assertThrows<PaymentCaptureOutcomeUnknownException> {
-                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-            }
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verify(mockGovUkPayClient, times(2)).capturePayment(PAYMENT_ID)
             verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @Test
+        fun `finalisePayment logs that the payment requires manual intervention and why its capture could not be confirmed`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+                // Assert
+                val output = outContent.toString()
+                assertContains(output, "Payment requires manual intervention: $PAYMENT_ID")
+                assertContains(output, "Capture timed out")
+                assertContains(output, "GOV.UK Pay unavailable")
+            } finally {
+                System.setOut(originalOut)
+            }
+        }
+
+        @Test
+        fun `finalisePayment returns the current status instead of requiring manual intervention when another request finished it`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+                // Assert
+                assertEquals(PaymentStatus.SUCCEEDED, status)
+                assertFalse(outContent.toString().contains("Payment requires manual intervention"))
+            } finally {
+                System.setOut(originalOut)
+            }
+        }
+
+        @Test
+        fun `finalisePayment logs and rethrows when it cannot record that the payment requires manual intervention`() {
+            // Arrange
+            val flagFailure = DataAccessResourceFailureException("Database unavailable")
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            whenever(
+                mockPaymentRepository.updateStatusIfCurrentStatusIn(
+                    eq(PAYMENT_ID),
+                    eq(PaymentStatus.IN_PROGRESS_STATUSES),
+                    eq(PaymentStatus.MANUAL_INTERVENTION),
+                    any(),
+                ),
+            ).thenThrow(flagFailure)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                val exception =
+                    assertThrows<DataAccessResourceFailureException> {
+                        paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+                    }
+
+                // Assert
+                assertSame(flagFailure, exception)
+                assertIs<PaymentCaptureOutcomeUnknownException>(exception.suppressed.single())
+                val output = outContent.toString()
+                assertContains(output, "Payment requires manual intervention: $PAYMENT_ID")
+                assertContains(output, "but recording this failed")
+            } finally {
+                System.setOut(originalOut)
+            }
         }
 
         @ParameterizedTest
@@ -1528,30 +1686,118 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment throws and leaves the payment indeterminate when GOV UK Pay took it but registration fails to commit`() {
+        fun `finalisePayment registers the property again without capturing when the transaction fails to commit after the capture`() {
             // Arrange
-            val commitFailure = TransactionSystemException("Commit failed")
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
             stubTransaction()
             whenever(mockPropertyRegistrationService.registerProperty(any()))
                 .thenReturn(MockLandlordData.createPropertyOwnership())
-            stubStoredPayment()
-            doThrow(commitFailure).whenever(mockTransactionManager).commit(any())
-            doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+            // Rolling back discards the first attempt's changes to the payment
+            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenAnswer { Optional.of(createPayment(paymentId = PAYMENT_ID)) }
+            doThrow(TransactionSystemException("Commit failed")).doNothing().whenever(mockTransactionManager).commit(any())
 
             // Act
-            val exception =
-                assertThrows<IllegalStateException> {
-                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-                }
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
-            assertSame(commitFailure, exception.cause)
+            assertEquals(PaymentStatus.SUCCEEDED, status)
             verify(mockGovUkPayClient, times(1)).capturePayment(PAYMENT_ID)
-            // Only recording the payment as indeterminate and the rolled-back claim update the status
-            verify(mockPaymentRepository, times(2)).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
+            verify(mockPropertyRegistrationService, times(2)).registerProperty(any())
+            verify(mockTransactionManager, times(2)).commit(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verify(mockGovUkPayClient, never()).getPayment(any())
+        }
+
+        @Test
+        fun `finalisePayment requires manual intervention without cancelling when registering a captured payment fails again`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            // Rolling back discards the first attempt's changes to the payment
+            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenAnswer { Optional.of(createPayment(paymentId = PAYMENT_ID)) }
+            doThrow(TransactionSystemException("First commit failed"), TransactionSystemException("Second commit failed"))
+                .whenever(mockTransactionManager)
+                .commit(any())
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verify(mockGovUkPayClient, times(1)).capturePayment(PAYMENT_ID)
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verify(mockGovUkPayClient, never()).getPayment(any())
+        }
+
+        @Test
+        fun `finalisePayment logs both failures when registering a captured payment fails again`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            // Rolling back discards the first attempt's changes to the payment
+            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenAnswer { Optional.of(createPayment(paymentId = PAYMENT_ID)) }
+            doThrow(TransactionSystemException("First commit failed"), TransactionSystemException("Second commit failed"))
+                .whenever(mockTransactionManager)
+                .commit(any())
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+                // Assert
+                val alert = outContent.toString().substringAfter("Payment requires manual intervention: $PAYMENT_ID")
+                assertContains(alert, "Second commit failed")
+                assertContains(alert, "First commit failed")
+            } finally {
+                System.setOut(originalOut)
+            }
+        }
+
+        @Test
+        fun `finalisePayment returns the current status when another request finishes a captured payment before it is registered again`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            whenever(
+                mockPaymentRepository.updateStatusIfCurrentStatusIn(
+                    eq(PAYMENT_ID),
+                    eq(listOf(PaymentStatus.INDETERMINATE)),
+                    eq(PaymentStatus.SUCCEEDED),
+                    any(),
+                ),
+            ).thenReturn(1, 0)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            // Rolling back discards the first attempt's changes to the payment
+            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenAnswer { Optional.of(createPayment(paymentId = PAYMENT_ID)) }
+            doThrow(TransactionSystemException("Commit failed")).doNothing().whenever(mockTransactionManager).commit(any())
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verify(mockPropertyRegistrationService, times(1)).registerProperty(any())
+            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(
+                any(),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
+                eq(PaymentStatus.MANUAL_INTERVENTION),
+                any(),
+            )
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
 
         @Test
@@ -1938,9 +2184,10 @@ class PaymentServiceTests {
     private fun stubConditionalUpdate(
         expectedStatuses: List<PaymentStatus>,
         newStatus: PaymentStatus,
+        paymentId: String = PAYMENT_ID,
     ) {
         whenever(
-            mockPaymentRepository.updateStatusIfCurrentStatusIn(eq(PAYMENT_ID), eq(expectedStatuses), eq(newStatus), any()),
+            mockPaymentRepository.updateStatusIfCurrentStatusIn(eq(paymentId), eq(expectedStatuses), eq(newStatus), any()),
         ).thenReturn(1)
     }
 

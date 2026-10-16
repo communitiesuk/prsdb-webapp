@@ -191,7 +191,10 @@ class MockGovUkPayController(
         when (status) {
             PaymentStatus.CREATED -> {}
             PaymentStatus.INDETERMINATE, PaymentStatus.CAPTURABLE -> storedPayment.markCapturable()
-            PaymentStatus.SUCCEEDED -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
+            PaymentStatus.SUCCEEDED,
+            // GOV.UK Pay has no manual intervention status, so assume the worst case: that it took the payment
+            PaymentStatus.MANUAL_INTERVENTION,
+            -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
             PaymentStatus.FAILED -> storedPayment.markFailed()
             PaymentStatus.CANCELLED -> storedPayment.markCancelled()
         }
