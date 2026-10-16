@@ -48,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.Organisatio
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordInvitation
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordUser
 import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -616,7 +617,7 @@ class OrganisationalLandlordInvitationServiceTests {
             )
         whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(invitation))
         whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
-            listOf(OrganisationalLandlordUser(organisation, PrsdbUser("user-123"), "Team Member", inviteeEmail, EDITOR)),
+            listOf(createOrganisationalLandlordUser(organisationalLandlord = organisation, email = inviteeEmail, role = EDITOR)),
         )
 
         // Act
@@ -625,6 +626,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Assert
         assertNull(result)
         assertTrue(invitation.isHidden)
+        verify(mockInvitationRepository).save(invitation)
         verify(mockInvitationRepository, never()).delete(any())
         verifyNoInteractions(mockInvitationEmailSender)
     }

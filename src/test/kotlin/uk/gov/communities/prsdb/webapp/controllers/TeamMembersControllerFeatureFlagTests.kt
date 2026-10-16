@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -49,6 +50,20 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
         mvc
             .get(TeamMembersController.getResendInvitationPath(123L))
             .andExpect { status { isNotFound() } }
+    }
+
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    @Test
+    fun `resend invitation is available if the multi-user organisations feature flag is enabled`() {
+        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+        val organisation = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(organisation)
+        whenever(organisationalLandlordInvitationService.resendInvitation(eq(123L), eq(organisation)))
+            .thenReturn("invitee@example.com")
+
+        mvc
+            .get(TeamMembersController.getResendInvitationPath(123L))
+            .andExpect { status { is3xxRedirection() } }
     }
 
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
