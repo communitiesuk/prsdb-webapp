@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -232,6 +233,8 @@ class PaymentService(
 
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
+        } catch (exception: PaymentCaptureOutcomeUnknownException) {
+            throw exception
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
@@ -285,11 +288,48 @@ class PaymentService(
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                // TODO PDJB-1853: Reconcile the payment if the transaction fails to commit after capture.
-                govUkPayClient.capturePayment(paymentId)
+                captureAndConfirmPayment(paymentId)
                 PaymentStatus.SUCCEEDED
             },
         )
+
+    private fun captureAndConfirmPayment(paymentId: String) {
+        val outcomeUnknownException =
+            try {
+                govUkPayClient.capturePayment(paymentId)
+                return
+            } catch (captureFailure: GovUkPayException) {
+                PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
+            }
+
+        repeat(1 + CAPTURE_RETRIES) {
+            try {
+                when (val govUkPayStatus = getGovUkPayPaymentStatus(paymentId).status) {
+                    PaymentStatus.SUCCEEDED -> {
+                        return
+                    }
+
+                    PaymentStatus.CAPTURABLE -> {
+                        govUkPayClient.capturePayment(paymentId)
+                        return
+                    }
+
+                    PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
+                        throw IllegalStateException(
+                            "GOV.UK Pay reports payment $paymentId as $govUkPayStatus after it failed to capture",
+                            outcomeUnknownException.cause,
+                        )
+                    }
+
+                    PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
+                }
+            } catch (exception: GovUkPayException) {
+                outcomeUnknownException.addSuppressed(exception)
+            }
+        }
+
+        throw outcomeUnknownException
+    }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
@@ -388,4 +428,8 @@ class PaymentService(
             .filter { Year.isLeap(it.toLong()) }
             .map { LocalDate.of(it, Month.FEBRUARY, 29) }
             .any { !it.isBefore(today) && it.isBefore(renewalDate) }
+
+    companion object {
+        private const val CAPTURE_RETRIES = 1
+    }
 }
