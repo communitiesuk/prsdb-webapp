@@ -41,6 +41,16 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
             .andExpect { status { isNotFound() } }
     }
 
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    @Test
+    fun `resend invitation is unavailable if the multi-user organisations feature flag is disabled`() {
+        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
+
+        mvc
+            .get(TeamMembersController.getResendInvitationPath(123L))
+            .andExpect { status { isNotFound() } }
+    }
+
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     @Test
     fun `team members page is available if the multi-user organisations feature flag is enabled`() {
