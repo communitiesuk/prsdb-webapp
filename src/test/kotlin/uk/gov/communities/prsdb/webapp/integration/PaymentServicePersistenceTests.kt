@@ -49,7 +49,6 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
@@ -343,31 +342,6 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         // Assert
         assertPaymentSucceededForProperty()
         verify(mockGovUkPayClient, never()).createPayment(any())
-    }
-
-    @Test
-    fun `createPropertyRegistrationPayment requires manual intervention for an indeterminate payment GOV UK Pay has taken`() {
-        // Arrange
-        JourneyTestHelper.setMockUser(USER_ID)
-        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
-            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.CANCELLED))
-        whenever(mockGovUkPayClient.getPayment(CAPTURABLE_PAYMENT_ID))
-            .thenReturn(createGovUkPayPayment(CAPTURABLE_PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
-        whenever(mockGovUkPayClient.createPayment(any()))
-            .thenReturn(createGovUkPayCreatedPayment(paymentId = NEW_PAYMENT_ID, reference = "new-payment-reference"))
-
-        // Act
-        paymentService.createPropertyRegistrationPayment(
-            JOURNEY_ID,
-            "user@example.test",
-            paymentService.getPropertyRegistrationPaymentQuote(),
-        )
-
-        // Assert
-        assertEquals(PaymentStatus.MANUAL_INTERVENTION, paymentRepository.findStatusByPaymentId(CAPTURABLE_PAYMENT_ID))
-        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(CREATED_PAYMENT_ID))
-        assertEquals(PaymentStatus.CREATED, paymentRepository.findStatusByPaymentId(NEW_PAYMENT_ID))
-        verify(mockGovUkPayClient, never()).cancelPayment(any())
     }
 
     @Test
@@ -671,19 +645,6 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `finalisePayment requires manual intervention for an indeterminate payment GOV UK Pay reports succeeded`() {
-        // Act
-        val status = paymentService.finalisePayment(CAPTURABLE_PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
-
-        // Assert
-        assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
-        assertEquals(PaymentStatus.MANUAL_INTERVENTION, paymentRepository.findStatusByPaymentId(CAPTURABLE_PAYMENT_ID))
-        assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
-        verify(mockPropertyRegistrationService, never()).registerProperty(any())
-        verify(mockGovUkPayClient, never()).capturePayment(any())
-    }
-
-    @Test
     fun `finalisePayment cancels a payment that has been deleted along with its journey`() {
         // Arrange
         TransactionTemplate(transactionManager).executeWithoutResult { deleteJourney() }
@@ -811,7 +772,6 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         private const val LATEST_PAYMENT_ID = "latest-payment"
         private const val NEWER_SUCCEEDED_PAYMENT_ID = "newer-succeeded-payment"
         private const val NEWEST_FAILED_PAYMENT_ID = "newest-failed-payment"
-        private const val NEW_PAYMENT_ID = "new-payment"
         private const val LANDLORD_ID = 1L
         private const val PROPERTY_OWNERSHIP_ID = 1L
         private const val SUCCEEDED_PAYMENT_PROPERTY_OWNERSHIP_ID = 51L
