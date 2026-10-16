@@ -33,6 +33,7 @@ class VirusNotificationEmailHandler(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
+    private val landlordUserEmailService: LandlordUserEmailService,
     private val featureFlagManager: FeatureFlagManager,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
@@ -90,17 +91,23 @@ class VirusNotificationEmailHandler(
             findFirstSavedJourneyStateForLandlord(landlord, notification.journeyId)
                 ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
 
-        val email =
-            buildAlertEmail(
-                notification.certificateType,
-                if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
-                savedJourneyState.getPropertyRegistrationMultiLineAddress(),
-            )
-
         if (monitoringEmailAddress != null) {
+            val email =
+                buildAlertEmail(
+                    notification.certificateType,
+                    MONITORING_TEAM_RECIPIENT_NAME,
+                    savedJourneyState.getPropertyRegistrationMultiLineAddress(),
+                )
             emailNotificationService.sendEmail(monitoringEmailAddress, email)
         } else {
-            emailNotificationService.sendEmailToLandlord(landlord, email)
+            val userDetails = landlordUserEmailService.getUserDetailsByBaseUserId(savedJourneyState.user.id)
+            val email =
+                buildAlertEmail(
+                    notification.certificateType,
+                    userDetails.name,
+                    savedJourneyState.getPropertyRegistrationMultiLineAddress(),
+                )
+            emailNotificationService.sendEmail(userDetails.email, email)
         }
     }
 
