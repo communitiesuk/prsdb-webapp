@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.CompleteChangeAccessLevelStep
+import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.CompleteRemoveOrgUserStep
+import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.RemoveOrgUserConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ChangeOrgTeamMemberAccessLevelFormModel
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
@@ -48,7 +50,6 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
                 backUrl { TeamMembersController.TEAM_MEMBERS_ROUTE }
                 nextStep { journey.completeChangeAccessLevelStep }
             }
-            // TODO PDJB-1764: Add a split here for the remove journey
             step(journey.completeChangeAccessLevelStep) {
                 parents { journey.accessLevelStep.isComplete() }
                 nextDestination {
@@ -57,6 +58,16 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
                         .withFlashAttribute("accessLevelChangedMemberName", getMemberName(journey.otherOrganisationalLandlordUserId))
                         .withFlashAttribute("accessLevelChangedBannerContentKey", getBannerContentKey(journey.selectedRole))
                 }
+            }
+            step(journey.removeOrgUserConfirmationStep) {
+                routeSegment(RemoveOrgUserConfirmationStep.ROUTE_SEGMENT)
+                initialStep()
+                backStep { journey.accessLevelStep }
+                nextStep { journey.completeRemoveOrgUserStep }
+            }
+            step(journey.completeRemoveOrgUserStep) {
+                parents { journey.removeOrgUserConfirmationStep.isComplete() }
+                nextDestination { Destination.ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE) }
             }
         }
     }
@@ -83,6 +94,8 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
 class ChangeOrgTeamMemberAccessLevelJourney(
     override val accessLevelStep: AccessLevelStep,
     override val completeChangeAccessLevelStep: CompleteChangeAccessLevelStep,
+    override val removeOrgUserConfirmationStep: RemoveOrgUserConfirmationStep,
+    override val completeRemoveOrgUserStep: CompleteRemoveOrgUserStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     ChangeOrgTeamMemberAccessLevelJourneyState {
@@ -106,6 +119,8 @@ class ChangeOrgTeamMemberAccessLevelJourney(
 interface ChangeOrgTeamMemberAccessLevelJourneyState : JourneyState {
     val accessLevelStep: AccessLevelStep
     val completeChangeAccessLevelStep: CompleteChangeAccessLevelStep
+    val removeOrgUserConfirmationStep: RemoveOrgUserConfirmationStep
+    val completeRemoveOrgUserStep: CompleteRemoveOrgUserStep
     var otherOrganisationalLandlordUserId: Long
     var isStateInitialized: Boolean
 
