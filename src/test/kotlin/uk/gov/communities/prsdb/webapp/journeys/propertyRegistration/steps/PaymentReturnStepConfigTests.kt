@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -89,5 +90,14 @@ class PaymentReturnStepConfigTests {
 
         // Assert
         verify(mockState, never()).paymentReference = anyOrNull()
+    }
+
+    @Test
+    fun `chooseTemplate returns the payment processing template`() {
+        // Act
+        val template = stepConfig.chooseTemplate(mockState)
+
+        // Assert
+        assertEquals("forms/paymentProcessingForm", template)
     }
 }

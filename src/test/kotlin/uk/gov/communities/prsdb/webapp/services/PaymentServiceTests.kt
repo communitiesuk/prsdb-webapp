@@ -1645,6 +1645,46 @@ class PaymentServiceTests {
         }
     }
 
+    @Nested
+    inner class GetLatestSucceededPaymentForPropertyTests {
+        @Test
+        fun `getLatestSucceededPaymentForProperty returns the latest succeeded payment associated with the property`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val payment = createPayment(paymentId = PAYMENT_ID, status = PaymentStatus.SUCCEEDED)
+            whenever(
+                mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    propertyOwnership,
+                    PaymentStatus.SUCCEEDED,
+                ),
+            ).thenReturn(payment)
+
+            // Act
+            val latestPayment = paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)
+
+            // Assert
+            assertSame(payment, latestPayment)
+        }
+
+        @Test
+        fun `getLatestSucceededPaymentForProperty returns null when the property has no succeeded payment`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(
+                mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    propertyOwnership,
+                    PaymentStatus.SUCCEEDED,
+                ),
+            ).thenReturn(null)
+
+            // Act
+            val latestPayment = paymentService.getLatestSucceededPaymentForProperty(propertyOwnership)
+
+            // Assert
+            assertNull(latestPayment)
+        }
+    }
+
     private fun createPaymentService(
         annualFeeInPence: Int = 2000,
         gratisPeriodEndDate: String = "2027-11-14",

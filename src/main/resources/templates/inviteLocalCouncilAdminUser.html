@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="inviteLocalCouncilAdminModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="selectOptions" type="java.lang.Object"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{forms.inviteLocalCouncilAdminUser.title}, ~{::main}, ${#fields.hasErrors('${inviteLocalCouncilAdminModel.*}')})}">
+<html th:replace="~{fragments/layout :: layout(#{forms.inviteLocalCouncilAdminUser.fieldSetHeading}, ~{::main}, ${#fields.hasErrors('${inviteLocalCouncilAdminModel.*}')})}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-content"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">

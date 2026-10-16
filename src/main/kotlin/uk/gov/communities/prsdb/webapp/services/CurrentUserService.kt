@@ -18,7 +18,7 @@ class CurrentUserService(
     fun getCurrentName(): String = getCurrentUserDetails().name
 
     fun getCurrentUserDetails(): CurrentUserDetails {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         val individualLandlord = individualLandlordRepository.findByBaseUser_Id(baseUserId)
         val organisationalUsers = organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)
 

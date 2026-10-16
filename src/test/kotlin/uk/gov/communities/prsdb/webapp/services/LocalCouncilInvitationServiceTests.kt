@@ -194,7 +194,7 @@ class LocalCouncilInvitationServiceTests {
         val invitationFromDatabase = MockLocalCouncilData.createLocalCouncilInvitation(id = testId)
 
         whenever(mockLocalCouncilInviteRepository.findById(testId))
-            .thenReturn(Optional.of(invitationFromDatabase) as Optional<LocalCouncilInvitation?>)
+            .thenReturn(Optional.of(invitationFromDatabase))
 
         assertEquals(invitationFromDatabase, inviteService.getInvitationByIdOrNull(testId))
     }
@@ -212,7 +212,7 @@ class LocalCouncilInvitationServiceTests {
 
         whenever(
             mockLocalCouncilInviteRepository.findById(invitation.id),
-        ).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
+        ).thenReturn(Optional.of(invitation))
 
         val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
 
@@ -234,7 +234,7 @@ class LocalCouncilInvitationServiceTests {
 
         whenever(
             mockLocalCouncilInviteRepository.findById(invitation.id),
-        ).thenReturn(Optional.of(invitation) as Optional<LocalCouncilInvitation?>)
+        ).thenReturn(Optional.of(invitation))
 
         val result = inviteService.getAdminInvitationByIdOrNull(invitation.id)
 

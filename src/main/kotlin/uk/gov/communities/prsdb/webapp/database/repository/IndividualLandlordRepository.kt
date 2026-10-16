@@ -7,7 +7,7 @@ import java.time.Instant
 // The underscore tells JPA to access fields relating to the referenced table
 @Suppress("ktlint:standard:function-naming")
 interface IndividualLandlordRepository :
-    JpaRepository<IndividualLandlord?, Long?>,
+    JpaRepository<IndividualLandlord, Long>,
     LandlordSearchRepository {
     fun findByBaseUser_Id(subjectId: String): IndividualLandlord?
 

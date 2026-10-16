@@ -30,7 +30,7 @@ class LettingAgentPasswordService(
             throw PrsdbWebException("Password has already been set for letting agent access $lettingAgentAccessId")
         }
 
-        lettingAgentAccess.setEncodedPassword(passwordEncoder.encode(rawPassword))
+        lettingAgentAccess.setEncodedPassword(passwordEncoder.encode(rawPassword)!!)
         lettingAgentAccessRepository.save(lettingAgentAccess)
     }
 

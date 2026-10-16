@@ -227,8 +227,12 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockComplianceDetailsHelper.getElectricalSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getEpcCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockLicensingDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
-        lenient().`when`(mockOccupancyDetailsHelper.getOccupancySummaryList(any())).thenReturn(emptyList())
-        lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any())).thenReturn(emptyList())
+        lenient()
+            .`when`(mockOccupancyDetailsHelper.getOccupancySummaryList(any<PropertyRegistrationJourneyState>()))
+            .thenReturn(emptyList())
+        lenient()
+            .`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any<PropertyRegistrationJourneyState>(), any(), any()))
+            .thenReturn(emptyList())
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         lenient().`when`(mockState.licensingTask).thenReturn(mockLicensingTask)
         lenient().`when`(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
@@ -389,7 +393,7 @@ class PropertyRegistrationCyaStepConfigTests {
         fun `getStepSpecificContent puts rentedOutTenancyRows from getCheckYourAnswersSummaryList`() {
             val expectedTenancyDetails = listOf<SummaryListRowViewModel>()
             whenever(
-                mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any()),
+                mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any<PropertyRegistrationJourneyState>(), any(), any()),
             ).thenReturn(expectedTenancyDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
