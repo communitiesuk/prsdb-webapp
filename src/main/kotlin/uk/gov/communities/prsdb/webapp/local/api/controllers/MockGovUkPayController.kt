@@ -44,6 +44,9 @@ import kotlin.random.Random
  *
  * After the mock card page, a payment stays in progress for `gov-uk-pay.mock-card-entry-delay-seconds`, as a real
  * payment can while GOV.UK Pay finishes processing it, so that our payment processing page can be seen locally.
+ *
+ * Set `gov-uk-pay.mock-capture-outage-calls` to make a payment's calls fail with `503` from its first capture, and
+ * `gov-uk-pay.mock-capture-during-outage` to choose whether that capture still takes the payment.
  */
 @Profile("local")
 @PrsdbRestController
@@ -51,6 +54,8 @@ import kotlin.random.Random
 class MockGovUkPayController(
     @Value("\${server.port}") private val serverPort: String,
     @Value("\${gov-uk-pay.mock-card-entry-delay-seconds}") private val cardEntryDelaySeconds: Long,
+    @Value("\${gov-uk-pay.mock-capture-outage-calls}") private val captureOutageCalls: Int,
+    @Value("\${gov-uk-pay.mock-capture-during-outage}") private val captureDuringOutage: Boolean,
     private val objectMapper: ObjectMapper,
     private val paymentRepository: PaymentRepository,
 ) {
@@ -115,6 +120,7 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
+        if (payment.consumeOutageCall()) return unavailable()
         return jsonResponse(HttpStatus.OK, payment.toResponseJson())
     }
 
@@ -123,6 +129,13 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
+        payment.startOutage(captureOutageCalls)
+        if (payment.consumeOutageCall()) {
+            if (captureDuringOutage && payment.status == GovUkPayPaymentStatus.CAPTURABLE) {
+                payment.markCaptured()
+            }
+            return unavailable()
+        }
         if (payment.status != GovUkPayPaymentStatus.CAPTURABLE) {
             return jsonResponse(
                 HttpStatus.BAD_REQUEST,
@@ -138,6 +151,7 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
+        if (payment.consumeOutageCall()) return unavailable()
         if (payment.finished) {
             return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P0501", "Cancellation of payment failed"))
         }
@@ -306,6 +320,9 @@ class MockGovUkPayController(
 
     private fun notFound(): ResponseEntity<String> = jsonResponse(HttpStatus.NOT_FOUND, errorJson("P0200", "Not found"))
 
+    private fun unavailable(): ResponseEntity<String> =
+        jsonResponse(HttpStatus.SERVICE_UNAVAILABLE, errorJson("P0999", "GOV.UK Pay is unavailable"))
+
     private fun jsonResponse(
         status: HttpStatus,
         body: String,
@@ -351,6 +368,23 @@ class MockGovUkPayController(
             get() = status in GovUkPayPaymentStatus.FINISHED_STATUSES
 
         private var cardEntryCompletesAt: Instant? = null
+
+        private var hasOutageStarted = false
+        private var outageCallsRemaining = 0
+
+        @Synchronized
+        fun startOutage(calls: Int) {
+            if (hasOutageStarted) return
+            hasOutageStarted = true
+            outageCallsRemaining = calls
+        }
+
+        @Synchronized
+        fun consumeOutageCall(): Boolean {
+            if (outageCallsRemaining <= 0) return false
+            outageCallsRemaining--
+            return true
+        }
 
         @Synchronized
         fun enterCardDetails(completesAt: Instant) {
