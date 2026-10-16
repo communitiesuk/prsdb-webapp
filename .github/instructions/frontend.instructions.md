@@ -51,7 +51,9 @@ each page title is unique and descriptive:
 
 ### Form Fragments Location
 - `templates/fragments/forms/` - Input components (text, date, checkbox, etc.)
-- `templates/fragments/buttons/` - Button variants
+- `templates/fragments/buttons/` - Button variants. All buttons with `data-module="govuk-button"` (submit buttons and
+  link-buttons) must include `data-prevent-double-click="true"` to stop accidental double submissions. The only
+  exception is client-side toggles such as the password reveal button.
 - `templates/fragments/banners/` - Notification and confirmation banners
 - `templates/fragments/layouts/` - Page layout variants
 - `templates/fragments/pagination/` - Pagination controls
