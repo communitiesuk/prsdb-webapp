@@ -1312,35 +1312,10 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment checks the payment's status again when GOV UK Pay does not answer after the capture call fails`() {
-            // Arrange
-            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
-            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
-            stubTransaction()
-            whenever(mockPropertyRegistrationService.registerProperty(any()))
-                .thenReturn(MockLandlordData.createPropertyOwnership())
-            stubStoredPayment()
-            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
-                .thenThrow(GovUkPayException("GOV.UK Pay unavailable"))
-                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
-
-            // Act
-            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-
-            // Assert
-            assertEquals(PaymentStatus.SUCCEEDED, status)
-            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
-            verify(mockGovUkPayClient, times(1)).capturePayment(PAYMENT_ID)
-            verify(mockTransactionManager).commit(any())
-        }
-
-        @Test
         fun `finalisePayment rolls back without cancelling when it cannot confirm whether GOV UK Pay captured the payment`() {
             // Arrange
             val captureFailure = GovUkPayException("Capture timed out")
-            val firstStatusCheckFailure = GovUkPayException("GOV.UK Pay unavailable")
-            val secondStatusCheckFailure = GovUkPayException("GOV.UK Pay still unavailable")
+            val statusCheckFailure = GovUkPayException("GOV.UK Pay unavailable")
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1348,7 +1323,7 @@ class PaymentServiceTests {
                 .thenReturn(MockLandlordData.createPropertyOwnership())
             stubStoredPayment()
             doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(firstStatusCheckFailure, secondStatusCheckFailure)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(statusCheckFailure)
 
             // Act
             val exception =
@@ -1358,8 +1333,8 @@ class PaymentServiceTests {
 
             // Assert
             assertSame(captureFailure, exception.cause)
-            assertEquals(listOf(firstStatusCheckFailure, secondStatusCheckFailure), exception.suppressed.toList())
-            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+            assertEquals(listOf(statusCheckFailure), exception.suppressed.toList())
+            verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
             // Only recording the payment as indeterminate and the rolled-back claim update the status
@@ -1367,7 +1342,7 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment stops capturing the payment again after its retry when GOV UK Pay keeps rejecting the capture`() {
+        fun `finalisePayment captures the payment again only once when GOV UK Pay keeps rejecting the capture`() {
             // Arrange
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
@@ -1385,8 +1360,8 @@ class PaymentServiceTests {
             }
 
             // Assert
-            verify(mockGovUkPayClient, times(3)).capturePayment(PAYMENT_ID)
-            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+            verify(mockGovUkPayClient, times(2)).capturePayment(PAYMENT_ID)
+            verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
