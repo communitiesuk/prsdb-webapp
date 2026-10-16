@@ -75,7 +75,17 @@ confirmation:
     heading: Registered as a landlord
     body:
       beforeRegistrationNumber: Landlord Registration Number
-  emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  individual:
+    emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  organisation:
+    emailParagraph: We’ve emailed you a copy of your organisation’s Landlord Registration Number.
+    whatYouCanDoNow:
+      heading: What you can do now
+      paragraph: 'You are an administrator for your organisation. You can:'
+      bullet:
+        one: register or update properties
+        two: invite team members
+        three: update your organisation details
   whatYouNeedToDo:
     heading: What you need to do next
     paragraph:
