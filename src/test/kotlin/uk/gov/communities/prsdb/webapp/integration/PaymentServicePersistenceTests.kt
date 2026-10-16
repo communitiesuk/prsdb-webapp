@@ -44,7 +44,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import uk.gov.communities.prsdb.webapp.services.AddressService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -98,6 +100,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    @MockitoBean
+    private lateinit var mockManualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
@@ -545,6 +550,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         assertNull(payment.associatedProperty)
         assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
         verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
+        verify(mockManualInterventionEmailSender).sendEmail(eq("payments-support@example.com"), any())
     }
 
     @Test
