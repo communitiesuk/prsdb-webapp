@@ -11,4 +11,6 @@ class LeadTrusteeSelectAddressFormPageLandlordRegistration(
 ) : SelectAddressFormPage(
         page,
         "$LANDLORD_REGISTRATION_ROUTE/${TrusteeAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Select the lead trustee’s address"
+}

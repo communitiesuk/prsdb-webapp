@@ -5,11 +5,14 @@ data class OrganisationalLandlordRegistrationConfirmationEmail(
     val organisationName: String,
     val lrn: String,
     val prsdURL: String,
+    // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+    val isMultiUserOrganisationsEnabled: Boolean = false,
 ) : EmailTemplateModel {
     private val registrantNameKey = "registrant name"
     private val organisationNameKey = "organisation name"
     private val lrnKey = "LRN"
     private val prsdURLKey = "PRSD URL"
+    private val isMultiUserOrganisationsEnabledKey = "isMultiUserOrganisationsEnabled"
 
     override val template = EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
 
@@ -19,5 +22,6 @@ data class OrganisationalLandlordRegistrationConfirmationEmail(
             organisationNameKey to organisationName,
             lrnKey to lrn,
             prsdURLKey to prsdURL,
+            isMultiUserOrganisationsEnabledKey to isMultiUserOrganisationsEnabled.toNotifyYesNo(),
         )
 }

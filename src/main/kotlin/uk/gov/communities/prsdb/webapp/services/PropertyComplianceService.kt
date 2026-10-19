@@ -41,6 +41,7 @@ class PropertyComplianceService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val currentUserService: CurrentUserService,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -391,37 +392,42 @@ class PropertyComplianceService(
             )
         }
 
-        val landlord =
-            propertyOwnership.landlords
-                .singleOrNull { it.id == currentLandlord.id }
-                ?: throw PrsdbWebException(
-                    "Current landlord ${currentLandlord.id} is not a landlord of property ${propertyOwnership.id}",
-                )
+        propertyOwnership.landlords
+            .singleOrNull { it.id == currentLandlord.id }
+            ?: throw PrsdbWebException(
+                "Current landlord ${currentLandlord.id} is not a landlord of property ${propertyOwnership.id}",
+            )
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        sendComplianceUpdateConfirmationEmail(
-            landlord = landlord,
-            propertyOwnership = propertyOwnership,
-            updateType = updateType,
-            certificateType = certificateType,
-            certificateTypeLabel = certificateTypeLabel,
-            expiryDate = formattedExpiryDate,
-            deadlineDate = formattedDeadlineDate,
-        )
-
-        val otherLandlords =
-            propertyOwnership.landlords.filter { it.id != currentLandlord.id }
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        otherLandlords.forEach { otherLandlord ->
-            sendComplianceUpdateConfirmationEmail(
-                landlord = otherLandlord,
+        val currentUser = currentUserService.getCurrentUserDetails()
+        complianceUpdateConfirmationSender.sendEmail(
+            currentUser.email,
+            buildComplianceUpdateConfirmationEmail(
+                recipientName = currentUser.name,
                 propertyOwnership = propertyOwnership,
                 updateType = updateType,
                 certificateType = certificateType,
                 certificateTypeLabel = certificateTypeLabel,
                 expiryDate = formattedExpiryDate,
                 deadlineDate = formattedDeadlineDate,
-                isJointLandlord = true,
+            ),
+        )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
+
+        val otherLandlords =
+            propertyOwnership.landlords.filter { it.id != currentLandlord.id }
+        otherLandlords.forEach { otherLandlord ->
+            complianceUpdateConfirmationSender.sendEmailToLandlord(
+                otherLandlord,
+                buildComplianceUpdateConfirmationEmail(
+                    recipientName = otherLandlord.name,
+                    propertyOwnership = propertyOwnership,
+                    updateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = formattedExpiryDate,
+                    deadlineDate = formattedDeadlineDate,
+                    isJointLandlord = true,
+                ),
             )
         }
     }
@@ -436,8 +442,8 @@ class PropertyComplianceService(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
         propertyOwnership.landlords.forEach { landlord ->
-            lettingAgentComplianceUpdateSender.sendEmail(
-                landlord.email,
+            lettingAgentComplianceUpdateSender.sendEmailToLandlord(
+                landlord,
                 LettingAgentComplianceUpdateNotificationEmail(
                     recipientName = landlord.name,
                     multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
@@ -459,22 +465,24 @@ class PropertyComplianceService(
         expiryDate: String?,
         deadlineDate: String?,
     ) {
-        // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { landlord ->
-            sendComplianceUpdateConfirmationEmail(
-                landlord = landlord,
-                propertyOwnership = propertyOwnership,
-                updateType = updateType,
-                certificateType = certificateType,
-                certificateTypeLabel = certificateTypeLabel,
-                expiryDate = expiryDate,
-                deadlineDate = deadlineDate,
+            complianceUpdateConfirmationSender.sendEmailToLandlord(
+                landlord,
+                buildComplianceUpdateConfirmationEmail(
+                    recipientName = landlord.name,
+                    propertyOwnership = propertyOwnership,
+                    updateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = expiryDate,
+                    deadlineDate = deadlineDate,
+                ),
             )
         }
     }
 
-    private fun sendComplianceUpdateConfirmationEmail(
-        landlord: Landlord,
+    private fun buildComplianceUpdateConfirmationEmail(
+        recipientName: String,
         propertyOwnership: PropertyOwnership,
         updateType: ComplianceUpdateConfirmationEmail.UpdateType,
         certificateType: String,
@@ -482,24 +490,19 @@ class PropertyComplianceService(
         expiryDate: String?,
         deadlineDate: String?,
         isJointLandlord: Boolean = false,
-    ) {
-        complianceUpdateConfirmationSender.sendEmail(
-            landlord.email,
-            ComplianceUpdateConfirmationEmail(
-                landlordName = landlord.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
-                complianceUpdateType = updateType,
-                certificateType = certificateType,
-                certificateTypeLabel = certificateTypeLabel,
-                expiryDate = expiryDate,
-                deadlineDate = deadlineDate,
-                isJointLandlord = isJointLandlord,
-            ),
-        )
-    }
+    ) = ComplianceUpdateConfirmationEmail(
+        landlordName = recipientName,
+        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+        dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+        newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+        complianceUpdateType = updateType,
+        certificateType = certificateType,
+        certificateTypeLabel = certificateTypeLabel,
+        expiryDate = expiryDate,
+        deadlineDate = deadlineDate,
+        isJointLandlord = isJointLandlord,
+    )
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyCompliance: PropertyCompliance,

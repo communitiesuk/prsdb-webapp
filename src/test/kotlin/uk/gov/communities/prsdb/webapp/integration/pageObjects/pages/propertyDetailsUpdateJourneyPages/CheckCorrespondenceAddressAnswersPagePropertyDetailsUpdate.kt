@@ -18,6 +18,8 @@ class CheckCorrespondenceAddressAnswersPagePropertyDetailsUpdate(
             urlArguments["propertyOwnershipId"]!!.toLong(),
         ) + "/${UpdateCorrespondenceAddressCyaStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your contact address answers"
+
     val heading = Heading.default(page)
     val form = Form(page)
     val summaryName = Heading(page.locator("#summary-name"))

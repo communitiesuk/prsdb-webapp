@@ -4,6 +4,8 @@ interface FeatureFlagSelector {
     fun <T> ifEnabledOrElse(branches: IfEnabledOrElseBuilder<T>.() -> Unit): T
 
     fun ifEnabled(action: () -> Unit)
+
+    fun ifDisabled(action: () -> Unit)
 }
 
 class IfEnabledOrElseBuilder<T> {
@@ -28,6 +30,8 @@ abstract class EnabledFeatureFlagSelector : FeatureFlagSelector {
         IfEnabledOrElseBuilder<T>().apply(branches).resolveEnabled()
 
     final override fun ifEnabled(action: () -> Unit) = action()
+
+    final override fun ifDisabled(action: () -> Unit) {}
 }
 
 abstract class DisabledFeatureFlagSelector : FeatureFlagSelector {
@@ -35,4 +39,6 @@ abstract class DisabledFeatureFlagSelector : FeatureFlagSelector {
         IfEnabledOrElseBuilder<T>().apply(branches).resolveDisabled()
 
     final override fun ifEnabled(action: () -> Unit) {}
+
+    final override fun ifDisabled(action: () -> Unit) = action()
 }

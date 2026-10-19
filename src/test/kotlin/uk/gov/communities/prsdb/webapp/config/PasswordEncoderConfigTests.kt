@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.config
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.test.assertNotNull
 
 class PasswordEncoderConfigTests {
     private val encoder = PasswordEncoderConfig(iterations = 2, memory = 16384, parallelism = 1).passwordEncoder()
@@ -24,7 +25,7 @@ class PasswordEncoderConfigTests {
 
     @Test
     fun `encoded value contains an argon2 hash prefix`() {
-        val encoded = encoder.encode("test")
+        val encoded = assertNotNull(encoder.encode("test"))
         assertTrue(encoded.startsWith("\$argon2id"))
     }
 }

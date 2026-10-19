@@ -1,17 +1,36 @@
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.title}, ~{::#page/content()}, false)}">
+<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::#page/content()}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <th:block th:if="${successBanner != null}" th:with="isSuccess=true">
+            <div id="success-banner"
+                 th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{teamMembers.successBanner.title}, ~{::#success-banner/content()})}">
+                <p class="govuk-notification-banner__heading" th:text="#{${successBanner}}">teamMembers.successBanner</p>
+            </div>
+        </th:block>
+
+        <th:block th:if="${accessLevelChangedBannerContentKey != null}" th:with="isSuccess=true">
+            <div id="access-level-changed-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{teamMembers.accessLevelChangedBanner.title}, ~{::#access-level-changed-banner/content()})}"
+                 th:with="isSuccess=true">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{teamMembers.accessLevelChangedBanner.heading}">teamMembers.accessLevelChangedBanner.heading</h3>
+                <p class="govuk-body"
+                   th:text="#{${accessLevelChangedBannerContentKey}(${accessLevelChangedMemberName})}">content</p>
+            </div>
+        </th:block>
+
         <h1 class="govuk-heading-l" th:text="#{teamMembers.heading}">teamMembers.heading</h1>
 
-        <!--/* TODO PDJB-1760: add the "Invite a team member" button for admins, linking to the invite team member journey */-->
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${inviteTeamMemberUrl}, #{teamMembers.inviteTeamMemberButton})}"></a>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
                 <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${administratorsTabId}, #{teamMembers.administrators.tab(${teamMembers.adminRows.size()})})}"></li>
                 <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${editorsTabId}, #{teamMembers.editors.tab(${teamMembers.editorRows.size()})})}"></li>
-                <!--/* TODO PDJB-1757: add the Invitations tab */-->
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${invitationsTabId}, #{teamMembers.invitations.tab(${teamMembers.pendingInvitationRows.size()})})}"></li>
             </ul>
 
             <div id="administrators-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${administratorsTabId}, ~{::#administrators-panel/content()})}">
@@ -35,6 +54,23 @@
                 <th:block th:if="${#lists.isEmpty(teamMembers.editorRows)}">
                     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
                     <p class="govuk-body" th:text="#{teamMembers.editors.noEditors}">teamMembers.editors.noEditors</p>
+                </th:block>
+            </div>
+
+            <div id="invitations-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${invitationsTabId}, ~{::#invitations-panel/content()})}">
+                <h2 class="govuk-heading-m" th:text="#{teamMembers.invitations.heading}">teamMembers.invitations.heading</h2>
+                <p class="govuk-body" th:text="#{teamMembers.invitations.description}">teamMembers.invitations.description</p>
+                <th:block th:if="${!#lists.isEmpty(teamMembers.pendingInvitationRows)}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${teamMembers.pendingInvitationRows})}"></dl>
+                </th:block>
+                <th:block th:if="${#lists.isEmpty(teamMembers.pendingInvitationRows)}">
+                    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+                    <p class="govuk-body" th:text="#{teamMembers.invitations.noInvitations}">teamMembers.invitations.noInvitations</p>
+                </th:block>
+                <th:block th:if="${!#lists.isEmpty(teamMembers.expiredInvitationRows)}">
+                    <h2 class="govuk-heading-m" th:text="#{teamMembers.invitations.expired.heading}">teamMembers.invitations.expired.heading</h2>
+                    <p class="govuk-body" th:text="#{teamMembers.invitations.expired.description(${invitationLifetimeInDays})}">teamMembers.invitations.expired.description</p>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${teamMembers.expiredInvitationRows})}"></dl>
                 </th:block>
             </div>
         </div>

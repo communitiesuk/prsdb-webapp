@@ -10,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvi
 class InvalidLinkPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_INVITATION_ROUTE/${InvalidLinkStep.ROUTE_SEGMENT}") {
+    override val expectedTitleHeading = "There was a problem with this organisation invitation link"
+
     val heading = Heading(page.locator("h1"))
     val signInLink = Link.byText(page, "sign in to your account")
 }

@@ -21,6 +21,7 @@ class UpdateRentIncludesBillsCyaConfig(
     override fun getStepSpecificContent(state: UpdateRentIncludesBillsJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.checkRentIncludesBills.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,

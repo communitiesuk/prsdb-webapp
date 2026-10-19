@@ -20,6 +20,7 @@ class UpdateCorrespondenceEmailCyaConfig(
             state.correspondenceEmailStep.formModel.getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
         return mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.correspondenceEmail.pageTitle",
             "showWarning" to true,
             "insetText" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",

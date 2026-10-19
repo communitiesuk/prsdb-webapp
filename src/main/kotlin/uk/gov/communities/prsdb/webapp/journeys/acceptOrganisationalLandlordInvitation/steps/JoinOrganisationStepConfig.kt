@@ -12,20 +12,25 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitation
 @JourneyFrameworkComponent("acceptOrganisationalLandlordInvitationJoinOrganisationStepConfig")
 class JoinOrganisationStepConfig(
     private val invitationService: OrganisationalLandlordInvitationService,
-) :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrganisationalLandlordUserInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
+
+    override fun beforeAttemptingToReachStep(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Boolean =
+        invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId) != null
 
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> =
         mapOf(
             "organisationName" to
                 (
-                    // TODO PDJB-1822: Cache the validated invitation or organisation name in journey state
-                    // to avoid this repeated lookup.
-                    invitationService.getInvitationForJourneyIdOrNull(state.journeyId)
+                    invitationService
+                        .getPendingInvitationForJourneyIdOrNull(state.journeyId)
                         ?.organisationalLandlord
                         ?.name
-                        ?: throw PrsdbWebException("Could not find an organisation name for invitation journey ${state.journeyId}")
+                        // beforeAttemptingToReachStep has already checked for a pending invitation, so this is only reachable if the
+                        // invitation stopped being pending between that check and this one.
+                        ?: throw PrsdbWebException(
+                            "Could not find a pending invitation for invitation journey ${state.journeyId}",
+                        )
                 ),
         )
 

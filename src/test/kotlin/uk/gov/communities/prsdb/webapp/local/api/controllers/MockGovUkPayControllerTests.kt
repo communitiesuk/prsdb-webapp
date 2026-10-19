@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.local.api.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.hamcrest.Matchers.matchesPattern
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
@@ -17,6 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
@@ -30,8 +30,13 @@ class MockGovUkPayControllerTests {
 
     @BeforeEach
     fun setup() {
-        mvc = MockMvcBuilders.standaloneSetup(MockGovUkPayController("8080", objectMapper, mockPaymentRepository)).build()
+        mvc = createMvc(cardEntryDelaySeconds = 0)
     }
+
+    private fun createMvc(cardEntryDelaySeconds: Long) =
+        MockMvcBuilders
+            .standaloneSetup(MockGovUkPayController("8080", cardEntryDelaySeconds, objectMapper, mockPaymentRepository))
+            .build()
 
     private fun createBody(
         amount: Int = 12000,
@@ -104,6 +109,18 @@ class MockGovUkPayControllerTests {
         mvc
             .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
             .andExpect(jsonPath("$.state.status").value("capturable"))
+    }
+
+    @Test
+    fun `visiting the mock card page leaves the payment in progress while the card entry delay is running`() {
+        mvc = createMvc(cardEntryDelaySeconds = 3600)
+        val paymentId = createPaymentAndGetId(delayedCapture = true)
+
+        mvc.perform(get("/local/gov-uk-pay/mock-card-page/$paymentId"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("created"))
     }
 
     @Test

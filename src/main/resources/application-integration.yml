@@ -41,4 +41,5 @@ argon2:
   parallelism: 1
 
 gov-uk-pay:
+  annual-payment-amount-in-pence: 6500
   gratis-period-end-date: 2027-01-01

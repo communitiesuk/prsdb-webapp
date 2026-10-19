@@ -1,5 +1,7 @@
 # Performance Testing
 
+For the Gatling load/performance simulations, see [GatlingPerformanceTestsReadMe.md](GatlingPerformanceTestsReadMe.md).
+
 ## Password hashing performance
 
 To check how long passwords take to hash, log in as a system operator and call the `/system-operator/password-benchmark` endpoint.

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -59,7 +59,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${IdentityVerifyingStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrlPattern("**/id-verification/oauth2/authorize/one-login")
+                redirectedUrl("/id-verification/oauth2/authorize/one-login")
             }
     }
 
