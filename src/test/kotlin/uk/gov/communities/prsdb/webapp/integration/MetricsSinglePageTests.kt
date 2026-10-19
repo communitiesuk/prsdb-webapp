@@ -87,6 +87,9 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.form.getErrorMessage("toDate")).containsText("You must enter a real date")
     }
 
+    // This tests the shared date input template fragment used on this page, rather than anything specific to this page.
+    // If it fails, check that fragment's error message markup.
+    // If this test is removed, add an equivalent to another page that uses the same fragment.
     @Test
     fun `date error messages include a visually hidden error prefix`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()
