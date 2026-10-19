@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -25,11 +27,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationWithPaymentEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
+import java.time.Instant
 
 class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
@@ -49,6 +53,9 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var confirmationWithPaymentEmailSender: EmailNotificationService<PropertyRegistrationConfirmationWithPaymentEmail>
 
     @MockitoBean
     private lateinit var jointLandlordInvitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>
@@ -100,12 +107,14 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         // Act
         val propertyOwnership =
             TransactionTemplate(transactionManager).execute {
-                propertyRegistrationService.registerProperty(registrationData)
+                propertyRegistrationService.registerProperty(registrationData).apply {
+                    payments.add(createTestPayment())
+                }
             }!!
 
         // Assert
         verify(mockConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-        verify(confirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
+        verify(confirmationWithPaymentEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
         verify(lettingAgentInvitationEmailSender).sendEmail(eq(LETTING_AGENT_EMAIL), any())
         verify(jointLandlordInvitationEmailSender).sendEmail(eq(JOINT_LANDLORD_EMAIL), any())
         verify(jointLandlordInvitationConfirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
@@ -117,14 +126,19 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         doThrow(RuntimeException("Email failed to send")).whenever(jointLandlordInvitationEmailSender).sendEmail(any(), any())
 
         // Act
-        val propertyOwnership = propertyRegistrationService.registerProperty(registrationData)
+        val propertyOwnership =
+            TransactionTemplate(transactionManager).execute {
+                propertyRegistrationService.registerProperty(registrationData).apply {
+                    payments.add(createTestPayment())
+                }
+            }!!
 
         // Assert
         assertTrue(propertyOwnershipRepository.findById(propertyOwnership.id).isPresent)
         val invitedEmails = jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyOwnership.id).map { it.invitedEmail }
         assertEquals(listOf(JOINT_LANDLORD_EMAIL), invitedEmails)
         assertEquals(LETTING_AGENT_EMAIL, lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id)?.invitedEmail)
-        verify(confirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
+        verify(confirmationWithPaymentEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
         verify(lettingAgentInvitationEmailSender).sendEmail(eq(LETTING_AGENT_EMAIL), any())
         verify(jointLandlordInvitationConfirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
     }
@@ -132,10 +146,19 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
     private fun verifyNoEmailsSent() =
         verifyNoInteractions(
             confirmationEmailSender,
+            confirmationWithPaymentEmailSender,
             lettingAgentInvitationEmailSender,
             jointLandlordInvitationEmailSender,
             jointLandlordInvitationConfirmationEmailSender,
         )
+
+    private fun createTestPayment(): Payment =
+        Payment().apply {
+            paymentId = "string"
+            status = PaymentStatus.SUCCEEDED
+            paymentCreatedAt = Instant.now()
+            amountInPence = 2345
+        }
 
     companion object {
         private const val USER_ID = "urn:fdc:gov.uk:2022:UVWXY"

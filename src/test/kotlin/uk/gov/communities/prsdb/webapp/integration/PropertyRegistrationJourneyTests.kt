@@ -151,7 +151,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationWithPaymentEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -183,7 +183,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     ) {
         verify(confirmationEmailSender).sendEmail(
             eq("alex.surname@example.com"),
-            argThat<PropertyRegistrationConfirmationEmail> {
+            argThat<PropertyRegistrationConfirmationWithPaymentEmail> {
                 prn == expectedPrn &&
                     multiLineAddress == expectedAddress &&
                     prsdUrl == absoluteLandlordUrl &&
@@ -222,7 +222,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @MockitoBean
-    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationWithPaymentEmail>
 
     @MockitoBean
     private lateinit var jointLandlordInvitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>

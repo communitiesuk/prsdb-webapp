@@ -42,6 +42,7 @@ class Payment() : ModifiableAuditableEntity() {
 
     public fun associateWithProperty(property: PropertyOwnership) {
         associatedProperty = property
+        property.payments.add(this)
         associatedIncompleteProperty = null
     }
 
