@@ -192,20 +192,4 @@ class TeamMembersControllerTests(
                 flash { attribute("resendInvitationEmail", "invitee@example.com") }
             }
     }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `resendInvitation redirects to the invitations tab without a flash attribute when the invitation was not resent`() {
-        val organisation = createOrgLandlord()
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(organisation)
-        whenever(organisationalLandlordInvitationService.resendInvitation(eq(123L), eq(organisation))).thenReturn(null)
-
-        mvc
-            .get(resendRoute)
-            .andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
-                flash { attributeCount(0) }
-            }
-    }
 }

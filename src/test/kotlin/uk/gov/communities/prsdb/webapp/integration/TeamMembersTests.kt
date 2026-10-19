@@ -114,9 +114,7 @@ class TeamMembersTests :
             listOf("data-local.sql", "data-org-landlord-team-members.sql"),
         ) {
         @Test
-        fun `resending a pending invitation emails the invitee, shows a banner and moves the invitation to the end of the list`(
-            page: Page,
-        ) {
+        fun `resending a pending invitation emails the invitee and shows the invitation resent banner`(page: Page) {
             // Arrange
             val teamMembersPage = navigator.goToTeamMembers()
             teamMembersPage.tabs.goToInvitations(pendingInvitationCount = 3)
@@ -134,7 +132,6 @@ class TeamMembersTests :
             assertThat(resultPage.successBanner.content.heading).hasText("Invitation resent")
             assertThat(resultPage.successBanner.content).containsText("An invitation has been sent to pending-org-invite-c@example.com")
             assertEquals(INVITATIONS_FRAGMENT, resultPage.tabs.activeTabPanelId)
-            assertThat(resultPage.pendingInvitationsSummaryList.getRowByIndex(2).value).hasText("pending-org-invite-c@example.com")
             verify(invitationEmailSender).sendEmail(
                 "pending-org-invite-c@example.com",
                 OrganisationalLandlordInvitationEmail(

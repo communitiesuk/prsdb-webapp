@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
@@ -122,6 +123,8 @@ class OrganisationalLandlordInvitationService(
         // Re-check against the database when saving, as another admin may have invited the same email since validation ran
         if (getPendingInvitedAndMemberEmails(organisationalLandlord).containsEmail(invitedEmail)) return
 
+        hideExpiredInvitationsForEmail(organisationalLandlord, invitedEmail)
+
         val invitation =
             OrganisationalLandlordInvitation(
                 token = UUID.randomUUID(),
@@ -138,27 +141,26 @@ class OrganisationalLandlordInvitationService(
     fun resendInvitation(
         invitationId: Long,
         organisationalLandlord: OrganisationalLandlord,
-    ): String? {
+    ): String {
         val invitation =
             invitationRepository
                 .findById(invitationId)
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
 
         if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this organisation")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
         }
 
         if (invitation.status == OrganisationalLandlordInvitationStatus.HIDDEN) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation has been hidden")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
         }
 
-        // Resending would duplicate an invitation that is already pending or an existing membership, so hide this one instead
         if (getPendingInvitedAndMemberEmails(organisationalLandlord, excludingInvitationId = invitation.id)
                 .containsEmail(invitation.invitedEmail)
         ) {
-            invitation.isHidden = true
-            invitationRepository.save(invitation)
-            return null
+            throw PrsdbWebException(
+                "Cannot resend invitation $invitationId as its email address already has a pending invitation or is a team member",
+            )
         }
 
         val token = invitation.token
@@ -187,6 +189,19 @@ class OrganisationalLandlordInvitationService(
 
     fun getInvitationsForOrganisation(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordInvitation> =
         invitationRepository.findByOrganisationalLandlord(organisationalLandlord)
+
+    private fun hideExpiredInvitationsForEmail(
+        organisationalLandlord: OrganisationalLandlord,
+        email: String,
+    ) {
+        invitationRepository
+            .findByOrganisationalLandlord(organisationalLandlord)
+            .filter { it.status == OrganisationalLandlordInvitationStatus.EXPIRED && it.invitedEmail.isSameEmailAs(email) }
+            .forEach { expiredInvitation ->
+                expiredInvitation.isHidden = true
+                invitationRepository.save(expiredInvitation)
+            }
+    }
 
     private fun sendInvitationEmail(
         invitedEmail: String,

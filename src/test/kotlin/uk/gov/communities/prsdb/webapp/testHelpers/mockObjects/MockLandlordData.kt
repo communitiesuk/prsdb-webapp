@@ -179,7 +179,7 @@ class MockLandlordData {
             )
 
         fun createOrganisationalLandlordInvitation(
-            id: Long = 0,
+            id: Long = 1,
             token: UUID = UUID.randomUUID(),
             invitedEmail: String = "organisation.invitee@example.com",
             organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),

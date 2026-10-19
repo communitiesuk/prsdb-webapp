@@ -65,9 +65,7 @@ class TeamMembersController(
         redirectAttributes: RedirectAttributes,
     ): String {
         val resentEmail = organisationalLandlordInvitationService.resendInvitation(invitationId, getCurrentOrganisationalLandlord())
-        if (resentEmail != null) {
-            redirectAttributes.addFlashAttribute("resendInvitationEmail", resentEmail)
-        }
+        redirectAttributes.addFlashAttribute("resendInvitationEmail", resentEmail)
         return "redirect:$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT"
     }
 

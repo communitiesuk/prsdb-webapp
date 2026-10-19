@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -22,6 +23,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
@@ -397,20 +399,8 @@ class OrganisationalLandlordInvitationServiceTests {
     fun `createInvitation saves an invitation when the email address's previous invitation has expired`() {
         // Arrange
         val organisation = createOrgLandlord()
-        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(
-            listOf(
-                MockLandlordData.createOrganisationalLandlordInvitation(
-                    invitedEmail = "invitee@example.com",
-                    organisationalLandlord = organisation,
-                    role = EDITOR,
-                    createdDate =
-                        Instant.now().minus(
-                            (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                            ChronoUnit.DAYS,
-                        ),
-                ),
-            ),
-        )
+        val expiredInvitation = expiredInvitation(organisation, "invitee@example.com")
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(listOf(expiredInvitation))
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
             .thenReturn(URI("https://www.example.com/landlord/accept-invitation"))
 
@@ -418,8 +408,59 @@ class OrganisationalLandlordInvitationServiceTests {
         invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
 
         // Assert
-        verify(mockInvitationRepository).save(any())
+        val invitationCaptor = argumentCaptor<OrganisationalLandlordInvitation>()
+        verify(mockInvitationRepository, times(2)).save(invitationCaptor.capture())
+        val newInvitation = invitationCaptor.allValues.single { it !== expiredInvitation }
+        assertEquals("invitee@example.com", newInvitation.invitedEmail)
     }
+
+    @Test
+    fun `createInvitation hides the email address's expired invitations, ignoring case`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val expiredInvitation = expiredInvitation(organisation, "Invitee@Example.com")
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(listOf(expiredInvitation))
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
+            .thenReturn(URI("https://www.prsd.gov.uk/landlord/accept-invitation"))
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        assertTrue(expiredInvitation.isHidden)
+        verify(mockInvitationRepository).save(expiredInvitation)
+    }
+
+    @Test
+    fun `createInvitation does not hide expired invitations for a different email address`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val unrelatedExpiredInvitation = expiredInvitation(organisation, "someone.else@example.com")
+        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(listOf(unrelatedExpiredInvitation))
+        whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
+            .thenReturn(URI("https://www.prsd.gov.uk/landlord/accept-invitation"))
+
+        // Act
+        invitationService.createInvitation("invitee@example.com", EDITOR, organisation)
+
+        // Assert
+        assertFalse(unrelatedExpiredInvitation.isHidden)
+        verify(mockInvitationRepository, never()).save(unrelatedExpiredInvitation)
+    }
+
+    private fun expiredInvitation(
+        organisation: OrganisationalLandlord,
+        email: String,
+    ) = createOrganisationalLandlordInvitation(
+        invitedEmail = email,
+        organisationalLandlord = organisation,
+        role = EDITOR,
+        createdDate =
+            Instant.now().minus(
+                (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
+                ChronoUnit.DAYS,
+            ),
+    )
 
     @Test
     fun `createInvitation does not save an invitation when the email address belongs to a team member`() {
@@ -570,7 +611,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `resendInvitation hides the invitation without resending when the email address has another pending invitation`() {
+    fun `resendInvitation throws without resending when the email address has another pending invitation`() {
         // Arrange
         val organisation = createOrgLandlord()
         val expiredInvitation =
@@ -594,19 +635,14 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation))
             .thenReturn(listOf(expiredInvitation, pendingInvitation))
 
-        // Act
-        val result = invitationService.resendInvitation(1L, organisation)
-
-        // Assert
-        assertNull(result)
-        assertTrue(expiredInvitation.isHidden)
-        verify(mockInvitationRepository).save(expiredInvitation)
+        // Act & Assert
+        assertThrows<PrsdbWebException> { invitationService.resendInvitation(1L, organisation) }
         verify(mockInvitationRepository, never()).delete(any())
         verifyNoInteractions(mockInvitationEmailSender)
     }
 
     @Test
-    fun `resendInvitation hides the invitation without resending when the email address belongs to a team member`() {
+    fun `resendInvitation throws without resending when the email address belongs to a team member`() {
         // Arrange
         val organisation = createOrgLandlord()
         val invitation =
@@ -620,19 +656,14 @@ class OrganisationalLandlordInvitationServiceTests {
             listOf(createOrganisationalLandlordUser(organisationalLandlord = organisation, email = inviteeEmail, role = EDITOR)),
         )
 
-        // Act
-        val result = invitationService.resendInvitation(1L, organisation)
-
-        // Assert
-        assertNull(result)
-        assertTrue(invitation.isHidden)
-        verify(mockInvitationRepository).save(invitation)
+        // Act & Assert
+        assertThrows<PrsdbWebException> { invitationService.resendInvitation(1L, organisation) }
         verify(mockInvitationRepository, never()).delete(any())
         verifyNoInteractions(mockInvitationEmailSender)
     }
 
     @Test
-    fun `resendInvitation is not blocked by the pending invitation being resent`() {
+    fun `resendInvitation does not treat the invitation being resent as a duplicate of itself`() {
         // Arrange
         val organisation = createOrgLandlord()
         val invitation =
