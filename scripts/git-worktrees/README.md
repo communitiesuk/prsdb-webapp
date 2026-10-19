@@ -58,9 +58,10 @@ Removes a git worktree and optionally deletes the associated local branch.
 **What it does:**
 1. Checks for uncommitted changes (warns before proceeding)
 2. Confirms removal with the user (unless force is used)
-3. Removes the worktree via `git worktree remove`
-4. Prunes stale worktree references
-5. Optionally deletes the local branch (never deletes `main` or `test`)
+3. Stops the worktree's local Docker containers (`docker compose down`) so their ports are freed
+4. Removes the worktree via `git worktree remove`
+5. Prunes stale worktree references
+6. Optionally deletes the local branch (never deletes `main` or `test`)
 
 **Parameters:**
 
