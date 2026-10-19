@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
+import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.RemoveOrgUserConfirmationStep
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 
 @PreAuthorize("hasRole('ORG_ADMIN')")
@@ -82,5 +83,8 @@ class ChangeOrgTeamMemberAccessLevelController(
 
         fun getChangeAccessLevelPath(otherOrganisationalLandlordUserId: Long): String =
             "${getChangeAccessLevelBasePath(otherOrganisationalLandlordUserId)}/${AccessLevelStep.ROUTE_SEGMENT}"
+
+        fun getRemoveOrgUserPath(otherOrganisationalLandlordUserId: Long): String =
+            "${getChangeAccessLevelBasePath(otherOrganisationalLandlordUserId)}/${RemoveOrgUserConfirmationStep.ROUTE_SEGMENT}"
     }
 }
