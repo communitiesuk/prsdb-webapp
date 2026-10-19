@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -8,6 +10,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
@@ -152,6 +155,19 @@ class TeamMembersControllerTests(
             .andExpect {
                 status { isForbidden() }
             }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["INDIVIDUAL_LANDLORD", "ORG_EDITOR", "LOCAL_COUNCIL_ADMIN", "LOCAL_COUNCIL_USER", "SYSTEM_OPERATOR"])
+    fun `removeExpiredInvitation returns 403 for roles other than organisation admin`(role: String) {
+        mvc
+            .get(removeExpiredInvitationRoute) {
+                with(user("user").roles(role))
+            }.andExpect {
+                status { isForbidden() }
+            }
+
+        verify(organisationalLandlordInvitationService, never()).hideExpiredInvitation(any(), any())
     }
 
     @Test

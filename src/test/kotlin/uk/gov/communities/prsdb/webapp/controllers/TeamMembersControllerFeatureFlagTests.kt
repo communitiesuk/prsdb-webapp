@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.security.test.context.support.WithMockUser
@@ -31,16 +33,6 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
     @MockitoBean
     private lateinit var manageTeamMembersUrlProvider: ManageTeamMembersUrlProvider
 
-    @WithMockUser(roles = ["ORG_ADMIN"])
-    @Test
-    fun `team members page is unavailable if the multi-user organisations feature flag is disabled`() {
-        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
-
-        mvc
-            .get(TEAM_MEMBERS_ROUTE)
-            .andExpect { status { isNotFound() } }
-    }
-
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     @Test
     fun `team members page is available if the multi-user organisations feature flag is enabled`() {
@@ -55,13 +47,28 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
             .andExpect { status { isOk() } }
     }
 
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    @Test
-    fun `removing an expired invitation is unavailable if the multi-user organisations feature flag is disabled`() {
-        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
+    // TODO PDJB-1828: Delete this nested class when the MULTI_USER_ORGANISATIONS flag is removed
+    @Nested
+    inner class BeforePdjb1210MultiUserOrganisations {
+        @BeforeEach
+        fun disableMultiUserOrganisations() {
+            featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
+        }
 
-        mvc
-            .get(TeamMembersController.getRemoveExpiredInvitationPath(1))
-            .andExpect { status { isNotFound() } }
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        @Test
+        fun `team members page is unavailable if the multi-user organisations feature flag is disabled`() {
+            mvc
+                .get(TEAM_MEMBERS_ROUTE)
+                .andExpect { status { isNotFound() } }
+        }
+
+        @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+        @Test
+        fun `removing an expired invitation is unavailable if the multi-user organisations feature flag is disabled`() {
+            mvc
+                .get(TeamMembersController.getRemoveExpiredInvitationPath(1))
+                .andExpect { status { isNotFound() } }
+        }
     }
 }

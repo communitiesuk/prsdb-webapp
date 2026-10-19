@@ -1,12 +1,16 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.ADMINISTRATORS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.util.UUID
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
@@ -97,5 +101,33 @@ class TeamMembersTests :
         val hiddenInvitation = invitationRepository.findByToken(UUID.fromString("1234abcd-5678-abcd-1234-567abcd2222e"))
         assertNotNull(hiddenInvitation)
         assertTrue(hiddenInvitation.isHidden)
+    }
+
+    @Nested
+    inner class RemovingExpiredInvitations :
+        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
+            listOf("data-local.sql", "data-org-landlord-team-members.sql"),
+        ) {
+        @Test
+        fun `removing an expired invitation hides it and returns to the invitations tab`(page: Page) {
+            // Arrange
+            val teamMembersPage = navigator.goToTeamMembers()
+            teamMembersPage.tabs.goToInvitations(pendingInvitationCount = 3)
+            assertThat(teamMembersPage.expiredInvitationsSummaryList.rows).hasCount(2)
+
+            // Act
+            teamMembersPage.expiredInvitationsSummaryList
+                .getRowByIndex(0)
+                .clickNamedActionLinkAndWait("Remove")
+
+            // Assert
+            val reloadedPage = assertPageIs(page, TeamMembersPage::class)
+            assertEquals(INVITATIONS_FRAGMENT, reloadedPage.tabs.activeTabPanelId)
+            assertThat(reloadedPage.expiredInvitationsSummaryList.rows).hasCount(1)
+            val remainingRow = reloadedPage.expiredInvitationsSummaryList.getRowByIndex(0)
+            assertThat(remainingRow.key).hasText("Expired invite 1")
+            assertThat(remainingRow.value).hasText("expired-org-invite-d@example.com")
+            assertThat(reloadedPage.invitationsPanel).not().containsText("expired-org-invite-f@example.com")
+        }
     }
 }

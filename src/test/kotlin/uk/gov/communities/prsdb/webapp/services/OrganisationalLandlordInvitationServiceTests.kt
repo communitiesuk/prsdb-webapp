@@ -721,6 +721,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 id = 1,
                 organisationalLandlord = organisation,
                 createdDate = Instant.now().minus(60, ChronoUnit.DAYS),
+                isHidden = false,
             )
         whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.of(invitation))
 
