@@ -10,7 +10,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.RemoveOrgUserConfirmationPage
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelJourneyTests :
@@ -55,5 +57,20 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Carl Editor is now an administrator.")
         val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG03").single()
         assertEquals(OrganisationalLandlordUserRole.ADMIN, updatedMember.role)
+    }
+
+    @Test
+    fun `an admin can confirm removal of another organisation member`(page: Page) {
+        val teamMembersPage = navigator.goToTeamMembers()
+        teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
+
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        accessLevelPage.removeAccessLink.clickAndWait()
+
+        val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        confirmationPage.form.submit()
+
+        assertPageIs(page, TeamMembersPage::class)
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isEmpty())
     }
 }

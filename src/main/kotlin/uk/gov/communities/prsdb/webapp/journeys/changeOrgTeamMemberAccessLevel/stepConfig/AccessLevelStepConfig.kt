@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyState
@@ -32,8 +33,8 @@ class AccessLevelStepConfig(
                     null -> null
                 },
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            // TODO PDJB-1764: link to the remove-access journey
-            "removeAccessUrl" to "#",
+            "removeAccessUrl" to
+                ChangeOrgTeamMemberAccessLevelController.getRemoveOrgUserPath(state.otherOrganisationalLandlordUserId),
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
