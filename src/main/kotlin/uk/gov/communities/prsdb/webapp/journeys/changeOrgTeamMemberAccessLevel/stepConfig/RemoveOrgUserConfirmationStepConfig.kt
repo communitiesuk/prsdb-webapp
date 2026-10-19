@@ -13,7 +13,10 @@ class RemoveOrgUserConfirmationStepConfig :
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: ChangeOrgTeamMemberAccessLevelJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "Confirm removal from the organisation (TODO PDJB-1764)")
+        mapOf(
+            "todoComment" to
+                "Confirm removal - continuing will remove this user from the organisation (TODO PDJB-1764: page content)",
+        )
 
     override fun chooseTemplate(state: ChangeOrgTeamMemberAccessLevelJourneyState) = "forms/todo"
 

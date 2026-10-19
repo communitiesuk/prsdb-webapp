@@ -10,8 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyState
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
+import kotlin.test.assertSame
 
 @ExtendWith(MockitoExtension::class)
 class CompleteRemoveOrgUserStepConfigTests {
@@ -33,15 +32,15 @@ class CompleteRemoveOrgUserStepConfigTests {
     }
 
     @Test
-    fun `resolveNextDestination clears the journey and returns to team members`() {
-        val defaultDestination = Destination.Nowhere()
+    fun `resolveNextDestination deletes the journey before returning the default destination`() {
+        // Arrange
+        val destination = Destination.ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
 
-        val result = createStepConfig().resolveNextDestination(mockState, defaultDestination)
+        // Act
+        val result = createStepConfig().resolveNextDestination(mockState, destination)
 
+        // Assert
         verify(mockState).deleteJourney()
-        assertEquals(
-            TeamMembersController.TEAM_MEMBERS_ROUTE,
-            assertIs<Destination.ExternalUrl>(result).externalUrl,
-        )
+        assertSame(destination, result)
     }
 }

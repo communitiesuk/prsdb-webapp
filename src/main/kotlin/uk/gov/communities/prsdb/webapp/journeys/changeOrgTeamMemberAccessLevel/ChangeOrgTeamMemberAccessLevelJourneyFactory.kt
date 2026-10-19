@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.CompleteChangeAccessLevelStep
@@ -61,8 +62,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
             }
             step(journey.removeOrgUserConfirmationStep) {
                 routeSegment(RemoveOrgUserConfirmationStep.ROUTE_SEGMENT)
-                initialStep()
-                backStep { journey.accessLevelStep }
+                parents { journey.accessLevelStep.always() }
                 nextStep { journey.completeRemoveOrgUserStep }
             }
             step(journey.completeRemoveOrgUserStep) {

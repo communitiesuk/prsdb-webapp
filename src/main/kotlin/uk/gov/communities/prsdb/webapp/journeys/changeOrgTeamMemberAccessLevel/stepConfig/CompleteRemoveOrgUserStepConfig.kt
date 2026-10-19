@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -28,7 +27,7 @@ class CompleteRemoveOrgUserStepConfig(
         defaultDestination: Destination,
     ): Destination {
         state.deleteJourney()
-        return Destination.ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
+        return defaultDestination
     }
 }
 
