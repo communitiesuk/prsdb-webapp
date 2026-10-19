@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.PrsdbWebMvcRegistration
 import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
+import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfig
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
     LandlordSecurityConfig::class,
     LettingAgentSecurityConfig::class,
     LocalCouncilSecurityConfig::class,
+    ActingAsLandlordSecurityConfig::class,
     CustomErrorConfig::class,
     TrailingSlashFilterConfiguration::class,
     BackLinkInterceptorConfig::class,

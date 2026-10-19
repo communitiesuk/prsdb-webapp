@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController.Companion.UPDATE_GAS_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
@@ -33,7 +34,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_GAS_SAFETY_ROUTE)
+@RequestMapping(UPDATE_GAS_SAFETY_ROUTE, "/$SYSTEM_OPERATOR_PATH_SEGMENT$UPDATE_GAS_SAFETY_ROUTE")
 @AllowIfLandlord
 class LandlordUpdateGasSafetyController(
     private val journeyFactory: UpdateGasSafetyJourneyFactory,

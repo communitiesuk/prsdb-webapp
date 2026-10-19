@@ -19,6 +19,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.filters.ActingAsLandlordRedirectFilter
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
@@ -111,6 +112,7 @@ class LandlordSecurityConfig(
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
             }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
+            .addFilterAfter(ActingAsLandlordRedirectFilter(), SecurityContextHolderFilter::class.java)
             .headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->

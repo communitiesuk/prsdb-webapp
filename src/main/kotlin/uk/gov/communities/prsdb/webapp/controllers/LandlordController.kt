@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -31,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
 @AllowIfLandlord
 @PrsdbController
-@RequestMapping(LANDLORD_BASE_URL, "/")
+@RequestMapping(LANDLORD_BASE_URL, "/", "/$SYSTEM_OPERATOR_PATH_SEGMENT$LANDLORD_BASE_URL")
 class LandlordController(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,

@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -18,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.phon
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_PHONE_NUMBER_ROUTE)
+@RequestMapping(UPDATE_PHONE_NUMBER_ROUTE, "/$SYSTEM_OPERATOR_PATH_SEGMENT$UPDATE_PHONE_NUMBER_ROUTE")
 @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
 class UpdateLandlordPhoneNumberController(
     private val updatePhoneNumberJourneyFactory: UpdatePhoneNumberJourneyFactory,

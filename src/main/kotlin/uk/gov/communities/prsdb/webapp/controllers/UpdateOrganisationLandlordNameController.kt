@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -22,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_ORG_NAME_ROUTE)
+@RequestMapping(UPDATE_ORG_NAME_ROUTE, "/$SYSTEM_OPERATOR_PATH_SEGMENT$UPDATE_ORG_NAME_ROUTE")
 @PreAuthorize("hasRole('ORG_ADMIN')")
 class UpdateOrganisationLandlordNameController(
     private val journeyFactory: UpdateOrganisationNameJourneyFactory,

@@ -97,7 +97,8 @@ class DefaultSecurityConfig(
         UserServiceFactory.create(userRolesService::getAllRolesForSubjectId)
 
     @Bean
-    fun securityContextRepository(): SecurityContextRepository = HttpSessionSecurityContextRepository()
+    fun securityContextRepository(): SecurityContextRepository =
+        ActingTokenRejectingSecurityContextRepository(HttpSessionSecurityContextRepository())
 
     private fun oidcLogoutSuccessHandler(): LogoutSuccessHandler {
         val oidcLogoutSuccessHandler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)

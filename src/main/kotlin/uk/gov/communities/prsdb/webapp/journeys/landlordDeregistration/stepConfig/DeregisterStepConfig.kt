@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConf
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthenticationToken
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -60,7 +61,9 @@ class DeregisterStepConfig(
             swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)
         }
 
-        securityContextService.refreshContext()
+        if (SecurityContextHolder.getContext().authentication !is ActingAsLandlordAuthenticationToken) {
+            securityContextService.refreshContext()
+        }
     }
 
     override fun resolveNextDestination(
