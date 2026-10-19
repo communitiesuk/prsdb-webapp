@@ -201,8 +201,8 @@ class LandlordSecurityConfig(
         val user = authenticationToken.principal
         return user is OidcUser &&
             (
-                user.userInfo.claims.keys
-                    .any { it.contains(OneLoginClaimKeys.DOMAIN) }
+                user.userInfo?.claims?.keys
+                    ?.any { it.contains(OneLoginClaimKeys.DOMAIN) } == true
             )
     }
 

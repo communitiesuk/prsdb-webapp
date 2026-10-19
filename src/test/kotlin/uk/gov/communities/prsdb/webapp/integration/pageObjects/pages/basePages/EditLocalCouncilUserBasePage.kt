@@ -16,6 +16,9 @@ open class EditLocalCouncilUserBasePage(
     val form = EditLocalCouncilUserForm(page)
     val removeAccountButton = Button.byText(page, "Remove this account")
 
+    override val expectedTitleHeading
+        get() = "Edit access for ${page.locator("h1").first().textContent().trim()}"
+
     fun selectManagerRadio() {
         form.isManagerRadios.selectValue("true")
     }

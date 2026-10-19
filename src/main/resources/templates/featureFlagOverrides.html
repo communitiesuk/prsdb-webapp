@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{featureFlagOverrides.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{featureFlagOverrides.heading}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
         <h1 class="govuk-heading-l" th:text="#{featureFlagOverrides.heading}">featureFlagOverrides.heading</h1>
         <p class="govuk-body" th:text="#{featureFlagOverrides.description}">featureFlagOverrides.description</p>

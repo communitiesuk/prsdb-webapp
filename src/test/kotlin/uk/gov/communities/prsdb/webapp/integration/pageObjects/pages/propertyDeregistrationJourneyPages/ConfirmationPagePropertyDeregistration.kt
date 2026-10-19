@@ -15,8 +15,6 @@ class ConfirmationPagePropertyDeregistration(
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
-    override val expectedTitleHeading = "Property deregistered"
-
     val confirmationBanner = ConfirmationBanner(page)
     val goToDashboardLink = Link.byText(page, "Go to dashboard")
 }

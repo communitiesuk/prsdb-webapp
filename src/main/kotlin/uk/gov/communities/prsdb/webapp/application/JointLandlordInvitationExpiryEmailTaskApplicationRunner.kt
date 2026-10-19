@@ -15,7 +15,7 @@ class JointLandlordInvitationExpiryEmailTaskApplicationRunner(
     private val context: ApplicationContext,
     private val taskLogic: JointLandlordInvitationExpiryEmailTaskLogic,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         println("Executing joint landlord invitation expiry email scheduled task")
 
         val failureCount = taskLogic.sendJointLandlordInvitationExpiryEmails()

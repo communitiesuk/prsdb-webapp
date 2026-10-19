@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerAsALandlord.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{registerAsALandlord.confirmation.banner.heading}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
@@ -12,9 +12,30 @@
             <br>
             <strong th:text="${registrationNumber}"></strong>
         </div>
-        <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.emailParagraph}">
-            registerAsALandlord.confirmation.emailParagraph
+        <p class="govuk-body" th:unless="${showOrgAdminContent}" th:text="#{registerAsALandlord.confirmation.individual.emailParagraph}">
+            registerAsALandlord.confirmation.individual.emailParagraph
         </p>
+        <th:block th:if="${showOrgAdminContent}">
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.organisation.emailParagraph}">
+                registerAsALandlord.confirmation.organisation.emailParagraph
+            </p>
+
+            <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.confirmation.organisation.whatYouCanDoNow.heading}">registerAsALandlord.confirmation.organisation.whatYouCanDoNow.heading</h2>
+            <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.organisation.whatYouCanDoNow.paragraph}">
+                registerAsALandlord.confirmation.organisation.whatYouCanDoNow.paragraph
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.one}">
+                    registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.one
+                </li>
+                <li th:text="#{registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.two}">
+                    registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.two
+                </li>
+                <li th:text="#{registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.three}">
+                    registerAsALandlord.confirmation.organisation.whatYouCanDoNow.bullet.three
+                </li>
+            </ul>
+        </th:block>
 
         <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.confirmation.whatYouNeedToDo.heading}">registerAsALandlord.confirmation.whatYouNeedToDo.heading</h2>
         <p class="govuk-body" th:text="#{registerAsALandlord.confirmation.whatYouNeedToDo.paragraph.one}">

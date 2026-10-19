@@ -25,13 +25,12 @@ class SwapToIndividualNudgeEmailService(
             invitations.any { it.status == JointLandlordInvitationStatus.EXPIRED && !it.invitationExpiredEmailSent }
         if (hasUnprocessedExpiredInvitations) return
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
         val soleLandlord = propertyOwnership.landlords.single()
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
-        nudgeEmailNotificationService.sendEmail(
-            soleLandlord.email,
+        nudgeEmailNotificationService.sendEmailToLandlord(
+            soleLandlord,
             SwapToIndividualNudgeEmail(
                 recipientName = soleLandlord.name,
                 propertyAddress = propertyAddress,

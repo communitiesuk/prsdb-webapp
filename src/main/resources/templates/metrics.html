@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="metricRows" type="java.lang.Object"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{metrics.title}, ~{::main}, ${#fields.hasErrors('${formModel.*}')})}">
+<html th:replace="~{fragments/layout :: layout(#{metrics.heading}, ~{::main}, ${#fields.hasErrors('${formModel.*}')})}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-content"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">

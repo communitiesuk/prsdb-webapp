@@ -1,18 +1,24 @@
 package uk.gov.communities.prsdb.webapp.clients
 
+import com.sun.net.httpserver.HttpServer
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
+import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import java.net.InetSocketAddress
 import java.net.URI
 
 class EpcRegisterClientTests {
@@ -21,7 +27,7 @@ class EpcRegisterClientTests {
 
     @BeforeEach
     fun setUp() {
-        val builder = RestClient.builder().baseUrl(BASE_URL)
+        val builder = configuredClientBuilder(BASE_URL)
         mockServer = MockRestServiceServer.bindTo(builder).build()
         epcRegisterClient = EpcRegisterClient(builder.build())
     }
@@ -106,6 +112,55 @@ class EpcRegisterClientTests {
         }
         mockServer.verify()
     }
+
+    @Test
+    fun `getByUprn normalises a streaming HTTP 404 with an INVALID_REQUEST body`() {
+        withStreamingResponse(HttpStatus.NOT_FOUND, errorBody("INVALID_REQUEST", "Certificate not found")) { client ->
+            assertEquals("NOT_FOUND", errorCodeOf(client.getByUprn(123)))
+        }
+    }
+
+    @Test
+    fun `getByRrn returns a recognised streaming HTTP 400 response`() {
+        val responseBody = errorBody("BAD_REQUEST", "Invalid certificate number")
+
+        withStreamingResponse(HttpStatus.BAD_REQUEST, responseBody) { client ->
+            assertEquals(responseBody, client.getByRrn(CERTIFICATE_NUMBER))
+        }
+    }
+
+    private fun withStreamingResponse(
+        status: HttpStatus,
+        responseBody: String,
+        assertion: (EpcRegisterClient) -> Unit,
+    ) {
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+        val requestFactory = HttpComponentsClientHttpRequestFactory()
+        server.createContext("/api/prsdatabase/assessments/search") { exchange ->
+            val bytes = responseBody.toByteArray()
+            exchange.responseHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            exchange.sendResponseHeaders(status.value(), bytes.size.toLong())
+            exchange.responseBody.use { it.write(bytes) }
+        }
+        server.start()
+
+        try {
+            val client =
+                configuredClientBuilder("http://127.0.0.1:${server.address.port}")
+                    .requestFactory(requestFactory)
+                    .build()
+            assertion(EpcRegisterClient(client))
+        } finally {
+            server.stop(0)
+            requestFactory.destroy()
+        }
+    }
+
+    private fun configuredClientBuilder(baseUrl: String): RestClient.Builder =
+        EpcRegisterConfig(mock())
+            .apply { this.baseUrl = baseUrl }
+            .epcWebClient()
+            .mutate()
 
     private fun errorBody(
         code: String,

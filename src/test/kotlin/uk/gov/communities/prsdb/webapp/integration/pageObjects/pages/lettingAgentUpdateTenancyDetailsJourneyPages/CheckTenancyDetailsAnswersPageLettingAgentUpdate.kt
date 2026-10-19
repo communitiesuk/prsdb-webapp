@@ -14,4 +14,6 @@ class CheckTenancyDetailsAnswersPageLettingAgentUpdate(
         LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(
             UUID.fromString(urlArguments["token"]!!),
         ) + "/${UpdateTenancyDetailsCyaStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    override val expectedTitleHeading = "Check your tenancy details answers"
+}

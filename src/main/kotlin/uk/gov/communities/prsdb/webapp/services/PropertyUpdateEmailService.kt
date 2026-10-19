@@ -22,6 +22,7 @@ class PropertyUpdateEmailService(
         JointLandlordPropertyUpdateWithLettingAgentRemovedNotification,
         >,
     private val lettingAgentUpdateEmailService: EmailNotificationService<LettingAgentPropertyUpdateNotificationEmail>,
+    private val currentUserService: CurrentUserService,
 ) {
     fun sendUpdateEmails(
         propertyId: Long,
@@ -42,9 +43,8 @@ class PropertyUpdateEmailService(
         val registrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
         confirmationEmailService.sendEmail(
-            actingLandlord.email,
+            currentUserService.getCurrentEmail(),
             PropertyUpdateConfirmation(
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
                 registrationNumber = registrationNumber,
@@ -52,14 +52,14 @@ class PropertyUpdateEmailService(
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         val otherLandlords = propertyOwnership.landlords.filter { it.id != actingLandlord.id }
         if (otherLandlords.isNotEmpty()) {
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
-            // TODO: PDJB-1274: Update emails to account for org landlord
             otherLandlords.forEach { landlord ->
-                notificationEmailService.sendEmail(
-                    landlord.email,
+                notificationEmailService.sendEmailToLandlord(
+                    landlord,
                     JointLandlordPropertyUpdateNotificationEmail(
                         recipientName = landlord.name,
                         propertyAddress = propertyOwnership.address.toMultiLineAddress(),
@@ -79,10 +79,9 @@ class PropertyUpdateEmailService(
         val registrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
-        // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { landlord ->
-            lettingAgentUpdateEmailService.sendEmail(
-                landlord.email,
+            lettingAgentUpdateEmailService.sendEmailToLandlord(
+                landlord,
                 LettingAgentPropertyUpdateNotificationEmail(
                     recipientName = landlord.name,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
@@ -118,25 +117,25 @@ class PropertyUpdateEmailService(
     ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val currentUser = currentUserService.getCurrentUserDetails()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         lettingAgentRemovedEmailService.sendEmail(
-            // TODO: PDJB-1274: Update emails to account for org landlord
-            actingLandlord.email,
+            currentUser.email,
             PropertyUpdateWithLettingAgentRemovedConfirmation(
-                name = actingLandlord.name,
+                name = currentUser.name,
                 propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 updatedMessage = updatedMessage,
                 lettingAgentEmail = lettingAgentEmail,
                 propertyRecordUrl = propertyRecordUrl,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         val otherLandlords = propertyOwnership.landlords.filter { it.id != actingLandlord.id }
         otherLandlords.forEach { landlord ->
-            jointLandlordLettingAgentRemovedEmailService.sendEmail(
-                // TODO: PDJB-1274: Update emails to account for org landlord
-                landlord.email,
+            jointLandlordLettingAgentRemovedEmailService.sendEmailToLandlord(
+                landlord,
                 JointLandlordPropertyUpdateWithLettingAgentRemovedNotification(
                     recipientName = landlord.name,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),

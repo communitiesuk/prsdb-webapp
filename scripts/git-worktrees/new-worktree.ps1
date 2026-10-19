@@ -182,6 +182,11 @@ try {
         $content = $content -replace 'ELASTICACHE_PORT="6379"', "ELASTICACHE_PORT=`"$newRedisPort`""
         $content = $content -replace 'LANDLORD_BASE_URL="http://localhost:8080/landlord"', "LANDLORD_BASE_URL=`"http://localhost:${newServerPort}/landlord`""
         $content = $content -replace 'LOCAL_AUTHORITY_BASE_URL="http://localhost:8080/local-council"', "LOCAL_AUTHORITY_BASE_URL=`"http://localhost:${newServerPort}/local-council`""
+        # Append any port keys missing from the copied .env so defaults aren't used
+        $portKeys = [ordered]@{ SERVER_PORT = $newServerPort; POSTGRES_PORT = $newPostgresPort; REDIS_PORT = $newRedisPort }
+        foreach ($key in $portKeys.Keys) {
+            if ($content -notmatch "(?m)^${key}=") { $content = $content.TrimEnd() + "`n${key}=`"$($portKeys[$key])`"" }
+        }
         Set-Content -Path $envFilePath -Value $content -NoNewline
         Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
         Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
