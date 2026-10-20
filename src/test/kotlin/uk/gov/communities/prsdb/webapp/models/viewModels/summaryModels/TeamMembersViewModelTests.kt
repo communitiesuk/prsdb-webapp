@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUse
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -31,7 +32,9 @@ class TeamMembersViewModelTests {
         email: String,
         daysAgo: Long,
         isHidden: Boolean = false,
+        id: Long = 0,
     ) = MockLandlordData.createOrganisationalLandlordInvitation(
+        id = id,
         invitedEmail = email,
         organisationalLandlord = organisation,
         createdDate = Instant.now().minus(daysAgo, ChronoUnit.DAYS),
@@ -116,7 +119,7 @@ class TeamMembersViewModelTests {
         val invitations =
             listOf(
                 invitation("newer@example.com", daysAgo = 1),
-                invitation("older@example.com", daysAgo = 10),
+                invitation("older@example.com", daysAgo = 10, id = 2L),
             )
 
         // Act
@@ -131,7 +134,7 @@ class TeamMembersViewModelTests {
         assertEquals("teamMembers.invitations.rowHeading", viewModel.pendingInvitationRows.first().fieldHeading)
         assertEquals(
             listOf(
-                SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(2L)),
                 SummaryListRowActionsViewModel("forms.links.cancel", "#"),
             ),
             viewModel.pendingInvitationRows.first().actions,
@@ -146,7 +149,7 @@ class TeamMembersViewModelTests {
             listOf(
                 invitation("pending@example.com", daysAgo = 1),
                 invitation("expired-newer@example.com", daysAgo = 40),
-                invitation("expired-older@example.com", daysAgo = 60),
+                invitation("expired-older@example.com", daysAgo = 60, id = 3L),
             )
 
         // Act
@@ -162,7 +165,7 @@ class TeamMembersViewModelTests {
         assertEquals("teamMembers.invitations.expired.rowHeading", viewModel.expiredInvitationRows.first().fieldHeading)
         assertEquals(
             listOf(
-                SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(3L)),
                 SummaryListRowActionsViewModel("forms.links.remove", "#"),
             ),
             viewModel.expiredInvitationRows.first().actions,

@@ -27,6 +27,10 @@ accessLevelChangedBanner:
   content:
     administrator: '{0,,name} is now an administrator.'
     editor: '{0,,name} is now an editor.'
+resendInvitationBanner:
+  title: Success
+  heading: Invitation resent
+  content: 'An invitation has been sent to {0,,email}'
 invitations:
   tab: Invitations ({0,,count})
   heading: Invitations
