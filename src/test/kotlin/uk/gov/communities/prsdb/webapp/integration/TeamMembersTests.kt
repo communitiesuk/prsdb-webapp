@@ -35,6 +35,7 @@ class TeamMembersTests :
 
     @MockitoBean
     private lateinit var invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>
+
     @Test
     fun `the administrators tab is shown by default, listing administrators alphabetically and marking the current user`() {
         // Act
