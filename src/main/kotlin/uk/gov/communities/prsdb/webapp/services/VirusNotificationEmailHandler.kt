@@ -108,11 +108,13 @@ class VirusNotificationEmailHandler(
     }
 
     private fun findSavedJourneyState(notification: IncompletePropertyEmailNotification): SavedJourneyState? {
+        // TODO PDJB-1919: The findByJourneyIdAndUser_Id call can be inlined as notification.userId != null will always be true
+        // then we can remove findSavedJourneyState
         if (notification.userId != null) {
             return savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, notification.userId)
         }
 
-        // TODO PDJB-1919: Remove this fallback once all saved notifications have a userId
+        // TODO PDJB-1919: Remove this fallback code (the rest of this method) once all saved notifications have a userId
         val landlord =
             landlordRepository.findById(notification.landlordId).orElse(null)
                 ?: throw IllegalStateException("No landlord found for id: ${notification.landlordId}")
