@@ -20,6 +20,8 @@ class MockPropertyRegistrationData {
         val DEFAULT_CORRESPONDENCE_ADDRESS_MODEL =
             AddressDataModel.fromManualAddressData("2 Correspondence Road", "Leeds", "LS1 1AA")
 
+        fun createDefaultCorrespondenceAddress() = MockLandlordData.createAddress(DEFAULT_CORRESPONDENCE_ADDRESS_MODEL.singleLineAddress)
+
         fun createPropertyRegistrationDataModel(
             addressModel: AddressDataModel = AddressDataModel("1 Example Road, EG1 2AB"),
             propertyType: PropertyType = PropertyType.DETACHED_HOUSE,

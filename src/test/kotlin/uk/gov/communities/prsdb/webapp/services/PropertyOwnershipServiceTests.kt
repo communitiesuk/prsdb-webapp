@@ -67,6 +67,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -311,7 +312,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(address)
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -330,8 +332,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = RentFrequency.OTHER,
             customRentFrequency = "Fortnightly",
             rentAmount = 123.toBigDecimal(),
-            correspondenceEmail = "chosen@example.com",
-            correspondenceAddressModel = AddressDataModel("12 Contact Road, EG1 2AC"),
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -352,7 +354,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(address)
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -371,8 +374,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = null,
             customRentFrequency = null,
             rentAmount = null,
-            correspondenceEmail = "chosen@example.com",
-            correspondenceAddressModel = AddressDataModel("12 Contact Road, EG1 2AC"),
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -388,8 +391,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY))
             .thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456))
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer { it.arguments[0] as PropertyOwnership }
-        whenever(mockAddressService.findOrCreateAddress(any()))
-            .thenReturn(MockLandlordData.createAddress("12 Contact Road, EG1 2AC"))
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         // Act
         val property =
@@ -411,8 +414,8 @@ class PropertyOwnershipServiceTests {
                 rentAmount = null,
                 customPropertyType = null,
                 renewalDate = renewalDate,
-                correspondenceEmail = "chosen@example.com",
-                correspondenceAddressModel = AddressDataModel("12 Contact Road, EG1 2AC"),
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             )
 
         // Assert
@@ -432,7 +435,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(address)
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -451,8 +455,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = null,
             customRentFrequency = null,
             rentAmount = null,
-            correspondenceEmail = "chosen@example.com",
-            correspondenceAddressModel = AddressDataModel("12 Contact Road, EG1 2AC"),
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
