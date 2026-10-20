@@ -6,39 +6,34 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class LettingAgentEmailStepConfigTests {
     @Mock
-    lateinit var mockUserToLandlordService: UserToLandlordService
+    lateinit var mockCurrentUserService: CurrentUserService
 
     @Mock
     lateinit var mockJourneyState: WhoProvidesDetailsState
 
-    @Mock
-    lateinit var mockLandlord: Landlord
-
     @Test
-    fun `enrichSubmittedDataBeforeValidation injects the landlord email`() {
-        val stepConfig = LettingAgentEmailStepConfig(mockUserToLandlordService)
+    fun `enrichSubmittedDataBeforeValidation injects the current user's email`() {
+        val stepConfig = LettingAgentEmailStepConfig(mockCurrentUserService)
         stepConfig.urlPath = LettingAgentEmailStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
-        whenever(mockLandlord.email).thenReturn("landlord@example.com")
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("landlord@example.com")
 
         val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
 
-        assertEquals("landlord@example.com", result["landlordEmail"])
+        assertEquals("landlord@example.com", result["currentUserEmail"])
     }
 
     @Test
     fun `chooseTemplate returns the letting agent email form template`() {
-        val stepConfig = LettingAgentEmailStepConfig(mockUserToLandlordService)
+        val stepConfig = LettingAgentEmailStepConfig(mockCurrentUserService)
 
         assertEquals("forms/lettingAgentEmailForm", stepConfig.chooseTemplate(mockJourneyState))
     }

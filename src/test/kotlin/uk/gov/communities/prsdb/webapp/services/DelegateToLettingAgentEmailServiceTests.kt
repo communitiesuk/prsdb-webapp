@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
-import uk.gov.communities.prsdb.webapp.services.CurrentUserService.CurrentUserDetails
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 import java.util.UUID
@@ -99,8 +99,8 @@ class DelegateToLettingAgentEmailServiceTests {
             MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
         emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
@@ -126,8 +126,8 @@ class DelegateToLettingAgentEmailServiceTests {
             MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
         emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
@@ -154,8 +154,8 @@ class DelegateToLettingAgentEmailServiceTests {
             MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
         emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
@@ -212,8 +212,8 @@ class DelegateToLettingAgentEmailServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5, landlords = mutableSetOf(landlord))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
         emailService.sendCancellationEmails(propertyOwnership, agentEmail)
@@ -236,8 +236,8 @@ class DelegateToLettingAgentEmailServiceTests {
                 landlords = mutableSetOf(actingLandlord, jointLandlord),
             )
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actingLandlord)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
         emailService.sendCancellationEmails(propertyOwnership, agentEmail)
@@ -254,8 +254,8 @@ class DelegateToLettingAgentEmailServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5, landlords = mutableSetOf(landlord))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
         emailService.sendCancellationEmails(propertyOwnership, agentEmail)
@@ -271,8 +271,8 @@ class DelegateToLettingAgentEmailServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5, landlords = mutableSetOf(landlord))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
         emailService.sendCancellationEmails(propertyOwnership, agentEmail)
