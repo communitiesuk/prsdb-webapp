@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class AllowLettingAgentEmailFormModelTests {
     @Test
-    fun `isEmailNotCurrentUser returns true when email is different from landlord email`() {
+    fun `isEmailNotCurrentUser returns true when email is different from current user email`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"
@@ -17,7 +17,7 @@ class AllowLettingAgentEmailFormModelTests {
     }
 
     @Test
-    fun `isEmailNotCurrentUser returns false when email matches landlord email`() {
+    fun `isEmailNotCurrentUser returns false when email matches current user email`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "landlord@example.com"
@@ -28,7 +28,7 @@ class AllowLettingAgentEmailFormModelTests {
     }
 
     @Test
-    fun `isEmailNotCurrentUser returns false when email matches landlord email case-insensitively`() {
+    fun `isEmailNotCurrentUser returns false when email matches current user email case-insensitively`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "Landlord@Example.COM"
@@ -50,7 +50,7 @@ class AllowLettingAgentEmailFormModelTests {
     }
 
     @Test
-    fun `isEmailNotCurrentUser returns true when landlord email is null`() {
+    fun `isEmailNotCurrentUser returns true when current user email is null`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"

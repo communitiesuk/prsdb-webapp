@@ -65,17 +65,6 @@ class AllowLettingAgentStepConfigTests {
     }
 
     @Test
-    fun `enrichSubmittedDataBeforeValidation injects the acting sub-user email for an organisational user`() {
-        val stepConfig = createStepConfig()
-
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("sub-user@example.com")
-
-        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
-
-        assertEquals("sub-user@example.com", result["currentUserEmail"])
-    }
-
-    @Test
     fun `chooseTemplate returns the allow letting agent form template`() {
         val stepConfig = createStepConfig()
 

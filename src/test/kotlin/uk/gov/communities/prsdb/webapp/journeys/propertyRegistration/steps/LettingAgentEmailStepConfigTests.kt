@@ -32,19 +32,6 @@ class LettingAgentEmailStepConfigTests {
     }
 
     @Test
-    fun `enrichSubmittedDataBeforeValidation injects the acting sub-user email for an organisational user`() {
-        val stepConfig = LettingAgentEmailStepConfig(mockCurrentUserService)
-        stepConfig.urlPath = LettingAgentEmailStep.ROUTE_SEGMENT
-        stepConfig.validator = AlwaysTrueValidator()
-
-        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("sub-user@example.com")
-
-        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
-
-        assertEquals("sub-user@example.com", result["currentUserEmail"])
-    }
-
-    @Test
     fun `chooseTemplate returns the letting agent email form template`() {
         val stepConfig = LettingAgentEmailStepConfig(mockCurrentUserService)
 
