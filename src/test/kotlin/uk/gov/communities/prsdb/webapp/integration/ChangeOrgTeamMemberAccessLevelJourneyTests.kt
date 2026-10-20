@@ -73,4 +73,19 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         assertPageIs(page, TeamMembersPage::class)
         assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isEmpty())
     }
+
+    @Test
+    fun `cancelling on the remove access confirmation page returns to the team members page without removing the member`(page: Page) {
+        val teamMembersPage = navigator.goToTeamMembers()
+        teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
+
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        accessLevelPage.removeAccessLink.clickAndWait()
+
+        val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        confirmationPage.cancelLink.clickAndWait()
+
+        assertPageIs(page, TeamMembersPage::class)
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isNotEmpty())
+    }
 }

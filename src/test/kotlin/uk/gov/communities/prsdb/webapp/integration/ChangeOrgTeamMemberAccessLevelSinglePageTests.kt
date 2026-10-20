@@ -33,4 +33,15 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
         val errorPage = assertPageIs(page, AccessLevelPage::class)
         assertThat(errorPage.errorSummary.errorLinks("Select the access level")).hasCount(1)
     }
+
+    @Test
+    fun `the remove access confirmation page shows the heading and member name`(page: Page) {
+        val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
+
+        val confirmationPage = navigator.goToRemoveOrgUserConfirmationPage(memberId)
+
+        BaseComponent.assertThat(confirmationPage.heading).hasText("Are you sure you want to remove their access?")
+        assertThat(confirmationPage.memberNameParagraph)
+            .hasText("Beth Admin will no longer be able to access your organisation on the service.")
+    }
 }

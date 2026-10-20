@@ -107,6 +107,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbac
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.AreYouSurePageCancelLettingAgentDelegation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.RemoveOrgUserConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
@@ -1234,6 +1235,11 @@ class Navigator(
     fun goToChangeOrgTeamMemberAccessLevelPage(otherOrganisationalLandlordUserId: Long): AccessLevelPage {
         navigate(ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelPath(otherOrganisationalLandlordUserId))
         return createValidPage(page, AccessLevelPage::class)
+    }
+
+    fun goToRemoveOrgUserConfirmationPage(otherOrganisationalLandlordUserId: Long): RemoveOrgUserConfirmationPage {
+        navigate(ChangeOrgTeamMemberAccessLevelController.getRemoveOrgUserPath(otherOrganisationalLandlordUserId))
+        return createValidPage(page, RemoveOrgUserConfirmationPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
