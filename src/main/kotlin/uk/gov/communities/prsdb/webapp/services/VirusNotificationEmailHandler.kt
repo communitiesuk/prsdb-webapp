@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -84,11 +83,8 @@ class VirusNotificationEmailHandler(
         notification: IncompletePropertyEmailNotification,
         monitoringEmailAddress: String? = null,
     ) {
-        val landlord =
-            landlordRepository.findById(notification.landlordId).orElse(null)
-                ?: throw IllegalStateException("No landlord found for id: ${notification.landlordId}")
         val savedJourneyState =
-            findFirstSavedJourneyStateForLandlord(landlord, notification.journeyId)
+            findSavedJourneyState(notification)
                 ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
 
         if (monitoringEmailAddress != null) {
@@ -111,10 +107,15 @@ class VirusNotificationEmailHandler(
         }
     }
 
-    private fun findFirstSavedJourneyStateForLandlord(
-        landlord: Landlord,
-        journeyId: String,
-    ): SavedJourneyState? {
+    private fun findSavedJourneyState(notification: IncompletePropertyEmailNotification): SavedJourneyState? {
+        if (notification.userId != null) {
+            return savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, notification.userId)
+        }
+
+        // TODO PDJB-1919: Remove this fallback once all saved notifications have a userId
+        val landlord =
+            landlordRepository.findById(notification.landlordId).orElse(null)
+                ?: throw IllegalStateException("No landlord found for id: ${notification.landlordId}")
         val baseUserIds =
             when (landlord) {
                 is IndividualLandlord -> {
@@ -129,7 +130,7 @@ class VirusNotificationEmailHandler(
                     throw IllegalStateException("Unexpected landlord type for id ${landlord.id}: ${landlord.landlordType}")
                 }
             }
-        return savedJourneyStateRepository.findFirstByJourneyIdAndUser_IdIn(journeyId, baseUserIds)
+        return savedJourneyStateRepository.findFirstByJourneyIdAndUser_IdIn(notification.journeyId, baseUserIds)
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
