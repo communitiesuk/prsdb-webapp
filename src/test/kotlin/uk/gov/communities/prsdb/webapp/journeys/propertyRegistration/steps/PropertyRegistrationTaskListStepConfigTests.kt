@@ -14,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -187,10 +186,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel includes correspondence task between ownership and occupied when flag enabled`() {
-            // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
-
+        fun `getTaskListViewModel includes correspondence task between ownership and occupied`() {
             // Act
             val aboutSection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
 
@@ -200,25 +196,6 @@ class PropertyRegistrationTaskListStepConfigTests {
                     "registerProperty.taskList.aboutYourProperty.propertyDetails",
                     "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
                     "registerProperty.taskList.aboutYourProperty.correspondence",
-                    "registerProperty.taskList.aboutYourProperty.occupied",
-                ),
-                aboutSection.tasks.map { it.nameKey },
-            )
-        }
-
-        @Test
-        fun `getTaskListViewModel excludes the correspondence task when CORRESPONDENCE_ADDRESS is disabled`() {
-            // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
-
-            // Act
-            val aboutSection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
-
-            // Assert
-            assertEquals(
-                listOf(
-                    "registerProperty.taskList.aboutYourProperty.propertyDetails",
-                    "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
                     "registerProperty.taskList.aboutYourProperty.occupied",
                 ),
                 aboutSection.tasks.map { it.nameKey },

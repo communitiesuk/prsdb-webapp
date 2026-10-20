@@ -15,6 +15,11 @@ import java.time.LocalDate
 
 class MockPropertyRegistrationData {
     companion object {
+        const val DEFAULT_CORRESPONDENCE_EMAIL = "correspondence@example.com"
+
+        val DEFAULT_CORRESPONDENCE_ADDRESS_MODEL =
+            AddressDataModel.fromManualAddressData("2 Correspondence Road", "Leeds", "LS1 1AA")
+
         fun createPropertyRegistrationDataModel(
             addressModel: AddressDataModel = AddressDataModel("1 Example Road, EG1 2AB"),
             propertyType: PropertyType = PropertyType.DETACHED_HOUSE,
@@ -53,8 +58,8 @@ class MockPropertyRegistrationData {
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
             isDelegatedToLettingAgent: Boolean = false,
-            correspondenceEmail: String? = null,
-            correspondenceAddressModel: AddressDataModel? = null,
+            correspondenceEmail: String = DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel: AddressDataModel = DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         ) = PropertyRegistrationDataModel(
             addressModel = addressModel,
             propertyType = propertyType,

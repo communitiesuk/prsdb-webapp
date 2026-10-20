@@ -10,8 +10,6 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
-    // TODO PDJB-1733: Remove when the correspondence is always shown
-    showCorrespondenceSection: Boolean = true,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
@@ -30,27 +28,23 @@ class PropertyDetailsViewModel(
     val ownershipSection: List<SummaryListRowViewModel> =
         listOf(ownershipTypeRow())
 
-    val correspondenceSection: List<SummaryListRowViewModel>? =
-        if (showCorrespondenceSection) {
-            listOf(
-                rowWithViewTypeSpecificChangeLink(
-                    key = "propertyDetails.propertyRecord.correspondence.emailAddress",
-                    value = propertyOwnership.correspondenceEmail,
-                    landlordActionLink =
-                        LandlordUpdateCorrespondenceEmailController
-                            .getUpdateCorrespondenceEmailFirstStepRoute(propertyOwnership.id),
-                ),
-                rowWithViewTypeSpecificChangeLink(
-                    key = "propertyDetails.propertyRecord.correspondence.address",
-                    value = propertyOwnership.correspondenceAddress.toMultiLineAddress().split("\n"),
-                    landlordActionLink =
-                        LandlordUpdateCorrespondenceAddressController
-                            .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id),
-                ),
-            )
-        } else {
-            null
-        }
+    val correspondenceSection: List<SummaryListRowViewModel> =
+        listOf(
+            rowWithViewTypeSpecificChangeLink(
+                key = "propertyDetails.propertyRecord.correspondence.emailAddress",
+                value = propertyOwnership.correspondenceEmail,
+                landlordActionLink =
+                    LandlordUpdateCorrespondenceEmailController
+                        .getUpdateCorrespondenceEmailFirstStepRoute(propertyOwnership.id),
+            ),
+            rowWithViewTypeSpecificChangeLink(
+                key = "propertyDetails.propertyRecord.correspondence.address",
+                value = propertyOwnership.correspondenceAddress.toMultiLineAddress().split("\n"),
+                landlordActionLink =
+                    LandlordUpdateCorrespondenceAddressController
+                        .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id),
+            ),
+        )
 
     val occupiedSection: List<SummaryListRowViewModel> =
         listOf(occupiedRow())

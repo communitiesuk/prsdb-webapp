@@ -6,7 +6,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
@@ -308,7 +307,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class CorrespondenceSection {
             @Test
-            fun `shows the correspondence section when the CORRESPONDENCE_ADDRESS flag is enabled`(page: Page) {
+            fun `shows the correspondence section`(page: Page) {
                 val propertyOwnershipId = 1L
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
 
@@ -330,20 +329,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     "href",
                     LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnershipId),
                 )
-            }
-
-            @Test
-            fun `hides the correspondence section when the CORRESPONDENCE_ADDRESS flag is disabled`(page: Page) {
-                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-
-                navigator.goToPropertyDetailsLandlordView(1)
-
-                assertThat(
-                    page.getByRole(
-                        com.microsoft.playwright.options.AriaRole.HEADING,
-                        Page.GetByRoleOptions().setName("Who the council should contact"),
-                    ),
-                ).not().isVisible()
             }
         }
     }
@@ -417,22 +402,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class CorrespondenceSection {
             @Test
-            fun `shows the correspondence section when the CORRESPONDENCE_ADDRESS flag is enabled`(page: Page) {
+            fun `shows the correspondence section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
                 assertThat(detailsPage.sectionHeading("Who the council should contact")).isVisible()
                 assertThat(detailsPage.propertyDetailsSummaryList.contactEmailAddressRow.value).containsText("email@example.com")
                 assertThat(detailsPage.propertyDetailsSummaryList.contactAddressRow.value).containsText("1 Fictional Road")
                 assertThat(detailsPage.propertyDetailsSummaryList.contactAddressRow.actions).isHidden()
-            }
-
-            @Test
-            fun `hides the correspondence section when the CORRESPONDENCE_ADDRESS flag is disabled`(page: Page) {
-                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-
-                assertThat(detailsPage.sectionHeading("Who the council should contact")).not().isVisible()
             }
         }
 
