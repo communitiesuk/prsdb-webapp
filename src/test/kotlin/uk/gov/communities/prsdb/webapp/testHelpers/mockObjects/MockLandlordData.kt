@@ -197,7 +197,7 @@ class MockLandlordData {
                 )
 
             ReflectionTestUtils.setField(invitation, "createdDate", createdDate)
-            invitation.isHidden = isHidden
+            if (isHidden) invitation.markAsHidden()
 
             return invitation
         }

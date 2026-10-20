@@ -183,7 +183,7 @@ class OrganisationalLandlordInvitationService(
             .findByOrganisationalLandlord(organisationalLandlord)
             .filter { it.status == OrganisationalLandlordInvitationStatus.EXPIRED && it.invitedEmail.isSameEmailAs(email) }
             .forEach { expiredInvitation ->
-                expiredInvitation.isHidden = true
+                expiredInvitation.markAsHidden()
                 invitationRepository.save(expiredInvitation)
             }
     }
