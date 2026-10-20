@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -25,7 +26,9 @@ class CompleteRemoveOrgUserStepConfig(
     override fun afterStepIsReached(state: ChangeOrgTeamMemberAccessLevelJourneyState) {
         val removingAdmin =
             userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()
-                ?: throw PrsdbWebException("Current user is not an organisational landlord user")
+                ?: throw PrsdbWebException(
+                    "Current user ${SecurityContextHolder.getContext().authentication!!.name} is not an organisational landlord user",
+                )
         val removedMember =
             organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
                 ?: throw PrsdbWebException(

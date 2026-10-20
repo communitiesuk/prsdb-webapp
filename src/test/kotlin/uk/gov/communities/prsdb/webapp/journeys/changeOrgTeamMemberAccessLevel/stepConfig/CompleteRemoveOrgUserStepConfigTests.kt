@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -12,6 +13,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
@@ -25,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserServic
 import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
 import java.net.URI
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class CompleteRemoveOrgUserStepConfigTests {
@@ -42,6 +47,11 @@ class CompleteRemoveOrgUserStepConfigTests {
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
+    }
 
     private fun createStepConfig() =
         CompleteRemoveOrgUserStepConfig(
@@ -103,10 +113,18 @@ class CompleteRemoveOrgUserStepConfigTests {
     @Test
     fun `afterStepIsReached throws when the current user is not an organisational landlord user`() {
         // Arrange
+        val authentication = mock<Authentication>()
+        whenever(authentication.name).thenReturn("test-user")
+        val securityContext = mock<SecurityContext>()
+        whenever(securityContext.authentication).thenReturn(authentication)
+        SecurityContextHolder.setContext(securityContext)
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
 
-        // Act, Assert
-        assertThrows<PrsdbWebException> { createStepConfig().afterStepIsReached(mockState) }
+        // Act
+        val exception = assertThrows<PrsdbWebException> { createStepConfig().afterStepIsReached(mockState) }
+
+        // Assert
+        assertTrue(exception.message!!.contains("test-user"))
         verify(mockOrganisationalLandlordUserService, never()).removeOrganisationalLandlordUser(any())
         verifyNoMoreInteractions(mockEmailSender)
     }
