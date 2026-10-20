@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
@@ -122,6 +123,8 @@ class OrganisationalLandlordInvitationService(
         // Re-check against the database when saving, as another admin may have invited the same email since validation ran
         if (getPendingInvitedAndMemberEmails(organisationalLandlord).containsEmail(invitedEmail)) return
 
+        hideExpiredInvitationsForEmail(organisationalLandlord, invitedEmail)
+
         val invitation =
             OrganisationalLandlordInvitation(
                 token = UUID.randomUUID(),
@@ -131,13 +134,34 @@ class OrganisationalLandlordInvitationService(
             )
         invitationRepository.save(invitation)
 
-        invitationEmailSender.sendEmail(
-            invitedEmail,
-            OrganisationalLandlordInvitationEmail(
-                organisationName = organisationalLandlord.name,
-                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(invitation.token.toString()),
-            ),
-        )
+        sendInvitationEmail(invitedEmail, organisationalLandlord, invitation.token)
+    }
+
+    @Transactional
+    fun resendInvitation(
+        invitationId: Long,
+        organisationalLandlord: OrganisationalLandlord,
+    ): String {
+        val invitation =
+            invitationRepository
+                .findById(invitationId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
+
+        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this organisation")
+        }
+
+        val token = invitation.token
+        val invitedEmail = invitation.invitedEmail
+        val role = invitation.role
+
+        // Flush the delete before saving the replacement, as the token must be unique
+        invitationRepository.delete(invitation)
+        invitationRepository.flush()
+        invitationRepository.save(OrganisationalLandlordInvitation(token, invitedEmail, organisationalLandlord, role))
+
+        sendInvitationEmail(invitedEmail, organisationalLandlord, token)
+        return invitedEmail
     }
 
     // Expired and hidden invitations can no longer be accepted, so they must not block re-inviting that email address
@@ -169,8 +193,35 @@ class OrganisationalLandlordInvitationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only expired invitations can be hidden")
         }
 
-        invitation.isHidden = true
+        invitation.markAsHidden()
         invitationRepository.save(invitation)
+    }
+
+    private fun hideExpiredInvitationsForEmail(
+        organisationalLandlord: OrganisationalLandlord,
+        email: String,
+    ) {
+        invitationRepository
+            .findByOrganisationalLandlord(organisationalLandlord)
+            .filter { it.status == OrganisationalLandlordInvitationStatus.EXPIRED && it.invitedEmail.isSameEmailAs(email) }
+            .forEach { expiredInvitation ->
+                expiredInvitation.markAsHidden()
+                invitationRepository.save(expiredInvitation)
+            }
+    }
+
+    private fun sendInvitationEmail(
+        invitedEmail: String,
+        organisationalLandlord: OrganisationalLandlord,
+        token: UUID,
+    ) {
+        invitationEmailSender.sendEmail(
+            invitedEmail,
+            OrganisationalLandlordInvitationEmail(
+                organisationName = organisationalLandlord.name,
+                invitationUri = absoluteUrlProvider.buildOrganisationalLandlordInvitationUri(token.toString()),
+            ),
+        )
     }
 
     @Suppress("UNCHECKED_CAST")

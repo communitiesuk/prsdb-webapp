@@ -56,4 +56,12 @@ class OrganisationalLandlordUserService(
         user.role = role
         organisationalLandlordUserRepository.save(user)
     }
+
+    @Transactional
+    fun removeOrganisationalLandlordUser(id: Long) {
+        val user =
+            getOrganisationalLandlordUserOrNull(id)
+                ?: throw PrsdbWebException("No organisational landlord user found with id $id")
+        organisationalLandlordUserRepository.delete(user)
+    }
 }

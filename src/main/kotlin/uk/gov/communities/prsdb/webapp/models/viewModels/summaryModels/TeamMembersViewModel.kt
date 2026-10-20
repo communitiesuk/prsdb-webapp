@@ -83,8 +83,7 @@ data class TeamMembersViewModel(
             fieldValue = invitation.invitedEmail,
             actions =
                 listOf(
-                    // TODO PDJB-1758: replace "#" with the resend invitation URL
-                    SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                    SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(invitation.id)),
                     // TODO PDJB-1769: replace "#" with the cancel invitation URL
                     SummaryListRowActionsViewModel("forms.links.cancel", "#"),
                 ),
@@ -99,8 +98,7 @@ data class TeamMembersViewModel(
             fieldValue = invitation.invitedEmail,
             actions =
                 listOf(
-                    // TODO PDJB-1758: replace "#" with the resend invitation URL
-                    SummaryListRowActionsViewModel("forms.links.resend", "#"),
+                    SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(invitation.id)),
                     SummaryListRowActionsViewModel(
                         "forms.links.remove",
                         TeamMembersController.getRemoveExpiredInvitationPath(invitation.id),

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -44,6 +45,8 @@ class TeamMembersControllerTests(
     private lateinit var organisationalLandlordInvitationService: OrganisationalLandlordInvitationService
 
     private val removeExpiredInvitationRoute = TeamMembersController.getRemoveExpiredInvitationPath(1)
+
+    private val resendRoute = TeamMembersController.getResendInvitationPath(123L)
 
     private fun stubOrgLandlordWithCurrentUser() {
         val organisation = createOrgLandlord()
@@ -134,6 +137,65 @@ class TeamMembersControllerTests(
 
         val teamMembers = result.modelAndView!!.model["teamMembers"] as TeamMembersViewModel
         assertEquals(1, teamMembers.pendingInvitationRows.size)
+    }
+
+    @Test
+    fun `resendInvitation returns a redirect for unauthenticated user`() {
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `resendInvitation returns 403 for an unauthorised user`() {
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"])
+    fun `resendInvitation returns 403 for an organisation editor`() {
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `resendInvitation returns 403 for a non-organisation landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+        verify(organisationalLandlordInvitationService, never()).resendInvitation(any(), any())
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `resendInvitation redirects to the invitations tab with the resent email as a flash attribute`() {
+        val organisation = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(organisation)
+        whenever(organisationalLandlordInvitationService.resendInvitation(eq(123L), eq(organisation)))
+            .thenReturn("invitee@example.com")
+
+        mvc
+            .get(resendRoute)
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
+                flash { attribute("resendInvitationEmail", "invitee@example.com") }
+            }
     }
 
     @Test
