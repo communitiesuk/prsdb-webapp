@@ -148,19 +148,7 @@ class OrganisationalLandlordInvitationService(
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
 
         if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
-        }
-
-        if (invitation.status == OrganisationalLandlordInvitationStatus.HIDDEN) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found")
-        }
-
-        if (getPendingInvitedAndMemberEmails(organisationalLandlord, excludingInvitationId = invitation.id)
-                .containsEmail(invitation.invitedEmail)
-        ) {
-            throw PrsdbWebException(
-                "Cannot resend invitation $invitationId as its email address already has a pending invitation or is a team member",
-            )
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this organisation")
         }
 
         val token = invitation.token
@@ -177,13 +165,10 @@ class OrganisationalLandlordInvitationService(
     }
 
     // Expired and hidden invitations can no longer be accepted, so they must not block re-inviting that email address
-    fun getPendingInvitedAndMemberEmails(
-        organisationalLandlord: OrganisationalLandlord,
-        excludingInvitationId: Long? = null,
-    ): List<String> =
+    fun getPendingInvitedAndMemberEmails(organisationalLandlord: OrganisationalLandlord): List<String> =
         invitationRepository
             .findByOrganisationalLandlord(organisationalLandlord)
-            .filter { it.status == OrganisationalLandlordInvitationStatus.PENDING && it.id != excludingInvitationId }
+            .filter { it.status == OrganisationalLandlordInvitationStatus.PENDING }
             .map { it.invitedEmail } +
             organisationalLandlordUserService.getOrganisationalLandlordUsers(organisationalLandlord).map { it.email }
 

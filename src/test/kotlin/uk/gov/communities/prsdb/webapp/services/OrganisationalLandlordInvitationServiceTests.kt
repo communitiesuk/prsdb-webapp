@@ -596,53 +596,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `resendInvitation throws NOT_FOUND when the invitation is hidden`() {
-        // Arrange
-        val organisation = createOrgLandlord()
-        val invitation = createOrganisationalLandlordInvitation(id = 1L, organisationalLandlord = organisation, isHidden = true)
-        whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(invitation))
-
-        // Act & Assert
-        val exception =
-            assertThrows<ResponseStatusException> {
-                invitationService.resendInvitation(1L, organisation)
-            }
-        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-    }
-
-    @Test
-    fun `resendInvitation throws without resending when the email address has another pending invitation`() {
-        // Arrange
-        val organisation = createOrgLandlord()
-        val expiredInvitation =
-            createOrganisationalLandlordInvitation(
-                id = 1L,
-                invitedEmail = inviteeEmail,
-                organisationalLandlord = organisation,
-                createdDate =
-                    Instant.now().minus(
-                        (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                        ChronoUnit.DAYS,
-                    ),
-            )
-        val pendingInvitation =
-            createOrganisationalLandlordInvitation(
-                id = 2L,
-                invitedEmail = "Invitee@Example.com",
-                organisationalLandlord = organisation,
-            )
-        whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(expiredInvitation))
-        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation))
-            .thenReturn(listOf(expiredInvitation, pendingInvitation))
-
-        // Act & Assert
-        assertThrows<PrsdbWebException> { invitationService.resendInvitation(1L, organisation) }
-        verify(mockInvitationRepository, never()).delete(any())
-        verifyNoInteractions(mockInvitationEmailSender)
-    }
-
-    @Test
-    fun `resendInvitation throws without resending when the email address belongs to a team member`() {
+    fun `resendInvitation resends a hidden invitation as a visible one`() {
         // Arrange
         val organisation = createOrgLandlord()
         val invitation =
@@ -650,30 +604,9 @@ class OrganisationalLandlordInvitationServiceTests {
                 id = 1L,
                 invitedEmail = inviteeEmail,
                 organisationalLandlord = organisation,
+                isHidden = true,
             )
         whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(invitation))
-        whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUsers(organisation)).thenReturn(
-            listOf(createOrganisationalLandlordUser(organisationalLandlord = organisation, email = inviteeEmail, role = EDITOR)),
-        )
-
-        // Act & Assert
-        assertThrows<PrsdbWebException> { invitationService.resendInvitation(1L, organisation) }
-        verify(mockInvitationRepository, never()).delete(any())
-        verifyNoInteractions(mockInvitationEmailSender)
-    }
-
-    @Test
-    fun `resendInvitation does not treat the invitation being resent as a duplicate of itself`() {
-        // Arrange
-        val organisation = createOrgLandlord()
-        val invitation =
-            createOrganisationalLandlordInvitation(
-                id = 1L,
-                invitedEmail = inviteeEmail,
-                organisationalLandlord = organisation,
-            )
-        whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(invitation))
-        whenever(mockInvitationRepository.findByOrganisationalLandlord(organisation)).thenReturn(listOf(invitation))
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
             .thenReturn(URI("https://example.com/accept-invitation"))
 
@@ -682,7 +615,9 @@ class OrganisationalLandlordInvitationServiceTests {
 
         // Assert
         assertEquals(inviteeEmail, result)
-        verify(mockInvitationRepository).delete(invitation)
+        val invitationCaptor = argumentCaptor<OrganisationalLandlordInvitation>()
+        verify(mockInvitationRepository).save(invitationCaptor.capture())
+        assertFalse(invitationCaptor.firstValue.isHidden)
     }
 
     @Test

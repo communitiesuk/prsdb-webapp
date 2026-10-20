@@ -69,6 +69,7 @@ class TeamMembersController(
         return "redirect:$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT"
     }
 
+    // TODO PDJB-1854: Use this in removeExpiredInvitation
     private fun getCurrentOrganisationalLandlord(): OrganisationalLandlord =
         userToLandlordService.getCurrentLandlordForUser() as? OrganisationalLandlord
             ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only organisation landlords can manage team members")
