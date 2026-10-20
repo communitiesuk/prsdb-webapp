@@ -37,7 +37,7 @@ class DeregisterStepConfig(
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
         val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)

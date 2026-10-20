@@ -42,7 +42,7 @@ class LeavePropertyService(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 

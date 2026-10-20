@@ -138,8 +138,8 @@ class PropertyComplianceServiceTests {
     private fun setMockPrincipal(landlord: IndividualLandlord = mockLoggedInLandlord) {
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
         lenient()
-            .`when`(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = landlord.name, email = landlord.email))
+            .`when`(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = landlord.name, email = landlord.email))
     }
 
     @Test
@@ -850,9 +850,9 @@ class PropertyComplianceServiceTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(actingLandlord))
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actingLandlord)
-            whenever(mockCurrentUserService.getCurrentUserDetails())
+            whenever(mockCurrentUserService.getRegisteredUserDetails())
                 .thenReturn(
-                    CurrentUserService.CurrentUserDetails(name = "Sub User", email = "sub.user@example.com"),
+                    CurrentUserService.RegisteredUserDetails(name = "Sub User", email = "sub.user@example.com"),
                 )
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)

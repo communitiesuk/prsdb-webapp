@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
-import uk.gov.communities.prsdb.webapp.services.CurrentUserService.CurrentUserDetails
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
@@ -204,8 +204,8 @@ class CancelInvitationStepConfigTests {
         whenever(mockJointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId))
             .thenReturn(invitation)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(cancellerLandlord)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = cancellerName, email = cancellerEmail))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = cancellerName, email = cancellerEmail))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("example.com"))
 
         return invitation
