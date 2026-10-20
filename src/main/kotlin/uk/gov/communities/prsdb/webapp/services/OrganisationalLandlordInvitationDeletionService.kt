@@ -23,7 +23,13 @@ class OrganisationalLandlordInvitationDeletionService(
         val invitationsToDelete =
             invitationRepository
                 .findAllByCreatedDateBefore(cutoffDate)
-                .filter { it.status in listOf(OrganisationalLandlordInvitationStatus.EXPIRED, OrganisationalLandlordInvitationStatus.HIDDEN) }
+                .filter {
+                    it.status in
+                        listOf(
+                            OrganisationalLandlordInvitationStatus.EXPIRED,
+                            OrganisationalLandlordInvitationStatus.HIDDEN,
+                        )
+                }
 
         val deletedIds = invitationsToDelete.map { it.id }
         invitationRepository.deleteAll(invitationsToDelete)
