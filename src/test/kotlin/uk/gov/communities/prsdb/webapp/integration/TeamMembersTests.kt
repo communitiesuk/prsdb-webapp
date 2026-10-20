@@ -110,9 +110,7 @@ class TeamMembersTests :
 
     @Nested
     inner class ResendInvitation :
-        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
-            listOf("data-local.sql", "data-org-landlord-team-members.sql"),
-        ) {
+        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData("data-local.sql") {
         @Test
         fun `resending a pending invitation emails the invitee and shows the invitation resent banner`(page: Page) {
             // Arrange
