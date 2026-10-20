@@ -80,6 +80,9 @@ class OrganisationalLandlordInvitationServiceTests {
     @Mock
     private lateinit var mockPrsdbUserService: PrsdbUserService
 
+    @Mock
+    private lateinit var mockUserToOrgLandlordUserService: UserToOrgLandlordUserService
+
     private lateinit var invitationService: OrganisationalLandlordInvitationService
 
     private val journeyId = "test-journey-id"
@@ -87,6 +90,7 @@ class OrganisationalLandlordInvitationServiceTests {
     private val acceptingUserId = "signed-in-user"
     private val inviteeName = "Jane Smith"
     private val inviteeEmail = "invitee@example.com"
+    private val invitationId = 1L
 
     @BeforeEach
     fun setup() {
@@ -99,6 +103,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 mockInvitationEmailSender,
                 mockAcceptedEmailSender,
                 mockPrsdbUserService,
+                mockUserToOrgLandlordUserService,
             )
     }
 
@@ -992,6 +997,144 @@ class OrganisationalLandlordInvitationServiceTests {
             }
         assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
         verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `getPendingInvitationForCurrentUsersOrganisation returns a pending invitation belonging to the current user's organisation`() {
+        // Arrange
+        val organisation = createOrgLandlordWithId(1L)
+        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = organisation)
+        arrangeCurrentUserInOrganisation(organisation)
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val result = invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+
+        // Assert
+        assertEquals(invitation, result)
+    }
+
+    @Test
+    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation does not exist`() {
+        // Arrange
+        arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.empty())
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @Test
+    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation belongs to a different organisation`() {
+        // Arrange
+        arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
+        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(2L))
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true, false",
+        "false, true",
+    )
+    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation is not pending`(
+        isExpired: Boolean,
+        isHidden: Boolean,
+    ) {
+        // Arrange
+        val organisation = createOrgLandlordWithId(1L)
+        arrangeCurrentUserInOrganisation(organisation)
+        val createdDate = if (isExpired) Instant.now().minus(60, ChronoUnit.DAYS) else Instant.now()
+        val invitation =
+            createOrganisationalLandlordInvitation(
+                organisationalLandlord = organisation,
+                createdDate = createdDate,
+                isHidden = isHidden,
+            )
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @Test
+    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the current user is not an organisational landlord user`() {
+        // Arrange
+        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(1L))
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @Test
+    fun `cancelInvitation deletes the pending invitation`() {
+        // Arrange
+        val organisation = createOrgLandlordWithId(1L)
+        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = organisation)
+        arrangeCurrentUserInOrganisation(organisation)
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        invitationService.cancelInvitation(invitationId)
+
+        // Assert
+        verify(mockInvitationRepository).delete(invitation)
+    }
+
+    @Test
+    fun `cancelInvitation does not delete an invitation that belongs to a different organisation`() {
+        // Arrange
+        arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
+        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(2L))
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.cancelInvitation(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
+    private fun createOrgLandlordWithId(id: Long): OrganisationalLandlord =
+        createOrgLandlord().also { ReflectionTestUtils.setField(it, "id", id) }
+
+    private fun arrangeCurrentUserInOrganisation(organisation: OrganisationalLandlord) {
+        val currentUser = mock<OrganisationalLandlordUser>()
+        whenever(currentUser.organisationalLandlord).thenReturn(organisation)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
     }
 
     private fun arrangePendingInvitationAcceptance(

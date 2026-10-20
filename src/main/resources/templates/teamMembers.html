@@ -7,6 +7,7 @@
             <div id="success-banner"
                  th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{teamMembers.successBanner.title}, ~{::#success-banner/content()})}">
                 <p class="govuk-notification-banner__heading" th:text="#{${successBanner}}">teamMembers.successBanner</p>
+                <p th:if="${successBannerBody != null}" class="govuk-body" th:text="#{${successBannerBody}}">teamMembers.successBannerBody</p>
             </div>
         </th:block>
 

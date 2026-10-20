@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @PrsdbWebService
 class OrganisationalLandlordInvitationService(
@@ -30,6 +31,7 @@ class OrganisationalLandlordInvitationService(
     private val invitationEmailSender: EmailNotificationService<OrganisationalLandlordInvitationEmail>,
     private val acceptedEmailSender: EmailNotificationService<OrganisationalLandlordInvitationAcceptedEmail>,
     private val prsdbUserService: PrsdbUserService,
+    private val userToOrgLandlordUserService: UserToOrgLandlordUserService,
 ) {
     fun addJourneyIdInvitationTokenPairToSession(
         journeyId: String,
@@ -181,6 +183,27 @@ class OrganisationalLandlordInvitationService(
 
         invitation.markAsHidden()
         invitationRepository.save(invitation)
+    }
+
+    fun getPendingInvitationForCurrentUsersOrganisation(invitationId: Long): OrganisationalLandlordInvitation {
+        val currentOrganisationId =
+            userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()?.organisationalLandlord?.id
+        return invitationRepository
+            .findById(invitationId)
+            .getOrNull()
+            ?.takeIf {
+                it.organisationalLandlord.id == currentOrganisationId &&
+                    it.status == OrganisationalLandlordInvitationStatus.PENDING
+            }
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No pending organisational landlord invitation with id $invitationId found for the current user's organisation",
+            )
+    }
+
+    @Transactional
+    fun cancelInvitation(invitationId: Long) {
+        invitationRepository.delete(getPendingInvitationForCurrentUsersOrganisation(invitationId))
     }
 
     private fun getInvitationForOrganisation(
