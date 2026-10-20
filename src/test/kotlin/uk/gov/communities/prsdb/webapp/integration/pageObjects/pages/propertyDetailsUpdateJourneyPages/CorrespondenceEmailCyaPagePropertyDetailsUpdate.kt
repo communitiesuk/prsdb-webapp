@@ -15,6 +15,8 @@ class CorrespondenceEmailCyaPagePropertyDetailsUpdate(
         LandlordUpdateCorrespondenceEmailController.getUpdateCorrespondenceEmailRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${UpdateCorrespondenceEmailCyaStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your contact email answers"
+
     val form = Form(page)
     val heading = page.locator("h1")
     val summaryHeading = page.locator("#summary-name")

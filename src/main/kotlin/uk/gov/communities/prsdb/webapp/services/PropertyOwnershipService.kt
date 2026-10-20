@@ -135,7 +135,7 @@ class PropertyOwnershipService(
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
@@ -187,7 +187,7 @@ class PropertyOwnershipService(
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
         if (!getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
-            val baseUserId = SecurityContextHolder.getContext().authentication.name
+            val baseUserId = SecurityContextHolder.getContext().authentication!!.name
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",

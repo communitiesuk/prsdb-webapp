@@ -1,6 +1,10 @@
 title: Team members
 heading: Team members
 currentUserName: '{0,,name} (You)'
+inviteTeamMemberButton: Invite a team member
+successBanner:
+  title: Success
+  invitationSent: Invitation sent
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators
@@ -17,3 +21,23 @@ editors:
   description: Editors can register and update properties.
   rowHeading: Editor {0,,number}
   noEditors: There are currently no editors.
+accessLevelChangedBanner:
+  title: Success
+  heading: Access level changed
+  content:
+    administrator: '{0,,name} is now an administrator.'
+    editor: '{0,,name} is now an editor.'
+resendInvitationBanner:
+  title: Success
+  heading: Invitation resent
+  content: 'An invitation has been sent to {0,,email}'
+invitations:
+  tab: Invitations ({0,,count})
+  heading: Invitations
+  description: Sent invitations that have not been accepted.
+  rowHeading: Invitation {0,,number}
+  noInvitations: There are no outstanding invitations.
+  expired:
+    heading: Expired invitations
+    description: Invitations that have not been accepted after {0,,count} days.
+    rowHeading: Expired invite {0,,number}

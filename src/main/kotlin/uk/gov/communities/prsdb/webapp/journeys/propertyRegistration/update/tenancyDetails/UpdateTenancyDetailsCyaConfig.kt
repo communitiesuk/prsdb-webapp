@@ -26,6 +26,7 @@ class UpdateTenancyDetailsCyaConfig(
     override fun getStepSpecificContent(state: UpdateTenancyDetailsJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
+            "pageTitleOverride" to "forms.update.checkTenancyDetails.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,

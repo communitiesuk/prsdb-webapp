@@ -62,7 +62,7 @@ class VirusNotificationEmailHandlerTests {
         featureFlagManager = mock()
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("https://www.prsd.gov.uk/landlord/dashboard"))
+            .thenReturn(URI("https://www.example.com/landlord/dashboard"))
         virusNotificationEmailHandler =
             VirusNotificationEmailHandler(
                 emailNotificationService,
@@ -314,7 +314,7 @@ class VirusNotificationEmailHandlerTests {
         certificateType = expectedCertType(certType),
         recipientName = recipientName,
         propertyAddress = "1 Main St\nAnytown",
-        landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
+        landlordDashboardUrl = URI("https://www.example.com/landlord/dashboard"),
     )
 
     @ParameterizedTest
@@ -469,7 +469,7 @@ class VirusNotificationEmailHandlerTests {
                 certificateType = bodyCertificateType,
                 recipientName = recipientName,
                 propertyAddress = "123 Main St\nAnytown",
-                landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
+                landlordDashboardUrl = URI("https://www.example.com/landlord/dashboard"),
             ),
             landlords,
         )

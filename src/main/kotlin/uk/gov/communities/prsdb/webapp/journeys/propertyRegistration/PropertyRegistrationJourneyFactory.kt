@@ -680,7 +680,8 @@ class PropertyRegistrationJourneyFactory(
                     step(journey.paymentFailedStep) {
                         routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
                         parents { journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE) }
-                        nextStep { journey.paymentSummaryStep }
+                        noNextDestination()
+                        backUrl { null }
                     }
                 }
                 paymentsStrategy.ifDisabled {

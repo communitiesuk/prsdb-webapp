@@ -1,9 +1,8 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.module.SimpleModule
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyStateDeserializer
@@ -18,9 +17,10 @@ data class SetJourneyStateRequestModel(
 
     companion object {
         private val objectMapper =
-            ObjectMapper()
-                .registerModule(SimpleModule().addDeserializer(Map::class.java, JourneyStateDeserializer()))
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            JsonMapper
+                .builder()
+                .addModule(SimpleModule().addDeserializer(Map::class.java, JourneyStateDeserializer()))
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .build()
     }
 }

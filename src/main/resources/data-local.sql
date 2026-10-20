@@ -325,7 +325,9 @@ VALUES (current_date, current_date, '1234abcd-5678-abcd-1234-567abcd2222a', 'pen
        (current_date - 20, current_date - 20, '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
         0, false, false),
        (current_date - 60, current_date - 60, '1234abcd-5678-abcd-1234-567abcd2222d', 'expired-org-invite-d@example.com', 36,
-        0, false, false);
+        0, false, false),
+        (current_date - 5, current_date - 5, '1234abcd-5678-abcd-1234-567abcd2222e', 'hidden-org-invite-e@example.com', 36,
+            0, false, true);
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),
               (SELECT MAX(id) FROM organisational_landlord_invitation));

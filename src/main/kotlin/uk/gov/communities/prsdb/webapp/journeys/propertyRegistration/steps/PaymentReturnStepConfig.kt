@@ -14,11 +14,9 @@ class PaymentReturnStepConfig(
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-1704: Replace this stub with the real GOV.UK Pay return handling.
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "Returned from GOV.UK Pay (TODO PDJB-1704)")
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> = emptyMap()
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todo"
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentProcessingForm"
 
     override fun beforeAttemptingToReachStep(state: PropertyRegistrationJourneyState): Boolean =
         paymentReferenceParameterService.getParameterOrNull() != null || state.paymentReference != null
