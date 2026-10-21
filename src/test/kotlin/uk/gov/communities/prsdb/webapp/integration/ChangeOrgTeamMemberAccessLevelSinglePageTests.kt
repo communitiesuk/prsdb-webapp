@@ -16,7 +16,7 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
     @Test
-    fun `the page loads and shows the correct heading`(page: Page) {
+    fun `the access level page loads and shows the correct heading`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
         val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
 
@@ -24,7 +24,7 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     }
 
     @Test
-    fun `submitting without selecting an access level shows a validation error`(page: Page) {
+    fun `submitting access level without selecting an access level shows a validation error`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
         val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
 
@@ -35,13 +35,11 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     }
 
     @Test
-    fun `the remove access confirmation page shows the heading and member name`(page: Page) {
+    fun `the remove access confirmation page loads and shows the correct heading`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
 
         val confirmationPage = navigator.goToRemoveOrgUserConfirmationPage(memberId)
 
         BaseComponent.assertThat(confirmationPage.heading).hasText("Are you sure you want to remove their access?")
-        assertThat(confirmationPage.memberNameParagraph)
-            .hasText("Beth Admin will no longer be able to access your organisation on the service.")
     }
 }

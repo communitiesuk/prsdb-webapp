@@ -14,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTe
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+private const val ADMIN_USER_ID = "urn:fdc:gov.uk:2022:ORG02"
+private const val EDITOR_USER_ID = "urn:fdc:gov.uk:2022:ORG03"
+
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelJourneyTests :
     IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
@@ -35,7 +38,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin is now an editor.")
-        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single()
+        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).single()
         assertEquals(OrganisationalLandlordUserRole.EDITOR, updatedMember.role)
     }
 
@@ -55,7 +58,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Carl Editor is now an administrator.")
-        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG03").single()
+        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id(EDITOR_USER_ID).single()
         assertEquals(OrganisationalLandlordUserRole.ADMIN, updatedMember.role)
     }
 
@@ -68,10 +71,12 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         accessLevelPage.removeAccessLink.clickAndWait()
 
         val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        assertThat(confirmationPage.memberNameParagraph)
+            .hasText("Beth Admin will no longer be able to access your organisation on the service.")
         confirmationPage.form.submit()
 
         assertPageIs(page, TeamMembersPage::class)
-        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isEmpty())
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isEmpty())
     }
 
     @Test
@@ -86,6 +91,6 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         confirmationPage.cancelLink.clickAndWait()
 
         assertPageIs(page, TeamMembersPage::class)
-        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isNotEmpty())
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isNotEmpty())
     }
 }
