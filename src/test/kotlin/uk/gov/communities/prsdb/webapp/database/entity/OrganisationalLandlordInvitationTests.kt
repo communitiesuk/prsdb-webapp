@@ -52,4 +52,22 @@ class OrganisationalLandlordInvitationTests {
 
         assertEquals(OrganisationalLandlordInvitationStatus.HIDDEN, invitation.status)
     }
+
+    @Test
+    fun `can be deleted by archive when expired or hidden`() {
+        val expiredInvitation =
+            MockLandlordData.createOrganisationalLandlordInvitation(
+                createdDate =
+                    Instant.now().minus(
+                        (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
+                        ChronoUnit.DAYS,
+                    ),
+            )
+        val hiddenInvitation = MockLandlordData.createOrganisationalLandlordInvitation(isHidden = true)
+        val pendingInvitation = MockLandlordData.createOrganisationalLandlordInvitation()
+
+        assertEquals(true, expiredInvitation.canBeDeletedByArchive())
+        assertEquals(true, hiddenInvitation.canBeDeletedByArchive())
+        assertEquals(false, pendingInvitation.canBeDeletedByArchive())
+    }
 }
