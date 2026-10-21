@@ -2,10 +2,10 @@ package uk.gov.communities.prsdb.webapp.constants.enums
 
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 
-// Stored by ordinal, so new entries must only be appended
+// Stored by ordinal; existing values must keep their position and new values must only be appended
 enum class PaymentStatus {
     CREATED,
-    INDETERMINATE,
+    INDETERMINATE, // Formerly CAPTURABLE at ordinal 1; internal, never reported by GOV.UK Pay
     SUCCEEDED,
     FAILED, // Includes payments cancelled by the user
     CANCELLED, // Only payments cancelled by our service
