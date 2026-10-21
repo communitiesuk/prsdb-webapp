@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
 import org.springframework.beans.factory.ObjectFactory
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -49,15 +50,20 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = emptySet()
 
     fun getCyaAnswersSnapshot(): String {
+        val unknownExcludedKeys = cyaSnapshotExcludedDelegateKeys - delegateKeys
+        if (unknownExcludedKeys.isNotEmpty()) {
+            throw JourneyInitialisationException(
+                "CYA snapshot excluded delegate keys $unknownExcludedKeys aren't delegate keys in this journey",
+            )
+        }
+
         val stepKeys = cyaStep.parentage.ancestry.mapNotNull { it.getUrlPathOrNull() }
         val snapshotDelegateKeys =
             delegateKeys
-                .filter { unscopedDelegateKey(it) !in cyaSnapshotExcludedDelegateKeys }
+                .filter { it !in cyaSnapshotExcludedDelegateKeys }
                 .map { CYA_SNAPSHOT_DELEGATE_KEY_PREFIX + it }
         return serializeCyaAnswers((stepKeys + snapshotDelegateKeys).toSet())
     }
-
-    private fun unscopedDelegateKey(scopedKey: String) = scopedKey.substringAfterLast('/')
 
     fun cyaAnswersMatchSnapshot(snapshot: String): Boolean =
         serializeCyaAnswers(CheckAnswersFormModel.deserializeJourneyDataKeys(snapshot)) == snapshot

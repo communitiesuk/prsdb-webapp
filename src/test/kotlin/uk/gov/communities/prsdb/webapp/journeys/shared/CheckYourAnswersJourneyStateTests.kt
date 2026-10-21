@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.ObjectFactory
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
@@ -238,29 +240,43 @@ class CheckYourAnswersJourneyStateTests {
         }
 
         @Test
-        fun `leaves out delegates excluded by the journey, whichever task owns them`() {
+        fun `leaves out delegates whose full key is excluded by the journey`() {
             val state =
                 createTestState(
                     cyaStep = mockCyaStep(mockRequestableStep("step-a")),
                     submittedStepData = mapOf("step-a" to mapOf("field" to "a")),
-                    delegateKeys = setOf("task/answer", "paymentQuote", "other-task/paymentReference"),
-                    cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "paymentReference"),
+                    delegateKeys = setOf("task/answer", "paymentQuote", "other-task/paymentReference", "paymentReference"),
+                    cyaSnapshotExcludedDelegateKeys = setOf("paymentQuote", "other-task/paymentReference"),
                     delegateValues =
                         mapOf(
                             "task/answer" to "{\"1\":\"value\"}",
                             "paymentQuote" to "later progress",
                             "other-task/paymentReference" to "\"reference\"",
+                            "paymentReference" to "\"another reference\"",
                         ),
                 )
 
             val expectedSnapshot =
                 CheckAnswersFormModel.serializeJourneyDataHashes(
                     linkedMapOf(
+                        "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}paymentReference" to "\"another reference\"",
                         "${CYA_SNAPSHOT_DELEGATE_KEY_PREFIX}task/answer" to "{\"1\":\"value\"}",
                         "step-a" to mapOf("field" to "a"),
                     ),
                 )
             assertEquals(expectedSnapshot, state.getCyaAnswersSnapshot())
+        }
+
+        @Test
+        fun `throws when an excluded key isn't a delegate key in the journey`() {
+            val state =
+                createTestState(
+                    cyaStep = mockCyaStep(mockRequestableStep("step-a")),
+                    delegateKeys = setOf("other-task/paymentReference"),
+                    cyaSnapshotExcludedDelegateKeys = setOf("paymentReference"),
+                )
+
+            assertThrows<JourneyInitialisationException> { state.getCyaAnswersSnapshot() }
         }
     }
 

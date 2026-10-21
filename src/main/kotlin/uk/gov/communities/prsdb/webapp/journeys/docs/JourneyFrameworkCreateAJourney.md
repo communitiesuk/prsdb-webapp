@@ -514,7 +514,9 @@ matches it, which catches changes made in another tab.
 
 If a delegate isn't an answer and can change while the user is on the CYA page (e.g. payment progress, or a back link
 set by another page), add its key to `cyaSnapshotExcludedDelegateKeys` and declare the delegate next to it. Otherwise,
-the CYA page will fail to submit. Exclusions match the delegate's key, not its property name:
+the CYA page will fail to submit. Exclusions match the delegate's full key, not its property name. A delegate owned by a
+task that has a route segment is keyed with that segment as a prefix, e.g. `correspondence-address/cachedAddresses`.
+Getting the snapshot throws if an excluded key isn't a delegate key in the journey:
 
 ```kotlin
 override var paymentRef: String? by delegateProvider.nullableDelegate("paymentReference")
@@ -522,8 +524,9 @@ override var paymentRef: String? by delegateProvider.nullableDelegate("paymentRe
 override val cyaSnapshotExcludedDelegateKeys = setOf("paymentReference")
 ```
 
-`PropertyRegistrationCheckAnswersJourneyTests` lists every delegate in the property registration snapshot, so adding a
-delegate to that journey fails the test until you decide whether it's an answer.
+The CYA answers snapshot tests in `PropertyRegistrationCheckAnswersJourneyTests`, `LandlordRegistrationJourneyTests`,
+`UpdateCompaniesHouseJourneyTests` and `OrganisationLandlordUpdateJourneyTests` list every delegate in each journey's
+snapshot, so adding a delegate to one of those journeys fails its test until you decide whether to exclude it.
 
 ## Define the Journey State
 
