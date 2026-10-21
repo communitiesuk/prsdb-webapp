@@ -18,11 +18,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -80,18 +78,13 @@ class PropertyOwnershipService(
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
-        // TODO PDJB-1733: Make correspondenceEmail and correspondenceAddressModel non-nullable - they are only null when the
-        //  CORRESPONDENCE_ADDRESS flag is off
-        correspondenceEmail: String? = null,
-        correspondenceAddressModel: AddressDataModel? = null,
+        correspondenceEmail: String,
+        correspondenceAddressModel: AddressDataModel,
         renewalDate: LocalDate = RenewalDateHelper.getRenewalDate(anniversary),
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
-        // TODO PDJB-1733: Remove the registering landlord's address and email fallbacks (here and on correspondenceEmail below).
-        //  These are the CORRESPONDENCE_ADDRESS flag-off defaults, used when no correspondence details are passed in.
-        val correspondenceAddress =
-            correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
+        val correspondenceAddress = addressService.findOrCreateAddress(correspondenceAddressModel)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -105,7 +98,7 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                correspondenceEmail = correspondenceEmail ?: getCorrespondenceContactEmail(registeringLandlord),
+                correspondenceEmail = correspondenceEmail,
                 correspondenceAddress = correspondenceAddress,
                 renewalDate = renewalDate,
                 isActive = isActive,
@@ -124,14 +117,6 @@ class PropertyOwnershipService(
             },
         )
     }
-
-    // TODO: PDJB-1733: Remove this method too, it's only used if correspondence email is null
-    private fun getCorrespondenceContactEmail(landlord: Landlord): String =
-        when (landlord) {
-            is IndividualLandlord -> landlord.email
-            is OrganisationalLandlord -> landlord.wholeOrgEmail
-            else -> throw IllegalArgumentException("Unknown landlord type")
-        }
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)

@@ -18,8 +18,6 @@ const val DELEGATE_TO_LETTING_AGENT = "pdjb-1022-delegate-to-letting-agent"
 
 const val PASSWORD_BENCHMARK_ENDPOINT = "pdjb-1664-password-benchmark-endpoint"
 
-const val CORRESPONDENCE_ADDRESS = "pdjb-1040-correspondence-address"
-
 const val PAYMENTS = "pdjb-1009-payments"
 
 const val PROPERTY_REGISTRATION_PHASE_TWO = "pdjb-939-property-registration-phase-two"
@@ -37,7 +35,6 @@ val featureFlagNames =
         DASHBOARD_NAV_LINK,
         DELEGATE_TO_LETTING_AGENT,
         PASSWORD_BENCHMARK_ENDPOINT,
-        CORRESPONDENCE_ADDRESS,
         PAYMENTS,
         PROPERTY_REGISTRATION_PHASE_TWO,
         LANDLORD_DASHBOARD_UPDATE,
