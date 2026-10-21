@@ -1026,13 +1026,37 @@ class PaymentServiceTests {
 
     @Nested
     inner class FinalisePaymentTests {
-        @ParameterizedTest
-        @EnumSource(PaymentStatus::class, names = ["CREATED", "INDETERMINATE"])
-        fun `finalisePayment throws when GOV UK Pay reports the payment is still in progress`(govUkPayStatus: PaymentStatus) {
-            // Act, Assert
-            assertThrows<IllegalArgumentException> {
-                paymentService.finalisePayment(PAYMENT_ID, govUkPayStatus, registrationData)
-            }
+        @Test
+        fun `finalisePayment rejects a payment that GOV UK Pay reports as still in progress`() {
+            // Act
+            val exception =
+                assertThrows<IllegalArgumentException> {
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CREATED, registrationData)
+                }
+
+            // Assert
+            assertEquals("Payment $PAYMENT_ID cannot be finalised while in progress", exception.message)
+            verifyNoInteractions(
+                mockPaymentRepository,
+                mockGovUkPayClient,
+                mockPropertyRegistrationService,
+                mockSavedJourneyStateRepository,
+            )
+        }
+
+        @Test
+        fun `finalisePayment rejects the internal indeterminate status as a GOV UK Pay status`() {
+            // Act
+            val exception =
+                assertThrows<IllegalArgumentException> {
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.INDETERMINATE, registrationData)
+                }
+
+            // Assert
+            assertEquals(
+                "Payment $PAYMENT_ID cannot be finalised with INDETERMINATE: it is not a GOV.UK Pay status",
+                exception.message,
+            )
             verifyNoInteractions(
                 mockPaymentRepository,
                 mockGovUkPayClient,
