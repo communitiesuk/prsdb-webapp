@@ -91,13 +91,17 @@ class PropertyRegistrationCyaStepConfigTests {
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
-    private val correspondenceTask = mock<CorrespondenceTask>()
+    @Mock
+    private lateinit var mockCorrespondenceTask: CorrespondenceTask
 
-    private val emailStep = mock<CorrespondenceEmailStep>()
+    @Mock
+    private lateinit var mockCorrespondenceEmailStep: CorrespondenceEmailStep
 
-    private val addressTask = mock<CorrespondenceAddressTask>()
+    @Mock
+    private lateinit var mockCorrespondenceAddressTask: CorrespondenceAddressTask
 
-    private val lookupStep = mock<LookupAddressStep>()
+    @Mock
+    private lateinit var mockCorrespondenceLookupAddressStep: LookupAddressStep
 
     private val emailForm =
         CorrespondenceEmailFormModel().apply {
@@ -260,19 +264,19 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
         lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
-        lenient().`when`(mockState.correspondenceTask).thenReturn(correspondenceTask)
-        lenient().`when`(correspondenceTask.correspondenceEmailStep).thenReturn(emailStep)
-        lenient().`when`(correspondenceTask.addressTask).thenReturn(addressTask)
-        lenient().`when`(emailStep.formModel).thenReturn(emailForm)
-        lenient().`when`(emailStep.isStepReachable).thenReturn(true)
-        lenient().`when`(emailStep.urlPath).thenReturn(CorrespondenceEmailStep.ROUTE_SEGMENT)
+        lenient().`when`(mockState.correspondenceTask).thenReturn(mockCorrespondenceTask)
+        lenient().`when`(mockCorrespondenceTask.correspondenceEmailStep).thenReturn(mockCorrespondenceEmailStep)
+        lenient().`when`(mockCorrespondenceTask.addressTask).thenReturn(mockCorrespondenceAddressTask)
+        lenient().`when`(mockCorrespondenceEmailStep.formModel).thenReturn(emailForm)
+        lenient().`when`(mockCorrespondenceEmailStep.isStepReachable).thenReturn(true)
+        lenient().`when`(mockCorrespondenceEmailStep.urlPath).thenReturn(CorrespondenceEmailStep.ROUTE_SEGMENT)
         lenient().`when`(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("account@example.com")
-        lenient().`when`(addressTask.lookupAddressStep).thenReturn(lookupStep)
-        lenient().`when`(lookupStep.isStepReachable).thenReturn(true)
-        lenient().`when`(lookupStep.urlPath).thenReturn(lookupPath)
-        lenient().`when`(mockState.getCyaJourneyId(emailStep)).thenReturn("email-change")
-        lenient().`when`(mockState.getCyaJourneyId(lookupStep)).thenReturn("postal-change")
-        lenient().`when`(addressTask.getAddress()).thenReturn(
+        lenient().`when`(mockCorrespondenceAddressTask.lookupAddressStep).thenReturn(mockCorrespondenceLookupAddressStep)
+        lenient().`when`(mockCorrespondenceLookupAddressStep.isStepReachable).thenReturn(true)
+        lenient().`when`(mockCorrespondenceLookupAddressStep.urlPath).thenReturn(lookupPath)
+        lenient().`when`(mockState.getCyaJourneyId(mockCorrespondenceEmailStep)).thenReturn("email-change")
+        lenient().`when`(mockState.getCyaJourneyId(mockCorrespondenceLookupAddressStep)).thenReturn("postal-change")
+        lenient().`when`(mockCorrespondenceAddressTask.getAddress()).thenReturn(
             AddressDataModel(
                 "12 Test Road, Leeds, LS1 1AA",
                 buildingNumber = "12",
@@ -314,7 +318,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `contact postal address preserves manually entered address lines and county`() {
-            whenever(addressTask.getAddress()).thenReturn(
+            whenever(mockCorrespondenceAddressTask.getAddress()).thenReturn(
                 AddressDataModel.fromManualAddressData(
                     addressLineOne = "12 Test Road",
                     addressLineTwo = "Test District",

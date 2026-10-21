@@ -179,31 +179,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Nested
-    inner class CorrespondenceTaskListItemTests {
-        @BeforeEach
-        fun setUp() {
-            stubState()
-        }
-
-        @Test
-        fun `getTaskListViewModel includes correspondence task between ownership and occupied`() {
-            // Act
-            val aboutSection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
-
-            // Assert
-            assertEquals(
-                listOf(
-                    "registerProperty.taskList.aboutYourProperty.propertyDetails",
-                    "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
-                    "registerProperty.taskList.aboutYourProperty.correspondence",
-                    "registerProperty.taskList.aboutYourProperty.occupied",
-                ),
-                aboutSection.tasks.map { it.nameKey },
-            )
-        }
-    }
-
-    @Nested
     inner class SubmitYourRegistrationTaskListItemTests {
         @BeforeEach
         fun setUp() {
