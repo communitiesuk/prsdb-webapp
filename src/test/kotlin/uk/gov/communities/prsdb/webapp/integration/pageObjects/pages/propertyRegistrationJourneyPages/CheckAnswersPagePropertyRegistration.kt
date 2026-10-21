@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.CyaAnswersSnapshot
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
@@ -24,8 +25,7 @@ class CheckAnswersPagePropertyRegistration(
 
     val form = PostForm(page)
 
-    val answersSnapshot: String
-        get() = page.locator("input[name='submittedFilteredJourneyData']").inputValue()
+    val answersSnapshot = CyaAnswersSnapshot(page)
 
     val sectionHeader = SectionHeader(page.locator("main"))
 

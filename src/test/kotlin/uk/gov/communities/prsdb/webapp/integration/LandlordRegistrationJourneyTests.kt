@@ -749,6 +749,38 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
+    fun `The organisation CYA answers snapshot covers every delegate in the journey except those that aren't answers`() {
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+
+        // When adding a delegate to this journey, add it to LandlordRegistrationTask.cyaSnapshotExcludedDelegateKeys if it
+        // isn't an answer and can change while the user is on the CYA page. Otherwise, add its key here.
+        assertEquals(
+            sortedSetOf(
+                "cachedAddresses",
+                "cachedSelectedAddress",
+                "checkingAnswersFor",
+                "cyaRouteSegment",
+                "governingBodyMembersMap",
+                "isAddressAlreadyRegistered",
+                "lead-trustee-address/cachedAddresses",
+                "lead-trustee-address/cachedSelectedAddress",
+                "lead-trustee-address/isAddressAlreadyRegistered",
+                "nextGoverningBodyMemberId",
+                "orgGovBodyDetailsMode",
+                "organisation-address/cachedAddresses",
+                "organisation-address/cachedSelectedAddress",
+                "organisation-address/isAddressAlreadyRegistered",
+                "organisation-governing-body-member-address/cachedAddresses",
+                "organisation-governing-body-member-address/cachedSelectedAddress",
+                "organisation-governing-body-member-address/isAddressAlreadyRegistered",
+                "originalCyaAnswers",
+                "verifiedIdentity",
+            ),
+            checkAnswersPage.answersSnapshot.delegateKeys,
+        )
+    }
+
+    @Test
     fun `Selecting no on companies house skips the company number question and goes to the governing body journey`(page: Page) {
         navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
         val companiesHousePage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)

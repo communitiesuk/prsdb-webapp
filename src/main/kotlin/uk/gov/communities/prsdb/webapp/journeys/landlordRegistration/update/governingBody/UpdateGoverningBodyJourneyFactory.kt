@@ -115,6 +115,10 @@ class UpdateGoverningBodyJourney(
     override var originalCyaAnswers: String? by delegateProvider.nullableDelegate("originalCyaAnswers")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
+    // This isn't an answer: it records which governing body member is being edited, and changes when the user opens a
+    // member's pages or the member list, which they could do in another tab while on the CYA page
+    override val cyaSnapshotExcludedDelegateKeys = setOf("editingGovBodyMemberId")
+
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(

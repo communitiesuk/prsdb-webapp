@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateComp
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.CyaAnswersSnapshot
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -14,6 +15,8 @@ class CompaniesHouseUpdateCheckAnswersPage(
     override val expectedTitleHeading = "Check your Companies House answers"
 
     val form = PostForm(page)
+
+    val answersSnapshot = CyaAnswersSnapshot(page)
 
     val companyDetails = CompanyDetailsSummaryList(page)
 

@@ -19,8 +19,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.CYA_SNAPSHOT_DELEGATE_KEY_PREFIX
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import kotlin.test.assertContains
 
@@ -104,13 +102,6 @@ class PropertyRegistrationCheckAnswersJourneyTests : IntegrationTestWithMutableD
     fun `the CYA answers snapshot covers every delegate in the journey except those that aren't answers`() {
         val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
 
-        val snapshotDelegateKeys =
-            CheckAnswersFormModel
-                .deserializeJourneyDataKeys(checkAnswersPage.answersSnapshot)
-                .filter { it.startsWith(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
-                .map { it.removePrefix(CYA_SNAPSHOT_DELEGATE_KEY_PREFIX) }
-                .toSortedSet()
-
         // When adding a delegate to this journey, add its key here if it's an answer. Otherwise, add it to
         // PropertyRegistrationJourney.cyaSnapshotExcludedDelegateKeys so that changing it can't stop the CYA page being submitted
         assertEquals(
@@ -142,7 +133,7 @@ class PropertyRegistrationCheckAnswersJourneyTests : IntegrationTestWithMutableD
                 "registrationNumberValue",
                 "updatedEpcRetrievedByCertificateNumber",
             ),
-            snapshotDelegateKeys,
+            checkAnswersPage.answersSnapshot.delegateKeys,
         )
     }
 }

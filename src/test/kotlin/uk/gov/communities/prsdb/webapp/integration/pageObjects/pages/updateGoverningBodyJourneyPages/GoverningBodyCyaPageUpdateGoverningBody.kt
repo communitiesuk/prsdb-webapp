@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGove
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGoverningBodyController.Companion.UPDATE_GOVERNING_BODY_ROUTE
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.CyaAnswersSnapshot
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
@@ -15,6 +16,7 @@ class GoverningBodyCyaPageUpdateGoverningBody(
 
     val form = PostForm(page)
     val warning = Warning.default(page)
+    val answersSnapshot = CyaAnswersSnapshot(page)
 
     fun governingBodyMemberCard(index: Int) = SummaryCard(page, index)
 

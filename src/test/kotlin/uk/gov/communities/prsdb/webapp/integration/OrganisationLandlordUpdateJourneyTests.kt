@@ -630,6 +630,32 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             assertThat(updatedCard.summaryList.dateOfBirthRow.value).containsText("19 April 1980")
             assertThat(updatedCard.summaryList.addressRow.value).containsText("1 PRSDB Square")
         }
+
+        @Test
+        fun `The CYA answers snapshot covers every delegate in the journey except those that aren't answers`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.governingBodyMembersLink.clickAndWait()
+            assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class).form.submit()
+            val cyaPage = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
+
+            // When adding a delegate to this journey, add it to UpdateGoverningBodyJourney.cyaSnapshotExcludedDelegateKeys if it
+            // isn't an answer and can change while the user is on the CYA page. Otherwise, add its key here.
+            assertEquals(
+                sortedSetOf(
+                    "checkingAnswersFor",
+                    "cyaRouteSegment",
+                    "governingBodyMembersInitialised",
+                    "governingBodyMembersMap",
+                    "nextGoverningBodyMemberId",
+                    "organisation-governing-body-member-address/cachedAddresses",
+                    "organisation-governing-body-member-address/cachedSelectedAddress",
+                    "organisation-governing-body-member-address/isAddressAlreadyRegistered",
+                    "originalCyaAnswers",
+                ),
+                cyaPage.answersSnapshot.delegateKeys,
+            )
+        }
     }
 
     companion object {

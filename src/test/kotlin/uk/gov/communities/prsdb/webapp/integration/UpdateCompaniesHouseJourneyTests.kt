@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -142,5 +143,31 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(updatedDetailsPage.mainContent).containsText("87654321")
+    }
+
+    @Test
+    fun `The CYA answers snapshot covers every delegate in the journey except those that aren't answers`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class).submitYes()
+        assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class).submitCompanyNumber("12345678")
+        val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
+
+        // When adding a delegate to this journey, add it to UpdateCompaniesHouseJourney.cyaSnapshotExcludedDelegateKeys if it
+        // isn't an answer and can change while the user is on the CYA page. Otherwise, add its key here.
+        assertEquals(
+            sortedSetOf(
+                "checkingAnswersFor",
+                "cyaRouteSegment",
+                "governingBodyMembersInitialised",
+                "governingBodyMembersMap",
+                "nextGoverningBodyMemberId",
+                "organisation-governing-body-member-address/cachedAddresses",
+                "organisation-governing-body-member-address/cachedSelectedAddress",
+                "organisation-governing-body-member-address/isAddressAlreadyRegistered",
+                "originalCyaAnswers",
+            ),
+            checkAnswersPage.answersSnapshot.delegateKeys,
+        )
     }
 }

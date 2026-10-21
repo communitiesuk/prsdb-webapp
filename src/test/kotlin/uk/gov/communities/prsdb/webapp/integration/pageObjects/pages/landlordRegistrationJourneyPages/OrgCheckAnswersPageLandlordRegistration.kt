@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.CyaAnswersSnapshot
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -20,6 +21,8 @@ class OrgCheckAnswersPageLandlordRegistration(
     fun confirmAndSubmit() = form.submit()
 
     val form = PostForm(page)
+
+    val answersSnapshot = CyaAnswersSnapshot(page)
 
     val sectionHeader = SectionHeader(page.locator("main"))
 
