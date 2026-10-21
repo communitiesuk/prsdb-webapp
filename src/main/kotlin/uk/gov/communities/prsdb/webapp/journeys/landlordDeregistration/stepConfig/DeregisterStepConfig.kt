@@ -30,14 +30,14 @@ class DeregisterStepConfig(
     override fun mode(state: LandlordDeregistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: LandlordDeregistrationJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         val soleLandlordProperties = landlord.landlordships.toList()
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
         val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)

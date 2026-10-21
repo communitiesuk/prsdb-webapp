@@ -51,7 +51,7 @@ class CancelInvitationStepConfig(
         )
 
         // Email the canceller
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         cancellerEmailSender.sendEmail(
             currentUser.email,
             JointLandlordInvitationCancellationCancellerEmail(

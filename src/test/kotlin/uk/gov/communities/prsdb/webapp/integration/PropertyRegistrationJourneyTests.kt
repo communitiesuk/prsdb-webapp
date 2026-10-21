@@ -19,6 +19,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,6 +60,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -173,7 +175,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     private fun verifyConfirmationEmailSent(
         expectedPrn: String,
@@ -362,16 +364,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkAnswersPage.confirm()
 
-            completePropertyRegistrationPaymentSuccessfully(page)
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
             val payment = getCreatedPayment()
             assertEquals(PaymentStatus.SUCCEEDED, payment.status)
             verify(govUkPayClient).capturePayment(payment.paymentId)
+
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(confirmationPage.paymentSummaryHeading).isVisible()
+            assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
+                .containsText(PaymentHelper.formatPence(payment.amountInPence))
+            assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
+                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+            assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
+                .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
 
         @Test
-        fun `with JavaScript enabled, a failed payment redirects to the payment failed page and continuing returns to the payment summary`(
-            page: Page,
-        ) {
+        fun `with JavaScript enabled, a failed payment shows the payment failed page and the payment can then be retried`(page: Page) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
@@ -380,8 +389,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
-            paymentFailedPage.form.submit()
-            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
+            assertThat(paymentFailedPage.backLink).isHidden()
+            paymentFailedPage.tryAgainLink.clickAndWait()
+
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient, times(2)).createPayment(requestCaptor.capture())
+            val retriedPayment = paymentRepository.findAll().single { it.reference == requestCaptor.secondValue.reference }
+            assertEquals(PaymentStatus.SUCCEEDED, retriedPayment.status)
+            verify(govUkPayClient).capturePayment(retriedPayment.paymentId)
         }
 
         @Test

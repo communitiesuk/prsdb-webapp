@@ -6,57 +6,57 @@ import org.junit.jupiter.api.Test
 
 class AllowLettingAgentEmailFormModelTests {
     @Test
-    fun `isEmailNotLandlord returns true when email is different from landlord email`() {
+    fun `isEmailNotCurrentUser returns true when email is different from current user email`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"
-                landlordEmail = "landlord@example.com"
+                currentUserEmail = "landlord@example.com"
             }
 
-        assertTrue(formModel.isEmailNotLandlord())
+        assertTrue(formModel.isEmailNotCurrentUser())
     }
 
     @Test
-    fun `isEmailNotLandlord returns false when email matches landlord email`() {
+    fun `isEmailNotCurrentUser returns false when email matches current user email`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "landlord@example.com"
-                landlordEmail = "landlord@example.com"
+                currentUserEmail = "landlord@example.com"
             }
 
-        assertFalse(formModel.isEmailNotLandlord())
+        assertFalse(formModel.isEmailNotCurrentUser())
     }
 
     @Test
-    fun `isEmailNotLandlord returns false when email matches landlord email case-insensitively`() {
+    fun `isEmailNotCurrentUser returns false when email matches current user email case-insensitively`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "Landlord@Example.COM"
-                landlordEmail = "landlord@example.com"
+                currentUserEmail = "landlord@example.com"
             }
 
-        assertFalse(formModel.isEmailNotLandlord())
+        assertFalse(formModel.isEmailNotCurrentUser())
     }
 
     @Test
-    fun `isEmailNotLandlord returns true when email is null`() {
+    fun `isEmailNotCurrentUser returns true when email is null`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = null
-                landlordEmail = "landlord@example.com"
+                currentUserEmail = "landlord@example.com"
             }
 
-        assertTrue(formModel.isEmailNotLandlord())
+        assertTrue(formModel.isEmailNotCurrentUser())
     }
 
     @Test
-    fun `isEmailNotLandlord returns true when landlord email is null`() {
+    fun `isEmailNotCurrentUser returns true when current user email is null`() {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"
-                landlordEmail = null
+                currentUserEmail = null
             }
 
-        assertTrue(formModel.isEmailNotLandlord())
+        assertTrue(formModel.isEmailNotCurrentUser())
     }
 }

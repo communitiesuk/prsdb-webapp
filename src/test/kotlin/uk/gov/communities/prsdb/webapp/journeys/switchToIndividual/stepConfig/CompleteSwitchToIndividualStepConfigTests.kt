@@ -78,8 +78,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(listOf(invitation1, invitation2))
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -95,8 +95,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -112,8 +112,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -152,8 +152,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(listOf(invitation1, invitation2))
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Org Admin", email = "org.admin@example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -170,13 +170,13 @@ class CompleteSwitchToIndividualStepConfigTests {
         val stepConfig = setupStepConfig()
         val propertyOwnershipId = 1L
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
-        val currentUser = CurrentUserService.CurrentUserDetails(name = "Org Admin", email = "org.admin@example.com")
+        val currentUser = CurrentUserService.RegisteredUserDetails(name = "Org Admin", email = "org.admin@example.com")
         val emailCaptor = argumentCaptor<SwitchToIndividualConfirmationEmail>()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(emptyList())
-        whenever(mockCurrentUserService.getCurrentUserDetails()).thenReturn(currentUser)
+        whenever(mockCurrentUserService.getRegisteredUserDetails()).thenReturn(currentUser)
 
         stepConfig.afterStepIsReached(mockState)
 

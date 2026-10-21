@@ -14,7 +14,7 @@ class UserToOrgLandlordUserService(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
     fun getOrganisationalLandlordUserForCurrentUser(): OrganisationalLandlordUser? {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).singleOrNull()
     }
 }

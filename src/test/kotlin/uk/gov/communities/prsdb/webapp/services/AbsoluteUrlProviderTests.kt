@@ -37,6 +37,24 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
+    fun `buildLandlordDashboardUri clears base URL query parameters when the controller URI has none`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test/landlord?source=base")
+
+        val uri = provider.buildLandlordDashboardUri()
+
+        assertThat(uri.query).isNull()
+    }
+
+    @Test
+    fun `buildTeamMembersUri builds the landlord team members URL`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test")
+
+        val uri = provider.buildTeamMembersUri()
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/team-members")
+    }
+
+    @Test
     fun `buildLocalCouncilDashboardUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(localCouncilBaseUrl = "example.test/local-council")
 
@@ -61,6 +79,15 @@ class AbsoluteUrlProviderTests {
         val uri = provider.buildOrganisationalLandlordInvitationUri("token-123")
 
         assertThat(uri.toString()).isEqualTo("https://example.test$ACCEPT_INVITATION_ROUTE?token=token-123")
+    }
+
+    @Test
+    fun `buildJointLandlordInvitationUri replaces base URL query parameters with the controller query`() {
+        val provider = createProvider(landlordBaseUrl = "https://example.test/landlord?source=base&token=old")
+
+        val uri = provider.buildJointLandlordInvitationUri("token-123")
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT?token=token-123")
     }
 
     @Test

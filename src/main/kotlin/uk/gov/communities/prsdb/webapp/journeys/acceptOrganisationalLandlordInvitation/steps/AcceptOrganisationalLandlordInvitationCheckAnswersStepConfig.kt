@@ -27,16 +27,6 @@ class AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig(
             "summaryListData" to getSummaryList(state),
         )
 
-    override fun afterStepDataIsAdded(state: AcceptOrganisationalLandlordUserInvitationJourneyState) {
-        // TODO PDJB-1774: Add a separate internal step to save the submitted details as an organisational landlord user with the role from the invitation,
-        // delete the invitation, clear its session token, and refresh the security context so the invitee receives their new role.
-        // That step should also re-check the invitation is still pending before saving, as it may have been cancelled or accepted elsewhere since
-        // beforeAttemptingToReachStep ran. If it is no longer valid, the invitee should end up at invalidLinkStep rather than a generic error page.
-        // It should re-check the invitee is still not a landlord for the same reason, as the check user is landlord step only runs at the start of
-        // the journey and the invitee could have registered as a landlord in another tab since then.
-    }
-
-    // override this as the next step will handle deleting the journey (TODO PDJB-1774)
     override fun resolveNextDestination(
         state: AcceptOrganisationalLandlordUserInvitationJourneyState,
         defaultDestination: Destination,

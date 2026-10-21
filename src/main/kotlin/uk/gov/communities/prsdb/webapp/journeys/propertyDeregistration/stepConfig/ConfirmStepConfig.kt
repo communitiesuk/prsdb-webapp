@@ -61,7 +61,7 @@ class ConfirmStepConfig(
         val singleLineAddress = propertyOwnership.address.singleLineAddress
         val multiLineAddress = propertyOwnership.address.toMultiLineAddress()
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(

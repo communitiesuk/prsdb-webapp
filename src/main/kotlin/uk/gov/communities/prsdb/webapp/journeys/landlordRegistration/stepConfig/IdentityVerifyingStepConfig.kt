@@ -31,7 +31,7 @@ class IdentityVerifyingStepConfig(
         StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator(journeyStep)
 
     override fun beforeChoosingNextDestination(state: IdentityState) {
-        val oidcUser = SecurityContextHolder.getContext().authentication.principal as OidcUser
+        val oidcUser = SecurityContextHolder.getContext().authentication!!.principal as OidcUser
         state.verifiedIdentity = identityService.getVerifiedIdentityData(oidcUser)
     }
 }

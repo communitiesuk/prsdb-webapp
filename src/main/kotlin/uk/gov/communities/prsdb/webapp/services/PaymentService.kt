@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -187,6 +188,12 @@ class PaymentService(
         )
     }
 
+    fun getLatestSucceededPaymentForProperty(propertyOwnership: PropertyOwnership): Payment? =
+        paymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+            propertyOwnership,
+            PaymentStatus.SUCCEEDED,
+        )
+
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun finalisePayment(
         paymentId: String,
@@ -344,7 +351,7 @@ class PaymentService(
         checkNotNull(paymentRepository.findStatusByPaymentId(paymentId)) { "Payment $paymentId not found" }
 
     private fun getIncompletePropertyForCurrentUser(journeyId: String): LandlordIncompleteProperty {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
             "No incomplete property found for journey $journeyId and user $baseUserId"
         }

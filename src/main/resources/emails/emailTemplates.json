@@ -275,8 +275,8 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
   },
   {
-    "test_id": "a977fa79-3068-4a12-909c-8f5b3c90a41b",
-    "prod_id": "7c8f98da-6c20-4224-93c8-7ad654539c85",
+    "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
+    "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Confirmation of landlord registration",
     "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"
@@ -371,5 +371,26 @@
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_EMAIL",
     "subject": "Invitation to join ((organisation name)) on Register your rental property",
     "bodyLocation": "/emails/OrganisationalLandlordInvitation.md"
+  },
+  {
+    "test_id": "9a28b667-bcca-41b4-8c2f-fbcde5c95066",
+    "prod_id": "aea51c4a-b4c0-45b2-8893-77fa37db6a3d",
+    "enumName": "CHANGE_ORG_TEAM_MEMBER_ACCESS_LEVEL",
+    "subject": "Your access level has changed",
+    "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
+  },
+  {
+    "test_id": "6d59d741-bb70-4d19-8539-c410fbf9e71a",
+    "prod_id": "f873de04-c276-4852-ba63-5d2f20d7c517",
+    "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EMAIL",
+    "subject": "You’ve joined an organisation on Register your rental property",
+    "bodyLocation": "/emails/OrganisationalLandlordInvitationAccepted.md"
+  },
+  {
+    "test_id": "ee9c5038-048f-49a9-bc56-1550436308d5",
+    "prod_id": "e3ce9bac-e5ec-42ef-8693-70b66db7cc06",
+    "enumName": "REMOVE_ORG_TEAM_MEMBER_CONFIRMATION",
+    "subject": "Access removed for ((member name)) to ((organisation name))",
+    "bodyLocation": "/emails/RemoveOrgTeamMemberConfirmation.md"
   }
 ]

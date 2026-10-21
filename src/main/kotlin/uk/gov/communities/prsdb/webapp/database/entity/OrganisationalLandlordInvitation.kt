@@ -46,6 +46,7 @@ class OrganisationalLandlordInvitation(
 
     @Column(nullable = false)
     var isHidden: Boolean = false
+        private set
 
     val expiresOnDate: LocalDate
         get() =
@@ -91,5 +92,9 @@ class OrganisationalLandlordInvitation(
 
     fun markAsExpiredEmailSent() {
         invitationExpiredEmailSent = true
+    }
+
+    fun markAsHidden() {
+        isHidden = true
     }
 }

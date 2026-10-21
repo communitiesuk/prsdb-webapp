@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
@@ -80,7 +81,7 @@ import kotlin.test.assertNotNull
 
 class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     @Autowired
     private lateinit var userToLandlordService: UserToLandlordService
@@ -100,6 +101,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        // TODO PDJB-1828: Remove this setup when the MULTI_USER_ORGANISATIONS feature flag is removed
+        featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
     }
 
     @Test
@@ -270,6 +273,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
+        assertThat(confirmationPage.whatYouCanDoNowHeading).not().isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
@@ -361,6 +365,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
                 organisationName = "Test Organisation Name",
                 lrn = createdOrgLandlordRegNum.toString(),
                 prsdURL = absoluteLandlordUrl,
+                // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+                isMultiUserOrganisationsEnabled = true,
             ),
         )
 
@@ -368,6 +374,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", ORG_LANDLORD_REGISTRATION_SURVEY_URL)
+        assertThat(confirmationPage.whatYouCanDoNowHeading).isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
 
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
@@ -851,7 +858,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `adding another governing body member from the list page completes the flow and shows both members`(page: Page) {
+    fun `Adding another governing body member from the list page completes the flow and shows both members`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(1 to createTestGovBodyMember("Alice Smith")),
@@ -881,7 +888,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `changing a governing body member updates their details in the list`(page: Page) {
+    fun `Changing a governing body member updates their details in the list`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -918,7 +925,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `removing governing body members one by one updates the list correctly`(page: Page) {
+    fun `Removing governing body members one by one updates the list correctly`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -949,7 +956,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `pressing back after starting to edit resets editing state and allows adding a new member`(page: Page) {
+    fun `Pressing back after starting to edit resets editing state and allows adding a new member`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(1 to createTestGovBodyMember("Alice Smith")),
@@ -989,7 +996,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `editing a governing body member pre-fills all questions including looked-up address`(page: Page) {
+    fun `Editing a governing body member pre-fills all questions including looked-up address`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -1039,7 +1046,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `editing a governing body member pre-fills manual address`(page: Page) {
+    fun `Editing a governing body member pre-fills manual address`(page: Page) {
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -1097,7 +1104,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `the back link on the org check answers page returns to the main contact page`(page: Page) {
+    fun `The back link on the org check answers page returns to the main contact page`(page: Page) {
         navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
 
         BackLink.default(page).clickAndWait()
@@ -1106,7 +1113,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `the back link on the individual check answers page returns to the select address page`(page: Page) {
+    fun `The back link on the individual check answers page returns to the select address page`(page: Page) {
         navigator.skipToLandlordRegistrationCheckAnswersPage(
             LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
         )
@@ -1117,7 +1124,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `the back link on the main contact page returns to the governing body member list page when not a registered company`(page: Page) {
+    fun `The back link on the main contact page returns to the governing body member list page when not a registered company`(page: Page) {
         navigator.skipToOrgLandlordRegistrationMainContactPage()
 
         BackLink.default(page).clickAndWait()
@@ -1126,7 +1133,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `the back link on the main contact page returns to the company number page when a registered company`(page: Page) {
+    fun `The back link on the main contact page returns to the company number page when a registered company`(page: Page) {
         navigator.skipToOrgLandlordRegistrationMainContactPage(
             LandlordStateSessionBuilder.beforeOrgCompanyNumber().withOrgCompanyNumber(),
         )

@@ -37,7 +37,7 @@ class LocalCouncilUserCyaStepConfig(
 
         val localCouncilUserId =
             localCouncilDataService.registerUserAndReturnID(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 localCouncil = invitation.invitingCouncil,
                 name = name,
                 email = email,

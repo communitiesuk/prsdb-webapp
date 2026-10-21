@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import java.net.URI
@@ -38,6 +39,13 @@ class AbsoluteUrlProvider(
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
+
+    fun buildTeamMembersUri(): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath(TeamMembersController.TEAM_MEMBERS_ROUTE)
+            .build()
+            .toUri()
 
     fun buildInvitationUri(
         token: String,
@@ -99,7 +107,7 @@ class AbsoluteUrlProvider(
         return UriComponentsBuilder
             .fromUriString(baseUrl)
             .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
-            .query(methodCallUriComponents.query)
+            .replaceQuery(methodCallUriComponents.query)
             .fragment(methodCallUriComponents.fragment)
             .build()
             .toUri()

@@ -33,7 +33,7 @@ class DeregisterStepConfig(
 
         val jointlyOwnedProperties = orgLandlord.landlordships.filterNot { it.isSolelyOwnedBy(orgLandlord) }
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 

@@ -6,14 +6,17 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.RemoveOrgUserConfirmationPage
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelJourneyTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
@@ -29,7 +32,9 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         accessLevelPage.submitAccessLevel(OrganisationalLandlordUserRole.EDITOR.name)
 
         // Assert
-        assertPageIs(page, TeamMembersPage::class)
+        val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin is now an editor.")
         val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single()
         assertEquals(OrganisationalLandlordUserRole.EDITOR, updatedMember.role)
     }
@@ -47,8 +52,25 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         accessLevelPage.submitAccessLevel(OrganisationalLandlordUserRole.ADMIN.name)
 
         // Assert
-        assertPageIs(page, TeamMembersPage::class)
+        val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Carl Editor is now an administrator.")
         val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG03").single()
         assertEquals(OrganisationalLandlordUserRole.ADMIN, updatedMember.role)
+    }
+
+    @Test
+    fun `an admin can confirm removal of another organisation member`(page: Page) {
+        val teamMembersPage = navigator.goToTeamMembers()
+        teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
+
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        accessLevelPage.removeAccessLink.clickAndWait()
+
+        val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        confirmationPage.form.submit()
+
+        assertPageIs(page, TeamMembersPage::class)
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isEmpty())
     }
 }
