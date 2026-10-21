@@ -30,7 +30,7 @@ class UpdateEmailJourneyFactory(
                 nextStep { journey.completeEmailUpdateStep }
                 initialStep()
                 stepSpecificInitialisation {
-                    withCorrespondenceTemplateIfFlagIsSet()
+                    withCorrespondenceTemplate()
                 }
             }
             step(journey.completeEmailUpdateStep) {

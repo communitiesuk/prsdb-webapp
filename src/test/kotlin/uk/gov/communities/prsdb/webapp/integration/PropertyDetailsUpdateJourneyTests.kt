@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -151,11 +150,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class CorrespondenceAddressUpdates {
-        @BeforeEach
-        fun enableCorrespondenceAddressFlag() {
-            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
-        }
-
         @Test
         fun `A property's correspondence address can be updated by selecting an address`(page: Page) {
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
@@ -262,11 +256,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class CorrespondenceEmailUpdates {
-        @BeforeEach
-        fun enableCorrespondenceAddressFlag() {
-            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
-        }
-
         @Test
         fun `A property's correspondence email can be updated to the landlord's account email`(page: Page) {
             navigator
