@@ -22,6 +22,18 @@
             </div>
         </th:block>
 
+        <th:block th:if="${accessRemovedBannerContentKey != null}" th:with="isSuccess=true">
+            <div id="access-removed-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{teamMembers.accessRemovedBanner.title}, ~{::#access-removed-banner/content()})}"
+                 th:with="isSuccess=true">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{teamMembers.accessRemovedBanner.heading}">teamMembers.accessRemovedBanner.heading</h3>
+                <p class="govuk-body"
+                   th:text="#{${accessRemovedBannerContentKey}(${accessRemovedMemberName})}">teamMembers.accessRemovedBanner.content</p>
+            </div>
+        </th:block>
+
         <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
             <div id="resend-invitation-banner"
                  th:replace="~{fragments/banners/notificationBanner ::

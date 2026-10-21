@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -15,9 +16,15 @@ class CompleteRemoveOrgUserStepConfig(
     override fun mode(state: ChangeOrgTeamMemberAccessLevelJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: ChangeOrgTeamMemberAccessLevelJourneyState) {
+        state.removedMemberName = organisationalLandlordUserService
+            .getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
+            ?.name
+            ?: throw PrsdbWebException(
+                "Could not determine the name of organisational landlord user ${state.otherOrganisationalLandlordUserId}",
+            )
+
         organisationalLandlordUserService.removeOrganisationalLandlordUser(state.otherOrganisationalLandlordUserId)
 
-        // TODO PDJB-1873: Show a success banner after removing the user
         // TODO PDJB-1768: Email the removed user
         // TODO PDJB-1767: Email the admin who removed the user
     }

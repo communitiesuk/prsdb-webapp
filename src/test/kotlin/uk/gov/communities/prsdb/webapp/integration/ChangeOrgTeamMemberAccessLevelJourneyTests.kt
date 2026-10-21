@@ -70,7 +70,9 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
         confirmationPage.form.submit()
 
-        assertPageIs(page, TeamMembersPage::class)
+        val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access removed")
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin")
         assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").isEmpty())
     }
 }

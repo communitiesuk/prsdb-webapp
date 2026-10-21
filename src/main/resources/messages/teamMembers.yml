@@ -27,6 +27,10 @@ accessLevelChangedBanner:
   content:
     administrator: '{0,,name} is now an administrator.'
     editor: '{0,,name} is now an editor.'
+accessRemovedBanner:
+  title: Success
+  heading: Access removed
+  content: '{0,,name} no longer has access to the service.'
 resendInvitationBanner:
   title: Success
   heading: Invitation resent

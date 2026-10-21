@@ -67,7 +67,12 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
             }
             step(journey.completeRemoveOrgUserStep) {
                 parents { journey.removeOrgUserConfirmationStep.isComplete() }
-                nextDestination { Destination.ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE) }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
+                        .withFlashAttribute("accessRemovedBannerContentKey", "teamMembers.accessRemovedBanner.content")
+                        .withFlashAttribute("accessRemovedMemberName", journey.removedMemberName)
+                }
             }
         }
     }
@@ -101,6 +106,7 @@ class ChangeOrgTeamMemberAccessLevelJourney(
     ChangeOrgTeamMemberAccessLevelJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var otherOrganisationalLandlordUserId: Long by delegateProvider.requiredImmutableDelegate("otherOrganisationalLandlordUserId")
+    override var removedMemberName: String by delegateProvider.requiredDelegate("removedMemberName", "")
 
     override fun generateJourneyId(seed: Any?): String {
         val otherOrganisationalLandlordUserId = seed as? Long
@@ -123,6 +129,7 @@ interface ChangeOrgTeamMemberAccessLevelJourneyState : JourneyState {
     val completeRemoveOrgUserStep: CompleteRemoveOrgUserStep
     var otherOrganisationalLandlordUserId: Long
     var isStateInitialized: Boolean
+    var removedMemberName: String
 
     val selectedRole: OrganisationalLandlordUserRole
         get() = accessLevelStep.formModel.notNullValue(ChangeOrgTeamMemberAccessLevelFormModel::role)

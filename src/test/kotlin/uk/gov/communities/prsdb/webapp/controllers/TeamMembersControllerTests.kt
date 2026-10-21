@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -8,10 +9,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
 import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH
@@ -29,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import kotlin.test.assertEquals
 
 @WebMvcTest(TeamMembersController::class)
+@Import(MessageSourceConfig::class)
 class TeamMembersControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -132,6 +136,22 @@ class TeamMembersControllerTests(
 
         val teamMembers = result.modelAndView!!.model["teamMembers"] as TeamMembersViewModel
         assertEquals(1, teamMembers.pendingInvitationRows.size)
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `getTeamMembers renders the access removed banner when flash attributes are present`() {
+        stubOrgLandlordWithCurrentUser()
+
+        mvc
+            .get(TEAM_MEMBERS_ROUTE) {
+                flashAttr("accessRemovedBannerContentKey", "teamMembers.accessRemovedBanner.content")
+                flashAttr("accessRemovedMemberName", "Anita Locke")
+            }.andExpect {
+                status { isOk() }
+                content { string(containsString("Access removed")) }
+                content { string(containsString("Anita Locke no longer has access to the service.")) }
+            }
     }
 
     @Test
