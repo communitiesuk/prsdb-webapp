@@ -348,8 +348,8 @@ class LandlordRegistrationServiceTests {
                 ),
             ).thenReturn(organisationalLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
-            whenever(mockCurrentUserService.getCurrentUserDetails())
-                .thenReturn(CurrentUserService.CurrentUserDetails("Org Admin", "admin@example.com"))
+            whenever(mockCurrentUserService.getRegisteredUserDetails())
+                .thenReturn(CurrentUserService.RegisteredUserDetails("Org Admin", "admin@example.com"))
         }
 
         @Test

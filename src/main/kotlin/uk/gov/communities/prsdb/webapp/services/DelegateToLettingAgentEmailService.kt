@@ -31,7 +31,7 @@ class DelegateToLettingAgentEmailService(
     ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         confirmationEmailService.sendEmail(
@@ -96,7 +96,7 @@ class DelegateToLettingAgentEmailService(
         lettingAgentEmail: String,
     ) {
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 

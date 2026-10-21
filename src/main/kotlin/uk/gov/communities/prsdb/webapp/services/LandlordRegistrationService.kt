@@ -149,7 +149,7 @@ class LandlordRegistrationService(
     }
 
     private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationalLandlord) {
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         organisationalRegistrationConfirmationSender.sendEmail(
             currentUser.email,
             OrganisationalLandlordRegistrationConfirmationEmail(
