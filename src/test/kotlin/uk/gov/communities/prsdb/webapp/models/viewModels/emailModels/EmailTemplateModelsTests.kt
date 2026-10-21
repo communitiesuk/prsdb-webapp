@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.String
 
@@ -494,6 +495,16 @@ class EmailTemplateModelsTests {
                         teamMembersUrl = URI("teamMembersUrl"),
                     ),
                     "/emails/RemoveOrgTeamMemberConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PaymentRequiresManualInterventionEmail(
+                        paymentId = "payment-id",
+                        paymentReference = "payment-reference",
+                        amountInPence = 2000,
+                        paymentCreatedAt = Instant.parse("2026-01-01T12:00:00Z"),
+                        reason = "reason",
+                    ),
+                    "/emails/PaymentRequiresManualIntervention.md",
                 ),
                 EmailTemplateTestData(
                     RemoveOrgTeamMemberNotificationEmail(

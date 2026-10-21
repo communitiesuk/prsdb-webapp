@@ -387,6 +387,13 @@
     "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
   },
   {
+    "test_id": "00d8a549-b18d-4b93-a604-95c72e1ffdea",
+    "prod_id": "abefdbc5-3311-430d-9158-33c55af33c9f",
+    "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
+    "subject": "A property registration payment needs checking",
+    "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
+  },
+  {
     "test_id": "594cf2bc-a9c7-4248-81db-c155a7dfd6c9",
     "prod_id": "b2b6b10d-8a2a-4ff5-a546-73e5a4ae9294",
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EMAIL",

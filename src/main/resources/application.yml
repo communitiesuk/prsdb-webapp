@@ -117,6 +117,7 @@ gov-uk-pay:
   connect-timeout: 5s
   read-timeout: 10s
   capture-check-delay: 2s
+  manual-intervention-email-address: ${GOV_UK_PAY_MANUAL_INTERVENTION_EMAIL_ADDRESS:Team-PRSDB+payment-manual-intervention@softwire.com}
 
 cloudwatch-metrics:
   ecs:
