@@ -61,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPay
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentLinks
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -108,6 +109,9 @@ class PaymentServiceTests {
 
     @Mock
     private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
+
+    @Mock
+    private lateinit var mockManualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
@@ -842,6 +846,7 @@ class PaymentServiceTests {
             whenever(mockGovUkPayClient.getPayment(existingPayment.paymentId))
                 .thenReturn(createGovUkPayPayment(existingPayment.paymentId, GovUkPayPaymentStatus.SUCCESS))
             stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION, existingPayment.paymentId)
+            whenever(mockPaymentRepository.findById(existingPayment.paymentId)).thenReturn(Optional.of(existingPayment))
             stubGovUkPayCreatePayment(nextUrl = "https://pay.example.test/next")
 
             // Act
@@ -857,6 +862,7 @@ class PaymentServiceTests {
             verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIn(any(), any(), eq(PaymentStatus.SUCCEEDED), any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
             verify(mockPaymentRepository).save(any<Payment>())
+            verify(mockManualInterventionEmailSender).sendEmail(eq(MANUAL_INTERVENTION_EMAIL_ADDRESS), any())
         }
 
         @Test
@@ -914,6 +920,7 @@ class PaymentServiceTests {
             // Assert
             assertContains(exception.message!!, existingPayment.paymentId)
             verify(mockGovUkPayClient, never()).createPayment(any())
+            verifyNoInteractions(mockManualInterventionEmailSender)
         }
 
         @Test
@@ -1140,6 +1147,60 @@ class PaymentServiceTests {
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
+            verifyNoInteractions(mockManualInterventionEmailSender)
+        }
+
+        @Test
+        fun `finalisePayment emails support when a payment requires manual intervention`() {
+            // Arrange
+            val paymentCreatedAt = Instant.parse("2026-01-01T12:00:00Z")
+            val payment =
+                createPayment(
+                    paymentId = PAYMENT_ID,
+                    amountInPence = 2000,
+                    reference = PAYMENT_REFERENCE,
+                    paymentCreatedAt = paymentCreatedAt,
+                )
+            stubStoredPayment(payment)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+
+            // Act
+            paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
+
+            // Assert
+            val emailCaptor = argumentCaptor<PaymentRequiresManualInterventionEmail>()
+            verify(mockManualInterventionEmailSender).sendEmail(eq(MANUAL_INTERVENTION_EMAIL_ADDRESS), emailCaptor.capture())
+            assertEquals(PAYMENT_ID, emailCaptor.firstValue.paymentId)
+            assertEquals(PAYMENT_REFERENCE, emailCaptor.firstValue.paymentReference)
+            assertEquals(2000, emailCaptor.firstValue.amountInPence)
+            assertEquals(paymentCreatedAt, emailCaptor.firstValue.paymentCreatedAt)
+            assertContains(emailCaptor.firstValue.reason, "GOV.UK Pay reports it succeeded")
+        }
+
+        @Test
+        fun `finalisePayment still requires manual intervention when emailing support fails`() {
+            // Arrange
+            stubStoredPayment()
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(PaymentStatus.IN_PROGRESS_STATUSES, PaymentStatus.MANUAL_INTERVENTION)
+            doThrow(RuntimeException("Notify unavailable")).whenever(mockManualInterventionEmailSender).sendEmail(any(), any())
+            val outContent = ByteArrayOutputStream()
+            val originalOut = System.out
+            System.setOut(PrintStream(outContent))
+
+            try {
+                // Act
+                val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
+
+                // Assert
+                assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+                val output = outContent.toString()
+                assertContains(output, "Failed to email support about payment $PAYMENT_ID")
+                assertContains(output, "Notify unavailable")
+            } finally {
+                System.setOut(originalOut)
+            }
         }
 
         @Test
@@ -1524,6 +1585,7 @@ class PaymentServiceTests {
                 // Assert
                 assertEquals(PaymentStatus.SUCCEEDED, status)
                 assertFalse(outContent.toString().contains("Payment requires manual intervention"))
+                verifyNoInteractions(mockManualInterventionEmailSender)
             } finally {
                 System.setOut(originalOut)
             }
@@ -1566,6 +1628,7 @@ class PaymentServiceTests {
                 val output = outContent.toString()
                 assertContains(output, "Payment requires manual intervention: $PAYMENT_ID")
                 assertContains(output, "but recording this failed")
+                verifyNoInteractions(mockManualInterventionEmailSender)
             } finally {
                 System.setOut(originalOut)
             }
@@ -1747,6 +1810,7 @@ class PaymentServiceTests {
                 any(),
             )
             verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verifyNoInteractions(mockManualInterventionEmailSender)
         }
 
         @Test
@@ -2069,6 +2133,7 @@ class PaymentServiceTests {
         annualFeeInPence,
         gratisPeriodEndDate,
         captureCheckDelay,
+        MANUAL_INTERVENTION_EMAIL_ADDRESS,
         mockGovUkPayClient,
         mockPaymentRepository,
         mockLandlordIncompletePropertiesRepository,
@@ -2079,6 +2144,7 @@ class PaymentServiceTests {
         messageSource,
         TransactionTemplate(mockTransactionManager),
         mockEntityManager,
+        mockManualInterventionEmailSender,
     )
 
     private fun setUpIncompletePropertyAndLandlord(anniversary: MonthDay = MonthDay.of(Month.MARCH, 1)): LandlordIncompleteProperty {
@@ -2165,6 +2231,7 @@ class PaymentServiceTests {
         private const val OTHER_PAYMENT_ID = "other-payment-id"
         private const val FINISHED_PAYMENT_ID = "finished-payment-id"
         private val CAPTURE_CHECK_DELAY: Duration = Duration.ofMillis(100)
+        private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
 
         @JvmStatic
         fun provideUnfinishedInProgressPaymentStatuses() =

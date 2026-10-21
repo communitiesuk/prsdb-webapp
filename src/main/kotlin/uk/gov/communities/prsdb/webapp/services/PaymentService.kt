@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -40,6 +41,7 @@ class PaymentService(
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
     @Value("\${gov-uk-pay.gratis-period-end-date}") gratisPeriodEndDate: String,
     @Value("\${gov-uk-pay.capture-check-delay}") private val captureCheckDelay: Duration,
+    @Value("\${gov-uk-pay.manual-intervention-email-address}") private val manualInterventionEmailAddress: String,
     private val govUkPayClient: GovUkPayClient,
     private val paymentRepository: PaymentRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
@@ -50,6 +52,7 @@ class PaymentService(
     private val messageSource: MessageSource,
     private val transactionTemplate: TransactionTemplate,
     private val entityManager: EntityManager,
+    private val manualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>,
 ) {
     private val gratisPeriodEndDate: LocalDate = LocalDate.parse(gratisPeriodEndDate)
 
@@ -466,7 +469,32 @@ class PaymentService(
         if (!isFlagged) return getStoredPaymentStatus(paymentId)
 
         println(if (cause == null) alert else "$alert: ${cause.stackTraceToString()}")
+        emailSupportAboutManualIntervention(paymentId, reason)
         return PaymentStatus.MANUAL_INTERVENTION
+    }
+
+    private fun emailSupportAboutManualIntervention(
+        paymentId: String,
+        reason: String,
+    ) {
+        try {
+            val payment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
+            manualInterventionEmailSender.sendEmail(
+                manualInterventionEmailAddress,
+                PaymentRequiresManualInterventionEmail(
+                    payment.paymentId,
+                    payment.reference,
+                    payment.amountInPence,
+                    payment.paymentCreatedAt,
+                    reason,
+                ),
+            )
+        } catch (exception: Exception) {
+            println(
+                "Failed to email support about payment $paymentId requiring manual intervention: " +
+                    exception.stackTraceToString(),
+            )
+        }
     }
 
     private fun getStoredPaymentStatus(paymentId: String): PaymentStatus =
