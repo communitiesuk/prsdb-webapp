@@ -392,5 +392,12 @@
     "enumName": "REMOVE_ORG_TEAM_MEMBER_CONFIRMATION",
     "subject": "Access removed for ((member name)) to ((organisation name))",
     "bodyLocation": "/emails/RemoveOrgTeamMemberConfirmation.md"
+  },
+  {
+    "test_id": "622cbb37-46a8-45a7-920f-189bb3427988",
+    "prod_id": "5b681022-e959-436f-a318-909d1f15e0c0",
+    "enumName": "REMOVE_ORG_TEAM_MEMBER_NOTIFICATION",
+    "subject": "Access removed for ((organisation name))",
+    "bodyLocation": "/emails/RemoveOrgTeamMemberNotification.md"
   }
 ]

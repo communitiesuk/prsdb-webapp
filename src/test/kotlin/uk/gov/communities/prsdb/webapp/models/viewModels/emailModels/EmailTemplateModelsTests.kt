@@ -479,6 +479,13 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/RemoveOrgTeamMemberConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    RemoveOrgTeamMemberNotificationEmail(
+                        memberName = "Anita Locke",
+                        organisationName = "Keystone Living Group",
+                    ),
+                    "/emails/RemoveOrgTeamMemberNotification.md",
+                ),
             )
     }
 
