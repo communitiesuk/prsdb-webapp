@@ -142,14 +142,7 @@ class OrganisationalLandlordInvitationService(
         invitationId: Long,
         organisationalLandlord: OrganisationalLandlord,
     ): String {
-        val invitation =
-            invitationRepository
-                .findById(invitationId)
-                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
-
-        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this organisation")
-        }
+        val invitation = getInvitationForOrganisation(invitationId, organisationalLandlord)
 
         val token = invitation.token
         val invitedEmail = invitation.invitedEmail
@@ -180,14 +173,7 @@ class OrganisationalLandlordInvitationService(
         invitationId: Long,
         organisationalLandlord: OrganisationalLandlord,
     ) {
-        val invitation =
-            invitationRepository.findById(invitationId).orElseThrow {
-                ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
-            }
-
-        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invitation does not belong to this organisation")
-        }
+        val invitation = getInvitationForOrganisation(invitationId, organisationalLandlord)
 
         if (invitation.status != OrganisationalLandlordInvitationStatus.EXPIRED) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only expired invitations can be hidden")
@@ -196,6 +182,17 @@ class OrganisationalLandlordInvitationService(
         invitation.markAsHidden()
         invitationRepository.save(invitation)
     }
+
+    // Invitations belonging to another organisation are reported as not found, so that their existence is not disclosed
+    private fun getInvitationForOrganisation(
+        invitationId: Long,
+        organisationalLandlord: OrganisationalLandlord,
+    ): OrganisationalLandlordInvitation =
+        invitationRepository
+            .findById(invitationId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found") }
+            .takeIf { it.organisationalLandlord.id == organisationalLandlord.id }
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
 
     private fun hideExpiredInvitationsForEmail(
         organisationalLandlord: OrganisationalLandlord,

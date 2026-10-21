@@ -935,7 +935,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `hideExpiredInvitation throws 403 when the invitation belongs to another organisation`() {
+    fun `hideExpiredInvitation throws 404 when the invitation belongs to another organisation`() {
         // Arrange
         val otherOrganisation = createOrgLandlord(name = "Other organisation")
         val invitation =
@@ -951,7 +951,7 @@ class OrganisationalLandlordInvitationServiceTests {
             assertThrows<ResponseStatusException> {
                 invitationService.hideExpiredInvitation(1, createOrgLandlord())
             }
-        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
         verify(mockInvitationRepository, never()).save(any())
     }
 
