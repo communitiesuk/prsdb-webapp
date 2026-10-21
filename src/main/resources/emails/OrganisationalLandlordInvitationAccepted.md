@@ -4,7 +4,7 @@ You’ve joined ((organisation name)).
 
 # What you can do
 
-Your access level is ((role name)). You can:
+Your access level is ((role name)), you can:
 
 * register rental properties
 * update rental property information
