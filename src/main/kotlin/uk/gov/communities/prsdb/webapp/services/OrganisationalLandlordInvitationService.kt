@@ -183,16 +183,22 @@ class OrganisationalLandlordInvitationService(
         invitationRepository.save(invitation)
     }
 
-    // Invitations belonging to another organisation are reported as not found, so that their existence is not disclosed
     private fun getInvitationForOrganisation(
         invitationId: Long,
         organisationalLandlord: OrganisationalLandlord,
-    ): OrganisationalLandlordInvitation =
-        invitationRepository
-            .findById(invitationId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found") }
-            .takeIf { it.organisationalLandlord.id == organisationalLandlord.id }
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+    ): OrganisationalLandlordInvitation {
+        val invitation =
+            invitationRepository.findById(invitationId).orElseThrow {
+                ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+            }
+
+        // Invitations belonging to another organisation are reported as not found, so that their existence is not disclosed
+        if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+        }
+
+        return invitation
+    }
 
     private fun hideExpiredInvitationsForEmail(
         organisationalLandlord: OrganisationalLandlord,
