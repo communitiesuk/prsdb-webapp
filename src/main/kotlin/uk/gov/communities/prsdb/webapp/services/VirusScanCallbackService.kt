@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
@@ -23,12 +24,14 @@ class VirusScanCallbackService(
         fileUploadId: Long,
         certificateType: CertificateType,
         landlordId: Long,
+        userId: String,
     ): VirusScanCallback {
         val data =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
                 certificateType = certificateType,
                 landlordId = landlordId,
+                userId = userId,
             )
 
         return saveVirusScanCallback(fileUploadId, data)
@@ -39,12 +42,14 @@ class VirusScanCallbackService(
         fileUploadId: Long,
         certificateType: CertificateType,
         landlordId: Long,
+        userId: String,
     ): VirusScanCallback {
         val internalData =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
                 certificateType = certificateType,
                 landlordId = landlordId,
+                userId = userId,
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
@@ -98,8 +103,9 @@ class VirusScanCallbackService(
             saveEmailToMonitoringTeamForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
         } else {
             val landlordId = userToLandlordService.getCurrentLandlordForUser().id
-            saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId)
-            saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId)
+            val userId = SecurityContextHolder.getContext().authentication!!.name
+            saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId, userId)
+            saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId, userId)
         }
     }
 
@@ -137,7 +143,9 @@ sealed class EmailNotificationData {
     data class IncompletePropertyEmailNotification(
         val journeyId: String,
         val certificateType: CertificateType,
+        // TODO PDJB-1919: Remove landlordId once all saved notifications have a userId
         val landlordId: Long,
+        val userId: String? = null,
     ) : EmailNotificationData()
 
     @Serializable

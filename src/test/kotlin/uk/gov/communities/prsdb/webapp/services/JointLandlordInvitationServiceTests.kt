@@ -84,6 +84,41 @@ class JointLandlordInvitationServiceTests {
     }
 
     @Nested
+    inner class GetInUseEmailsForPropertyTests {
+        @Test
+        fun `getInUseEmailsForProperty returns individual landlord emails`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    landlords =
+                        mutableSetOf(
+                            MockLandlordData.createIndividualLandlord(email = "one@example.com"),
+                            MockLandlordData.createIndividualLandlord(email = "two@example.com"),
+                        ),
+                )
+
+            val result = invitationService.getInUseEmailsForProperty(propertyOwnership)
+
+            assertEquals(listOf("one@example.com", "two@example.com"), result.sorted())
+        }
+
+        @Test
+        fun `getInUseEmailsForProperty excludes organisational landlords`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    landlords =
+                        mutableSetOf(
+                            MockLandlordData.createIndividualLandlord(email = "individual@example.com"),
+                            MockLandlordData.createOrgLandlord(registrantEmail = "org.user@example.com"),
+                        ),
+                )
+
+            val result = invitationService.getInUseEmailsForProperty(propertyOwnership)
+
+            assertEquals(listOf("individual@example.com"), result)
+        }
+    }
+
+    @Nested
     inner class GetPendingAndExpiredInvitationsTests {
         @Test
         fun `getPendingAndExpiredInvitations partitions into pending and expired`() {
@@ -613,14 +648,14 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
-        fun `sendInvitationEmails skips emails already an organisation landlord on the property`() {
+        fun `sendInvitationEmails does not skip an email matching an organisation landlord on the property`() {
             // Arrange
             val existingOrgLandlord =
                 MockLandlordData.createOrgLandlord(registrantEmail = "existing@example.com")
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = 123L,
-                    landlords = mutableSetOf(MockLandlordData.createIndividualLandlord(), existingOrgLandlord),
+                    landlords = mutableSetOf(existingOrgLandlord),
                 )
             val jointLandlordEmails = listOf("existing@example.com", "new@example.com")
 
@@ -630,10 +665,10 @@ class JointLandlordInvitationServiceTests {
             // Act
             invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
 
-            // Assert
+            // Assert: organisational landlord emails are not treated as in-use, so both are invited
             val emailCaptor = argumentCaptor<String>()
-            verify(mockInvitationEmailSender, times(1)).sendEmail(emailCaptor.capture(), any())
-            assertEquals(listOf("new@example.com"), emailCaptor.allValues)
+            verify(mockInvitationEmailSender, times(2)).sendEmail(emailCaptor.capture(), any())
+            assertEquals(listOf("existing@example.com", "new@example.com"), emailCaptor.allValues)
         }
 
         @Test

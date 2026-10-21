@@ -85,7 +85,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         acceptedEmailSender.sendEmail(
             currentUser.email,
             JointLandlordInvitationAcceptedEmail(
