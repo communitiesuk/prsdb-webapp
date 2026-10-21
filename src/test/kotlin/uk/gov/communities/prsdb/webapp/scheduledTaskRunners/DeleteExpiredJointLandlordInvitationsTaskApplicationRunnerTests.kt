@@ -18,11 +18,11 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunnerTests {
     private lateinit var taskLogic: DeleteExpiredJointLandlordInvitationsTaskLogic
 
     @Test
-    fun `deleteExpiredJointLandlordInvitations calls service to delete expired invitations`() {
+    fun `deleteJointLandlordInvitationsPastRetentionPeriod calls deletion service`() {
         // Act
-        taskLogic.deleteExpiredJointLandlordInvitations()
+        taskLogic.deleteJointLandlordInvitationsPastRetentionPeriod()
 
         // Assert
-        verify(jointLandlordInvitationDeletionService).deleteExpiredInvitations()
+        verify(jointLandlordInvitationDeletionService).deleteInvitationsPastRetentionPeriod()
     }
 }
