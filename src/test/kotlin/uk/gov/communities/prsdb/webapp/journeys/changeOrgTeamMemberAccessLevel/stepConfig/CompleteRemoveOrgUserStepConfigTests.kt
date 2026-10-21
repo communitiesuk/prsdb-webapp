@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.RemoveOrgTeamMemberConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.RemoveOrgTeamMemberNotificationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
@@ -43,10 +44,13 @@ class CompleteRemoveOrgUserStepConfigTests {
     private lateinit var mockUserToOrgLandlordUserService: UserToOrgLandlordUserService
 
     @Mock
-    private lateinit var mockEmailSender: EmailNotificationService<RemoveOrgTeamMemberConfirmationEmail>
+    private lateinit var mockRemovalConfirmationEmailSender: EmailNotificationService<RemoveOrgTeamMemberConfirmationEmail>
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockRemovalNotificationEmailSender: EmailNotificationService<RemoveOrgTeamMemberNotificationEmail>
 
     @AfterEach
     fun tearDown() {
@@ -57,17 +61,17 @@ class CompleteRemoveOrgUserStepConfigTests {
         CompleteRemoveOrgUserStepConfig(
             mockOrganisationalLandlordUserService,
             mockUserToOrgLandlordUserService,
-            mockEmailSender,
+            mockRemovalConfirmationEmailSender,
             mockAbsoluteUrlProvider,
+            mockRemovalNotificationEmailSender,
         )
 
-    @Test
-    fun `afterStepIsReached removes the target membership and emails only the removing admin`() {
-        // Arrange
+    private fun setUpSuccessfulRemoval() {
         val organisation = mock<OrganisationalLandlord>()
         whenever(organisation.name).thenReturn("Keystone Living Group")
         val removedMember = mock<OrganisationalLandlordUser>()
         whenever(removedMember.name).thenReturn("Anita Locke")
+        whenever(removedMember.email).thenReturn("anita@example.com")
         whenever(removedMember.organisationalLandlord).thenReturn(organisation)
         val admin = mock<OrganisationalLandlordUser>()
         whenever(admin.name).thenReturn("Alex Admin")
@@ -76,6 +80,12 @@ class CompleteRemoveOrgUserStepConfigTests {
         whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUserOrNull(42L)).thenReturn(removedMember)
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(admin)
         whenever(mockAbsoluteUrlProvider.buildTeamMembersUri()).thenReturn(URI("https://example.com/team-members"))
+    }
+
+    @Test
+    fun `afterStepIsReached removes the target membership`() {
+        // Arrange
+        setUpSuccessfulRemoval()
 
         // Act
         createStepConfig().afterStepIsReached(mockState)
@@ -83,7 +93,18 @@ class CompleteRemoveOrgUserStepConfigTests {
         // Assert
         verify(mockState).removedMemberName = "Anita Locke"
         verify(mockOrganisationalLandlordUserService).removeOrganisationalLandlordUser(42L)
-        verify(mockEmailSender).sendEmail(
+    }
+
+    @Test
+    fun `afterStepIsReached sends a removal confirmation email to the removing admin`() {
+        // Arrange
+        setUpSuccessfulRemoval()
+
+        // Act
+        createStepConfig().afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockRemovalConfirmationEmailSender).sendEmail(
             eq("alex@example.com"),
             eq(
                 RemoveOrgTeamMemberConfirmationEmail(
@@ -94,7 +115,28 @@ class CompleteRemoveOrgUserStepConfigTests {
                 ),
             ),
         )
-        verifyNoMoreInteractions(mockEmailSender)
+        verifyNoMoreInteractions(mockRemovalConfirmationEmailSender)
+    }
+
+    @Test
+    fun `afterStepIsReached sends a removal notification email to the removed member`() {
+        // Arrange
+        setUpSuccessfulRemoval()
+
+        // Act
+        createStepConfig().afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockRemovalNotificationEmailSender).sendEmail(
+            eq("anita@example.com"),
+            eq(
+                RemoveOrgTeamMemberNotificationEmail(
+                    memberName = "Anita Locke",
+                    organisationName = "Keystone Living Group",
+                ),
+            ),
+        )
+        verifyNoMoreInteractions(mockRemovalNotificationEmailSender)
     }
 
     @Test
@@ -108,7 +150,8 @@ class CompleteRemoveOrgUserStepConfigTests {
         // Act, Assert
         assertThrows<PrsdbWebException> { createStepConfig().afterStepIsReached(mockState) }
         verify(mockOrganisationalLandlordUserService, never()).removeOrganisationalLandlordUser(any())
-        verifyNoMoreInteractions(mockEmailSender)
+        verifyNoMoreInteractions(mockRemovalConfirmationEmailSender)
+        verifyNoMoreInteractions(mockRemovalNotificationEmailSender)
     }
 
     @Test
@@ -127,7 +170,8 @@ class CompleteRemoveOrgUserStepConfigTests {
         // Assert
         assertTrue(exception.message!!.contains("test-user"))
         verify(mockOrganisationalLandlordUserService, never()).removeOrganisationalLandlordUser(any())
-        verifyNoMoreInteractions(mockEmailSender)
+        verifyNoMoreInteractions(mockRemovalConfirmationEmailSender)
+        verifyNoMoreInteractions(mockRemovalNotificationEmailSender)
     }
 
     @Test
