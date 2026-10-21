@@ -117,7 +117,7 @@ class PropertyUpdateEmailService(
     ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         lettingAgentRemovedEmailService.sendEmail(

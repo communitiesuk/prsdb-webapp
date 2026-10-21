@@ -1,5 +1,5 @@
 -- Adds a second expired organisational landlord invitation for the local organisation landlord (id 36).
--- Apply on top of data-local.sql and data-org-landlord-team-members.sql.
+-- Apply on top of data-local.sql.
 -- Used by tests that need more than one expired invitation, e.g. to check that removing one leaves the others.
 
 INSERT INTO organisational_landlord_invitation (created_date, last_modified_date, token, invited_email, organisation_landlord_id,

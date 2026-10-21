@@ -11,6 +11,12 @@ interface SavedJourneyStateRepository : JpaRepository<SavedJourneyState, Long> {
         principalName: String,
     ): SavedJourneyState?
 
+    // TODO: PDJB-1919: Remove this
+    fun findFirstByJourneyIdAndUser_IdIn(
+        journeyId: String,
+        principalNames: Collection<String>,
+    ): SavedJourneyState?
+
     fun existsByJourneyIdAndUser_Id(
         journeyId: String,
         principalName: String,

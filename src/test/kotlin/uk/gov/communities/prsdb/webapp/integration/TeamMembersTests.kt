@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
 
 @WithOrgLandlordProfile
 class TeamMembersTests :
-    IntegrationTestWithImmutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithImmutableData("data-local.sql") {
     @Autowired
     private lateinit var invitationRepository: OrganisationalLandlordInvitationRepository
 
@@ -110,9 +110,7 @@ class TeamMembersTests :
 
     @Nested
     inner class ResendInvitation :
-        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
-            listOf("data-local.sql", "data-org-landlord-team-members.sql"),
-        ) {
+        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData("data-local.sql") {
         @Test
         fun `resending a pending invitation emails the invitee and shows the invitation resent banner`(page: Page) {
             // Arrange
@@ -165,7 +163,7 @@ class TeamMembersTests :
     @Nested
     inner class RemovingExpiredInvitations :
         IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
-            listOf("data-local.sql", "data-org-landlord-team-members.sql", "data-overlay-extra-expired-org-invitation.sql"),
+            listOf("data-local.sql", "data-overlay-extra-expired-org-invitation.sql"),
         ) {
         @Test
         fun `removing an expired invitation hides it and returns to the invitations tab`(page: Page) {

@@ -6,10 +6,14 @@ import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskServ
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
@@ -24,9 +28,11 @@ class VirusNotificationEmailHandler(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
-    private val individualLandlordRepository: IndividualLandlordRepository,
+    private val landlordRepository: LandlordRepository,
+    private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
+    private val landlordUserEmailService: LandlordUserEmailService,
     private val featureFlagManager: FeatureFlagManager,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
@@ -77,22 +83,56 @@ class VirusNotificationEmailHandler(
         notification: IncompletePropertyEmailNotification,
         monitoringEmailAddress: String? = null,
     ) {
-        val landlord =
-            individualLandlordRepository.findById(notification.landlordId).orElse(null)
-                ?: throw IllegalStateException("No individual landlord found for id: ${notification.landlordId}")
         val savedJourneyState =
-            savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, landlord.baseUser.id)
+            findSavedJourneyState(notification)
                 ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
 
-        // TODO: PDJB-1274: update to account for org landlords
-        emailNotificationService.sendEmail(
-            monitoringEmailAddress ?: landlord.email,
-            buildAlertEmail(
-                notification.certificateType,
-                if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
-                savedJourneyState.getPropertyRegistrationMultiLineAddress(),
-            ),
-        )
+        if (monitoringEmailAddress != null) {
+            val email =
+                buildAlertEmail(
+                    notification.certificateType,
+                    MONITORING_TEAM_RECIPIENT_NAME,
+                    savedJourneyState.getPropertyRegistrationMultiLineAddress(),
+                )
+            emailNotificationService.sendEmail(monitoringEmailAddress, email)
+        } else {
+            val userDetails = landlordUserEmailService.getUserDetailsByBaseUserId(savedJourneyState.user.id)
+            val email =
+                buildAlertEmail(
+                    notification.certificateType,
+                    userDetails.name,
+                    savedJourneyState.getPropertyRegistrationMultiLineAddress(),
+                )
+            emailNotificationService.sendEmail(userDetails.email, email)
+        }
+    }
+
+    private fun findSavedJourneyState(notification: IncompletePropertyEmailNotification): SavedJourneyState? {
+        // TODO PDJB-1919: The findByJourneyIdAndUser_Id call can be inlined as notification.userId != null will always be true
+        // then we can remove findSavedJourneyState
+        if (notification.userId != null) {
+            return savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, notification.userId)
+        }
+
+        // TODO PDJB-1919: Remove this fallback code (the rest of this method) once all saved notifications have a userId
+        val landlord =
+            landlordRepository.findById(notification.landlordId).orElse(null)
+                ?: throw IllegalStateException("No landlord found for id: ${notification.landlordId}")
+        val baseUserIds =
+            when (landlord) {
+                is IndividualLandlord -> {
+                    listOf(landlord.baseUser.id)
+                }
+
+                is OrganisationalLandlord -> {
+                    organisationalLandlordUserRepository.findByOrganisationalLandlord(landlord).map { it.baseUser.id }
+                }
+
+                else -> {
+                    throw IllegalStateException("Unexpected landlord type for id ${landlord.id}: ${landlord.landlordType}")
+                }
+            }
+        return savedJourneyStateRepository.findFirstByJourneyIdAndUser_IdIn(notification.journeyId, baseUserIds)
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
