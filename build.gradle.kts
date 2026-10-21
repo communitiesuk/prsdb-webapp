@@ -19,7 +19,7 @@ version = "latest"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -225,6 +225,8 @@ tasks.named<Test>("test") {
 
 tasks.register<Test>("testWithOneLoginSimulator") {
     group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     include("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
@@ -271,6 +273,8 @@ tasks.register<JavaExec>("playwright") {
 
 tasks.register<Test>("testWithoutIntegration") {
     group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
     exclude("uk/gov/communities/prsdb/webapp/integration/**")
     exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
 }
