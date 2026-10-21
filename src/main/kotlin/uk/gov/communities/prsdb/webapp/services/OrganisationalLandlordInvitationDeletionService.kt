@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit
 class OrganisationalLandlordInvitationDeletionService(
     private val invitationRepository: OrganisationalLandlordInvitationRepository,
 ) {
-    fun deleteExpiredInvitations(): List<Long> {
+    fun deleteInvitationsPastRetentionPeriod(): List<Long> {
         val retentionPeriodInDays =
             (
                 ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS +

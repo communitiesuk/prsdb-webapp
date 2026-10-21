@@ -16,9 +16,9 @@ class DeleteExpiredOrganisationalLandlordInvitationsTaskApplicationRunner(
     private val taskLogic: DeleteExpiredOrganisationalLandlordInvitationsTaskLogic,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        println("Executing delete expired organisational landlord invitations scheduled task")
+        println("Executing organisational landlord invitation retention cleanup scheduled task")
 
-        taskLogic.deleteExpiredOrganisationalLandlordInvitations()
+        taskLogic.deleteOrganisationalLandlordInvitationsPastRetentionPeriod()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
@@ -33,13 +33,13 @@ class DeleteExpiredOrganisationalLandlordInvitationsTaskLogic(
     private val organisationalLandlordInvitationDeletionService: OrganisationalLandlordInvitationDeletionService,
 ) {
     @Transactional
-    fun deleteExpiredOrganisationalLandlordInvitations() {
-        val deletedIds = organisationalLandlordInvitationDeletionService.deleteExpiredInvitations()
+    fun deleteOrganisationalLandlordInvitationsPastRetentionPeriod() {
+        val deletedIds = organisationalLandlordInvitationDeletionService.deleteInvitationsPastRetentionPeriod()
 
         deletedIds.forEach { id ->
-            println("Deleted expired organisational landlord invitation with id: $id")
+            println("Deleted organisational landlord invitation past retention period with id: $id")
         }
 
-        println("Deleted ${deletedIds.size} expired organisational landlord invitations.")
+        println("Deleted ${deletedIds.size} organisational landlord invitations past the retention period.")
     }
 }

@@ -28,48 +28,48 @@ class OrganisationalLandlordInvitationDeletionServiceTests {
     }
 
     @Test
-    fun `deleteExpiredInvitations deletes expired invitations past the grace period`() {
+    fun `deleteInvitationsPastRetentionPeriod deletes expired invitations`() {
         val expiredInvitation = createInvitation(id = 1, ageInDays = 36)
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(listOf(expiredInvitation))
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(listOf(1L), deletedIds)
         verify(mockInvitationRepository).deleteAll(listOf(expiredInvitation))
     }
 
     @Test
-    fun `deleteExpiredInvitations deletes hidden invitations past the grace period`() {
+    fun `deleteInvitationsPastRetentionPeriod deletes hidden invitations`() {
         val hiddenInvitation = createInvitation(id = 1, ageInDays = 36, isHidden = true)
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(listOf(hiddenInvitation))
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(listOf(1L), deletedIds)
         verify(mockInvitationRepository).deleteAll(listOf(hiddenInvitation))
     }
 
     @Test
-    fun `deleteExpiredInvitations does not delete pending invitations`() {
+    fun `deleteInvitationsPastRetentionPeriod does not delete pending invitations`() {
         val pendingInvitation = createInvitation(id = 1, ageInDays = 1)
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(listOf(pendingInvitation))
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(emptyList<Long>(), deletedIds)
         verify(mockInvitationRepository).deleteAll(emptyList())
     }
 
     @Test
-    fun `deleteExpiredInvitations uses invitation lifetime plus grace period as cutoff`() {
+    fun `deleteInvitationsPastRetentionPeriod uses invitation lifetime plus grace period as cutoff`() {
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(emptyList())
         val start = Instant.now()
 
-        deletionService.deleteExpiredInvitations()
+        deletionService.deleteInvitationsPastRetentionPeriod()
 
         val end = Instant.now()
         val cutoffCaptor = argumentCaptor<Instant>()

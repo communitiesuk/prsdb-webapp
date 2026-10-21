@@ -18,9 +18,9 @@ class DeleteExpiredOrganisationalLandlordInvitationsTaskApplicationRunnerTests {
     private lateinit var taskLogic: DeleteExpiredOrganisationalLandlordInvitationsTaskLogic
 
     @Test
-    fun `deleteExpiredOrganisationalLandlordInvitations calls service to delete expired invitations`() {
-        taskLogic.deleteExpiredOrganisationalLandlordInvitations()
+    fun `deleteOrganisationalLandlordInvitationsPastRetentionPeriod calls deletion service`() {
+        taskLogic.deleteOrganisationalLandlordInvitationsPastRetentionPeriod()
 
-        verify(organisationalLandlordInvitationDeletionService).deleteExpiredInvitations()
+        verify(organisationalLandlordInvitationDeletionService).deleteInvitationsPastRetentionPeriod()
     }
 }
