@@ -41,7 +41,7 @@ class PaymentStatusCheckStepConfig(
             when (finalisedStatus) {
                 PaymentStatus.SUCCEEDED -> PaymentOutcome.SUCCESS
                 PaymentStatus.FAILED, PaymentStatus.CANCELLED -> PaymentOutcome.FAILURE
-                PaymentStatus.CREATED, PaymentStatus.CAPTURABLE -> PaymentOutcome.IN_PROGRESS
+                PaymentStatus.CREATED, PaymentStatus.INDETERMINATE, PaymentStatus.CAPTURABLE -> PaymentOutcome.IN_PROGRESS
             }
         state.paymentOutcome = paymentOutcome
 
