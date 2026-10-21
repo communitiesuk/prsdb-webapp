@@ -87,6 +87,19 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.form.getErrorMessage("toDate")).containsText("You must enter a real date")
     }
 
+    // This tests the shared date input template fragment used on this page, rather than anything specific to this page.
+    // If it fails, check that fragment's error message markup.
+    // If this test is removed, add an equivalent to another page that uses the same fragment.
+    @Test
+    fun `date error messages include a visually hidden error prefix`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("10", "1", "2025", "40", "2", "2025")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.form.getErrorMessage("toDate").locator(".govuk-visually-hidden")).containsText("Error:")
+    }
+
     @Test
     fun `submitting a valid date range re-renders the page without errors`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()

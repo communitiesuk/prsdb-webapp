@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
@@ -44,6 +47,8 @@ class TeamMembersControllerTests(
 
     @MockitoBean
     private lateinit var organisationalLandlordInvitationService: OrganisationalLandlordInvitationService
+
+    private val removeExpiredInvitationRoute = TeamMembersController.getRemoveExpiredInvitationPath(1)
 
     private val resendRoute = TeamMembersController.getResendInvitationPath(123L)
 
@@ -211,5 +216,69 @@ class TeamMembersControllerTests(
                 redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
                 flash { attribute("resendInvitationEmail", "invitee@example.com") }
             }
+    }
+
+    @Test
+    fun `removeExpiredInvitation returns a redirect for unauthenticated user`() {
+        mvc
+            .get(removeExpiredInvitationRoute)
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+
+        verify(organisationalLandlordInvitationService, never()).hideExpiredInvitation(any(), any())
+    }
+
+    @Test
+    @WithMockUser
+    fun `removeExpiredInvitation returns 403 for an unauthorised user`() {
+        mvc
+            .get(removeExpiredInvitationRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["INDIVIDUAL_LANDLORD", "ORG_EDITOR", "LOCAL_COUNCIL_ADMIN", "LOCAL_COUNCIL_USER", "SYSTEM_OPERATOR"])
+    fun `removeExpiredInvitation returns 403 for roles other than organisation admin`(role: String) {
+        mvc
+            .get(removeExpiredInvitationRoute) {
+                with(user("user").roles(role))
+            }.andExpect {
+                status { isForbidden() }
+            }
+
+        verify(organisationalLandlordInvitationService, never()).hideExpiredInvitation(any(), any())
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `removeExpiredInvitation returns 403 for a non-organisation landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+
+        mvc
+            .get(removeExpiredInvitationRoute)
+            .andExpect {
+                status { isForbidden() }
+            }
+
+        verify(organisationalLandlordInvitationService, never()).hideExpiredInvitation(any(), any())
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `removeExpiredInvitation hides the invitation and redirects to the invitations tab`() {
+        val organisation = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(organisation)
+
+        mvc
+            .get(removeExpiredInvitationRoute)
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
+            }
+
+        verify(organisationalLandlordInvitationService).hideExpiredInvitation(1, organisation)
     }
 }

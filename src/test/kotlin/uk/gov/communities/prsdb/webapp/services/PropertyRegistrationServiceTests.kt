@@ -196,6 +196,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -620,6 +622,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = rentAmount,
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -667,6 +671,8 @@ class PropertyRegistrationServiceTests {
             rentAmount = rentAmount,
             licenseProvideLater = false,
             tenancyProvideLater = false,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
     }
 
@@ -733,6 +739,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = rentAmount,
                 licenseProvideLater = true,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -783,6 +791,8 @@ class PropertyRegistrationServiceTests {
             rentAmount = rentAmount,
             licenseProvideLater = true,
             tenancyProvideLater = false,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
     }
 
@@ -840,6 +850,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -934,6 +946,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1016,6 +1030,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1113,6 +1129,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1194,6 +1212,8 @@ class PropertyRegistrationServiceTests {
                 rentAmount = 123.toBigDecimal(),
                 licenseProvideLater = false,
                 tenancyProvideLater = false,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))

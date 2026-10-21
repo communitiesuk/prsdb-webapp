@@ -212,7 +212,7 @@ class MockLandlordData {
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
-            correspondenceEmail: String = landlords.firstOrNull()?.email ?: "email@example.com",
+            correspondenceEmail: String = "email@example.com",
             correspondenceAddress: Address = createAddress(),
             id: Long = 1,
             createdDate: Instant = Instant.now(),

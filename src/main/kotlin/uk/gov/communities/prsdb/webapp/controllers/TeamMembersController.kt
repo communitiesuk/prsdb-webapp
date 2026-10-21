@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
@@ -69,7 +71,17 @@ class TeamMembersController(
         return "redirect:$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT"
     }
 
-    // TODO PDJB-1854: Use this in removeExpiredInvitation
+    // TODO PDJB-1828: Remove this annotation when the MULTI_USER_ORGANISATIONS flag is removed
+    @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
+    @GetMapping(REMOVE_EXPIRED_INVITATION_PATH)
+    fun removeExpiredInvitation(
+        @PathVariable invitationId: Long,
+    ): String {
+        organisationalLandlordInvitationService.hideExpiredInvitation(invitationId, getCurrentOrganisationalLandlord())
+
+        return "redirect:$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT"
+    }
+
     private fun getCurrentOrganisationalLandlord(): OrganisationalLandlord =
         userToLandlordService.getCurrentLandlordForUser() as? OrganisationalLandlord
             ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Only organisation landlords can manage team members")
@@ -80,6 +92,12 @@ class TeamMembersController(
         const val ADMINISTRATORS_FRAGMENT = "administrators"
         const val EDITORS_FRAGMENT = "editors"
         const val INVITATIONS_FRAGMENT = "invitations"
+
+        const val REMOVE_EXPIRED_INVITATION_PATH = "/$REMOVE_EXPIRED_INVITE_PATH_SEGMENT/{invitationId}"
+        const val REMOVE_EXPIRED_INVITATION_ROUTE = "$TEAM_MEMBERS_ROUTE$REMOVE_EXPIRED_INVITATION_PATH"
+
+        fun getRemoveExpiredInvitationPath(invitationId: Long): String =
+            UriTemplate(REMOVE_EXPIRED_INVITATION_ROUTE).expand(invitationId).toASCIIString()
 
         fun getResendInvitationPath(invitationId: Long): String = "$TEAM_MEMBERS_ROUTE/$RESEND_PATH_SEGMENT/$invitationId"
     }

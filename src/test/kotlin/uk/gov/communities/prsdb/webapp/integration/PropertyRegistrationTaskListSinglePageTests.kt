@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
@@ -12,7 +11,6 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
     @BeforeEach
     fun enableFeatureFlags() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-        featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
     }
 
     @Nested
@@ -148,27 +146,6 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
                 "Once your property’s occupied, your letting agent or property manager can keep these details updated for you",
                 delegationTask.hintText.trim(),
             )
-        }
-    }
-
-    // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
-    @Nested
-    inner class CorrespondenceAddressTaskFlagDisabled {
-        @BeforeEach
-        fun disableCorrespondenceAddressFlag() {
-            featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-        }
-
-        @Test
-        fun `Correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy(),
-                )
-
-            assert("Who the council should contact" !in taskListPage.getAboutYourPropertyTaskNames()) {
-                "Correspondence task should not be visible when CORRESPONDENCE_ADDRESS feature flag is disabled"
-            }
         }
     }
 }

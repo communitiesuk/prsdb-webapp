@@ -147,8 +147,8 @@ class TeamMembersViewModelTests {
         // Arrange
         val invitations =
             listOf(
-                invitation("pending@example.com", daysAgo = 1),
-                invitation("expired-newer@example.com", daysAgo = 40),
+                invitation("pending@example.com", daysAgo = 1, id = 1L),
+                invitation("expired-newer@example.com", daysAgo = 40, id = 2L),
                 invitation("expired-older@example.com", daysAgo = 60, id = 3L),
             )
 
@@ -166,9 +166,17 @@ class TeamMembersViewModelTests {
         assertEquals(
             listOf(
                 SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(3L)),
-                SummaryListRowActionsViewModel("forms.links.remove", "#"),
+                SummaryListRowActionsViewModel("forms.links.remove", TeamMembersController.getRemoveExpiredInvitationPath(3L)),
             ),
             viewModel.expiredInvitationRows.first().actions,
+        )
+        assertEquals(
+            "/landlord/team-members/remove-expired-invite/2",
+            viewModel.expiredInvitationRows
+                .last()
+                .actions
+                .last()
+                .url,
         )
     }
 

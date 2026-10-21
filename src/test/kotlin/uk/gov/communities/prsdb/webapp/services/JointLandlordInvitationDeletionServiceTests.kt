@@ -31,7 +31,7 @@ class JointLandlordInvitationDeletionServiceTests {
     }
 
     @Test
-    fun `deleteExpiredInvitations deletes invitations that have been expired for longer than the grace period`() {
+    fun `deleteInvitationsPastRetentionPeriod deletes expired invitations`() {
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 id = 1,
@@ -41,14 +41,14 @@ class JointLandlordInvitationDeletionServiceTests {
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(listOf(invitation))
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(listOf(1L), deletedIds)
         verify(mockInvitationRepository).deleteAll(listOf(invitation))
     }
 
     @Test
-    fun `deleteExpiredInvitations deletes hidden invitations past the grace period`() {
+    fun `deleteInvitationsPastRetentionPeriod deletes hidden invitations`() {
         val hiddenInvitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 id = 1,
@@ -59,25 +59,25 @@ class JointLandlordInvitationDeletionServiceTests {
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(listOf(hiddenInvitation))
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(listOf(1L), deletedIds)
         verify(mockInvitationRepository).deleteAll(listOf(hiddenInvitation))
     }
 
     @Test
-    fun `deleteExpiredInvitations returns empty list when no invitations are found`() {
+    fun `deleteInvitationsPastRetentionPeriod returns empty list when no invitations are found`() {
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(emptyList())
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(emptyList<Long>(), deletedIds)
         verify(mockInvitationRepository).deleteAll(emptyList())
     }
 
     @Test
-    fun `deleteExpiredInvitations deletes multiple expired invitations`() {
+    fun `deleteInvitationsPastRetentionPeriod deletes multiple expired invitations`() {
         val invitations =
             listOf(
                 MockJointLandlordData.createJointLandlordInvitation(id = 1, createdDate = expiredAndPastGracePeriodCreatedDate),
@@ -88,7 +88,7 @@ class JointLandlordInvitationDeletionServiceTests {
         whenever(mockInvitationRepository.findAllByCreatedDateBefore(any()))
             .thenReturn(invitations)
 
-        val deletedIds = deletionService.deleteExpiredInvitations()
+        val deletedIds = deletionService.deleteInvitationsPastRetentionPeriod()
 
         assertEquals(listOf(1L, 2L, 3L), deletedIds)
         verify(mockInvitationRepository).deleteAll(invitations)

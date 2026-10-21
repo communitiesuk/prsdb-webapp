@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -7,26 +8,46 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.ChangeOrgTeamMemberAccessLevelJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.RemoveOrgTeamMemberConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
+import uk.gov.communities.prsdb.webapp.services.UserToOrgLandlordUserService
 
 @JourneyFrameworkComponent
 class CompleteRemoveOrgUserStepConfig(
     private val organisationalLandlordUserService: OrganisationalLandlordUserService,
+    private val userToOrgLandlordUserService: UserToOrgLandlordUserService,
+    private val removalConfirmationEmailSender: EmailNotificationService<RemoveOrgTeamMemberConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractInternalStepConfig<Complete, ChangeOrgTeamMemberAccessLevelJourneyState>() {
     override fun mode(state: ChangeOrgTeamMemberAccessLevelJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: ChangeOrgTeamMemberAccessLevelJourneyState) {
-        state.removedMemberName = organisationalLandlordUserService
-            .getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
-            ?.name
-            ?: throw PrsdbWebException(
-                "Could not determine the name of organisational landlord user ${state.otherOrganisationalLandlordUserId}",
+        val removingAdmin =
+            userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()
+                ?: throw PrsdbWebException(
+                    "Current user ${SecurityContextHolder.getContext().authentication!!.name} is not an organisational landlord user",
+                )
+        val removedMember =
+            organisationalLandlordUserService.getOrganisationalLandlordUserOrNull(state.otherOrganisationalLandlordUserId)
+                ?: throw PrsdbWebException(
+                    "No organisational landlord user found with id ${state.otherOrganisationalLandlordUserId}",
+                )
+        val emailModel =
+            RemoveOrgTeamMemberConfirmationEmail(
+                adminName = removingAdmin.name,
+                memberName = removedMember.name,
+                organisationName = removedMember.organisationalLandlord.name,
+                teamMembersUrl = absoluteUrlProvider.buildTeamMembersUri(),
             )
 
+        state.removedMemberName = removedMember.name
         organisationalLandlordUserService.removeOrganisationalLandlordUser(state.otherOrganisationalLandlordUserId)
 
+        removalConfirmationEmailSender.sendEmail(removingAdmin.email, emailModel)
         // TODO PDJB-1768: Email the removed user
-        // TODO PDJB-1767: Email the admin who removed the user
+        // TODO PDJB-1768: Email the removed user
     }
 
     override fun resolveNextDestination(

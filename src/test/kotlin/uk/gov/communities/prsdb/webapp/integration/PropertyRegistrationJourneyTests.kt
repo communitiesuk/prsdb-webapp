@@ -29,7 +29,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
@@ -352,7 +351,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     inner class EnableFeatureFlags {
         @BeforeEach
         fun enableFeatureFlags() {
-            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         }
 
@@ -2627,50 +2625,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
             assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
-        }
-
-        // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
-        @Nested
-        inner class CorrespondenceAddressFlagDisabled {
-            @BeforeEach
-            fun disableCorrespondenceAddressFlag() {
-                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-            }
-
-            @Test
-            fun `correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
-                val taskListPage =
-                    navigator.goToPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy(),
-                    )
-
-                assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
-            }
-
-            @Test
-            fun `registering a property saves the landlord's email and address as the correspondence details`(page: Page) {
-                val taskListPage =
-                    navigator.goToPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder
-                            .beforePropertyRegistrationCheckAnswersOccupied()
-                            .withBedrooms(),
-                    )
-                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-                checkAnswersPage.confirm()
-
-                val confirmMissingCompliancePage =
-                    assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-                confirmMissingCompliancePage.form.radios.selectValue("true")
-                confirmMissingCompliancePage.form.submit()
-
-                completePropertyRegistrationPaymentSuccessfully(page)
-
-                val propertyOwnershipCaptor = captor<PropertyOwnership>()
-                verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-                assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
-                assertEquals(1L, propertyOwnershipCaptor.value.correspondenceAddress.id)
-            }
         }
     }
 
