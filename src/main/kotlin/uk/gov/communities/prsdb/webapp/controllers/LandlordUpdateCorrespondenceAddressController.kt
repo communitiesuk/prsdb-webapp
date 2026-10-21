@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController.Companion.UPDATE_CORRESPONDENCE_ADDRESS_ROUTE
@@ -29,7 +27,6 @@ class LandlordUpdateCorrespondenceAddressController(
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(CORRESPONDENCE_ADDRESS)
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -40,7 +37,6 @@ class LandlordUpdateCorrespondenceAddressController(
     }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(CORRESPONDENCE_ADDRESS)
     fun postUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,

@@ -12,7 +12,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -712,16 +711,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             BackLink.default(page).clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `when the correspondence address feature is disabled, the council contact section is not displayed`(page: Page) {
-            featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-
-            val checkAnswersPage = goToCheckAnswersWithCorrespondence(page)
-
-            BaseComponent.assertThat(checkAnswersPage.correspondenceHeading).isHidden()
-            assertThat(checkAnswersPage.correspondenceRowKeys).hasCount(0)
         }
 
         private fun goToCheckAnswersWithCorrespondence(page: Page): CheckAnswersPagePropertyRegistration {
