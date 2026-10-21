@@ -201,7 +201,7 @@ class PaymentService(
         registrationData: PropertyRegistrationDataModel,
     ): PaymentStatus =
         when (govUkPayStatus) {
-            PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {
+            PaymentStatus.CREATED -> {
                 throw IllegalArgumentException("Payment $paymentId cannot be finalised while in progress")
             }
 
@@ -221,6 +221,10 @@ class PaymentService(
 
             PaymentStatus.CAPTURABLE -> {
                 finaliseCapturablePayment(paymentId, registrationData)
+            }
+
+            PaymentStatus.INDETERMINATE -> {
+                throw IllegalArgumentException("Payment $paymentId cannot be finalised with $govUkPayStatus: it is not a GOV.UK Pay status")
             }
         }
 
