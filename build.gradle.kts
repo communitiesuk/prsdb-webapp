@@ -69,7 +69,7 @@ dependencies {
 
     // Auth
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.85.2")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.86")
 
     // Templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
@@ -367,7 +367,7 @@ buildscript {
         resolutionStrategy {
             // Application dependency management does not apply to the build classpath.
             force("org.apache.commons:commons-lang3:3.18.0")
-            force("com.fasterxml.jackson:jackson-bom:2.21.7")
+            force("com.fasterxml.jackson:jackson-bom:2.22.3")
             force("tools.jackson:jackson-bom:3.1.7")
             force("org.apache.httpcomponents.client5:httpclient5:5.6.4")
             force("org.apache.httpcomponents.core5:httpcore5:5.4.3")
