@@ -66,9 +66,7 @@ class CompleteRemoveOrgUserStepConfigTests {
             mockRemovalNotificationEmailSender,
         )
 
-    @Test
-    fun `afterStepIsReached removes the target membership and emails the removing admin and the removed member`() {
-        // Arrange
+    private fun setUpSuccessfulRemoval() {
         val organisation = mock<OrganisationalLandlord>()
         whenever(organisation.name).thenReturn("Keystone Living Group")
         val removedMember = mock<OrganisationalLandlordUser>()
@@ -82,12 +80,29 @@ class CompleteRemoveOrgUserStepConfigTests {
         whenever(mockOrganisationalLandlordUserService.getOrganisationalLandlordUserOrNull(42L)).thenReturn(removedMember)
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(admin)
         whenever(mockAbsoluteUrlProvider.buildTeamMembersUri()).thenReturn(URI("https://example.com/team-members"))
+    }
+
+    @Test
+    fun `afterStepIsReached removes the target membership`() {
+        // Arrange
+        setUpSuccessfulRemoval()
 
         // Act
         createStepConfig().afterStepIsReached(mockState)
 
         // Assert
         verify(mockOrganisationalLandlordUserService).removeOrganisationalLandlordUser(42L)
+    }
+
+    @Test
+    fun `afterStepIsReached sends a removal confirmation email to the removing admin`() {
+        // Arrange
+        setUpSuccessfulRemoval()
+
+        // Act
+        createStepConfig().afterStepIsReached(mockState)
+
+        // Assert
         verify(mockRemovalConfirmationEmailSender).sendEmail(
             eq("alex@example.com"),
             eq(
@@ -100,6 +115,17 @@ class CompleteRemoveOrgUserStepConfigTests {
             ),
         )
         verifyNoMoreInteractions(mockRemovalConfirmationEmailSender)
+    }
+
+    @Test
+    fun `afterStepIsReached sends a removal notification email to the removed member`() {
+        // Arrange
+        setUpSuccessfulRemoval()
+
+        // Act
+        createStepConfig().afterStepIsReached(mockState)
+
+        // Assert
         verify(mockRemovalNotificationEmailSender).sendEmail(
             eq("anita@example.com"),
             eq(
