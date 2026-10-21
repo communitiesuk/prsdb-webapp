@@ -99,8 +99,10 @@ data class TeamMembersViewModel(
             actions =
                 listOf(
                     SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(invitation.id)),
-                    // TODO PDJB-1854: replace "#" with the remove expired invitation URL
-                    SummaryListRowActionsViewModel("forms.links.remove", "#"),
+                    SummaryListRowActionsViewModel(
+                        "forms.links.remove",
+                        TeamMembersController.getRemoveExpiredInvitationPath(invitation.id),
+                    ),
                 ),
         )
     }

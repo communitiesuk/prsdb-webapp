@@ -44,6 +44,16 @@ class TeamMembersControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() 
 
     @WithMockUser(roles = ["ORG_ADMIN"])
     @Test
+    fun `removing an expired invitation is unavailable if the multi-user organisations feature flag is disabled`() {
+        featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
+
+        mvc
+            .get(TeamMembersController.getRemoveExpiredInvitationPath(1))
+            .andExpect { status { isNotFound() } }
+    }
+
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    @Test
     fun `resend invitation is unavailable if the multi-user organisations feature flag is disabled`() {
         featureFlagManager.disableFeature(MULTI_USER_ORGANISATIONS)
 
