@@ -102,8 +102,8 @@ class PropertyRegistrationCheckAnswersJourneyTests : IntegrationTestWithMutableD
     fun `the CYA answers snapshot covers every delegate in the journey except those that aren't answers`() {
         val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
 
-        // When adding a delegate to this journey, add its key here if it's an answer. Otherwise, add it to
-        // PropertyRegistrationJourney.cyaSnapshotExcludedDelegateKeys so that changing it can't stop the CYA page being submitted
+        // When adding a delegate to this journey, add it to PropertyRegistrationJourney.cyaSnapshotExcludedDelegateKeys if it
+        // isn't an answer and can change while the user is on the CYA page (e.g. payment progress). Otherwise, add its key here.
         assertEquals(
             sortedSetOf(
                 "acceptedEpc",
