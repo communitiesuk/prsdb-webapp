@@ -5,10 +5,10 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -20,11 +20,10 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Test
-    fun `the back link is shown when navigated to from the dashboard and returns to the dashboard`(page: Page) {
-        featureFlagManager.disableFeature(LANDLORD_DASHBOARD_UPDATE)
+    fun `the back link is shown when navigated to from the dashboard footer and returns to the dashboard`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
-        dashboard.privacyNoticeLink.clickAndWait()
-        val privacyNoticePage = assertPageIs(page, LandlordPrivacyNoticePage::class)
+        dashboard.footer.privacyNoticeLink.clickAndWait()
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePage::class)
         assertThat(privacyNoticePage.backLink).isVisible()
         privacyNoticePage.backLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
