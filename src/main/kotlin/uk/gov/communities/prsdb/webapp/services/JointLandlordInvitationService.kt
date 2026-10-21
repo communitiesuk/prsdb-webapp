@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -57,6 +58,16 @@ class JointLandlordInvitationService(
             .filter { it.status == JointLandlordInvitationStatus.PENDING }
             .map { it.invitedEmail }
 
+    /**
+     * Returns the email addresses already in use by the property's landlords for the purpose of blocking duplicate
+     * joint landlord invitations.
+     */
+    fun getInUseEmailsForProperty(propertyOwnership: PropertyOwnership): List<String> =
+        propertyOwnership.landlords
+            // TODO: PDJB-1892: Decide how to handle org LLs in this check
+            .filterIsInstance<IndividualLandlord>()
+            .map { it.email }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,
@@ -65,7 +76,7 @@ class JointLandlordInvitationService(
         // Re-check against the current state of the database when finishing the journey. The form-level checks happen
         // when an email is submitted, so without this a concurrent journey could invite the same email twice.
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
-        val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
+        val existingLandlordEmails = getInUseEmailsForProperty(propertyOwnership)
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
                 !alreadyInvitedEmails.containsEmail(candidateEmail) &&

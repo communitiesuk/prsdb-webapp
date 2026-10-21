@@ -41,10 +41,10 @@ class CurrentUserServiceTests {
     }
 
     @Test
-    fun `getCurrentUserDetails throws a null pointer exception when there is no authentication`() {
+    fun `getRegisteredUserDetails throws a null pointer exception when there is no authentication`() {
         SecurityContextHolder.clearContext()
 
-        assertThrows<NullPointerException> { service.getCurrentUserDetails() }
+        assertThrows<NullPointerException> { service.getRegisteredUserDetails() }
     }
 
     @Test

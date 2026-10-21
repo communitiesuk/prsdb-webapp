@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTe
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelSinglePageTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 

@@ -40,7 +40,7 @@ class CompleteSwitchToIndividualStepConfig(
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
         jointLandlordInvitationService.removeInvitations(pendingInvitations)

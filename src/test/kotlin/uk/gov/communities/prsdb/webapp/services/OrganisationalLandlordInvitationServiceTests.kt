@@ -899,6 +899,101 @@ class OrganisationalLandlordInvitationServiceTests {
         verify(mockAcceptedEmailSender, never()).sendEmail(any(), any())
     }
 
+    @Test
+    fun `hideExpiredInvitation hides and saves an expired invitation`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val invitation =
+            createOrganisationalLandlordInvitation(
+                id = 1,
+                organisationalLandlord = organisation,
+                createdDate = Instant.now().minus(60, ChronoUnit.DAYS),
+                isHidden = false,
+            )
+        whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.of(invitation))
+
+        // Act
+        invitationService.hideExpiredInvitation(1, organisation)
+
+        // Assert
+        assertTrue(invitation.isHidden)
+        assertEquals(OrganisationalLandlordInvitationStatus.HIDDEN, invitation.status)
+        verify(mockInvitationRepository).save(invitation)
+    }
+
+    @Test
+    fun `hideExpiredInvitation throws 404 when the invitation does not exist`() {
+        // Arrange
+        whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.empty())
+
+        // Act, Assert
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.hideExpiredInvitation(1, createOrgLandlord())
+            }
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @Test
+    fun `hideExpiredInvitation throws 404 when the invitation belongs to another organisation`() {
+        // Arrange
+        val otherOrganisation = createOrgLandlord(name = "Other organisation")
+        val invitation =
+            createOrganisationalLandlordInvitation(
+                id = 1,
+                organisationalLandlord = otherOrganisation,
+                createdDate = Instant.now().minus(60, ChronoUnit.DAYS),
+            )
+        whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.of(invitation))
+
+        // Act, Assert
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.hideExpiredInvitation(1, createOrgLandlord())
+            }
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `hideExpiredInvitation throws 400 when the invitation is still pending`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val invitation =
+            createOrganisationalLandlordInvitation(id = 1, organisationalLandlord = organisation)
+        whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.of(invitation))
+
+        // Act, Assert
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.hideExpiredInvitation(1, organisation)
+            }
+        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
+    @Test
+    fun `hideExpiredInvitation throws 400 when the invitation is already hidden`() {
+        // Arrange
+        val organisation = createOrgLandlord()
+        val invitation =
+            createOrganisationalLandlordInvitation(
+                id = 1,
+                organisationalLandlord = organisation,
+                createdDate = Instant.now().minus(60, ChronoUnit.DAYS),
+                isHidden = true,
+            )
+        whenever(mockInvitationRepository.findById(1)).thenReturn(Optional.of(invitation))
+
+        // Act, Assert
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.hideExpiredInvitation(1, organisation)
+            }
+        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+        verify(mockInvitationRepository, never()).save(any())
+    }
+
     private fun arrangePendingInvitationAcceptance(
         role: OrganisationalLandlordUserRole,
         stubConfirmationEmailDetails: Boolean = true,

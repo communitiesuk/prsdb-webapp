@@ -65,6 +65,10 @@ class OrganisationalLandlordInvitation(
                 else -> OrganisationalLandlordInvitationStatus.PENDING
             }
 
+    fun canBeDeletedByArchive(): Boolean =
+        status == OrganisationalLandlordInvitationStatus.EXPIRED ||
+            status == OrganisationalLandlordInvitationStatus.HIDDEN
+
     constructor(
         token: UUID,
         invitedEmail: String,

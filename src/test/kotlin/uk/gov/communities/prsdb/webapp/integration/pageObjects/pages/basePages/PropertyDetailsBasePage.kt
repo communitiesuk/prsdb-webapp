@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -54,6 +55,8 @@ abstract class PropertyDetailsBasePage(
     class PropertyDetailsSummaryList(
         page: Page,
     ) : SummaryList(page.locator("#property-details")) {
+        val actionLinks: Locator = locator.locator(".govuk-summary-list__actions .govuk-link")
+
         val addressRow = getRow("Address")
         val propertyTypeRow = getRow("Property type")
         val ownershipTypeRow = getRow("How do you own this property?")

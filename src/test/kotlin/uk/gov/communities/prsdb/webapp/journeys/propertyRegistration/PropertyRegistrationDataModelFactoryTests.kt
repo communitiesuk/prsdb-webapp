@@ -21,7 +21,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -125,7 +124,6 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
         val correspondenceTask = mock<CorrespondenceTask>()
         val emailStep = mock<CorrespondenceEmailStep>()
         val addressTask = mock<CorrespondenceAddressTask>()
@@ -156,23 +154,6 @@ class PropertyRegistrationDataModelFactoryTests {
         if (choice == CorrespondenceEmailOption.DIFFERENT_EMAIL) {
             verify(mockState, never()).loggedInLandlordEmailAtStartOfJourney
         }
-    }
-
-    // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
-    @Test
-    fun `fromJourneyState returns no correspondence details when the CORRESPONDENCE_ADDRESS flag is off`() {
-        // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
-
-        // Act
-        val result = factory.fromJourneyState(mockState)
-
-        // Assert
-        assertNull(result.correspondenceEmail)
-        assertNull(result.correspondenceAddressModel)
-        verify(mockState, never()).correspondenceTask
     }
 
     @Test
@@ -518,6 +499,22 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockJointLandlordsTask.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
         whenever(mockHasJointLandlordsStep.formModel).thenReturn(hasJointLandlordsFormModel)
         whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mock())
+
+        val mockCorrespondenceTask = mock<CorrespondenceTask>()
+        val mockCorrespondenceEmailStep = mock<CorrespondenceEmailStep>()
+        val mockCorrespondenceAddressTask = mock<CorrespondenceAddressTask>()
+        lenient().`when`(mockState.correspondenceTask).thenReturn(mockCorrespondenceTask)
+        lenient().`when`(mockCorrespondenceTask.correspondenceEmailStep).thenReturn(mockCorrespondenceEmailStep)
+        lenient().`when`(mockCorrespondenceTask.addressTask).thenReturn(mockCorrespondenceAddressTask)
+        lenient().`when`(mockCorrespondenceEmailStep.formModel).thenReturn(
+            CorrespondenceEmailFormModel().apply {
+                correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
+                differentEmailAddress = "contact@example.com"
+            },
+        )
+        lenient().`when`(mockCorrespondenceAddressTask.getAddress()).thenReturn(
+            AddressDataModel(singleLineAddress = "2 Contact St", uprn = 54321L, localCouncilId = 1),
+        )
     }
 
     private fun setupStateForComplianceData(

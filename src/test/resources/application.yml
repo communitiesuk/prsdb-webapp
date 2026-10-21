@@ -92,9 +92,6 @@ features:
     - name: "pdjb-939-property-registration-phase-two"
       enabled: false
       expiry-date: "2026-12-31"
-    - name: "pdjb-1053-dashboard-nav-link"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "pdjb-1022-delegate-to-letting-agent"
       enabled: false
       expiry-date: "2026-12-31"
@@ -102,9 +99,6 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-238-gatling-post-endpoint"
-      enabled: false
-      expiry-date: "2026-12-31"
-    - name: "pdjb-1040-correspondence-address"
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"

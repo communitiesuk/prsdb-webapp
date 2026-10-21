@@ -12,13 +12,9 @@ const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
 const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
 
-const val DASHBOARD_NAV_LINK = "pdjb-1053-dashboard-nav-link"
-
 const val DELEGATE_TO_LETTING_AGENT = "pdjb-1022-delegate-to-letting-agent"
 
 const val PASSWORD_BENCHMARK_ENDPOINT = "pdjb-1664-password-benchmark-endpoint"
-
-const val CORRESPONDENCE_ADDRESS = "pdjb-1040-correspondence-address"
 
 const val PAYMENTS = "pdjb-1009-payments"
 
@@ -34,10 +30,8 @@ val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
         SUBJECT_IDENTIFIER_PAGE,
-        DASHBOARD_NAV_LINK,
         DELEGATE_TO_LETTING_AGENT,
         PASSWORD_BENCHMARK_ENDPOINT,
-        CORRESPONDENCE_ADDRESS,
         PAYMENTS,
         PROPERTY_REGISTRATION_PHASE_TWO,
         LANDLORD_DASHBOARD_UPDATE,

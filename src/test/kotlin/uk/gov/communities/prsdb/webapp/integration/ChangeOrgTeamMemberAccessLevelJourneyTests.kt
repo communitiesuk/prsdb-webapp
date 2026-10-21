@@ -19,7 +19,7 @@ private const val EDITOR_USER_ID = "urn:fdc:gov.uk:2022:ORG03"
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelJourneyTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 

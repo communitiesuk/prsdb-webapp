@@ -470,6 +470,15 @@ class EmailTemplateModelsTests {
                     "/emails/ChangeOrgTeamMemberAccessLevel.md",
                     allowExtraKeys = true,
                 ),
+                EmailTemplateTestData(
+                    RemoveOrgTeamMemberConfirmationEmail(
+                        adminName = "Alex Admin",
+                        memberName = "Anita Locke",
+                        organisationName = "Keystone Living Group",
+                        teamMembersUrl = URI("teamMembersUrl"),
+                    ),
+                    "/emails/RemoveOrgTeamMemberConfirmation.md",
+                ),
             )
     }
 
