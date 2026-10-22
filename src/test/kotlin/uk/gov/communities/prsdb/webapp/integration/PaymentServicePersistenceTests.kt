@@ -31,6 +31,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.ResourceAccessException
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertyId
@@ -548,6 +549,51 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         assertEquals(PaymentStatus.INDETERMINATE, payment.status)
         assertNull(payment.associatedProperty)
         assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
+        verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
+    }
+
+    @Test
+    fun `finalisePayment commits the registration when a retried status check confirms capture succeeded`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
+            .thenThrow(GovUkPayException("Network error", ResourceAccessException("Connection reset")))
+            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.SUCCEEDED, status)
+        assertPaymentSucceededForProperty()
+        assertNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
+        verify(mockGovUkPayClient, times(2)).getPayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
+    }
+
+    @Test
+    fun `finalisePayment leaves the payment indeterminate and restores the journey when both status checks fail`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
+            .thenThrow(GovUkPayException("Network error", ResourceAccessException("Connection reset")))
+
+        // Act
+        assertThrows<PaymentCaptureOutcomeUnknownException> {
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+        }
+
+        // Assert
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        assertEquals(PaymentStatus.INDETERMINATE, payment.status)
+        assertNull(payment.associatedProperty)
+        assertEquals(INCOMPLETE_PROPERTY_ID, payment.associatedIncompleteProperty?.id)
+        assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
+        verify(mockGovUkPayClient, times(2)).getPayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
     }
 
