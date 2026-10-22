@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.CancelOrganisationalLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.ADMINISTRATORS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.INVITATIONS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController.Companion.TEAM_MEMBERS_ROUTE
@@ -81,17 +82,21 @@ class TeamMembersTests :
         val pendingInvitations = teamMembersPage.pendingInvitationsSummaryList
         assertThat(pendingInvitations.rows).hasCount(3)
         listOf(
-            "pending-org-invite-c@example.com",
-            "pending-org-invite-b@example.com",
-            "pending-org-invite-a@example.com",
+            "pending-org-invite-c@example.com" to "1234abcd-5678-abcd-1234-567abcd2222c",
+            "pending-org-invite-b@example.com" to "1234abcd-5678-abcd-1234-567abcd2222b",
+            "pending-org-invite-a@example.com" to "1234abcd-5678-abcd-1234-567abcd2222a",
         )
-            .forEachIndexed { index, email ->
+            .forEachIndexed { index, (email, token) ->
                 val row = pendingInvitations.getRowByIndex(index)
                 assertThat(row.key).hasText("Invitation ${index + 1}")
                 assertThat(row.value).hasText(email)
                 assertThat(row.actions.getActionLink("Resend")).hasAttribute("href", resendInvitationHrefPattern)
                 assertThat(row.actions.getActionLink("Cancel")).isVisible()
-                // TODO PDJB-1769: assert the Cancel link goes to the cancel invitation page
+                val invitationId = invitationRepository.findByToken(UUID.fromString(token))!!.id
+                assertThat(row.actions.getActionLink("Cancel")).hasAttribute(
+                    "href",
+                    CancelOrganisationalLandlordInvitationController.getCancelInvitationPath(invitationId),
+                )
             }
 
         val expiredInvitations = teamMembersPage.expiredInvitationsSummaryList
