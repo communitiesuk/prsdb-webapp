@@ -240,6 +240,10 @@ NFT is behind CloudFront, whose cache policy has a 1 second minimum TTL that ove
 of the same URL by the same session within a second can return a stale page, so the saved-details reads append a
 unique `perfCacheBuster` query parameter to bypass the cache.
 
+Gatling's console output goes to a public GitHub Actions log, so `src/gatling/resources/logback-test.xml` limits it to
+warnings and errors. Without it logback defaults to DEBUG, which prints every request and response, including session
+cookies and OAuth codes. Diagnose failures from the uploaded Gatling report, or re-run locally with debug logging.
+
 Each registration pass uses a separate sequential virtual user and a unique synthetic One Login subject, email,
 and phone value. It performs identity verification with synthetic claims, accepts the privacy notice, and completes
 the individual manual-address registration. Registration clears the app session to refresh the user's roles, so
