@@ -20,6 +20,7 @@ buttons:
   removeAccess: Remove access
 removeAccess:
   heading: Are you sure you want to remove their access?
+  pageTitle: 'Are you sure you want to remove access for {0,,name}?'
   paragraph:
     one: '{0,,name} will no longer be able to access your organisation on the service.'
     two: To give them access again, you will need to send a new invitation.
