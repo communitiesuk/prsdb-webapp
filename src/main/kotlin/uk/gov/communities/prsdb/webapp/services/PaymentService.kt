@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentNotCapturedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -242,6 +243,9 @@ class PaymentService(
             registerPropertyAndCapturePayment(paymentId, registrationData)
         } catch (exception: PaymentCaptureOutcomeUnknownException) {
             throw exception
+        } catch (exception: PaymentNotCapturedException) {
+            println("Failed to capture payment $paymentId, so recording its outcome: ${exception.stackTraceToString()}")
+            recordUncapturedPaymentOutcome(paymentId, exception)
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
@@ -301,13 +305,14 @@ class PaymentService(
         )
 
     private fun captureAndConfirmPayment(paymentId: String) {
-        val outcomeUnknownException =
+        val captureFailure =
             try {
                 govUkPayClient.capturePayment(paymentId)
                 return
-            } catch (captureFailure: GovUkPayException) {
-                PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
+            } catch (exception: GovUkPayException) {
+                exception
             }
+        val outcomeUnknownException = PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
 
         try {
             when (val govUkPayStatus = getGovUkPayPaymentStatusWithRetry(paymentId).status) {
@@ -321,10 +326,7 @@ class PaymentService(
                 }
 
                 PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
-                    throw IllegalStateException(
-                        "GOV.UK Pay reports payment $paymentId as $govUkPayStatus after it failed to capture",
-                        outcomeUnknownException.cause,
-                    )
+                    throw PaymentNotCapturedException(paymentId, govUkPayStatus, captureFailure)
                 }
 
                 PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
@@ -392,6 +394,23 @@ class PaymentService(
             )
         }
     }
+
+    private fun recordUncapturedPaymentOutcome(
+        paymentId: String,
+        notCapturedException: PaymentNotCapturedException,
+    ): PaymentStatus =
+        try {
+            paymentRepository.updateStatusIfCurrentStatusIn(
+                paymentId,
+                listOf(PaymentStatus.INDETERMINATE),
+                notCapturedException.govUkPayStatus,
+                Instant.now(),
+            )
+            getStoredPaymentStatus(paymentId)
+        } catch (exception: Exception) {
+            exception.addSuppressed(notCapturedException)
+            throw exception
+        }
 
     private fun cancelUnfinalisedPayment(
         paymentId: String,
