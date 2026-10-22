@@ -2,11 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
@@ -24,11 +22,6 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
 
     @Autowired
     lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
-
-    @BeforeEach
-    fun enableDelegateToLettingAgentFlag() {
-        featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `a landlord can walk the journey from the first step to the confirmation page`(page: Page) {
@@ -119,15 +112,6 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
     }
 
     @Test
-    fun `the property record does not show the delegate to letting agent link when the feature flag is disabled`() {
-        featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER)
-
-        assertThat(propertyDetailsPage.delegateToLettingAgentLink.locator).hasCount(0)
-    }
-
-    @Test
     fun `the back link on the first step returns to the property record`(page: Page) {
         val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER
         val allowLettingAgentPage = navigator.goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId)
@@ -146,17 +130,6 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
         val response =
             navigator.navigate(
                 DelegateToLettingAgentController.getDelegateToLettingAgentPath(PROPERTY_OWNERSHIP_ID_OWNED_BY_ANOTHER_LANDLORD),
-            )
-        assertEquals(404, response?.status())
-    }
-
-    @Test
-    fun `the journey is not reachable when the delegate to letting agent feature flag is disabled`() {
-        featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-
-        val response =
-            navigator.navigate(
-                DelegateToLettingAgentController.getDelegateToLettingAgentPath(PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER),
             )
         assertEquals(404, response?.status())
     }
