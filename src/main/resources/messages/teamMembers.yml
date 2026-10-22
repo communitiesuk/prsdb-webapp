@@ -3,11 +3,10 @@ heading: Team members
 currentUserName: '{0,,name} (You)'
 inviteTeamMemberButton: Invite a team member
 successBanner:
+  title: Success
   invitationSent:
-    title: Success
     heading: Invitation sent
   invitationCancelled:
-    title: Success
     heading: Invitation cancelled
     body: The invitation link will no longer work.
 administrators:
