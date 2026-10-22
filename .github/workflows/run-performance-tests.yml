@@ -10,6 +10,10 @@ on:
         description: Fail the smoke deliberately to prove restoration (no journeys)
         type: boolean
         default: false
+      fail-gatling:
+        description: Use an unseeded landlord subject to prove Gatling failure recovery
+        type: boolean
+        default: false
 
 concurrency:
   group: nft-app-service-operation
@@ -37,7 +41,7 @@ jobs:
         id: changes
         env:
           GH_TOKEN: ${{ github.token }}
-          FORCE_READINESS: ${{ inputs.force == true || inputs.fail-smoke == true }}
+          FORCE_READINESS: ${{ inputs.force == true || inputs.fail-smoke == true || inputs.fail-gatling == true }}
         run: node scripts/performance-tests/nft-change-check.mjs
 
   performance-tests:
@@ -52,9 +56,18 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - name: Install JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 25
+          cache: gradle
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -70,24 +83,58 @@ jobs:
           FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
           READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
         run: node scripts/performance-tests/nft-prepare.mjs
-      - name: Run performance tests (stub)
+      - name: Run basic Gatling journeys
+        env:
+          FAIL_GATLING: ${{ inputs.fail-gatling == true }}
         run: |
-          echo "::notice::Performance test execution is not yet implemented (PDJB-238, see PR #2028)."
-          echo "Once the Gatling basic-performance-tests simulation is wired in here, it will run against"
-          echo "the NFT app while it is switched to the One Login simulator, before the next step restores it."
+          landlord_subject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo
+          if [ "$FAIL_GATLING" = "true" ]; then
+            landlord_subject=urn:fdc:gov.uk:2026:PERF-UNKNOWN
+          fi
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            --simulation uk.gov.communities.prsdb.webapp.performance.BasicJourneysSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject="$landlord_subject" \
+            -Dgatling.basic.registrationSubject="urn:fdc:gov.uk:2026:PERF-${GITHUB_RUN_ID}"
+      - name: Upload Gatling report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/reports/gatling/**
+          if-no-files-found: ignore
+          retention-days: 30
       - name: Restore environment
         if: always()
         env:
           READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
         run: node scripts/performance-tests/nft-restore.mjs
 
-  marker:
-    name: Record successful NFT head
+  reset-database:
+    name: Reset NFT database
     needs: [changes, performance-tests]
     if: >-
       always() && needs.changes.result == 'success' &&
-      (needs.performance-tests.result == 'success' ||
-      (needs.performance-tests.result == 'skipped' && needs.changes.outputs.run == 'false'))
+      needs.changes.outputs.run == 'true'
+    uses: ./.github/workflows/reset-database.yml
+    with:
+      environment: nft
+      aws-account-id: 448120078528
+    permissions:
+      contents: read
+      id-token: write
+
+  marker:
+    name: Record successful NFT head
+    needs: [changes, performance-tests, reset-database]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success') ||
+      (needs.performance-tests.result == 'skipped' && needs.reset-database.result == 'skipped' &&
+      needs.changes.outputs.run == 'false'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

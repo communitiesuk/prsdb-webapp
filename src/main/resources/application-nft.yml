@@ -1,3 +1,9 @@
+spring:
+  sql:
+    init:
+      data-locations:
+        - classpath:data-test.sql
+
 features:
   overrides-enabled: true
   feature-flags:
