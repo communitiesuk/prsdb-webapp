@@ -250,61 +250,35 @@ experiment, change the mode to `gated` and supply both `gatling.local.basic.mean
 front-channel requests are checked for correctness but excluded from application timing gates; the application
 callback includes its back-channel authentication work.
 
-The local basic slice now covers seeded phone and email updates and individual registration through the manual-address
-branch. It does not cover other registration branches, council or letting-agent journeys, or run the scheduled
-NFT workflow. See ADRs 0035-0040 for the basic/load distinction, API-level measurement, runner, scheduling,
-Gatling and fixture-restoration decisions.
+The basic slice covers seeded phone and email updates and individual registration through the manual-address
+branch. It does not cover other registration branches, council or letting-agent journeys. See ADRs 0035-0040
+for the basic/load distinction, API-level measurement, runner, scheduling, Gatling and fixture-restoration decisions.
 
-### Daily NFT performance-test orchestrator (PDJB-430 first slice)
+### NFT basic performance workflow (PDJB-430)
 
-`.github/workflows/schedule-performance-tests.yml` runs on `main` at **19:00 UTC daily** (chosen to avoid
-the 1–2am maintenance windows) and only dispatches `run-performance-tests.yml` on the `nft` branch
-(`gh workflow run run-performance-tests.yml --ref nft`). The orchestrator workflow and its scripts run
-entirely from `nft`, so `main` never needs access to the `nft` environment, and the observed NFT SHA is
-simply the checked-out `HEAD`. It runs on a standard GitHub-hosted runner and can also be dispatched
-manually from `nft`. If NFT has not changed since the last successful workflow, it skips **before
-assuming AWS credentials**. The small `nft-head-sha` artifact records success (including unchanged
-skips) for 30 days. Missing/expired history causes a fresh run; GitHub/API errors or malformed markers
-fail explicitly. Failures do not advance the marker. The deployed app image must also carry the
-observed NFT SHA, so a failed deployment cannot cause an older app to be marked ready.
+`.github/workflows/run-performance-tests.yml` is dispatched on the `nft` branch. It first checks whether the NFT
+head differs from the last successful run; if unchanged, it skips all AWS and database operations unless `force`
+is selected. The deployed app image must carry the workflow's NFT SHA. The performance job runs the existing
+`BasicJourneysSimulation` in baseline mode after the One Login simulator is prepared, uploads the report, and
+always attempts to restore the original app/simulator state and its own WAF/security-group changes.
 
-The `performance-tests` job runs three steps on the same runner (so the IP it allowlists for WAF/SG
-access stays valid throughout): **Prepare environment** switches the app to simulator authentication
-and smoke-checks it; **Run performance tests** is currently a stub (see below); **Restore environment**
-(`if: always()`) always runs, even if preparation or the test step failed, and returns the app/simulator
-and any owned WAF/SG entries to their original state. Preparation and restoration are separate scripts
-(`nft-prepare.mjs`/`nft-restore.mjs`, sharing helpers from `nft-shared.mjs`) that hand off a small JSON
-state file between them, rather than one script performing an atomic switch-then-restore.
+After the prepare/test/restore job completes, every selected execution invokes the shared database reset, even
+when preparation, Gatling or environment restoration failed. The reset cleans and migrates the NFT schema and
+restarts the application. The NFT Spring profile loads the existing `data-test.sql` fixture, restoring the
+synthetic landlord and other predefined test records. This does not restore the full-scale `pg_dump` described
+in ADR-0040. The manual `Reset Database - NFT` workflow uses the same reset sequence and shares the
+`nft-app-service-operation` concurrency lock with performance runs and webapp NFT deployments.
 
-This first slice **does not run Gatling**, complete login, submit journey forms, restore data, or send
-notifications. It proves the existing simulator can start, the existing app can switch to simulator
-authentication, and both can return to their original state. Daily journey execution remains a follow-up:
-prove ADR-0040 fixture restoration, session handling and safe Notify recipients first. A successful run
-is not a performance result and does not complete PDJB-430's eventual performance-execution requirement.
-The "Run performance tests" step is a placeholder until the Gatling simulations (PDJB-552, see PR #2028)
-are wired in here to run between preparation and restoration.
+After this profile change is deployed, run the manual `Reset Database - NFT` workflow once before the first
+performance run. This clean reset seeds the fixture on the existing NFT database; thereafter the performance
+workflow performs the post-run reset automatically. Verify the configured landlord is available before Gatling
+starts because SQL initialization continues on error and app health alone does not prove the fixture loaded.
 
-Before enabling the workflow:
-
-1.  Verify the **simulator service's exact referenced task**, not simply the latest family revision, uses the approved digest
-   `sha256:5257554c6f6a50c471ad231bc8f13da4a866b4a2e320a6d1f2f74e5d0ad52755` and current shared simulator
-   settings. Do not rotate or overwrite the existing client ID/public/private credentials. The runner
-   checks app/simulator snapshots agree without reading the private key.
-2. Apply the separately reviewed extension to `nft-performance-test-network-access`. It needs app
-   service describe/update, webapp-family task registration, existing app-role PassRole, and simulator
-   ECR image reads, in addition to existing simulator/network access. AWS task-definition describe and
-   deregister do not support resource-level restrictions: those actions are region-restricted to
-   `eu-west-2`, and the scripts retire only their own returned temporary ARN. No Terraform-admin, DB,
-   SSM, secret-value or `RunTask` permissions are used.
-3. Keep the GitHub `nft` environment's deployment branches restricted to `nft` (as for normal NFT deploys),
-   without required reviewers, before granting the expanded role. The workflow also rejects dispatches
-   from other refs.
-4. Merge the workflow/scripts into `main` (so the scheduler and workflow are registered) and release them to `nft` before dispatching.
-   The scheduler is live as soon as it reaches `main`, and its dispatch fails until `nft` has the workflow, so
-   run `gh workflow disable schedule-performance-tests.yml` straight after merging to `main`, and
-   `gh workflow enable schedule-performance-tests.yml` once the changes are released to `nft`. Do not run NFT infra applies, manual
-   ECS changes, or network changes while it is running. The shared non-cancelling concurrency group
-   serializes this action with the **webapp** NFT deploy workflow, not the separate infra repository.
+The manual `fail-smoke` input injects a failure after simulator setup but before Gatling. The separate
+`fail-gatling` input uses an unseeded synthetic landlord so the journey fails after Gatling starts. Both inputs
+force the workflow past the unchanged-head check. Gatling reports are uploaded even when the simulation fails.
+The successful NFT head marker advances only when both the performance job and post-run database reset succeed;
+failed test or reset attempts do not advance it.
 
 The scripts record the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
 entries in logs (and in the handoff state file). They require a stable one-task app using `default,nft`
@@ -325,17 +299,19 @@ Restoration (run unconditionally, even after a prior-step failure):
 5. Restores the original app task and verifies its health **before** scaling simulator back to zero.
    It removes only its owned access, then deregisters the temporary app revision.
 
-Manual proof commands:
+Manual dispatch examples:
 
 ```bash
 gh workflow run run-performance-tests.yml --ref nft -f force=true
-# A separate controlled-failure run must fail while still restoring the environment:
+# Fail before Gatling to prove environment restoration:
 gh workflow run run-performance-tests.yml --ref nft -f force=true -f fail-smoke=true
+# Fail a Gatling journey to prove report retention, environment restoration and database reset:
+gh workflow run run-performance-tests.yml --ref nft -f fail-gatling=true
 ```
 
-Inspect the exact resulting run and compare original/restored app task ARN/profile/health, simulator
-desired/running count zero, owned access removal and temporary revision retirement. The `fail-smoke`
-input injects failure after the app starts with simulator auth; it never enables mutating journeys.
+Inspect the exact resulting run and compare the Gatling artifact, original/restored app task ARN/profile/health,
+simulator desired/running count zero, owned access removal, temporary revision retirement and database-reset
+outcome. The `fail-smoke` case never starts mutating journeys.
 
 **Interrupted-run recovery:** ordinary errors and signals trigger bounded best-effort cleanup, but
 hard cancellation/runner loss can prevent it. Do not start another NFT deployment or readiness run
