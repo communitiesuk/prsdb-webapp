@@ -92,7 +92,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withExpiredGasSafetyCert(): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).minusDays(1)
         return this
     }
 

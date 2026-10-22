@@ -156,7 +156,7 @@ class PropertyComplianceTests {
         private fun provideGasCertIssueDates() =
             arrayOf(
                 arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
                 arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
             )
 
