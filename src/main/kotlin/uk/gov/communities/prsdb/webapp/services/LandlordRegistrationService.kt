@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
@@ -24,6 +26,7 @@ class LandlordRegistrationService(
     private val organisationalRegistrationConfirmationSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val currentUserService: CurrentUserService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
     fun registerIndividualLandlord(
@@ -146,7 +149,7 @@ class LandlordRegistrationService(
     }
 
     private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationalLandlord) {
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         organisationalRegistrationConfirmationSender.sendEmail(
             currentUser.email,
             OrganisationalLandlordRegistrationConfirmationEmail(
@@ -154,6 +157,8 @@ class LandlordRegistrationService(
                 organisationName = landlord.name,
                 lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                // TODO: PDJB-1828: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
+                isMultiUserOrganisationsEnabled = featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS),
             ),
         )
     }

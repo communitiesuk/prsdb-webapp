@@ -11,12 +11,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTe
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelSinglePageTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
     @Test
-    fun `the page loads and shows the correct heading`(page: Page) {
+    fun `the access level page loads and shows the correct heading`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
         val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
 
@@ -24,7 +24,7 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
     }
 
     @Test
-    fun `submitting without selecting an access level shows a validation error`(page: Page) {
+    fun `submitting access level without selecting an access level shows a validation error`(page: Page) {
         val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
         val accessLevelPage = navigator.goToChangeOrgTeamMemberAccessLevelPage(memberId)
 
@@ -32,5 +32,14 @@ class ChangeOrgTeamMemberAccessLevelSinglePageTests :
 
         val errorPage = assertPageIs(page, AccessLevelPage::class)
         assertThat(errorPage.errorSummary.errorLinks("Select the access level")).hasCount(1)
+    }
+
+    @Test
+    fun `the remove access confirmation page loads and shows the correct heading`(page: Page) {
+        val memberId = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single().id
+
+        val confirmationPage = navigator.goToRemoveOrgUserConfirmationPage(memberId)
+
+        BaseComponent.assertThat(confirmationPage.heading).hasText("Are you sure you want to remove their access?")
     }
 }

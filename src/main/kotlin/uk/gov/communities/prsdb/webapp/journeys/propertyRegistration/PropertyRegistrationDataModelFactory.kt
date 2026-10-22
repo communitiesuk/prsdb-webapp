@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -28,7 +27,6 @@ class PropertyRegistrationDataModelFactory(
 ) {
     fun fromJourneyState(state: PropertyRegistrationJourneyState): PropertyRegistrationDataModel {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val lettingAgentEmail =
             if (isDelegatedToLettingAgent) {
@@ -168,13 +166,9 @@ class PropertyRegistrationDataModelFactory(
             tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
             isDelegatedToLettingAgent = isDelegatedToLettingAgent,
             correspondenceEmail =
-                if (correspondenceEnabled) {
-                    state.correspondenceTask.correspondenceEmailStep.formModel
-                        .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney }
-                } else {
-                    null
-                },
-            correspondenceAddressModel = if (correspondenceEnabled) state.correspondenceTask.addressTask.getAddress() else null,
+                state.correspondenceTask.correspondenceEmailStep.formModel
+                    .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
+            correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
         )
     }
 }

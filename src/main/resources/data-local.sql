@@ -40,6 +40,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
        ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'), -- benjamin.johnson@madetech.com
        ('urn:fdc:gov.uk:2022:ORG01', '07/23/26'),
+       ('urn:fdc:gov.uk:2022:ORG02', '07/23/26'), -- Local org second admin (Beth Admin)
+       ('urn:fdc:gov.uk:2022:ORG03', '07/23/26'), -- Local org editor (Carl Editor)
        ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '07/23/26'), -- Team-PRSDB+orglandlord@softwire.com
        ('urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', '07/23/26'), -- Team-PRSDB+orglandlordeditor@softwire.com
        ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '08/25/26'); -- Katrina.DiMuro@communities.gov.uk
@@ -309,6 +311,8 @@ VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
 
 INSERT INTO organisational_landlord_user (organisation_landlord_id, subject_identifier, name, email, role, created_date)
 VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', 0, '07/23/26'),
+       (36, 'urn:fdc:gov.uk:2022:ORG02', 'Beth Admin', 'beth.admin@example.com', 0, '07/23/26'),
+       (36, 'urn:fdc:gov.uk:2022:ORG03', 'Carl Editor', 'carl.editor@example.com', 1, '07/23/26'),
        (100, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', 0, '07/23/26'),
        (101, 'urn:fdc:gov.uk:2022:i9iTdfNB4Vh3FCmIE7NZ7QKePVzq5L36yVGFdmwEbdk', 'Test Editor', 'Team-PRSDB+orglandlordeditor@softwire.com', 1, '07/23/26');
 
@@ -321,7 +325,9 @@ VALUES (current_date, current_date, '1234abcd-5678-abcd-1234-567abcd2222a', 'pen
        (current_date - 20, current_date - 20, '1234abcd-5678-abcd-1234-567abcd2222c', 'pending-org-invite-c@example.com', 36,
         0, false, false),
        (current_date - 60, current_date - 60, '1234abcd-5678-abcd-1234-567abcd2222d', 'expired-org-invite-d@example.com', 36,
-        0, false, false);
+        0, false, false),
+        (current_date - 5, current_date - 5, '1234abcd-5678-abcd-1234-567abcd2222e', 'hidden-org-invite-e@example.com', 36,
+            0, false, true);
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_invitation', 'id'),
               (SELECT MAX(id) FROM organisational_landlord_invitation));

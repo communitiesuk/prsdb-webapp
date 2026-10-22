@@ -107,8 +107,8 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
                 address = address,
             )
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
@@ -131,8 +131,8 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(orgLandlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
                 address = address,
             )
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Acting User", email = "acting.user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Acting User", email = "acting.user@example.com"))
 
         // Act
         leavePropertyService.leavePropertyOwnership(orgLandlord, propertyOwnership)
@@ -154,8 +154,8 @@ class LeavePropertyServiceTests {
             MockLandlordData.createPropertyOwnership(
                 landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
             )
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
@@ -170,8 +170,8 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
             )
         doThrow(RuntimeException("Email failed to send")).whenever(emailSender).sendEmail(any(), any())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
         assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
 

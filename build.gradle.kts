@@ -10,6 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.noarg") version "2.3.21"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("io.gatling.gradle") version "3.16.0"
     id("org.flywaydb.flyway") version "12.4.0"
 }
 
@@ -18,7 +19,7 @@ version = "latest"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -68,7 +69,7 @@ dependencies {
 
     // Auth
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-client")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.85.2")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.86")
 
     // Templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
@@ -125,6 +126,10 @@ dependencies {
     // Fake data generation
     implementation("net.datafaker:datafaker:2.4.2")
 
+    // Gatling performance tests (src/gatling)
+    gatlingImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    gatlingRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     // Ktlint's parser must use its own compiler rather than the application-managed version.
     "ktlint"("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.9.10")
 
@@ -151,6 +156,37 @@ val frontendAssetsSpec: CopySpec =
         from("dist")
         include("**/*")
     }
+
+// The Gatling performance code lives in src/gatling and drives the running webapp over HTTP, reusing its route
+// constants. The One Login simulator fixtures are shared with the simulator integration tests.
+sourceSets.named("gatling") {
+    resources.srcDir("src/test/resources")
+    resources.include("one-login-simulator/*.json")
+}
+
+gatling {
+    includeTestOutput = false
+    // Test-only simulation used by the performance unit tests; it must not be offered as a real simulation.
+    excludes = listOf("uk.gov.communities.prsdb.webapp.performance.BasicContractSimulation")
+    systemProperties =
+        System
+            .getProperties()
+            .stringPropertyNames()
+            .filter { it.startsWith("gatling.") }
+            .associateWith { System.getProperty(it) }
+}
+
+tasks.register<Test>("performanceTest") {
+    group = "verification"
+    description = "Runs the unit and assertion tests for the Gatling performance code in src/gatling (no app, Docker or NFT needed)"
+    val gatlingSourceSet = sourceSets["gatling"]
+    testClassesDirs = gatlingSourceSet.output.classesDirs
+    classpath = gatlingSourceSet.runtimeClasspath
+    include("**/*Tests.class")
+    // Provided lazily so the classpath is only resolved when the tests actually run.
+    val gatlingClasspath = gatlingSourceSet.runtimeClasspath
+    jvmArgumentProviders.add(CommandLineArgumentProvider { listOf("-Dperformance.test.classpath=${gatlingClasspath.asPath}") })
+}
 
 tasks.register<Exec>("buildFrontendAssets") {
     group = "build"
@@ -189,6 +225,8 @@ tasks.named<Test>("test") {
 
 tasks.register<Test>("testWithOneLoginSimulator") {
     group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     include("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
@@ -235,6 +273,8 @@ tasks.register<JavaExec>("playwright") {
 
 tasks.register<Test>("testWithoutIntegration") {
     group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
     exclude("uk/gov/communities/prsdb/webapp/integration/**")
     exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
 }
@@ -327,7 +367,7 @@ buildscript {
         resolutionStrategy {
             // Application dependency management does not apply to the build classpath.
             force("org.apache.commons:commons-lang3:3.18.0")
-            force("com.fasterxml.jackson:jackson-bom:2.21.7")
+            force("com.fasterxml.jackson:jackson-bom:2.22.3")
             force("tools.jackson:jackson-bom:3.1.7")
             force("org.apache.httpcomponents.client5:httpclient5:5.6.4")
             force("org.apache.httpcomponents.core5:httpcore5:5.4.3")

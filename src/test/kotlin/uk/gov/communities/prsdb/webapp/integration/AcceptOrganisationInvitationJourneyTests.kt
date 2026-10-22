@@ -203,7 +203,7 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
 
         val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
         assertThat(confirmationPage.accessLevel)
-            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}.")
+            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}, you can:")
         val expectedPermissions =
             if (isAdmin) {
                 arrayOf(

@@ -10,11 +10,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.RemoveOrgUserConfirmationPage
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+private const val ADMIN_USER_ID = "urn:fdc:gov.uk:2022:ORG02"
+private const val EDITOR_USER_ID = "urn:fdc:gov.uk:2022:ORG03"
 
 @WithOrgLandlordProfile
 class ChangeOrgTeamMemberAccessLevelJourneyTests :
-    IntegrationTestWithMutableData(listOf("data-local.sql", "data-org-landlord-team-members.sql")) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
@@ -33,7 +38,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin is now an editor.")
-        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG02").single()
+        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).single()
         assertEquals(OrganisationalLandlordUserRole.EDITOR, updatedMember.role)
     }
 
@@ -53,7 +58,39 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
         val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access level changed")
         BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Carl Editor is now an administrator.")
-        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG03").single()
+        val updatedMember = organisationalLandlordUserRepository.findByBaseUser_Id(EDITOR_USER_ID).single()
         assertEquals(OrganisationalLandlordUserRole.ADMIN, updatedMember.role)
+    }
+
+    @Test
+    fun `an admin can confirm removal of another organisation member`(page: Page) {
+        val teamMembersPage = navigator.goToTeamMembers()
+        teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
+
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        accessLevelPage.removeAccessLink.clickAndWait()
+
+        val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        assertThat(confirmationPage.memberNameParagraph)
+            .hasText("Beth Admin will no longer be able to access your organisation on the service.")
+        confirmationPage.form.submit()
+
+        assertPageIs(page, TeamMembersPage::class)
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isEmpty())
+    }
+
+    @Test
+    fun `cancelling on the remove access confirmation page returns to the team members page without removing the member`(page: Page) {
+        val teamMembersPage = navigator.goToTeamMembers()
+        teamMembersPage.administratorsSummaryList.getRowByIndex(0).clickFirstActionLinkAndWait()
+
+        val accessLevelPage = assertPageIs(page, AccessLevelPage::class)
+        accessLevelPage.removeAccessLink.clickAndWait()
+
+        val confirmationPage = assertPageIs(page, RemoveOrgUserConfirmationPage::class)
+        confirmationPage.cancelLink.clickAndWait()
+
+        assertPageIs(page, TeamMembersPage::class)
+        assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isNotEmpty())
     }
 }

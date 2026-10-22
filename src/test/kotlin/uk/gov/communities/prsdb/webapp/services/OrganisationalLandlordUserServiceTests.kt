@@ -107,6 +107,25 @@ class OrganisationalLandlordUserServiceTests {
     }
 
     @Test
+    fun `removeOrganisationalLandlordUser deletes the existing membership`() {
+        val member = MockLandlordData.createOrganisationalLandlordUser()
+        whenever(mockOrganisationalLandlordUserRepository.findById(5L)).thenReturn(Optional.of(member))
+
+        organisationalLandlordUserService.removeOrganisationalLandlordUser(5L)
+
+        verify(mockOrganisationalLandlordUserRepository).delete(member)
+    }
+
+    @Test
+    fun `removeOrganisationalLandlordUser throws when the membership does not exist`() {
+        whenever(mockOrganisationalLandlordUserRepository.findById(5L)).thenReturn(Optional.empty())
+
+        assertFailsWith<PrsdbWebException> {
+            organisationalLandlordUserService.removeOrganisationalLandlordUser(5L)
+        }
+    }
+
+    @Test
     fun `getCurrentUserIsAuthorizedToEditRecordOfOtherUser returns false when the current user is not an org team member`() {
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
 

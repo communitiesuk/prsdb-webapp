@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -40,8 +41,11 @@ class EmailTemplateModelsTests {
                         organisationName = "Test Organisation Name",
                         lrn = "L-CCCC-CCCC",
                         prsdURL = "prsdUrl",
+                        // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+                        isMultiUserOrganisationsEnabled = true,
                     ),
                     "/emails/OrganisationalLandlordRegistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     OrganisationalLandlordDeregistrationConfirmationEmail(
@@ -466,6 +470,22 @@ class EmailTemplateModelsTests {
                     "/emails/ChangeOrgTeamMemberAccessLevel.md",
                     allowExtraKeys = true,
                 ),
+                EmailTemplateTestData(
+                    RemoveOrgTeamMemberConfirmationEmail(
+                        adminName = "Alex Admin",
+                        memberName = "Anita Locke",
+                        organisationName = "Keystone Living Group",
+                        teamMembersUrl = URI("teamMembersUrl"),
+                    ),
+                    "/emails/RemoveOrgTeamMemberConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    RemoveOrgTeamMemberNotificationEmail(
+                        memberName = "Anita Locke",
+                        organisationName = "Keystone Living Group",
+                    ),
+                    "/emails/RemoveOrgTeamMemberNotification.md",
+                ),
             )
     }
 
@@ -507,6 +527,33 @@ class EmailTemplateModelsTests {
                 modelHashMap.keys.single { key -> key == parameter }
             }
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `organisation registration email includes the feature flag as yes or no personalisation`(
+        isMultiUserOrganisationsEnabled: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        val email =
+            OrganisationalLandlordRegistrationConfirmationEmail(
+                registrantName = "Jill Jones",
+                organisationName = "Test Organisation Name",
+                lrn = "L-CCCC-CCCC",
+                prsdURL = "prsdUrl",
+                isMultiUserOrganisationsEnabled = isMultiUserOrganisationsEnabled,
+            )
+
+        Assertions.assertEquals(
+            hashMapOf(
+                "registrant name" to "Jill Jones",
+                "organisation name" to "Test Organisation Name",
+                "LRN" to "L-CCCC-CCCC",
+                "PRSD URL" to "prsdUrl",
+                "isMultiUserOrganisationsEnabled" to expectedPersonalisation,
+            ),
+            email.toHashMap(),
+        )
     }
 
     private fun isOptionalContentParameter(parameter: String): Boolean = extractOptionalContentParameter(parameter).isNotEmpty()

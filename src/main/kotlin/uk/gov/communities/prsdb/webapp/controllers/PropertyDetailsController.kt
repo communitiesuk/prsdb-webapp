@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -64,14 +63,11 @@ class PropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
-
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
                 isLandlordView = true,
                 messageSource = messageSource,
-                showCorrespondenceSection = showCorrespondenceSection,
             )
 
         val propertyComplianceDetails =
@@ -186,14 +182,11 @@ class PropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
-
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
                 isLandlordView = false,
                 messageSource = messageSource,
-                showCorrespondenceSection = showCorrespondenceSection,
             )
 
         val landlordSummaryCards =

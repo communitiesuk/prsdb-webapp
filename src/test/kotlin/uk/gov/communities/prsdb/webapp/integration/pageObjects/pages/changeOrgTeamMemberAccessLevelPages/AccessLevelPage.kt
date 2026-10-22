@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLeve
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.changeOrgTeamMemberAccessLevel.stepConfig.AccessLevelStep
@@ -20,6 +21,8 @@ class AccessLevelPage(
     val errorSummary = ErrorSummary(page)
 
     val currentLevelHint: Locator = page.locator("main p.govuk-body").first()
+
+    val removeAccessLink = Link.byText(page, "Remove access")
 
     override val expectedTitleHeadingPattern = Regex("Change access level for .+")
 

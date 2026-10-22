@@ -398,7 +398,7 @@ class PropertyComplianceService(
                 "Current landlord ${currentLandlord.id} is not a landlord of property ${propertyOwnership.id}",
             )
 
-        val currentUser = currentUserService.getCurrentUserDetails()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         complianceUpdateConfirmationSender.sendEmail(
             currentUser.email,
             buildComplianceUpdateConfirmationEmail(

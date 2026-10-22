@@ -18,3 +18,10 @@ radios:
     missing: Select the access level
 buttons:
   removeAccess: Remove access
+removeAccess:
+  heading: Are you sure you want to remove their access?
+  paragraph:
+    one: '{0,,name} will no longer be able to access your organisation on the service.'
+    two: To give them access again, you will need to send a new invitation.
+  confirmButton: Yes, remove access
+  cancelLink: Cancel and go back

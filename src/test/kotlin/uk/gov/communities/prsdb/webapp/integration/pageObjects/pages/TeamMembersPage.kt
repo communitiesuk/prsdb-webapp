@@ -19,16 +19,24 @@ class TeamMembersPage(
     val tabs = TeamMembersTabs(page)
     val administratorsSummaryList = TeamMembersSummaryList(page.locator("#${TeamMembersController.ADMINISTRATORS_FRAGMENT}"))
     val editorsSummaryList = TeamMembersSummaryList(page.locator("#${TeamMembersController.EDITORS_FRAGMENT}"))
+    val invitationsPanel: Locator = page.locator("#${TeamMembersController.INVITATIONS_FRAGMENT}")
+    val pendingInvitationsSummaryList = TeamMembersSummaryList(invitationsPanel, 0)
+    val expiredInvitationsSummaryList = TeamMembersSummaryList(invitationsPanel, 1)
 
     class TeamMembersTabs(
         page: Page,
     ) : Tabs(page) {
         fun goToEditors(editorCount: Int) = goToTab("Editors ($editorCount)")
+
+        fun goToInvitations(pendingInvitationCount: Int) = goToTab("Invitations ($pendingInvitationCount)")
     }
 
     class TeamMembersSummaryList(
         parentLocator: Locator,
-    ) : SummaryList(parentLocator) {
+        index: Int? = null,
+    ) : SummaryList(parentLocator, index) {
+        val rows: Locator = locator.locator(".govuk-summary-list__row")
+
         fun getRowByIndex(index: Int) = getRow(index)
     }
 }

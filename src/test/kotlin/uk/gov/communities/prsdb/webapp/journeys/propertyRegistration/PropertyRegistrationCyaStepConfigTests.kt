@@ -17,7 +17,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
@@ -91,6 +90,26 @@ class PropertyRegistrationCyaStepConfigTests {
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
+
+    @Mock
+    private lateinit var mockCorrespondenceTask: CorrespondenceTask
+
+    @Mock
+    private lateinit var mockCorrespondenceEmailStep: CorrespondenceEmailStep
+
+    @Mock
+    private lateinit var mockCorrespondenceAddressTask: CorrespondenceAddressTask
+
+    @Mock
+    private lateinit var mockCorrespondenceLookupAddressStep: LookupAddressStep
+
+    private val emailForm =
+        CorrespondenceEmailFormModel().apply {
+            correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
+            differentEmailAddress = "council.contact@example.com"
+        }
+
+    private val lookupPath = "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}"
 
     @Mock
     private lateinit var mockPropertyDetailsTask: PropertyDetailsTask
@@ -245,47 +264,31 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
         lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
+        lenient().`when`(mockState.correspondenceTask).thenReturn(mockCorrespondenceTask)
+        lenient().`when`(mockCorrespondenceTask.correspondenceEmailStep).thenReturn(mockCorrespondenceEmailStep)
+        lenient().`when`(mockCorrespondenceTask.addressTask).thenReturn(mockCorrespondenceAddressTask)
+        lenient().`when`(mockCorrespondenceEmailStep.formModel).thenReturn(emailForm)
+        lenient().`when`(mockCorrespondenceEmailStep.isStepReachable).thenReturn(true)
+        lenient().`when`(mockCorrespondenceEmailStep.urlPath).thenReturn(CorrespondenceEmailStep.ROUTE_SEGMENT)
+        lenient().`when`(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("account@example.com")
+        lenient().`when`(mockCorrespondenceAddressTask.lookupAddressStep).thenReturn(mockCorrespondenceLookupAddressStep)
+        lenient().`when`(mockCorrespondenceLookupAddressStep.isStepReachable).thenReturn(true)
+        lenient().`when`(mockCorrespondenceLookupAddressStep.urlPath).thenReturn(lookupPath)
+        lenient().`when`(mockState.getCyaJourneyId(mockCorrespondenceEmailStep)).thenReturn("email-change")
+        lenient().`when`(mockState.getCyaJourneyId(mockCorrespondenceLookupAddressStep)).thenReturn("postal-change")
+        lenient().`when`(mockCorrespondenceAddressTask.getAddress()).thenReturn(
+            AddressDataModel(
+                "12 Test Road, Leeds, LS1 1AA",
+                buildingNumber = "12",
+                streetName = "Test Road",
+                townName = "Leeds",
+                postcode = "LS1 1AA",
+            ),
+        )
     }
 
     @Nested
     inner class CorrespondenceContent {
-        private val correspondenceTask = mock<CorrespondenceTask>()
-        private val emailStep = mock<CorrespondenceEmailStep>()
-        private val addressTask = mock<CorrespondenceAddressTask>()
-        private val lookupStep = mock<LookupAddressStep>()
-        private val emailForm =
-            CorrespondenceEmailFormModel().apply {
-                correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
-                differentEmailAddress = "council.contact@example.com"
-            }
-        private val lookupPath = "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}"
-
-        @BeforeEach
-        fun setUpCorrespondence() {
-            lenient().`when`(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
-            lenient().`when`(mockState.correspondenceTask).thenReturn(correspondenceTask)
-            lenient().`when`(correspondenceTask.correspondenceEmailStep).thenReturn(emailStep)
-            lenient().`when`(correspondenceTask.addressTask).thenReturn(addressTask)
-            lenient().`when`(emailStep.formModel).thenReturn(emailForm)
-            lenient().`when`(emailStep.isStepReachable).thenReturn(true)
-            lenient().`when`(emailStep.urlPath).thenReturn(CorrespondenceEmailStep.ROUTE_SEGMENT)
-            lenient().`when`(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("account@example.com")
-            lenient().`when`(addressTask.lookupAddressStep).thenReturn(lookupStep)
-            lenient().`when`(lookupStep.isStepReachable).thenReturn(true)
-            lenient().`when`(lookupStep.urlPath).thenReturn(lookupPath)
-            lenient().`when`(mockState.getCyaJourneyId(emailStep)).thenReturn("email-change")
-            lenient().`when`(mockState.getCyaJourneyId(lookupStep)).thenReturn("postal-change")
-            lenient().`when`(addressTask.getAddress()).thenReturn(
-                AddressDataModel(
-                    "12 Test Road, Leeds, LS1 1AA",
-                    buildingNumber = "12",
-                    streetName = "Test Road",
-                    townName = "Leeds",
-                    postcode = "LS1 1AA",
-                ),
-            )
-        }
-
         @Test
         fun `contact rows show the selected account email instead of a retained different email`() {
             val rows = correspondenceRows()
@@ -315,7 +318,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `contact postal address preserves manually entered address lines and county`() {
-            whenever(addressTask.getAddress()).thenReturn(
+            whenever(mockCorrespondenceAddressTask.getAddress()).thenReturn(
                 AddressDataModel.fromManualAddressData(
                     addressLineOne = "12 Test Road",
                     addressLineTwo = "Test District",
@@ -345,17 +348,6 @@ class PropertyRegistrationCyaStepConfigTests {
                 JourneyStateService.urlWithJourneyState(lookupPath, "postal-change"),
                 rows[1].actions.single().url,
             )
-        }
-
-        // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
-        @Test
-        fun `disabled correspondence does not read contact state or create child journeys`() {
-            whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
-
-            assertEquals(emptyList<SummaryListRowViewModel>(), correspondenceRows())
-            verify(mockState, never()).correspondenceTask
-            verify(mockState, never()).getCyaJourneyId(emailStep)
-            verify(mockState, never()).getCyaJourneyId(lookupStep)
         }
 
         private fun correspondenceRows(): List<SummaryListRowViewModel> =

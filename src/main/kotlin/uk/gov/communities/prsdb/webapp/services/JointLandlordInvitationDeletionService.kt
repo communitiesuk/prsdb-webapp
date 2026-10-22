@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit
 class JointLandlordInvitationDeletionService(
     private val invitationRepository: JointLandlordInvitationRepository,
 ) {
-    fun deleteExpiredInvitations(): List<Long> {
+    fun deleteInvitationsPastRetentionPeriod(): List<Long> {
         val totalGracePeriodInDays =
             (JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + JOINT_LANDLORD_INVITATION_DELETION_GRACE_PERIOD_IN_DAYS).toLong()
         val cutoffDate = Instant.now().minus(totalGracePeriodInDays, ChronoUnit.DAYS)

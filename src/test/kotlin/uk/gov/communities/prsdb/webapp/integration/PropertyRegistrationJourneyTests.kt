@@ -18,6 +18,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +29,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
@@ -173,7 +173,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+    private val absoluteLandlordUrl = "www.example.com/landlord"
 
     private fun verifyConfirmationEmailSent(
         expectedPrn: String,
@@ -351,7 +351,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     inner class EnableFeatureFlags {
         @BeforeEach
         fun enableFeatureFlags() {
-            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         }
 
@@ -378,9 +377,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `with JavaScript enabled, a failed payment redirects to the payment failed page and continuing returns to the payment summary`(
-            page: Page,
-        ) {
+        fun `with JavaScript enabled, a failed payment shows the payment failed page and the payment can then be retried`(page: Page) {
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
@@ -389,8 +386,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
-            paymentFailedPage.form.submit()
-            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
+            assertThat(paymentFailedPage.backLink).isHidden()
+            paymentFailedPage.tryAgainLink.clickAndWait()
+
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient, times(2)).createPayment(requestCaptor.capture())
+            val retriedPayment = paymentRepository.findAll().single { it.reference == requestCaptor.secondValue.reference }
+            assertEquals(PaymentStatus.SUCCEEDED, retriedPayment.status)
+            verify(govUkPayClient).capturePayment(retriedPayment.paymentId)
         }
 
         @Test
@@ -2618,50 +2625,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
             assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
-        }
-
-        // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
-        @Nested
-        inner class CorrespondenceAddressFlagDisabled {
-            @BeforeEach
-            fun disableCorrespondenceAddressFlag() {
-                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
-            }
-
-            @Test
-            fun `correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
-                val taskListPage =
-                    navigator.goToPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy(),
-                    )
-
-                assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
-            }
-
-            @Test
-            fun `registering a property saves the landlord's email and address as the correspondence details`(page: Page) {
-                val taskListPage =
-                    navigator.goToPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder
-                            .beforePropertyRegistrationCheckAnswersOccupied()
-                            .withBedrooms(),
-                    )
-                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-                checkAnswersPage.confirm()
-
-                val confirmMissingCompliancePage =
-                    assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-                confirmMissingCompliancePage.form.radios.selectValue("true")
-                confirmMissingCompliancePage.form.submit()
-
-                completePropertyRegistrationPaymentSuccessfully(page)
-
-                val propertyOwnershipCaptor = captor<PropertyOwnership>()
-                verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-                assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
-                assertEquals(1L, propertyOwnershipCaptor.value.correspondenceAddress.id)
-            }
         }
     }
 

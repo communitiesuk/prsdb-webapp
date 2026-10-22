@@ -18,7 +18,7 @@ allowLettingAgent:
   error:
     missing: Enter your letting agent or property manager’s email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
-    cannotUseLandlordEmail: You cannot enter yourself as the letting agent or property manager
+    cannotUseYourEmail: You cannot enter yourself as the letting agent or property manager
 confirmation:
   banner:
     heading: Letting agent or property manager can make updates

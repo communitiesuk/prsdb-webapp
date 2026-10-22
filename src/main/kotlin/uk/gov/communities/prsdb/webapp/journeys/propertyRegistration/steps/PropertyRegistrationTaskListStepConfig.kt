@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
@@ -71,14 +70,12 @@ class PropertyRegistrationTaskListStepConfig(
                             state.ownershipAndLandlordsTask,
                         ),
                     )
-                    if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)) {
-                        add(
-                            TaskListItemViewModel.fromTask(
-                                "registerProperty.taskList.aboutYourProperty.correspondence",
-                                state.correspondenceTask,
-                            ),
-                        )
-                    }
+                    add(
+                        TaskListItemViewModel.fromTask(
+                            "registerProperty.taskList.aboutYourProperty.correspondence",
+                            state.correspondenceTask,
+                        ),
+                    )
                     add(
                         TaskListItemViewModel.fromStep(
                             "registerProperty.taskList.aboutYourProperty.occupied",

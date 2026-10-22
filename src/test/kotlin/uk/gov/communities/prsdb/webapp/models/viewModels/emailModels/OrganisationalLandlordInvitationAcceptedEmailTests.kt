@@ -16,7 +16,7 @@ class OrganisationalLandlordInvitationAcceptedEmailTests {
                 roleName = if (isAdmin) "administrator" else "editor",
                 organisationName = "Example Organisation",
                 isAdmin = isAdmin,
-                dashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
+                dashboardUrl = URI("https://www.example.com/landlord/dashboard"),
             )
 
         // Act
@@ -30,7 +30,7 @@ class OrganisationalLandlordInvitationAcceptedEmailTests {
                 "organisation name" to "Example Organisation",
                 "role name" to if (isAdmin) "administrator" else "editor",
                 "isAdmin" to if (isAdmin) "yes" else "no",
-                "dashboard url" to "https://www.prsd.gov.uk/landlord/dashboard",
+                "dashboard url" to "https://www.example.com/landlord/dashboard",
             ),
             personalisation,
         )

@@ -139,8 +139,8 @@ class DeregisterStepConfigTests {
         }
 
     private fun setupCurrentUser() {
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = CURRENT_USERNAME, email = CURRENT_EMAIL))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = CURRENT_USERNAME, email = CURRENT_EMAIL))
     }
 
     private fun setupStepConfig() =

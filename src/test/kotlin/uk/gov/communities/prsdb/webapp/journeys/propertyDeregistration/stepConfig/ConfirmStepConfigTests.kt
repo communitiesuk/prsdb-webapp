@@ -58,8 +58,8 @@ class ConfirmStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -75,8 +75,8 @@ class ConfirmStepConfigTests {
             .thenReturn(
                 MockLandlordData.createPropertyOwnership(address = MockLandlordData.createAddress(singleLineAddress = propertyAddress)),
             )
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -92,8 +92,8 @@ class ConfirmStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -114,8 +114,8 @@ class ConfirmStepConfigTests {
                     address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, AB1 2CD"),
                 ),
             )
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -146,8 +146,8 @@ class ConfirmStepConfigTests {
                 ),
             )
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(signInUrl))
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -171,8 +171,8 @@ class ConfirmStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserService.CurrentUserDetails(name = "James", email = "james@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 

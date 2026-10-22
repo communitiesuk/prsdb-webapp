@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
@@ -105,8 +104,7 @@ class OrganisationalLandlord() : Landlord() {
     @Column(name = "organisation_main_contact_phone")
     lateinit var mainContactPhone: String
 
-    // We eager fetch these as we're temporarily using them to get the email for an org landlord.
-    @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "organisationalLandlord")
     private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
 
     @get:Transient
@@ -115,12 +113,6 @@ class OrganisationalLandlord() : Landlord() {
             organisationalLandlordUsers
                 .filter { it.role == OrganisationalLandlordUserRole.ADMIN }
                 .map { it.email }
-
-    // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
-    // Also remove the EAGER fetch on organisationalLandlordUserSet if it still exists
-    @get:Transient
-    override val email: String
-        get() = organisationalLandlordUsers.single().email
 
     internal fun addOrganisationalLandlordUser(organisationalLandlordUser: OrganisationalLandlordUser) {
         organisationalLandlordUsers.add(organisationalLandlordUser)
