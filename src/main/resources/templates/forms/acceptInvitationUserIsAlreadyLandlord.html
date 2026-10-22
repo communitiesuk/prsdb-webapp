@@ -1,41 +1,38 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="confirmSignOutUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html>
-<th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
-    <main class="govuk-main-wrapper" id="main-content">
-        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
-            <div id="page-content">
-                <h1 class="govuk-heading-l" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.heading}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.heading
-                </h1>
-                <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.heading}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.heading
-                </h2>
-                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.one}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.one
-                </p>
-                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.two}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.two
-                </p>
-                <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.heading}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.heading
-                </h2>
-                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.one}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.one
-                </p>
-                <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.two}">
-                    acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.two
-                </p>
-                <p class="govuk-body">
-                    <a class="govuk-link" th:href="@{${confirmSignOutUrl}}"
-                       th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link}">
-                        acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link</a><span
-                        th:remove="tag" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink}">acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink</span>
-                </p>
-            </div>
+<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <h1 class="govuk-heading-l" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.heading}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.heading
+            </h1>
+            <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.heading}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.heading
+            </h2>
+            <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.one}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.two}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatsHappened.paragraph.two
+            </p>
+            <h2 class="govuk-heading-m" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.heading}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.heading
+            </h2>
+            <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.one}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.two}">
+                acceptOrganisationInvitation.userIsAlreadyLandlord.whatToDo.paragraph.two
+            </p>
+            <p class="govuk-body">
+                <a class="govuk-link" th:href="@{${confirmSignOutUrl}}"
+                   th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link}">
+                    acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.link</a><span
+                    th:remove="tag" th:text="#{acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink}">acceptOrganisationInvitation.userIsAlreadyLandlord.signOutLink.afterLink</span>
+            </p>
         </div>
-    </main>
-</th:block>
+    </div>
+</main>
 </html>

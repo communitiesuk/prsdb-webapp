@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::#page/content()}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::main/content()}, false, null, null)}">
+<main>
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <th:block th:if="${successBanner != null}" th:with="isSuccess=true">

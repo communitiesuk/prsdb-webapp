@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{cannotDeregisterPropertyJointLandlords.heading}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{cannotDeregisterPropertyJointLandlords.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back</a>
         <h1 class="govuk-heading-l" th:text="#{cannotDeregisterPropertyJointLandlords.heading}">
             cannotDeregisterPropertyJointLandlords.heading
         </h1>

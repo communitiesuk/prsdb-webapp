@@ -1,18 +1,17 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{addressForms.nonEnglandOrWalesAddress.heading}, ~{::#page/content()}, false)}">
-    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
-    <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
-        <main class="govuk-main-wrapper" id="main-content">
-            <header>
-                <h1 class="govuk-heading-l" th:text="#{addressForms.nonEnglandOrWalesAddress.heading}">addressForms.nonEnglandOrWalesAddress.heading</h1>
-            </header>
-            <p class="govuk-body" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.one}">addressForms.nonEnglandOrWalesAddress.paragraph.one</p>
-            <p class="govuk-body">
-                <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">If you made a mistake, </span>
-                <a class="govuk-link" th:href="${backUrl}" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.linkText}">go back</a>
-                <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">.</span>
-            </p>
-        </main>
-    </th:block>
+<html th:replace="~{fragments/layout :: layout(#{addressForms.nonEnglandOrWalesAddress.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{addressForms.nonEnglandOrWalesAddress.heading}">addressForms.nonEnglandOrWalesAddress.heading</h1>
+        </header>
+        <p class="govuk-body" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.one}">addressForms.nonEnglandOrWalesAddress.paragraph.one</p>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">If you made a mistake, </span>
+            <a class="govuk-link" th:href="${backUrl}" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.linkText}">go back</a>
+            <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">.</span>
+        </p>
+    </div>
+</main>
 </html>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${userName}, ~{::main}, false)}">
-<main class="govuk-main-wrapper">
+<html th:replace="~{fragments/layout :: layout(${userName}, ~{::main/content()}, false, null, null)}">
+<main>
     <div id="page-content">
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${userName}, ~{::#dashboard-banner/content()})}">
