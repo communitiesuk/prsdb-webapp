@@ -380,8 +380,8 @@
     "bodyLocation": "/emails/ChangeOrgTeamMemberAccessLevel.md"
   },
   {
-    "test_id": "d4f9be8c-f88a-4f19-9269-84478035f5bc",
-    "prod_id": "6725f4d1-3b04-4d06-95b0-9e31f0ae0947",
+    "test_id": "594cf2bc-a9c7-4248-81db-c155a7dfd6c9",
+    "prod_id": "b2b6b10d-8a2a-4ff5-a546-73e5a4ae9294",
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’ve joined an organisation on Register your rental property",
     "bodyLocation": "/emails/OrganisationalLandlordInvitationAccepted.md"

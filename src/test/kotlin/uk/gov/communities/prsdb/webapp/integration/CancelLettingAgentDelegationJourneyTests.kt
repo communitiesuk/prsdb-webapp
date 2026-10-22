@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -18,8 +17,6 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
 
     @Test
     fun `a landlord can walk the remove letting agent journey and reach the confirmation page`(page: Page) {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.removeLettingAgentLink.clickAndWait()
 
@@ -63,8 +60,6 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
 
     @Test
     fun `a landlord who selects no is returned to the property record with the letting agent still delegated`(page: Page) {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-
         val areYouSurePage = navigator.goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId)
         areYouSurePage.submitDoesNotWantToProceed()
 
@@ -78,24 +73,5 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
         val restartedPage = navigator.goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId)
         BaseComponent.assertThat(restartedPage.form.fieldsetHeading)
             .containsText("Are you sure you want to remove $lettingAgentEmail?")
-    }
-
-    @Test
-    fun `the remove letting agent journey is unavailable when the flag is disabled`() {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        val response =
-            navigator.navigate(
-                CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
-            )
-
-        assertEquals(404, response?.status())
-
-        val confirmationResponse =
-            navigator.navigate(
-                CancelLettingAgentDelegationController.getRemoveLettingAgentConfirmationPath(propertyOwnershipId),
-            )
-
-        assertEquals(404, confirmationResponse?.status())
     }
 }
