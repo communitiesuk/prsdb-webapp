@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{deregisterProperty.confirmation.panel.title(${address})}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{deregisterProperty.confirmation.panel.heading(${address})}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title"
-                    th:text="#{deregisterProperty.confirmation.panel.title(${address})}">
-                    deregisterProperty.confirmation.panel.title
+                    th:text="#{deregisterProperty.confirmation.panel.heading(${address})}">
+                    deregisterProperty.confirmation.panel.heading
                 </h1>
                 <div class="govuk-panel__body"
                      th:text="#{deregisterProperty.confirmation.panel.body}">

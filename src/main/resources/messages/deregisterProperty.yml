@@ -24,7 +24,7 @@ confirm:
   cancelLink: Cancel (go back to property record)
 confirmation:
   panel:
-    title: "Deregistered {0}"
+    heading: "Deregistered {0}"
     body: This property is no longer registered as a rental property
   body:
     one: We’ve sent you a confirmation email.
