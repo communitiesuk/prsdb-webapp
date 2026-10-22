@@ -56,8 +56,9 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
                 nextDestination {
                     Destination
                         .ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
+                        .withFlashAttribute("successBanner", "accessLevelChanged")
                         .withFlashAttribute("accessLevelChangedMemberName", getMemberName(journey.otherOrganisationalLandlordUserId))
-                        .withFlashAttribute("accessLevelChangedBannerContentKey", getBannerContentKey(journey.selectedRole))
+                        .withFlashAttribute("accessLevelChangedRole", journey.selectedRole.name)
                 }
             }
             step(journey.removeOrgUserConfirmationStep) {
@@ -70,7 +71,7 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
                 nextDestination {
                     Destination
                         .ExternalUrl(TeamMembersController.TEAM_MEMBERS_ROUTE)
-                        .withFlashAttribute("accessRemovedBannerContentKey", "teamMembers.accessRemovedBanner.content")
+                        .withFlashAttribute("successBanner", "accessRemoved")
                         .withFlashAttribute("accessRemovedMemberName", journey.removedMemberName)
                 }
             }
@@ -87,12 +88,6 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
             ?: throw PrsdbWebException(
                 "Could not determine the name of organisational landlord user $otherOrganisationalLandlordUserId",
             )
-
-    private fun getBannerContentKey(role: OrganisationalLandlordUserRole): String =
-        when (role) {
-            OrganisationalLandlordUserRole.ADMIN -> "teamMembers.accessLevelChangedBanner.content.administrator"
-            OrganisationalLandlordUserRole.EDITOR -> "teamMembers.accessLevelChangedBanner.content.editor"
-        }
 }
 
 @JourneyFrameworkComponent

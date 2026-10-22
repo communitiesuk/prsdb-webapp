@@ -35,7 +35,7 @@ class InviteOrganisationalLandlordUserJourneyFactory(
                 nextDestination {
                     Destination
                         .ExternalUrl(TEAM_MEMBERS_ROUTE)
-                        .withFlashAttribute("successBanner", "teamMembers.successBanner.invitationSent")
+                        .withFlashAttribute("successBanner", "invitationSent")
                 }
             }
         }

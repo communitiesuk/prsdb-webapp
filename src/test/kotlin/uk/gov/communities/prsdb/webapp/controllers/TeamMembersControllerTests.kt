@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -36,7 +38,7 @@ import kotlin.test.assertEquals
 
 @WebMvcTest(TeamMembersController::class)
 @Import(MessageSourceConfig::class)
-class TeamMembersControllerTests(
+class TeamMembersControllerTestshat t i(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
@@ -150,12 +152,36 @@ class TeamMembersControllerTests(
 
         mvc
             .get(TEAM_MEMBERS_ROUTE) {
-                flashAttr("accessRemovedBannerContentKey", "teamMembers.accessRemovedBanner.content")
+                flashAttr("successBanner", "accessRemoved")
                 flashAttr("accessRemovedMemberName", "Anita Locke")
             }.andExpect {
                 status { isOk() }
                 content { string(containsString("Access removed")) }
                 content { string(containsString("Anita Locke no longer has access to the service.")) }
+            }
+    }
+
+    @ParameterizedTest
+    @CsvSource("ADMIN, administrator", "EDITOR, editor")
+    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
+    fun `getTeamMembers renders the access level changed banner for the selected role`(
+        role: String,
+        roleDescription: String,
+    ) {
+        stubOrgLandlordWithCurrentUser()
+
+        mvc
+            .get(TEAM_MEMBERS_ROUTE) {
+                flashAttr("successBanner", "accessLevelChanged")
+                flashAttr("accessLevelChangedMemberName", "Anita Locke")
+                flashAttr("accessLevelChangedRole", role)
+            }.andExpect {
+                status { isOk() }
+                content { string(containsString("Access level changed")) }
+                content { string(containsString("Anita Locke is now an $roleDescription.")) }
+                content { string(not(containsString("Invitation sent"))) }
+                content { string(not(containsString("Access removed"))) }
+                content { string(not(containsString("Invitation resent"))) }
             }
     }
 
@@ -214,6 +240,7 @@ class TeamMembersControllerTests(
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
+                flash { attribute("successBanner", "resendInvitation") }
                 flash { attribute("resendInvitationEmail", "invitee@example.com") }
             }
     }
