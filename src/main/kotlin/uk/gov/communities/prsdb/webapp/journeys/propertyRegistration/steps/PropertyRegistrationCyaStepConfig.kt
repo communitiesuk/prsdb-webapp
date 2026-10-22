@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -32,25 +31,12 @@ class PropertyRegistrationCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        // TODO PDJB-1617: Remove this check once the feature flag is removed and the letting agent journey is fully implemented
-        val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-        if (!isLettingAgentEnabled) {
-            return getContentBeforePdjb1022(state)
-        }
-
-        // TODO PDJB-1617: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
-        return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        if (state.isDelegatedToLettingAgent()) {
             getDelegatedContent(state)
         } else {
             getNonDelegatedContent(state)
         }
-    }
-
-    // TODO PDJB-1617: Remove this method once the feature flag is removed and the letting agent journey is fully implemented
-    private fun getContentBeforePdjb1022(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        return getContent(state, emptyMap())
-    }
 
     private fun getNonDelegatedContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val whoProvides = state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides

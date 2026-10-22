@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -23,11 +22,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @PrsdbWebComponent
 class PropertyRegistrationDataModelFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun fromJourneyState(state: PropertyRegistrationJourneyState): PropertyRegistrationDataModel {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
+        val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent()
         val lettingAgentEmail =
             if (isDelegatedToLettingAgent) {
                 state.whoProvidesDetailsTask.lettingAgentEmailStep.formModel.emailAddress

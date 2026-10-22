@@ -7,8 +7,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -18,52 +16,19 @@ class ProvideGasCertLaterStepConfigTests {
     @Mock
     lateinit var mockState: GasSafetyDetailState
 
-    @Mock
-    lateinit var featureFlagManager: FeatureFlagManager
-
     @InjectMocks
     lateinit var stepConfig: ProvideGasCertLaterStepConfig
 
     @Test
-    fun `chooseTemplate returns legacy occupied template when letting agents is disabled and isOccupied is true`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
+    fun `chooseTemplate returns occupied template when isOccupied is true`() {
         whenever(mockState.isOccupied).thenReturn(true)
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-        // Act
-        val result = stepConfig.chooseTemplate(mockState)
-
-        // Assert
-        assertEquals("forms/provideGasCertificateLaterForOccupiedPropertyBeforeLettingAgents", result)
-    }
-
-    @Test
-    fun `chooseTemplate returns legacy unoccupied template when letting agents is disabled and isOccupied is false`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.isOccupied).thenReturn(false)
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-        // Act
-        val result = stepConfig.chooseTemplate(mockState)
-
-        // Assert
-        assertEquals("forms/provideGasCertificateLaterForUnoccupiedPropertyBeforeLettingAgents", result)
-    }
-
-    @Test
-    fun `chooseTemplate returns occupied template when letting agents is enabled and isOccupied is true`() {
-        whenever(mockState.isOccupied).thenReturn(true)
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
         assertEquals("forms/provideGasCertificateLaterForOccupiedProperty", setupStepConfig().chooseTemplate(mockState))
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when letting agents is enabled and isOccupied is false`() {
+    fun `chooseTemplate returns unoccupied template when isOccupied is false`() {
         whenever(mockState.isOccupied).thenReturn(false)
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
         assertEquals("forms/provideGasCertificateLaterForUnoccupiedProperty", setupStepConfig().chooseTemplate(mockState))
     }

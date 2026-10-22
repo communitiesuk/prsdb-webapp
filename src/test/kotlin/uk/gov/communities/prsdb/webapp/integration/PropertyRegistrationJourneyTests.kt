@@ -29,7 +29,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -1159,8 +1158,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -1231,8 +1228,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -2541,55 +2536,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
         }
 
-        // TODO PDJB-1617: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
-        @Nested
-        inner class DelegateToLettingAgentDisabled {
-            @BeforeEach
-            fun disableDelegateToLettingAgentFlag() {
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
-
-            @Test
-            fun `occupied journey routes straight from occupancy to licensing without asking who provides the details`(page: Page) {
-                val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
-                occupancyPage.submitIsOccupied()
-
-                assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-            }
-
-            @Test
-            fun `who provides details task is absent from the rented out section`() {
-                val taskListPage =
-                    navigator.goToPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy().withOccupancyStatus(true),
-                    )
-
-                assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
-            }
-
-            @Test
-            fun `task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
-                val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-                val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
-
-                // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
-                assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
-                assertEquals(
-                    "We’ll ask for tenancy details when your property becomes occupied",
-                    tenancyDetailsTask.hintText.trim(),
-                )
-                assertFalse(tenancyDetailsTask.hasLink)
-
-                val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
-                assertTrue(checkAndSubmitTask.hasLink)
-                taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-                // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
-                assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
-            }
-        }
-
         @Test
         fun `manual address selection is cached when an address search returns no results`(page: Page) {
             val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
@@ -2629,12 +2575,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Nested
-    inner class DelegateToLettingAgentEnabled {
-        @BeforeEach
-        fun enableLettingAgentFlag() {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-        }
-
+    inner class DelegateToLettingAgent {
         @Test
         fun `compliance certificate values are cleared after delegating rental details from CYA`(page: Page) {
             whenever(fileDownloader.isFileDownloadable(any())).thenReturn(true)

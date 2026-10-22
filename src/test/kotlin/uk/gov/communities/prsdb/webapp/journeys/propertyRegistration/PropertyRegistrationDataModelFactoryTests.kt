@@ -14,13 +14,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -93,9 +91,6 @@ class PropertyRegistrationDataModelFactoryTests {
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
-
-    @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
     @Mock
@@ -114,7 +109,6 @@ class PropertyRegistrationDataModelFactoryTests {
         factory =
             PropertyRegistrationDataModelFactory(
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-                featureFlagManager = mockFeatureFlagManager,
             )
     }
 
@@ -283,7 +277,7 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
         whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
         val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
         val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
@@ -310,7 +304,7 @@ class PropertyRegistrationDataModelFactoryTests {
     @Test
     fun `fromJourneyState throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
         // Arrange
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
 
         val mockOccupiedStep = mock<OccupiedStep>()
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)

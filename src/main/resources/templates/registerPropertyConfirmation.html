@@ -19,16 +19,9 @@
                 <strong th:text="${prn}">L-GD47-39FX</strong>
             </div>
 
-            <!--/* TODO: PDJB-1617: Remove this when we removed the feature flag */-->
             <p class="govuk-body"
-               th:unless="${lettingAgentFeatureEnabled}"
-               th:text="#{registerProperty.confirmation.keepNumber.old}">
-                registerProperty.confirmation.keepNumber.old
-            </p>
-            <p class="govuk-body"
-               th:if="${lettingAgentFeatureEnabled}"
-               th:text="#{registerProperty.confirmation.keepNumber.lettingAgentRedesign}">
-                registerProperty.confirmation.keepNumber.lettingAgentRedesign
+               th:text="#{registerProperty.confirmation.keepNumber}">
+                registerProperty.confirmation.keepNumber
             </p>
             <p class="govuk-body"
                th:text="#{registerProperty.confirmation.useInAdverts}">

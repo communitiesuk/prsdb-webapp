@@ -4,9 +4,7 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
@@ -113,7 +111,6 @@ import java.security.Principal
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
-    private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentsStrategy: PaymentsPropertyRegistrationStrategy,
 ) {
@@ -145,21 +142,11 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        whoProvidesChangeCyaJourney()
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
-                    }
-                }
+                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> whoProvidesChangeCyaJourney()
 
                 LettingAgentEmailStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask) {
-                            checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
-                        }
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    fromTask(journey.whoProvidesDetailsTask) {
+                        checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                     }
                 }
 
@@ -221,14 +208,7 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.tenancyDetailsTask)
                 }
 
-                OccupiedStep.ROUTE_SEGMENT -> {
-                    val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-                    if (isDelegateEnabled) {
-                        occupancyChangeCyaJourney()
-                    } else {
-                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
-                    }
-                }
+                OccupiedStep.ROUTE_SEGMENT -> occupancyChangeCyaJourney()
 
                 HouseholdStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
@@ -431,65 +411,51 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
             }
-            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
                     parents { journey.correspondenceTask.isComplete() }
                     nextStep { occupancy ->
-                        if (delegateEnabled) {
-                            when (occupancy) {
-                                YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
-                                YesOrNo.NO -> journey.licensingTask.firstStep
-                            }
-                        } else {
-                            journey.licensingTask.firstStep
+                        when (occupancy) {
+                            YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
+                            YesOrNo.NO -> journey.licensingTask.firstStep
                         }
                     }
                     saveProgress()
                 }
             }
-            if (delegateEnabled) {
-                task(journey.whoProvidesDetailsTask) {
-                    withDependencies { journey }
-                    parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                    nextStep {
-                        if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
-                            WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
-                        ) {
-                            journey.cyaStep
-                        } else {
-                            journey.licensingTask.firstStep
-                        }
+            task(journey.whoProvidesDetailsTask) {
+                withDependencies { journey }
+                parents { journey.occupied.hasOutcome(YesOrNo.YES) }
+                nextStep {
+                    if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
+                        WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+                    ) {
+                        journey.cyaStep
+                    } else {
+                        journey.licensingTask.firstStep
                     }
-                    saveProgress()
                 }
+                saveProgress()
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {
-                        if (delegateEnabled) {
-                            OrParents(
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                                AndParents(
-                                    journey.whoProvidesDetailsTask.isComplete(),
-                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
-                                        WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES,
-                                    ),
+                        OrParents(
+                            journey.occupied.hasOutcome(YesOrNo.NO),
+                            AndParents(
+                                journey.whoProvidesDetailsTask.isComplete(),
+                                journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                    WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES,
                                 ),
-                            )
-                        } else {
-                            OrParents(
-                                journey.occupied.hasOutcome(YesOrNo.YES),
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                            )
-                        }
+                            ),
+                        )
                     }
                     backStep {
-                        if (delegateEnabled && journey.occupied.outcome == YesOrNo.YES) {
+                        if (journey.occupied.outcome == YesOrNo.YES) {
                             journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep
                         } else {
                             journey.occupied
@@ -557,27 +523,21 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
-                        val landlordProvidesPath =
+                        OrParents(
                             AndParents(
                                 journey.epcTask.isComplete(),
                                 OrParents(
                                     journey.tenancyDetailsTask.isComplete(),
                                     journey.occupied.hasOutcome(YesOrNo.NO),
                                 ),
-                            )
-                        if (delegateEnabled) {
-                            OrParents(
-                                landlordProvidesPath,
-                                AndParents(
-                                    journey.whoProvidesDetailsTask.isComplete(),
-                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
-                                        WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES,
-                                    ),
+                            ),
+                            AndParents(
+                                journey.whoProvidesDetailsTask.isComplete(),
+                                journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                    WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES,
                                 ),
-                            )
-                        } else {
-                            landlordProvidesPath
-                        }
+                            ),
+                        )
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
@@ -853,9 +813,6 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1617: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
-    //  once the feature flag is removed and the letting agent journey is fully implemented
-    fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
-        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-            whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+    fun isDelegatedToLettingAgent(): Boolean =
+        whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
 }
