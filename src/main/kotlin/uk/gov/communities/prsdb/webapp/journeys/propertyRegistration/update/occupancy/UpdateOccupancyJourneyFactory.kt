@@ -4,8 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
@@ -20,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -28,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -56,14 +52,10 @@ class UpdateOccupancyJourneyFactory(
         checkingAnswersFor: String?,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> =
-        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-            if (checkingAnswersFor == null) {
-                mainJourneyMap(state, propertyId)
-            } else {
-                checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
-            }
+        if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
         } else {
-            beforePdjb1022JourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
 
     private fun mainJourneyMap(
@@ -175,41 +167,6 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun beforePdjb1022JourneyMap(
-        state: UpdateOccupancyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
-            step(journey.occupied) {
-                routeSegment(OccupiedStep.ROUTE_SEGMENT)
-                initialStep()
-                backUrl { propertyDetailsRoute }
-                nextStep { journey.completeOccupancyUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                        "submitButton" to "transactionSubmitButton",
-                        "showWarning" to true,
-                    )
-                }
-            }
-            step(journey.completeOccupancyUpdateStep) {
-                parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
-                }
-                nextUrl { propertyDetailsRoute }
-            }
-        }
-    }
-
     fun initializeJourneyState(
         seed: Any?,
         currentLastModifiedDate: java.time.Instant,
@@ -228,16 +185,13 @@ class UpdateOccupancyJourney(
     override val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep,
     // Interruption shown when unoccupying a property that is delegated to a letting agent
     override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
-    // Check-your-answers step for the update (included when DELEGATE_TO_LETTING_AGENT is enabled -
-    // see journeyMap)
+    // Check-your-answers step for the update
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    // Only the update with letting agent delegation has its own check-your-answers page. The single-page update
-    // with delegation off has no check-your-answers page, so it never reads this.
     override val cyaStep: JourneyStep.RequestableStep<*, *, *>
         get() = checkYourAnswersStep
 

@@ -14,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -69,23 +68,8 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel excludes the who provides details task when DELEGATE_TO_LETTING_AGENT is disabled`() {
-            // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-            whenever(mockState.cachedOccupied).thenReturn(true)
-
-            // Act
-            val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
-
-            // Assert
-            val rentedOutNames = taskListViewModel.taskSections[1].tasks.map { it.nameKey }
-            assert("registerProperty.taskList.rentedOut.whoProvidesDetails" !in rentedOutNames)
-        }
-
-        @Test
         fun `getTaskListViewModel shows who provides details as NOT_NEEDED_YET for an unoccupied property`() {
             // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.cachedOccupied).thenReturn(false)
 
             // Act
@@ -104,7 +88,6 @@ class PropertyRegistrationTaskListStepConfigTests {
         @Test
         fun `getTaskListViewModel shows who provides details as a task for an occupied property`() {
             // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.cachedOccupied).thenReturn(true)
 
             // Act
@@ -120,29 +103,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Test
-    fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property when delegation is disabled`() {
+    fun `getTaskListViewModel shows tenancy details as NOT_NEEDED_YET for an unoccupied property`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        whenever(mockState.cachedOccupied).thenReturn(false)
-        stubState()
-
-        // Act
-        val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
-
-        // Assert
-        val tenancyItem =
-            taskListViewModel.taskSections[1].tasks.find {
-                it.nameKey == "registerProperty.taskList.rentedOut.tenancyDetails"
-            }
-        assertEquals("taskList.status.notRequired", tenancyItem?.status?.textKey)
-        assertEquals("registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint", tenancyItem?.hintKey)
-        assertNull(tenancyItem?.url)
-    }
-
-    @Test
-    fun `getTaskListViewModel shows tenancy details as NOT_NEEDED_YET for an unoccupied property when delegation is enabled`() {
-        // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockState.cachedOccupied).thenReturn(false)
         stubState()
 
@@ -162,7 +124,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details task for an occupied property`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(true)
         stubState()
 

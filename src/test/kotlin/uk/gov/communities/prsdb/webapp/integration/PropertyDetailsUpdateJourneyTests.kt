@@ -2,11 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -514,69 +512,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Nested
         inner class OccupancyUpdates {
-            @BeforeEach
-            fun disableDelegateToLettingAgentFlag() {
-                // Without delegation the occupancy journey is a single page with no check answers page
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
-
-            @Test
-            fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
-                // Details page
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                val originalNumberOfBedrooms =
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value
-                        .textContent()
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value).containsText("1")
-                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
-                val updateOccupancyPage =
-                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-                // Update occupancy to vacant and submit directly (single-page update, no check answers page)
-                assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
-                updateOccupancyPage.submitIsVacant()
-
-                propertyDetailsPage =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-                // Check changes have occurred
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                    .containsText(originalNumberOfBedrooms)
-            }
-
-            @Test
-            fun `A property can have its occupancy updated from vacant to occupied`(page: Page) {
-                // Details page
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
-                val updateOccupancyPage =
-                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
-
-                // Update occupancy to occupied and submit directly (single-page update, no check answers page)
-                assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
-                updateOccupancyPage.submitIsOccupied()
-                propertyDetailsPage =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
-
-                // The occupancy status is updated and the property defaults to providing tenancy details later
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
-            }
-        }
-
-        @Nested
-        inner class OccupancyUpdatesWithLettingAgentDelegation {
             private val undelegatedPropertyOwnershipId = 4L
             private val undelegatedPropertyUrlArguments =
                 mapOf("propertyOwnershipId" to undelegatedPropertyOwnershipId.toString())
-
-            @BeforeEach
-            fun enableDelegateToLettingAgentFlag() {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
 
             @Test
             fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
@@ -669,6 +607,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             @Test
             fun `making an undelegated property vacant skips the interruption`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
+                val originalNumberOfBedrooms =
+                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value
+                        .textContent()
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
                     assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
@@ -686,6 +628,34 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 val updatedPropertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
                 assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+
+                // Bedrooms is a property detail rather than a tenancy detail, so it survives the property becoming vacant
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                    .containsText(originalNumberOfBedrooms)
+            }
+
+            @Test
+            fun `a vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
+                val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                val updateOccupancyPage =
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+                updateOccupancyPage.submitIsOccupied()
+
+                val checkAnswersPage =
+                    assertPageIs(
+                        page,
+                        UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                        vacantPropertyUrlArguments,
+                    )
+                checkAnswersPage.confirm()
+
+                val updatedPropertyDetailsPage =
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
             }
 
             @Test

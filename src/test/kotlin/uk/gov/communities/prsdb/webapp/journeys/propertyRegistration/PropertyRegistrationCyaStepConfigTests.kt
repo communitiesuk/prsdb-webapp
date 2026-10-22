@@ -17,7 +17,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -214,7 +213,6 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockMessageSource,
                 mockFeatureFlagManager,
             )
-        lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
         lenient().`when`(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         lenient().`when`(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
@@ -355,214 +353,16 @@ class PropertyRegistrationCyaStepConfigTests {
                 .map { assertIs<SummaryListRowViewModel>(it) }
     }
 
-    // TODO PDJB-1617: Remove this inner class once the feature flag is removed and the letting agent journey is fully implemented
-    @Nested
-    inner class ContentBeforePdjb1022 {
-        @BeforeEach
-        fun disableLettingAgentFlag() {
-            lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        }
-
-        @Test
-        fun `chooseTemplate returns CYA template`() {
-            assertEquals(
-                "forms/propertyRegistrationCheckAnswersForm",
-                stepConfig.chooseTemplate(mockState),
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent puts occupancyDetails from getOccupancySummaryList`() {
-            val expectedOccupancyDetails = listOf<SummaryListRowViewModel>()
-            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals(expectedOccupancyDetails, content["occupancyDetails"])
-        }
-
-        @Test
-        fun `getStepSpecificContent puts rentedOutTenancyRows from getCheckYourAnswersSummaryList`() {
-            val expectedTenancyDetails = listOf<SummaryListRowViewModel>()
-            whenever(
-                mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any<PropertyRegistrationJourneyState>(), any(), any()),
-            ).thenReturn(expectedTenancyDetails)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals(expectedTenancyDetails, content["rentedOutTenancyRows"])
-        }
-
-        @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
-        }
-
-        @Test
-        fun `getStepSpecificContent includes flattened about-property and rented-out keys`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.checkPropertyAnswers.aboutYourProperty.heading", content["aboutPropertyHeadingKey"])
-            assertEquals("forms.checkPropertyAnswers.rentedOut.heading", content["rentedOutHeadingKey"])
-            assertTrue(content["rentedOutLicensingRows"] is List<*>)
-            assertTrue(content["rentedOutTenancyRows"] is List<*>)
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button and warning text`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-            assertEquals("forms.checkPropertyAnswers.warning", content["warningTextKey"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.submitAndPay", content["submitButtonText"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
-                licensingRows.first().fieldValue,
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
-                licensingRows.first().fieldValue,
-            )
-            assertEquals(
-                "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
-                content["tenancyUnoccupiedBodyTextKey"],
-            )
-            assertEquals(emptyList<SummaryListRowViewModel>(), content["rentedOutTenancyRows"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses Address heading for property details row`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
-
-            assertTrue(
-                propertyDetailsRows.any { it.fieldHeading == "propertyDetails.propertyRecord.propertyDetails.address" },
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses ownership question heading under ownership and landlords rows`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
-
-            assertTrue(
-                ownershipAndLandlordsRows.any { it.fieldHeading == "propertyDetails.propertyRecord.ownership.ownershipType" },
-            )
-            assertTrue(
-                propertyDetailsRows.none { it.fieldHeading == "propertyDetails.propertyRecord.ownership.ownershipType" },
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent hides joint landlord invitations when there are no joint landlords`() {
-            val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
-            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
-            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
-            val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
-            assertEquals(
-                listOf(
-                    "propertyDetails.propertyRecord.ownership.ownershipType",
-                    "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
-                ),
-                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
-            )
-            assertEquals(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
-                ownershipAndLandlordsRows.last().fieldValue,
-            )
-            assertEquals(expectedOccupancyDetails, occupancyDetails)
-        }
-
-        @Test
-        fun `getStepSpecificContent adds invitations to ownership rows and retains occupancy when there are joint landlords`() {
-            val mockInviteJointLandlordsTask = mock<InviteJointLandlordsTask>()
-            val mockCheckJointLandlordsStep = mock<CheckJointLandlordsStep>()
-            val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
-            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(true)
-            whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
-            whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("joint.landlord@example.com"))
-            whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
-            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
-            val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
-            assertEquals(
-                listOf(
-                    "propertyDetails.propertyRecord.ownership.ownershipType",
-                    "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
-                ),
-                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
-            )
-            assertEquals(listOf("joint.landlord@example.com"), ownershipAndLandlordsRows.last().fieldValue)
-            assertEquals(expectedOccupancyDetails, occupancyDetails)
-        }
-    }
-
     @Nested
     inner class NonDelegatedContent {
         @BeforeEach
         fun enableLettingAgentFlag() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
         }
 
         @Test
         fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details`() {
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -576,7 +376,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details and property is unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -661,14 +461,95 @@ class PropertyRegistrationCyaStepConfigTests {
 
             assertEquals(false, content["showLettingAgentDelegationUnoccupiedPanel"])
         }
+
+        @Test
+        fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
+            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
+            assertEquals(
+                "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
+                licensingRows.first().fieldValue,
+            )
+        }
+
+        @Test
+        fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
+            assertEquals(
+                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                licensingRows.first().fieldValue,
+            )
+            assertEquals(
+                "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
+                content["tenancyUnoccupiedBodyTextKey"],
+            )
+            assertEquals(emptyList<SummaryListRowViewModel>(), content["rentedOutTenancyRows"])
+        }
+
+        @Test
+        fun `getStepSpecificContent hides joint landlord invitations when there are no joint landlords`() {
+            val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
+            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
+            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
+            val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
+            assertEquals(
+                listOf(
+                    "propertyDetails.propertyRecord.ownership.ownershipType",
+                    "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
+                ),
+                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+            assertEquals(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                ownershipAndLandlordsRows.last().fieldValue,
+            )
+            assertEquals(expectedOccupancyDetails, occupancyDetails)
+        }
+
+        @Test
+        fun `getStepSpecificContent adds invitations to ownership rows and retains occupancy when there are joint landlords`() {
+            val mockInviteJointLandlordsTask = mock<InviteJointLandlordsTask>()
+            val mockCheckJointLandlordsStep = mock<CheckJointLandlordsStep>()
+            val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
+            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(true)
+            whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+            whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("joint.landlord@example.com"))
+            whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
+            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
+            val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
+            assertEquals(
+                listOf(
+                    "propertyDetails.propertyRecord.ownership.ownershipType",
+                    "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
+                ),
+                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+            assertEquals(listOf("joint.landlord@example.com"), ownershipAndLandlordsRows.last().fieldValue)
+            assertEquals(expectedOccupancyDetails, occupancyDetails)
+        }
     }
 
     @Nested
     inner class DelegatedContent {
         @BeforeEach
         fun enableDelegationFlag() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
         }
 
         @Test

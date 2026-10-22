@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
@@ -12,7 +11,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -65,11 +63,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
     @MockitoSpyBean
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Nested
     inner class Confirmation {
@@ -306,23 +299,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when delegate to letting agent feature is disabled, letting agent delegation section is not displayed`(page: Page) {
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withLandlordProvidesRentalDetails()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isHidden()
-            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.key).hasCount(0)
-        }
-
-        @Test
         fun `when property is unoccupied, letting agent delegation unoccupied panel is displayed`(page: Page) {
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
@@ -342,6 +318,9 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 "When your property becomes occupied, you can choose for your letting agent or property manager to " +
                     "provide this section for you. They can also keep these details up to date.",
             )
+
+            // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
+            assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
         }
 
         @Test
