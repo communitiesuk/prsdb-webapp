@@ -25,7 +25,7 @@ class CancelOrganisationalLandlordInvitationAreYouSureFormModelTests {
     }
 
     @Test
-    fun `validation fails when wantsToProceed is null`() {
+    fun `validation fails when the user does not choose an option`() {
         val formModel = CancelOrganisationalLandlordInvitationAreYouSureFormModel(wantsToProceed = null)
 
         val violations = validator.validate(formModel)
@@ -37,7 +37,7 @@ class CancelOrganisationalLandlordInvitationAreYouSureFormModelTests {
     }
 
     @Test
-    fun `validation passes when wantsToProceed is true`() {
+    fun `validation passes when the user chooses to cancel the invitation`() {
         val formModel = CancelOrganisationalLandlordInvitationAreYouSureFormModel(wantsToProceed = true)
 
         val violations = validator.validate(formModel)
@@ -46,7 +46,7 @@ class CancelOrganisationalLandlordInvitationAreYouSureFormModelTests {
     }
 
     @Test
-    fun `validation passes when wantsToProceed is false`() {
+    fun `validation passes when the user chooses not to cancel the invitation`() {
         val formModel = CancelOrganisationalLandlordInvitationAreYouSureFormModel(wantsToProceed = false)
 
         val violations = validator.validate(formModel)
