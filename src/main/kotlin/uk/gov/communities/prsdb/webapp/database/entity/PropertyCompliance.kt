@@ -9,11 +9,13 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.LocalDate
 
 @Entity
@@ -69,7 +71,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
     val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() = gasSafetyCertIssueDate?.let { isGasCertificateDateExpired(it) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
@@ -148,5 +150,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertProvideLater = gasSafetyCertProvideLater
         this.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
         this.epcProvideLater = epcProvideLater
+    }
+
+    companion object {
+        fun isGasCertificateDateExpired(issueDate: LocalDate): Boolean =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .toJavaLocalDate()
+                .isAfter(issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))
     }
 }
