@@ -76,7 +76,8 @@ class ChangeOrgTeamMemberAccessLevelJourneyFactory(
                             "accessRemovedMemberName",
                             journey.removedMemberName
                                 ?: throw PrsdbWebException(
-                                    "Removed member name is not set for organisational landlord user ${journey.otherOrganisationalLandlordUserId}",
+                                    "Removed member name is not set for organisational landlord user " +
+                                        journey.otherOrganisationalLandlordUserId,
                                 ),
                         )
                 }

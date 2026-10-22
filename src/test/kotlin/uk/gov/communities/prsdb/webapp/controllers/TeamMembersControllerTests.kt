@@ -38,7 +38,7 @@ import kotlin.test.assertEquals
 
 @WebMvcTest(TeamMembersController::class)
 @Import(MessageSourceConfig::class)
-class TeamMembersControllerTestshat t i(
+class TeamMembersControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
