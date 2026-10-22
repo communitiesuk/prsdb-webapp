@@ -77,13 +77,20 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
 
     val isElectricalSafetyExpired: Boolean?
-        get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() =
+            electricalSafetyExpiryDate?.let { expiryDate ->
+                when (electricalCertType) {
+                    CertificateType.Eic -> isEicCertificateDateExpired(expiryDate)
+                    CertificateType.Eicr -> isEicrCertificateDateExpired(expiryDate)
+                    else -> null
+                }
+            }
 
     val isElectricalSafetyMissing: Boolean
         get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
-        get() = epcExpiryDate?.isBefore(LocalDate.now())
+        get() = epcExpiryDate?.let { isEpcCertificateDateExpired(it) }
 
     val isEpcRatingLow: Boolean?
         get() {
@@ -153,10 +160,20 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     }
 
     companion object {
+        // Valid up to and including the anniversary of the issue date
         fun isGasCertificateDateExpired(issueDate: LocalDate): Boolean =
-            DateTimeHelper()
-                .getCurrentDateInUK()
-                .toJavaLocalDate()
-                .isAfter(issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))
+            DateTimeHelper().getCurrentDateInUK().toJavaLocalDate() > issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+
+        // Expired on the expiry date
+        fun isEicCertificateDateExpired(expiryDate: LocalDate): Boolean =
+            DateTimeHelper().getCurrentDateInUK().toJavaLocalDate() >= expiryDate
+
+        // Expired on the expiry date
+        fun isEicrCertificateDateExpired(expiryDate: LocalDate): Boolean =
+            DateTimeHelper().getCurrentDateInUK().toJavaLocalDate() >= expiryDate
+
+        // Valid up to and including the expiry date
+        fun isEpcCertificateDateExpired(expiryDate: LocalDate): Boolean =
+            DateTimeHelper().getCurrentDateInUK().toJavaLocalDate() > expiryDate
     }
 }

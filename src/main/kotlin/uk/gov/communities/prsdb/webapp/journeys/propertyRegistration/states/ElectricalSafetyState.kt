@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -44,7 +46,11 @@ interface ElectricalSafetyDetailState : JourneyState {
 
     fun getElectricalCertificateIsOutdated(): Boolean? =
         getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
-            DateTimeHelper().getCurrentDateInUK() >= expiryDate
+            when (getElectricalCertificateTypeAsCertificateType()) {
+                CertificateType.Eic -> PropertyCompliance.isEicCertificateDateExpired(expiryDate.toJavaLocalDate())
+                CertificateType.Eicr -> PropertyCompliance.isEicrCertificateDateExpired(expiryDate.toJavaLocalDate())
+                else -> null
+            }
         }
 
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
