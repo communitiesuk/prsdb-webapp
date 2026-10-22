@@ -11,8 +11,10 @@ abstract class BasePage(
     val page: Page,
     private val urlSegment: String? = null,
 ) {
+    // Override where the title deliberately differs from the h1, to check the title heading against this exact string
     protected open val expectedTitleHeading: String? = null
 
+    // Override instead of expectedTitleHeading where the title heading includes variable data, such as a name
     protected open val expectedTitleHeadingPattern: Regex? = null
 
     private val h1Text: String
@@ -60,11 +62,15 @@ abstract class BasePage(
 
     private fun validateTitle() {
         val title = page.title()
-        val expectedHeading = expectedTitleHeadingPattern?.pattern ?: Regex.escape(expectedTitleHeading ?: h1Text)
+        // The title heading must match the first one of these that is set:
+        // 1. the expectedTitleHeadingPattern regex
+        // 2. the expectedTitleHeading string, exactly
+        // 3. the h1 text, exactly
+        val expectedHeadingPattern = expectedTitleHeadingPattern?.pattern ?: Regex.escape(expectedTitleHeading ?: h1Text)
         assertTrue(
-            Regex("^(Error: )?$expectedHeading - $SERVICE_NAMES - GOV\\.UK$").matches(title),
-            "Page title \"$title\" should match \"[Error: ]$expectedHeading - <service name> - GOV.UK\" " +
-                "(override expectedTitleHeading if the title deliberately differs from the h1)",
+            Regex("^(Error: )?$expectedHeadingPattern - $SERVICE_NAMES - GOV\\.UK$").matches(title),
+            "Page title \"$title\" should match \"[Error: ]$expectedHeadingPattern - <service name> - GOV.UK\" " +
+                "(override expectedTitleHeading or expectedTitleHeadingPattern if the title deliberately differs from the h1)",
         )
     }
 
