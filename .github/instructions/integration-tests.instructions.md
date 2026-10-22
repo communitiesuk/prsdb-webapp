@@ -56,12 +56,12 @@ user is requires a seed data change rather than a different login.
 ### Structure
 ```kotlin
 class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
-    
+
     val heading: Locator
         get() = parentLocator.locator("h1")
-    
+
     val submitButton = Button(parentLocator.locator("[data-testid='submit']"))
-    
+
     val form = ExampleForm(parentLocator.locator("form"))
 }
 ```
@@ -73,12 +73,12 @@ class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
 - Prefer **custom classes** over raw `Locator`
 
 ### Page Validation
-`BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, and checks the page
-`<title>` matches `[Error: ]<heading> - <service name> - GOV.UK`. On page objects whose title deliberately differs from
-the h1, override `expectedTitleHeading` with the expected title heading; the title heading is always checked against it.
-When `STRICT_TITLE_CHECK` is enabled, pages without an override also have their title heading checked against the h1
-text. Pages that don't use the shared layout (e.g. `MaintenancePage`) override `validateTitle()` with
-their own title check.
+`BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, checks the page has
+exactly one `<main id="main-content" role="main">`, and checks the page `<title>` matches
+`[Error: ]<heading> - <service name> - GOV.UK`. On page objects whose title deliberately differs from the h1, override
+`expectedTitleHeading` with the expected title heading; the title heading is always checked against it. When
+`STRICT_TITLE_CHECK` is enabled, pages without an override also have their title heading checked against the h1 text.
+Pages that don't use the shared layout (e.g. `MaintenancePage`) override `validateTitle()` with their own title check.
 
 ## Components
 
@@ -132,10 +132,10 @@ If a navigator method is called with different arguments pointing to genuinely d
 @Test
 fun `user can submit form successfully`() {
     val page = navigator.goToExamplePage()
-    
+
     page.form.fillName("Test Name")
     page.submitButton.click()
-    
+
     val resultPage = ResultPage(page.playwright.page)
     assertThat(resultPage.confirmationBanner.isVisible).isTrue()
 }

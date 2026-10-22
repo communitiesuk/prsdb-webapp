@@ -13,10 +13,10 @@ applyTo: "**/templates/**,**/css/**,**/js/**,**/assets/**"
 ## Thymeleaf Templates
 
 ### Layout Structure
-Every page uses `fragments/layout :: layout(title, content, hasErrors)`:
+Every page uses `fragments/layout :: layout(title, content, hasErrors, backUrl, mainClass)`.
 ```html
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{example.heading}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{example.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
 <main>
     <h1 class="govuk-heading-l" th:text="#{example.heading}">Example heading</h1>
     <!-- Page content here -->
