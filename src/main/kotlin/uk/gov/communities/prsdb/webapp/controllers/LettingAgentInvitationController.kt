@@ -6,9 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_PATH_SEGMENT
@@ -31,7 +29,6 @@ class LettingAgentInvitationController(
     private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @GetMapping
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun startJourney(
         @RequestParam(value = TOKEN, required = false) rawToken: String?,
     ): ModelAndView {
@@ -57,20 +54,17 @@ class LettingAgentInvitationController(
     }
 
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun getJourneyStep(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun invalidLink(): ModelAndView = ModelAndView("invalidLettingAgentInvitationLink")
 
     private fun dispatchJourneyStep(

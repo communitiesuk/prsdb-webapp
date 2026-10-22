@@ -12,9 +12,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
@@ -50,7 +48,6 @@ class PropertyDetailsController(
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -98,30 +95,28 @@ class PropertyDetailsController(
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
-        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-            modelAndView.addObject("showLettingAgentPanel", true)
-            val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
-            modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
-            modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
-            if (propertyOwnership.isOccupied) {
-                if (lettingAgentAccess != null) {
-                    modelAndView.addObject("lettingAgentEmail", lettingAgentAccess.invitedEmail)
-                    modelAndView.addObject(
-                        "lettingAgentPanelLink",
-                        TicketPanelLinkViewModel(
-                            text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
-                            url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
-                        ),
-                    )
-                } else {
-                    modelAndView.addObject(
-                        "lettingAgentPanelLink",
-                        TicketPanelLinkViewModel(
-                            text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
-                            url = getDelegateToLettingAgentPath(propertyOwnershipId),
-                        ),
-                    )
-                }
+        modelAndView.addObject("showLettingAgentPanel", true)
+        val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
+        modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
+        modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
+        if (propertyOwnership.isOccupied) {
+            if (lettingAgentAccess != null) {
+                modelAndView.addObject("lettingAgentEmail", lettingAgentAccess.invitedEmail)
+                modelAndView.addObject(
+                    "lettingAgentPanelLink",
+                    TicketPanelLinkViewModel(
+                        text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
+                        url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+                    ),
+                )
+            } else {
+                modelAndView.addObject(
+                    "lettingAgentPanelLink",
+                    TicketPanelLinkViewModel(
+                        text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
+                        url = getDelegateToLettingAgentPath(propertyOwnershipId),
+                    ),
+                )
             }
         }
         if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {

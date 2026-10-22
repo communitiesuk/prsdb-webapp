@@ -2,20 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateLicensingJourneyPages.CheckLicensingAnswersPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateLicensingJourneyPages.LicensingTypeFormPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateLicensingJourneyPages.SelectiveLicenceFormPageLettingAgentUpdate
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import java.util.UUID
 import kotlin.test.assertContains
 
@@ -23,11 +17,6 @@ class LettingAgentUpdateLicensingJourneyTests : IntegrationTestWithMutableData("
     // Property 40 has an existing licence for the removal scenario.
     private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222d")
     private val urlArguments = mapOf("token" to token.toString())
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `A letting agent can update a property's licensing`(page: Page) {
@@ -135,18 +124,5 @@ class LettingAgentUpdateLicensingJourneyTests : IntegrationTestWithMutableData("
         val licenceNumberPage = assertPageIs(page, SelectiveLicenceFormPageLettingAgentUpdate::class, urlArguments)
 
         assertThat(licenceNumberPage.form.submitButton).hasText("Continue")
-    }
-
-    @Test
-    fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        navigator.navigate(
-            LettingAgentUpdateLicensingController.getUpdateLicensingRoute(token) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
-        )
-
-        val errorPage = createValidPage(page, ErrorPage::class)
-        assertThat(errorPage.heading).containsText("Page not found")
     }
 }

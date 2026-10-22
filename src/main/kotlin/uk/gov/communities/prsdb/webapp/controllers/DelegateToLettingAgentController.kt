@@ -11,10 +11,8 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.DELEGATE_TO_LETTING_AGENT_ROUTE
@@ -36,7 +34,6 @@ class DelegateToLettingAgentController(
     private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun getJourneyStep(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -46,7 +43,6 @@ class DelegateToLettingAgentController(
     }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun postJourneyData(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -70,7 +66,6 @@ class DelegateToLettingAgentController(
         )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun getConfirmation(
         model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
