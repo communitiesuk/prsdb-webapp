@@ -75,7 +75,8 @@ class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
 ### Page Validation
 `BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, and checks the page
 `<title>` is `[Error: ]<h1 text> - <service name> - GOV.UK`. On page objects whose title deliberately differs from
-the h1, override `expectedTitleHeading` with the expected title heading, and it is checked instead of the h1.
+the h1, override `expectedTitleHeading` with the expected title heading, and it is checked instead of the h1. Where
+that heading includes variable data such as a name, override `expectedTitleHeadingPattern` with a `Regex` instead.
 
 ## Components
 

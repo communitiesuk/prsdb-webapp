@@ -13,6 +13,8 @@ abstract class BasePage(
 ) {
     protected open val expectedTitleHeading: String? = null
 
+    protected open val expectedTitleHeadingPattern: Regex? = null
+
     private val h1Text: String
         get() {
             val h1 = page.locator("h1").first()
@@ -58,10 +60,10 @@ abstract class BasePage(
 
     private fun validateTitle() {
         val title = page.title()
-        val expectedHeading = expectedTitleHeading ?: h1Text
+        val expectedHeading = expectedTitleHeadingPattern?.pattern ?: Regex.escape(expectedTitleHeading ?: h1Text)
         assertTrue(
-            Regex("^(Error: )?${Regex.escape(expectedHeading)} - $SERVICE_NAMES - GOV\\.UK$").matches(title),
-            "Page title \"$title\" should be \"[Error: ]$expectedHeading - <service name> - GOV.UK\" " +
+            Regex("^(Error: )?$expectedHeading - $SERVICE_NAMES - GOV\\.UK$").matches(title),
+            "Page title \"$title\" should match \"[Error: ]$expectedHeading - <service name> - GOV.UK\" " +
                 "(override expectedTitleHeading if the title deliberately differs from the h1)",
         )
     }
