@@ -5,8 +5,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -16,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepo
 class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
-    private val featureFlagManager: FeatureFlagManager,
     private val userToLandlordService: UserToLandlordService,
 ) {
     fun saveEmailForJourney(
@@ -97,8 +94,7 @@ class VirusScanCallbackService(
         certificateType: CertificateType,
         propertyOwnershipId: Long?,
     ) {
-        // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
-        if (propertyOwnershipId != null && featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+        if (propertyOwnershipId != null) {
             saveEmailForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
             saveEmailToMonitoringTeamForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
         } else {

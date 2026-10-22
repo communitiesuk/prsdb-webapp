@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
@@ -33,7 +31,6 @@ class VirusNotificationEmailHandler(
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val landlordUserEmailService: LandlordUserEmailService,
-    private val featureFlagManager: FeatureFlagManager,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
     fun handleCallback(callback: VirusScanCallback) =
@@ -62,19 +59,16 @@ class VirusNotificationEmailHandler(
                 )
             }
 
-            // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
-            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)
-                if (PropertyOwnershipService.hasLettingAgent(ownership, lettingAgentAccess)) {
-                    emailNotificationService.sendEmail(
-                        lettingAgentAccess!!.invitedEmail,
-                        buildAlertEmail(
-                            notification.certificateType,
-                            lettingAgentAccess.invitedEmail,
-                            ownership.address.toMultiLineAddress(),
-                        ),
-                    )
-                }
+            val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)
+            if (PropertyOwnershipService.hasLettingAgent(ownership, lettingAgentAccess)) {
+                emailNotificationService.sendEmail(
+                    lettingAgentAccess!!.invitedEmail,
+                    buildAlertEmail(
+                        notification.certificateType,
+                        lettingAgentAccess.invitedEmail,
+                        ownership.address.toMultiLineAddress(),
+                    ),
+                )
             }
         }
     }
