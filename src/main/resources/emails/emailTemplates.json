@@ -381,7 +381,7 @@
   },
   {
     "test_id": "594cf2bc-a9c7-4248-81db-c155a7dfd6c9",
-    "prod_id": "c3902a41-9c5d-4fc4-82f2-76cecbfc8c17",
+    "prod_id": "b2b6b10d-8a2a-4ff5-a546-73e5a4ae9294",
     "enumName": "ORGANISATIONAL_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’ve joined an organisation on Register your rental property",
     "bodyLocation": "/emails/OrganisationalLandlordInvitationAccepted.md"
