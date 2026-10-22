@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -28,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
@@ -221,12 +223,16 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         assertEquals(originalPeriodEnd, propertyOwnershipRepository.findById(registeredProperty.id).get().renewalDate)
     }
 
-    @Test
-    fun `finalisePayment rolls back the registration and cancels the payment when capture fails and GOV UK Pay has not taken it`() {
+    @ParameterizedTest
+    @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideUnsuccessfulFinishedGovUkPayStatuses")
+    fun `finalisePayment rolls back registration and records the outcome without cancelling when GOV UK Pay reports the payment finished`(
+        govUkPayStatus: GovUkPayPaymentStatus,
+        expectedStatus: PaymentStatus,
+    ) {
         // Arrange
         doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
-            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.CANCELLED))
+            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, govUkPayStatus))
         whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
             setLandlordAnniversary()
             getProperty()
@@ -236,13 +242,55 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
         // Assert
-        assertEquals(PaymentStatus.CANCELLED, status)
-        verify(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
+        assertEquals(expectedStatus, status)
+        verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient).getPayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
         assertNull(landlordRepository.findById(LANDLORD_ID).get().anniversary)
+        assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
         val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
-        assertEquals(PaymentStatus.CANCELLED, payment.status)
+        assertEquals(expectedStatus, payment.status)
         assertNull(payment.associatedProperty)
-        assertNotNull(payment.associatedIncompleteProperty)
+        assertEquals(INCOMPLETE_PROPERTY_ID, payment.associatedIncompleteProperty?.id)
+    }
+
+    @Test
+    fun `finalisePayment does not overwrite a status another request records after GOV UK Pay reports a failed capture`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doAnswer {
+            TransactionSynchronizationManager.registerSynchronization(
+                object : TransactionSynchronization {
+                    override fun afterCompletion(status: Int) {
+                        if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
+                            // Simulate another request recording its outcome after the registration releases its row lock.
+                            TransactionTemplate(transactionManager)
+                                .apply { propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW }
+                                .executeWithoutResult {
+                                    paymentRepository.updateStatusIfCurrentStatusIn(
+                                        CREATED_PAYMENT_ID,
+                                        listOf(PaymentStatus.INDETERMINATE),
+                                        PaymentStatus.CANCELLED,
+                                        NOW,
+                                    )
+                                }
+                        }
+                    }
+                },
+            )
+            throw GovUkPayException("Capture failed")
+        }.whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
+            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.FAILED))
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.CANCELLED, status)
+        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(CREATED_PAYMENT_ID))
+        verify(mockGovUkPayClient).getPayment(CREATED_PAYMENT_ID)
+        verify(mockGovUkPayClient, never()).cancelPayment(CREATED_PAYMENT_ID)
     }
 
     @Test
