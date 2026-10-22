@@ -203,14 +203,16 @@ class OrganisationalLandlordInvitationService(
         invitationRepository.delete(getPendingInvitationIfAuthorized(invitationId))
     }
 
+    private fun getInvitationById(invitationId: Long): OrganisationalLandlordInvitation =
+        invitationRepository.findById(invitationId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+        }
+
     private fun getInvitationForOrganisation(
         invitationId: Long,
         organisationalLandlord: OrganisationalLandlord,
     ): OrganisationalLandlordInvitation {
-        val invitation =
-            invitationRepository.findById(invitationId).orElseThrow {
-                ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
-            }
+        val invitation = getInvitationById(invitationId)
 
         // Invitations belonging to another organisation are reported as not found, so that their existence is not disclosed
         if (invitation.organisationalLandlord.id != organisationalLandlord.id) {
