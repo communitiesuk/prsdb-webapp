@@ -7,6 +7,7 @@ import org.springframework.context.MessageSource
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.ResourceAccessException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
@@ -308,17 +309,8 @@ class PaymentService(
                 PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
             }
 
-        // GOV.UK Pay may be briefly unavailable, so wait before checking whether the capture went through
         try {
-            Thread.sleep(captureCheckDelay)
-        } catch (exception: InterruptedException) {
-            Thread.currentThread().interrupt()
-            outcomeUnknownException.addSuppressed(exception)
-            throw outcomeUnknownException
-        }
-
-        try {
-            when (val govUkPayStatus = getGovUkPayPaymentStatus(paymentId).status) {
+            when (val govUkPayStatus = getGovUkPayPaymentStatusWithRetry(paymentId).status) {
                 PaymentStatus.SUCCEEDED -> {
                     return
                 }
@@ -343,6 +335,31 @@ class PaymentService(
 
         throw outcomeUnknownException
     }
+
+    private fun getGovUkPayPaymentStatusWithRetry(paymentId: String): PaymentStatusCheckDataModel =
+        try {
+            getGovUkPayPaymentStatus(paymentId)
+        } catch (exception: GovUkPayException) {
+            val isTransientFailure = exception.httpStatus?.is5xxServerError() ?: (exception.cause is ResourceAccessException)
+            if (!isTransientFailure) throw exception
+
+            // Wait only after a transient lookup failure; the first check should be immediate.
+            try {
+                Thread.sleep(captureCheckDelay)
+            } catch (interruption: InterruptedException) {
+                Thread.currentThread().interrupt()
+                exception.addSuppressed(interruption)
+                throw exception
+            }
+
+            // Try to get the payment status one more time.
+            try {
+                getGovUkPayPaymentStatus(paymentId)
+            } catch (retryException: GovUkPayException) {
+                if (retryException !== exception) retryException.addSuppressed(exception)
+                throw retryException
+            }
+        }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }

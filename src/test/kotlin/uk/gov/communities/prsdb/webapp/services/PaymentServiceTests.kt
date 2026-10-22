@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -42,6 +43,8 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.TransactionSystemException
 import org.springframework.transaction.support.SimpleTransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.ResourceAccessException
+import org.springframework.web.client.RestClientException
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
@@ -1316,9 +1319,42 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment waits before checking the payment's status with GOV UK Pay after the capture call fails`() {
+        fun `finalisePayment waits only once before retrying a transient status check failure`() {
             // Arrange
             val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = CAPTURE_CHECK_DELAY)
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            var firstStatusCheckFailedAt = 0L
+            var statusRetriedAt = 0L
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenAnswer {
+                if (firstStatusCheckFailedAt == 0L) {
+                    firstStatusCheckFailedAt = System.nanoTime()
+                    throw GovUkPayException("Network error", ResourceAccessException("Connection reset"))
+                } else {
+                    statusRetriedAt = System.nanoTime()
+                    createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS)
+                }
+            }
+
+            // Act
+            val status = paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            assertTrue(Duration.ofNanos(statusRetriedAt - firstStatusCheckFailedAt) >= CAPTURE_CHECK_DELAY)
+            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+        }
+
+        @Test
+        fun `finalisePayment does not wait before the first status check after capture fails`() {
+            // Arrange
+            val captureCheckDelay = Duration.ofSeconds(5)
+            val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = captureCheckDelay)
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1341,11 +1377,14 @@ class PaymentServiceTests {
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
-            assertTrue(Duration.ofNanos(statusCheckedAt - captureFailedAt) >= CAPTURE_CHECK_DELAY)
+            assertTrue(Duration.ofNanos(statusCheckedAt - captureFailedAt) < captureCheckDelay)
+            verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
+            verify(mockTransactionManager).commit(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
 
         @Test
-        fun `finalisePayment rolls back without checking GOV UK Pay when interrupted while waiting to check a failed capture`() {
+        fun `finalisePayment preserves the interrupt flag when the first status check confirms capture succeeded`() {
             // Arrange
             val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = CAPTURE_CHECK_DELAY)
             val captureFailure = GovUkPayException("Capture timed out")
@@ -1359,14 +1398,14 @@ class PaymentServiceTests {
                 Thread.currentThread().interrupt()
                 throw captureFailure
             }.whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
 
             // Act
             var wasInterrupted = false
-            val exception =
+            val status =
                 try {
-                    assertThrows<PaymentCaptureOutcomeUnknownException> {
-                        paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
-                    }
+                    paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 } finally {
                     // Clears the flag so it can't leak into other tests
                     wasInterrupted = Thread.interrupted()
@@ -1374,15 +1413,151 @@ class PaymentServiceTests {
 
             // Assert
             assertTrue(wasInterrupted)
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
+            verify(mockTransactionManager).commit(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @ParameterizedTest
+        @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideTransientStatusCheckFailures")
+        fun `finalisePayment recovers after one transient status check failure`(statusCheckFailure: GovUkPayException) {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+                .thenThrow(statusCheckFailure)
+                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+            verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            verify(mockTransactionManager).commit(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = [false, true])
+        fun `finalisePayment preserves failed status checks and rolls back without cancelling`(sameFailure: Boolean) {
+            // Arrange
+            val captureFailure = GovUkPayException("Capture timed out")
+            val firstFailure = GovUkPayException("Network error", ResourceAccessException("Connection reset"))
+            val retryFailure =
+                if (sameFailure) {
+                    firstFailure
+                } else {
+                    GovUkPayException(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        null,
+                        null,
+                        RuntimeException(),
+                    )
+                }
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(firstFailure).thenThrow(retryFailure)
+
+            // Act
+            val exception =
+                assertThrows<PaymentCaptureOutcomeUnknownException> {
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+                }
+
+            // Assert
             assertSame(captureFailure, exception.cause)
-            assertIs<InterruptedException>(exception.suppressed.single())
-            verify(mockGovUkPayClient, never()).getPayment(any())
+            assertSame(retryFailure, exception.suppressed.single())
+            if (sameFailure) {
+                assertTrue(retryFailure.suppressed.isEmpty())
+            } else {
+                assertSame(firstFailure, retryFailure.suppressed.single())
+            }
+            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+            verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            verify(mockTransactionManager).rollback(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @ParameterizedTest
+        @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideNonTransientStatusCheckFailures")
+        fun `finalisePayment does not retry non-transient status check failures`(statusCheckFailure: GovUkPayException) {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(statusCheckFailure)
+
+            // Act
+            val exception =
+                assertThrows<PaymentCaptureOutcomeUnknownException> {
+                    paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+                }
+
+            // Assert
+            assertSame(statusCheckFailure, exception.suppressed.single())
+            verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
 
         @Test
-        fun `finalisePayment captures the payment again when GOV UK Pay still reports it capturable after the capture call fails`() {
+        fun `finalisePayment does not retry a transient status check failure on an interrupted thread`() {
+            // Arrange
+            val statusCheckFailure = GovUkPayException("Network error", ResourceAccessException("Connection reset"))
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
+            stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(GovUkPayException("Capture timed out")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenAnswer {
+                Thread.currentThread().interrupt()
+                throw statusCheckFailure
+            }
+
+            // Act
+            var wasInterrupted = false
+            val exception =
+                try {
+                    assertThrows<PaymentCaptureOutcomeUnknownException> {
+                        paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+                    }
+                } finally {
+                    wasInterrupted = Thread.interrupted()
+                }
+
+            // Assert
+            assertTrue(wasInterrupted)
+            assertSame(statusCheckFailure, exception.suppressed.single())
+            assertIs<InterruptedException>(statusCheckFailure.suppressed.single())
+            verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
+            verify(mockTransactionManager).rollback(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @ParameterizedTest
+        @ValueSource(booleans = [false, true])
+        fun `finalisePayment captures the payment again when GOV UK Pay still reports it capturable after the capture call fails`(
+            retryStatusCheck: Boolean,
+        ) {
             // Arrange
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
@@ -1391,8 +1566,15 @@ class PaymentServiceTests {
                 .thenReturn(MockLandlordData.createPropertyOwnership())
             stubStoredPayment()
             doThrow(GovUkPayException("Capture failed")).doNothing().whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
-                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
+            val statusCheck = whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+            val capturablePayment = createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE)
+            if (retryStatusCheck) {
+                statusCheck
+                    .thenThrow(GovUkPayException("Network error", ResourceAccessException("Connection reset")))
+                    .thenReturn(capturablePayment)
+            } else {
+                statusCheck.thenReturn(capturablePayment)
+            }
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
@@ -1400,6 +1582,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
             verify(mockGovUkPayClient, times(2)).capturePayment(PAYMENT_ID)
+            verify(mockGovUkPayClient, times(if (retryStatusCheck) 2 else 1)).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).commit(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
@@ -1984,6 +2167,26 @@ class PaymentServiceTests {
         private const val OTHER_PAYMENT_ID = "other-payment-id"
         private const val FINISHED_PAYMENT_ID = "finished-payment-id"
         private val CAPTURE_CHECK_DELAY: Duration = Duration.ofMillis(100)
+
+        @JvmStatic
+        fun provideTransientStatusCheckFailures() =
+            listOf(
+                Arguments.of(GovUkPayException("Network error", ResourceAccessException("Connection reset"))),
+                Arguments.of(GovUkPayException(HttpStatus.INTERNAL_SERVER_ERROR, null, null, RuntimeException())),
+                Arguments.of(GovUkPayException(HttpStatus.BAD_GATEWAY, null, null, RuntimeException())),
+                Arguments.of(GovUkPayException(HttpStatus.SERVICE_UNAVAILABLE, null, null, RuntimeException())),
+            )
+
+        @JvmStatic
+        fun provideNonTransientStatusCheckFailures() =
+            listOf(
+                Arguments.of(GovUkPayException(HttpStatus.BAD_REQUEST, null, null, RuntimeException())),
+                Arguments.of(GovUkPayException(HttpStatus.NOT_FOUND, null, null, RuntimeException())),
+                Arguments.of(GovUkPayException(HttpStatus.TOO_MANY_REQUESTS, null, null, RuntimeException())),
+                Arguments.of(GovUkPayException("No response body")),
+                Arguments.of(GovUkPayException("Malformed response", RestClientException("Unreadable response"))),
+                Arguments.of(GovUkPayException("Interrupted", InterruptedException())),
+            )
 
         @JvmStatic
         fun provideUnfinishedInProgressPaymentStatuses() =
