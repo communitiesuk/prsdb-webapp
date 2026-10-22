@@ -3,11 +3,11 @@
 <main class="govuk-main-wrapper" id="main-content">
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <th:block th:if="${successBanner != null}" th:with="isSuccess=true">
+        <th:block th:if="${successBanner != null}" th:with="isSuccess=true, successBannerBody=${#messages.msgOrNull(successBanner + '.body')}">
             <div id="success-banner"
-                 th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{teamMembers.successBanner.title}, ~{::#success-banner/content()})}">
-                <p class="govuk-notification-banner__heading" th:text="#{${successBanner}}">teamMembers.successBanner</p>
-                <p th:if="${successBannerBody != null}" class="govuk-body" th:text="#{${successBannerBody}}">teamMembers.successBannerBody</p>
+                 th:replace="~{fragments/banners/notificationBanner :: notificationBanner(${#messages.msg(successBanner + '.title')}, ~{::#success-banner/content()})}">
+                <p class="govuk-notification-banner__heading" th:text="${#messages.msg(successBanner + '.heading')}">teamMembers.successBanner.heading</p>
+                <p th:if="${successBannerBody != null}" class="govuk-body" th:text="${successBannerBody}">teamMembers.successBanner.body</p>
             </div>
         </th:block>
 

@@ -35,18 +35,15 @@ class CancelOrganisationalLandlordInvitationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }
-            configure {
-                withAdditionalContentProperty { "title" to "cancelOrganisationalLandlordInvitation.title" }
-            }
             step(journey.areYouSureStep) {
                 routeSegment(AreYouSureStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { invitationsTabUrl }
                 nextDestination { mode ->
-                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
-                        Destination.ExternalUrl(invitationsTabUrl)
-                    } else {
+                    if (mode == AreYouSureMode.WANTS_TO_PROCEED) {
                         Destination(journey.cancelInvitationStep)
+                    } else {
+                        Destination.ExternalUrl(invitationsTabUrl)
                     }
                 }
             }
@@ -55,8 +52,7 @@ class CancelOrganisationalLandlordInvitationJourneyFactory(
                 nextDestination {
                     Destination
                         .ExternalUrl(invitationsTabUrl)
-                        .withFlashAttribute("successBanner", "teamMembers.successBanner.invitationCancelled.heading")
-                        .withFlashAttribute("successBannerBody", "teamMembers.successBanner.invitationCancelled.body")
+                        .withFlashAttribute("successBanner", "teamMembers.successBanner.invitationCancelled")
                 }
             }
         }

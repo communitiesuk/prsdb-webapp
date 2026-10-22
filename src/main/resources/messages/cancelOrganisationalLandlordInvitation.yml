@@ -1,4 +1,3 @@
-title: Cancel invitation
 areYouSure:
   fieldSetHeading: 'Do you want to cancel the invitation for {0}?'
   radios:
