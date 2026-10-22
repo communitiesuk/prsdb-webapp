@@ -35,12 +35,12 @@ jobs:
       FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.environment == 'integration' && 'main' || inputs.environment }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/${{ inputs.environment }}-rds-access
           aws-region: ${{ env.AWS_REGION }}
