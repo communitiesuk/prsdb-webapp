@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 
@@ -54,8 +55,21 @@ class PropertyComplianceTests {
         expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(expiryDate).build()
-        assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired)
+        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate)
+                    .withElectricalCertType(certType)
+                    .build()
+            assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired, "for $certType")
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyExpired is null when the electrical cert type is missing`() {
+        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(LocalDate.now().minusYears(1)).build()
+
+        assertNull(propertyCompliance.isElectricalSafetyExpired)
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")

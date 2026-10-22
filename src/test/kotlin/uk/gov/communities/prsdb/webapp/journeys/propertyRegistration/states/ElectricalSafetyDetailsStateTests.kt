@@ -53,35 +53,26 @@ class ElectricalSafetyDetailsStateTests {
 
     @Test
     fun `getElectricalCertificateIsOutdated returns true if the certificate expiry date is in the past`() {
-        // Arrange
-        val expiryDate = LocalDate.now().minusDays(5)
-        val expiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate)
-        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = expiryDateFormModel)
-
-        // Act, Assert
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        electricalCertTypes.forEach { certType ->
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now().minusDays(5), certType)
+            assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
+        }
     }
 
     @Test
     fun `getElectricalCertificateIsOutdated returns false if the certificate expiry date is in the future`() {
-        // Arrange
-        val expiryDate = LocalDate.now().plusDays(5)
-        val expiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate)
-        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = expiryDateFormModel)
-
-        // Act, Assert
-        assertFalse(state.getElectricalCertificateIsOutdated()!!)
+        electricalCertTypes.forEach { certType ->
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now().plusDays(5), certType)
+            assertFalse(state.getElectricalCertificateIsOutdated()!!, "for $certType")
+        }
     }
 
     @Test
     fun `getElectricalCertificateIsOutdated returns true if the certificate expires today`() {
-        // Arrange
-        val expiryDate = LocalDate.now()
-        val expiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate)
-        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = expiryDateFormModel)
-
-        // Act, Assert
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        electricalCertTypes.forEach { certType ->
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now(), certType)
+            assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
+        }
     }
 
     @Test
@@ -136,6 +127,16 @@ class ElectricalSafetyDetailsStateTests {
         val state = buildTestElectricalSafetyDetailState(hasElectricalCertFormModel = formModel)
         assertNull(state.mapElectricalCertificateTypeToGlobalCertificateType())
     }
+
+    private val electricalCertTypes = listOf(HasElectricalSafetyCertificate.HAS_EIC, HasElectricalSafetyCertificate.HAS_EICR)
+
+    private fun buildTestElectricalSafetyDetailStateWithExpiryDate(
+        expiryDate: LocalDate,
+        certType: HasElectricalSafetyCertificate,
+    ) = buildTestElectricalSafetyDetailState(
+        expiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate),
+        hasElectricalCertFormModel = HasElectricalCertFormModel().apply { electricalCertType = certType },
+    )
 
     private fun buildTestElectricalSafetyDetailState(
         expiryDateFormModel: AnyDateFormModel = AnyDateFormModel(),

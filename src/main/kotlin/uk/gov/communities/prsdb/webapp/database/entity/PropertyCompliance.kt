@@ -133,6 +133,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         hasGasSupply: Boolean? = null,
         gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -148,6 +149,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.hasGasSupply = hasGasSupply
         this.gasSafetyFileUploads = gasSafetyFileUploads
         this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        this.electricalCertType = electricalCertType
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
         this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
