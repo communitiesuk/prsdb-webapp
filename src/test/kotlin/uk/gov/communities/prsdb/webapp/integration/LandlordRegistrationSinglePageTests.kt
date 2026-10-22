@@ -329,10 +329,10 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class LandlordRegistrationConfirmation {
         @Test
-        fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
+        fun `Navigating here without a registered landlord returns a 403 error page`(page: Page) {
             navigator.navigateToLandlordRegistrationConfirmationPage()
             val errorPage = assertPageIs(page, ErrorPage::class)
-            BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+            BaseComponent.assertThat(errorPage.heading).containsText("You do not have permission to access this page")
         }
     }
 
