@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - nft
+      - feat/PDJB-552-nft-performance-tests-nft
 
 permissions:
   id-token: write
