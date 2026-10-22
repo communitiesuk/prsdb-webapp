@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -11,6 +12,7 @@ import org.junit.jupiter.params.provider.NullSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -100,13 +102,24 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
-    // TODO PDJB-1734: Tests that send the confirmation email currently rely on the PAYMENTS flag defaulting to off.
-    //  When the flag is removed, they will need a succeeded payment stubbed on this repository.
     @Mock
     private lateinit var mockPaymentRepository: PaymentRepository
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
+
+    @BeforeEach
+    fun setUp() {
+        // TODO PDJB-1734: Remove the checkFeature(PAYMENTS) stub when the flag is removed, but keep the payment repository stub
+        lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+        lenient()
+            .`when`(
+                mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    any(),
+                    eq(PaymentStatus.SUCCEEDED),
+                ),
+            ).thenReturn(MockPaymentData.createPayment(status = PaymentStatus.SUCCEEDED))
+    }
 
     @AfterEach
     fun tearDown() {
@@ -1569,8 +1582,6 @@ class PropertyRegistrationServiceTests {
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
-        // TODO PDJB-1734: Replace with a succeeded payment stub when the PAYMENTS flag is removed
-        whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
 
         propertyRegistrationService.registerProperty(
             MockPropertyRegistrationData.createPropertyRegistrationDataModel(
@@ -1724,7 +1735,7 @@ class PropertyRegistrationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
-        stubConfirmationEmailDependencies(isPaymentsEnabled = true)
+        stubConfirmationEmailDependencies()
         // 23:30 UTC on 4 October is 00:30 BST on 5 October
         val payment =
             MockPaymentData.createPayment(
@@ -1762,7 +1773,7 @@ class PropertyRegistrationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
-        stubConfirmationEmailDependencies(isPaymentsEnabled = true)
+        stubConfirmationEmailDependencies()
         whenever(
             mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
                 propertyOwnership,
@@ -1786,7 +1797,8 @@ class PropertyRegistrationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
-        stubConfirmationEmailDependencies(isPaymentsEnabled = false)
+        stubConfirmationEmailDependencies()
+        whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
 
         // Act
         propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
@@ -1835,12 +1847,10 @@ class PropertyRegistrationServiceTests {
         ).thenReturn(propertyOwnership)
     }
 
-    // TODO PDJB-1734: Remove the isPaymentsEnabled parameter and PAYMENTS stub when the PAYMENTS flag is removed
-    private fun stubConfirmationEmailDependencies(isPaymentsEnabled: Boolean) {
+    private fun stubConfirmationEmailDependencies() {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(CURRENT_USER_EMAIL)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(false)
-        whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(isPaymentsEnabled)
     }
 
     private fun createLettingAgentInvitation(propertyOwnership: PropertyOwnership) =
