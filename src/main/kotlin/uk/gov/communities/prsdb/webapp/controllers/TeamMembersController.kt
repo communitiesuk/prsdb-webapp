@@ -92,6 +92,7 @@ class TeamMembersController(
         const val ADMINISTRATORS_FRAGMENT = "administrators"
         const val EDITORS_FRAGMENT = "editors"
         const val INVITATIONS_FRAGMENT = "invitations"
+        const val TEAM_MEMBERS_INVITATIONS_TAB_PATH = "$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT"
 
         const val REMOVE_EXPIRED_INVITATION_PATH = "/$REMOVE_EXPIRED_INVITE_PATH_SEGMENT/{invitationId}"
         const val REMOVE_EXPIRED_INVITATION_ROUTE = "$TEAM_MEMBERS_ROUTE$REMOVE_EXPIRED_INVITATION_PATH"

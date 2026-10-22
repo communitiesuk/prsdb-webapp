@@ -5,6 +5,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
+import uk.gov.communities.prsdb.webapp.controllers.CancelOrganisationalLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
@@ -118,7 +119,7 @@ class TeamMembersViewModelTests {
         // Arrange
         val invitations =
             listOf(
-                invitation("newer@example.com", daysAgo = 1),
+                invitation("newer@example.com", daysAgo = 1, id = 1L),
                 invitation("older@example.com", daysAgo = 10, id = 2L),
             )
 
@@ -135,7 +136,10 @@ class TeamMembersViewModelTests {
         assertEquals(
             listOf(
                 SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(2L)),
-                SummaryListRowActionsViewModel("forms.links.cancel", "#"),
+                SummaryListRowActionsViewModel(
+                    "forms.links.cancel",
+                    CancelOrganisationalLandlordInvitationController.getCancelInvitationPath(2L),
+                ),
             ),
             viewModel.pendingInvitationRows.first().actions,
         )
