@@ -95,7 +95,6 @@ class PropertyDetailsController(
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
-        modelAndView.addObject("showLettingAgentPanel", true)
         val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
         modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
         modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)

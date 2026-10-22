@@ -407,7 +407,6 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    model { attribute("showLettingAgentPanel", true) }
                     model { attribute("delegatesToLettingAgent", true) }
                     model { attribute("lettingAgentEmail", "agent@example.com") }
                     model { attributeExists("lettingAgentPanelLink") }
@@ -428,7 +427,6 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    model { attribute("showLettingAgentPanel", true) }
                     model { attribute("delegatesToLettingAgent", false) }
                     model { attributeDoesNotExist("lettingAgentEmail") }
                     model { attributeExists("lettingAgentPanelLink") }
@@ -465,7 +463,6 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    model { attribute("showLettingAgentPanel", true) }
                     model { attribute("propertyIsOccupied", false) }
                     model { attributeDoesNotExist("lettingAgentPanelLink") }
                 }
@@ -485,7 +482,6 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    model { attribute("showLettingAgentPanel", true) }
                     model { attribute("propertyIsOccupied", true) }
                     model { attributeExists("lettingAgentPanelLink") }
                 }
