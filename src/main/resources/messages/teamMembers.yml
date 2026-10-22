@@ -2,9 +2,9 @@ title: Team members
 heading: Team members
 currentUserName: '{0,,name} (You)'
 inviteTeamMemberButton: Invite a team member
-successBanner:
+invitationSentBanner:
   title: Success
-  invitationSent: Invitation sent
+  heading: Invitation sent
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators
