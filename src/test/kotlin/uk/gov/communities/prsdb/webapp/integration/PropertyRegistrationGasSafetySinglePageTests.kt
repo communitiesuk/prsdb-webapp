@@ -2,12 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -23,7 +21,7 @@ import java.util.regex.Pattern
 
 class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
-    inner class BeforePdjb1022HasGasSupplyStep {
+    inner class HasGasSupplyStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
@@ -61,12 +59,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     }
 
     @Nested
-    inner class ProvideGasCertLaterStep {
-        @BeforeEach
-        fun enableLettingAgentsFlag() {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-        }
-
+    inner class ProvideGasCertLaterStepTests {
         @Test
         fun `Occupied property shows the provide later content`(page: Page) {
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = true)
@@ -99,15 +92,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             isOccupied: Boolean,
         ): ProvideGasCertLaterFormPagePropertyRegistration {
             val gasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = isOccupied)
-            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                // With the flag enabled, "Provide this later" is submitted directly from the has-gas-supply page
-                gasSupplyPage.submitProvideThisLater()
-            } else {
-                // With the flag disabled, "Provide this later" is only offered on the (legacy) has-gas-cert page
-                gasSupplyPage.submitHasGasSupply()
-                val gasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-                gasCertPage.submitProvideThisLater()
-            }
+            gasSupplyPage.submitProvideThisLater()
             return assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
         }
     }
@@ -267,60 +252,24 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
 
         @Nested
         inner class ProvideLater {
-            @Nested
-            inner class WhenLettingAgentsEnabled {
-                @BeforeEach
-                fun enableLettingAgentsFlag() {
-                    featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-                }
-
-                @Test
-                fun `A single provide this later row is shown against the gas supply question`() {
-                    val cyaPage =
-                        navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
-                            PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
-                        )
-                    assertThat(cyaPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Provide this later")
-                    assertThat(cyaPage.gasSupplySummaryList.gasCertRow.value).hasCount(0)
-                }
-
-                @Test
-                fun `The gas supply change link navigates to has gas supply page`(page: Page) {
-                    val cyaPage =
-                        navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
-                            PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
-                        )
-                    cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
-                    assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
-                }
+            @Test
+            fun `A single provide this later row is shown against the gas supply question`() {
+                val cyaPage =
+                    navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
+                    )
+                assertThat(cyaPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Provide this later")
+                assertThat(cyaPage.gasSupplySummaryList.gasCertRow.value).hasCount(0)
             }
 
-            @Nested
-            inner class WhenLettingAgentsDisabled {
-                @BeforeEach
-                fun disableLettingAgentsFlag() {
-                    featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-                }
-
-                @Test
-                fun `Separate gas supply and gas cert rows are shown`() {
-                    val cyaPage =
-                        navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
-                            PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert(),
-                        )
-                    assertThat(cyaPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
-                    assertThat(cyaPage.gasSupplySummaryList.gasCertRow.value).containsText("Provide this later")
-                }
-
-                @Test
-                fun `The gas cert change link navigates to has gas cert page`(page: Page) {
-                    val cyaPage =
-                        navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
-                            PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert(),
-                        )
-                    cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
-                    assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-                }
+            @Test
+            fun `The gas supply change link navigates to has gas supply page`(page: Page) {
+                val cyaPage =
+                    navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
+                    )
+                cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+                assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             }
         }
 
