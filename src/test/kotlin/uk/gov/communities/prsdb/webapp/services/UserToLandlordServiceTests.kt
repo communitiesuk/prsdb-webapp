@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -79,9 +80,9 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
-        assertThrows<ResponseStatusException> {
-            service.getLandlordForBaseUserId(baseUserId)
-        }
+        val exception = assertThrows<ResponseStatusException> { service.getLandlordForBaseUserId(baseUserId) }
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
     }
 
     @Test
@@ -117,7 +118,61 @@ class UserToLandlordServiceTests {
 
         val exception = assertThrows<ResponseStatusException> { service.getCurrentLandlordForUser() }
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+    }
+
+    @Test
+    fun `getCurrentLandlordForUser returns forbidden after organisation membership is removed`() {
+        val baseUserId = "organisation-user"
+        val landlord = OrganisationalLandlord()
+        val member =
+            OrganisationalLandlordUser(
+                landlord,
+                MockLandlordData.createPrsdbUser(baseUserId),
+                "Alice Registrant",
+                "alice@example.com",
+                OrganisationalLandlordUserRole.EDITOR,
+            )
+        setMockPrincipal(baseUserId)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId))
+            .thenReturn(listOf(member), emptyList())
+
+        assertEquals(landlord, service.getCurrentLandlordForUser())
+        val exception = assertThrows<ResponseStatusException> { service.getCurrentLandlordForUser() }
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+    }
+
+    @Test
+    fun `getCurrentLandlordForUserOrNull returns null when authenticated user has no landlord`() {
+        val baseUserId = "non-landlord-user"
+        setMockPrincipal(baseUserId)
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
+
+        val result = service.getCurrentLandlordForUserOrNull()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getCurrentLandlordForUser preserves error when multiple landlords are found`() {
+        val baseUserId = "multiple-landlord-user"
+        setMockPrincipal(baseUserId)
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(MockLandlordData.createIndividualLandlord())
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
+            listOf(
+                OrganisationalLandlordUser(
+                    OrganisationalLandlord(),
+                    MockLandlordData.createPrsdbUser(baseUserId),
+                    "Alice Registrant",
+                    "alice@example.com",
+                    OrganisationalLandlordUserRole.EDITOR,
+                ),
+            ),
+        )
+
+        assertThrows<PrsdbWebException> { service.getCurrentLandlordForUser() }
     }
 
     @Test

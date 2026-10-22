@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -117,6 +119,19 @@ class LandlordControllerTests(
     @Test
     @WithMockUser
     fun `landlordDashboard returns 403 for unauthorized user`() {
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_EDITOR"], username = "removed-member")
+    fun `landlordDashboard returns 403 when session retains organisation role after membership removal`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser())
+            .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
+
         mvc
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
@@ -252,8 +267,8 @@ class LandlordControllerTests(
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.HAS_FAULTS,
-                false,
-                true,
+                isComplete = false,
+                isOccupied = true,
             )
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
