@@ -185,11 +185,13 @@ class OrganisationalLandlordInvitationService(
     }
 
     fun getPendingInvitationIfAuthorized(invitationId: Long): OrganisationalLandlordInvitation {
-        val currentOrganisation =
-            userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()?.organisationalLandlord
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+        val currentAdmin =
+            userToOrgLandlordUserService
+                .getOrganisationalLandlordUserForCurrentUser()
+                ?.takeIf { it.role == OrganisationalLandlordUserRole.ADMIN }
+                ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Current user is not an organisation admin")
 
-        val invitation = getInvitationForOrganisation(invitationId, currentOrganisation)
+        val invitation = getInvitationForOrganisation(invitationId, currentAdmin.organisationalLandlord)
 
         if (invitation.status != OrganisationalLandlordInvitationStatus.PENDING) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId is not pending")

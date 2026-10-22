@@ -1079,7 +1079,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getPendingInvitationIfAuthorized throws 404 when the current user is not an organisational landlord user`() {
+    fun `getPendingInvitationIfAuthorized throws 403 when the current user is not an organisational landlord user`() {
         // Arrange
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
 
@@ -1090,7 +1090,23 @@ class OrganisationalLandlordInvitationServiceTests {
             }
 
         // Assert
-        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+        verify(mockInvitationRepository, never()).findById(any())
+    }
+
+    @Test
+    fun `getPendingInvitationIfAuthorized throws 403 when the current user is not an organisation admin`() {
+        // Arrange
+        arrangeCurrentUserIsEditor()
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.getPendingInvitationIfAuthorized(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
         verify(mockInvitationRepository, never()).findById(any())
     }
 
@@ -1110,7 +1126,24 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `cancelInvitationIfAuthorized does not delete an invitation that belongs to a different organisation`() {
+    fun `cancelInvitationIfAuthorized throws 404 and does not delete when the invitation does not exist`() {
+        // Arrange
+        arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.empty())
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.cancelInvitationIfAuthorized(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
+    @Test
+    fun `cancelInvitationIfAuthorized throws 404 and does not delete an invitation that belongs to a different organisation`() {
         // Arrange
         arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
         val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(2L))
@@ -1127,12 +1160,83 @@ class OrganisationalLandlordInvitationServiceTests {
         verify(mockInvitationRepository, never()).delete(any())
     }
 
+    @ParameterizedTest
+    @CsvSource(
+        "true, false",
+        "false, true",
+    )
+    fun `cancelInvitationIfAuthorized throws 404 and does not delete when the invitation is not pending`(
+        isExpired: Boolean,
+        isHidden: Boolean,
+    ) {
+        // Arrange
+        val organisation = createOrgLandlordWithId(1L)
+        arrangeCurrentUserInOrganisation(organisation)
+        val createdDate = if (isExpired) Instant.now().minus(60, ChronoUnit.DAYS) else Instant.now()
+        val invitation =
+            createOrganisationalLandlordInvitation(
+                organisationalLandlord = organisation,
+                createdDate = createdDate,
+                isHidden = isHidden,
+            )
+        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.cancelInvitationIfAuthorized(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
+    @Test
+    fun `cancelInvitationIfAuthorized throws 403 and does not delete when the current user is not an organisational landlord user`() {
+        // Arrange
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.cancelInvitationIfAuthorized(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
+    @Test
+    fun `cancelInvitationIfAuthorized throws 403 and does not delete when the current user is not an organisation admin`() {
+        // Arrange
+        arrangeCurrentUserIsEditor()
+
+        // Act
+        val exception =
+            assertThrows<ResponseStatusException> {
+                invitationService.cancelInvitationIfAuthorized(invitationId)
+            }
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+        verify(mockInvitationRepository, never()).delete(any())
+    }
+
     private fun createOrgLandlordWithId(id: Long): OrganisationalLandlord =
         createOrgLandlord().also { ReflectionTestUtils.setField(it, "id", id) }
 
     private fun arrangeCurrentUserInOrganisation(organisation: OrganisationalLandlord) {
         val currentUser = mock<OrganisationalLandlordUser>()
+        whenever(currentUser.role).thenReturn(ADMIN)
         whenever(currentUser.organisationalLandlord).thenReturn(organisation)
+        whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
+    }
+
+    private fun arrangeCurrentUserIsEditor() {
+        val currentUser = mock<OrganisationalLandlordUser>()
+        whenever(currentUser.role).thenReturn(EDITOR)
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(currentUser)
     }
 
