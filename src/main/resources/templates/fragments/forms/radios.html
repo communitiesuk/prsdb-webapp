@@ -1,10 +1,10 @@
 <th:block id="radios" th:fragment="radios(label, fieldName, hint, options)" th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#radios/content()}, ${hint})}">
     <div class="govuk-radios" data-module="govuk-radios">
-        <th:block th:each="option: ${options}">
+        <th:block th:each="option, optionStat: ${options}">
 
             <div th:if="${option.isDivider}" class="govuk-radios__divider" th:text="#{${option.labelMsgKey}}"></div>
 
-            <th:block th:if="${!option.isDivider}" th:with="radioItemID=|${fieldName}-${option.valueStr}|,  hintID=|${fieldName}-${option.valueStr}-hint|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
+            <th:block th:if="${!option.isDivider}" th:with="radioItemID=${optionStat.first} ? ${fieldName} : |${fieldName}-${option.valueStr}|,  hintID=|${fieldName}-${option.valueStr}-hint|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
                 <div class="govuk-radios__item">
                     <input class="govuk-radios__input"
                            type="radio"

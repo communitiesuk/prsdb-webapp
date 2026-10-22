@@ -3,7 +3,7 @@
     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
         <th:block th:each="option, itemStat: ${options}">
             <div th:if="${option.isDivider}" class="govuk-checkboxes__divider" th:text="#{${option.labelMsgKey}}"></div>
-            <th:block th:if="${!option.isDivider}" th:with="checkboxInputID=|${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
+            <th:block th:if="${!option.isDivider}" th:with="checkboxInputID=${itemStat.first} ? ${fieldName} : |${fieldName}-${option.valueStr}|, conditionalFragmentID=|${fieldName}-${option.valueStr}-conditional|">
             <div class="govuk-checkboxes__item">
                 <input th:if="${options.size() == 1}" class="govuk-checkboxes__input" type="checkbox"
                        th:field="*{__${fieldName}__}" th:value="${option.value}" th:id="${checkboxInputID}"
