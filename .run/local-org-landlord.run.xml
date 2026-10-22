@@ -1,9 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="local-org-landlord" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ACTIVE_PROFILES" value="local, local-no-auth, local-org-landlord, use-notify" />
+    <option name="ACTIVE_PROFILES" value="local, local-no-auth, local-org-landlord" />
     <option name="ALTERNATIVE_JRE_PATH" value="corretto-25" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="PROGRAM_PARAMETERS" value="--local.one-login-user-id=urn:fdc:gov.uk:2022:INVITEE" />
     <option name="envFilePaths">
       <option value="$PROJECT_DIR$/.env" />
     </option>
