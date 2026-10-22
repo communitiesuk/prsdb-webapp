@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -20,13 +21,23 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Test
-    fun `the back link is shown when navigated to from the dashboard footer and returns to the dashboard`(page: Page) {
+    fun `the back link returns to the dashboard when navigated to from its footer`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.footer.privacyNoticeLink.clickAndWait()
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePage::class)
         assertThat(privacyNoticePage.backLink).isVisible()
         privacyNoticePage.backLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `the back link returns to the landlord record when navigated to from its footer`(page: Page) {
+        val landlordDetails = navigator.goToLandlordDetails()
+        landlordDetails.footer.privacyNoticeLink.clickAndWait()
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePage::class)
+        assertThat(privacyNoticePage.backLink).isVisible()
+        privacyNoticePage.backLink.clickAndWait()
+        assertPageIs(page, LandlordDetailsPage::class)
     }
 
     @Test
