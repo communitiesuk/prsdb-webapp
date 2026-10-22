@@ -236,6 +236,10 @@ addresses use `example.invalid`. Each pass checks the saved profile value. Run w
 enable `use-notify`; local email notifications are handled by the stub service. In NFT the `one-login-simulator` profile (active only during performance runs) also selects the stub service, so
 no emails are sent to Notify and Notify's allow-list cannot fail the journeys.
 
+NFT is behind CloudFront, whose cache policy has a 1 second minimum TTL that overrides `no-store`. A repeat GET
+of the same URL by the same session within a second can return a stale page, so the saved-details reads append a
+unique `perfCacheBuster` query parameter to bypass the cache.
+
 Each registration pass uses a separate sequential virtual user and a unique synthetic One Login subject, email,
 and phone value. It performs identity verification with synthetic claims, accepts the privacy notice, and completes
 the individual manual-address registration. Registration clears the app session to refresh the user's roles, so
