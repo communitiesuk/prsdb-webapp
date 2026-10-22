@@ -5,7 +5,7 @@
 <!--/*@thymesVar id="plausibleEventCurrentUrl" type="String"*/-->
 <!--/*@thymesVar id="serviceName" type="String"*/-->
 <!DOCTYPE html>
-<html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded"
+<html th:fragment="layout(title, content, hasErrors, backUrl, mainClass)" lang="en" class="govuk-template govuk-template--rebranded"
       th:with="pageTitleServiceName=${serviceName ?: #messages.msg('serviceName')}">
 <head>
     <meta charset="utf-8">
@@ -56,7 +56,10 @@
 <div class="govuk-width-container">
     <div th:replace="~{fragments/banners/betaBanner :: betaBanner}"></div>
     <div th:replace="~{fragments/banners/featureFlagOverrideBanner :: featureFlagOverrideBanner}"></div>
-    <div th:replace="${content}"></div>
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}"></a>
+    <main class="govuk-main-wrapper" th:classappend="${mainClass}" id="main-content" role="main">
+        <th:block th:replace="${content}"></th:block>
+    </main>
 </div>
 <div th:replace="~{fragments/footer :: footer}"></div>
 <script type="module" th:src="@{/assets/js/index.js}"></script>
