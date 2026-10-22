@@ -233,7 +233,8 @@ The basic suite signs in as seeded landlord Alexander Smith for each profile-upd
 change on every warm-up and measured pass, so each profile submission updates the saved value rather than
 resubmitting an unchanged value. Phone values use the synthetic London range beginning `02079460123`; email
 addresses use `example.invalid`. Each pass checks the saved profile value. Run with the local profile and do not
-enable `use-notify`; local email notifications are handled by the stub service.
+enable `use-notify`; local email notifications are handled by the stub service. In NFT the `one-login-simulator` profile (active only during performance runs) also selects the stub service, so
+no emails are sent to Notify and Notify's allow-list cannot fail the journeys.
 
 Each registration pass uses a separate sequential virtual user and a unique synthetic One Login subject, email,
 and phone value. It performs identity verification with synthetic claims, accepts the privacy notice, and completes
