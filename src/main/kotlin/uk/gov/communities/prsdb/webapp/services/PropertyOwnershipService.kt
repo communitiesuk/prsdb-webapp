@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -52,7 +50,6 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
-    private val featureFlagManager: FeatureFlagManager,
     private val addressService: AddressService,
 ) {
     @Transactional
@@ -155,8 +152,6 @@ class PropertyOwnershipService(
     }
 
     fun hasLettingAgent(propertyOwnershipId: Long): Boolean {
-        if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
-
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 

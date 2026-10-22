@@ -6,20 +6,16 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcSummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateEpcJourneyPages.CheckEpcAnswersFormPageLettingAgentUpdateEpc
@@ -45,11 +41,6 @@ class LettingAgentUpdateEpcJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Value("\${epc.certificate-base-url}")
     private lateinit var epcCertificateBaseUrl: String
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `The EPC update journey shows Continue buttons rather than Save and continue`(page: Page) {
@@ -95,16 +86,6 @@ class LettingAgentUpdateEpcJourneyTests : IntegrationTestWithMutableData("data-l
         saveAnswers(page)
 
         assertCertificateSaved(page)
-    }
-
-    @Test
-    fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        navigator.navigate("$updateRoute/${StartEpcStep.ROUTE_SEGMENT}")
-
-        val errorPage = createValidPage(page, ErrorPage::class)
-        assertThatComponent(errorPage.heading).containsText("Page not found")
     }
 
     private fun startUpdate() {

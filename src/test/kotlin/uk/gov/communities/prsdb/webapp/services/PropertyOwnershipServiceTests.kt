@@ -35,8 +35,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -102,9 +100,6 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLettingAgentAccessRepository: LettingAgentAccessRepository
-
-    @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -708,19 +703,8 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetLettingAgentAccess {
         @Test
-        fun `getLettingAgentAccess returns null without loading the property when the feature is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
-
-            verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessRepository)
-        }
-
-        @Test
         fun `getLettingAgentAccess returns null when the property is unoccupied`() {
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
 
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
@@ -729,7 +713,6 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `getLettingAgentAccess returns null when the property is occupied but has no access record`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
@@ -737,10 +720,9 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `getLettingAgentAccess returns access for a delegated property when the feature is enabled`() {
+        fun `getLettingAgentAccess returns access for a delegated property`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -751,20 +733,9 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class HasLettingAgent {
         @Test
-        fun `hasLettingAgent returns false without loading the property when the feature is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            assertFalse(propertyOwnershipService.hasLettingAgent(1L))
-
-            verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessRepository)
-        }
-
-        @Test
         fun `hasLettingAgent returns false when the property is unoccupied`() {
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -774,7 +745,6 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `hasLettingAgent returns false when the property is occupied but has no access record`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
@@ -785,7 +755,6 @@ class PropertyOwnershipServiceTests {
         fun `hasLettingAgent returns true when the property is occupied and access exists`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -808,21 +777,9 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns false if the user is not a landlord and the letting agent feature flag is disabled`() {
-            val propertyOwnershipId = 1L
-            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
-
-            assertFalse(result)
-        }
-
-        @Test
         fun `returns false if the user is not a landlord and the property has no letting agent access`() {
             val propertyOwnershipId = 1L
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId))
                 .thenReturn(MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId))
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(null)
@@ -838,7 +795,6 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
@@ -854,7 +810,6 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)

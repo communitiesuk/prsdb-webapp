@@ -22,12 +22,12 @@ features:
     - name: "pdjb-1009-payments"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "pdjb-926-landlord-dashboard-update"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: true
       expiry-date: "2026-11-01"
+    - name: "pdjb-1894-gas-certificate-14-month-expiry"
+      enabled: true
+      expiry-date: "2026-12-31"
 
 argon2:
   iterations: 2

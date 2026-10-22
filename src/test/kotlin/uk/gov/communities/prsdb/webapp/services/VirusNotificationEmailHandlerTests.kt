@@ -17,8 +17,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -47,7 +45,6 @@ class VirusNotificationEmailHandlerTests {
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
     private lateinit var landlordUserEmailService: LandlordUserEmailService
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     private val virusMonitoringEmail = "support@example.com"
 
@@ -61,8 +58,6 @@ class VirusNotificationEmailHandlerTests {
         savedJourneyStateRepository = mock()
         lettingAgentAccessRepository = mock()
         landlordUserEmailService = mock()
-        featureFlagManager = mock()
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("https://www.example.com/landlord/dashboard"))
         virusNotificationEmailHandler =
@@ -75,7 +70,6 @@ class VirusNotificationEmailHandlerTests {
                 savedJourneyStateRepository,
                 lettingAgentAccessRepository,
                 landlordUserEmailService,
-                featureFlagManager,
                 virusMonitoringEmail,
             )
     }
@@ -235,57 +229,6 @@ class VirusNotificationEmailHandlerTests {
             eq(lettingAgentEmail),
             eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
         )
-    }
-
-    @Test
-    fun `handleCallback does not email letting agent when delegation feature is disabled`() {
-        // Arrange
-        val (ownershipId, expectedEmail, landlords) =
-            arrangeOwnedPropertyUploadCallback(
-                expectedCertType(CertificateType.GasSafetyCert),
-                listOf("landlord1@example.com"),
-            )
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "agent@example.com"))
-
-        // Act
-        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
-        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
-        virusNotificationEmailHandler.handleCallback(
-            VirusScanCallback(mock(), encodedCallbackData),
-        )
-
-        // Assert
-        assertEmailSentToLandlords(landlords, expectedEmail)
-        verify(emailNotificationService, never()).sendEmail(any(), any())
-        verify(lettingAgentAccessRepository, never()).findByPropertyOwnershipId(ownershipId)
-    }
-
-    @Test
-    fun `handleCallback does not email letting agent for joint landlords when delegation feature is disabled`() {
-        // Arrange
-        val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
-        val (ownershipId, expectedEmail, landlords) =
-            arrangeOwnedPropertyUploadCallback(
-                expectedCertType(CertificateType.GasSafetyCert),
-                landlordEmails,
-            )
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "agent@example.com"))
-
-        // Act
-        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
-        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
-        virusNotificationEmailHandler.handleCallback(
-            VirusScanCallback(mock(), encodedCallbackData),
-        )
-
-        // Assert
-        assertEmailSentToLandlords(landlords, expectedEmail)
-        verify(emailNotificationService, never()).sendEmail(any(), any())
-        verify(lettingAgentAccessRepository, never()).findByPropertyOwnershipId(ownershipId)
     }
 
     private fun expectedCertType(certType: CertificateType) =

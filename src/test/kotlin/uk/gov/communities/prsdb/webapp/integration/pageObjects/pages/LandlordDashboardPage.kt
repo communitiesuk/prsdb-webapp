@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Authen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BetaBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FeatureFlagOverrideBanner
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Footer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
@@ -26,8 +27,7 @@ class LandlordDashboardPage(
     val addComplianceInformationButton = Button.byText(page, "Compliance actions")
     val notificationBanner = DashboardNotificationBanner(page)
 
-    val rentersRightsBillLink = Link.byText(page, "Renters’ Rights Bill")
-    val privacyNoticeLink = Link.byText(page, "How your information is used")
+    val footer = Footer(page)
 
     class DashboardNotificationBanner(
         page: Page,

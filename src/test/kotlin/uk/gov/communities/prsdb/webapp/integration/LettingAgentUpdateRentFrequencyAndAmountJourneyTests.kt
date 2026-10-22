@@ -2,30 +2,19 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentFrequencyAndAmountJourneyPages.CheckRentFrequencyAndAmountAnswersPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentFrequencyAndAmountJourneyPages.RentAmountFormPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentFrequencyAndAmountJourneyPages.RentFrequencyFormPageLettingAgentUpdate
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import java.util.UUID
 
 class LettingAgentUpdateRentFrequencyAndAmountJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
     private val urlArguments = mapOf("token" to token.toString())
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `A letting agent can update a property's rent frequency and amount`(page: Page) {
@@ -94,18 +83,5 @@ class LettingAgentUpdateRentFrequencyAndAmountJourneyTests : IntegrationTestWith
         val updatedPropertyDetailsPage =
             assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
         assertThat(updatedPropertyDetailsPage.summaryList.rentAmountRow).containsText(newRentAmount)
-    }
-
-    @Test
-    fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        navigator.navigate(
-            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(token) +
-                "/${RentFrequencyStep.ROUTE_SEGMENT}",
-        )
-
-        val errorPage = createValidPage(page, ErrorPage::class)
-        assertThat(errorPage.heading).containsText("Page not found")
     }
 }
