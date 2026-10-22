@@ -63,9 +63,6 @@ class UpdateLicensingJourneyFactory(
                 )
 
         return journey(state) {
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
             when (state.checkingAnswersFor) {
@@ -128,9 +125,6 @@ class UpdateLicensingJourneyFactory(
                 initialStep()
                 backUrl { returnUrl }
                 nextStep { journey.cyaStep }
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateLicensingCyaStep.ROUTE_SEGMENT)

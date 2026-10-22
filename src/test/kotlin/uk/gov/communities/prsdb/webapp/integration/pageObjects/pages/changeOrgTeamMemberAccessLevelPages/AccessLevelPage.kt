@@ -24,6 +24,8 @@ class AccessLevelPage(
 
     val removeAccessLink = Link.byText(page, "Remove access")
 
+    override val expectedTitleHeadingPattern = Regex("Change access level for .+")
+
     fun submitAccessLevel(role: String) {
         form.accessLevelRadios.selectValue(role)
         form.submit()

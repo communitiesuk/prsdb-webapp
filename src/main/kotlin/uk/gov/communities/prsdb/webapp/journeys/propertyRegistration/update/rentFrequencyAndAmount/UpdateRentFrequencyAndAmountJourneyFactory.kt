@@ -57,9 +57,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 initialStep()
                 backUrl { returnUrl }
                 nextStep { journey.cyaStep }
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT)
@@ -95,9 +92,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         journey(state) {
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             when (state.checkingAnswersFor) {
                 RentAmountStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)

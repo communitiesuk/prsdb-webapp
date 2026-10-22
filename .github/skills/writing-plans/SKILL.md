@@ -159,6 +159,10 @@ Plans must account for these patterns:
 - Steps extend `RequestableStep`, annotated `@JourneyFrameworkComponent`
 - Journey factories annotated `@PrsdbWebService`
 
+### Page Titles
+- Title = the page's h1. Only plan a different title when the h1 isn't unique or descriptive out of context, and list
+  it as a question for the user. See "Page Titles" in `.github/instructions/frontend.instructions.md`.
+
 ### Validation
 - Form models annotated `@IsValidPrioritised`
 - Properties annotated `@ValidatedBy` with `ConstraintDescriptor` entries

@@ -36,7 +36,6 @@ class UpdateDateOfBirthJourneyFactory(
                 nextStep { journey.completeDateOfBirthUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",

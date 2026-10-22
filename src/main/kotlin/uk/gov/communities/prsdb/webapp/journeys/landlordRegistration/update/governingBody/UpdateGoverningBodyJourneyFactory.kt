@@ -39,7 +39,6 @@ class UpdateGoverningBodyJourneyFactory(
     private fun mainJourneyMap(state: UpdateGoverningBodyJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE#$ORGANISATION_CONTACTS_FRAGMENT" }
-            configure { withAdditionalContentProperty { "title" to "landlordDetails.update.title" } }
 
             step(journey.initialiseGovBodyMembersStep) {
                 initialStep()
@@ -66,7 +65,6 @@ class UpdateGoverningBodyJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(state: UpdateGoverningBodyJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            configure { withAdditionalContentProperty { "title" to "landlordDetails.update.title" } }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
 

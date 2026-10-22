@@ -34,9 +34,6 @@ class PropertyDeregistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.checkCanDeregisterStep }
-            configure {
-                withAdditionalContentProperty { "title" to "deregisterProperty.title" }
-            }
             step(journey.checkCanDeregisterStep) {
                 routeSegment(CheckCanDeregisterStep.ROUTE_SEGMENT)
                 initialStep()

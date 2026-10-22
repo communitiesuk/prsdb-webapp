@@ -38,7 +38,6 @@ class UpdateCompaniesHouseJourneyFactory(
     private fun mainJourneyMap(state: UpdateCompaniesHouseJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            configure { withAdditionalContentProperty { "title" to "landlordDetails.update.title" } }
 
             task(journey.updateCompaniesHouseTask) {
                 initialStep()
@@ -54,7 +53,6 @@ class UpdateCompaniesHouseJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(state: UpdateCompaniesHouseJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            configure { withAdditionalContentProperty { "title" to "landlordDetails.update.title" } }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
 

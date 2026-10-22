@@ -22,8 +22,7 @@ class UpdateOrganisationCharityCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<UpdateOrganisationCharityJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOrganisationCharityJourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "landlordDetails.update.title",
-            "pageTitleOverride" to "forms.update.checkCharity.pageTitle",
+            "title" to "forms.update.checkCharity.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "summaryName" to "forms.update.checkCharity.summaryName",
