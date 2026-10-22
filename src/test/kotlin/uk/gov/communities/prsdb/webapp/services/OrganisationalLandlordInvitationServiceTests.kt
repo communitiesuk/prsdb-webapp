@@ -1000,7 +1000,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getPendingInvitationForCurrentUsersOrganisation returns a pending invitation belonging to the current user's organisation`() {
+    fun `getPendingInvitationIfAuthorized returns a pending invitation belonging to the current user's organisation`() {
         // Arrange
         val organisation = createOrgLandlordWithId(1L)
         val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = organisation)
@@ -1008,14 +1008,14 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
 
         // Act
-        val result = invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+        val result = invitationService.getPendingInvitationIfAuthorized(invitationId)
 
         // Assert
         assertEquals(invitation, result)
     }
 
     @Test
-    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation does not exist`() {
+    fun `getPendingInvitationIfAuthorized throws 404 when the invitation does not exist`() {
         // Arrange
         arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
         whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.empty())
@@ -1023,7 +1023,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Act
         val exception =
             assertThrows<ResponseStatusException> {
-                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+                invitationService.getPendingInvitationIfAuthorized(invitationId)
             }
 
         // Assert
@@ -1031,7 +1031,7 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation belongs to a different organisation`() {
+    fun `getPendingInvitationIfAuthorized throws 404 when the invitation belongs to a different organisation`() {
         // Arrange
         arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
         val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(2L))
@@ -1040,7 +1040,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Act
         val exception =
             assertThrows<ResponseStatusException> {
-                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+                invitationService.getPendingInvitationIfAuthorized(invitationId)
             }
 
         // Assert
@@ -1052,7 +1052,7 @@ class OrganisationalLandlordInvitationServiceTests {
         "true, false",
         "false, true",
     )
-    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the invitation is not pending`(
+    fun `getPendingInvitationIfAuthorized throws 404 when the invitation is not pending`(
         isExpired: Boolean,
         isHidden: Boolean,
     ) {
@@ -1071,7 +1071,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Act
         val exception =
             assertThrows<ResponseStatusException> {
-                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+                invitationService.getPendingInvitationIfAuthorized(invitationId)
             }
 
         // Assert
@@ -1079,24 +1079,23 @@ class OrganisationalLandlordInvitationServiceTests {
     }
 
     @Test
-    fun `getPendingInvitationForCurrentUsersOrganisation throws 404 when the current user is not an organisational landlord user`() {
+    fun `getPendingInvitationIfAuthorized throws 404 when the current user is not an organisational landlord user`() {
         // Arrange
-        val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(1L))
         whenever(mockUserToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()).thenReturn(null)
-        whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
 
         // Act
         val exception =
             assertThrows<ResponseStatusException> {
-                invitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+                invitationService.getPendingInvitationIfAuthorized(invitationId)
             }
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockInvitationRepository, never()).findById(any())
     }
 
     @Test
-    fun `cancelInvitation deletes the pending invitation`() {
+    fun `cancelInvitationIfAuthorized deletes the pending invitation`() {
         // Arrange
         val organisation = createOrgLandlordWithId(1L)
         val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = organisation)
@@ -1104,14 +1103,14 @@ class OrganisationalLandlordInvitationServiceTests {
         whenever(mockInvitationRepository.findById(invitationId)).thenReturn(Optional.of(invitation))
 
         // Act
-        invitationService.cancelInvitation(invitationId)
+        invitationService.cancelInvitationIfAuthorized(invitationId)
 
         // Assert
         verify(mockInvitationRepository).delete(invitation)
     }
 
     @Test
-    fun `cancelInvitation does not delete an invitation that belongs to a different organisation`() {
+    fun `cancelInvitationIfAuthorized does not delete an invitation that belongs to a different organisation`() {
         // Arrange
         arrangeCurrentUserInOrganisation(createOrgLandlordWithId(1L))
         val invitation = createOrganisationalLandlordInvitation(organisationalLandlord = createOrgLandlordWithId(2L))
@@ -1120,7 +1119,7 @@ class OrganisationalLandlordInvitationServiceTests {
         // Act
         val exception =
             assertThrows<ResponseStatusException> {
-                invitationService.cancelInvitation(invitationId)
+                invitationService.cancelInvitationIfAuthorized(invitationId)
             }
 
         // Assert

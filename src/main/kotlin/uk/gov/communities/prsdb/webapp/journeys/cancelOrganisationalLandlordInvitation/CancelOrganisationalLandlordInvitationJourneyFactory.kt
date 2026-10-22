@@ -22,7 +22,7 @@ class CancelOrganisationalLandlordInvitationJourneyFactory(
     private val organisationalLandlordInvitationService: OrganisationalLandlordInvitationService,
 ) {
     fun createJourneySteps(invitationId: Long): Map<String, StepLifecycleOrchestrator> {
-        val invitation = organisationalLandlordInvitationService.getPendingInvitationForCurrentUsersOrganisation(invitationId)
+        val invitation = organisationalLandlordInvitationService.getPendingInvitationIfAuthorized(invitationId)
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {

@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
 import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
 
 @PrsdbWebService
 class OrganisationalLandlordInvitationService(
@@ -185,25 +184,23 @@ class OrganisationalLandlordInvitationService(
         invitationRepository.save(invitation)
     }
 
-    fun getPendingInvitationForCurrentUsersOrganisation(invitationId: Long): OrganisationalLandlordInvitation {
-        val currentOrganisationId =
-            userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()?.organisationalLandlord?.id
-        return invitationRepository
-            .findById(invitationId)
-            .getOrNull()
-            ?.takeIf {
-                it.organisationalLandlord.id == currentOrganisationId &&
-                    it.status == OrganisationalLandlordInvitationStatus.PENDING
-            }
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No pending organisational landlord invitation with id $invitationId found for the current user's organisation",
-            )
+    fun getPendingInvitationIfAuthorized(invitationId: Long): OrganisationalLandlordInvitation {
+        val currentOrganisation =
+            userToOrgLandlordUserService.getOrganisationalLandlordUserForCurrentUser()?.organisationalLandlord
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+
+        val invitation = getInvitationForOrganisation(invitationId, currentOrganisation)
+
+        if (invitation.status != OrganisationalLandlordInvitationStatus.PENDING) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId is not pending")
+        }
+
+        return invitation
     }
 
     @Transactional
-    fun cancelInvitation(invitationId: Long) {
-        invitationRepository.delete(getPendingInvitationForCurrentUsersOrganisation(invitationId))
+    fun cancelInvitationIfAuthorized(invitationId: Long) {
+        invitationRepository.delete(getPendingInvitationIfAuthorized(invitationId))
     }
 
     private fun getInvitationForOrganisation(

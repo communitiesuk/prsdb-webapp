@@ -15,7 +15,7 @@ class CancelInvitationStepConfig(
     override fun mode(state: CancelOrganisationalLandlordInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: CancelOrganisationalLandlordInvitationJourneyState) {
-        organisationalLandlordInvitationService.cancelInvitation(state.invitationId)
+        organisationalLandlordInvitationService.cancelInvitationIfAuthorized(state.invitationId)
     }
 
     override fun resolveNextDestination(

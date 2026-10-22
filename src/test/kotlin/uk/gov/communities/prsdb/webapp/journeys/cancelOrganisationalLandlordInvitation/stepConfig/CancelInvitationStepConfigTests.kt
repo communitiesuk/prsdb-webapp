@@ -26,7 +26,7 @@ class CancelInvitationStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockInvitationService).cancelInvitation(1L)
+        verify(mockInvitationService).cancelInvitationIfAuthorized(1L)
     }
 
     @Test
