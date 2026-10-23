@@ -189,6 +189,7 @@ class LandlordDashboardUrlTests(
                 delegateToLettingAgentEmailService = mock(),
                 featureFlagManager = mock(),
                 currentUserService = mockCurrentUserService,
+                paymentRepository = mock(),
             )
 
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(landlord.email)
