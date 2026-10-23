@@ -19,9 +19,11 @@ class UserToLandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
-    fun getCurrentLandlordForUser(): Landlord =
-        getCurrentLandlordForUserOrNull()
-            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No landlord was found for the current user")
+    fun getCurrentLandlordForUser(): Landlord {
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
+        return getLandlordForBaseUserIdOrNull(baseUserId)
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No landlord was found for user with baseUserId $baseUserId")
+    }
 
     fun getCurrentOrganisationLandlordForUser(): OrganisationalLandlord {
         val landlord = getCurrentLandlordForUser()
