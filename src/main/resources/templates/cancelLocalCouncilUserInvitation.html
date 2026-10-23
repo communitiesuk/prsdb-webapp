@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html>
-<body th:replace="~{fragments/layout :: layout(#{cancelLocalCouncilUserInvitation.heading}, ~{::body/content()}, false)}">
-<a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
-<th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
-    <main class="govuk-main-wrapper">
+<html th:replace="~{fragments/layout :: layout(#{cancelLocalCouncilUserInvitation.heading}, ~{::main/content()}, false, ${backLinkPath}, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
         <header id="header">
             <h1 class="govuk-heading-l" th:text="#{cancelLocalCouncilUserInvitation.heading}">cancelLocalCouncilUserInvitation.heading</h1>
         </header>
@@ -22,7 +20,6 @@
         <form method="post" th:action="@{''}">
             <button th:replace="~{fragments/buttons/warningButton :: warningButton(buttonText=#{cancelLocalCouncilUserInvitation.cancelButton})}"></button>
         </form>
-    </main>
-</th:block>
-</body>
+    </div>
+</main>
 </html>

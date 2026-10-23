@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{error.fileTooLarge.header}, ~{::main}, false)}">
-<main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+<html th:replace="~{fragments/layout :: layout(#{error.fileTooLarge.header}, ~{::main/content()}, false, null, 'govuk-main-wrapper--l')}">
+<main>
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <h1 class="govuk-heading-l" th:text="#{error.fileTooLarge.header}">error.fileTooLarge.header</h1>

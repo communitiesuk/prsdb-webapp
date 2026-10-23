@@ -19,4 +19,8 @@ object HttpDestination {
         ) { "Unexpected HTTP destination origin" }
         return destination.toString()
     }
+
+    // CloudFront keeps every cacheable GET for at least 1s (min TTL), even when the app sends no-store, so a repeat
+    // read of the same URL by the same session can return a stale page. The query string is part of the cache key.
+    fun withCacheBuster(url: String): String = url + (if ('?' in url) "&" else "?") + "perfCacheBuster=" + System.nanoTime()
 }

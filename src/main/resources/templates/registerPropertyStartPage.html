@@ -1,40 +1,36 @@
 <!DOCTYPE html>
-<html>
-    <th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(#{registerProperty.heading}, ~{::#main-content/content()},false)}">
-        <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-        <main class="govuk-main-wrapper">
-            <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
-                <div id="page-content">
-                    <header>
-                        <h1 class="govuk-heading-l" th:text="#{registerProperty.heading}">registerProperty.heading</h1>
-                    </header>
-                    <p class="govuk-body" th:text="#{registerProperty.intro.paragraph}">registerProperty.intro.paragraph</p>
-                    <ul class="govuk-list govuk-list--bullet">
-                        <li th:text="#{registerProperty.intro.bullet.one}">registerProperty.intro.bullet.one</li>
-                        <li th:text="#{registerProperty.intro.bullet.two}">registerProperty.intro.bullet.two</li>
-                    </ul>
-                    <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.one}">registerProperty.certificates.paragraph.one</p>
-                    <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.two}">registerProperty.certificates.paragraph.two</p>
-                    <section>
-                        <h2 class="govuk-heading-m" th:text="#{registerProperty.ifOccupied.heading}">registerProperty.ifOccupied.heading</h2>
-                        <p class="govuk-body" th:text="#{registerProperty.ifOccupied.paragraph}">registerProperty.ifOccupied.paragraph</p>
-                        <ul class="govuk-list govuk-list--bullet">
-                            <li th:text="#{registerProperty.ifOccupied.bullet.one}">registerProperty.ifOccupied.bullet.one</li>
-                            <li th:text="#{registerProperty.ifOccupied.bullet.two}">registerProperty.ifOccupied.bullet.two</li>
-                        </ul>
-                    </section>
-                    <section>
-                        <h2 class="govuk-heading-m" th:text="#{registerProperty.afterRegistered.heading}">registerProperty.afterRegistered.heading</h2>
-                        <p class="govuk-body" th:utext="#{registerProperty.afterRegistered.paragraph.one}">registerProperty.afterRegistered.paragraph.one</p>
-                        <p class="govuk-body" th:text="#{registerProperty.afterRegistered.paragraph.two}">registerProperty.afterRegistered.paragraph.two</p>
-                        <div class="govuk-inset-text" th:text="#{registerProperty.afterRegistered.insetText}">registerProperty.afterRegistered.insetText</div>
-                    </section>
-                    <section>
-                        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyInitialStep}, #{forms.buttons.continue})}"></a>
-                    </section>
-                </div>
-            </div>
-        </main>
-    </th:block>
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.heading}, ~{::main/content()},false, ${backUrl}, null)}">
+<main>
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <h1 class="govuk-heading-l" th:text="#{registerProperty.heading}">registerProperty.heading</h1>
+            </header>
+            <p class="govuk-body" th:text="#{registerProperty.intro.paragraph}">registerProperty.intro.paragraph</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerProperty.intro.bullet.one}">registerProperty.intro.bullet.one</li>
+                <li th:text="#{registerProperty.intro.bullet.two}">registerProperty.intro.bullet.two</li>
+            </ul>
+            <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.one}">registerProperty.certificates.paragraph.one</p>
+            <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.two}">registerProperty.certificates.paragraph.two</p>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerProperty.ifOccupied.heading}">registerProperty.ifOccupied.heading</h2>
+                <p class="govuk-body" th:text="#{registerProperty.ifOccupied.paragraph}">registerProperty.ifOccupied.paragraph</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerProperty.ifOccupied.bullet.one}">registerProperty.ifOccupied.bullet.one</li>
+                    <li th:text="#{registerProperty.ifOccupied.bullet.two}">registerProperty.ifOccupied.bullet.two</li>
+                </ul>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{registerProperty.afterRegistered.heading}">registerProperty.afterRegistered.heading</h2>
+                <p class="govuk-body" th:utext="#{registerProperty.afterRegistered.paragraph.one}">registerProperty.afterRegistered.paragraph.one</p>
+                <p class="govuk-body" th:text="#{registerProperty.afterRegistered.paragraph.two}">registerProperty.afterRegistered.paragraph.two</p>
+                <div class="govuk-inset-text" th:text="#{registerProperty.afterRegistered.insetText}">registerProperty.afterRegistered.insetText</div>
+            </section>
+            <section>
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyInitialStep}, #{forms.buttons.continue})}"></a>
+            </section>
+        </div>
+    </div>
+</main>
 </html>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{generatePasscode.banner.heading}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+<html th:replace="~{fragments/layout :: layout(#{generatePasscode.banner.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
         <div id="confirmation-banner" th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{generatePasscode.banner.heading}, ~{::#confirmation-banner/content()})}">
             <span th:text="#{generatePasscode.banner.body}" th:remove="tag">generatePasscode.banner.body</span>
             <br>
@@ -17,5 +18,6 @@
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePasscode.generateAnother})}">generatePasscode.generateAnother</button>
             </div>
         </form>
-    </main>
+    </div>
+</main>
 </html>
