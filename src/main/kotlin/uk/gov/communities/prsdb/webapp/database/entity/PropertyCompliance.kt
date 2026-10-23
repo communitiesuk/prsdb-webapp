@@ -9,14 +9,13 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
-import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 @Entity
@@ -72,7 +71,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
     val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertIssueDate?.let { isGasIssueDateExpired(it) }
+        get() = gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
@@ -81,8 +80,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() =
             electricalSafetyExpiryDate?.let { expiryDate ->
                 when (electricalCertType) {
-                    CertificateType.Eic -> isEicExpiryDateExpired(expiryDate)
-                    CertificateType.Eicr -> isEicrExpiryDateExpired(expiryDate)
+                    CertificateType.Eic -> CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate)
+                    CertificateType.Eicr -> CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate)
                     else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
                 }
             }
@@ -91,7 +90,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
-        get() = epcExpiryDate?.let { isEpcExpiryDateExpired(it) }
+        get() = epcExpiryDate?.let { CertificateExpiryHelper.isEpcExpiryDateExpired(it) }
 
     val isEpcRatingLow: Boolean?
         get() {
@@ -160,31 +159,5 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertProvideLater = gasSafetyCertProvideLater
         this.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
         this.epcProvideLater = epcProvideLater
-    }
-
-    companion object {
-        // Valid up to and including the anniversary of the issue date
-        fun isGasIssueDateExpired(
-            issueDate: LocalDate,
-            asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
-        ): Boolean = asOf > issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
-
-        // Expired on the expiry date
-        fun isEicExpiryDateExpired(
-            expiryDate: LocalDate,
-            asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
-        ): Boolean = asOf >= expiryDate
-
-        // Expired on the expiry date
-        fun isEicrExpiryDateExpired(
-            expiryDate: LocalDate,
-            asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
-        ): Boolean = asOf >= expiryDate
-
-        // Valid up to and including the expiry date
-        fun isEpcExpiryDateExpired(
-            expiryDate: LocalDate,
-            asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
-        ): Boolean = asOf > expiryDate
     }
 }

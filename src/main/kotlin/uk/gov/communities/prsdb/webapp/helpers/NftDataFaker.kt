@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toInstant
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toLocalDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toTimestamp
@@ -603,7 +602,7 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.let { !PropertyCompliance.isGasIssueDateExpired(it.toLocalDate(), referenceDate()) } == true
+        issueDate?.let { !CertificateExpiryHelper.isGasIssueDateExpired(it.toLocalDate(), referenceDate()) } == true
 
     fun isElectricalSafetyCertificateCurrent(
         expiryDate: Date?,
@@ -613,8 +612,8 @@ object NftDataFaker {
         if (expiryDate == null) return false
         val asOfDate = asOf.toLocalDateTime().toLocalDate()
         return when (certType) {
-            CertificateType.Eic -> !PropertyCompliance.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
-            CertificateType.Eicr -> !PropertyCompliance.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
             else -> false
         }
     }

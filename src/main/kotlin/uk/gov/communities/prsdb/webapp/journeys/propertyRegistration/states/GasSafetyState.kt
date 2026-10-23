@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import kotlinx.datetime.toJavaLocalDate
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -59,7 +59,7 @@ interface GasSafetyDetailState : JourneyState {
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
         getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
-            PropertyCompliance.isGasIssueDateExpired(issueDate.toJavaLocalDate())
+            CertificateExpiryHelper.isGasIssueDateExpired(issueDate.toJavaLocalDate())
         }
 
     val gasUploadIds: List<Long>
