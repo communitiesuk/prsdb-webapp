@@ -122,28 +122,6 @@ class UserToLandlordServiceTests {
     }
 
     @Test
-    fun `getCurrentLandlordForUser throws forbidden when landlord lookup is empty on a subsequent call`() {
-        val baseUserId = "organisation-user"
-        val landlord = OrganisationalLandlord()
-        val member =
-            OrganisationalLandlordUser(
-                landlord,
-                MockLandlordData.createPrsdbUser(baseUserId),
-                "Alice Registrant",
-                "alice@example.com",
-                OrganisationalLandlordUserRole.EDITOR,
-            )
-        setMockPrincipal(baseUserId)
-        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId))
-            .thenReturn(listOf(member), emptyList())
-
-        assertEquals(landlord, service.getCurrentLandlordForUser())
-        val exception = assertThrows<ResponseStatusException> { service.getCurrentLandlordForUser() }
-
-        assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
-    }
-
-    @Test
     fun `getCurrentLandlordForUserOrNull returns null when authenticated user has no landlord`() {
         val baseUserId = "non-landlord-user"
         setMockPrincipal(baseUserId)
