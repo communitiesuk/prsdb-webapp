@@ -30,13 +30,24 @@ class MockGovUkPayControllerTests {
 
     @BeforeEach
     fun setup() {
-        mvc = createMvc(cardEntryDelaySeconds = 0)
+        mvc = createMvc()
     }
 
-    private fun createMvc(cardEntryDelaySeconds: Long) =
-        MockMvcBuilders
-            .standaloneSetup(MockGovUkPayController("8080", cardEntryDelaySeconds, objectMapper, mockPaymentRepository))
-            .build()
+    private fun createMvc(
+        cardEntryDelaySeconds: Long = 0,
+        captureOutageCalls: Int = 0,
+        captureDuringOutage: Boolean = true,
+    ) = MockMvcBuilders
+        .standaloneSetup(
+            MockGovUkPayController(
+                "8080",
+                cardEntryDelaySeconds,
+                captureOutageCalls,
+                captureDuringOutage,
+                objectMapper,
+                mockPaymentRepository,
+            ),
+        ).build()
 
     private fun createBody(
         amount: Int = 12000,
@@ -58,6 +69,12 @@ class MockGovUkPayControllerTests {
                 ).andReturn()
                 .response.contentAsString
         return objectMapper.readTree(response).get("payment_id").asText()
+    }
+
+    private fun createCapturablePaymentAndGetId(): String {
+        val paymentId = createPaymentAndGetId(delayedCapture = true)
+        mvc.perform(get("/local/gov-uk-pay/mock-card-page/$paymentId"))
+        return paymentId
     }
 
     @Test
@@ -215,6 +232,61 @@ class MockGovUkPayControllerTests {
         mvc
             .perform(post("/local/gov-uk-pay/v1/payments/unknownpaymentid00000000000/cancel"))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `capturing during a capture outage returns 503 but still captures the payment when set to`() {
+        mvc = createMvc(captureOutageCalls = 1, captureDuringOutage = true)
+        val paymentId = createCapturablePaymentAndGetId()
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments/$paymentId/capture"))
+            .andExpect(status().isServiceUnavailable)
+            .andExpect(jsonPath("$.code").value("P0999"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("success"))
+    }
+
+    @Test
+    fun `capturing during a capture outage returns 503 without capturing the payment when set not to`() {
+        mvc = createMvc(captureOutageCalls = 1, captureDuringOutage = false)
+        val paymentId = createCapturablePaymentAndGetId()
+
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/capture")).andExpect(status().isServiceUnavailable)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("capturable"))
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/capture")).andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `a capture outage fails the payment's calls from its first capture for the configured number of calls`() {
+        mvc = createMvc(captureOutageCalls = 3, captureDuringOutage = false)
+        val paymentId = createCapturablePaymentAndGetId()
+        mvc.perform(get("/local/gov-uk-pay/v1/payments/$paymentId")).andExpect(status().isOk)
+
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/capture")).andExpect(status().isServiceUnavailable)
+        mvc.perform(get("/local/gov-uk-pay/v1/payments/$paymentId")).andExpect(status().isServiceUnavailable)
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/cancel")).andExpect(status().isServiceUnavailable)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.state.status").value("capturable"))
+    }
+
+    @Test
+    fun `a capture outage only affects the payment being captured`() {
+        mvc = createMvc(captureOutageCalls = 2, captureDuringOutage = false)
+        val paymentId = createCapturablePaymentAndGetId()
+        val otherPaymentId = createCapturablePaymentAndGetId()
+
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/capture")).andExpect(status().isServiceUnavailable)
+
+        mvc.perform(get("/local/gov-uk-pay/v1/payments/$otherPaymentId")).andExpect(status().isOk)
     }
 
     @Test
