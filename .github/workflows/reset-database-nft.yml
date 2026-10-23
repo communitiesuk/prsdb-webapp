@@ -1,6 +1,10 @@
 name: Reset Database - NFT
 on: workflow_dispatch
 
+concurrency:
+  group: nft-app-service-operation
+  cancel-in-progress: false
+
 permissions:
   id-token: write
   contents: read

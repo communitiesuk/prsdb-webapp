@@ -1,131 +1,130 @@
 <!--/*@thymesVar id="complianceInfoTabId" type="java.lang.String"*/-->
 <!--/*@thymesVar id="delegateToLettingAgentLink" type="uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel"*/-->
 <!DOCTYPE html>
-<html id="main-content" th:replace="~{fragments/layout :: layout(${#strings.listJoin(propertyDetails.addressParts, ' ')}, ~{::#main-content/content()}, false)}">
-    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
-    <main class="govuk-main-wrapper">
-        <div id="page-contents">
-            <th:block th:if="${inviteRemoved}" th:with="isSuccess=true">
-                <div id="invite-removed-banner"
-                     th:replace="~{fragments/banners/notificationBanner ::
-                    notificationBanner(#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.title}, ~{::#invite-removed-banner/content()})}"
-                     th:with="isSuccess=true">
-                    <p class="govuk-notification-banner__heading" th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content}">
-                        propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content
-                    </p>
-                </div>
-            </th:block>
-            <div id="notification-banner"
-                 th:replace="${notificationBanner != null and !notificationBanner.isEmpty()} ? ~{fragments/banners/notificationBanner ::
-                notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
-                <th:block th:each="message : ${notificationBanner}">
-                    <h2 class="govuk-notification-banner__heading"><span
-                        th:if="${message.mainText != null}" th:remove="tag"><span th:utext="#{${message.mainText}}" th:remove="tag"></span> </span><th:block
-                        th:each="link : ${message.links}"><span
-                        th:if="${link.beforeLinkText != null}" th:text="#{${link.beforeLinkText}}" th:remove="tag"></span><a
-                        class="govuk-notification-banner__link" th:href="${link.linkUrl}" th:text="#{${link.linkText}}"></a><span
-                        th:if="${link.afterLinkText != null}" th:text="#{${link.afterLinkText}}" th:remove="tag"></span></th:block></h2>
-                </th:block>
+<html th:replace="~{fragments/layout :: layout(${#strings.listJoin(propertyDetails.addressParts, ' ')}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-contents">
+        <th:block th:if="${inviteRemoved}" th:with="isSuccess=true">
+            <div id="invite-removed-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.title}, ~{::#invite-removed-banner/content()})}"
+                 th:with="isSuccess=true">
+                <p class="govuk-notification-banner__heading" th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content}">
+                    propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content
+                </p>
             </div>
-            <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
-                <div id="resend-invitation-success-banner"
-                     th:replace="~{fragments/banners/notificationBanner ::
-                    notificationBanner(#{propertyDetails.resendInvitation.successBanner.title}, ~{::#resend-invitation-success-banner/content()})}"
-                     th:with="isSuccess=true">
-                    <h3 class="govuk-notification-banner__heading"
-                        th:text="#{propertyDetails.resendInvitation.successBanner.heading(${resendInvitationEmail})}">
-                        propertyDetails.resendInvitation.successBanner.heading
-                    </h3>
-                    <p class="govuk-body"
-                       th:text="#{propertyDetails.resendInvitation.successBanner.body}">
-                        propertyDetails.resendInvitation.successBanner.body
-                    </p>
-                </div>
+        </th:block>
+        <div id="notification-banner"
+             th:replace="${notificationBanner != null and !notificationBanner.isEmpty()} ? ~{fragments/banners/notificationBanner ::
+            notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
+            <th:block th:each="message : ${notificationBanner}">
+                <h2 class="govuk-notification-banner__heading"><span
+                    th:if="${message.mainText != null}" th:remove="tag"><span th:utext="#{${message.mainText}}" th:remove="tag"></span> </span><th:block
+                    th:each="link : ${message.links}"><span
+                    th:if="${link.beforeLinkText != null}" th:text="#{${link.beforeLinkText}}" th:remove="tag"></span><a
+                    class="govuk-notification-banner__link" th:href="${link.linkUrl}" th:text="#{${link.linkText}}"></a><span
+                    th:if="${link.afterLinkText != null}" th:text="#{${link.afterLinkText}}" th:remove="tag"></span></th:block></h2>
             </th:block>
-            <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
-            <h1 class="govuk-heading-l">
-                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
-            </h1>
-            <p class="govuk-body">
-                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
-            </p>
-            <th:block th:if="${isLandlordView}">
-                <th:block th:if="${propertyIsOccupied}">
-                    <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
-                        <article id="letting-agent-panel"
-                                 th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.cancelDelegation.heading', ~{::#letting-agent-panel/content()}, ${lettingAgentPanelLink})}">
-                            <p class="govuk-body-l" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
-                            <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.cancelDelegation.body}">propertyDetails.lettingAgentPanel.cancelDelegation.body</p>
-                        </article>
-                    </div>
-                    <div th:unless="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
-                        <article id="delegate-to-letting-agent-ticket-panel"
-                                 th:replace="~{fragments/ticketPanel ::
-                                 ticketPanel('propertyDetails.lettingAgentPanel.delegateToLettingAgent.heading',
-                                 ~{::#delegate-to-letting-agent-ticket-panel/content()}, ${lettingAgentPanelLink})}">
-                            <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.delegateToLettingAgent.body}">
-                                propertyDetails.lettingAgentPanel.delegateToLettingAgent.body
-                            </p>
-                        </article>
-                    </div>
-                </th:block>
-                <div th:unless="${propertyIsOccupied}" class="govuk-!-width-two-thirds">
-                    <article id="unoccupied-letting-agent-ticket-panel"
+        </div>
+        <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
+            <div id="resend-invitation-success-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{propertyDetails.resendInvitation.successBanner.title}, ~{::#resend-invitation-success-banner/content()})}"
+                 th:with="isSuccess=true">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{propertyDetails.resendInvitation.successBanner.heading(${resendInvitationEmail})}">
+                    propertyDetails.resendInvitation.successBanner.heading
+                </h3>
+                <p class="govuk-body"
+                   th:text="#{propertyDetails.resendInvitation.successBanner.body}">
+                    propertyDetails.resendInvitation.successBanner.body
+                </p>
+            </div>
+        </th:block>
+        <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
+        <h1 class="govuk-heading-l">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
+        </h1>
+        <p class="govuk-body">
+            <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
+        </p>
+        <th:block th:if="${isLandlordView}">
+            <th:block th:if="${propertyIsOccupied}">
+                <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
+                    <article id="letting-agent-panel"
+                             th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.cancelDelegation.heading', ~{::#letting-agent-panel/content()}, ${lettingAgentPanelLink})}">
+                        <p class="govuk-body-l" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
+                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.cancelDelegation.body}">propertyDetails.lettingAgentPanel.cancelDelegation.body</p>
+                    </article>
+                </div>
+                <div th:unless="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
+                    <article id="delegate-to-letting-agent-ticket-panel"
                              th:replace="~{fragments/ticketPanel ::
-                             ticketPanel('propertyDetails.lettingAgentPanel.unoccupied.heading',
-                             ~{::#unoccupied-letting-agent-ticket-panel/content()}, null)}">
-                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.unoccupied.body}">
-                            propertyDetails.lettingAgentPanel.unoccupied.body
+                             ticketPanel('propertyDetails.lettingAgentPanel.delegateToLettingAgent.heading',
+                             ~{::#delegate-to-letting-agent-ticket-panel/content()}, ${lettingAgentPanelLink})}">
+                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.delegateToLettingAgent.body}">
+                            propertyDetails.lettingAgentPanel.delegateToLettingAgent.body
                         </p>
                     </article>
                 </div>
             </th:block>
-            <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
-                <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${complianceInfoTabId}, #{propertyDetails.complianceInformation.heading})}"></li>
-                </ul>
-
-                <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
-                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.heading}">propertyDetails.propertyRecord.heading</h2>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.registrationDetails)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.registrationDetails})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.correspondence.heading}">propertyDetails.propertyRecord.correspondence.heading</h3>
-                        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.correspondenceSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.occupation.heading}">propertyDetails.propertyRecord.occupation.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.occupiedSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupiedSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h3>
-                        <th:block th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}">
-                            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
-                        </th:block>
-                        <p th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.licensingProvideLaterParagraph}"></p>
-                        <hr th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-                        <th:block th:if="${propertyDetails.showTenancySection}">
-                            <h3 class="govuk-heading-s" th:text="#{${propertyDetails.tenancyHeadingKey}}">propertyDetails.propertyRecord.tenancy.heading</h3>
-                            <th:block th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}">
-                                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
-                            </th:block>
-                            <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
-                            <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-                        </th:block>
-                    <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
-                        <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
-                            propertyDetails.deregisterPropertyLink.text
-                        </a>
+            <div th:unless="${propertyIsOccupied}" class="govuk-!-width-two-thirds">
+                <article id="unoccupied-letting-agent-ticket-panel"
+                         th:replace="~{fragments/ticketPanel ::
+                         ticketPanel('propertyDetails.lettingAgentPanel.unoccupied.heading',
+                         ~{::#unoccupied-letting-agent-ticket-panel/content()}, null)}">
+                    <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.unoccupied.body}">
+                        propertyDetails.lettingAgentPanel.unoccupied.body
                     </p>
-                </div>
-                <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
-                    <div th:replace="~{fragments/landlordDetails :: landlordDetailsTabContent}"></div>
-                </div>
+                </article>
+            </div>
+        </th:block>
+        <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
+            <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${complianceInfoTabId}, #{propertyDetails.complianceInformation.heading})}"></li>
+            </ul>
 
-                <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
-                    <div th:replace="~{fragments/compliance :: complianceTabContent}"></div>
-                </div>
+            <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.heading}">propertyDetails.propertyRecord.heading</h2>
+                    <dl th:if="${not #lists.isEmpty(propertyDetails.registrationDetails)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.registrationDetails})}"></dl>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
+                    <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
+                    <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.correspondence.heading}">propertyDetails.propertyRecord.correspondence.heading</h3>
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.correspondenceSection})}"></dl>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.occupation.heading}">propertyDetails.propertyRecord.occupation.heading</h3>
+                    <dl th:if="${not #lists.isEmpty(propertyDetails.occupiedSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupiedSection})}"></dl>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h3>
+                    <th:block th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}">
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
+                    </th:block>
+                    <p th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.licensingProvideLaterParagraph}"></p>
+                    <hr th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+                    <th:block th:if="${propertyDetails.showTenancySection}">
+                        <h3 class="govuk-heading-s" th:text="#{${propertyDetails.tenancyHeadingKey}}">propertyDetails.propertyRecord.tenancy.heading</h3>
+                        <th:block th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}">
+                            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
+                        </th:block>
+                        <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
+                        <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+                    </th:block>
+                <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
+                    <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
+                        propertyDetails.deregisterPropertyLink.text
+                    </a>
+                </p>
+            </div>
+            <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
+                <div th:replace="~{fragments/landlordDetails :: landlordDetailsTabContent}"></div>
+            </div>
+
+            <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
+                <div th:replace="~{fragments/compliance :: complianceTabContent}"></div>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 </html>

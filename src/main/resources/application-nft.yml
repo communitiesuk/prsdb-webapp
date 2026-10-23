@@ -1,3 +1,10 @@
+spring:
+  sql:
+    init:
+      data-locations:
+        - classpath:data-test.sql
+        - classpath:data-nft-performance.sql
+
 features:
   overrides-enabled: true
   feature-flags:

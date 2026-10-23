@@ -58,6 +58,16 @@ abstract class BasePage(
     private fun validate() {
         if (urlSegment != null) assertContains(page.url(), urlSegment)
         validateTitle()
+        validateMainLandmark()
+    }
+
+    private fun validateMainLandmark() {
+        assertEquals(1, page.locator("main").count(), "Page should have exactly one <main> element")
+        assertEquals(
+            1,
+            page.locator("main#main-content").count(),
+            "The <main> element should have id=\"main-content\" (the skip link target)",
+        )
     }
 
     private fun validateTitle() {

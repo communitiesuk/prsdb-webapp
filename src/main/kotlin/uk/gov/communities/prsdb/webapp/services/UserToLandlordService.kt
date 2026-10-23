@@ -20,9 +20,9 @@ class UserToLandlordService(
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
     fun getCurrentLandlordForUser(): Landlord {
-        // TODO: PDJB-1477: Improve this method with caching
         val baseUserId = SecurityContextHolder.getContext().authentication!!.name
-        return getLandlordForBaseUserId(baseUserId)
+        return getLandlordForBaseUserIdOrNull(baseUserId)
+            ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "No landlord was found for user with baseUserId $baseUserId")
     }
 
     fun getCurrentOrganisationLandlordForUser(): OrganisationalLandlord {
@@ -32,7 +32,7 @@ class UserToLandlordService(
     }
 
     fun getCurrentLandlordForUserOrNull(): Landlord? {
-        // TODO: PDJB-1477: Improve this method with caching
+        // TODO: PDJB-1477: Consider request-scoped caching; membership changes must be reflected on the next request.
         val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return getLandlordForBaseUserIdOrNull(baseUserId)
     }
@@ -41,7 +41,7 @@ class UserToLandlordService(
 
     /**
      * Calls getCurrentLandlordForUser and discards result.
-     * Use for checking that the user has a landlord and expect a ResponseStatusException(BAD_REQUEST) if they do not.
+     * Use for checking that the user has a landlord and expect a ResponseStatusException(FORBIDDEN) if they do not.
      */
     fun throwIfCurrentUserDoesNotHaveALandlord() {
         getCurrentLandlordForUser()

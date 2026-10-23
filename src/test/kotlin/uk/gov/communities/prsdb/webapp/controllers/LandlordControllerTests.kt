@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -119,6 +121,19 @@ class LandlordControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["ORG_EDITOR"], username = "removed-member")
+    fun `landlordDashboard forwards forbidden exception from userToLandlordService`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser())
+            .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
+
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard returns 200 for authorised landlord user`() {
         val landlord = createIndividualLandlord()
@@ -207,14 +222,14 @@ class LandlordControllerTests(
     fun `getComplianceActions returns 200 for authorised landlord user`() {
         val nonCompliantDataModel =
             ComplianceStatusDataModel(
-                2,
-                "456 Example Avenue, EX",
-                "P-YYYY-YYYY",
-                ComplianceCertStatus.EXPIRED,
-                ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.HAS_FAULTS,
-                false,
-                true,
+                propertyOwnershipId = 2,
+                singleLineAddress = "456 Example Avenue, EX",
+                registrationNumber = "P-YYYY-YYYY",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.HAS_FAULTS,
+                isComplete = false,
+                isOccupied = true,
             )
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
