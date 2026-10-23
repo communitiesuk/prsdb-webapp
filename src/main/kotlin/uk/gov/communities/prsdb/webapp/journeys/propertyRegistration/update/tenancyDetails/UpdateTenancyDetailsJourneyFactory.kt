@@ -72,9 +72,6 @@ class UpdateTenancyDetailsJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
                 backUrl { returnUrl }
@@ -113,9 +110,6 @@ class UpdateTenancyDetailsJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {

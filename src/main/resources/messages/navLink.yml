@@ -4,5 +4,3 @@ manageUsers:
   title: Manage users
 manageTeamMembers:
   title: Manage team members
-generatePasscode:
-  title: Generate a passcode

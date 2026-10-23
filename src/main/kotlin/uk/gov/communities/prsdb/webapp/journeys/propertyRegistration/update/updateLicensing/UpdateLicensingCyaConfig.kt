@@ -21,8 +21,7 @@ class UpdateLicensingCyaConfig(
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "propertyDetails.update.title",
-            "pageTitleOverride" to "forms.update.checkLicensing.pageTitle",
+            "title" to "forms.update.checkLicensing.pageTitle",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,

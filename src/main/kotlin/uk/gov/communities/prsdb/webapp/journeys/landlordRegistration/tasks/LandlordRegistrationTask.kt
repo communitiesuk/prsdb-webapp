@@ -164,9 +164,6 @@ class LandlordRegistrationTask(
         ): Map<String, StepLifecycleOrchestrator> =
             journey(state) {
                 unreachableStepDestination { journey.returnToCyaPageDestination }
-                configure {
-                    withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
-                }
                 configureFirst { backDestination { journey.returnToCyaPageDestination } }
                 when (checkingAnswersFor) {
                     NameStep.ROUTE_SEGMENT -> {

@@ -21,4 +21,6 @@ class RemoveOrgUserConfirmationPage(
     val backLink = BackLink.default(page)
 
     val cancelLink = Link.byText(page, "Cancel and go back")
+
+    override val expectedTitleHeadingPattern = Regex("Are you sure you want to remove access for .+\\?")
 }

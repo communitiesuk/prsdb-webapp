@@ -1,4 +1,3 @@
-title: User removed
 banner:
   heading: 'You’ve removed {0,,deletedUserName}’s account from {1,,localCouncilName}'
 whatHappensNext:

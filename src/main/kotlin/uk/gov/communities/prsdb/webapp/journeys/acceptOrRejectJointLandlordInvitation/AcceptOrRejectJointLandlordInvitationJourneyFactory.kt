@@ -47,9 +47,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
     private fun mainJourneyMap(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.validateTokenStep }
-            configure {
-                withAdditionalContentProperty { "title" to "acceptOrRejectJointLandlordInvitation.title" }
-            }
             step(journey.validateTokenStep) {
                 routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
                 initialStep()

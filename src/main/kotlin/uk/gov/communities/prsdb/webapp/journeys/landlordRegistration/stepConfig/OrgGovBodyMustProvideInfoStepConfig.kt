@@ -15,7 +15,6 @@ class OrgGovBodyMustProvideInfoStepConfig :
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "forms.orgGovBodyMustProvideInfo.heading",
             "orgTypeUrl" to JourneyStateService.urlWithJourneyState(OrgTypeStep.ROUTE_SEGMENT, state.journeyId),
             "registerAsIndividualUrl" to JourneyStateService.urlWithJourneyState(LandlordTypeStep.ROUTE_SEGMENT, state.journeyId),
         )

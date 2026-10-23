@@ -15,7 +15,6 @@ class EpcExemptionStepConfig : AbstractRequestableStepConfig<Complete, EpcExempt
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "propertyCompliance.epcTask.epcExemption.fieldSetHeading",
             "fieldSetHeading" to "propertyCompliance.epcTask.epcExemption.fieldSetHeading",
             "radioOptions" to
                 listOf(
