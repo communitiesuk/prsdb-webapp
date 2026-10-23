@@ -4,12 +4,15 @@ import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
@@ -39,6 +42,7 @@ class PropertyRegistrationService(
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
+    private val paymentRepository: PaymentRepository,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -199,7 +203,25 @@ class PropertyRegistrationService(
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcProvideLater = epcProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
+                // TODO PDJB-1734: Always get the payment details when the PAYMENTS flag is removed
+                paymentDetails = if (featureFlagManager.checkFeature(PAYMENTS)) getPaymentDetails(propertyOwnership) else null,
             ),
+        )
+    }
+
+    private fun getPaymentDetails(propertyOwnership: PropertyOwnership): PropertyRegistrationConfirmationEmail.PaymentDetails {
+        val payment =
+            checkNotNull(
+                paymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+                    propertyOwnership,
+                    PaymentStatus.SUCCEEDED,
+                ),
+            ) { "No succeeded payment found for property ownership ${propertyOwnership.id}" }
+
+        return PropertyRegistrationConfirmationEmail.PaymentDetails(
+            amountInPence = payment.amountInPence,
+            paymentDate = payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).toLocalDate(),
+            renewalDate = propertyOwnership.renewalDate,
         )
     }
 

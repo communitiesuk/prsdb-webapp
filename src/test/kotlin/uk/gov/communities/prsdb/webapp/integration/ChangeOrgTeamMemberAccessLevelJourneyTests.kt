@@ -75,7 +75,9 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
             .hasText("Beth Admin will no longer be able to access your organisation on the service.")
         confirmationPage.form.submit()
 
-        assertPageIs(page, TeamMembersPage::class)
+        val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access removed")
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin")
         assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isEmpty())
     }
 
