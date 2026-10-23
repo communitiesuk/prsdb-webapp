@@ -54,6 +54,7 @@ class NoParents : Parentage {
 
 class SingleParent(
     val step: JourneyStep<*, *, *>,
+    val label: String? = null,
     private val condition: () -> Boolean,
 ) : Parentage {
     override fun allowsChild(): Boolean = condition()
@@ -69,10 +70,10 @@ class SingleParent(
 }
 
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnum): Parentage =
-    SingleParent(this) { outcome == outcomeValue }
+    SingleParent(this, outcomeValue.name) { outcome == outcomeValue }
 
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.doesNotHaveOutcome(outcomeValue: TEnum): Parentage =
-    SingleParent(this) { outcome != null && outcome != outcomeValue }
+    SingleParent(this, "not ${outcomeValue.name}") { outcome != null && outcome != outcomeValue }
 
 fun Task<*, *>.isComplete() =
     SingleParent(exitStep) {

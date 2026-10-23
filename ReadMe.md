@@ -163,6 +163,58 @@ A regression test suite covering these checks (`NftDataSeederTests`, under `src/
 seeder directly against a testcontainer database at a small scale, so it doesn't need Docker profile activation and
 doesn't hit the `exitProcess()` behaviour described above.
 
+#### Generating journey maps
+
+The `generateJourneyMap` task walks every route through a journey in the integration test harness (so Docker must be
+running), screenshots each page and each distinct version of it, and draws a map of the journey. External services
+such as One Login and the EPC register are stubbed by the scenarios in `JourneyMapRegistry`.
+
+```bash
+./gradlew generateJourneyMap                                       # every journey in JourneyDescriptors
+./gradlew generateJourneyMap -PjourneyMap=propertyRegistration     # selected journeys, comma separated
+```
+
+Each journey is written to `build/journey-maps/<journey>/`: open `index.html` for the interactive map. `README.md` has
+the same map and screenshots in Markdown, `report.md` lists coverage gaps, errors and the arrows in the routing code that
+no walk took, and `manifest.json` holds the underlying data.
+
+As well as the routes walked, the map draws every arrow in the journey's routing code: for each outcome of each page and
+decision, where the code sends the journey. Arrows that a walk took are solid, and arrows that no walk took are dashed and
+marked "not walked". When the routing code for an arrow also reads earlier answers, where it leads is only known once it
+has been walked, so an arrow like that which was not walked is listed in `report.md` rather than drawn. Changing an
+answer from check your answers starts a separate journey, so the outcomes passed while changing answers do not count as
+walking the journey's arrows.
+
+The map starts at a green Start node with an arrow to each entry point, labelled with how users get there, such as the
+change link they follow; entry points have a green border. Selecting a page highlights the arrows leading from it in
+blue and to it in purple, and hovering an item in its "Leads to" or "Reached from" list highlights that arrow.
+
+| Property                          | Default | Purpose                                                                  |
+|-----------------------------------|---------|--------------------------------------------------------------------------|
+| `-PjourneyMapViewports`           | desktop | Set to `desktop,mobile` to capture mobile screenshots too.               |
+| `-PjourneyMapChangeFlows`         | true    | Set to `false` to skip following check your answers change links.        |
+| `-PjourneyMapStages`              | all     | Set to `structure` to map the journey's structure without walking it.    |
+| `-PjourneyMapMaxActions`          | 3000    | The most submissions and link clicks to make in each journey.            |
+| `-PjourneyMapMaxVariantsPerPage`  | 12      | The most versions of each page to capture.                               |
+| `-PjourneyMapStrict`              | false   | Set to `true` to fail the task when there are coverage gaps or errors.   |
+| `-PjourneyMapVerbose`             | false   | Set to `true` to print the route taken by each walk through the journey. |
+
+`./gradlew journeyMapSmoke` walks the same journeys without screenshots and fails if any page or branch can no longer
+be reached. Journeys are mapped with the feature flags set in the first document of the main `application.yml`.
+
+To map another journey, add a `JourneyDescriptor` to `JourneyDescriptors`. Set `startsFromLink` when the journey is
+entered by following a link on the page that `start` opens, such as a change link on a details page; the journey is then
+also walked from every other link into it. Add `startingPoints` with seed data overlays from
+`src/test/resources/journey-map/seeds` for data that changes where the journey goes, such as a vacant property, and use
+`arrange` to switch on any other feature flag the journey needs. Branches that depend on an external service need a
+scenario in `JourneyMapRegistry`, including services called while the journey opens; a branch the generator cannot reach
+can be exempted there with a reason.
+
+To publish the maps, `node scripts/journey-maps/prepare-pages.mjs` copies them, with an index page, into
+`docs/journey-maps`, and GitHub Pages publishes the `docs` folder of the branch chosen under Settings > Pages. The
+repository is public, so the site is too; its pages ask search engines not to index them. The maps add about 100 MB, so
+keep the commit that adds them out of main.
+
 ### Scripts
 
 Utility scripts are in the `scripts/` directory.

@@ -124,7 +124,7 @@ sealed class Destination {
     ) : Destination() {
         override fun toModelAndView() = step.lifecycleOrchestrator.getStepModelAndView()
 
-        override fun toUrlStringOrNull() = if (step.isStepReachable) step.getNextDestination().toUrlStringOrNull() else null
+        override fun toUrlStringOrNull() = if (step.isStepReachable) step.getNextDestinationForLink().toUrlStringOrNull() else null
     }
 
     class Nowhere : Destination() {

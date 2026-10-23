@@ -684,4 +684,32 @@ class JourneyStateServiceTests {
 
     private fun HttpSession.getJourneyStateMetadataStore(): JourneyMetadataStore? =
         getAttribute("journeyStateKeyStore")?.toString()?.let { Json.decodeFromString(it) }
+
+    @Test
+    fun `getValue and setValue report each key to the access observer`() {
+        val session = MockHttpSession().apply { setAttribute("journey-id", mapOf("someKey" to "someValue")) }
+        val service = createJourneyStateServiceWithJourneyId(session, "journey-id")
+        val observer = RecordingAccessObserver()
+
+        observer.observe {
+            service.getValue("someKey")
+            service.setValue("otherKey", "value")
+        }
+
+        assertEquals(listOf("read:someKey", "written:otherKey"), observer.events)
+    }
+
+    @Test
+    fun `reads and writes of the step data map itself are not reported`() {
+        val session = MockHttpSession().apply { setAttribute("journey-id", mapOf<String, Any?>()) }
+        val service = createJourneyStateServiceWithJourneyId(session, "journey-id")
+        val observer = RecordingAccessObserver()
+
+        observer.observe {
+            service.addSingleStepData("page", mapOf("answer" to "yes"))
+            service.getSubmittedStepData()
+        }
+
+        assertEquals(emptyList<String>(), observer.events)
+    }
 }

@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyContainer
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -505,6 +506,52 @@ class TaskInitialiserTests {
 
         // Assert
         assertTrue(built.none { it is TaskRouteRedirectStep })
+    }
+
+    @Test
+    fun `build records the task as the container of every built step, including the landing step`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
+
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        val built = builder.build()
+
+        // Assert
+        val expectedContainers = listOf(JourneyContainer.Task(taskMock::class, "task-route"))
+        assertEquals(2, built.size)
+        built.forEach { assertEquals(expectedContainers, it.containers) }
+    }
+
+    @Test
+    fun `build places the task container before any containers recorded by inner builders`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
+        val innerContainer = JourneyContainer.Task(String::class, "inner-route")
+        realStep.enclosedBy(innerContainer)
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        assertEquals(listOf(JourneyContainer.Task(taskMock::class, null), innerContainer), realStep.containers)
     }
 
     @Test

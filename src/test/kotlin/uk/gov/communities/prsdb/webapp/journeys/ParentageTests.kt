@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -246,6 +248,32 @@ class ParentageTests {
 
         whenever(step.outcome).thenReturn(null)
         assertFalse(parent.allowsChild())
+    }
+
+    @Test
+    fun `hasOutcome labels the single parent with the outcome name`() {
+        val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
+
+        val parent = step.hasOutcome(TestEnum.ALTERNATIVE_VALUE) as SingleParent
+
+        assertEquals("ALTERNATIVE_VALUE", parent.label)
+    }
+
+    @Test
+    fun `doesNotHaveOutcome labels the single parent with the negated outcome name`() {
+        val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
+
+        val parent = step.doesNotHaveOutcome(TestEnum.ENUM_VALUE) as SingleParent
+
+        assertEquals("not ENUM_VALUE", parent.label)
+    }
+
+    @Test
+    fun `isComplete and always single parents have no label`() {
+        val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
+
+        assertNull((step.isComplete() as SingleParent).label)
+        assertNull((step.always() as SingleParent).label)
     }
 
     companion object {

@@ -221,6 +221,7 @@ require(shardCount == null || (shardIndex != null && shardIndex in 1..shardCount
 
 tasks.named<Test>("test") {
     exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
+    exclude("uk/gov/communities/prsdb/webapp/integration/journeyMap/**")
 }
 
 tasks.register<Test>("testWithOneLoginSimulator") {
@@ -230,6 +231,44 @@ tasks.register<Test>("testWithOneLoginSimulator") {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     include("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
+}
+
+// Journey maps walk journeys in the integration test harness; each -PjourneyMap* property is passed to the tests
+val journeyMapProperties =
+    mapOf(
+        "journeyMap" to "journeys",
+        "journeyMapStages" to "stages",
+        "journeyMapStrict" to "strict",
+        "journeyMapViewports" to "viewports",
+        "journeyMapMaxActions" to "maxActions",
+        "journeyMapMaxVariantsPerPage" to "maxVariantsPerPage",
+        "journeyMapChangeFlows" to "changeFlows",
+        "journeyMapVerbose" to "verbose",
+    )
+
+fun Test.configureJourneyMapTask(testPackage: String) {
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    include("uk/gov/communities/prsdb/webapp/integration/journeyMap/$testPackage/**")
+    outputs.upToDateWhen { false }
+    systemProperty("journeyMap.outputDir", layout.buildDirectory.dir("journey-maps").get().asFile.absolutePath)
+    systemProperty("journeyMap.nodeModules", file("node_modules").absolutePath)
+    journeyMapProperties.forEach { (projectProperty, settingName) ->
+        project.findProperty(projectProperty)?.let { systemProperty("journeyMap.$settingName", it.toString()) }
+    }
+    testLogging { showStandardStreams = true }
+}
+
+tasks.register<Test>("generateJourneyMap") {
+    group = "documentation"
+    description = "Walks journeys in the integration test harness and writes screenshot maps to build/journey-maps"
+    configureJourneyMapTask("generation")
+}
+
+tasks.register<Test>("journeyMapSmoke") {
+    group = "verification"
+    description = "Walks journeys without screenshots and fails if any page or branch can no longer be reached"
+    configureJourneyMapTask("smoke")
 }
 
 tasks.withType<Test> {

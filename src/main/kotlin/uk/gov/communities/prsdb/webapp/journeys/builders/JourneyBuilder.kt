@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
+import uk.gov.communities.prsdb.webapp.journeys.JourneyContainer
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -76,6 +77,12 @@ open class JourneyBuilder<TState : JourneyState>(
         // heading against the wrong `sections` list (breaking numbering) and mask the inner header with the outer's.
         override fun section(init: SectionBuilder<TState>.() -> Unit): Unit =
             throw JourneyInitialisationException("Sections cannot be nested")
+
+        override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
+            val sectionSteps = super.build(registry)
+            sectionSteps.forEach { it.enclosedBy(JourneyContainer.Section(headingMessageKey)) }
+            return sectionSteps
+        }
 
         fun withHeadingMessageKey(
             key: String,

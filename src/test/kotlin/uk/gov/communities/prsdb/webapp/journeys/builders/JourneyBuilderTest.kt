@@ -22,9 +22,11 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyContainer
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
+import uk.gov.communities.prsdb.webapp.journeys.StepConfigTests
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
@@ -826,6 +828,52 @@ class JourneyBuilderTest {
             val expectedSectionHeaderInfo = SectionHeaderViewModel("section.heading", 1, 1)
             val sectionHeaderInfo = capturedSectionHeader(taskStep)
             assertEquals(expectedSectionHeaderInfo, sectionHeaderInfo)
+        }
+
+        @Test
+        fun `a step inside a section records the section as its container`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val step = JourneyStep.RequestableStep(StepConfigTests.TestStepConfig())
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                step(step) {
+                    routeSegment("step-route")
+                    initialStep()
+                    nextUrl { "url1" }
+                    unreachableStepUrl { "unreachable" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            assertEquals(listOf(JourneyContainer.Section("section.heading")), step.containers)
+        }
+
+        @Test
+        fun `a step in a task inside a section records the section then the task as its containers`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val taskStep = JourneyStep.RequestableStep(StepConfigTests.TestStepConfig())
+            val task = testTaskWithSteps(taskStep)
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                task(task) {
+                    parents { NoParents() }
+                    nextUrl { "url1" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            assertEquals(
+                listOf(JourneyContainer.Section("section.heading"), JourneyContainer.Task(task::class, null)),
+                taskStep.containers,
+            )
         }
 
         @Test

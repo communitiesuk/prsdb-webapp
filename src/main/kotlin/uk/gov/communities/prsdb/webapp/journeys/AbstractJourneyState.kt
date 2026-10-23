@@ -8,14 +8,23 @@ abstract class AbstractJourneyState(
         JourneyStateDelegateProvider(journeyStateService),
 ) : JourneyState,
     DelegateKeysOwner by delegateProvider {
-    override fun getStepData(key: String): FormData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
+    override fun getStepData(key: String): FormData? {
+        JourneyStateService.accessObserver?.read(JourneyStateAccessObserver.stepKey(key))
+        return objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
+    }
 
     override fun addStepData(
         key: String,
         value: FormData,
-    ) = journeyStateService.addSingleStepData(key, value)
+    ) {
+        JourneyStateService.accessObserver?.written(JourneyStateAccessObserver.stepKey(key))
+        journeyStateService.addSingleStepData(key, value)
+    }
 
-    override fun clearStepData(key: String) = journeyStateService.clearStepData(key)
+    override fun clearStepData(key: String) {
+        JourneyStateService.accessObserver?.written(JourneyStateAccessObserver.stepKey(key))
+        journeyStateService.clearStepData(key)
+    }
 
     override val journeyId: String
         get() = journeyStateService.journeyId
@@ -25,7 +34,10 @@ abstract class AbstractJourneyState(
 
     override fun deleteJourney() = journeyStateService.deleteState()
 
-    override fun getSubmittedStepData() = journeyStateService.getSubmittedStepData()
+    override fun getSubmittedStepData(): Map<String, Any?> {
+        JourneyStateService.accessObserver?.read(JourneyStateAccessObserver.ALL_STEP_DATA)
+        return journeyStateService.getSubmittedStepData()
+    }
 
     override fun initializeState(seed: Any?): String {
         val journeyId = generateJourneyId(seed)

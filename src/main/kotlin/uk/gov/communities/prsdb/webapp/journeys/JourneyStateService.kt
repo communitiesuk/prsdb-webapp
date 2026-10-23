@@ -81,6 +81,7 @@ class JourneyStateService(
     fun save(): SavedJourneyState = persistenceService.saveJourneyStateData(session.getAttribute(journeyId), journeyId)
 
     fun getValue(key: String): Any? {
+        if (key != STEP_DATA_KEY) accessObserver?.read(key)
         ensureJourneyDataLoaded()
         return objectToStringKeyedMap(session.getAttribute(journeyId))?.get(key)
     }
@@ -113,6 +114,7 @@ class JourneyStateService(
         key: String,
         value: Any?,
     ) {
+        if (key != STEP_DATA_KEY) accessObserver?.written(key)
         val journeyState = objectToStringKeyedMap(session.getAttribute(journeyId)) ?: mapOf()
         session.setAttribute(journeyId, journeyState + (key to value))
         updateLastUpdated()
@@ -180,6 +182,10 @@ class JourneyStateService(
     }
 
     companion object {
+        // Lets local tooling see which journey state each step reads and writes; it is never set outside tests.
+        @Volatile
+        var accessObserver: JourneyStateAccessObserver? = null
+
         private const val STEP_DATA_KEY = "journeyData"
         private const val JOURNEY_STATE_METADATA_STORE_KEY = "journeyStateKeyStore"
 

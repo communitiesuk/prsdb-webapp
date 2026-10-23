@@ -123,10 +123,17 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         }
     }
 
-    fun getNextDestination(): Destination {
+    fun getNextDestination(): Destination = chooseNextDestination(movingOn = true)
+
+    // Works out where a link to this step leads, without the journey moving on from it
+    fun getNextDestinationForLink(): Destination = chooseNextDestination(movingOn = false)
+
+    private fun chooseNextDestination(movingOn: Boolean): Destination {
         stepConfig.beforeChoosingNextDestination(state)
+        val mode = workOutMode()
+        if (movingOn) JourneyStateService.accessObserver?.stepPassed(this, mode)
         val defaultDestination =
-            stepConfig.mode(state)?.let { nextDestination(it) }
+            mode?.let { nextDestination(it) }
                 ?: throw UnrecoverableJourneyStateException(currentJourneyId, "Determining next destination failed - step mode is null")
         return stepConfig.resolveNextDestination(state, defaultDestination)
     }
@@ -168,9 +175,34 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     lateinit var parentage: Parentage
 
+    var containers: List<JourneyContainer> = emptyList()
+        private set
+
+    internal fun enclosedBy(container: JourneyContainer) {
+        containers = listOf(container) + containers
+    }
+
     private lateinit var state: TState
 
-    val outcome: TEnum? by lazy(LazyThreadSafetyMode.NONE) { if (isStepReachable) stepConfig.mode(state) else null }
+    private val memoisedOutcome: TEnum? by lazy(LazyThreadSafetyMode.NONE) { if (isStepReachable) workOutMode() else null }
+
+    val outcome: TEnum?
+        get() {
+            JourneyStateService.accessObserver?.outcomeRead(this)
+            return memoisedOutcome
+        }
+
+    private fun workOutMode(): TEnum? {
+        val observer = JourneyStateService.accessObserver ?: return stepConfig.mode(state)
+        observer.modeStarted(this)
+        var mode: TEnum? = null
+        try {
+            mode = stepConfig.mode(state)
+            return mode
+        } finally {
+            observer.modeFinished(this, mode)
+        }
+    }
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 

@@ -449,6 +449,89 @@ class JourneyStepTests {
 
     @ParameterizedTest
     @MethodSource("journeyStepProvider")
+    fun `working out and reading the outcome is reported to the access observer`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(true)
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+        val observer = RecordingAccessObserver()
+
+        observer.observe {
+            step.outcome
+            step.outcome
+        }
+
+        assertEquals(listOf("outcomeRead", "modeStarted", "modeFinished:ENUM_VALUE", "outcomeRead"), observer.events)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
+    fun `choosing the next destination reports the step as passed with its mode`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
+        val state: JourneyState = mock()
+        whenever(state.journeyId).thenReturn("jid123")
+        step.initialize(
+            routeSegment,
+            state,
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            mock(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+        whenever(step.stepConfig.beforeChoosingNextDestination(any())).thenCallRealMethod()
+        whenever(step.stepConfig.resolveNextDestination(anyOrNull(), any())).thenCallRealMethod()
+        val observer = RecordingAccessObserver()
+
+        observer.observe { step.getNextDestination() }
+
+        assertEquals(listOf("modeStarted", "modeFinished:ENUM_VALUE", "stepPassed:ENUM_VALUE"), observer.events)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
+    fun `working out the next destination for a link does not report the step as passed`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
+        val state: JourneyState = mock()
+        whenever(state.journeyId).thenReturn("jid123")
+        step.initialize(
+            routeSegment,
+            state,
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            mock(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+        whenever(step.stepConfig.beforeChoosingNextDestination(any())).thenCallRealMethod()
+        whenever(step.stepConfig.resolveNextDestination(anyOrNull(), any())).thenCallRealMethod()
+        val observer = RecordingAccessObserver()
+
+        val destination = observer.observe { step.getNextDestinationForLink() }
+
+        assertEquals("redirect", (destination as Destination.ExternalUrl).externalUrl)
+        assertEquals(listOf("modeStarted", "modeFinished:ENUM_VALUE"), observer.events)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
     fun `determine redirect returns the result of the redirectProvider if the step config's mode is not null`(
         step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
         routeSegment: String?,

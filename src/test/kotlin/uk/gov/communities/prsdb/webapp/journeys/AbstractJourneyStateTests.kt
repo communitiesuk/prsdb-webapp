@@ -74,6 +74,26 @@ class AbstractJourneyStateTests {
         // Assert
         assertEquals("testJourneyId", result)
     }
+
+    @Test
+    fun `step answers read and written are reported to the access observer by step key`() {
+        val journeyStateService: JourneyStateService = mock()
+        whenever(journeyStateService.getSubmittedStepData()).thenReturn(mapOf("stepKey" to mapOf("field" to "value")))
+        val journeyState = object : AbstractJourneyState(journeyStateService) {}
+        val observer = RecordingAccessObserver()
+
+        observer.observe {
+            journeyState.getStepData("stepKey")
+            journeyState.addStepData("stepKey", mapOf())
+            journeyState.clearStepData("stepKey")
+            journeyState.getSubmittedStepData()
+        }
+
+        assertEquals(
+            listOf("read:step:stepKey", "written:step:stepKey", "written:step:stepKey", "read:step:*"),
+            observer.events,
+        )
+    }
 }
 
 class JourneyStateDelegateProviderTests {
