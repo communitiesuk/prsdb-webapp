@@ -56,9 +56,6 @@ class UpdateCorrespondenceEmailJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             step(journey.correspondenceEmailStep) {
                 initialStep()
                 routeSegment(CorrespondenceEmailStep.ROUTE_SEGMENT)
@@ -80,9 +77,6 @@ class UpdateCorrespondenceEmailJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 CorrespondenceEmailStep.ROUTE_SEGMENT -> {

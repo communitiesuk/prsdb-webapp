@@ -23,9 +23,6 @@ class LeavePropertyJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.confirmStep }
-            configure {
-                withAdditionalContentProperty { "title" to "leaveProperty.title" }
-            }
             step(journey.confirmStep) {
                 routeSegment(ConfirmStep.ROUTE_SEGMENT)
                 initialStep()

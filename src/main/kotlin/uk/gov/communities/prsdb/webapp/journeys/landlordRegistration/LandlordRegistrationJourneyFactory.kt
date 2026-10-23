@@ -34,9 +34,6 @@ class LandlordRegistrationJourneyFactory(
         journey(state) {
             configureFirst { backDestination { Destination.ExternalUrl(LANDLORD_REGISTRATION_START_PAGE_ROUTE) } }
             unreachableStepStep { journey.landlordRegistrationTask.privacyNoticeStep }
-            configure {
-                withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
-            }
             section {
                 withHeadingMessageKey("registerAsALandlord.caption", shouldUseNumbering = false)
                 task(journey.landlordRegistrationTask) {

@@ -2,8 +2,8 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{forms.update.email.title}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <h1 class="govuk-heading-l" th:text="#{forms.update.email.title}">forms.update.email.title</h1>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{forms.update.email.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <h1 class="govuk-heading-l" th:text="#{forms.update.email.heading}">forms.update.email.heading</h1>
     <p class="govuk-body" th:text="#{forms.update.email.body}">forms.update.email.body</p>
     <div class="govuk-inset-text" th:text="#{forms.update.email.insetText}">forms.update.email.insetText</div>
     <div th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#email-input/content()}, fieldName='emailAddress', fieldSetHeading=#{forms.update.email.fieldSetHeading}, fieldSetHint=null)}">

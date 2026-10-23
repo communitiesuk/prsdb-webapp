@@ -1,4 +1,3 @@
-title: Remove letting agent or property manager
 areYouSure:
   fieldSetHeading: 'Are you sure you want to remove {0}?'
   fieldSetHint: They will no longer be able to provide details for this property record

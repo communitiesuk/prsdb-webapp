@@ -1,9 +1,8 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="confirmSignOutUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html>
 <th:block id="main-content"
-          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
+          th:replace="~{fragments/layout :: layout(#{acceptOrganisationInvitation.userIsAlreadyLandlord.heading}, ~{::#main-content/content()}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
             <div id="page-content">

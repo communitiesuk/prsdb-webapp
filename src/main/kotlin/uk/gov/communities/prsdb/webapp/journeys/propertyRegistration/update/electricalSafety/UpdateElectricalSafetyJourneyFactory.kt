@@ -70,7 +70,6 @@ class UpdateElectricalSafetyJourneyFactory(
                 nextStep { journey.updateCheckElectricalSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }
@@ -82,11 +81,6 @@ class UpdateElectricalSafetyJourneyFactory(
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
                 nextStep { journey.completeElectricalSafetyUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                    )
-                }
             }
             step(journey.completeElectricalSafetyUpdateStep) {
                 parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
@@ -108,7 +102,6 @@ class UpdateElectricalSafetyJourneyFactory(
             configure {
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }
