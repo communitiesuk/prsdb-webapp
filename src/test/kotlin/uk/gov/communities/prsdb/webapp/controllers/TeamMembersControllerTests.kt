@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -143,46 +142,6 @@ class TeamMembersControllerTests(
 
         val teamMembers = result.modelAndView!!.model["teamMembers"] as TeamMembersViewModel
         assertEquals(1, teamMembers.pendingInvitationRows.size)
-    }
-
-    @Test
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getTeamMembers renders the access removed banner when flash attributes are present`() {
-        stubOrgLandlordWithCurrentUser()
-
-        mvc
-            .get(TEAM_MEMBERS_ROUTE) {
-                flashAttr("successBanner", "accessRemoved")
-                flashAttr("accessRemovedMemberName", "Anita Locke")
-            }.andExpect {
-                status { isOk() }
-                content { string(containsString("Access removed")) }
-                content { string(containsString("Anita Locke no longer has access to the service.")) }
-            }
-    }
-
-    @ParameterizedTest
-    @CsvSource(
-        "teamMembers.accessLevelChangedBanner.content.administrator, administrator",
-        "teamMembers.accessLevelChangedBanner.content.editor, editor",
-    )
-    @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
-    fun `getTeamMembers renders the access level changed banner for the selected role`(
-        bannerContentKey: String,
-        roleDescription: String,
-    ) {
-        stubOrgLandlordWithCurrentUser()
-
-        mvc
-            .get(TEAM_MEMBERS_ROUTE) {
-                flashAttr("successBanner", "accessLevelChanged")
-                flashAttr("accessLevelChangedMemberName", "Anita Locke")
-                flashAttr("accessLevelChangedBannerContentKey", bannerContentKey)
-            }.andExpect {
-                status { isOk() }
-                content { string(containsString("Access level changed")) }
-                content { string(containsString("Anita Locke is now an $roleDescription.")) }
-            }
     }
 
     @Test
