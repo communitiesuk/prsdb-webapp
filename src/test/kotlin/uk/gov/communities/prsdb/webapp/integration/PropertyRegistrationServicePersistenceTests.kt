@@ -17,9 +17,15 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
@@ -29,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 
 class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -43,6 +50,12 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
 
     @Autowired
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Autowired
+    private lateinit var paymentRepository: PaymentRepository
+
+    @Autowired
+    private lateinit var prsdbUserRepository: PrsdbUserRepository
 
     @Autowired
     private lateinit var transactionManager: PlatformTransactionManager
@@ -100,7 +113,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         // Act
         val propertyOwnership =
             TransactionTemplate(transactionManager).execute {
-                propertyRegistrationService.registerProperty(registrationData)
+                registerPropertyWithPayment()
             }!!
 
         // Assert
@@ -117,7 +130,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         doThrow(RuntimeException("Email failed to send")).whenever(jointLandlordInvitationEmailSender).sendEmail(any(), any())
 
         // Act
-        val propertyOwnership = propertyRegistrationService.registerProperty(registrationData)
+        val propertyOwnership = TransactionTemplate(transactionManager).execute { registerPropertyWithPayment() }!!
 
         // Assert
         assertTrue(propertyOwnershipRepository.findById(propertyOwnership.id).isPresent)
@@ -128,6 +141,20 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         verify(lettingAgentInvitationEmailSender).sendEmail(eq(LETTING_AGENT_EMAIL), any())
         verify(jointLandlordInvitationConfirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
     }
+
+    // The confirmation email needs a succeeded payment linked to the property, which PaymentService would normally save
+    private fun registerPropertyWithPayment(): PropertyOwnership =
+        propertyRegistrationService.registerProperty(registrationData).also { propertyOwnership ->
+            val user = prsdbUserRepository.findById(USER_ID).get()
+            paymentRepository.save(
+                MockPaymentData
+                    .createPayment(
+                        paymentId = PAYMENT_ID,
+                        status = PaymentStatus.SUCCEEDED,
+                        incompleteProperty = LandlordIncompleteProperty(user, SavedJourneyState(user, JOURNEY_ID)),
+                    ).apply { associateWithProperty(propertyOwnership) },
+            )
+        }
 
     private fun verifyNoEmailsSent() =
         verifyNoInteractions(
@@ -142,5 +169,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
         private const val LANDLORD_EMAIL = "alex.surname@example.com"
         private const val JOINT_LANDLORD_EMAIL = "joint.landlord@example.com"
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
+        private const val PAYMENT_ID = "property-registration-payment-id"
+        private const val JOURNEY_ID = "property-registration-journey-id"
     }
 }
