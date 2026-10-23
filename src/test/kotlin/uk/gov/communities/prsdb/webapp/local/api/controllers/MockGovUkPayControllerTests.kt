@@ -306,6 +306,7 @@ class MockGovUkPayControllerTests {
     @CsvSource(
         "CREATED, created, false",
         "CAPTURABLE, capturable, false",
+        "INDETERMINATE, capturable, false",
         "SUCCEEDED, success, true",
         "FAILED, failed, true",
         "CANCELLED, cancelled, true",
@@ -332,7 +333,7 @@ class MockGovUkPayControllerTests {
     @Test
     fun `cancelling a payment created before the mock started moves it to cancelled`() {
         whenever(mockPaymentRepository.findById(SAVED_PAYMENT_ID))
-            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.CAPTURABLE)))
+            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.INDETERMINATE)))
 
         mvc
             .perform(post("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID/cancel"))
@@ -346,7 +347,7 @@ class MockGovUkPayControllerTests {
     @Test
     fun `capturing a capturable payment created before the mock started moves it to success`() {
         whenever(mockPaymentRepository.findById(SAVED_PAYMENT_ID))
-            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.CAPTURABLE)))
+            .thenReturn(Optional.of(createSavedPayment(PaymentStatus.INDETERMINATE)))
 
         mvc
             .perform(post("/local/gov-uk-pay/v1/payments/$SAVED_PAYMENT_ID/capture"))
