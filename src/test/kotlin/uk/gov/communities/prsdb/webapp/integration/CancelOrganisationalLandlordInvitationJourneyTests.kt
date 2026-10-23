@@ -35,6 +35,7 @@ class CancelOrganisationalLandlordInvitationJourneyTests :
         BaseComponent
             .assertThat(areYouSurePage.form.fieldsetHeading)
             .containsText("Do you want to cancel the invitation for pending-org-invite-c@example.com?")
+        BaseComponent.assertThat(areYouSurePage.form.submitButton).hasText("Confirm")
         areYouSurePage.submitWantsToProceed()
 
         // Assert
