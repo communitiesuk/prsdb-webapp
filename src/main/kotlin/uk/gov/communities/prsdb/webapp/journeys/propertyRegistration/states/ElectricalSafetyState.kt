@@ -47,8 +47,8 @@ interface ElectricalSafetyDetailState : JourneyState {
     fun getElectricalCertificateIsOutdated(): Boolean? =
         getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
             when (getElectricalCertificateTypeAsCertificateType()) {
-                CertificateType.Eic -> PropertyCompliance.isEicCertificateDateExpired(expiryDate.toJavaLocalDate())
-                CertificateType.Eicr -> PropertyCompliance.isEicrCertificateDateExpired(expiryDate.toJavaLocalDate())
+                CertificateType.Eic -> PropertyCompliance.isEicExpiryDateExpired(expiryDate.toJavaLocalDate())
+                CertificateType.Eicr -> PropertyCompliance.isEicrExpiryDateExpired(expiryDate.toJavaLocalDate())
                 else -> null
             }
         }

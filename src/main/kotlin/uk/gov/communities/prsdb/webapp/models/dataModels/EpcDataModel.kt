@@ -26,7 +26,7 @@ data class EpcDataModel(
         certificateNumber == latestCertificateNumberForThisProperty ||
             latestCertificateNumberForThisProperty == null
 
-    fun isPastExpiryDate(): Boolean = PropertyCompliance.isEpcCertificateDateExpired(expiryDateAsJavaLocalDate)
+    fun isPastExpiryDate(): Boolean = PropertyCompliance.isEpcExpiryDateExpired(expiryDateAsJavaLocalDate)
 
     fun isEnergyRatingEOrBetter(): Boolean = energyRatingUppercase in EPC_ACCEPTABLE_RATING_RANGE
 

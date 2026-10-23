@@ -302,7 +302,9 @@ object NftDataFaker {
             when {
                 // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
                 randomDouble < 0.60 -> 0
+
                 randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+
                 else -> faker.random().nextInt(2, 4)
             }
 
@@ -601,7 +603,7 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.let { !PropertyCompliance.isGasCertificateDateExpired(it.toLocalDate(), referenceDate()) } == true
+        issueDate?.let { !PropertyCompliance.isGasIssueDateExpired(it.toLocalDate(), referenceDate()) } == true
 
     fun isElectricalSafetyCertificateCurrent(
         expiryDate: Date?,
@@ -611,8 +613,8 @@ object NftDataFaker {
         if (expiryDate == null) return false
         val asOfDate = asOf.toLocalDateTime().toLocalDate()
         return when (certType) {
-            CertificateType.Eic -> !PropertyCompliance.isEicCertificateDateExpired(expiryDate.toLocalDate(), asOfDate)
-            CertificateType.Eicr -> !PropertyCompliance.isEicrCertificateDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eic -> !PropertyCompliance.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !PropertyCompliance.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
             else -> false
         }
     }

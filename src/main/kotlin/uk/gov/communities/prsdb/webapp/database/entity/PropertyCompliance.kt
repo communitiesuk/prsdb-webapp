@@ -71,7 +71,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
     val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertIssueDate?.let { isGasCertificateDateExpired(it) }
+        get() = gasSafetyCertIssueDate?.let { isGasIssueDateExpired(it) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
@@ -80,8 +80,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() =
             electricalSafetyExpiryDate?.let { expiryDate ->
                 when (electricalCertType) {
-                    CertificateType.Eic -> isEicCertificateDateExpired(expiryDate)
-                    CertificateType.Eicr -> isEicrCertificateDateExpired(expiryDate)
+                    CertificateType.Eic -> isEicExpiryDateExpired(expiryDate)
+                    CertificateType.Eicr -> isEicrExpiryDateExpired(expiryDate)
                     else -> null
                 }
             }
@@ -90,7 +90,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
-        get() = epcExpiryDate?.let { isEpcCertificateDateExpired(it) }
+        get() = epcExpiryDate?.let { isEpcExpiryDateExpired(it) }
 
     val isEpcRatingLow: Boolean?
         get() {
@@ -163,25 +163,25 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     companion object {
         // Valid up to and including the anniversary of the issue date
-        fun isGasCertificateDateExpired(
+        fun isGasIssueDateExpired(
             issueDate: LocalDate,
             asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
         ): Boolean = asOf > issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
         // Expired on the expiry date
-        fun isEicCertificateDateExpired(
+        fun isEicExpiryDateExpired(
             expiryDate: LocalDate,
             asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
         ): Boolean = asOf >= expiryDate
 
         // Expired on the expiry date
-        fun isEicrCertificateDateExpired(
+        fun isEicrExpiryDateExpired(
             expiryDate: LocalDate,
             asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
         ): Boolean = asOf >= expiryDate
 
         // Valid up to and including the expiry date
-        fun isEpcCertificateDateExpired(
+        fun isEpcExpiryDateExpired(
             expiryDate: LocalDate,
             asOf: LocalDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
         ): Boolean = asOf > expiryDate

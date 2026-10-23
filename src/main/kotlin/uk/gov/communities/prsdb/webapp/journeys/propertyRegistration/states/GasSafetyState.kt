@@ -59,7 +59,7 @@ interface GasSafetyDetailState : JourneyState {
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
         getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
-            PropertyCompliance.isGasCertificateDateExpired(issueDate.toJavaLocalDate())
+            PropertyCompliance.isGasIssueDateExpired(issueDate.toJavaLocalDate())
         }
 
     val gasUploadIds: List<Long>
