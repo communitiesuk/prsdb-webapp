@@ -222,12 +222,12 @@ class LandlordControllerTests(
     fun `getComplianceActions returns 200 for authorised landlord user`() {
         val nonCompliantDataModel =
             ComplianceStatusDataModel(
-                2,
-                "456 Example Avenue, EX",
-                "P-YYYY-YYYY",
-                ComplianceCertStatus.EXPIRED,
-                ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.HAS_FAULTS,
+                propertyOwnershipId = 2,
+                singleLineAddress = "456 Example Avenue, EX",
+                registrationNumber = "P-YYYY-YYYY",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.HAS_FAULTS,
                 isComplete = false,
                 isOccupied = true,
             )
