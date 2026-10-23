@@ -58,6 +58,7 @@ Existing interceptors:
 - `BackLinkInterceptor` — stores/retrieves back URL via query parameter
 - `MaintenanceInterceptor` — active only with `@Profile("maintenance-mode")`
 - `PasscodeInterceptor` — active only with `@Profile("require-passcode")`
+- `RobotsTagInterceptor` — adds `X-Robots-Tag: noindex, nofollow` to every response so search engines don't index the service
 
 ## Custom Annotations for Config Classes
 

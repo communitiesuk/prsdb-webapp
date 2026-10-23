@@ -8,6 +8,8 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.controllers.MaintenanceController.Companion.MAINTENANCE_ROUTE
 
 // The ActiveProfiles annotation is not picked up for inner classes, so we need to create separate classes with and without the maintenance-mode profile
@@ -34,6 +36,15 @@ class MaintenanceControllerTests(
             .andExpect {
                 status { isOk() }
                 view { name("maintenancePage") }
+            }
+    }
+
+    @Test
+    fun `index response tells search engines not to index the page`() {
+        mvc
+            .get(MAINTENANCE_ROUTE)
+            .andExpect {
+                header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
             }
     }
 }
