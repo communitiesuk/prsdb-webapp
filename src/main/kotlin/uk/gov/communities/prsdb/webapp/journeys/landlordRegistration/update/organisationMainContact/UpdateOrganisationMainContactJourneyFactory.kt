@@ -30,7 +30,6 @@ class UpdateOrganisationMainContactJourneyFactory(
                 nextStep { journey.completeOrganisationMainContactUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "landlordDetails.update.title",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",
                         "showWarning" to true,

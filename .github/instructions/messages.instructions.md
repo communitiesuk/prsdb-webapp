@@ -20,13 +20,13 @@ The custom `YamlMessageSource` automatically prefixes all message keys with the 
 For example, if `registerProperty.yml` contains:
 
 ```yaml
-title: Register a Property
+heading: Register a property
 confirmation:
   banner:
     heading: You have registered a property
 ```
 
-The resolved message keys are `registerProperty.title` and `registerProperty.confirmation.banner.heading` — the
+The resolved message keys are `registerProperty.heading` and `registerProperty.confirmation.banner.heading` — the
 filename `registerProperty` is prepended automatically. You do **not** need to repeat the filename inside the YAML
 structure.
 
@@ -42,7 +42,6 @@ Use hierarchical dot notation: `{feature}.{section}.{element}.{variant}`
 
 ```yaml
 # In registerProperty.yml — keys are auto-prefixed with "registerProperty."
-title: Register a Property
 heading: Register a property
 
 # Nested sections (in registerProperty.yml)

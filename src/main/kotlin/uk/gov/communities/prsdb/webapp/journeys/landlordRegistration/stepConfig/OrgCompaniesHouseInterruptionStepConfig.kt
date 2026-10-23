@@ -26,7 +26,7 @@ class OrgCompaniesHouseInterruptionStepConfig :
         return this
     }
 
-    override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState) = mapOf("title" to "registerAsALandlord.title")
+    override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState): Map<String, Any?> = emptyMap()
 
     override fun chooseTemplate(state: OrgCompaniesHouseUpdateState): String {
         val isChangingToCompany =

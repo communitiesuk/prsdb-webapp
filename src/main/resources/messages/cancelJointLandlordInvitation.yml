@@ -1,4 +1,3 @@
-title: Cancel joint landlord invitation
 areYouSure:
   fieldSetHeading: 'Do you want to cancel the invitation for {0}?'
   radios:
@@ -10,7 +9,6 @@ areYouSure:
     error:
       missing: Select if you want to cancel this invitation
 confirmation:
-  title: Invitation cancelled
   pageTitle: Joint landlord invitation cancelled
   banner:
     heading: Invitation cancelled
