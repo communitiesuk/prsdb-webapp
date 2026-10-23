@@ -15,7 +15,7 @@
         button { background: var(--grey); border: 1px solid var(--border); padding: 4px 10px; cursor: pointer; }
         button.active { background: var(--blue); border-color: var(--blue); color: white; }
         main { flex: 1; display: flex; min-height: 0; }
-        #graph-view { flex: 1; position: relative; overflow: hidden; cursor: grab; }
+        #graph-view { flex: 1; position: relative; overflow: hidden; cursor: grab; user-select: none; -webkit-user-select: none; }
         #graph-view.dragging { cursor: grabbing; }
         #graph { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
         #graph svg { max-width: none !important; }
@@ -175,6 +175,7 @@
                 drag = { startX: event.clientX, startY: event.clientY, offsetX, offsetY, moved: false, target: event.target };
                 view.classList.add("dragging");
             });
+            view.addEventListener("dragstart", (event) => event.preventDefault());
             window.addEventListener("mousemove", (event) => {
                 if (!drag) return;
                 const dx = event.clientX - drag.startX;
