@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toInstant
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toLocalDate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toTimestamp
@@ -600,7 +601,21 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.after(Date.valueOf(referenceDate().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))) == true
+        issueDate?.let { !PropertyCompliance.isGasCertificateDateExpired(it.toLocalDate(), referenceDate()) } == true
+
+    fun isElectricalSafetyCertificateCurrent(
+        expiryDate: Date?,
+        certType: CertificateType?,
+        asOf: Timestamp,
+    ): Boolean {
+        if (expiryDate == null) return false
+        val asOfDate = asOf.toLocalDateTime().toLocalDate()
+        return when (certType) {
+            CertificateType.Eic -> !PropertyCompliance.isEicCertificateDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !PropertyCompliance.isEicrCertificateDateExpired(expiryDate.toLocalDate(), asOfDate)
+            else -> false
+        }
+    }
 
     fun generateJourneyId(): String = faker.regexify("[a-z0-9]{7}")
 

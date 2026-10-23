@@ -796,17 +796,23 @@ class NftDataSeeder(
             gasSafetyFileUploadsStmt.setLong(2, gasSafetyUploadId)
             gasSafetyFileUploadsStmt.addBatch()
         }
-        if (complianceData.electricalSafetyExpiryDate?.after(createdDate) == true) {
-            val eicrUploadId = (++updatedFileUploadCount).toLong()
+        if (
+            NftDataFaker.isElectricalSafetyCertificateCurrent(
+                complianceData.electricalSafetyExpiryDate,
+                complianceData.electricalCertType,
+                createdDate,
+            )
+        ) {
+            val electricalSafetyUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
                 propertyOwnershipId,
                 createdDate,
                 complianceData.electricalCertType!!,
-                eicrUploadId,
+                electricalSafetyUploadId,
             )
             electricalSafetyFileUploadsStmt.setLong(1, complianceId)
-            electricalSafetyFileUploadsStmt.setLong(2, eicrUploadId)
+            electricalSafetyFileUploadsStmt.setLong(2, electricalSafetyUploadId)
             electricalSafetyFileUploadsStmt.addBatch()
         }
 

@@ -1,12 +1,15 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import java.sql.Date
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
@@ -120,6 +123,57 @@ class NftDataFakerTests {
 
         // Assert
         assertEquals(LocalDate.of(2025, 9, 1), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `isGasSafetyCertificateCurrent returns true on the anniversary of the issue date`() {
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        assertTrue(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 6, 15))))
+    }
+
+    @Test
+    fun `isGasSafetyCertificateCurrent returns false the day after the anniversary of the issue date`() {
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        assertFalse(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 6, 14))))
+    }
+
+    @Test
+    fun `isElectricalSafetyCertificateCurrent returns false on the expiry date`() {
+        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
+            assertFalse(
+                NftDataFaker.isElectricalSafetyCertificateCurrent(
+                    Date.valueOf(LocalDate.of(2025, 6, 15)),
+                    certType,
+                    Timestamp.from(MIDYEAR_REFERENCE),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyCertificateCurrent returns true the day before the expiry date`() {
+        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
+            assertTrue(
+                NftDataFaker.isElectricalSafetyCertificateCurrent(
+                    Date.valueOf(LocalDate.of(2025, 6, 16)),
+                    certType,
+                    Timestamp.from(MIDYEAR_REFERENCE),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyCertificateCurrent returns false when the cert type is missing`() {
+        assertFalse(
+            NftDataFaker.isElectricalSafetyCertificateCurrent(
+                Date.valueOf(LocalDate.of(2025, 6, 16)),
+                null,
+                Timestamp.from(MIDYEAR_REFERENCE),
+            ),
+        )
     }
 
     @Test
