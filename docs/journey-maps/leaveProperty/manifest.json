@@ -1,0 +1,92 @@
+{
+    "journey": {
+        "name": "leaveProperty",
+        "title": "Leave a property you jointly own",
+        "basePath": "/landlord/leave-property/2",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:26.101157800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "confirm",
+            "kind": "page",
+            "route": "confirm",
+            "title": "Confirm that you’re no longer a landlord for 3 Imaginary Street",
+            "stepConfig": "ConfirmStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm/v1.jpg",
+                    "thumbnail": "img/confirm/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/leave-property/2/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/leave-property/2/confirmation",
+            "title": "No longer registered as a landlord for 3 Imaginary Street",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_leave-property_2_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_leave-property_2_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "confirm",
+            "to": "/landlord/leave-property/2/confirmation",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "confirm",
+            "mode": "COMPLETE",
+            "to": "/landlord/leave-property/2/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "confirm",
+            "label": ""
+        }
+    ]
+}

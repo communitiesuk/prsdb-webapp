@@ -1,0 +1,1411 @@
+{
+    "journey": {
+        "name": "updateCompaniesHouse",
+        "title": "Update whether the organisation is registered with Companies House",
+        "basePath": "/landlord/landlord-details/update-companies-house",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:39:29.588225700Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:UpdateCompaniesHouseTask",
+            "kind": "task",
+            "label": "Update companies house",
+            "parent": null
+        },
+        {
+            "id": "task:OrgGovBodyMembersTask",
+            "kind": "task",
+            "label": "Org gov body members",
+            "parent": "task:UpdateCompaniesHouseTask"
+        },
+        {
+            "id": "task:GovBodyMemberAddressTask/organisation-governing-body-member-address",
+            "kind": "task",
+            "label": "Gov body member address",
+            "parent": "task:OrgGovBodyMembersTask"
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "organisation-companies-house",
+            "kind": "page",
+            "route": "organisation-companies-house",
+            "title": "Is your organisation registered with Companies House?",
+            "stepConfig": "OrgIsRegisteredCompanyStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-companies-house/v1.jpg",
+                    "thumbnail": "img/organisation-companies-house/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-company-number",
+            "kind": "page",
+            "route": "organisation-company-number",
+            "title": "What is your organisation’s company number?",
+            "stepConfig": "OrgCompanyNumberStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-company-number/v1.jpg",
+                    "thumbnail": "img/organisation-company-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-answers",
+            "kind": "page",
+            "route": "check-answers",
+            "title": "Check your answers",
+            "stepConfig": "CompaniesHouseUpdateCheckAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-answers/v1.jpg",
+                    "thumbnail": "img/check-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-answers/v2.jpg",
+                    "thumbnail": "img/check-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-answers/v3.jpg",
+                    "thumbnail": "img/check-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Trustee"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-answers/v4.jpg",
+                    "thumbnail": "img/check-answers/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Partner"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-answers/v5.jpg",
+                    "thumbnail": "img/check-answers/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Other member of the governing body"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/check-answers/v6.jpg",
+                    "thumbnail": "img/check-answers/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/check-answers/v7.jpg",
+                    "thumbnail": "img/check-answers/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_landlord-details/v2.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_landlord-details/v3.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Trustee"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_landlord-details/v4.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Partner"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/landlord_landlord-details/v5.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Other member of the governing body"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/landlord_landlord-details/v6.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/landlord_landlord-details/v7.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v8",
+                    "image": "img/landlord_landlord-details/v8.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v8.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v9",
+                    "image": "img/landlord_landlord-details/v9.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v9.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Remove Person 1"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-companies-house-interruption",
+            "kind": "page",
+            "route": "organisation-companies-house-interruption",
+            "title": "Your new answer affects other sections of your landlord record",
+            "stepConfig": "OrgCompaniesHouseInterruptionStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-companies-house-interruption/v1.jpg",
+                    "thumbnail": "img/change_organisation-companies-house-interruption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        },
+                        {
+                            "step": "Your new answer affects other sections of your landlord record",
+                            "answer": "Continue to other sections"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Director"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-companies-house-interruption",
+            "kind": "page",
+            "route": "organisation-companies-house-interruption",
+            "title": "Your new answer affects other sections of your landlord record",
+            "stepConfig": "OrgCompaniesHouseInterruptionStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-companies-house-interruption/v1.jpg",
+                    "thumbnail": "img/organisation-companies-house-interruption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/organisation-companies-house-interruption/v2.jpg",
+                    "thumbnail": "img/organisation-companies-house-interruption/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/lookup-address",
+            "title": "What is their contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/select-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/select-address",
+            "title": "Select their address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_select-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-list",
+            "kind": "page",
+            "route": "organisation-governing-body-member-list",
+            "title": "You’ve added 1 person",
+            "stepConfig": "OrgGovBodyMemberListStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-list/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/organisation-governing-body-member-list/v2.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/organisation-governing-body-member-list/v3.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation is a trust"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/no-address-found",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and Slate House",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "What is their contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/manual-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/manual-address",
+            "title": "What is their contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_manual-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "What is their contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "kind": "decision",
+            "route": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "title": "Org companies house update routing",
+            "stepConfig": "OrgCompaniesHouseUpdateRoutingStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "kind": "decision",
+            "route": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "title": "Has any gov body members",
+            "stepConfig": "HasAnyGovBodyMembersStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "kind": "decision",
+            "route": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "title": "Gov body members back routing",
+            "stepConfig": "GovBodyMembersBackRoutingStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-governing-body-member",
+            "kind": "decision",
+            "route": "remove-governing-body-member",
+            "title": "Remove gov body member",
+            "stepConfig": "RemoveGovBodyMemberStepConfig",
+            "containers": [
+                "task:UpdateCompaniesHouseTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "organisation-companies-house",
+            "to": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "label": "",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "to": "organisation-company-number",
+            "label": "Unchanged company",
+            "mode": "UNCHANGED_COMPANY",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "to": "organisation-companies-house-interruption",
+            "label": "Changed to non company / Changed to company",
+            "mode": "CHANGED_TO_NON_COMPANY",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-company-number",
+            "to": "check-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-companies-house",
+            "label": "Change Registered with Companies House",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-companies-house",
+            "to": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "to": "change:organisation-companies-house-interruption",
+            "label": "Changed to non company",
+            "mode": "CHANGED_TO_NON_COMPANY",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-company-number",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-companies-house-interruption",
+            "to": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "label": "Continue to other sections",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "to": "change:organisation-governing-body-who-to-provide",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-companies-house-interruption",
+            "to": "organisation-companies-house",
+            "label": "Go back",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-who-to-provide",
+            "to": "change:organisation-governing-body-member-name",
+            "label": "Director / Trustee and 2 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-member-name",
+            "to": "change:organisation-governing-body-member-dob",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-company-number",
+            "label": "Change Companies House number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-companies-house-interruption",
+            "to": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "label": "Continue to other sections",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-companies-house-interruption",
+            "to": "organisation-companies-house",
+            "label": "Go back",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "to": "organisation-governing-body-member-name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "to": "organisation-governing-body-member-dob",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "Slate House, PRSDB Square, AA3 1AB / Slate House, PRSDB Road, AA3 1AB and 3 more",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "to": "check-answers",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "Add another person / Change Person 1 and 2 more",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "remove-governing-body-member",
+            "label": "Remove Person 1 / Remove Person 2 / Remove Person 3",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "organisation-companies-house-interruption",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-governing-body-member-list",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "to": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "label": "Unchanged non company",
+            "mode": "UNCHANGED_NON_COMPANY",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-companies-house-interruption",
+            "to": "organisation-company-number",
+            "label": "Continue with the change",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-governing-body-member",
+            "writers": [
+                "organisation-companies-house",
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/lookup-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/select-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "writers": [
+                "organisation-companies-house"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-companies-house",
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "writers": [
+                "organisation-companies-house",
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-companies-house",
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "organisation-companies-house",
+            "mode": "YES",
+            "to": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-companies-house",
+            "mode": "NO",
+            "to": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-companies-house-interruption",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:internal:InitialiseGovBodyMembersStep@task:UpdateCompaniesHouseTask",
+                "outcome:internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+                "outcome:organisation-companies-house",
+                "step:organisation-companies-house"
+            ]
+        },
+        {
+            "from": "organisation-company-number",
+            "mode": "COMPLETE",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-governing-body-member",
+            "mode": "NO_MEMBERS",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-governing-body-member",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "mode": "COMPLETE",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-dob",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "UNCHANGED_COMPANY",
+            "to": "organisation-company-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "UNCHANGED_NON_COMPANY",
+            "to": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "CHANGED_TO_COMPANY",
+            "to": "organisation-companies-house-interruption",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "CHANGED_TO_NON_COMPANY",
+            "to": "organisation-companies-house-interruption",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "mode": "NO_MEMBERS",
+            "to": "organisation-governing-body-who-to-provide",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:UpdateCompaniesHouseTask>task:OrgGovBodyMembersTask",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "NO_MEMBERS",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:internal:OrgCompaniesHouseUpdateRoutingStep@task:UpdateCompaniesHouseTask"
+            ]
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:UpdateCompaniesHouseTask",
+            "mode": "SOME_MEMBERS",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "organisation-companies-house",
+            "label": "Change Registered with Companies House"
+        }
+    ]
+}

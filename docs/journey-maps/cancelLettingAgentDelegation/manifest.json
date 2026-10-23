@@ -1,0 +1,136 @@
+{
+    "journey": {
+        "name": "cancelLettingAgentDelegation",
+        "title": "Remove a property's letting agent",
+        "basePath": "/landlord/property-details/1/remove-letting-agent",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:24.573666800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Are you sure you want to remove letting.agent.one@example.com?",
+            "stepConfig": "AreYouSureStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/are-you-sure/v1.jpg",
+                    "thumbnail": "img/are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1/remove-letting-agent/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1/remove-letting-agent/confirmation",
+            "title": "Letting agent or property manager can no longer provide details",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1_remove-letting-agent_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1_remove-letting-agent_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Are you sure you want to remove letting.agent.one@example.com?",
+                            "answer": "Yes"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Are you sure you want to remove letting.agent.one@example.com?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/property-details/1/remove-letting-agent/confirmation",
+            "label": "Yes",
+            "mode": "WANTS_TO_PROCEED",
+            "kind": "observed"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/property-details/1",
+            "label": "No",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "are-you-sure",
+            "mode": "WANTS_TO_PROCEED",
+            "to": "/landlord/property-details/1/remove-letting-agent/confirmation",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "are-you-sure",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "are-you-sure",
+            "label": "Remove your letting agent or property manager"
+        }
+    ]
+}

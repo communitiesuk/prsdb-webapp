@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="robots" content="noindex">
+    <meta charset="utf-8">
+    <title>Update the organisation phone number journey map – journey map</title>
+    <style>
+        :root { --blue: #1d70b8; --grey: #f3f2f1; --border: #b1b4b6; --text: #0b0c0c; --secondary: #505a5f; --red: #d4351c; --yellow: #ffdd00; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+        header { padding: 10px 16px; border-bottom: 4px solid var(--blue); display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        header h1 { font-size: 20px; margin: 0; }
+        .meta { color: var(--secondary); font-size: 13px; }
+        .tools { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+        button, input { font: inherit; font-size: 14px; }
+        button { background: var(--grey); border: 1px solid var(--border); padding: 4px 10px; cursor: pointer; }
+        button.active { background: var(--blue); border-color: var(--blue); color: white; }
+        main { flex: 1; display: flex; min-height: 0; }
+        #graph-view { flex: 1; position: relative; overflow: hidden; cursor: grab; user-select: none; -webkit-user-select: none; }
+        #graph-view.dragging { cursor: grabbing; }
+        #graph { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+        #graph svg { max-width: none !important; }
+        #graph g.node { cursor: pointer; }
+        #graph g.node.match rect, #graph g.node.match polygon, #graph g.node.match path { stroke: #f47738 !important; stroke-width: 5px !important; }
+        #graph g.node.selected rect, #graph g.node.selected polygon, #graph g.node.selected path, #graph g.node.selected circle { stroke: var(--yellow) !important; stroke-width: 8px !important; }
+        #graph.focused g.node, #graph.focused path.flowchart-link, #graph.focused g.edgeLabel { opacity: 0.18; }
+        #graph.focused g.node.related, #graph.focused path.flowchart-link.related, #graph.focused g.edgeLabel.related { opacity: 1; }
+        #graph path.flowchart-link.edge-out { stroke: #1d70b8 !important; stroke-width: 4px !important; }
+        #graph path.flowchart-link.edge-in { stroke: #4c2c92 !important; stroke-width: 4px !important; }
+        #graph path.flowchart-link.edge-hover { stroke-width: 8px !important; }
+        #graph g.node.hover-target rect, #graph g.node.hover-target polygon, #graph g.node.hover-target path, #graph g.node.hover-target circle { stroke: #f47738 !important; stroke-width: 6px !important; }
+        #graph-missing { padding: 24px; color: var(--secondary); }
+        #gallery-view { flex: 1; overflow: auto; padding: 16px; display: none; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+        .card { border: 1px solid var(--border); cursor: pointer; background: white; }
+        .card.hidden { display: none; }
+        .card img, .card .no-image { width: 100%; aspect-ratio: 16 / 10; display: block; border-bottom: 1px solid var(--border); object-fit: cover; object-position: top; }
+        .card .no-image { background: var(--grey); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .card .card-title { padding: 8px; font-size: 14px; }
+        .badge { display: inline-block; font-size: 12px; padding: 1px 6px; margin-left: 4px; background: var(--grey); border: 1px solid var(--border); }
+        .badge.gap { background: #fff7bf; }
+        .badge.error { background: var(--red); color: white; border-color: var(--red); }
+        .badge.start { background: #00703c; color: white; border-color: #00703c; }
+        .entry-note { color: #00703c; font-weight: bold; margin: 4px 0; }
+        .link-list { list-style: none; padding-left: 0 !important; }
+        .link-list li { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
+        .link-list .thumb { width: 96px; height: 60px; flex: none; border: 1px solid var(--border); object-fit: cover; object-position: top; display: block; }
+        .link-list .thumb.placeholder { display: flex; align-items: center; justify-content: center; background: var(--grey); color: var(--secondary); font-size: 11px; text-align: center; }
+        aside { width: min(42vw, 640px); border-left: 1px solid var(--border); overflow: auto; padding: 16px; }
+        aside h2 { font-size: 19px; margin: 0 0 4px; }
+        aside h3 { font-size: 16px; margin: 16px 0 6px; }
+        aside ul { padding-left: 18px; margin: 4px 0; }
+        aside a { color: var(--blue); cursor: pointer; }
+        .tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 8px 0; }
+        .conditions { background: var(--grey); padding: 8px 12px; font-size: 14px; margin: 8px 0; }
+        .shot { width: 100%; border: 1px solid var(--border); display: block; }
+        .issues table { border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+        .issues td, .issues th { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+        code { font-size: 13px; background: var(--grey); padding: 0 3px; }
+        @media print {
+            body { height: auto; display: block; }
+            .tools, aside { display: none; }
+            main { display: block; }
+            #graph-view { overflow: visible; height: auto; }
+            #graph { position: static; transform: none !important; }
+            #gallery-view { display: block !important; overflow: visible; }
+            .card { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Update the organisation phone number journey map</h1>
+    <div class="meta" id="meta"></div>
+    <div class="tools">
+        <input id="search" type="search" placeholder="Search pages" aria-label="Search pages">
+        <button id="map-button" class="active" type="button">Map</button>
+        <button id="pages-button" type="button">Pages</button>
+        <button id="start-button" type="button">Start</button>
+        <button id="fit-button" type="button">Fit</button>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+        <button id="download-svg" type="button">Download SVG</button>
+    </div>
+</header>
+<main>
+    <div id="graph-view"><div id="graph"><svg id="journey-map-svg" width="100%" xmlns="http://www.w3.org/2000/svg" class="flowchart" style="max-width: 280.64776611328125px;" viewBox="4 4 280.64776611328125 645.796875" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#journey-map-svg{font-family:Arial,Helvetica,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#journey-map-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#journey-map-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#journey-map-svg .error-icon{fill:#552222;}#journey-map-svg .error-text{fill:#552222;stroke:#552222;}#journey-map-svg .edge-thickness-normal{stroke-width:1px;}#journey-map-svg .edge-thickness-thick{stroke-width:3.5px;}#journey-map-svg .edge-pattern-solid{stroke-dasharray:0;}#journey-map-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#journey-map-svg .edge-pattern-dashed{stroke-dasharray:3;}#journey-map-svg .edge-pattern-dotted{stroke-dasharray:2;}#journey-map-svg .marker{fill:#333333;stroke:#333333;}#journey-map-svg .marker.cross{stroke:#333333;}#journey-map-svg svg{font-family:Arial,Helvetica,sans-serif;font-size:16px;}#journey-map-svg p{margin:0;}#journey-map-svg .label{font-family:Arial,Helvetica,sans-serif;color:#333;}#journey-map-svg .cluster-label text{fill:#333;}#journey-map-svg .cluster-label span{color:#333;}#journey-map-svg .cluster-label span p{background-color:transparent;}#journey-map-svg .label text,#journey-map-svg span{fill:#333;color:#333;}#journey-map-svg .node rect,#journey-map-svg .node circle,#journey-map-svg .node ellipse,#journey-map-svg .node polygon,#journey-map-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#journey-map-svg .rough-node .label text,#journey-map-svg .node .label text,#journey-map-svg .image-shape .label,#journey-map-svg .icon-shape .label{text-anchor:middle;}#journey-map-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#journey-map-svg .rough-node .label,#journey-map-svg .node .label,#journey-map-svg .image-shape .label,#journey-map-svg .icon-shape .label{text-align:center;}#journey-map-svg .node.clickable{cursor:pointer;}#journey-map-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#journey-map-svg .arrowheadPath{fill:#333333;}#journey-map-svg .edgePaths .path{stroke:#333333;stroke-width:1px;}#journey-map-svg .flowchart-link{stroke:#333333;fill:none;}#journey-map-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#journey-map-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#journey-map-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#journey-map-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#journey-map-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#journey-map-svg .cluster text{fill:#333;}#journey-map-svg .cluster span{color:#333;}#journey-map-svg .node .collapsed-indicator{fill:#aaaa33;stroke:none;opacity:0.6;}#journey-map-svg .node .collapsed-separator{stroke:#aaaa33;stroke-width:0.75px;}#journey-map-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#journey-map-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#journey-map-svg rect.text{fill:none;stroke-width:0;}#journey-map-svg .icon-shape,#journey-map-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#journey-map-svg .icon-shape p,#journey-map-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#journey-map-svg .icon-shape .label rect,#journey-map-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#journey-map-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#journey-map-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#journey-map-svg .node .neo-node{stroke:#9370DB;}#journey-map-svg [data-look="neo"].node rect,#journey-map-svg [data-look="neo"].cluster rect,#journey-map-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#journey-map-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#journey-map-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#journey-map-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#journey-map-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#journey-map-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#journey-map-svg [data-look="neo"].node circle .state-start{fill:#000000;}#journey-map-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#journey-map-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#journey-map-svg :root{--mermaid-font-family:Arial,Helvetica,sans-serif;}#journey-map-svg .gap>*{fill:rgb(243, 242, 241)!important;stroke:rgb(177, 180, 182)!important;stroke-dasharray:5,5!important;color:rgb(80, 90, 95)!important;}#journey-map-svg .gap span{fill:rgb(243, 242, 241)!important;stroke:rgb(177, 180, 182)!important;stroke-dasharray:5,5!important;color:rgb(80, 90, 95)!important;}#journey-map-svg .gap tspan{fill:rgb(80, 90, 95)!important;}#journey-map-svg .decision>*{fill:rgb(255, 247, 191)!important;stroke:rgb(181, 136, 64)!important;}#journey-map-svg .decision span{fill:rgb(255, 247, 191)!important;stroke:rgb(181, 136, 64)!important;}#journey-map-svg .terminal>*{fill:rgb(204, 226, 216)!important;stroke:rgb(0, 112, 60)!important;}#journey-map-svg .terminal span{fill:rgb(204, 226, 216)!important;stroke:rgb(0, 112, 60)!important;}#journey-map-svg .change>*{stroke:rgb(29, 112, 184)!important;stroke-width:3px!important;}#journey-map-svg .change span{stroke:rgb(29, 112, 184)!important;stroke-width:3px!important;}#journey-map-svg .startNode>*{fill:rgb(0, 112, 60)!important;stroke:rgb(0, 112, 60)!important;color:rgb(255, 255, 255)!important;}#journey-map-svg .startNode span{fill:rgb(0, 112, 60)!important;stroke:rgb(0, 112, 60)!important;color:rgb(255, 255, 255)!important;}#journey-map-svg .startNode tspan{fill:rgb(255, 255, 255)!important;}#journey-map-svg .entryPoint>*{stroke:rgb(0, 112, 60)!important;stroke-width:4px!important;}#journey-map-svg .entryPoint span{stroke:rgb(0, 112, 60)!important;stroke-width:4px!important;}</style><g><marker id="journey-map-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="journey-map-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="journey-map-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></path></marker><marker id="journey-map-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></polygon></marker><marker id="journey-map-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="journey-map-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="journey-map-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="journey-map-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="journey-map-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="journey-map-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="journey-map-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"></path></marker><marker id="journey-map-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"></g><g class="edges edgePath"><path d="M144.32388305664062,60.796875L144.32388305664062,184.796875" id="journey-map-svg-s0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="s0" data-look="classic" marker-end="url(#journey-map-svg_flowchart-v2-pointEnd)"></path><path d="M144.32388305664062,402.796875L144.32388305664062,438.796875" id="journey-map-svg-e0" class=" edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="e0" data-look="classic" marker-end="url(#journey-map-svg_flowchart-v2-pointEnd)"></path></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(144.32388305664062, 124.796875)"><g class="label" data-id="s0" transform="translate(-100, -24)"><foreignObject width="200" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel "><p>Change Organisation phone</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default startNode " id="journey-map-svg-flowchart-journeyStart-0" data-look="classic" transform="translate(144.32388305664062, 36.3984375)"><circle class="basic label-container" style="fill:#00703c !important;stroke:#00703c !important" r="24.3984375" cx="0" cy="0"></circle><g class="label" style="color:#ffffff !important" transform="translate(-16.8984375, -12)"><rect></rect><foreignObject width="33.796875" height="24"><div style="color: rgb(255, 255, 255) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#ffffff !important" class="nodeLabel "><p>Start</p></span></div></foreignObject></g></g><g class="node default entryPoint " id="journey-map-svg-flowchart-n0-1" data-look="classic" transform="translate(144.32388305664062, 295.796875)"><rect class="basic label-container" style="stroke:#00703c !important;stroke-width:4px !important" x="-130" y="-107" width="260" height="214"></rect><g class="label" style="" transform="translate(-100, -92)"><rect></rect><foreignObject width="200" height="184"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel "><p><img src="img/organisation-phone-number/v1.thumb.jpg" width="180" height="112" style="display: flex; flex-direction: column; width: 100%;"><br/>What is your organisation’s phone number?</p></span></div></foreignObject></g></g><g class="node default terminal " id="journey-map-svg-flowchart-n1-2" data-look="classic" transform="translate(144.32388305664062, 542.296875)"><g class="basic label-container outer-path"><path d="M-32.875 -99.5 C-17.423502271215376 -99.5, -1.9720045424307528 -99.5, 32.875 -99.5 C32.875 -99.5, 32.87499999999999 -99.5, 32.87499999999999 -99.5 C34.50846147047682 -99.44761806998169, 36.14192294095365 -99.39523613996336, 39.249986888080926 -99.29556657865847 C40.70718653013335 -99.15499228172864, 42.164386172185765 -99.01441798479883, 45.59877758760834 -98.68310637541299 C47.81683803429401 -98.32450756370852, 50.03489848097968 -97.96590875200405, 51.895283555786534 -97.66513612061101 C53.577450621711044 -97.28119246497971, 55.259617687635554 -96.89724880934841, 58.11363109899597 -96.24583887238343 C60.143455749010535 -95.64339757102613, 62.173280399025096 -95.04095626966881, 64.22826769335026 -94.43104682756153 C66.48188205846692 -93.60169590901577, 68.7354964235836 -92.77234499047, 70.21406698549772 -92.22821735592916 C72.32264968821015 -91.29481034232188, 74.43123239092256 -90.36140332871462, 76.04643204219703 -89.64640235629071 C77.99142754487038 -88.6316994483751, 79.93642304754373 -87.6169965404595, 81.70139642439179 -86.69621106027726 C83.69530543588296 -85.48749170000134, 85.68921444737413 -84.27877233972542, 87.15572267044959 -83.38976643673816 C89.14778773529628 -82.00018808260789, 91.13985280014298 -80.61060972847763, 92.38699778387598 -79.74065537586168 C94.36297344509312 -78.1648673689617, 96.33894910631027 -76.58907936206171, 97.37372533312492 -75.76387285772888 C99.26025076804498 -74.05058037246226, 101.14677620296504 -72.33728788719563, 102.0954137850469 -71.4757603347239 C103.58773192954834 -69.93481932892792, 105.08005007404977 -68.39387832313193, 106.53266070899389 -66.89393858100104 C107.45283112566437 -65.8130540503999, 108.37300154233488 -64.73216951979875, 110.66723250556896 -62.03723528494399 C111.86612890633444 -60.430823329627266, 113.06502530709992 -58.82441137431054, 114.48213933239708 -56.925607682155906 C115.34442630151662 -55.60090334111612, 116.20671327063616 -54.27619900007634, 117.96170491903193 -51.58006054689725 C118.85352323453723 -49.996546821320656, 119.74534155004253 -48.41303309574407, 121.09163098411351 -46.02255987896311 C121.82996657544642 -44.489390225709435, 122.56830216677932 -42.95622057245577, 123.85905599007333 -40.27594264067821 C124.53174777467697 -38.614380927096306, 125.20443955928063 -36.9528192135144, 126.25260799395114 -34.363822914920156 C126.77566367842586 -32.78846253088818, 127.29871936290057 -31.21310214685621, 128.26245137714773 -28.310494869787757 C128.81608973774289 -26.19923185245509, 129.36972809833804 -24.087968835122417, 129.88032726209144 -22.140832928653293 C130.2409119817886 -20.289306602615934, 130.60149670148573 -18.437780276578575, 131.09958744973778 -15.88018955582127 C131.32774378193417 -14.11065409786977, 131.5559001141306 -12.341118639918268, 131.9152217384452 -9.554291077814353 C132.00140886295068 -8.211857044646893, 132.08759598745615 -6.869423011479431, 132.32387851196845 -3.189131968379689 C132.32387851196845 -1.6797709168442398, 132.32387851196845 -0.17040986530879065, 132.32387851196845 3.1891319683796646 C132.22434915217127 4.739382085873938, 132.12481979237407 6.28963220336821, 131.9152217384452 9.554291077814286 C131.73592564008737 10.944876210658405, 131.55662954172954 12.335461343502525, 131.09958744973778 15.8801895558212 C130.82560349859088 17.287039238431955, 130.55161954744398 18.693888921042713, 129.88032726209144 22.14083292865327 C129.35719289240717 24.135771008129442, 128.8340585227229 26.130709087605617, 128.26245137714773 28.31049486978769 C127.82214001697183 29.636642532549384, 127.38182865679592 30.96279019531108, 126.25260799395116 34.36382291492009 C125.55125990198007 36.09616626173159, 124.84991181000899 37.828509608543094, 123.85905599007334 40.27594264067818 C123.17232807328575 41.70194785351115, 122.48560015649818 43.127953066344126, 121.09163098411352 46.02255987896309 C120.02934175653219 47.90876197098236, 118.96705252895084 49.794964063001636, 117.96170491903194 51.58006054689723 C117.13045068499494 52.85709027339408, 116.29919645095794 54.13411999989093, 114.48213933239713 56.92560768215585 C113.46056068864132 58.2944299970596, 112.4389820448855 59.66325231196335, 110.66723250556898 62.03723528494397 C109.64007932082666 63.24378786241424, 108.61292613608433 64.4503404398845, 106.53266070899393 66.89393858100098 C105.13598066113785 68.33612539997688, 103.73930061328177 69.77831221895278, 102.09541378504692 71.47576033472387 C100.43506620046705 72.98364408064953, 98.77471861588718 74.4915278265752, 97.37372533312501 75.76387285772881 C95.56779007196118 77.20405817055136, 93.76185481079737 78.64424348337391, 92.38699778387601 79.74065537586168 C90.40247049152192 81.124975706206, 88.41794319916784 82.50929603655034, 87.15572267044965 83.38976643673811 C85.53080732492066 84.3747996682603, 83.90589197939167 85.35983289978246, 81.70139642439182 86.69621106027725 C80.41224371453941 87.36876120326552, 79.12309100468701 88.0413113462538, 76.04643204219704 89.6464023562907 C74.397863241977 90.37617486109217, 72.74929444175699 91.10594736589364, 70.21406698549777 92.22821735592915 C67.90771437679523 93.07697643562149, 65.60136176809269 93.92573551531382, 64.22826769335032 94.4310468275615 C62.76972931369858 94.86393336261796, 61.31119093404685 95.29681989767441, 58.11363109899607 96.2458388723834 C56.13139554941842 96.69827120127867, 54.149159999840776 97.15070353017394, 51.89528355578658 97.665136120611 C49.93226744100624 97.98250134263135, 47.96925132622591 98.2998665646517, 45.5987775876084 98.68310637541298 C43.70984472618817 98.86532945678005, 41.82091186476795 99.04755253814713, 39.249986888080926 99.29556657865847 C37.00072587052826 99.36769600157041, 34.75146485297559 99.43982542448234, 32.87500000000002 99.5 C32.875000000000014 99.5, 32.87500000000001 99.5, 32.875 99.5 C18.475176562762467 99.5, 4.075353125524934 99.5, -32.87499999999998 99.5 C-34.54040077762075 99.44659383856767, -36.20580155524151 99.39318767713533, -39.24998688808089 99.29556657865847 C-40.86264740979489 99.13999515763675, -42.475307931508894 98.98442373661504, -45.59877758760837 98.68310637541298 C-47.45433230024752 98.38311467951519, -49.30988701288667 98.0831229836174, -51.895283555786534 97.665136120611 C-54.00979884712173 97.18251180386555, -56.124314138456924 96.69988748712011, -58.11363109899595 96.24583887238343 C-59.89734675335753 95.71644142908345, -61.68106240771911 95.18704398578346, -64.2282676933502 94.43104682756154 C-65.52120944914832 93.95523230960526, -66.81415120494643 93.479417791649, -70.21406698549774 92.22821735592916 C-72.33617108099318 91.28882482283471, -74.45827517648863 90.34943228974026, -76.04643204219701 89.64640235629072 C-78.008542625768 88.62277052163354, -79.97065320933899 87.59913868697637, -81.70139642439177 86.69621106027726 C-83.65861555675443 85.50973332034272, -85.61583468911707 84.32325558040817, -87.15572267044953 83.38976643673819 C-88.8434557675633 82.21247688897986, -90.53118886467705 81.03518734122156, -92.38699778387598 79.74065537586169 C-93.67302603903373 78.71508206502253, -94.95905429419146 77.68950875418336, -97.37372533312492 75.7638728577289 C-98.47530699495238 74.76344553871081, -99.57688865677981 73.76301821969273, -102.09541378504684 71.47576033472394 C-103.40482334830392 70.12368745613657, -104.71423291156098 68.77161457754919, -106.5326607089939 66.89393858100102 C-107.42262106557567 65.84854050598122, -108.31258142215744 64.8031424309614, -110.66723250556896 62.037235284944 C-111.47445427659679 60.9556316511829, -112.28167604762461 59.8740280174218, -114.48213933239708 56.92560768215591 C-115.62389960798862 55.17155729328449, -116.76565988358016 53.41750690441308, -117.9617049190319 51.5800605468973 C-118.90167711680168 49.9110447272508, -119.84164931457147 48.24202890760429, -121.0916309841135 46.02255987896312 C-121.72799487727087 44.70113663881574, -122.36435877042827 43.37971339866836, -123.85905599007333 40.27594264067822 C-124.56921554090357 38.521834820126635, -125.27937509173383 36.76772699957505, -126.25260799395114 34.36382291492017 C-126.83629671219455 32.60584549373888, -127.41998543043795 30.847868072557603, -128.26245137714773 28.31049486978773 C-128.8059929700772 26.23773520353115, -129.34953456300664 24.16497553727458, -129.88032726209144 22.140832928653307 C-130.34563977332104 19.75155152732337, -130.81095228455064 17.36227012599344, -131.09958744973778 15.88018955582128 C-131.31579180171954 14.203351296229197, -131.53199615370127 12.526513036637112, -131.9152217384452 9.55429107781441 C-132.06653563941305 7.197454931857735, -132.2178495403809 4.840618785901061, -132.32387851196845 3.1891319683797015 C-132.32387851196845 1.50540514178437, -132.32387851196845 -0.17832168481096167, -132.32387851196845 -3.189131968379653 C-132.22099090747534 -4.791689457739379, -132.11810330298223 -6.394246947099106, -131.9152217384452 -9.554291077814273 C-131.6636627828127 -11.50533266176558, -131.41210382718018 -13.456374245716887, -131.09958744973778 -15.880189555821234 C-130.8480325257489 -17.171870924352234, -130.59647760175997 -18.463552292883232, -129.88032726209144 -22.14083292865326 C-129.29161681225497 -24.38584102260275, -128.70290636241847 -26.63084911655224, -128.26245137714776 -28.31049486978768 C-127.48617195845988 -30.64852479554673, -126.709892539772 -32.98655472130579, -126.25260799395119 -34.36382291492004 C-125.67533905401916 -35.78968835728784, -125.09807011408714 -37.21555379965562, -123.85905599007334 -40.27594264067817 C-123.2689410461546 -41.501328948162524, -122.67882610223586 -42.72671525564688, -121.09163098411352 -46.02255987896307 C-119.84977306420959 -48.22760436750296, -118.60791514430564 -50.43264885604286, -117.96170491903193 -51.580060546897265 C-116.78499954378889 -53.38779599290657, -115.60829416854583 -55.19553143891587, -114.48213933239711 -56.925607682155885 C-113.45957538937353 -58.29575020831585, -112.43701144634994 -59.66589273447581, -110.66723250556899 -62.03723528494397 C-109.56387276367487 -63.33330442072068, -108.46051302178074 -64.6293735564974, -106.53266070899393 -66.89393858100098 C-105.14211656979776 -68.32978957051805, -103.75157243060161 -69.7656405600351, -102.09541378504694 -71.47576033472384 C-100.96157552278187 -72.5054822447965, -99.82773726051681 -73.53520415486915, -97.37372533312502 -75.76387285772881 C-96.36446507552537 -76.56873105562113, -95.35520481792574 -77.37358925351344, -92.38699778387603 -79.74065537586166 C-90.40343961185648 -81.12429968981316, -88.41988143983694 -82.50794400376465, -87.15572267044965 -83.3897664367381 C-85.85365422518312 -84.17908798006219, -84.55158577991659 -84.96840952338628, -81.70139642439182 -86.69621106027724 C-80.11472792864376 -87.52397499819932, -78.52805943289569 -88.35173893612142, -76.04643204219707 -89.6464023562907 C-74.09303160574548 -90.51111478394267, -72.13963116929388 -91.37582721159465, -70.21406698549778 -92.22821735592915 C-68.22380234160856 -92.96065314268506, -66.23353769771934 -93.69308892944099, -64.22826769335033 -94.4310468275615 C-62.67648654032155 -94.89160732831496, -61.124705387292764 -95.3521678290684, -58.11363109899609 -96.2458388723834 C-56.16417428827874 -96.69078966803507, -54.21471747756138 -97.13574046368674, -51.895283555786584 -97.665136120611 C-50.46258707625739 -97.89676337669414, -49.0298905967282 -98.12839063277728, -45.59877758760842 -98.68310637541298 C-44.13478968464369 -98.82433552770893, -42.67080178167897 -98.96556468000489, -39.24998688808094 -99.29556657865847 C-37.04899714926645 -99.36614803561561, -34.848007410451956 -99.43672949257275, -32.87500000000003 -99.5 C-32.87500000000002 -99.5, -32.875000000000014 -99.5, -32.875 -99.5" stroke="none" stroke-width="0" fill="#cce2d8" style="fill:#cce2d8 !important;stroke:#00703c !important"></path><path d="M-32.875 -99.5 C-8.115800557670411 -99.5, 16.643398884659177 -99.5, 32.875 -99.5 M-32.875 -99.5 C-14.255914569280698 -99.5, 4.363170861438604 -99.5, 32.875 -99.5 M32.875 -99.5 C32.875 -99.5, 32.87499999999999 -99.5, 32.87499999999999 -99.5 M32.875 -99.5 C32.875 -99.5, 32.875 -99.5, 32.87499999999999 -99.5 M32.87499999999999 -99.5 C34.65946013388477 -99.44277583674726, 36.44392026776955 -99.38555167349452, 39.249986888080926 -99.29556657865847 M32.87499999999999 -99.5 C34.6654938861538 -99.44258234605597, 36.455987772307594 -99.38516469211196, 39.249986888080926 -99.29556657865847 M39.249986888080926 -99.29556657865847 C41.49079597898936 -99.07939842062575, 43.731605069897796 -98.86323026259304, 45.59877758760834 -98.68310637541299 M39.249986888080926 -99.29556657865847 C40.60734491487173 -99.16462388227582, 41.96470294166254 -99.03368118589317, 45.59877758760834 -98.68310637541299 M45.59877758760834 -98.68310637541299 C47.59466395612963 -98.36042694568043, 49.59055032465092 -98.03774751594787, 51.895283555786534 -97.66513612061101 M45.59877758760834 -98.68310637541299 C47.69403953773434 -98.34436067231572, 49.78930148786035 -98.00561496921846, 51.895283555786534 -97.66513612061101 M51.895283555786534 -97.66513612061101 C53.56741514848236 -97.28348299625658, 55.23954674117819 -96.90182987190215, 58.11363109899597 -96.24583887238343 M51.895283555786534 -97.66513612061101 C53.38036758576645 -97.32617538184707, 54.86545161574636 -96.98721464308312, 58.11363109899597 -96.24583887238343 M58.11363109899597 -96.24583887238343 C60.020797809446115 -95.67980180364418, 61.92796451989627 -95.11376473490492, 64.22826769335026 -94.43104682756153 M58.11363109899597 -96.24583887238343 C60.214714878876904 -95.62224823532858, 62.31579865875785 -94.99865759827374, 64.22826769335026 -94.43104682756153 M64.22826769335026 -94.43104682756153 C66.36481937972484 -93.6447760569084, 68.50137106609941 -92.85850528625527, 70.21406698549772 -92.22821735592916 M64.22826769335026 -94.43104682756153 C65.46561649252365 -93.9756910315388, 66.70296529169704 -93.52033523551609, 70.21406698549772 -92.22821735592916 M70.21406698549772 -92.22821735592916 C72.39793156536423 -91.26148528846332, 74.58179614523073 -90.29475322099748, 76.04643204219703 -89.64640235629071 M70.21406698549772 -92.22821735592916 C71.59546660612436 -91.61671272164155, 72.976866226751 -91.00520808735395, 76.04643204219703 -89.64640235629071 M76.04643204219703 -89.64640235629071 C77.81960149761353 -88.72134098716916, 79.59277095303003 -87.79627961804762, 81.70139642439179 -86.69621106027726 M76.04643204219703 -89.64640235629071 C77.48841640223148 -88.8941200392958, 78.93040076226595 -88.14183772230088, 81.70139642439179 -86.69621106027726 M81.70139642439179 -86.69621106027726 C83.33197954951767 -85.70774198745589, 84.96256267464354 -84.71927291463452, 87.15572267044959 -83.38976643673816 M81.70139642439179 -86.69621106027726 C83.80841082348262 -85.4189265493574, 85.91542522257345 -84.14164203843752, 87.15572267044959 -83.38976643673816 M87.15572267044959 -83.38976643673816 C88.68787062345581 -82.32100635033692, 90.22001857646201 -81.25224626393569, 92.38699778387598 -79.74065537586168 M87.15572267044959 -83.38976643673816 C88.74351038097421 -82.28219446409837, 90.33129809149882 -81.17462249145858, 92.38699778387598 -79.74065537586168 M92.38699778387598 -79.74065537586168 C94.21424160540032 -78.28347705319624, 96.04148542692465 -76.8262987305308, 97.37372533312492 -75.76387285772888 M92.38699778387598 -79.74065537586168 C94.21860750643945 -78.27999536329902, 96.05021722900293 -76.81933535073638, 97.37372533312492 -75.76387285772888 M97.37372533312492 -75.76387285772888 C98.33782127891148 -74.88830642834644, 99.30191722469803 -74.012739998964, 102.0954137850469 -71.4757603347239 M97.37372533312492 -75.76387285772888 C98.72717969678298 -74.53470141509474, 100.08063406044106 -73.3055299724606, 102.0954137850469 -71.4757603347239 M102.0954137850469 -71.4757603347239 C103.21818682073922 -70.316404993991, 104.34095985643155 -69.15704965325811, 106.53266070899389 -66.89393858100104 M102.0954137850469 -71.4757603347239 C103.73401363709513 -69.78377145593431, 105.37261348914336 -68.09178257714471, 106.53266070899389 -66.89393858100104 M106.53266070899389 -66.89393858100104 C107.52973897257573 -65.72271371723737, 108.52681723615757 -64.55148885347369, 110.66723250556896 -62.03723528494399 M106.53266070899389 -66.89393858100104 C108.14443332658306 -65.00065875192075, 109.75620594417224 -63.10737892284046, 110.66723250556896 -62.03723528494399 M110.66723250556896 -62.03723528494399 C111.94702442052716 -60.322430710341976, 113.22681633548534 -58.60762613573996, 114.48213933239708 -56.925607682155906 M110.66723250556896 -62.03723528494399 C111.61006377055844 -60.77392728355333, 112.55289503554792 -59.510619282162665, 114.48213933239708 -56.925607682155906 M114.48213933239708 -56.925607682155906 C115.55906016747893 -55.27116808573503, 116.63598100256078 -53.61672848931415, 117.96170491903193 -51.58006054689725 M114.48213933239708 -56.925607682155906 C115.74042642659053 -54.992540808079895, 116.99871352078397 -53.059473934003876, 117.96170491903193 -51.58006054689725 M117.96170491903193 -51.58006054689725 C118.77073749673836 -50.14354128174751, 119.57977007444481 -48.70702201659777, 121.09163098411351 -46.02255987896311 M117.96170491903193 -51.58006054689725 C119.15059485957539 -49.46906606930143, 120.33948480011884 -47.3580715917056, 121.09163098411351 -46.02255987896311 M121.09163098411351 -46.02255987896311 C121.6595303786974 -44.84330463500919, 122.22742977328129 -43.664049391055265, 123.85905599007333 -40.27594264067821 M121.09163098411351 -46.02255987896311 C121.85929194744803 -44.42849546328564, 122.62695291078255 -42.83443104760817, 123.85905599007333 -40.27594264067821 M123.85905599007333 -40.27594264067821 C124.57550608303279 -38.50629705944811, 125.29195617599225 -36.73665147821801, 126.25260799395114 -34.363822914920156 M123.85905599007333 -40.27594264067821 C124.8133109284206 -37.9189144936963, 125.76756586676788 -35.56188634671438, 126.25260799395114 -34.363822914920156 M126.25260799395114 -34.363822914920156 C126.86210723845151 -32.52810830100181, 127.47160648295187 -30.69239368708346, 128.26245137714773 -28.310494869787757 M126.25260799395114 -34.363822914920156 C126.74520301167425 -32.88020520589587, 127.23779802939734 -31.396587496871582, 128.26245137714773 -28.310494869787757 M128.26245137714773 -28.310494869787757 C128.72648468888679 -26.54093473881722, 129.19051800062584 -24.77137460784668, 129.88032726209144 -22.140832928653293 M128.26245137714773 -28.310494869787757 C128.78399300786262 -26.321630594299222, 129.30553463857754 -24.33276631881069, 129.88032726209144 -22.140832928653293 M129.88032726209144 -22.140832928653293 C130.1738666187561 -20.633570371745304, 130.46740597542075 -19.126307814837315, 131.09958744973778 -15.88018955582127 M129.88032726209144 -22.140832928653293 C130.19060156977855 -20.54763993517818, 130.50087587746566 -18.95444694170307, 131.09958744973778 -15.88018955582127 M131.09958744973778 -15.88018955582127 C131.28401934277497 -14.449772213621541, 131.46845123581215 -13.019354871421813, 131.9152217384452 -9.554291077814353 M131.09958744973778 -15.88018955582127 C131.2869779398049 -14.426825919298418, 131.47436842987202 -12.973462282775566, 131.9152217384452 -9.554291077814353 M131.9152217384452 -9.554291077814353 C132.04842212753792 -7.479587500276664, 132.18162251663063 -5.404883922738975, 132.32387851196845 -3.189131968379689 M131.9152217384452 -9.554291077814353 C132.0062981160521 -8.135702981058351, 132.09737449365898 -6.717114884302348, 132.32387851196845 -3.189131968379689 M132.32387851196845 -3.189131968379689 C132.32387851196845 -1.0775370317346762, 132.32387851196845 1.0340579049103367, 132.32387851196845 3.1891319683796646 M132.32387851196845 -3.189131968379689 C132.32387851196845 -1.4872942469552994, 132.32387851196845 0.21454347446909017, 132.32387851196845 3.1891319683796646 M132.32387851196845 3.1891319683796646 C132.223160347255 4.757898682030815, 132.12244218254156 6.326665395681964, 131.9152217384452 9.554291077814286 M132.32387851196845 3.1891319683796646 C132.23118689357645 4.632878744162618, 132.13849527518445 6.076625519945571, 131.9152217384452 9.554291077814286 M131.9152217384452 9.554291077814286 C131.7289400250473 10.999055261443507, 131.54265831164938 12.443819445072728, 131.09958744973778 15.8801895558212 M131.9152217384452 9.554291077814286 C131.59719785275908 12.020821534276443, 131.27917396707295 14.487351990738603, 131.09958744973778 15.8801895558212 M131.09958744973778 15.8801895558212 C130.68143412132906 18.02731852046275, 130.26328079292034 20.174447485104302, 129.88032726209144 22.14083292865327 M131.09958744973778 15.8801895558212 C130.66091704708 18.13266936044646, 130.22224664442223 20.38514916507172, 129.88032726209144 22.14083292865327 M129.88032726209144 22.14083292865327 C129.379407509361 24.051057045808676, 128.8784877566305 25.961281162964085, 128.26245137714773 28.31049486978769 M129.88032726209144 22.14083292865327 C129.27601471331826 24.44533858784084, 128.67170216454505 26.749844247028413, 128.26245137714773 28.31049486978769 M128.26245137714773 28.31049486978769 C127.5739515728168 30.384146582885872, 126.88545176848586 32.457798295984055, 126.25260799395116 34.36382291492009 M128.26245137714773 28.31049486978769 C127.59805862137264 30.311539993572246, 126.93366586559755 32.312585117356804, 126.25260799395116 34.36382291492009 M126.25260799395116 34.36382291492009 C125.71859593604965 35.6828430223576, 125.18458387814815 37.001863129795105, 123.85905599007334 40.27594264067818 M126.25260799395116 34.36382291492009 C125.39974437842815 36.47041253425819, 124.54688076290516 38.57700215359628, 123.85905599007334 40.27594264067818 M123.85905599007334 40.27594264067818 C123.1959774194222 41.65283948024387, 122.53289884877107 43.02973631980956, 121.09163098411352 46.02255987896309 M123.85905599007334 40.27594264067818 C122.8049177777303 42.46488319355305, 121.75077956538723 44.65382374642792, 121.09163098411352 46.02255987896309 M121.09163098411352 46.02255987896309 C120.303142437391 47.42260113679216, 119.51465389066848 48.82264239462124, 117.96170491903194 51.58006054689723 M121.09163098411352 46.02255987896309 C120.36257005421653 47.3170813854197, 119.63350912431954 48.61160289187631, 117.96170491903194 51.58006054689723 M117.96170491903194 51.58006054689723 C116.66226661905107 53.57634672370874, 115.36282831907019 55.57263290052024, 114.48213933239713 56.92560768215585 M117.96170491903194 51.58006054689723 C116.89685582693544 53.21595470437576, 115.83200673483891 54.85184886185429, 114.48213933239713 56.92560768215585 M114.48213933239713 56.92560768215585 C113.24801644995426 58.579219913721765, 112.01389356751142 60.23283214528768, 110.66723250556898 62.03723528494397 M114.48213933239713 56.92560768215585 C113.17243361896784 58.68049402150602, 111.86272790553856 60.43538036085619, 110.66723250556898 62.03723528494397 M110.66723250556898 62.03723528494397 C109.16548423082197 63.80127426035938, 107.66373595607497 65.5653132357748, 106.53266070899393 66.89393858100098 M110.66723250556898 62.03723528494397 C109.29057138398156 63.654339772597474, 107.91391026239415 65.27144426025099, 106.53266070899393 66.89393858100098 M106.53266070899393 66.89393858100098 C104.91143987418648 68.56798219764562, 103.29021903937904 70.24202581429024, 102.09541378504692 71.47576033472387 M106.53266070899393 66.89393858100098 C104.81148392617844 68.67119492049987, 103.09030714336295 70.44845125999876, 102.09541378504692 71.47576033472387 M102.09541378504692 71.47576033472387 C100.98192095354936 72.48700506288407, 99.86842812205181 73.49824979104426, 97.37372533312501 75.76387285772881 M102.09541378504692 71.47576033472387 C100.88277162805304 72.57704985695243, 99.67012947105916 73.67833937918098, 97.37372533312501 75.76387285772881 M97.37372533312501 75.76387285772881 C95.4484468213205 77.29923123708002, 93.52316830951601 78.83458961643124, 92.38699778387601 79.74065537586168 M97.37372533312501 75.76387285772881 C96.09711760686402 76.78193354746362, 94.82050988060303 77.79999423719845, 92.38699778387601 79.74065537586168 M92.38699778387601 79.74065537586168 C90.72020458172638 80.90333815936647, 89.05341137957674 82.06602094287125, 87.15572267044965 83.38976643673811 M92.38699778387601 79.74065537586168 C90.73420768068658 80.89357020371621, 89.08141757749715 82.04648503157074, 87.15572267044965 83.38976643673811 M87.15572267044965 83.38976643673811 C85.33171969022318 84.49548776238271, 83.50771670999671 85.6012090880273, 81.70139642439182 86.69621106027725 M87.15572267044965 83.38976643673811 C85.92444286190113 84.13617549248355, 84.69316305335262 84.88258454822898, 81.70139642439182 86.69621106027725 M81.70139642439182 86.69621106027725 C79.58729547601858 87.79913617089728, 77.47319452764533 88.9020612815173, 76.04643204219704 89.6464023562907 M81.70139642439182 86.69621106027725 C79.90579665986 87.63297430729695, 78.11019689532819 88.56973755431666, 76.04643204219704 89.6464023562907 M76.04643204219704 89.6464023562907 C74.23888757929664 90.4465486711153, 72.43134311639625 91.24669498593988, 70.21406698549777 92.22821735592915 M76.04643204219704 89.6464023562907 C73.84133183625185 90.62253480548911, 71.63623163030668 91.59866725468753, 70.21406698549777 92.22821735592915 M70.21406698549777 92.22821735592915 C68.28898066995893 92.93666691535026, 66.36389435442008 93.64511647477138, 64.22826769335032 94.4310468275615 M70.21406698549777 92.22821735592915 C68.45286284086772 92.87635676154565, 66.69165869623768 93.52449616716214, 64.22826769335032 94.4310468275615 M64.22826769335032 94.4310468275615 C62.683055586248955 94.88965766996533, 61.13784347914759 95.34826851236915, 58.11363109899607 96.2458388723834 M64.22826769335032 94.4310468275615 C62.983838581835705 94.80038685571733, 61.73940947032109 95.16972688387318, 58.11363109899607 96.2458388723834 M58.11363109899607 96.2458388723834 C55.87943352016217 96.75577989025051, 53.64523594132827 97.26572090811763, 51.89528355578658 97.665136120611 M58.11363109899607 96.2458388723834 C56.25326043403275 96.67045633660814, 54.39288976906942 97.09507380083289, 51.89528355578658 97.665136120611 M51.89528355578658 97.665136120611 C50.18166426147339 97.94218079879944, 48.4680449671602 98.2192254769879, 45.5987775876084 98.68310637541298 M51.89528355578658 97.665136120611 C50.31035266777378 97.9213754552623, 48.72542177976097 98.17761478991359, 45.5987775876084 98.68310637541298 M45.5987775876084 98.68310637541298 C43.37007266950268 98.89810685845282, 41.14136775139696 99.11310734149265, 39.249986888080926 99.29556657865847 M45.5987775876084 98.68310637541298 C44.29031465405174 98.80933222095628, 42.98185172049509 98.93555806649958, 39.249986888080926 99.29556657865847 M39.249986888080926 99.29556657865847 C37.19100161503247 99.36159422879342, 35.13201634198402 99.42762187892838, 32.87500000000002 99.5 M39.249986888080926 99.29556657865847 C36.93080175096437 99.36993833198578, 34.611616613847815 99.44431008531308, 32.87500000000002 99.5 M32.87500000000002 99.5 C32.875000000000014 99.5, 32.87500000000001 99.5, 32.875 99.5 M32.87500000000002 99.5 C32.875000000000014 99.5, 32.875000000000014 99.5, 32.875 99.5 M32.875 99.5 C10.522463985554648 99.5, -11.830072028890704 99.5, -32.87499999999998 99.5 M32.875 99.5 C13.400235698194216 99.5, -6.074528603611569 99.5, -32.87499999999998 99.5 M-32.87499999999998 99.5 C-34.18995031128983 99.45783210291245, -35.50490062257968 99.4156642058249, -39.24998688808089 99.29556657865847 M-32.87499999999998 99.5 C-34.19570467761159 99.4576475715847, -35.516409355223196 99.4152951431694, -39.24998688808089 99.29556657865847 M-39.24998688808089 99.29556657865847 C-40.98140840688362 99.1285384270786, -42.71282992568634 98.96151027549872, -45.59877758760837 98.68310637541298 M-39.24998688808089 99.29556657865847 C-41.691734723189036 99.060014101637, -44.133482558297175 98.82446162461552, -45.59877758760837 98.68310637541298 M-45.59877758760837 98.68310637541298 C-47.629784123868035 98.35474898932144, -49.6607906601277 98.0263916032299, -51.895283555786534 97.665136120611 M-45.59877758760837 98.68310637541298 C-47.95747315745158 98.30177076763806, -50.316168727294794 97.92043515986315, -51.895283555786534 97.665136120611 M-51.895283555786534 97.665136120611 C-53.73964904115105 97.24417173418612, -55.58401452651557 96.82320734776125, -58.11363109899595 96.24583887238343 M-51.895283555786534 97.665136120611 C-53.94833370741566 97.19654082090594, -56.00138385904478 96.7279455212009, -58.11363109899595 96.24583887238343 M-58.11363109899595 96.24583887238343 C-60.20121153563664 95.62625595672179, -62.28879197227732 95.00667304106017, -64.2282676933502 94.43104682756154 M-58.11363109899595 96.24583887238343 C-60.50175696092447 95.5370556520915, -62.88988282285298 94.82827243179958, -64.2282676933502 94.43104682756154 M-64.2282676933502 94.43104682756154 C-65.46065204314937 93.97751799479941, -66.69303639294853 93.52398916203727, -70.21406698549774 92.22821735592916 M-64.2282676933502 94.43104682756154 C-66.33190893768791 93.65688740379878, -68.43555018202562 92.88272798003601, -70.21406698549774 92.22821735592916 M-70.21406698549774 92.22821735592916 C-72.0727912772879 91.40541524905075, -73.93151556907806 90.58261314217235, -76.04643204219701 89.64640235629072 M-70.21406698549774 92.22821735592916 C-72.4425364354183 91.24174003564684, -74.67100588533886 90.25526271536452, -76.04643204219701 89.64640235629072 M-76.04643204219701 89.64640235629072 C-77.20662108064353 89.04113247806971, -78.36681011909005 88.43586259984872, -81.70139642439177 86.69621106027726 M-76.04643204219701 89.64640235629072 C-77.6970433577058 88.7852794902568, -79.34765467321458 87.92415662422286, -81.70139642439177 86.69621106027726 M-81.70139642439177 86.69621106027726 C-83.02980838136712 85.89091992534364, -84.35822033834245 85.08562879041, -87.15572267044953 83.38976643673819 M-81.70139642439177 86.69621106027726 C-82.81373465419728 86.02190508854416, -83.92607288400279 85.34759911681104, -87.15572267044953 83.38976643673819 M-87.15572267044953 83.38976643673819 C-88.74169862687533 82.28345826532816, -90.32767458330113 81.17715009391814, -92.38699778387598 79.74065537586169 M-87.15572267044953 83.38976643673819 C-89.12542234728404 82.01578920910319, -91.09512202411854 80.64181198146818, -92.38699778387598 79.74065537586169 M-92.38699778387598 79.74065537586169 C-93.75473130287529 78.64992429137727, -95.12246482187457 77.55919320689284, -97.37372533312492 75.7638728577289 M-92.38699778387598 79.74065537586169 C-93.79298723186969 78.61941620603726, -95.19897667986339 77.49817703621281, -97.37372533312492 75.7638728577289 M-97.37372533312492 75.7638728577289 C-98.58486140411057 74.66395112296416, -99.79599747509621 73.56402938819943, -102.09541378504684 71.47576033472394 M-97.37372533312492 75.7638728577289 C-98.58941629920064 74.65981448775929, -99.80510726527633 73.55575611778968, -102.09541378504684 71.47576033472394 M-102.09541378504684 71.47576033472394 C-103.84006824460559 69.67426136643454, -105.58472270416435 67.87276239814511, -106.5326607089939 66.89393858100102 M-102.09541378504684 71.47576033472394 C-103.46298896604344 70.06362668033448, -104.83056414704005 68.651493025945, -106.5326607089939 66.89393858100102 M-106.5326607089939 66.89393858100102 C-108.01212843501837 65.15607160591425, -109.49159616104284 63.41820463082747, -110.66723250556896 62.037235284944 M-106.5326607089939 66.89393858100102 C-107.90020351040506 65.28754499107366, -109.26774631181623 63.68115140114629, -110.66723250556896 62.037235284944 M-110.66723250556896 62.037235284944 C-111.60553623842276 60.77999376414848, -112.54383997127657 59.52275224335296, -114.48213933239708 56.92560768215591 M-110.66723250556896 62.037235284944 C-111.97241037967692 60.28841583778976, -113.27758825378487 58.53959639063552, -114.48213933239708 56.92560768215591 M-114.48213933239708 56.92560768215591 C-115.28717472324031 55.688857139549896, -116.09221011408354 54.45210659694388, -117.9617049190319 51.5800605468973 M-114.48213933239708 56.92560768215591 C-115.31063260405135 55.65281953530116, -116.13912587570562 54.38003138844641, -117.9617049190319 51.5800605468973 M-117.9617049190319 51.5800605468973 C-118.77312791573178 50.139296850768545, -119.58455091243164 48.6985331546398, -121.0916309841135 46.02255987896312 M-117.9617049190319 51.5800605468973 C-119.00275189370615 49.73157622592593, -120.04379886838039 47.88309190495455, -121.0916309841135 46.02255987896312 M-121.0916309841135 46.02255987896312 C-121.67781570204731 44.80533476982982, -122.26400041998114 43.58810966069652, -123.85905599007333 40.27594264067822 M-121.0916309841135 46.02255987896312 C-122.14647714521128 43.83214925535138, -123.20132330630906 41.64173863173964, -123.85905599007333 40.27594264067822 M-123.85905599007333 40.27594264067822 C-124.81548287722349 37.91354973816143, -125.77190976437363 35.55115683564464, -126.25260799395114 34.36382291492017 M-123.85905599007333 40.27594264067822 C-124.36440874241835 39.02771157205524, -124.86976149476335 37.779480503432254, -126.25260799395114 34.36382291492017 M-126.25260799395114 34.36382291492017 C-126.73739630949554 32.90371774902907, -127.22218462503993 31.443612583137973, -128.26245137714773 28.31049486978773 M-126.25260799395114 34.36382291492017 C-126.74584823265292 32.87826190311011, -127.23908847135469 31.392700891300045, -128.26245137714773 28.31049486978773 M-128.26245137714773 28.31049486978773 C-128.75373882088547 26.437002921490652, -129.24502626462325 24.563510973193573, -129.88032726209144 22.140832928653307 M-128.26245137714773 28.31049486978773 C-128.8406234255973 26.10567426769864, -129.41879547404685 23.900853665609553, -129.88032726209144 22.140832928653307 M-129.88032726209144 22.140832928653307 C-130.16861188950392 20.66055229586775, -130.45689651691643 19.180271663082188, -131.09958744973778 15.88018955582128 M-129.88032726209144 22.140832928653307 C-130.2393062801439 20.297551541196377, -130.59828529819632 18.454270153739447, -131.09958744973778 15.88018955582128 M-131.09958744973778 15.88018955582128 C-131.35583993608634 13.892745874478777, -131.61209242243493 11.905302193136274, -131.9152217384452 9.55429107781441 M-131.09958744973778 15.88018955582128 C-131.27722722403067 14.5024505453468, -131.45486699832355 13.124711534872318, -131.9152217384452 9.55429107781441 M-131.9152217384452 9.55429107781441 C-132.00826316082964 8.105095822492688, -132.10130458321404 6.655900567170964, -132.32387851196845 3.1891319683797015 M-131.9152217384452 9.55429107781441 C-132.0651020533531 7.21978419191172, -132.21498236826096 4.88527730600903, -132.32387851196845 3.1891319683797015 M-132.32387851196845 3.1891319683797015 C-132.32387851196845 1.3892405890491124, -132.32387851196845 -0.41065079028147666, -132.32387851196845 -3.189131968379653 M-132.32387851196845 3.1891319683797015 C-132.32387851196845 1.4059177436511798, -132.32387851196845 -0.3772964810773418, -132.32387851196845 -3.189131968379653 M-132.32387851196845 -3.189131968379653 C-132.19968880748422 -5.123486859846634, -132.075499103 -7.057841751313614, -131.9152217384452 -9.554291077814273 M-132.32387851196845 -3.189131968379653 C-132.23028701016983 -4.6468951545937225, -132.1366955083712 -6.1046583408077915, -131.9152217384452 -9.554291077814273 M-131.9152217384452 -9.554291077814273 C-131.69278344409148 -11.279478563412432, -131.4703451497377 -13.004666049010593, -131.09958744973778 -15.880189555821234 M-131.9152217384452 -9.554291077814273 C-131.6813921694993 -11.3678270396877, -131.4475626005534 -13.181363001561126, -131.09958744973778 -15.880189555821234 M-131.09958744973778 -15.880189555821234 C-130.81026778744075 -17.365784873984182, -130.52094812514372 -18.85138019214713, -129.88032726209144 -22.14083292865326 M-131.09958744973778 -15.880189555821234 C-130.75861034479794 -17.63103492415062, -130.4176332398581 -19.38188029248, -129.88032726209144 -22.14083292865326 M-129.88032726209144 -22.14083292865326 C-129.2435384020794 -24.56918483791695, -128.60674954206735 -26.99753674718064, -128.26245137714776 -28.31049486978768 M-129.88032726209144 -22.14083292865326 C-129.36341486762473 -24.11204392000375, -128.84650247315804 -26.083254911354235, -128.26245137714776 -28.31049486978768 M-128.26245137714776 -28.31049486978768 C-127.5572985523822 -30.43430282713642, -126.85214572761666 -32.55811078448516, -126.25260799395119 -34.36382291492004 M-128.26245137714776 -28.31049486978768 C-127.7113595043336 -29.970295786138077, -127.16026763151945 -31.63009670248848, -126.25260799395119 -34.36382291492004 M-126.25260799395119 -34.36382291492004 C-125.35933962269338 -36.57021306209591, -124.46607125143557 -38.77660320927178, -123.85905599007334 -40.27594264067817 M-126.25260799395119 -34.36382291492004 C-125.73153448397255 -35.65088455883824, -125.21046097399392 -36.93794620275645, -123.85905599007334 -40.27594264067817 M-123.85905599007334 -40.27594264067817 C-122.90813752215931 -42.25054518569744, -121.95721905424529 -44.225147730716714, -121.09163098411352 -46.02255987896307 M-123.85905599007334 -40.27594264067817 C-123.2366030050559 -41.568479582427216, -122.61415002003845 -42.86101652417627, -121.09163098411352 -46.02255987896307 M-121.09163098411352 -46.02255987896307 C-120.33048620596882 -47.374049506825415, -119.56934142782413 -48.72553913468776, -117.96170491903193 -51.580060546897265 M-121.09163098411352 -46.02255987896307 C-120.34841741407281 -47.34221083110507, -119.6052038440321 -48.66186178324707, -117.96170491903193 -51.580060546897265 M-117.96170491903193 -51.580060546897265 C-117.21752526234343 -52.723320339788884, -116.47334560565494 -53.866580132680504, -114.48213933239711 -56.925607682155885 M-117.96170491903193 -51.580060546897265 C-116.79066866396342 -53.37908670194655, -115.61963240889492 -55.17811285699583, -114.48213933239711 -56.925607682155885 M-114.48213933239711 -56.925607682155885 C-113.71897751241751 -57.94817499545647, -112.95581569243792 -58.97074230875705, -110.66723250556899 -62.03723528494397 M-114.48213933239711 -56.925607682155885 C-113.36681105134716 -58.42004597026614, -112.2514827702972 -59.91448425837639, -110.66723250556899 -62.03723528494397 M-110.66723250556899 -62.03723528494397 C-109.3904142328444 -63.537058681104156, -108.11359596011981 -65.03688207726434, -106.53266070899393 -66.89393858100098 M-110.66723250556899 -62.03723528494397 C-109.71906833515267 -63.151002871584666, -108.77090416473635 -64.26477045822536, -106.53266070899393 -66.89393858100098 M-106.53266070899393 -66.89393858100098 C-105.27461145469938 -68.19297772382477, -104.01656220040483 -69.49201686664857, -102.09541378504694 -71.47576033472384 M-106.53266070899393 -66.89393858100098 C-105.18436828745106 -68.28616120311048, -103.83607586590819 -69.67838382521998, -102.09541378504694 -71.47576033472384 M-102.09541378504694 -71.47576033472384 C-100.80075875714323 -72.65153177637107, -99.5061037292395 -73.8273032180183, -97.37372533312502 -75.76387285772881 M-102.09541378504694 -71.47576033472384 C-101.01012495612551 -72.46139093398143, -99.92483612720406 -73.44702153323902, -97.37372533312502 -75.76387285772881 M-97.37372533312502 -75.76387285772881 C-96.19745885401205 -76.7019140730558, -95.02119237489909 -77.63995528838281, -92.38699778387603 -79.74065537586166 M-97.37372533312502 -75.76387285772881 C-96.05100750587654 -76.81870512595982, -94.72828967862807 -77.87353739419085, -92.38699778387603 -79.74065537586166 M-92.38699778387603 -79.74065537586166 C-90.30644827119023 -81.19195665037446, -88.22589875850443 -82.64325792488728, -87.15572267044965 -83.3897664367381 M-92.38699778387603 -79.74065537586166 C-91.09075865030862 -80.64485568215058, -89.7945195167412 -81.5490559884395, -87.15572267044965 -83.3897664367381 M-87.15572267044965 -83.3897664367381 C-85.63820149232804 -84.30969669285975, -84.12068031420642 -85.22962694898139, -81.70139642439182 -86.69621106027724 M-87.15572267044965 -83.3897664367381 C-85.5138118980647 -84.38510239589657, -83.87190112567977 -85.38043835505503, -81.70139642439182 -86.69621106027724 M-81.70139642439182 -86.69621106027724 C-79.93476907484768 -87.6178594169556, -78.16814172530356 -88.53950777363394, -76.04643204219707 -89.6464023562907 M-81.70139642439182 -86.69621106027724 C-79.45168038337509 -87.86988647786377, -77.20196434235835 -89.04356189545031, -76.04643204219707 -89.6464023562907 M-76.04643204219707 -89.6464023562907 C-74.75327518024523 -90.2188445389414, -73.4601183182934 -90.7912867215921, -70.21406698549778 -92.22821735592915 M-76.04643204219707 -89.6464023562907 C-73.75133650314343 -90.6623730698395, -71.45624096408982 -91.67834378338833, -70.21406698549778 -92.22821735592915 M-70.21406698549778 -92.22821735592915 C-67.82957470958046 -93.10573255547169, -65.44508243366313 -93.98324775501423, -64.22826769335033 -94.4310468275615 M-70.21406698549778 -92.22821735592915 C-68.84646648086029 -92.73150698359622, -67.4788659762228 -93.2347966112633, -64.22826769335033 -94.4310468275615 M-64.22826769335033 -94.4310468275615 C-61.86085325185892 -95.13368300698417, -59.49343881036751 -95.83631918640684, -58.11363109899609 -96.2458388723834 M-64.22826769335033 -94.4310468275615 C-62.97321676818189 -94.80353935425475, -61.718165843013445 -95.17603188094802, -58.11363109899609 -96.2458388723834 M-58.11363109899609 -96.2458388723834 C-55.62771367338563 -96.81323330265175, -53.141796247775176 -97.3806277329201, -51.895283555786584 -97.665136120611 M-58.11363109899609 -96.2458388723834 C-56.56509832465378 -96.5992813730063, -55.016565550311476 -96.95272387362921, -51.895283555786584 -97.665136120611 M-51.895283555786584 -97.665136120611 C-49.967190709878146 -97.97685521935414, -48.03909786396971 -98.28857431809728, -45.59877758760842 -98.68310637541298 M-51.895283555786584 -97.665136120611 C-50.01417283229265 -97.96925951415396, -48.13306210879871 -98.27338290769691, -45.59877758760842 -98.68310637541298 M-45.59877758760842 -98.68310637541298 C-43.408213632268456 -98.89442744564602, -41.2176496769285 -99.10574851587907, -39.24998688808094 -99.29556657865847 M-45.59877758760842 -98.68310637541298 C-43.77062663555207 -98.85946589908465, -41.942475683495715 -99.03582542275633, -39.24998688808094 -99.29556657865847 M-39.24998688808094 -99.29556657865847 C-37.73495588237998 -99.34415067418234, -36.219924876679016 -99.39273476970621, -32.87500000000003 -99.5 M-39.24998688808094 -99.29556657865847 C-37.615667816018146 -99.34797601029042, -35.98134874395535 -99.40038544192238, -32.87500000000003 -99.5 M-32.87500000000003 -99.5 C-32.87500000000002 -99.5, -32.875000000000014 -99.5, -32.875 -99.5 M-32.87500000000003 -99.5 C-32.87500000000002 -99.5, -32.875000000000014 -99.5, -32.875 -99.5" stroke="#00703c" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="fill:#cce2d8 !important;stroke:#00703c !important"></path></g><g class="label" style="" transform="translate(-100, -92)"><rect></rect><foreignObject width="200" height="184"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel "><p><img src="img/landlord_landlord-details/v1.thumb.jpg" width="180" height="112" style="display: flex; flex-direction: column; width: 100%;"><br/>Local Organisation Landlord</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="journey-map-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"></feDropShadow></filter></defs><defs><filter id="journey-map-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"></feDropShadow></filter></defs></svg></div></div>
+    <div id="gallery-view"><div class="gallery" id="gallery"></div><div class="issues" id="issues"></div></div>
+    <aside id="details"><p>Select a page to see its screenshots and the answers that lead to each version of it.</p></aside>
+</main>
+<script>
+    const manifest = {"journey":{"name":"updateOrganisationPhoneNumber","title":"Update the organisation phone number","basePath":"/landlord/landlord-details/update-organisation-phone-number","gitCommit":"3a5832daa","generatedAt":"2026-10-23T09:38:19.330475300Z","featureFlags":{"failover-test-endpoints":false,"subject-identifier-page":true,"pdjb-939-property-registration-phase-two":false,"pdjb-1053-dashboard-nav-link":true,"pdjb-1022-delegate-to-letting-agent":true,"pdjb-1664-password-benchmark-endpoint":false,"pdjb-238-gatling-post-endpoint":false,"pdjb-1040-correspondence-address":true,"pdjb-1009-payments":false,"pdjb-926-landlord-dashboard-update":true,"pdjb-1210-multi-user-organisations":false}},"containers":[],"nodes":[{"id":"organisation-phone-number","kind":"page","route":"organisation-phone-number","title":"What is your organisation’s phone number?","stepConfig":"OrgPhoneNumberStepConfig","containers":[],"variants":[{"id":"v1","image":"img/organisation-phone-number/v1.jpg","thumbnail":"img/organisation-phone-number/v1.thumb.jpg","mobileImage":null,"conditions":[],"origin":"main"}],"origin":"main","skippedVariants":0},{"id":"/landlord/landlord-details","kind":"terminal","route":"/landlord/landlord-details","title":"Local Organisation Landlord","stepConfig":null,"containers":[],"variants":[{"id":"v1","image":"img/landlord_landlord-details/v1.jpg","thumbnail":"img/landlord_landlord-details/v1.thumb.jpg","mobileImage":null,"conditions":[],"origin":"main"}],"origin":"main","skippedVariants":0}],"edges":[{"from":"organisation-phone-number","to":"/landlord/landlord-details","label":"","mode":"COMPLETE","kind":"observed"}],"gaps":[],"errors":[],"dependencies":[],"arrows":[{"from":"organisation-phone-number","mode":"COMPLETE","to":"/landlord/landlord-details","walked":true,"reads":[]}],"entries":[{"node":"organisation-phone-number","label":"Change Organisation phone"}]};
+</script>
+<script>
+    (() => {
+        const nodes = manifest.nodes;
+        const indexById = new Map(nodes.map((node, index) => [node.id, index]));
+        const containerLabels = new Map(manifest.containers.map((container) => [container.id, container.label]));
+        const entries = manifest.entries || [];
+        const entryLabels = new Map(entries.map((entry) => [entry.node, entry.label]));
+        const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+        const kindLabels = { page: "Page", decision: "Decision", terminal: "Leaves the journey" };
+
+        const pageCount = nodes.filter((node) => node.kind !== "decision").length;
+        const screenshotCount = nodes.reduce((total, node) => total + node.variants.length, 0);
+        document.getElementById("meta").textContent =
+            `${pageCount} pages · ${screenshotCount} screenshots · ${manifest.gaps.length} gaps · ${manifest.errors.length} errors · ` +
+            `generated ${manifest.journey.generatedAt}${manifest.journey.gitCommit ? " at " + manifest.journey.gitCommit : ""}`;
+
+        const view = document.getElementById("graph-view");
+        const graph = document.getElementById("graph");
+        const svg = graph.querySelector("svg");
+        const nodeElements = new Map();
+        let startElement = null;
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        const applyTransform = () => {
+            graph.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        };
+
+        const naturalSize = () => {
+            const box = svg.viewBox && svg.viewBox.baseVal;
+            if (box && box.width) return { width: box.width, height: box.height };
+            return { width: svg.clientWidth || 1000, height: svg.clientHeight || 1000 };
+        };
+
+        const fit = () => {
+            if (!svg) return;
+            const size = naturalSize();
+            const scaleX = view.clientWidth / size.width;
+            const scaleY = view.clientHeight / size.height;
+            scale = Math.min(scaleX, scaleY, 1) * 0.95;
+            offsetX = (view.clientWidth - size.width * scale) / 2;
+            offsetY = 12;
+            applyTransform();
+        };
+
+        const zoomAt = (factor, pointX, pointY) => {
+            const newScale = Math.min(4, Math.max(0.03, scale * factor));
+            offsetX = pointX - (pointX - offsetX) * (newScale / scale);
+            offsetY = pointY - (pointY - offsetY) * (newScale / scale);
+            scale = newScale;
+            applyTransform();
+        };
+
+        const centreOn = (element) => {
+            if (!element) return;
+            const viewBox = view.getBoundingClientRect();
+            const box = element.getBoundingClientRect();
+            offsetX += viewBox.left + viewBox.width / 2 - (box.left + box.width / 2);
+            offsetY += viewBox.top + viewBox.height / 2 - (box.top + box.height / 2);
+            applyTransform();
+        };
+
+        if (svg) {
+            const size = naturalSize();
+            svg.setAttribute("width", size.width);
+            svg.setAttribute("height", size.height);
+            svg.style.maxWidth = "none";
+            svg.querySelectorAll("g.node").forEach((element) => {
+                const dataId = element.getAttribute("data-id");
+                const match = (dataId && /^n(\d+)$/.exec(dataId)) || /flowchart-n(\d+)-/.exec(element.id);
+                if (match) nodeElements.set(Number(match[1]), element);
+            });
+            startElement = svg.querySelector('g.node[id*="flowchart-journeyStart-"]');
+            view.addEventListener("wheel", (event) => {
+                event.preventDefault();
+                const rect = view.getBoundingClientRect();
+                zoomAt(Math.exp(-event.deltaY * 0.0015), event.clientX - rect.left, event.clientY - rect.top);
+            }, { passive: false });
+            let drag = null;
+            view.addEventListener("mousedown", (event) => {
+                if (event.button !== 0) return;
+                drag = { startX: event.clientX, startY: event.clientY, offsetX, offsetY, moved: false, target: event.target };
+                view.classList.add("dragging");
+            });
+            view.addEventListener("dragstart", (event) => event.preventDefault());
+            window.addEventListener("mousemove", (event) => {
+                if (!drag) return;
+                const dx = event.clientX - drag.startX;
+                const dy = event.clientY - drag.startY;
+                if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+                offsetX = drag.offsetX + dx;
+                offsetY = drag.offsetY + dy;
+                applyTransform();
+            });
+            window.addEventListener("mouseup", () => {
+                if (!drag) return;
+                const { moved, target } = drag;
+                drag = null;
+                view.classList.remove("dragging");
+                if (moved) return;
+                const element = target.closest && target.closest("g.node");
+                if (!element) return clearSelection();
+                if (element === startElement) return selectStart(false);
+                for (const [index, candidate] of nodeElements) {
+                    if (candidate === element) select(index, false);
+                }
+            });
+            requestAnimationFrame(fit);
+        } else {
+            graph.innerHTML = '<p id="graph-missing">The map could not be drawn. Use the Pages view instead.</p>';
+        }
+
+        const details = document.getElementById("details");
+        const indexedEdges = manifest.edges.map((edge, index) => ({ edge, id: `e${index}` }));
+        const edgeElements = (id) =>
+            svg
+                ? [svg.querySelector(`path[data-id="${id}"]`), svg.querySelector(`g.label[data-id="${id}"]`)?.closest("g.edgeLabel")].filter(Boolean)
+                : [];
+        const highlightClasses = ["related", "edge-out", "edge-in", "edge-hover", "hover-target", "selected"];
+        const clearHighlight = () => {
+            graph.classList.remove("focused");
+            graph.querySelectorAll(highlightClasses.map((name) => "." + name).join(",")).forEach((element) => element.classList.remove(...highlightClasses));
+        };
+        // Links are { id, other }: the arrow's id in the SVG and the index of the node at its other end
+        const highlight = (element, outgoing, incoming) => {
+            clearHighlight();
+            if (!svg) return;
+            graph.classList.add("focused");
+            if (element) element.classList.add("selected", "related");
+            const mark = (links, edgeClass) =>
+                links.forEach(({ id, other }) => {
+                    edgeElements(id).forEach((part) => part.classList.add("related", edgeClass));
+                    const otherElement = nodeElements.get(other);
+                    if (otherElement) otherElement.classList.add("related");
+                });
+            mark(outgoing, "edge-out");
+            mark(incoming, "edge-in");
+        };
+        const defaultDetails = details.innerHTML;
+        const clearSelection = () => {
+            clearHighlight();
+            details.innerHTML = defaultDetails;
+        };
+
+        const thumbnailFor = (otherIndex) => {
+            const other = nodes[otherIndex];
+            const thumbnail = other && other.variants[0] && other.variants[0].thumbnail;
+            if (thumbnail) return `<img class="thumb" src="${escapeHtml(thumbnail)}" alt="" loading="lazy">`;
+            const text = !other ? "Elsewhere" : other.kind === "decision" ? "Decision" : other.kind === "terminal" ? "Leaves the journey" : "Not reached";
+            return `<span class="thumb placeholder">${text}</span>`;
+        };
+        const linkItem = (id, otherIndex, title, label, badge) =>
+            `<li data-edge="${id}" data-other="${otherIndex ?? ""}"><a data-node="${otherIndex ?? ""}">${thumbnailFor(otherIndex)}</a>` +
+            `<span><a data-node="${otherIndex ?? ""}">${escapeHtml(title)}</a>${label ? ` <span class="meta">(${escapeHtml(label)})</span>` : ""}${badge}</span></li>`;
+        const edgeItems = (links, end) =>
+            links
+                .map(({ edge, id }) => {
+                    const otherIndex = indexById.get(edge[end]);
+                    const title = otherIndex === undefined ? edge[end] : nodes[otherIndex].title;
+                    const badge = edge.kind === "observed" ? "" : ` <span class="badge">${escapeHtml(edge.kind)}</span>`;
+                    return linkItem(id, otherIndex, title, edge.label, badge);
+                })
+                .join("");
+        const bindLinks = () => {
+            details.querySelectorAll("li[data-edge]").forEach((item) => {
+                item.addEventListener("mouseenter", () => {
+                    edgeElements(item.dataset.edge).forEach((part) => part.classList.add("edge-hover"));
+                    const other = item.dataset.other === "" ? null : nodeElements.get(Number(item.dataset.other));
+                    if (other) other.classList.add("hover-target");
+                });
+                item.addEventListener("mouseleave", () => {
+                    edgeElements(item.dataset.edge).forEach((part) => part.classList.remove("edge-hover"));
+                    graph.querySelectorAll(".hover-target").forEach((element) => element.classList.remove("hover-target"));
+                });
+            });
+            details.querySelectorAll("a[data-node]").forEach((link) => {
+                link.addEventListener("click", () => {
+                    if (link.dataset.node !== "") select(Number(link.dataset.node), true);
+                });
+            });
+        };
+
+        const renderVariant = (node, variantIndex) => {
+            const variant = node.variants[variantIndex];
+            const conditions = variant.conditions.length
+                ? "<strong>Shown when:</strong><ul>" + variant.conditions.map((c) => `<li>${escapeHtml(c.step)}: <strong>${escapeHtml(c.answer)}</strong></li>`).join("") + "</ul>"
+                : "Shown on the default route.";
+            const origin = variant.origin === "change" ? '<p class="meta">Seen while changing an answer from a check your answers page.</p>' : "";
+            const mobile = variant.mobileImage ? `<p><a href="${escapeHtml(variant.mobileImage)}" target="_blank">Mobile screenshot</a></p>` : "";
+            return `<a href="${escapeHtml(variant.image)}" target="_blank"><img class="shot" src="${escapeHtml(variant.image)}" alt="Screenshot of ${escapeHtml(node.title)}"></a>` +
+                `<div class="conditions">${conditions}</div>${origin}${mobile}`;
+        };
+
+        const select = (index, centre) => {
+            const node = nodes[index];
+            if (!node) return;
+            const outgoing = indexedEdges.filter(({ edge }) => edge.from === node.id);
+            const incoming = indexedEdges.filter(({ edge }) => edge.to === node.id);
+            highlight(
+                nodeElements.get(index),
+                outgoing.map(({ edge, id }) => ({ id, other: indexById.get(edge.to) })),
+                incoming.map(({ edge, id }) => ({ id, other: indexById.get(edge.from) })),
+            );
+            if (centre) centreOn(nodeElements.get(index));
+            const entryIndex = entries.findIndex((entry) => entry.node === node.id);
+            if (entryIndex >= 0 && svg) {
+                edgeElements(`s${entryIndex}`).forEach((part) => part.classList.add("related", "edge-in"));
+                if (startElement) startElement.classList.add("related");
+            }
+            const containers = node.containers.map((id) => containerLabels.get(id) || id).join(" › ");
+            const gaps = manifest.gaps.filter((gap) => gap.node === node.id);
+            const errors = manifest.errors.filter((error) => error.node === node.id);
+            const entryLabel = entryLabels.get(node.id);
+            const tabs = node.variants.length > 1
+                ? '<div class="tabs">' + node.variants.map((variant, i) => `<button type="button" data-variant="${i}" class="${i === 0 ? "active" : ""}">Version ${i + 1}</button>`).join("") + "</div>"
+                : "";
+            details.innerHTML =
+                `<h2>${escapeHtml(node.title)}</h2>` +
+                (entryLabels.has(node.id) ? `<p class="entry-note">Entry point${entryLabel ? ": " + escapeHtml(entryLabel) : ""}</p>` : "") +
+                `<p class="meta">${kindLabels[node.kind] || node.kind}${node.route ? ` · <code>${escapeHtml(node.route)}</code>` : ""}${node.stepConfig ? ` · ${escapeHtml(node.stepConfig)}` : ""}</p>` +
+                (containers ? `<p class="meta">${escapeHtml(containers)}</p>` : "") +
+                (gaps.length ? "<h3>Gaps</h3><ul>" + gaps.map((gap) => `<li>${escapeHtml(gap.mode || "")} ${escapeHtml(gap.reason)}</li>`).join("") + "</ul>" : "") +
+                (errors.length ? "<h3>Errors</h3><ul>" + errors.map((error) => `<li>${escapeHtml(error.kind)}: ${escapeHtml(error.detail)}</li>`).join("") + "</ul>" : "") +
+                (node.variants.length ? `<h3>Screenshots</h3>${tabs}<div id="variant"></div>` : "<p>This page was not reached by the generator.</p>") +
+                (outgoing.length ? `<h3>Leads to</h3><ul class="link-list">${edgeItems(outgoing, "to")}</ul>` : "") +
+                (incoming.length ? `<h3>Reached from</h3><ul class="link-list">${edgeItems(incoming, "from")}</ul>` : "");
+            if (node.variants.length) {
+                const variantContainer = details.querySelector("#variant");
+                variantContainer.innerHTML = renderVariant(node, 0);
+                details.querySelectorAll("button[data-variant]").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        details.querySelectorAll("button[data-variant]").forEach((other) => other.classList.remove("active"));
+                        button.classList.add("active");
+                        variantContainer.innerHTML = renderVariant(node, Number(button.dataset.variant));
+                    });
+                });
+            }
+            bindLinks();
+        };
+
+        const selectStart = (centre) => {
+            if (!entries.length) return;
+            highlight(startElement, entries.map((entry, index) => ({ id: `s${index}`, other: indexById.get(entry.node) })), []);
+            if (centre && startElement) {
+                scale = 1;
+                applyTransform();
+                centreOn(startElement);
+            }
+            details.innerHTML =
+                '<h2>Start</h2><p class="meta">Where users enter this journey</p><h3>Entry points</h3><ul class="link-list">' +
+                entries
+                    .map((entry, index) => {
+                        const otherIndex = indexById.get(entry.node);
+                        return linkItem(`s${index}`, otherIndex, otherIndex === undefined ? entry.node : nodes[otherIndex].title, entry.label, "");
+                    })
+                    .join("") +
+                "</ul>";
+            bindLinks();
+        };
+
+        const gallery = document.getElementById("gallery");
+        nodes.forEach((node, index) => {
+            if (node.kind === "decision") return;
+            const card = document.createElement("div");
+            card.className = "card";
+            card.dataset.index = index;
+            const thumbnail = node.variants[0] && node.variants[0].thumbnail;
+            const gapCount = manifest.gaps.filter((gap) => gap.node === node.id).length;
+            const errorCount = manifest.errors.filter((error) => error.node === node.id).length;
+            card.innerHTML =
+                (thumbnail ? `<img src="${escapeHtml(thumbnail)}" alt="" loading="lazy">` : '<div class="no-image">Not reached</div>') +
+                `<div class="card-title">${escapeHtml(node.title)}` +
+                (node.variants.length > 1 ? `<span class="badge">${node.variants.length} versions</span>` : "") +
+                (entryLabels.has(node.id) ? '<span class="badge start">Start</span>' : "") +
+                (gapCount ? '<span class="badge gap">gap</span>' : "") +
+                (errorCount ? '<span class="badge error">error</span>' : "") +
+                "</div>";
+            card.addEventListener("click", () => select(index, false));
+            gallery.appendChild(card);
+        });
+
+        const issueTable = (title, rows, columns) =>
+            rows.length
+                ? `<h3>${title}</h3><table><tr>${columns.map((c) => `<th>${c}</th>`).join("")}</tr>` +
+                  rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("") + "</table>"
+                : "";
+        document.getElementById("issues").innerHTML =
+            issueTable("Gaps", manifest.gaps.map((gap) => [gap.node, gap.mode || "", gap.reason]), ["Page", "Answer", "Reason"]) +
+            issueTable("Errors", manifest.errors.map((error) => [error.node, error.kind, error.detail]), ["Page", "Kind", "Detail"]);
+
+        const mapButton = document.getElementById("map-button");
+        const pagesButton = document.getElementById("pages-button");
+        const showView = (showMap) => {
+            document.getElementById("graph-view").style.display = showMap ? "block" : "none";
+            document.getElementById("gallery-view").style.display = showMap ? "none" : "block";
+            mapButton.classList.toggle("active", showMap);
+            pagesButton.classList.toggle("active", !showMap);
+        };
+        mapButton.addEventListener("click", () => showView(true));
+        pagesButton.addEventListener("click", () => showView(false));
+        if (!svg) showView(false);
+
+        document.getElementById("fit-button").addEventListener("click", fit);
+        const startButton = document.getElementById("start-button");
+        if (!svg || !entries.length) startButton.hidden = true;
+        startButton.addEventListener("click", () => selectStart(true));
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && event.target !== document.getElementById("search")) clearSelection();
+        });
+        document.getElementById("zoom-in").addEventListener("click", () => zoomAt(1.25, view.clientWidth / 2, view.clientHeight / 2));
+        document.getElementById("zoom-out").addEventListener("click", () => zoomAt(0.8, view.clientWidth / 2, view.clientHeight / 2));
+
+        document.getElementById("download-svg").addEventListener("click", () => {
+            if (!svg) return;
+            const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: "image/svg+xml" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${manifest.journey.name}-journey-map.svg`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        const search = document.getElementById("search");
+        const matches = () => {
+            const term = search.value.trim().toLowerCase();
+            return nodes.map((node, index) => [node, index]).filter(([node]) => term && node.title.toLowerCase().includes(term)).map(([, index]) => index);
+        };
+        search.addEventListener("input", () => {
+            const found = new Set(matches());
+            const term = search.value.trim();
+            nodeElements.forEach((element, index) => element.classList.toggle("match", found.has(index)));
+            gallery.querySelectorAll(".card").forEach((card) => card.classList.toggle("hidden", term !== "" && !found.has(Number(card.dataset.index))));
+        });
+        search.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+            const [first] = matches();
+            if (first !== undefined) select(first, true);
+        });
+    })();
+</script>
+</body>
+</html>

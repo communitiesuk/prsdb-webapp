@@ -1,0 +1,92 @@
+{
+    "journey": {
+        "name": "organisationLandlordDeregistration",
+        "title": "Delete your organisation's landlord account",
+        "basePath": "/landlord/deregister-organisational-landlord",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:41.783291400Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Are you sure you want to delete your organisation?",
+            "stepConfig": "AreYouSureStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/are-you-sure/v1.jpg",
+                    "thumbnail": "img/are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/deregister-organisational-landlord/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/deregister-organisational-landlord/confirmation",
+            "title": "Organisation deleted",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_deregister-organisational-landlord_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_deregister-organisational-landlord_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/deregister-organisational-landlord/confirmation",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "are-you-sure",
+            "mode": "COMPLETE",
+            "to": "/landlord/deregister-organisational-landlord/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "are-you-sure",
+            "label": "Delete organisation"
+        }
+    ]
+}

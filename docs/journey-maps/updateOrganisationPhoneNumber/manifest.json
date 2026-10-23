@@ -1,0 +1,92 @@
+{
+    "journey": {
+        "name": "updateOrganisationPhoneNumber",
+        "title": "Update the organisation phone number",
+        "basePath": "/landlord/landlord-details/update-organisation-phone-number",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:38:19.330475300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "organisation-phone-number",
+            "kind": "page",
+            "route": "organisation-phone-number",
+            "title": "What is your organisation’s phone number?",
+            "stepConfig": "OrgPhoneNumberStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-phone-number/v1.jpg",
+                    "thumbnail": "img/organisation-phone-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "organisation-phone-number",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "organisation-phone-number",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "organisation-phone-number",
+            "label": "Change Organisation phone"
+        }
+    ]
+}

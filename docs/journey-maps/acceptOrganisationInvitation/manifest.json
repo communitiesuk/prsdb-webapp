@@ -1,0 +1,370 @@
+{
+    "journey": {
+        "name": "acceptOrganisationInvitation",
+        "title": "Join an organisation",
+        "basePath": "/landlord/accept-invitation",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:37.413333100Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": true
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "already-landlord",
+            "kind": "page",
+            "route": "already-landlord",
+            "title": "You need to use a different GOV.UK One Login to accept this invitation",
+            "stepConfig": "UserIsAlreadyLandlordStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/already-landlord/v1.jpg",
+                    "thumbnail": "img/already-landlord/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "join-your-organisation",
+            "kind": "page",
+            "route": "join-your-organisation",
+            "title": "Join your organisation",
+            "stepConfig": "JoinOrganisationStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/join-your-organisation/v1.jpg",
+                    "thumbnail": "img/join-your-organisation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "name",
+            "kind": "page",
+            "route": "name",
+            "title": "What is your full name?",
+            "stepConfig": "FullNameStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/name/v1.jpg",
+                    "thumbnail": "img/name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "email",
+            "kind": "page",
+            "route": "email",
+            "title": "What is your email address?",
+            "stepConfig": "EmailAddressStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/email/v1.jpg",
+                    "thumbnail": "img/email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-answers",
+            "kind": "page",
+            "route": "check-answers",
+            "title": "Check your answers",
+            "stepConfig": "AcceptOrganisationalLandlordInvitationCheckAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-answers/v1.jpg",
+                    "thumbnail": "img/check-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/accept-invitation/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/accept-invitation/confirmation",
+            "title": "Invitation accepted",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_accept-invitation_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_accept-invitation_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "invalid-link",
+            "kind": "page",
+            "route": "invalid-link",
+            "title": "There was a problem with this invitation link",
+            "stepConfig": "InvalidLinkStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/invalid-link/v1.jpg",
+                    "thumbnail": "img/invalid-link/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invitation has expired"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "validate-token",
+            "kind": "decision",
+            "route": "validate-token",
+            "title": "Validate token",
+            "stepConfig": "ValidateTokenStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-if-user-is-landlord",
+            "kind": "decision",
+            "route": "check-if-user-is-landlord",
+            "title": "Check user is landlord",
+            "stepConfig": "CheckUserIsLandlordStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "join-your-organisation",
+            "to": "name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "name",
+            "to": "email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "email",
+            "to": "check-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "/landlord/accept-invitation/confirmation",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "name",
+            "label": "Change Name",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "name",
+            "to": "check-answers",
+            "label": "Save and continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "email",
+            "label": "Change Email address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "email",
+            "to": "check-answers",
+            "label": "Save and continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "validate-token",
+            "to": "check-if-user-is-landlord",
+            "label": "Valid",
+            "mode": "VALID",
+            "kind": "observed"
+        },
+        {
+            "from": "validate-token",
+            "to": "invalid-link",
+            "label": "Invalid",
+            "mode": "INVALID",
+            "kind": "observed"
+        },
+        {
+            "from": "check-if-user-is-landlord",
+            "to": "already-landlord",
+            "label": "Already a landlord",
+            "mode": "ALREADY_A_LANDLORD",
+            "kind": "observed"
+        },
+        {
+            "from": "check-if-user-is-landlord",
+            "to": "join-your-organisation",
+            "label": "Not a landlord",
+            "mode": "NOT_A_LANDLORD",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "validate-token",
+            "mode": "VALID",
+            "to": "check-if-user-is-landlord",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "validate-token",
+            "mode": "INVALID",
+            "to": "invalid-link",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-if-user-is-landlord",
+            "mode": "ALREADY_A_LANDLORD",
+            "to": "already-landlord",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-if-user-is-landlord",
+            "mode": "NOT_A_LANDLORD",
+            "to": "join-your-organisation",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "join-your-organisation",
+            "mode": "COMPLETE",
+            "to": "name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "name",
+            "mode": "COMPLETE",
+            "to": "email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "email",
+            "mode": "COMPLETE",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/accept-invitation/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "validate-token",
+            "label": "Link in the invitation email"
+        }
+    ]
+}

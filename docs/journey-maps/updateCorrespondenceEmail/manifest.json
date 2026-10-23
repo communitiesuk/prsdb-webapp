@@ -1,0 +1,140 @@
+{
+    "journey": {
+        "name": "updateCorrespondenceEmail",
+        "title": "Update the correspondence email address",
+        "basePath": "/landlord/property-details/1/update-correspondence-email",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:33:53.067431500Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "correspondence-email",
+            "kind": "page",
+            "route": "correspondence-email",
+            "title": "Where should the council send emails?",
+            "stepConfig": "CorrespondenceEmailStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/correspondence-email/v1.jpg",
+                    "thumbnail": "img/correspondence-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "correspondence-email-check-your-answers",
+            "kind": "page",
+            "route": "correspondence-email-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateCorrespondenceEmailCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/correspondence-email-check-your-answers/v1.jpg",
+                    "thumbnail": "img/correspondence-email-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "correspondence-email",
+            "to": "correspondence-email-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "correspondence-email-check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "correspondence-email-check-your-answers",
+            "to": "correspondence-email",
+            "label": "Change Email address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "correspondence-email",
+            "to": "correspondence-email-check-your-answers",
+            "label": "The email address from my account / A different email address (must belong to you or another landlord)",
+            "mode": "COMPLETE",
+            "kind": "change"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "correspondence-email",
+            "mode": "COMPLETE",
+            "to": "correspondence-email-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "correspondence-email-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "correspondence-email",
+            "label": "Change Contact email address"
+        }
+    ]
+}

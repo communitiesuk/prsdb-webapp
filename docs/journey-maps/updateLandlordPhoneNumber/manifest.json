@@ -1,0 +1,92 @@
+{
+    "journey": {
+        "name": "updateLandlordPhoneNumber",
+        "title": "Update your phone number",
+        "basePath": "/landlord/landlord-details/update-phone-number",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:38:02.865278Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "phone-number",
+            "kind": "page",
+            "route": "phone-number",
+            "title": "What is your updated phone number?",
+            "stepConfig": "PhoneNumberStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/phone-number/v1.jpg",
+                    "thumbnail": "img/phone-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Alexander Smith",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "phone-number",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "phone-number",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "phone-number",
+            "label": "Change Telephone number"
+        }
+    ]
+}

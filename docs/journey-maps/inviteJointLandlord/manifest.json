@@ -1,0 +1,467 @@
+{
+    "journey": {
+        "name": "inviteJointLandlord",
+        "title": "Invite a joint landlord",
+        "basePath": "/landlord/property-details/1/invite-joint-landlord",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:36:39.865524100Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:InviteJointLandlordsTask",
+            "kind": "task",
+            "label": "Invite joint landlords",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "has-joint-landlords",
+            "kind": "page",
+            "route": "has-joint-landlords",
+            "title": "Invite joint landlords",
+            "stepConfig": "HasJointLandlordsConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-joint-landlords/v1.jpg",
+                    "thumbnail": "img/has-joint-landlords/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Invite joint landlords",
+                            "answer": "No, I am the only landlord for this property"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "invite-joint-landlord",
+            "kind": "page",
+            "route": "invite-joint-landlord",
+            "title": "Invite a joint landlord to this property",
+            "stepConfig": "InviteJointLandlordStepConfig",
+            "containers": [
+                "task:InviteJointLandlordsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/invite-joint-landlord/v1.jpg",
+                    "thumbnail": "img/invite-joint-landlord/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-joint-landlords",
+            "kind": "page",
+            "route": "check-joint-landlords",
+            "title": "You’ve added 1 joint landlord",
+            "stepConfig": "CheckJointLandlordsStepConfig",
+            "containers": [
+                "task:InviteJointLandlordsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-joint-landlords/v1.jpg",
+                    "thumbnail": "img/check-joint-landlords/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-joint-landlords/v2.jpg",
+                    "thumbnail": "img/check-joint-landlords/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 1 joint landlord",
+                            "answer": "Add another landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-invitations",
+            "kind": "page",
+            "route": "check-invitations",
+            "title": "Check your answers",
+            "stepConfig": "CheckInvitationsStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-invitations/v1.jpg",
+                    "thumbnail": "img/check-invitations/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1/invite-joint-landlord/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1/invite-joint-landlord/confirmation",
+            "title": "Joint landlord invitations sent",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1_invite-joint-landlord_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1_invite-joint-landlord_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Confirm and send"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "invite-another-joint-landlord",
+            "kind": "page",
+            "route": "invite-another-joint-landlord",
+            "title": "Invite a joint landlord to this property",
+            "stepConfig": "InviteJointLandlordStepConfig",
+            "containers": [
+                "task:InviteJointLandlordsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/invite-another-joint-landlord/v1.jpg",
+                    "thumbnail": "img/invite-another-joint-landlord/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 1 joint landlord",
+                            "answer": "Add another landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-joint-landlord",
+            "kind": "page",
+            "route": "remove-joint-landlord",
+            "title": "Are you sure you want to remove jane.smith@example.com?",
+            "stepConfig": "RemoveJointLandlordAreYouSureStepConfig",
+            "containers": [
+                "task:InviteJointLandlordsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/remove-joint-landlord/v1.jpg",
+                    "thumbnail": "img/remove-joint-landlord/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 1 joint landlord",
+                            "answer": "Remove Joint landlord 1"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/remove-joint-landlord/v2.jpg",
+                    "thumbnail": "img/remove-joint-landlord/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 1 joint landlord",
+                            "answer": "Add another landlord"
+                        },
+                        {
+                            "step": "You’ve added 2 joint landlords",
+                            "answer": "Remove Joint landlord 2"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "kind": "decision",
+            "route": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "title": "Has any joint landlords invited",
+            "stepConfig": "HasAnyJointLandlordsInvitedStepConfig",
+            "containers": [
+                "task:InviteJointLandlordsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "has-joint-landlords",
+            "to": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "to": "invite-joint-landlord",
+            "label": "No landlords",
+            "mode": "NO_LANDLORDS",
+            "kind": "observed"
+        },
+        {
+            "from": "has-joint-landlords",
+            "to": "/landlord/property-details/1",
+            "label": "No, I am the only landlord for this property",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "invite-joint-landlord",
+            "to": "check-joint-landlords",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-joint-landlords",
+            "to": "check-invitations",
+            "label": "Save and continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-joint-landlords",
+            "to": "invite-another-joint-landlord",
+            "label": "Add another landlord / Change Joint landlord 1 / Change Joint landlord 2",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-joint-landlords",
+            "to": "remove-joint-landlord",
+            "label": "Remove Joint landlord 1 / Remove Joint landlord 2",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-invitations",
+            "to": "/landlord/property-details/1/invite-joint-landlord/confirmation",
+            "label": "Confirm and send",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-invitations",
+            "to": "check-joint-landlords",
+            "label": "Change Invitations",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "invite-another-joint-landlord",
+            "to": "check-joint-landlords",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "remove-joint-landlord",
+            "to": "has-joint-landlords",
+            "label": "Yes",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-joint-landlord",
+            "to": "check-joint-landlords",
+            "label": "No / Cancel / Yes",
+            "mode": "SOME_LANDLORDS",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "to": "check-joint-landlords",
+            "label": "Some landlords",
+            "mode": "SOME_LANDLORDS",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-joint-landlord",
+            "writers": [
+                "invite-another-joint-landlord",
+                "invite-joint-landlord"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "writers": [
+                "invite-another-joint-landlord",
+                "invite-joint-landlord",
+                "remove-joint-landlord"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "has-joint-landlords",
+            "mode": "YES",
+            "to": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-joint-landlords",
+            "mode": "NO",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:has-joint-landlords",
+                "outcome:start",
+                "step:has-joint-landlords"
+            ]
+        },
+        {
+            "from": "invite-joint-landlord",
+            "mode": "COMPLETE",
+            "to": "check-joint-landlords",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-joint-landlords",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "invitedJointLandlordEmails"
+            ]
+        },
+        {
+            "from": "invite-another-joint-landlord",
+            "mode": "COMPLETE",
+            "to": "check-joint-landlords",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-joint-landlord",
+            "mode": "NO_LANDLORDS",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "invitedJointLandlordEmails"
+            ]
+        },
+        {
+            "from": "remove-joint-landlord",
+            "mode": "SOME_LANDLORDS",
+            "to": "check-joint-landlords",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-invitations",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:has-joint-landlords",
+                "outcome:start",
+                "step:has-joint-landlords"
+            ]
+        },
+        {
+            "from": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "mode": "NO_LANDLORDS",
+            "to": "invite-joint-landlord",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyJointLandlordsInvitedStep@task:InviteJointLandlordsTask",
+            "mode": "SOME_LANDLORDS",
+            "to": "check-joint-landlords",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "has-joint-landlords",
+            "label": "invite them to join the property"
+        }
+    ]
+}

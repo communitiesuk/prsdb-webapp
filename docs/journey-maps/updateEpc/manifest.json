@@ -1,0 +1,1705 @@
+{
+    "journey": {
+        "name": "updateEpc",
+        "title": "Update the energy performance certificate",
+        "basePath": "/landlord/property-details/1/update-epc",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:35:57.904050200Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:EpcDetailsTask",
+            "kind": "task",
+            "label": "Epc details",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "has-epc",
+            "kind": "page",
+            "route": "has-epc",
+            "title": "Do you have an EPC for this property?",
+            "stepConfig": "HasEpcStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-epc/v1.jpg",
+                    "thumbnail": "img/has-epc/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "find-your-epc",
+            "kind": "page",
+            "route": "find-your-epc",
+            "title": "Find your EPC",
+            "stepConfig": "FindYourEpcStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/find-your-epc/v1.jpg",
+                    "thumbnail": "img/find-your-epc/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm-epc-details",
+            "kind": "page",
+            "route": "confirm-epc-details",
+            "title": "Confirm your EPC",
+            "stepConfig": "ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm-epc-details/v1.jpg",
+                    "thumbnail": "img/confirm-epc-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-epc-answers",
+            "kind": "page",
+            "route": "check-epc-answers",
+            "title": "Energy performance certificate (EPC)",
+            "stepConfig": "UpdateCheckEpcAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-epc-answers/v1.jpg",
+                    "thumbnail": "img/check-epc-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-epc-answers/v2.jpg",
+                    "thumbnail": "img/check-epc-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-epc-answers/v3.jpg",
+                    "thumbnail": "img/check-epc-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-epc-answers/v4.jpg",
+                    "thumbnail": "img/check-epc-answers/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-epc-answers/v5.jpg",
+                    "thumbnail": "img/check-epc-answers/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/check-epc-answers/v6.jpg",
+                    "thumbnail": "img/check-epc-answers/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        },
+                        {
+                            "step": "Confirm when the current tenancy began",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/check-epc-answers/v7.jpg",
+                    "thumbnail": "img/check-epc-answers/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        },
+                        {
+                            "step": "You need a registered energy efficiency exemption to let this property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v8",
+                    "image": "img/check-epc-answers/v8.jpg",
+                    "thumbnail": "img/check-epc-answers/v8.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_property-details_1/v3.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_property-details_1/v4.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/landlord_property-details_1/v5.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/landlord_property-details_1/v6.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        },
+                        {
+                            "step": "Confirm when the current tenancy began",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/landlord_property-details_1/v7.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        },
+                        {
+                            "step": "You need a registered energy efficiency exemption to let this property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v8",
+                    "image": "img/landlord_property-details_1/v8.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v8.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v9",
+                    "image": "img/landlord_property-details_1/v9.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v9.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v10",
+                    "image": "img/landlord_property-details_1/v10.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v10.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v11",
+                    "image": "img/landlord_property-details_1/v11.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v11.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "EPC register search by address",
+                            "answer": "Expired EPC found"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v12",
+                    "image": "img/landlord_property-details_1/v12.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v12.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "EPC register search by address",
+                            "answer": "Low rated EPC found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 1
+        },
+        {
+            "id": "change:is-epc-required",
+            "kind": "page",
+            "route": "is-epc-required",
+            "title": "Is an EPC required to let this property?",
+            "stepConfig": "IsEpcRequiredStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_is-epc-required/v1.jpg",
+                    "thumbnail": "img/change_is-epc-required/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Energy performance certificate (EPC)",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:epc-missing",
+            "kind": "page",
+            "route": "epc-missing",
+            "title": "Your property is missing an EPC",
+            "stepConfig": "EpcMissingStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_epc-missing/v1.jpg",
+                    "thumbnail": "img/change_epc-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Energy performance certificate (EPC)",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "Yes"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:epc-exemption",
+            "kind": "page",
+            "route": "epc-exemption",
+            "title": "Why does this property not need an EPC to be let?",
+            "stepConfig": "EpcExemptionStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_epc-exemption/v1.jpg",
+                    "thumbnail": "img/change_epc-exemption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Energy performance certificate (EPC)",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "is-epc-required",
+            "kind": "page",
+            "route": "is-epc-required",
+            "title": "Is an EPC required to let this property?",
+            "stepConfig": "IsEpcRequiredStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/is-epc-required/v1.jpg",
+                    "thumbnail": "img/is-epc-required/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-missing",
+            "kind": "page",
+            "route": "epc-missing",
+            "title": "Your property is missing an EPC",
+            "stepConfig": "EpcMissingStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-missing/v1.jpg",
+                    "thumbnail": "img/epc-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/epc-missing/v2.jpg",
+                    "thumbnail": "img/epc-missing/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-not-found",
+            "kind": "page",
+            "route": "epc-not-found",
+            "title": "We could not find your EPC",
+            "stepConfig": "EpcNotFoundStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-not-found/v1.jpg",
+                    "thumbnail": "img/epc-not-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Certificate not found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-superseded",
+            "kind": "page",
+            "route": "epc-superseded",
+            "title": "There’s a newer EPC for this property",
+            "stepConfig": "EpcSuperseededStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-superseded/v1.jpg",
+                    "thumbnail": "img/epc-superseded/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Superseded certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-in-date-at-start-of-tenancy-check",
+            "kind": "page",
+            "route": "epc-in-date-at-start-of-tenancy-check",
+            "title": "Confirm when the current tenancy began",
+            "stepConfig": "EpcInDateAtStartOfTenancyCheckStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-in-date-at-start-of-tenancy-check/v1.jpg",
+                    "thumbnail": "img/epc-in-date-at-start-of-tenancy-check/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:epc-expired",
+            "kind": "page",
+            "route": "epc-expired",
+            "title": "This property’s EPC has expired",
+            "stepConfig": "EpcExpiredStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_epc-expired/v1.jpg",
+                    "thumbnail": "img/change_epc-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        },
+                        {
+                            "step": "Energy performance certificate (EPC)",
+                            "answer": "Change Was the EPC still in date when the current tenancy began?"
+                        },
+                        {
+                            "step": "Confirm when the current tenancy began",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "has-mees-exemption",
+            "kind": "page",
+            "route": "has-mees-exemption",
+            "title": "You need a registered energy efficiency exemption to let this property",
+            "stepConfig": "HasMeesExemptionStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-mees-exemption/v1.jpg",
+                    "thumbnail": "img/has-mees-exemption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "mees-exemption",
+            "kind": "page",
+            "route": "mees-exemption",
+            "title": "Which energy efficiency exemption did you register for this property?",
+            "stepConfig": "MeesExemptionStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/mees-exemption/v1.jpg",
+                    "thumbnail": "img/mees-exemption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:low-energy-rating",
+            "kind": "page",
+            "route": "low-energy-rating",
+            "title": "This property does not meet energy efficiency requirements for letting",
+            "stepConfig": "LowEnergyRatingStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_low-energy-rating/v1.jpg",
+                    "thumbnail": "img/change_low-energy-rating/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        },
+                        {
+                            "step": "Energy performance certificate (EPC)",
+                            "answer": "Change Do you have a registered energy efficiency exemption for this property?"
+                        },
+                        {
+                            "step": "You need a registered energy efficiency exemption to let this property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-exemption",
+            "kind": "page",
+            "route": "epc-exemption",
+            "title": "Why does this property not need an EPC to be let?",
+            "stepConfig": "EpcExemptionStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-exemption/v1.jpg",
+                    "thumbnail": "img/epc-exemption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have an EPC for this property?",
+                            "answer": "No (for example, the property does not require an EPC to be let), Continue"
+                        },
+                        {
+                            "step": "Is an EPC required to let this property?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "epc-expired",
+            "kind": "page",
+            "route": "epc-expired",
+            "title": "This property’s EPC has expired",
+            "stepConfig": "EpcExpiredStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/epc-expired/v1.jpg",
+                    "thumbnail": "img/epc-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Expired certificate found"
+                        },
+                        {
+                            "step": "Confirm when the current tenancy began",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/epc-expired/v2.jpg",
+                    "thumbnail": "img/epc-expired/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "EPC register search by address",
+                            "answer": "Expired EPC found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "low-energy-rating",
+            "kind": "page",
+            "route": "low-energy-rating",
+            "title": "This property does not meet energy efficiency requirements for letting",
+            "stepConfig": "LowEnergyRatingStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/low-energy-rating/v1.jpg",
+                    "thumbnail": "img/low-energy-rating/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by certificate number",
+                            "answer": "Low rated certificate found"
+                        },
+                        {
+                            "step": "You need a registered energy efficiency exemption to let this property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/low-energy-rating/v2.jpg",
+                    "thumbnail": "img/low-energy-rating/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "EPC register search by address",
+                            "answer": "Low rated EPC found"
+                        },
+                        {
+                            "step": "You need a registered energy efficiency exemption to let this property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-epc-details",
+            "kind": "page",
+            "route": "check-epc-details",
+            "title": "Check this EPC",
+            "stepConfig": "ConfirmEpcRetrievedByUprnStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-epc-details/v1.jpg",
+                    "thumbnail": "img/check-epc-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "EPC register search by address",
+                            "answer": "EPC found"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "kind": "decision",
+            "route": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "title": "Epc age check",
+            "stepConfig": "EpcAgeCheckStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "kind": "decision",
+            "route": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "title": "Epc energy rating check",
+            "stepConfig": "EpcEnergyRatingCheckStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "kind": "decision",
+            "route": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "title": "Property occupied check",
+            "stepConfig": "PropertyOccupiedCheckStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-epc-later",
+            "kind": "page",
+            "route": "provide-epc-later",
+            "title": "Provide epc later",
+            "stepConfig": "ProvideEpcLaterStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1#compliance-information",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1#compliance-information",
+            "title": "/landlord/property-details/1#compliance-information",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "kind": "decision",
+            "route": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "title": "Epc lookup by uprn",
+            "stepConfig": "EpcLookupByUprnStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "start",
+            "kind": "decision",
+            "route": "start",
+            "title": "Start epc",
+            "stepConfig": "StartEpcStepConfig",
+            "containers": [
+                "task:EpcDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "has-epc",
+            "to": "find-your-epc",
+            "label": "Yes, Continue",
+            "mode": "HAS_EPC",
+            "kind": "observed"
+        },
+        {
+            "from": "has-epc",
+            "to": "is-epc-required",
+            "label": "No (for example, the property does not require an EPC to be let), Continue",
+            "mode": "NO_EPC",
+            "kind": "observed"
+        },
+        {
+            "from": "find-your-epc",
+            "to": "confirm-epc-details",
+            "label": "Search",
+            "mode": "LATEST_EPC_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "find-your-epc",
+            "to": "epc-not-found",
+            "label": "Search",
+            "mode": "NOT_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "find-your-epc",
+            "to": "epc-superseded",
+            "label": "Search",
+            "mode": "SUPERSEDED_EPC_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "confirm-epc-details",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "to": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "label": "Epc 10 years or newer",
+            "mode": "EPC_10_YEARS_OR_NEWER",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "to": "check-epc-answers",
+            "label": "Epc meets energy requirements",
+            "mode": "EPC_MEETS_ENERGY_REQUIREMENTS",
+            "kind": "observed"
+        },
+        {
+            "from": "confirm-epc-details",
+            "to": "find-your-epc",
+            "label": "No, search again",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "/landlord/property-details/1",
+            "label": "Confirm and submit update",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "has-epc",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "has-epc",
+            "to": "change:is-epc-required",
+            "label": "No (for example, the property does not require an EPC to be let), Continue",
+            "mode": "NO_EPC",
+            "kind": "change"
+        },
+        {
+            "from": "change:is-epc-required",
+            "to": "change:epc-missing",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "change"
+        },
+        {
+            "from": "change:is-epc-required",
+            "to": "change:epc-exemption",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "confirm-epc-details",
+            "to": "check-epc-answers",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "change"
+        },
+        {
+            "from": "change:epc-missing",
+            "to": "check-epc-answers",
+            "label": "Continue anyway",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:epc-exemption",
+            "to": "check-epc-answers",
+            "label": "It has protected architectural or historical merit / It’s smaller than 50 metres squared and 3 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "is-epc-required",
+            "to": "epc-missing",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "is-epc-required",
+            "to": "epc-exemption",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "epc-missing",
+            "to": "check-epc-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "is-epc-required",
+            "label": "Change Is an EPC required to let this property?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "epc-not-found",
+            "to": "is-epc-required",
+            "label": "I do not have an EPC for this property",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "epc-not-found",
+            "to": "find-your-epc",
+            "label": "search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "epc-superseded",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "label": "Continue with most recent EPC",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "epc-superseded",
+            "to": "find-your-epc",
+            "label": "Search by certificate number again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "to": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "label": "Epc older than 10 years",
+            "mode": "EPC_OLDER_THAN_10_YEARS",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "to": "epc-in-date-at-start-of-tenancy-check",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "to": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "label": "Yes",
+            "mode": "IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "to": "epc-expired",
+            "label": "No",
+            "mode": "NOT_IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "epc-in-date-at-start-of-tenancy-check",
+            "label": "Change Was the EPC still in date when the current tenancy began?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "to": "check-epc-answers",
+            "label": "Yes",
+            "mode": "IN_DATE",
+            "kind": "change"
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "to": "change:epc-expired",
+            "label": "No",
+            "mode": "NOT_IN_DATE",
+            "kind": "change"
+        },
+        {
+            "from": "change:epc-expired",
+            "to": "check-epc-answers",
+            "label": "Continue anyway",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "to": "has-mees-exemption",
+            "label": "Epc low energy rating",
+            "mode": "EPC_LOW_ENERGY_RATING",
+            "kind": "observed"
+        },
+        {
+            "from": "has-mees-exemption",
+            "to": "mees-exemption",
+            "label": "Yes",
+            "mode": "HAS_EXEMPTION",
+            "kind": "observed"
+        },
+        {
+            "from": "has-mees-exemption",
+            "to": "low-energy-rating",
+            "label": "No",
+            "mode": "NO_EXEMPTION",
+            "kind": "observed"
+        },
+        {
+            "from": "mees-exemption",
+            "to": "check-epc-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "has-mees-exemption",
+            "label": "Change Do you have a registered energy efficiency exemption for this property?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "has-mees-exemption",
+            "to": "change:low-energy-rating",
+            "label": "No",
+            "mode": "NO_EXEMPTION",
+            "kind": "change"
+        },
+        {
+            "from": "mees-exemption",
+            "to": "check-epc-answers",
+            "label": "‘All relevant improvements made’ exemption / ‘High cost’ exemption and 4 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:low-energy-rating",
+            "to": "check-epc-answers",
+            "label": "Continue anyway",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "mees-exemption",
+            "label": "Change Registered exemption",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "epc-exemption",
+            "to": "check-epc-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "epc-exemption",
+            "label": "Change Why does this property not need an EPC?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "epc-expired",
+            "to": "check-epc-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "low-energy-rating",
+            "to": "check-epc-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-details",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "check-epc-details",
+            "to": "has-epc",
+            "label": "No (use a different EPC or the property does not need one)",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "to": "epc-expired",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "has-epc",
+            "to": "provide-epc-later",
+            "label": "Provide later",
+            "mode": "PROVIDE_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-epc-later",
+            "to": "check-epc-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        },
+        {
+            "from": "check-epc-answers",
+            "to": "/landlord/property-details/1#compliance-information",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "to": "check-epc-details",
+            "label": "Epc found",
+            "mode": "EPC_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "to": "has-epc",
+            "label": "Not found",
+            "mode": "NOT_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "label": "",
+            "mode": null,
+            "kind": "structural"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "writers": [
+                "start"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "writers": [
+                "check-epc-details",
+                "confirm-epc-details",
+                "epc-superseded"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "writers": [
+                "check-epc-details",
+                "confirm-epc-details",
+                "epc-superseded"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "check-epc-details",
+            "mode": "YES",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-epc-details",
+            "mode": "NO",
+            "to": "has-epc",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-epc",
+            "mode": "HAS_EPC",
+            "to": "find-your-epc",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-epc",
+            "mode": "NO_EPC",
+            "to": "is-epc-required",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-epc",
+            "mode": "PROVIDE_LATER",
+            "to": "provide-epc-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "find-your-epc",
+            "mode": "LATEST_EPC_FOUND",
+            "to": "confirm-epc-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "find-your-epc",
+            "mode": "SUPERSEDED_EPC_FOUND",
+            "to": "epc-superseded",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "find-your-epc",
+            "mode": "NOT_FOUND",
+            "to": "epc-not-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm-epc-details",
+            "mode": "YES",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm-epc-details",
+            "mode": "NO",
+            "to": "find-your-epc",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-superseded",
+            "mode": "COMPLETE",
+            "to": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-not-found",
+            "mode": "COMPLETE",
+            "to": "is-epc-required",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "mode": "IN_DATE",
+            "to": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-in-date-at-start-of-tenancy-check",
+            "mode": "NOT_IN_DATE",
+            "to": "epc-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-expired",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "is-epc-required",
+            "mode": "YES",
+            "to": "epc-missing",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "is-epc-required",
+            "mode": "NO",
+            "to": "epc-exemption",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-exemption",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "epc-missing",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-mees-exemption",
+            "mode": "HAS_EXEMPTION",
+            "to": "mees-exemption",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-mees-exemption",
+            "mode": "NO_EXEMPTION",
+            "to": "low-energy-rating",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "mees-exemption",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "low-energy-rating",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-epc-later",
+            "mode": "COMPLETE",
+            "to": "check-epc-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "check-epc-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1#compliance-information",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "mode": "EPC_FOUND",
+            "to": "check-epc-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcLookupByUprnStep@task:EpcDetailsTask",
+            "mode": "NOT_FOUND",
+            "to": "has-epc",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "mode": "EPC_10_YEARS_OR_NEWER",
+            "to": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcAgeCheckStep@task:EpcDetailsTask",
+            "mode": "EPC_OLDER_THAN_10_YEARS",
+            "to": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "mode": "YES",
+            "to": "epc-in-date-at-start-of-tenancy-check",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:PropertyOccupiedCheckStep@task:EpcDetailsTask",
+            "mode": "NO",
+            "to": "epc-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "mode": "EPC_MEETS_ENERGY_REQUIREMENTS",
+            "to": "check-epc-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:EpcEnergyRatingCheckStep@task:EpcDetailsTask",
+            "mode": "EPC_LOW_ENERGY_RATING",
+            "to": "has-mees-exemption",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "start",
+            "label": "Change"
+        },
+        {
+            "node": "check-epc-details",
+            "label": "Change"
+        },
+        {
+            "node": "has-epc",
+            "label": "Change"
+        }
+    ]
+}

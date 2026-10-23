@@ -1,0 +1,124 @@
+{
+    "journey": {
+        "name": "updateLandlordName",
+        "title": "Update your name",
+        "basePath": "/landlord/landlord-details/update-name",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:37:58.445240700Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "name",
+            "kind": "page",
+            "route": "name",
+            "title": "Update your full name",
+            "stepConfig": "NameStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/name/v1.jpg",
+                    "thumbnail": "img/name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Jane Smith",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:CheckLandlordIdentityVerifiedStep",
+            "kind": "decision",
+            "route": "internal:CheckLandlordIdentityVerifiedStep",
+            "title": "Check landlord identity verified",
+            "stepConfig": "CheckLandlordIdentityVerifiedStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "name",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "to": "name",
+            "label": "Verified / Not verified",
+            "mode": "VERIFIED",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "name",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "mode": "VERIFIED",
+            "to": "name",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "mode": "NOT_VERIFIED",
+            "to": "name",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "internal:CheckLandlordIdentityVerifiedStep",
+            "label": "Change Name"
+        }
+    ]
+}

@@ -1,0 +1,172 @@
+{
+    "journey": {
+        "name": "changeOrgTeamMemberAccessLevel",
+        "title": "Change a team member's access level",
+        "basePath": "/landlord/team-members/902/change-access-level",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:33.205948300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": true
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "access-level",
+            "kind": "page",
+            "route": "access-level",
+            "title": "Change access level",
+            "stepConfig": "AccessLevelStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/access-level/v1.jpg",
+                    "thumbnail": "img/access-level/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/team-members",
+            "kind": "terminal",
+            "route": "/landlord/team-members",
+            "title": "Team members",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_team-members/v1.jpg",
+                    "thumbnail": "img/landlord_team-members/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Change access level",
+                            "answer": "Administrator"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_team-members/v2.jpg",
+                    "thumbnail": "img/landlord_team-members/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Change access level",
+                            "answer": "Editor"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_team-members/v3.jpg",
+                    "thumbnail": "img/landlord_team-members/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Change access level",
+                            "answer": "Remove access"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm-removal",
+            "kind": "page",
+            "route": "confirm-removal",
+            "title": "Confirm removal - continuing will remove this user from the organisation (TODO PDJB-1764: page content)",
+            "stepConfig": "RemoveOrgUserConfirmationStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm-removal/v1.jpg",
+                    "thumbnail": "img/confirm-removal/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Change access level",
+                            "answer": "Remove access"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "access-level",
+            "to": "/landlord/team-members",
+            "label": "Administrator / Editor",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "access-level",
+            "to": "confirm-removal",
+            "label": "Remove access",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "confirm-removal",
+            "to": "/landlord/team-members",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "access-level",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "otherOrganisationalLandlordUserId",
+                "step:access-level"
+            ]
+        },
+        {
+            "from": "confirm-removal",
+            "mode": "COMPLETE",
+            "to": "/landlord/team-members",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "access-level",
+            "label": "Change Editor 1"
+        }
+    ]
+}

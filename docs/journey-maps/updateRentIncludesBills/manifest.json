@@ -1,0 +1,239 @@
+{
+    "journey": {
+        "name": "updateRentIncludesBills",
+        "title": "Update whether rent includes bills",
+        "basePath": "/landlord/property-details/1/update-rent-includes-bills",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:37:10.029076500Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:RentIncludesBillsTask",
+            "kind": "task",
+            "label": "Rent includes bills",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "rent-includes-bills",
+            "kind": "page",
+            "route": "rent-includes-bills",
+            "title": "Update whether the rent includes bills",
+            "stepConfig": "RentIncludesBillsStepConfig",
+            "containers": [
+                "task:RentIncludesBillsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-includes-bills/v1.jpg",
+                    "thumbnail": "img/rent-includes-bills/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "bills-included",
+            "kind": "page",
+            "route": "bills-included",
+            "title": "Update which of these you include in the rent",
+            "stepConfig": "BillsIncludedStepConfig",
+            "containers": [
+                "task:RentIncludesBillsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/bills-included/v1.jpg",
+                    "thumbnail": "img/bills-included/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-includes-bills-check-your-answers",
+            "kind": "page",
+            "route": "rent-includes-bills-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateRentIncludesBillsCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-includes-bills-check-your-answers/v1.jpg",
+                    "thumbnail": "img/rent-includes-bills-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/rent-includes-bills-check-your-answers/v2.jpg",
+                    "thumbnail": "img/rent-includes-bills-check-your-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether the rent includes bills",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether the rent includes bills",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "rent-includes-bills",
+            "to": "bills-included",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-includes-bills",
+            "to": "rent-includes-bills-check-your-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "bills-included",
+            "to": "rent-includes-bills-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-includes-bills-check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "rent-includes-bills-check-your-answers",
+            "to": "rent-includes-bills",
+            "label": "Change Rent includes bills",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "rent-includes-bills",
+            "to": "rent-includes-bills-check-your-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "bills-included",
+            "to": "rent-includes-bills-check-your-answers",
+            "label": "Gas / Electricity and 10 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "rent-includes-bills-check-your-answers",
+            "to": "bills-included",
+            "label": "Change Which bills are included",
+            "mode": null,
+            "kind": "change"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "rent-includes-bills",
+            "mode": "YES",
+            "to": "bills-included",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-includes-bills",
+            "mode": "NO",
+            "to": "rent-includes-bills-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "bills-included",
+            "mode": "COMPLETE",
+            "to": "rent-includes-bills-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-includes-bills-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "rent-includes-bills",
+            "label": "Change Rent includes bills"
+        }
+    ]
+}

@@ -1,0 +1,92 @@
+{
+    "journey": {
+        "name": "delegateToLettingAgent",
+        "title": "Delegate a property to a letting agent",
+        "basePath": "/landlord/delegate-to-letting-agent/4",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:22.316264100Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "allow-letting-agent",
+            "kind": "page",
+            "route": "allow-letting-agent",
+            "title": "Allow your letting agent or property manager to provide details",
+            "stepConfig": "AllowLettingAgentStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/allow-letting-agent/v1.jpg",
+                    "thumbnail": "img/allow-letting-agent/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/delegate-to-letting-agent/4/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/delegate-to-letting-agent/4/confirmation",
+            "title": "Letting agent or property manager can make updates",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_delegate-to-letting-agent_4_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_delegate-to-letting-agent_4_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "allow-letting-agent",
+            "to": "/landlord/delegate-to-letting-agent/4/confirmation",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "allow-letting-agent",
+            "mode": "COMPLETE",
+            "to": "/landlord/delegate-to-letting-agent/4/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "allow-letting-agent",
+            "label": "Allow your letting agent or property manager to update details"
+        }
+    ]
+}

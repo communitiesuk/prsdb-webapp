@@ -1,0 +1,595 @@
+{
+    "journey": {
+        "name": "updateLeadTrustee",
+        "title": "Update the lead trustee",
+        "basePath": "/landlord/landlord-details/update-lead-trustee",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:39:44.933871800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:LeadTrusteeTask",
+            "kind": "task",
+            "label": "Lead trustee",
+            "parent": null
+        },
+        {
+            "id": "task:TrusteeAddressTask/lead-trustee-address",
+            "kind": "task",
+            "label": "Trustee address",
+            "parent": "task:LeadTrusteeTask"
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "lead-trustee-name",
+            "kind": "page",
+            "route": "lead-trustee-name",
+            "title": "What is the lead trustee’s full name?",
+            "stepConfig": "LeadTrusteeNameStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-name/v1.jpg",
+                    "thumbnail": "img/lead-trustee-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-dob",
+            "kind": "page",
+            "route": "lead-trustee-dob",
+            "title": "What is the lead trustee’s date of birth?",
+            "stepConfig": "LeadTrusteeDobStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-dob/v1.jpg",
+                    "thumbnail": "img/lead-trustee-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-email",
+            "kind": "page",
+            "route": "lead-trustee-email",
+            "title": "What is the lead trustee’s email address?",
+            "stepConfig": "LeadTrusteeEmailStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-email/v1.jpg",
+                    "thumbnail": "img/lead-trustee-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-phone",
+            "kind": "page",
+            "route": "lead-trustee-phone",
+            "title": "What is the lead trustee’s phone number?",
+            "stepConfig": "LeadTrusteePhoneStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-phone/v1.jpg",
+                    "thumbnail": "img/lead-trustee-phone/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/lookup-address",
+            "kind": "page",
+            "route": "lead-trustee-address/lookup-address",
+            "title": "What is the lead trustee’s contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/select-address",
+            "kind": "page",
+            "route": "lead-trustee-address/select-address",
+            "title": "Select your address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_select-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-check-your-answers",
+            "kind": "page",
+            "route": "lead-trustee-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateLeadTrusteeCyaStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-check-your-answers/v1.jpg",
+                    "thumbnail": "img/lead-trustee-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:lead-trustee-address/manual-address",
+            "kind": "page",
+            "route": "lead-trustee-address/manual-address",
+            "title": "What is the lead trustee’s contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_lead-trustee-address_manual-address/v1.jpg",
+                    "thumbnail": "img/change_lead-trustee-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Address"
+                        },
+                        {
+                            "step": "Select your address",
+                            "answer": "I want to manually enter my address"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/no-address-found",
+            "kind": "page",
+            "route": "lead-trustee-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and Slate House",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What is the lead trustee’s contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/manual-address",
+            "kind": "page",
+            "route": "lead-trustee-address/manual-address",
+            "title": "What is the lead trustee’s contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_manual-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What is the lead trustee’s contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details#organisation-contacts",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details#organisation-contacts",
+            "title": "/landlord/landlord-details#organisation-contacts",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "lead-trustee-name",
+            "to": "lead-trustee-dob",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-dob",
+            "to": "lead-trustee-email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-email",
+            "to": "lead-trustee-phone",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-phone",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "to": "lead-trustee-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "to": "lead-trustee-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Slate House, PRSDB Square, AA3 1AB / Slate House, PRSDB Road, AA3 1AB and 3 more",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "/landlord/landlord-details",
+            "label": "Confirm and submit update",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "lead-trustee-name",
+            "label": "Change Name",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-name",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "lead-trustee-dob",
+            "label": "Change Date of birth",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-dob",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "lead-trustee-email",
+            "label": "Change Email",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-email",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "lead-trustee-phone",
+            "label": "Change Phone number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-phone",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "Change Address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Slate House, PRSDB Square, AA3 1AB / Slate House, PRSDB Road, AA3 1AB and 3 more",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "change:lead-trustee-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "change"
+        },
+        {
+            "from": "change:lead-trustee-address/manual-address",
+            "to": "lead-trustee-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "to": "lead-trustee-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/manual-address",
+            "to": "lead-trustee-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "to": "/landlord/landlord-details#organisation-contacts",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "lead-trustee-name",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-dob",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-dob",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-email",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-phone",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-phone",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "lead-trustee-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "lead-trustee-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "lead-trustee-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "lead-trustee-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "lead-trustee-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details#organisation-contacts",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "lead-trustee-name",
+            "label": "Change"
+        }
+    ]
+}

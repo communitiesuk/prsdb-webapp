@@ -1,0 +1,549 @@
+{
+    "journey": {
+        "name": "updateOrganisationCharity",
+        "title": "Update whether the organisation is a registered charity",
+        "basePath": "/landlord/landlord-details/update-organisation-charity",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:38:47.133712Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:OrgCharityTask",
+            "kind": "task",
+            "label": "Org charity",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "organisation-charity",
+            "kind": "page",
+            "route": "organisation-charity",
+            "title": "Is your organisation a registered charity?",
+            "stepConfig": "OrgIsRegisteredCharityStepConfig",
+            "containers": [
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity/v1.jpg",
+                    "thumbnail": "img/organisation-charity/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-registered-with",
+            "kind": "page",
+            "route": "organisation-charity-registered-with",
+            "title": "Who is your charity registered with?",
+            "stepConfig": "OrgCharityRegisteredWithStepConfig",
+            "containers": [
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-registered-with/v1.jpg",
+                    "thumbnail": "img/organisation-charity-registered-with/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number",
+            "kind": "page",
+            "route": "organisation-charity-number",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberEnglandAndWalesStepConfig",
+            "containers": [
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-check-your-answers",
+            "kind": "page",
+            "route": "organisation-charity-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateOrganisationCharityCyaStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-check-your-answers/v1.jpg",
+                    "thumbnail": "img/organisation-charity-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/organisation-charity-check-your-answers/v2.jpg",
+                    "thumbnail": "img/organisation-charity-check-your-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation a registered charity?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/organisation-charity-check-your-answers/v3.jpg",
+                    "thumbnail": "img/organisation-charity-check-your-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "None of these"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_landlord-details/v2.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Is your organisation a registered charity?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_landlord-details/v3.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "None of these"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-charity-number-northern-ireland",
+            "kind": "page",
+            "route": "organisation-charity-number-northern-ireland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberNorthernIrelandStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-charity-number-northern-ireland/v1.jpg",
+                    "thumbnail": "img/change_organisation-charity-number-northern-ireland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered charity"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Charities Commission of Northern Ireland"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-charity-number-scotland",
+            "kind": "page",
+            "route": "organisation-charity-number-scotland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberScotlandStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-charity-number-scotland/v1.jpg",
+                    "thumbnail": "img/change_organisation-charity-number-scotland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered charity"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Scottish Charity Regulator"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number-northern-ireland",
+            "kind": "page",
+            "route": "organisation-charity-number-northern-ireland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberNorthernIrelandStepConfig",
+            "containers": [
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number-northern-ireland/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number-northern-ireland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Charities Commission of Northern Ireland"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number-scotland",
+            "kind": "page",
+            "route": "organisation-charity-number-scotland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberScotlandStepConfig",
+            "containers": [
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number-scotland/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number-scotland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Scottish Charity Regulator"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "organisation-charity",
+            "to": "organisation-charity-registered-with",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity",
+            "to": "organisation-charity-check-your-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number",
+            "label": "Charities Commission of England and Wales",
+            "mode": "ENGLAND_AND_WALES",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number-northern-ireland",
+            "label": "Charities Commission of Northern Ireland",
+            "mode": "NORTHERN_IRELAND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number-scotland",
+            "label": "Scottish Charity Regulator",
+            "mode": "SCOTLAND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-check-your-answers",
+            "label": "None of these",
+            "mode": "NONE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-number",
+            "to": "organisation-charity-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "organisation-charity",
+            "label": "Change Registered charity",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity",
+            "to": "organisation-charity-check-your-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "change:organisation-charity-number-northern-ireland",
+            "label": "Charities Commission of Northern Ireland",
+            "mode": "NORTHERN_IRELAND",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "change:organisation-charity-number-scotland",
+            "label": "Scottish Charity Regulator",
+            "mode": "SCOTLAND",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-check-your-answers",
+            "label": "None of these",
+            "mode": "NONE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number",
+            "to": "organisation-charity-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-charity-number-northern-ireland",
+            "to": "organisation-charity-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-charity-number-scotland",
+            "to": "organisation-charity-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "organisation-charity-registered-with",
+            "label": "Change Charity commission",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "organisation-charity-number",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number-northern-ireland",
+            "to": "organisation-charity-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "organisation-charity-number-northern-ireland",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number-scotland",
+            "to": "organisation-charity-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "to": "organisation-charity-number-scotland",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "organisation-charity",
+            "mode": "YES",
+            "to": "organisation-charity-registered-with",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity",
+            "mode": "NO",
+            "to": "organisation-charity-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "ENGLAND_AND_WALES",
+            "to": "organisation-charity-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "NORTHERN_IRELAND",
+            "to": "organisation-charity-number-northern-ireland",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "SCOTLAND",
+            "to": "organisation-charity-number-scotland",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "NONE",
+            "to": "organisation-charity-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number",
+            "mode": "COMPLETE",
+            "to": "organisation-charity-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number-northern-ireland",
+            "mode": "COMPLETE",
+            "to": "organisation-charity-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number-scotland",
+            "mode": "COMPLETE",
+            "to": "organisation-charity-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "organisation-charity",
+            "label": "Change Registered charity"
+        }
+    ]
+}

@@ -1,0 +1,296 @@
+{
+    "journey": {
+        "name": "updateRentFrequencyAndAmount",
+        "title": "Update the rent frequency and amount",
+        "basePath": "/landlord/property-details/1/update-rent-frequency-and-amount",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:36:57.440805300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:RentFrequencyAndAmountTask",
+            "kind": "task",
+            "label": "Rent frequency and amount",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "rent-frequency",
+            "kind": "page",
+            "route": "rent-frequency",
+            "title": "Update when you charge rent",
+            "stepConfig": "RentFrequencyStepConfig",
+            "containers": [
+                "task:RentFrequencyAndAmountTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-frequency/v1.jpg",
+                    "thumbnail": "img/rent-frequency/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-amount",
+            "kind": "page",
+            "route": "rent-amount",
+            "title": "Update your monthly rent",
+            "stepConfig": "RentAmountStepConfig",
+            "containers": [
+                "task:RentFrequencyAndAmountTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-amount/v1.jpg",
+                    "thumbnail": "img/rent-amount/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/rent-amount/v2.jpg",
+                    "thumbnail": "img/rent-amount/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Other"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/rent-amount/v3.jpg",
+                    "thumbnail": "img/rent-amount/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "4 weekly"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/rent-amount/v4.jpg",
+                    "thumbnail": "img/rent-amount/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Weekly"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-frequency-and-amount-check-your-answers",
+            "kind": "page",
+            "route": "rent-frequency-and-amount-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateRentFrequencyAndAmountCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-frequency-and-amount-check-your-answers/v1.jpg",
+                    "thumbnail": "img/rent-frequency-and-amount-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:rent-amount",
+            "kind": "page",
+            "route": "rent-amount",
+            "title": "Update your 4-weekly rent",
+            "stepConfig": "RentAmountStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_rent-amount/v1.jpg",
+                    "thumbnail": "img/change_rent-amount/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "4 weekly"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/change_rent-amount/v2.jpg",
+                    "thumbnail": "img/change_rent-amount/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Weekly"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "rent-frequency",
+            "to": "rent-amount",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-amount",
+            "to": "rent-frequency-and-amount-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-frequency-and-amount-check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "rent-frequency-and-amount-check-your-answers",
+            "to": "rent-frequency",
+            "label": "Change When rent is paid",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "rent-frequency",
+            "to": "change:rent-amount",
+            "label": "4 weekly / Weekly",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "rent-amount",
+            "to": "rent-frequency-and-amount-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "rent-frequency-and-amount-check-your-answers",
+            "to": "rent-amount",
+            "label": "Change Rent amount",
+            "mode": null,
+            "kind": "change"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "rent-frequency",
+            "mode": "COMPLETE",
+            "to": "rent-amount",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-amount",
+            "mode": "COMPLETE",
+            "to": "rent-frequency-and-amount-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-frequency-and-amount-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "rent-frequency",
+            "label": "Change When rent is paid"
+        }
+    ]
+}

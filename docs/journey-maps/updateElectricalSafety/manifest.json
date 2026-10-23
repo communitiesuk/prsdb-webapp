@@ -1,0 +1,957 @@
+{
+    "journey": {
+        "name": "updateElectricalSafety",
+        "title": "Update electrical safety",
+        "basePath": "/landlord/property-details/1/update-electrical-safety",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:34:19.894367100Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:ElectricalSafetyDetailsTask",
+            "kind": "task",
+            "label": "Electrical safety details",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "has-electrical-safety",
+            "kind": "page",
+            "route": "has-electrical-safety",
+            "title": "Which electrical safety certificate do you have for this property?",
+            "stepConfig": "HasElectricalCertStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-electrical-safety/v1.jpg",
+                    "thumbnail": "img/has-electrical-safety/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "electrical-safety-certificate-expiry-date",
+            "kind": "page",
+            "route": "electrical-safety-certificate-expiry-date",
+            "title": "What’s the expiry date on the Electrical Installation Certificate?",
+            "stepConfig": "ElectricalCertExpiryDateStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/electrical-safety-certificate-expiry-date/v1.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-expiry-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/electrical-safety-certificate-expiry-date/v2.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-expiry-date/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "electrical-safety-certificate-file-upload",
+            "kind": "page",
+            "route": "electrical-safety-certificate-file-upload",
+            "title": "Upload the Electrical Installation Certificate (EIC)",
+            "stepConfig": "UploadElectricalCertStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/electrical-safety-certificate-file-upload/v1.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-file-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/electrical-safety-certificate-file-upload/v2.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-file-upload/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-electrical-safety-certificate-uploads",
+            "kind": "page",
+            "route": "check-electrical-safety-certificate-uploads",
+            "title": "You’ve uploaded 1 file",
+            "stepConfig": "CheckElectricalCertUploadsStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-electrical-safety-certificate-uploads/v1.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-electrical-safety-certificate-uploads/v2.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Are you sure you want to remove validFile.png?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-electrical-safety-certificate-uploads/v3.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-electrical-safety-certificate-uploads/v4.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-electrical-safety-certificate-uploads/v5.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/check-electrical-safety-certificate-uploads/v6.jpg",
+                    "thumbnail": "img/check-electrical-safety-certificate-uploads/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-electrical-safety-answers",
+            "kind": "page",
+            "route": "check-electrical-safety-answers",
+            "title": "Electrical safety certificate",
+            "stepConfig": "UpdateCheckElectricalSafetyAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-electrical-safety-answers/v1.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-electrical-safety-answers/v2.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-electrical-safety-answers/v3.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_property-details_1/v3.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the expiry date on the Electrical Installation Certificate?",
+                            "answer": "Date: 23 September 2026"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_property-details_1/v4.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/landlord_property-details_1/v5.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:electrical-safety-certificate-expiry-date",
+            "kind": "page",
+            "route": "electrical-safety-certificate-expiry-date",
+            "title": "What’s the expiry date on the Electrical Installation Condition Report?",
+            "stepConfig": "ElectricalCertExpiryDateStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_electrical-safety-certificate-expiry-date/v1.jpg",
+                    "thumbnail": "img/change_electrical-safety-certificate-expiry-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:electrical-safety-certificate-missing",
+            "kind": "page",
+            "route": "electrical-safety-certificate-missing",
+            "title": "You must get a valid electrical safety certificate for this property",
+            "stepConfig": "ElectricalCertMissingStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_electrical-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/change_electrical-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:remove-electrical-safety-certificate-upload",
+            "kind": "page",
+            "route": "remove-electrical-safety-certificate-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveElectricalCertUploadStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_remove-electrical-safety-certificate-upload/v1.jpg",
+                    "thumbnail": "img/change_remove-electrical-safety-certificate-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:check-electrical-safety-certificate-uploads",
+            "kind": "page",
+            "route": "check-electrical-safety-certificate-uploads",
+            "title": "You’ve uploaded 2 files",
+            "stepConfig": "CheckElectricalCertUploadsStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_check-electrical-safety-certificate-uploads/v1.jpg",
+                    "thumbnail": "img/change_check-electrical-safety-certificate-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "electrical-safety-certificate-missing",
+            "kind": "page",
+            "route": "electrical-safety-certificate-missing",
+            "title": "You must get a valid electrical safety certificate for this property",
+            "stepConfig": "ElectricalCertMissingStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/electrical-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/electrical-safety-certificate-missing/v2.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-missing/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "electrical-safety-certificate-expired",
+            "kind": "page",
+            "route": "electrical-safety-certificate-expired",
+            "title": "This electrical safety certificate has expired",
+            "stepConfig": "ElectricalCertExpiredStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/electrical-safety-certificate-expired/v1.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the expiry date on the Electrical Installation Certificate?",
+                            "answer": "Date: 23 September 2026"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-electrical-safety-certificate-upload",
+            "kind": "page",
+            "route": "remove-electrical-safety-certificate-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveElectricalCertUploadStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/remove-electrical-safety-certificate-upload/v1.jpg",
+                    "thumbnail": "img/remove-electrical-safety-certificate-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "kind": "decision",
+            "route": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "title": "Has any in collection",
+            "stepConfig": "HasAnyInCollectionStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-electrical-safety-certificate-later",
+            "kind": "page",
+            "route": "provide-electrical-safety-certificate-later",
+            "title": "Provide electrical cert later",
+            "stepConfig": "ProvideElectricalCertLaterStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1#compliance-information",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1#compliance-information",
+            "title": "/landlord/property-details/1#compliance-information",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "has-electrical-safety",
+            "to": "electrical-safety-certificate-expiry-date",
+            "label": "Electrical Installation Certificate (EIC), Continue / Electrical Installation Condition Report (EICR), Continue",
+            "mode": "HAS_EIC",
+            "kind": "observed"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "electrical-safety-certificate-missing",
+            "label": "None of the above, Continue",
+            "mode": "NO_CERTIFICATE",
+            "kind": "observed"
+        },
+        {
+            "from": "electrical-safety-certificate-expiry-date",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "label": "Continue",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "to": "electrical-safety-certificate-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "electrical-safety-certificate-expiry-date",
+            "to": "electrical-safety-certificate-expired",
+            "label": "Date: 23 September 2026",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "kind": "observed"
+        },
+        {
+            "from": "electrical-safety-certificate-file-upload",
+            "to": "check-electrical-safety-certificate-uploads",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "to": "electrical-safety-certificate-file-upload",
+            "label": "Upload another file",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "to": "remove-electrical-safety-certificate-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "/landlord/property-details/1",
+            "label": "Confirm and submit update",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "has-electrical-safety",
+            "label": "Change Which electrical safety certificate do you have for this property?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "change:electrical-safety-certificate-expiry-date",
+            "label": "Electrical Installation Condition Report (EICR), Continue",
+            "mode": "HAS_EICR",
+            "kind": "change"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "change:electrical-safety-certificate-missing",
+            "label": "None of the above, Continue",
+            "mode": "NO_CERTIFICATE",
+            "kind": "change"
+        },
+        {
+            "from": "change:electrical-safety-certificate-missing",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue without a valid electrical safety certificate",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "to": "change:remove-electrical-safety-certificate-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "electrical-safety-certificate-file-upload",
+            "to": "change:check-electrical-safety-certificate-uploads",
+            "label": "Upload a file",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:remove-electrical-safety-certificate-upload",
+            "to": "electrical-safety-certificate-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "change:remove-electrical-safety-certificate-upload",
+            "to": "check-electrical-safety-certificate-uploads",
+            "label": "No / Cancel",
+            "mode": "SOME_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "electrical-safety-certificate-expiry-date",
+            "label": "Change Expiry date",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "check-electrical-safety-certificate-uploads",
+            "label": "Change Your certificate",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "electrical-safety-certificate-missing",
+            "to": "check-electrical-safety-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "electrical-safety-certificate-expired",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue without a valid electrical safety certificate",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "electrical-safety-certificate-expired",
+            "to": "electrical-safety-certificate-expiry-date",
+            "label": "Change the expiry date",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-electrical-safety-certificate-upload",
+            "to": "electrical-safety-certificate-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-electrical-safety-certificate-upload",
+            "to": "check-electrical-safety-certificate-uploads",
+            "label": "No / Cancel / Yes",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "provide-electrical-safety-certificate-later",
+            "label": "Provide this later",
+            "mode": "PROVIDE_THIS_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-electrical-safety-certificate-later",
+            "to": "check-electrical-safety-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "/landlord/property-details/1#compliance-information",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "to": "check-electrical-safety-certificate-uploads",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-electrical-safety-certificate-upload",
+            "writers": [
+                "electrical-safety-certificate-file-upload"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "has-electrical-safety",
+            "mode": "HAS_EIC",
+            "to": "electrical-safety-certificate-expiry-date",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "HAS_EICR",
+            "to": "electrical-safety-certificate-expiry-date",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "NO_CERTIFICATE",
+            "to": "electrical-safety-certificate-missing",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "PROVIDE_THIS_LATER",
+            "to": "provide-electrical-safety-certificate-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "to": "electrical-safety-certificate-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-file-upload",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-certificate-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-electrical-safety-certificate-uploads",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-electrical-safety-certificate-upload",
+            "mode": "NO_MEMBERS",
+            "to": "electrical-safety-certificate-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-electrical-safety-certificate-upload",
+            "mode": "SOME_MEMBERS",
+            "to": "check-electrical-safety-certificate-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-expired",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-missing",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-electrical-safety-certificate-later",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1#compliance-information",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "mode": "NO_MEMBERS",
+            "to": "electrical-safety-certificate-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "mode": "SOME_MEMBERS",
+            "to": "check-electrical-safety-certificate-uploads",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "has-electrical-safety",
+            "label": "Change"
+        }
+    ]
+}

@@ -1,0 +1,256 @@
+{
+    "journey": {
+        "name": "localCouncilUserRegistration",
+        "title": "Register as a local council user",
+        "basePath": "/local-council/register-local-council-user",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:45.589621900Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "privacy-notice",
+            "kind": "page",
+            "route": "privacy-notice",
+            "title": "Read and agree to the privacy notice",
+            "stepConfig": "PrivacyNoticeStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/privacy-notice/v1.jpg",
+                    "thumbnail": "img/privacy-notice/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "landing-page",
+            "kind": "page",
+            "route": "landing-page",
+            "title": "Registering as a local council user",
+            "stepConfig": "LandingPageStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landing-page/v1.jpg",
+                    "thumbnail": "img/landing-page/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "name",
+            "kind": "page",
+            "route": "name",
+            "title": "What is your full name?",
+            "stepConfig": "NameStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/name/v1.jpg",
+                    "thumbnail": "img/name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "email",
+            "kind": "page",
+            "route": "email",
+            "title": "What is your work email address?",
+            "stepConfig": "EmailStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/email/v1.jpg",
+                    "thumbnail": "img/email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-answers",
+            "kind": "page",
+            "route": "check-answers",
+            "title": "Check your answers",
+            "stepConfig": "LocalCouncilUserCyaStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-answers/v1.jpg",
+                    "thumbnail": "img/check-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/local-council/register-local-council-user/confirmation",
+            "kind": "terminal",
+            "route": "/local-council/register-local-council-user/confirmation",
+            "title": "You’ve registered as a BRISTOL CITY COUNCIL user",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/local-council_register-local-council-user_confirmation/v1.jpg",
+                    "thumbnail": "img/local-council_register-local-council-user_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "privacy-notice",
+            "to": "landing-page",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "landing-page",
+            "to": "name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "name",
+            "to": "email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "email",
+            "to": "check-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "/local-council/register-local-council-user/confirmation",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "name",
+            "label": "Change Name",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "name",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "email",
+            "label": "Change Email address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "email",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "privacy-notice",
+            "mode": "COMPLETE",
+            "to": "landing-page",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "landing-page",
+            "mode": "COMPLETE",
+            "to": "name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "name",
+            "mode": "COMPLETE",
+            "to": "email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "email",
+            "mode": "COMPLETE",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-answers",
+            "mode": "COMPLETE",
+            "to": "/local-council/register-local-council-user/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "privacy-notice",
+            "label": "Link in the invitation email"
+        }
+    ]
+}

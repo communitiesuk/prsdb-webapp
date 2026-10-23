@@ -1,0 +1,165 @@
+{
+    "journey": {
+        "name": "switchToIndividual",
+        "title": "Register as the only landlord of a property",
+        "basePath": "/landlord/property-details/13/switch-to-individual",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:28.930976200Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "check-invitations",
+            "kind": "page",
+            "route": "check-invitations",
+            "title": "Check these actions before confirming you’re the only landlord",
+            "stepConfig": "CheckPendingInvitationsStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-invitations/v1.jpg",
+                    "thumbnail": "img/check-invitations/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm",
+            "kind": "page",
+            "route": "confirm",
+            "title": "Confirm that you’re the only landlord for this property",
+            "stepConfig": "ConfirmOnlyLandlordStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm/v1.jpg",
+                    "thumbnail": "img/confirm/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/13/switch-to-individual/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/property-details/13/switch-to-individual/confirmation",
+            "title": "Registered as the only landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_13_switch-to-individual_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_13_switch-to-individual_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "start",
+            "kind": "decision",
+            "route": "start",
+            "title": "Has pending invitations",
+            "stepConfig": "HasPendingInvitationsStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "check-invitations",
+            "to": "confirm",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "confirm",
+            "to": "/landlord/property-details/13/switch-to-individual/confirmation",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "check-invitations",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "confirm",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "start",
+            "mode": "YES",
+            "to": "check-invitations",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "start",
+            "mode": "NO",
+            "to": "confirm",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-invitations",
+            "mode": "COMPLETE",
+            "to": "confirm",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/13/switch-to-individual/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "start",
+            "label": "confirm that you're the only landlord"
+        }
+    ]
+}

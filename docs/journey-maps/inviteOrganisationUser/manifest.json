@@ -1,0 +1,97 @@
+{
+    "journey": {
+        "name": "inviteOrganisationUser",
+        "title": "Invite a team member",
+        "basePath": "/landlord/team-members/invite",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:30.674639900Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": true
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "invite-team-member",
+            "kind": "page",
+            "route": "invite-team-member",
+            "title": "Invite a team member",
+            "stepConfig": "InviteOrganisationalLandlordUserStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/invite-team-member/v1.jpg",
+                    "thumbnail": "img/invite-team-member/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/team-members",
+            "kind": "terminal",
+            "route": "/landlord/team-members",
+            "title": "Team members",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_team-members/v1.jpg",
+                    "thumbnail": "img/landlord_team-members/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Invite a team member",
+                            "answer": "Administrator"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "invite-team-member",
+            "to": "/landlord/team-members",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "invite-team-member",
+            "mode": "COMPLETE",
+            "to": "/landlord/team-members",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "invite-team-member",
+            "label": "Invite a team member"
+        }
+    ]
+}

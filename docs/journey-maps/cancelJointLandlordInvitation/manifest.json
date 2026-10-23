@@ -1,0 +1,156 @@
+{
+    "journey": {
+        "name": "cancelJointLandlordInvitation",
+        "title": "Cancel a joint landlord invitation",
+        "basePath": "/landlord/cancel-joint-landlord-invitation/3",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:40:20.247845700Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Do you want to cancel the invitation for pending@example.com?",
+            "stepConfig": "AreYouSureStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/are-you-sure/v1.jpg",
+                    "thumbnail": "img/are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/cancel-joint-landlord-invitation/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/cancel-joint-landlord-invitation/confirmation",
+            "title": "Invitation cancelled",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_cancel-joint-landlord-invitation_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_cancel-joint-landlord-invitation_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you want to cancel the invitation for pending@example.com?",
+                            "answer": "Yes, cancel this invitation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/2",
+            "kind": "terminal",
+            "route": "/landlord/property-details/2",
+            "title": "3 Test Lane",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_2/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_2/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you want to cancel the invitation for pending@example.com?",
+                            "answer": "No, do not cancel this invitation (go back to property record)"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/2#landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/property-details/2#landlord-details",
+            "title": "/landlord/property-details/2#landlord-details",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/cancel-joint-landlord-invitation/confirmation",
+            "label": "Yes, cancel this invitation",
+            "mode": "WANTS_TO_PROCEED",
+            "kind": "observed"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/property-details/2",
+            "label": "No, do not cancel this invitation (go back to property record)",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "kind": "observed"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/property-details/2#landlord-details",
+            "label": "Does not want to proceed",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "are-you-sure",
+            "mode": "WANTS_TO_PROCEED",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "propertyOwnershipId"
+            ]
+        },
+        {
+            "from": "are-you-sure",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "to": "/landlord/property-details/2#landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "are-you-sure",
+            "label": "Cancel invitation"
+        }
+    ]
+}

@@ -1,0 +1,4672 @@
+{
+    "journey": {
+        "name": "acceptOrRejectJointLandlordInvitation",
+        "title": "Accept or reject a joint landlord invitation",
+        "basePath": "/landlord/joint-landlord-invitation",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:19.934191300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:LandlordRegistrationTask",
+            "kind": "task",
+            "label": "Landlord registration",
+            "parent": null
+        },
+        {
+            "id": "task:IdentityTask",
+            "kind": "task",
+            "label": "Identity",
+            "parent": "task:LandlordRegistrationTask"
+        },
+        {
+            "id": "task:OrgLandlordRegistrationTask",
+            "kind": "task",
+            "label": "Org landlord registration",
+            "parent": "task:LandlordRegistrationTask"
+        },
+        {
+            "id": "task:OrgAddressTask/organisation-address",
+            "kind": "task",
+            "label": "Org address",
+            "parent": "task:OrgLandlordRegistrationTask"
+        },
+        {
+            "id": "task:LeadTrusteeTask",
+            "kind": "task",
+            "label": "Lead trustee",
+            "parent": "task:OrgLandlordRegistrationTask"
+        },
+        {
+            "id": "task:TrusteeAddressTask/lead-trustee-address",
+            "kind": "task",
+            "label": "Trustee address",
+            "parent": "task:LeadTrusteeTask"
+        },
+        {
+            "id": "task:OrgCharityTask",
+            "kind": "task",
+            "label": "Org charity",
+            "parent": "task:OrgLandlordRegistrationTask"
+        },
+        {
+            "id": "task:OrgCompaniesHouseTask",
+            "kind": "task",
+            "label": "Org companies house",
+            "parent": "task:OrgLandlordRegistrationTask"
+        },
+        {
+            "id": "task:OrgGovBodyTask",
+            "kind": "task",
+            "label": "Org gov body",
+            "parent": "task:OrgLandlordRegistrationTask"
+        },
+        {
+            "id": "task:OrgGovBodyMembersTask",
+            "kind": "task",
+            "label": "Org gov body members",
+            "parent": "task:OrgGovBodyTask"
+        },
+        {
+            "id": "task:GovBodyMemberAddressTask/organisation-governing-body-member-address",
+            "kind": "task",
+            "label": "Gov body member address",
+            "parent": "task:OrgGovBodyMembersTask"
+        },
+        {
+            "id": "task:IndividualLandlordLocationTask",
+            "kind": "task",
+            "label": "Individual landlord location",
+            "parent": "task:LandlordRegistrationTask"
+        },
+        {
+            "id": "task:LandlordAddressTask",
+            "kind": "task",
+            "label": "Landlord address",
+            "parent": "task:IndividualLandlordLocationTask"
+        },
+        {
+            "id": "task:OrgCompaniesHouseChangeGovBodyTask",
+            "kind": "task",
+            "label": "Org companies house change gov body",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "accept-or-reject",
+            "kind": "page",
+            "route": "accept-or-reject",
+            "title": "Tell us if you’re a joint landlord for a property",
+            "stepConfig": "AcceptOrRejectStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/accept-or-reject/v1.jpg",
+                    "thumbnail": "img/accept-or-reject/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/joint-landlord-invitation/invitation-rejected-confirmation",
+            "kind": "terminal",
+            "route": "/landlord/joint-landlord-invitation/invitation-rejected-confirmation",
+            "title": "Invite rejected",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_joint-landlord-invitation_invitation-rejected-confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_joint-landlord-invitation_invitation-rejected-confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Tell us if you’re a joint landlord for a property",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm-landlord-for-property",
+            "kind": "page",
+            "route": "confirm-landlord-for-property",
+            "title": "Confirm that you’re a joint landlord for this property",
+            "stepConfig": "ConfirmYouAreALandlordForThisPropertyStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm-landlord-for-property/v1.jpg",
+                    "thumbnail": "img/confirm-landlord-for-property/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/confirm-landlord-for-property/v2.jpg",
+                    "thumbnail": "img/confirm-landlord-for-property/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/joint-landlord-invitation/property-joined-confirmation",
+            "kind": "terminal",
+            "route": "/landlord/joint-landlord-invitation/property-joined-confirmation",
+            "title": "Registered as a joint landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_joint-landlord-invitation_property-joined-confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_joint-landlord-invitation_property-joined-confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "privacy-notice",
+            "kind": "page",
+            "route": "privacy-notice",
+            "title": "Your data privacy",
+            "stepConfig": "PrivacyNoticeStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/privacy-notice/v1.jpg",
+                    "thumbnail": "img/privacy-notice/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "identity-not-verified",
+            "kind": "page",
+            "route": "identity-not-verified",
+            "title": "You have not proven your identity using GOV.UK One Login",
+            "stepConfig": "IdentityNotVerifiedStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IdentityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/identity-not-verified/v1.jpg",
+                    "thumbnail": "img/identity-not-verified/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "name",
+            "kind": "page",
+            "route": "name",
+            "title": "What is your full name?",
+            "stepConfig": "NameStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IdentityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/name/v1.jpg",
+                    "thumbnail": "img/name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "date-of-birth",
+            "kind": "page",
+            "route": "date-of-birth",
+            "title": "What is your date of birth?",
+            "stepConfig": "DateOfBirthStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IdentityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/date-of-birth/v1.jpg",
+                    "thumbnail": "img/date-of-birth/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "email",
+            "kind": "page",
+            "route": "email",
+            "title": "What is your email address?",
+            "stepConfig": "EmailStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/email/v1.jpg",
+                    "thumbnail": "img/email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "phone-number",
+            "kind": "page",
+            "route": "phone-number",
+            "title": "What is your phone number?",
+            "stepConfig": "PhoneNumberStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/phone-number/v1.jpg",
+                    "thumbnail": "img/phone-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "landlord-type",
+            "kind": "page",
+            "route": "landlord-type",
+            "title": "Are you registering as an individual or an organisation?",
+            "stepConfig": "LandlordTypeStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord-type/v1.jpg",
+                    "thumbnail": "img/landlord-type/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "country-of-residence",
+            "kind": "page",
+            "route": "country-of-residence",
+            "title": "Do you live in England or Wales?",
+            "stepConfig": "CountryOfResidenceStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/country-of-residence/v1.jpg",
+                    "thumbnail": "img/country-of-residence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "neither-england-nor-wales-address",
+            "kind": "page",
+            "route": "neither-england-nor-wales-address",
+            "title": "This private beta is only available to landlords who live in England or Wales",
+            "stepConfig": "NonEnglandOrWalesAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/neither-england-nor-wales-address/v1.jpg",
+                    "thumbnail": "img/neither-england-nor-wales-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Do you live in England or Wales?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lookup-address",
+            "kind": "page",
+            "route": "lookup-address",
+            "title": "What is your contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask",
+                "task:LandlordAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lookup-address/v1.jpg",
+                    "thumbnail": "img/lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "select-address",
+            "kind": "page",
+            "route": "select-address",
+            "title": "Select your address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask",
+                "task:LandlordAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/select-address/v1.jpg",
+                    "thumbnail": "img/select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-answers",
+            "kind": "page",
+            "route": "check-answers",
+            "title": "Check your answers",
+            "stepConfig": "LandlordRegistrationCyaStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-answers/v1.jpg",
+                    "thumbnail": "img/check-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-answers/v2.jpg",
+                    "thumbnail": "img/check-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "One Login identity check",
+                            "answer": "Identity verified"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-answers/v3.jpg",
+                    "thumbnail": "img/check-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-answers/v4.jpg",
+                    "thumbnail": "img/check-answers/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-answers/v5.jpg",
+                    "thumbnail": "img/check-answers/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation a registered charity?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/check-answers/v6.jpg",
+                    "thumbnail": "img/check-answers/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "None of these"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/check-answers/v7.jpg",
+                    "thumbnail": "img/check-answers/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v8",
+                    "image": "img/check-answers/v8.jpg",
+                    "thumbnail": "img/check-answers/v8.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Trustee"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v9",
+                    "image": "img/check-answers/v9.jpg",
+                    "thumbnail": "img/check-answers/v9.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Partner"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v10",
+                    "image": "img/check-answers/v10.jpg",
+                    "thumbnail": "img/check-answers/v10.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Other member of the governing body"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-name",
+            "kind": "page",
+            "route": "organisation-name",
+            "title": "What is the name of your organisation?",
+            "stepConfig": "OrgNameStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-name/v1.jpg",
+                    "thumbnail": "img/change_organisation-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Landlord type"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-address/lookup-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/change_organisation-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Landlord type"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-address/select-address",
+            "kind": "page",
+            "route": "organisation-address/select-address",
+            "title": "Select your organisation’s address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-address_select-address/v1.jpg",
+                    "thumbnail": "img/change_organisation-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Landlord type"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-email",
+            "kind": "page",
+            "route": "organisation-email",
+            "title": "What is your organisation’s email address?",
+            "stepConfig": "OrgEmailStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-email/v1.jpg",
+                    "thumbnail": "img/change_organisation-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Landlord type"
+                        },
+                        {
+                            "step": "Select your organisation’s address",
+                            "answer": "1 Fictional Road"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-address/manual-address",
+            "kind": "page",
+            "route": "organisation-address/manual-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-address_manual-address/v1.jpg",
+                    "thumbnail": "img/change_organisation-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Landlord type"
+                        },
+                        {
+                            "step": "Select your organisation’s address",
+                            "answer": "I want to manually enter my address"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:manual-address",
+            "kind": "page",
+            "route": "manual-address",
+            "title": "What is your contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_manual-address/v1.jpg",
+                    "thumbnail": "img/change_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Contact address"
+                        },
+                        {
+                            "step": "Select your address",
+                            "answer": "I want to manually enter my address"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm-identity",
+            "kind": "page",
+            "route": "confirm-identity",
+            "title": "Confirm your name and date of birth",
+            "stepConfig": "ConfirmIdentityStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IdentityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm-identity/v1.jpg",
+                    "thumbnail": "img/confirm-identity/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "One Login identity check",
+                            "answer": "Identity verified"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-name",
+            "kind": "page",
+            "route": "organisation-name",
+            "title": "What is the name of your organisation?",
+            "stepConfig": "OrgNameStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-name/v1.jpg",
+                    "thumbnail": "img/organisation-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-address/lookup-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgAddressTask/organisation-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/organisation-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-address/select-address",
+            "kind": "page",
+            "route": "organisation-address/select-address",
+            "title": "Select your organisation’s address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgAddressTask/organisation-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-address_select-address/v1.jpg",
+                    "thumbnail": "img/organisation-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-email",
+            "kind": "page",
+            "route": "organisation-email",
+            "title": "What is your organisation’s email address?",
+            "stepConfig": "OrgEmailStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-email/v1.jpg",
+                    "thumbnail": "img/organisation-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-phone-number",
+            "kind": "page",
+            "route": "organisation-phone-number",
+            "title": "What is your organisation’s phone number?",
+            "stepConfig": "OrgPhoneNumberStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-phone-number/v1.jpg",
+                    "thumbnail": "img/organisation-phone-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-type",
+            "kind": "page",
+            "route": "organisation-type",
+            "title": "Select your organisation’s type",
+            "stepConfig": "OrgTypeStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-type/v1.jpg",
+                    "thumbnail": "img/organisation-type/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity",
+            "kind": "page",
+            "route": "organisation-charity",
+            "title": "Is your organisation a registered charity?",
+            "stepConfig": "OrgIsRegisteredCharityStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity/v1.jpg",
+                    "thumbnail": "img/organisation-charity/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-registered-with",
+            "kind": "page",
+            "route": "organisation-charity-registered-with",
+            "title": "Who is your charity registered with?",
+            "stepConfig": "OrgCharityRegisteredWithStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-registered-with/v1.jpg",
+                    "thumbnail": "img/organisation-charity-registered-with/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number",
+            "kind": "page",
+            "route": "organisation-charity-number",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberEnglandAndWalesStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-companies-house",
+            "kind": "page",
+            "route": "organisation-companies-house",
+            "title": "Is your organisation registered with Companies House?",
+            "stepConfig": "OrgIsRegisteredCompanyStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCompaniesHouseTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-companies-house/v1.jpg",
+                    "thumbnail": "img/organisation-companies-house/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-company-number",
+            "kind": "page",
+            "route": "organisation-company-number",
+            "title": "What is your organisation’s company number?",
+            "stepConfig": "OrgCompanyNumberStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCompaniesHouseTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-company-number/v1.jpg",
+                    "thumbnail": "img/organisation-company-number/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-main-contact",
+            "kind": "page",
+            "route": "organisation-main-contact",
+            "title": "Who is the main contact for your organisation?",
+            "stepConfig": "OrgMainContactStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-main-contact/v1.jpg",
+                    "thumbnail": "img/organisation-main-contact/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-type-trust-interruption",
+            "kind": "page",
+            "route": "organisation-type-trust-interruption",
+            "title": "You must provide trustee details",
+            "stepConfig": "OrgTypeTrustInterruptionStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-type-trust-interruption/v1.jpg",
+                    "thumbnail": "img/change_organisation-type-trust-interruption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Organisation type"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:lead-trustee-name",
+            "kind": "page",
+            "route": "lead-trustee-name",
+            "title": "What is the lead trustee’s full name?",
+            "stepConfig": "LeadTrusteeNameStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_lead-trustee-name/v1.jpg",
+                    "thumbnail": "img/change_lead-trustee-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Organisation type"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:lead-trustee-dob",
+            "kind": "page",
+            "route": "lead-trustee-dob",
+            "title": "What is the lead trustee’s date of birth?",
+            "stepConfig": "LeadTrusteeDobStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_lead-trustee-dob/v1.jpg",
+                    "thumbnail": "img/change_lead-trustee-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Organisation type"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:lead-trustee-email",
+            "kind": "page",
+            "route": "lead-trustee-email",
+            "title": "What is the lead trustee’s email address?",
+            "stepConfig": "LeadTrusteeEmailStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_lead-trustee-email/v1.jpg",
+                    "thumbnail": "img/change_lead-trustee-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Organisation type"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-charity-number-northern-ireland",
+            "kind": "page",
+            "route": "organisation-charity-number-northern-ireland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberNorthernIrelandStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-charity-number-northern-ireland/v1.jpg",
+                    "thumbnail": "img/change_organisation-charity-number-northern-ireland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered charity"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Charities Commission of Northern Ireland"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-charity-number-scotland",
+            "kind": "page",
+            "route": "organisation-charity-number-scotland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberScotlandStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-charity-number-scotland/v1.jpg",
+                    "thumbnail": "img/change_organisation-charity-number-scotland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered charity"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Scottish Charity Regulator"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-companies-house-interruption",
+            "kind": "page",
+            "route": "organisation-companies-house-interruption",
+            "title": "Your new answer affects other sections of your landlord record",
+            "stepConfig": "OrgCompaniesHouseInterruptionStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-companies-house-interruption/v1.jpg",
+                    "thumbnail": "img/change_organisation-companies-house-interruption/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Director"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Registered with Companies House"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "no-address-found",
+            "kind": "page",
+            "route": "no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and 1",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask",
+                "task:LandlordAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/no-address-found/v1.jpg",
+                    "thumbnail": "img/no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "What is your contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "manual-address",
+            "kind": "page",
+            "route": "manual-address",
+            "title": "What is your contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IndividualLandlordLocationTask",
+                "task:LandlordAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/manual-address/v1.jpg",
+                    "thumbnail": "img/manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "What is your contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-address/no-address-found",
+            "kind": "page",
+            "route": "organisation-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and 1",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgAddressTask/organisation-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/organisation-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "What is your organisation’s address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-address/manual-address",
+            "kind": "page",
+            "route": "organisation-address/manual-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgAddressTask/organisation-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-address_manual-address/v1.jpg",
+                    "thumbnail": "img/organisation-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "What is your organisation’s address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-name",
+            "kind": "page",
+            "route": "lead-trustee-name",
+            "title": "What is the lead trustee’s full name?",
+            "stepConfig": "LeadTrusteeNameStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-name/v1.jpg",
+                    "thumbnail": "img/lead-trustee-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-dob",
+            "kind": "page",
+            "route": "lead-trustee-dob",
+            "title": "What is the lead trustee’s date of birth?",
+            "stepConfig": "LeadTrusteeDobStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-dob/v1.jpg",
+                    "thumbnail": "img/lead-trustee-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-email",
+            "kind": "page",
+            "route": "lead-trustee-email",
+            "title": "What is the lead trustee’s email address?",
+            "stepConfig": "LeadTrusteeEmailStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-email/v1.jpg",
+                    "thumbnail": "img/lead-trustee-email/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-phone",
+            "kind": "page",
+            "route": "lead-trustee-phone",
+            "title": "What is the lead trustee’s phone number?",
+            "stepConfig": "LeadTrusteePhoneStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-phone/v1.jpg",
+                    "thumbnail": "img/lead-trustee-phone/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/lookup-address",
+            "kind": "page",
+            "route": "lead-trustee-address/lookup-address",
+            "title": "What is the lead trustee’s contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/select-address",
+            "kind": "page",
+            "route": "lead-trustee-address/select-address",
+            "title": "Select your address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_select-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number-northern-ireland",
+            "kind": "page",
+            "route": "organisation-charity-number-northern-ireland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberNorthernIrelandStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number-northern-ireland/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number-northern-ireland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Charities Commission of Northern Ireland"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-charity-number-scotland",
+            "kind": "page",
+            "route": "organisation-charity-number-scotland",
+            "title": "What is your organisation’s charity number?",
+            "stepConfig": "OrgCharityNumberScotlandStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgCharityTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-charity-number-scotland/v1.jpg",
+                    "thumbnail": "img/organisation-charity-number-scotland/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Who is your charity registered with?",
+                            "answer": "Scottish Charity Regulator"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-details",
+            "kind": "page",
+            "route": "organisation-governing-body-details",
+            "title": "Providing details about your organisation’s governing body",
+            "stepConfig": "OrgGovBodyDetailsStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-details/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-must-provide-info",
+            "kind": "page",
+            "route": "organisation-governing-body-must-provide-info",
+            "title": "You need to provide more information to register",
+            "stepConfig": "OrgGovBodyMustProvideInfoStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-must-provide-info/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-must-provide-info/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "Providing details about your organisation’s governing body",
+                            "answer": "I don’t have these details"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/lookup-address",
+            "title": "What is their contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/select-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/select-address",
+            "title": "Select their address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_select-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-list",
+            "kind": "page",
+            "route": "organisation-governing-body-member-list",
+            "title": "You’ve added 1 person",
+            "stepConfig": "OrgGovBodyMemberListStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-list/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/no-address-found",
+            "kind": "page",
+            "route": "lead-trustee-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and 1",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        },
+                        {
+                            "step": "What is the lead trustee’s contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "lead-trustee-address/manual-address",
+            "kind": "page",
+            "route": "lead-trustee-address/manual-address",
+            "title": "What is the lead trustee’s contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:LeadTrusteeTask",
+                "task:TrusteeAddressTask/lead-trustee-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lead-trustee-address_manual-address/v1.jpg",
+                    "thumbnail": "img/lead-trustee-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Select your organisation’s type",
+                            "answer": "Trust"
+                        },
+                        {
+                            "step": "What is the lead trustee’s contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/no-address-found",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and 1",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "What is their contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/manual-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/manual-address",
+            "title": "What is their contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_manual-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invited user is not a landlord"
+                        },
+                        {
+                            "step": "Are you registering as an individual or an organisation?",
+                            "answer": "An organisation"
+                        },
+                        {
+                            "step": "Is your organisation registered with Companies House?",
+                            "answer": "No"
+                        },
+                        {
+                            "step": "What is their contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "invite-unavailable",
+            "kind": "page",
+            "route": "invite-unavailable",
+            "title": "There was a problem with this invitation link",
+            "stepConfig": "InviteUnavailableStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/invite-unavailable/v1.jpg",
+                    "thumbnail": "img/invite-unavailable/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Invitation has expired"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-user-role",
+            "kind": "decision",
+            "route": "check-user-role",
+            "title": "Check user role",
+            "stepConfig": "CheckUserRoleStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "verify-identity",
+            "kind": "decision",
+            "route": "verify-identity",
+            "title": "Identity verifying",
+            "stepConfig": "IdentityVerifyingStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:IdentityTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:OrgTypeUpdateRoutingStep",
+            "kind": "decision",
+            "route": "internal:OrgTypeUpdateRoutingStep",
+            "title": "Org type update routing",
+            "stepConfig": "OrgTypeUpdateRoutingStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:OrgCompaniesHouseUpdateRoutingStep",
+            "kind": "decision",
+            "route": "internal:OrgCompaniesHouseUpdateRoutingStep",
+            "title": "Org companies house update routing",
+            "stepConfig": "OrgCompaniesHouseUpdateRoutingStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyGovBodyMembersStep@task:OrgCompaniesHouseChangeGovBodyTask>task:OrgGovBodyMembersTask",
+            "kind": "decision",
+            "route": "internal:HasAnyGovBodyMembersStep@task:OrgCompaniesHouseChangeGovBodyTask>task:OrgGovBodyMembersTask",
+            "title": "Has any gov body members",
+            "stepConfig": "HasAnyGovBodyMembersStepConfig",
+            "containers": [
+                "task:OrgCompaniesHouseChangeGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "kind": "decision",
+            "route": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "title": "Has any gov body members",
+            "stepConfig": "HasAnyGovBodyMembersStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "kind": "decision",
+            "route": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "title": "Gov body members back routing",
+            "stepConfig": "GovBodyMembersBackRoutingStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-governing-body-member",
+            "kind": "decision",
+            "route": "remove-governing-body-member",
+            "title": "Remove gov body member",
+            "stepConfig": "RemoveGovBodyMemberStepConfig",
+            "containers": [
+                "task:LandlordRegistrationTask",
+                "task:OrgLandlordRegistrationTask",
+                "task:OrgGovBodyTask",
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "validate-token",
+            "kind": "decision",
+            "route": "validate-token",
+            "title": "Validate token",
+            "stepConfig": "ValidateTokenStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "accept-or-reject",
+            "to": "check-user-role",
+            "label": "Yes (you’ll need to sign in with GOV.UK One Login)",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "check-user-role",
+            "to": "confirm-landlord-for-property",
+            "label": "User is already registered as landlord",
+            "mode": "USER_IS_ALREADY_REGISTERED_AS_LANDLORD",
+            "kind": "observed"
+        },
+        {
+            "from": "accept-or-reject",
+            "to": "/landlord/joint-landlord-invitation/invitation-rejected-confirmation",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "confirm-landlord-for-property",
+            "to": "/landlord/joint-landlord-invitation/property-joined-confirmation",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-user-role",
+            "to": "privacy-notice",
+            "label": "User not registered as landlord",
+            "mode": "USER_NOT_REGISTERED_AS_LANDLORD",
+            "kind": "observed"
+        },
+        {
+            "from": "privacy-notice",
+            "to": "verify-identity",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "verify-identity",
+            "to": "identity-not-verified",
+            "label": "Not verified",
+            "mode": "NOT_VERIFIED",
+            "kind": "observed"
+        },
+        {
+            "from": "verify-identity",
+            "to": "confirm-identity",
+            "label": "Verified",
+            "mode": "VERIFIED",
+            "kind": "observed"
+        },
+        {
+            "from": "identity-not-verified",
+            "to": "name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "name",
+            "to": "date-of-birth",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "date-of-birth",
+            "to": "email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "email",
+            "to": "phone-number",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "phone-number",
+            "to": "landlord-type",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "landlord-type",
+            "to": "country-of-residence",
+            "label": "An individual",
+            "mode": "INDIVIDUAL",
+            "kind": "observed"
+        },
+        {
+            "from": "landlord-type",
+            "to": "organisation-name",
+            "label": "An organisation",
+            "mode": "ORGANISATION",
+            "kind": "observed"
+        },
+        {
+            "from": "country-of-residence",
+            "to": "lookup-address",
+            "label": "Yes",
+            "mode": "ENGLAND_OR_WALES",
+            "kind": "observed"
+        },
+        {
+            "from": "country-of-residence",
+            "to": "neither-england-nor-wales-address",
+            "label": "No",
+            "mode": "NON_ENGLAND_OR_WALES",
+            "kind": "observed"
+        },
+        {
+            "from": "lookup-address",
+            "to": "select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lookup-address",
+            "to": "no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "check-answers",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "check-user-role",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "name",
+            "label": "Change Name",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "name",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "date-of-birth",
+            "label": "Change Date of birth",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "date-of-birth",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "landlord-type",
+            "label": "Change Landlord type",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "landlord-type",
+            "to": "check-answers",
+            "label": "An individual",
+            "mode": "INDIVIDUAL",
+            "kind": "change"
+        },
+        {
+            "from": "landlord-type",
+            "to": "change:organisation-name",
+            "label": "An organisation",
+            "mode": "ORGANISATION",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-name",
+            "to": "change:organisation-address/lookup-address",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-address/lookup-address",
+            "to": "change:organisation-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-address/select-address",
+            "to": "change:organisation-email",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-address/select-address",
+            "to": "change:organisation-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-address/select-address",
+            "to": "change:organisation-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "email",
+            "label": "Change Email address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "email",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "phone-number",
+            "label": "Change Phone number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "phone-number",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "country-of-residence",
+            "label": "Change Resident in England or Wales",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "country-of-residence",
+            "to": "check-answers",
+            "label": "Yes",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "lookup-address",
+            "label": "Change Contact address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "select-address",
+            "to": "check-answers",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "change"
+        },
+        {
+            "from": "select-address",
+            "to": "change:manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "change"
+        },
+        {
+            "from": "change:manual-address",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "confirm-identity",
+            "to": "email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-name",
+            "to": "organisation-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/lookup-address",
+            "to": "organisation-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/lookup-address",
+            "to": "organisation-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/select-address",
+            "to": "organisation-email",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/select-address",
+            "to": "organisation-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/select-address",
+            "to": "organisation-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-email",
+            "to": "organisation-phone-number",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-phone-number",
+            "to": "organisation-type",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-type",
+            "to": "organisation-charity",
+            "label": "Company / Charity / None of these",
+            "mode": "EXCLUDES_TRUST",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-type",
+            "to": "lead-trustee-name",
+            "label": "Trust",
+            "mode": "INCLUDES_TRUST",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity",
+            "to": "organisation-charity-registered-with",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity",
+            "to": "organisation-companies-house",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number",
+            "label": "Charities Commission of England and Wales",
+            "mode": "ENGLAND_AND_WALES",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number-northern-ireland",
+            "label": "Charities Commission of Northern Ireland",
+            "mode": "NORTHERN_IRELAND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-charity-number-scotland",
+            "label": "Scottish Charity Regulator",
+            "mode": "SCOTLAND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "organisation-companies-house",
+            "label": "None of these",
+            "mode": "NONE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-charity-number",
+            "to": "organisation-companies-house",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-companies-house",
+            "to": "organisation-company-number",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-companies-house",
+            "to": "organisation-governing-body-details",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-company-number",
+            "to": "organisation-main-contact",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-main-contact",
+            "to": "check-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-name",
+            "label": "Change Organisation name",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-address/lookup-address",
+            "label": "Change Organisation address",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-email",
+            "label": "Change Organisation email",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-email",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-phone-number",
+            "label": "Change Organisation phone number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-phone-number",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-type",
+            "label": "Change Organisation type",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-type",
+            "to": "check-answers",
+            "label": "Company / Charity / None of these",
+            "mode": "EXCLUDES_TRUST",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-type",
+            "to": "internal:OrgTypeUpdateRoutingStep",
+            "label": "Trust",
+            "mode": "INCLUDES_TRUST",
+            "kind": "change"
+        },
+        {
+            "from": "internal:OrgTypeUpdateRoutingStep",
+            "to": "change:organisation-type-trust-interruption",
+            "label": "Adding trust",
+            "mode": "ADDING_TRUST",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-type-trust-interruption",
+            "to": "change:lead-trustee-name",
+            "label": "Continue with the change",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:lead-trustee-name",
+            "to": "change:lead-trustee-dob",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:lead-trustee-dob",
+            "to": "change:lead-trustee-email",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-charity",
+            "label": "Change Registered charity",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity",
+            "to": "check-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "change:organisation-charity-number-northern-ireland",
+            "label": "Charities Commission of Northern Ireland",
+            "mode": "NORTHERN_IRELAND",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "change:organisation-charity-number-scotland",
+            "label": "Scottish Charity Regulator",
+            "mode": "SCOTLAND",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "to": "check-answers",
+            "label": "None of these",
+            "mode": "NONE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-charity-number-northern-ireland",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-charity-number-scotland",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-charity-registered-with",
+            "label": "Change Charity commission",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-charity-number",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-companies-house",
+            "label": "Change Registered with Companies House",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-companies-house",
+            "to": "check-answers",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-companies-house",
+            "to": "internal:OrgCompaniesHouseUpdateRoutingStep",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "internal:OrgCompaniesHouseUpdateRoutingStep",
+            "to": "change:organisation-companies-house-interruption",
+            "label": "Changed to non company",
+            "mode": "CHANGED_TO_NON_COMPANY",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-companies-house-interruption",
+            "to": "internal:HasAnyGovBodyMembersStep@task:OrgCompaniesHouseChangeGovBodyTask>task:OrgGovBodyMembersTask",
+            "label": "Continue to other sections",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:OrgCompaniesHouseChangeGovBodyTask>task:OrgGovBodyMembersTask",
+            "to": "change:organisation-governing-body-who-to-provide",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-who-to-provide",
+            "to": "change:organisation-governing-body-member-name",
+            "label": "Director / Trustee and 2 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-member-name",
+            "to": "change:organisation-governing-body-member-dob",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-company-number",
+            "label": "Change Companies House number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-company-number",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-main-contact",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-main-contact",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "no-address-found",
+            "to": "manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "no-address-found",
+            "to": "lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "manual-address",
+            "to": "check-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/no-address-found",
+            "to": "organisation-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/no-address-found",
+            "to": "organisation-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-address/manual-address",
+            "to": "organisation-email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-name",
+            "to": "lead-trustee-dob",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-dob",
+            "to": "lead-trustee-email",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-email",
+            "to": "lead-trustee-phone",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-phone",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "to": "lead-trustee-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "to": "lead-trustee-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "organisation-charity",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "lead-trustee-name",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number-northern-ireland",
+            "to": "organisation-companies-house",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-charity-number-northern-ireland",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-charity-number-scotland",
+            "to": "organisation-companies-house",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-charity-number-scotland",
+            "label": "Change Charity number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-details",
+            "to": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "label": "Continue",
+            "mode": "HAS_DETAILS",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-details",
+            "to": "organisation-governing-body-must-provide-info",
+            "label": "I don’t have these details",
+            "mode": "NO_DETAILS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "to": "organisation-governing-body-member-name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "to": "organisation-governing-body-member-dob",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "1 Fictional Road / 2 Fake Way",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "to": "organisation-main-contact",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "Add another person / Change Person 1",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "remove-governing-body-member",
+            "label": "Remove Person 1",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "organisation-governing-body-details",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-answers",
+            "to": "organisation-governing-body-member-list",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "check-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "to": "lead-trustee-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "to": "lead-trustee-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "lead-trustee-address/manual-address",
+            "to": "organisation-charity",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "validate-token",
+            "to": "accept-or-reject",
+            "label": "Valid",
+            "mode": "VALID",
+            "kind": "observed"
+        },
+        {
+            "from": "validate-token",
+            "to": "invite-unavailable",
+            "label": "Invalid",
+            "mode": "INVALID",
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "to": "organisation-governing-body-details",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "validate-token",
+            "writers": [
+                "confirm-landlord-for-property"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-details",
+            "writers": [
+                "organisation-companies-house-interruption"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "remove-governing-body-member",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/lookup-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/select-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:LandlordTypeChangeRedirectStep",
+            "writers": [
+                "country-of-residence",
+                "landlord-type",
+                "lead-trustee-address/lookup-address",
+                "lead-trustee-address/manual-address",
+                "lead-trustee-address/no-address-found",
+                "lead-trustee-address/select-address",
+                "lead-trustee-dob",
+                "lead-trustee-email",
+                "lead-trustee-name",
+                "lead-trustee-phone",
+                "lookup-address",
+                "organisation-address/lookup-address",
+                "organisation-address/manual-address",
+                "organisation-address/no-address-found",
+                "organisation-address/select-address",
+                "organisation-charity",
+                "organisation-charity-number",
+                "organisation-charity-number-northern-ireland",
+                "organisation-charity-number-scotland",
+                "organisation-charity-registered-with",
+                "organisation-companies-house",
+                "organisation-companies-house-interruption",
+                "organisation-company-number",
+                "organisation-email",
+                "organisation-governing-body-details",
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "organisation-governing-body-member-list",
+                "organisation-main-contact",
+                "organisation-name",
+                "organisation-phone-number",
+                "organisation-type",
+                "remove-governing-body-member",
+                "select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:OrgTypeUpdateRoutingStep",
+            "writers": [
+                "organisation-type"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:OrgCompaniesHouseUpdateRoutingStep",
+            "writers": [
+                "organisation-companies-house"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:OrgCompaniesHouseChangeGovBodyTask>task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:GovBodyMembersBackRoutingStep@task:OrgGovBodyTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "validate-token",
+            "mode": "VALID",
+            "to": "accept-or-reject",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "validate-token",
+            "mode": "INVALID",
+            "to": "invite-unavailable",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "accept-or-reject",
+            "mode": "YES",
+            "to": "check-user-role",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "accept-or-reject",
+            "mode": "NO",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:accept-or-reject"
+            ]
+        },
+        {
+            "from": "check-user-role",
+            "mode": "USER_IS_ALREADY_REGISTERED_AS_LANDLORD",
+            "to": "confirm-landlord-for-property",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-user-role",
+            "mode": "USER_NOT_REGISTERED_AS_LANDLORD",
+            "to": "privacy-notice",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "privacy-notice",
+            "mode": "COMPLETE",
+            "to": "verify-identity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "verify-identity",
+            "mode": "VERIFIED",
+            "to": "confirm-identity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "verify-identity",
+            "mode": "NOT_VERIFIED",
+            "to": "identity-not-verified",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm-identity",
+            "mode": "COMPLETE",
+            "to": "email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "identity-not-verified",
+            "mode": "COMPLETE",
+            "to": "name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "name",
+            "mode": "COMPLETE",
+            "to": "date-of-birth",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "date-of-birth",
+            "mode": "COMPLETE",
+            "to": "email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "email",
+            "mode": "COMPLETE",
+            "to": "phone-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "phone-number",
+            "mode": "COMPLETE",
+            "to": "landlord-type",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "landlord-type",
+            "mode": "INDIVIDUAL",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:accept-or-reject",
+                "outcome:confirm-identity",
+                "outcome:date-of-birth",
+                "outcome:email",
+                "outcome:exit:task:IdentityTask",
+                "outcome:identity-not-verified",
+                "outcome:landlord-type",
+                "outcome:name",
+                "outcome:phone-number",
+                "outcome:privacy-notice",
+                "outcome:validate-token",
+                "outcome:verify-identity",
+                "step:accept-or-reject",
+                "tokenIsValid"
+            ]
+        },
+        {
+            "from": "landlord-type",
+            "mode": "ORGANISATION",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:landlord-type"
+            ]
+        },
+        {
+            "from": "organisation-name",
+            "mode": "COMPLETE",
+            "to": "organisation-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "organisation-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "organisation-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "organisation-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "organisation-email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "organisation-email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "organisation-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "organisation-email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-email",
+            "mode": "COMPLETE",
+            "to": "organisation-phone-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-phone-number",
+            "mode": "COMPLETE",
+            "to": "organisation-type",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-type",
+            "mode": "INCLUDES_TRUST",
+            "to": "lead-trustee-name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-type",
+            "mode": "EXCLUDES_TRUST",
+            "to": "organisation-charity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-name",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-dob",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-dob",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-email",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-email",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-phone",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-phone",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "lead-trustee-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "lead-trustee-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "lead-trustee-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "organisation-charity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "organisation-charity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "lead-trustee-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lead-trustee-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "organisation-charity",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity",
+            "mode": "YES",
+            "to": "organisation-charity-registered-with",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity",
+            "mode": "NO",
+            "to": "organisation-companies-house",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "ENGLAND_AND_WALES",
+            "to": "organisation-charity-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "NORTHERN_IRELAND",
+            "to": "organisation-charity-number-northern-ireland",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "SCOTLAND",
+            "to": "organisation-charity-number-scotland",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-registered-with",
+            "mode": "NONE",
+            "to": "organisation-companies-house",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number",
+            "mode": "COMPLETE",
+            "to": "organisation-companies-house",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number-northern-ireland",
+            "mode": "COMPLETE",
+            "to": "organisation-companies-house",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-charity-number-scotland",
+            "mode": "COMPLETE",
+            "to": "organisation-companies-house",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-companies-house",
+            "mode": "YES",
+            "to": "organisation-company-number",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-companies-house",
+            "mode": "NO",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:exit:task:LeadTrusteeTask",
+                "outcome:exit:task:OrgAddressTask/organisation-address",
+                "outcome:exit:task:OrgCharityTask",
+                "outcome:exit:task:TrusteeAddressTask/lead-trustee-address",
+                "outcome:landlord-type",
+                "outcome:lead-trustee-address/lookup-address",
+                "outcome:lead-trustee-address/manual-address",
+                "outcome:lead-trustee-address/no-address-found",
+                "outcome:lead-trustee-address/select-address",
+                "outcome:lead-trustee-dob",
+                "outcome:lead-trustee-email",
+                "outcome:lead-trustee-name",
+                "outcome:lead-trustee-phone",
+                "outcome:organisation-address/lookup-address",
+                "outcome:organisation-address/manual-address",
+                "outcome:organisation-address/no-address-found",
+                "outcome:organisation-address/select-address",
+                "outcome:organisation-charity",
+                "outcome:organisation-charity-number",
+                "outcome:organisation-charity-number-northern-ireland",
+                "outcome:organisation-charity-number-scotland",
+                "outcome:organisation-charity-registered-with",
+                "outcome:organisation-companies-house",
+                "outcome:organisation-email",
+                "outcome:organisation-name",
+                "outcome:organisation-phone-number",
+                "outcome:organisation-type"
+            ]
+        },
+        {
+            "from": "organisation-company-number",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:exit:task:LeadTrusteeTask",
+                "outcome:exit:task:OrgAddressTask/organisation-address",
+                "outcome:exit:task:OrgCharityTask",
+                "outcome:exit:task:TrusteeAddressTask/lead-trustee-address",
+                "outcome:landlord-type",
+                "outcome:lead-trustee-address/lookup-address",
+                "outcome:lead-trustee-address/manual-address",
+                "outcome:lead-trustee-address/no-address-found",
+                "outcome:lead-trustee-address/select-address",
+                "outcome:lead-trustee-dob",
+                "outcome:lead-trustee-email",
+                "outcome:lead-trustee-name",
+                "outcome:lead-trustee-phone",
+                "outcome:organisation-address/lookup-address",
+                "outcome:organisation-address/manual-address",
+                "outcome:organisation-address/no-address-found",
+                "outcome:organisation-address/select-address",
+                "outcome:organisation-charity",
+                "outcome:organisation-charity-number",
+                "outcome:organisation-charity-number-northern-ireland",
+                "outcome:organisation-charity-number-scotland",
+                "outcome:organisation-charity-registered-with",
+                "outcome:organisation-companies-house",
+                "outcome:organisation-email",
+                "outcome:organisation-name",
+                "outcome:organisation-phone-number",
+                "outcome:organisation-type"
+            ]
+        },
+        {
+            "from": "organisation-governing-body-details",
+            "mode": "HAS_DETAILS",
+            "to": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-details",
+            "mode": "NO_DETAILS",
+            "to": "organisation-governing-body-must-provide-info",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-governing-body-member",
+            "mode": "NO_MEMBERS",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-governing-body-member",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "mode": "COMPLETE",
+            "to": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-dob",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-main-contact",
+            "mode": "COMPLETE",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "country-of-residence",
+            "mode": "ENGLAND_OR_WALES",
+            "to": "lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "country-of-residence",
+            "mode": "NON_ENGLAND_OR_WALES",
+            "to": "neither-england-nor-wales-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "no-address-found",
+            "mode": "COMPLETE",
+            "to": "manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "manual-address",
+            "mode": "COMPLETE",
+            "to": "check-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-answers",
+            "mode": "COMPLETE",
+            "to": "check-user-role",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm-landlord-for-property",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "outcome:accept-or-reject",
+                "tokenIsValid"
+            ]
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "mode": "NO_MEMBERS",
+            "to": "organisation-governing-body-who-to-provide",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask>task:OrgGovBodyMembersTask",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "mode": "NO_MEMBERS",
+            "to": "organisation-governing-body-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:GovBodyMembersBackRoutingStep@task:LandlordRegistrationTask>task:OrgLandlordRegistrationTask>task:OrgGovBodyTask",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-main-contact",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "validate-token",
+            "label": "Link in the invitation email"
+        }
+    ]
+}

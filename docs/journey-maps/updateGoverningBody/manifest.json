@@ -1,0 +1,969 @@
+{
+    "journey": {
+        "name": "updateGoverningBody",
+        "title": "Update the governing body",
+        "basePath": "/landlord/landlord-details/update-governing-body",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:40:18.143977500Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:OrgGovBodyMembersTask",
+            "kind": "task",
+            "label": "Org gov body members",
+            "parent": null
+        },
+        {
+            "id": "task:GovBodyMemberAddressTask/organisation-governing-body-member-address",
+            "kind": "task",
+            "label": "Gov body member address",
+            "parent": "task:OrgGovBodyMembersTask"
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "organisation-governing-body-member-list",
+            "kind": "page",
+            "route": "organisation-governing-body-member-list",
+            "title": "You’ve added 2 people",
+            "stepConfig": "OrgGovBodyMemberListStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-list/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/organisation-governing-body-member-list/v2.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/organisation-governing-body-member-list/v3.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-list/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Remove Person 1"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "governing-body-check-your-answers",
+            "kind": "page",
+            "route": "governing-body-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateGoverningBodyCyaStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/governing-body-check-your-answers/v1.jpg",
+                    "thumbnail": "img/governing-body-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/governing-body-check-your-answers/v2.jpg",
+                    "thumbnail": "img/governing-body-check-your-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/governing-body-check-your-answers/v3.jpg",
+                    "thumbnail": "img/governing-body-check-your-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Remove Person 1"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/governing-body-check-your-answers/v4.jpg",
+                    "thumbnail": "img/governing-body-check-your-answers/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation has no governing body members"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_landlord-details/v2.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_landlord-details/v3.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Remove Person 1"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_landlord-details/v4.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Organisation has no governing body members"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-list",
+            "kind": "page",
+            "route": "organisation-governing-body-member-list",
+            "title": "You’ve added 1 person",
+            "stepConfig": "OrgGovBodyMemberListStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-list/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-list/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Remove Person 1"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change"
+                        },
+                        {
+                            "step": "Who do you want to provide details for?",
+                            "answer": "Director"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:organisation-governing-body-member-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/lookup-address",
+            "title": "What is their contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_organisation-governing-body-member-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/change_organisation-governing-body-member-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-who-to-provide",
+            "kind": "page",
+            "route": "organisation-governing-body-who-to-provide",
+            "title": "Who do you want to provide details for?",
+            "stepConfig": "OrgGovBodyWhoToProvideStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-who-to-provide/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-who-to-provide/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-name",
+            "kind": "page",
+            "route": "organisation-governing-body-member-name",
+            "title": "What is their full name?",
+            "stepConfig": "OrgGovBodyMemberNameStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-name/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-name/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-dob",
+            "kind": "page",
+            "route": "organisation-governing-body-member-dob",
+            "title": "What is their date of birth?",
+            "stepConfig": "OrgGovBodyMemberDobStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-dob/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-dob/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/lookup-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/lookup-address",
+            "title": "What is their contact address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_lookup-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/select-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/select-address",
+            "title": "Select their address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_select-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/manual-address",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/manual-address",
+            "title": "What is their contact address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_manual-address/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "organisation-governing-body-member-address/no-address-found",
+            "kind": "page",
+            "route": "organisation-governing-body-member-address/no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and Slate House",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask",
+                "task:GovBodyMemberAddressTask/organisation-governing-body-member-address"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-governing-body-member-address_no-address-found/v1.jpg",
+                    "thumbnail": "img/organisation-governing-body-member-address_no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve added 2 people",
+                            "answer": "Add another person"
+                        },
+                        {
+                            "step": "What is their contact address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-governing-body-member",
+            "kind": "decision",
+            "route": "remove-governing-body-member",
+            "title": "Remove gov body member",
+            "stepConfig": "RemoveGovBodyMemberStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details#organisation-contacts",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details#organisation-contacts",
+            "title": "/landlord/landlord-details#organisation-contacts",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "kind": "decision",
+            "route": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "title": "Has any gov body members",
+            "stepConfig": "HasAnyGovBodyMembersStepConfig",
+            "containers": [
+                "task:OrgGovBodyMembersTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "start",
+            "kind": "decision",
+            "route": "start",
+            "title": "Initialise gov body members for gov body update",
+            "stepConfig": "InitialiseGovBodyMembersForGovBodyUpdateStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "governing-body-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "Add another person / Change Person 1 and 2 more",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "remove-governing-body-member",
+            "label": "Remove Person 1 / Remove Person 2 / Remove Person 3",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "governing-body-check-your-answers",
+            "to": "/landlord/landlord-details",
+            "label": "Confirm and submit update",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "governing-body-check-your-answers",
+            "to": "organisation-governing-body-member-list",
+            "label": "Change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "governing-body-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "change:organisation-governing-body-who-to-provide",
+            "label": "Add another person / Change Person 1 / Change Person 2",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "to": "remove-governing-body-member",
+            "label": "Remove Person 1 / Remove Person 2",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "change:organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-who-to-provide",
+            "to": "change:organisation-governing-body-member-name",
+            "label": "Director / Trustee and 2 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-member-name",
+            "to": "change:organisation-governing-body-member-dob",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:organisation-governing-body-member-dob",
+            "to": "change:organisation-governing-body-member-address/lookup-address",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "to": "organisation-governing-body-member-name",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "to": "organisation-governing-body-member-dob",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "Slate House, PRSDB Square, AA3 1AB / Slate House, PRSDB Road, AA3 1AB and 3 more",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "to": "organisation-governing-body-member-list",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-governing-body-member",
+            "to": "governing-body-check-your-answers",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "not walked"
+        },
+        {
+            "from": "governing-body-check-your-answers",
+            "to": "/landlord/landlord-details#organisation-contacts",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-who-to-provide",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "to": "organisation-governing-body-member-list",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "label": "",
+            "mode": null,
+            "kind": "structural"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-governing-body-member",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "start"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/lookup-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "organisation-governing-body-member-address/select-address",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "writers": [
+                "organisation-governing-body-member-address/manual-address",
+                "organisation-governing-body-member-address/select-address",
+                "remove-governing-body-member",
+                "start"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "remove-governing-body-member",
+            "mode": "NO_MEMBERS",
+            "to": "governing-body-check-your-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "remove-governing-body-member",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-list",
+            "mode": "COMPLETE",
+            "to": "governing-body-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-who-to-provide",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-name",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-name",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-dob",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-dob",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/lookup-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "organisation-governing-body-member-address/no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/no-address-found",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-address/manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "organisation-governing-body-member-address/manual-address",
+            "mode": "COMPLETE",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "governing-body-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details#organisation-contacts",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "mode": "NO_MEMBERS",
+            "to": "organisation-governing-body-who-to-provide",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyGovBodyMembersStep@task:OrgGovBodyMembersTask",
+            "mode": "SOME_MEMBERS",
+            "to": "organisation-governing-body-member-list",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "start",
+            "label": "Add, change or remove members of your governing body"
+        },
+        {
+            "node": "organisation-governing-body-who-to-provide",
+            "label": "Add, change or remove members of your governing body"
+        }
+    ]
+}

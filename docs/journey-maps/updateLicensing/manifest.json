@@ -1,0 +1,517 @@
+{
+    "journey": {
+        "name": "updateLicensing",
+        "title": "Update licensing",
+        "basePath": "/landlord/property-details/1/update-licensing",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:37:56.892263800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:LicensingTask",
+            "kind": "task",
+            "label": "Licensing",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "licensing-type",
+            "kind": "page",
+            "route": "licensing-type",
+            "title": "Update the type of licensing you have for your property",
+            "stepConfig": "LicensingTypeStepConfig",
+            "containers": [
+                "task:LicensingTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/licensing-type/v1.jpg",
+                    "thumbnail": "img/licensing-type/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "selective-licence",
+            "kind": "page",
+            "route": "selective-licence",
+            "title": "What is your selective licence number?",
+            "stepConfig": "SelectiveLicenceStepConfig",
+            "containers": [
+                "task:LicensingTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/selective-licence/v1.jpg",
+                    "thumbnail": "img/selective-licence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-licensing-answers",
+            "kind": "page",
+            "route": "check-licensing-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateLicensingCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-licensing-answers/v1.jpg",
+                    "thumbnail": "img/check-licensing-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-licensing-answers/v2.jpg",
+                    "thumbnail": "img/check-licensing-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "This property does not need a licence, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-licensing-answers/v3.jpg",
+                    "thumbnail": "img/check-licensing-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property has a licence"
+                        },
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "This property does not need a licence, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "This property does not need a licence, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:hmo-mandatory-licence",
+            "kind": "page",
+            "route": "hmo-mandatory-licence",
+            "title": "What is your HMO mandatory licence number?",
+            "stepConfig": "HmoMandatoryLicenceStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_hmo-mandatory-licence/v1.jpg",
+                    "thumbnail": "img/change_hmo-mandatory-licence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Licensing type"
+                        },
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "HMO mandatory licence, Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:hmo-additional-licence",
+            "kind": "page",
+            "route": "hmo-additional-licence",
+            "title": "What is your HMO additional licence number?",
+            "stepConfig": "HmoAdditionalLicenceStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_hmo-additional-licence/v1.jpg",
+                    "thumbnail": "img/change_hmo-additional-licence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Licensing type"
+                        },
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "HMO additional licence, Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "hmo-mandatory-licence",
+            "kind": "page",
+            "route": "hmo-mandatory-licence",
+            "title": "What is your HMO mandatory licence number?",
+            "stepConfig": "HmoMandatoryLicenceStepConfig",
+            "containers": [
+                "task:LicensingTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/hmo-mandatory-licence/v1.jpg",
+                    "thumbnail": "img/hmo-mandatory-licence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "HMO mandatory licence, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "hmo-additional-licence",
+            "kind": "page",
+            "route": "hmo-additional-licence",
+            "title": "What is your HMO additional licence number?",
+            "stepConfig": "HmoAdditionalLicenceStepConfig",
+            "containers": [
+                "task:LicensingTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/hmo-additional-licence/v1.jpg",
+                    "thumbnail": "img/hmo-additional-licence/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update the type of licensing you have for your property",
+                            "answer": "HMO additional licence, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-licensing-later",
+            "kind": "page",
+            "route": "provide-licensing-later",
+            "title": "Provide licensing later",
+            "stepConfig": "ProvideLicensingLaterStepConfig",
+            "containers": [
+                "task:LicensingTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "licensing-type",
+            "to": "selective-licence",
+            "label": "Selective licence, Continue",
+            "mode": "SELECTIVE_LICENCE",
+            "kind": "observed"
+        },
+        {
+            "from": "licensing-type",
+            "to": "hmo-mandatory-licence",
+            "label": "HMO mandatory licence, Continue",
+            "mode": "HMO_MANDATORY_LICENCE",
+            "kind": "observed"
+        },
+        {
+            "from": "licensing-type",
+            "to": "hmo-additional-licence",
+            "label": "HMO additional licence, Continue",
+            "mode": "HMO_ADDITIONAL_LICENCE",
+            "kind": "observed"
+        },
+        {
+            "from": "licensing-type",
+            "to": "check-licensing-answers",
+            "label": "This property does not need a licence, Continue",
+            "mode": "NO_LICENSING",
+            "kind": "observed"
+        },
+        {
+            "from": "selective-licence",
+            "to": "check-licensing-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-licensing-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "check-licensing-answers",
+            "to": "licensing-type",
+            "label": "Change Licensing type",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "licensing-type",
+            "to": "change:hmo-mandatory-licence",
+            "label": "HMO mandatory licence, Continue",
+            "mode": "HMO_MANDATORY_LICENCE",
+            "kind": "change"
+        },
+        {
+            "from": "licensing-type",
+            "to": "change:hmo-additional-licence",
+            "label": "HMO additional licence, Continue",
+            "mode": "HMO_ADDITIONAL_LICENCE",
+            "kind": "change"
+        },
+        {
+            "from": "licensing-type",
+            "to": "check-licensing-answers",
+            "label": "This property does not need a licence, Continue",
+            "mode": "NO_LICENSING",
+            "kind": "change"
+        },
+        {
+            "from": "selective-licence",
+            "to": "check-licensing-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:hmo-mandatory-licence",
+            "to": "check-licensing-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:hmo-additional-licence",
+            "to": "check-licensing-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-licensing-answers",
+            "to": "selective-licence",
+            "label": "Change Licensing number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "hmo-mandatory-licence",
+            "to": "check-licensing-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-licensing-answers",
+            "to": "hmo-mandatory-licence",
+            "label": "Change Licensing number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "hmo-additional-licence",
+            "to": "check-licensing-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-licensing-answers",
+            "to": "hmo-additional-licence",
+            "label": "Change Licensing number",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "licensing-type",
+            "to": "provide-licensing-later",
+            "label": "Provide later",
+            "mode": "PROVIDE_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-licensing-later",
+            "to": "check-licensing-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "licensing-type",
+            "mode": "SELECTIVE_LICENCE",
+            "to": "selective-licence",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "licensing-type",
+            "mode": "HMO_MANDATORY_LICENCE",
+            "to": "hmo-mandatory-licence",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "licensing-type",
+            "mode": "HMO_ADDITIONAL_LICENCE",
+            "to": "hmo-additional-licence",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "licensing-type",
+            "mode": "NO_LICENSING",
+            "to": "check-licensing-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "licensing-type",
+            "mode": "PROVIDE_LATER",
+            "to": "provide-licensing-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "selective-licence",
+            "mode": "COMPLETE",
+            "to": "check-licensing-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "hmo-mandatory-licence",
+            "mode": "COMPLETE",
+            "to": "check-licensing-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "hmo-additional-licence",
+            "mode": "COMPLETE",
+            "to": "check-licensing-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-licensing-later",
+            "mode": "COMPLETE",
+            "to": "check-licensing-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "check-licensing-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "licensing-type",
+            "label": "Change Licensing or Change Licensing type"
+        }
+    ]
+}

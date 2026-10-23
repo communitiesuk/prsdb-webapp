@@ -1,0 +1,191 @@
+{
+    "journey": {
+        "name": "landlordDeregistration",
+        "title": "Delete your landlord account",
+        "basePath": "/landlord/deregister-landlord",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:33:34.718011300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Are you sure you want to delete your account?",
+            "stepConfig": "AreYouSureStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/are-you-sure/v1.jpg",
+                    "thumbnail": "img/are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/are-you-sure/v2.jpg",
+                    "thumbnail": "img/are-you-sure/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Landlord has no properties"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "reason",
+            "kind": "page",
+            "route": "reason",
+            "title": "Why are you deleting your account? (optional)",
+            "stepConfig": "ReasonStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/reason/v1.jpg",
+                    "thumbnail": "img/reason/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/deregister-landlord/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/deregister-landlord/confirmation",
+            "title": "Account deleted",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_deregister-landlord_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_deregister-landlord_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Alexander Smith",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Landlord has no properties"
+                        },
+                        {
+                            "step": "Are you sure you want to delete your account?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "are-you-sure",
+            "to": "reason",
+            "label": "Yes, delete",
+            "mode": "WANTS_TO_PROCEED",
+            "kind": "observed"
+        },
+        {
+            "from": "reason",
+            "to": "/landlord/deregister-landlord/confirmation",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/deregister-landlord/confirmation",
+            "label": "Yes",
+            "mode": "WANTS_TO_PROCEED",
+            "kind": "observed"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "/landlord/landlord-details",
+            "label": "No",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "are-you-sure",
+            "mode": "WANTS_TO_PROCEED",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "userHasRegisteredProperties"
+            ]
+        },
+        {
+            "from": "are-you-sure",
+            "mode": "DOES_NOT_WANT_TO_PROCEED",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "reason",
+            "mode": "COMPLETE",
+            "to": "/landlord/deregister-landlord/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "are-you-sure",
+            "label": ""
+        }
+    ]
+}

@@ -1,0 +1,268 @@
+{
+    "journey": {
+        "name": "updateOrganisationAddress",
+        "title": "Update the organisation address",
+        "basePath": "/landlord/landlord-details/update-organisation-address",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:38:16.400706900Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:OrgAddressTask",
+            "kind": "task",
+            "label": "Org address",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "lookup-address",
+            "kind": "page",
+            "route": "lookup-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "LookupAddressStepConfig",
+            "containers": [
+                "task:OrgAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/lookup-address/v1.jpg",
+                    "thumbnail": "img/lookup-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "select-address",
+            "kind": "page",
+            "route": "select-address",
+            "title": "Select your organisation’s address",
+            "stepConfig": "SelectAddressStepConfig",
+            "containers": [
+                "task:OrgAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/select-address/v1.jpg",
+                    "thumbnail": "img/select-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Select your organisation’s address",
+                            "answer": "Slate House, PRSDB Square, AA3 1AB"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "manual-address",
+            "kind": "page",
+            "route": "manual-address",
+            "title": "What is your organisation’s address?",
+            "stepConfig": "ManualAddressStepConfig",
+            "containers": [
+                "task:OrgAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/manual-address/v1.jpg",
+                    "thumbnail": "img/manual-address/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "no-address-found",
+            "kind": "page",
+            "route": "no-address-found",
+            "title": "No matching address in England or Wales found for ZZ9 9ZZ and Slate House",
+            "stepConfig": "NoAddressFoundStepConfig",
+            "containers": [
+                "task:OrgAddressTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/no-address-found/v1.jpg",
+                    "thumbnail": "img/no-address-found/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What is your organisation’s address?",
+                            "answer": "Postcode: ZZ9 9ZZ"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "lookup-address",
+            "to": "select-address",
+            "label": "Find address",
+            "mode": "ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "lookup-address",
+            "to": "no-address-found",
+            "label": "Postcode: ZZ9 9ZZ",
+            "mode": "NO_ADDRESSES_FOUND",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "/landlord/landlord-details",
+            "label": "Slate House, PRSDB Square, AA3 1AB / Slate House, PRSDB Road, AA3 1AB and 3 more",
+            "mode": "ADDRESS_SELECTED",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "manual-address",
+            "label": "I want to manually enter my address",
+            "mode": "MANUAL_ADDRESS",
+            "kind": "observed"
+        },
+        {
+            "from": "select-address",
+            "to": "lookup-address",
+            "label": "Search again",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "manual-address",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "no-address-found",
+            "to": "manual-address",
+            "label": "Enter address manually",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "no-address-found",
+            "to": "lookup-address",
+            "label": "search again.",
+            "mode": null,
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "lookup-address",
+            "mode": "ADDRESSES_FOUND",
+            "to": "select-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "lookup-address",
+            "mode": "NO_ADDRESSES_FOUND",
+            "to": "no-address-found",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "MANUAL_ADDRESS",
+            "to": "manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "ADDRESS_ALREADY_REGISTERED",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "select-address",
+            "mode": "ADDRESS_SELECTED",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "no-address-found",
+            "mode": "COMPLETE",
+            "to": "manual-address",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "manual-address",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "lookup-address",
+            "label": "Change Organisation address"
+        }
+    ]
+}

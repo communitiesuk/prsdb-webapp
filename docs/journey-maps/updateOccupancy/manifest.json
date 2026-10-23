@@ -1,0 +1,318 @@
+{
+    "journey": {
+        "name": "updateOccupancy",
+        "title": "Update whether the property is occupied",
+        "basePath": "/landlord/property-details/1/update-occupancy",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:36:46.692383900Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "occupancy",
+            "kind": "page",
+            "route": "occupancy",
+            "title": "Update whether your property is occupied by tenants",
+            "stepConfig": "OccupiedStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/occupancy/v1.jpg",
+                    "thumbnail": "img/occupancy/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-your-answers",
+            "kind": "page",
+            "route": "check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateOccupancyCheckYourAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-your-answers/v1.jpg",
+                    "thumbnail": "img/check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether your property is occupied by tenants",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_property-details_1/v3.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Are you sure you want to change this?",
+            "stepConfig": "OccupancyLettingAgentInterruptionStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_are-you-sure/v1.jpg",
+                    "thumbnail": "img/change_are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change Occupied by tenants"
+                        },
+                        {
+                            "step": "Update whether your property is occupied by tenants",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "are-you-sure",
+            "kind": "page",
+            "route": "are-you-sure",
+            "title": "Are you sure you want to change this?",
+            "stepConfig": "OccupancyLettingAgentInterruptionStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/are-you-sure/v1.jpg",
+                    "thumbnail": "img/are-you-sure/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether your property is occupied by tenants",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:OccupancyUpdateRoutingStep",
+            "kind": "decision",
+            "route": "internal:OccupancyUpdateRoutingStep",
+            "title": "Occupancy update routing",
+            "stepConfig": "OccupancyUpdateRoutingStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "occupancy",
+            "to": "internal:OccupancyUpdateRoutingStep",
+            "label": "",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:OccupancyUpdateRoutingStep",
+            "to": "check-your-answers",
+            "label": "No interruption",
+            "mode": "NO_INTERRUPTION",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:OccupancyUpdateRoutingStep",
+            "to": "are-you-sure",
+            "label": "Show interruption",
+            "mode": "SHOW_INTERRUPTION",
+            "kind": "observed"
+        },
+        {
+            "from": "check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-your-answers",
+            "to": "occupancy",
+            "label": "Change Occupied by tenants",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "occupancy",
+            "to": "check-your-answers",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "change"
+        },
+        {
+            "from": "occupancy",
+            "to": "internal:OccupancyUpdateRoutingStep",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "internal:OccupancyUpdateRoutingStep",
+            "to": "change:are-you-sure",
+            "label": "Show interruption",
+            "mode": "SHOW_INTERRUPTION",
+            "kind": "change"
+        },
+        {
+            "from": "change:are-you-sure",
+            "to": "check-your-answers",
+            "label": "Continue with the change",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "are-you-sure",
+            "to": "check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "internal:OccupancyUpdateRoutingStep",
+            "writers": [
+                "occupancy"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "occupancy",
+            "mode": "YES",
+            "to": "internal:OccupancyUpdateRoutingStep",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "occupancy",
+            "mode": "NO",
+            "to": "internal:OccupancyUpdateRoutingStep",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "are-you-sure",
+            "mode": "COMPLETE",
+            "to": "check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OccupancyUpdateRoutingStep",
+            "mode": "NO_INTERRUPTION",
+            "to": "check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:OccupancyUpdateRoutingStep",
+            "mode": "SHOW_INTERRUPTION",
+            "to": "are-you-sure",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "occupancy",
+            "label": "Change Is this property occupied by tenants?"
+        }
+    ]
+}

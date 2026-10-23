@@ -1,0 +1,924 @@
+{
+    "journey": {
+        "name": "updateGasSafety",
+        "title": "Update gas safety",
+        "basePath": "/landlord/property-details/1/update-gas-safety",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:36:28.568507300Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:GasSafetyDetailsTask",
+            "kind": "task",
+            "label": "Gas safety details",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "has-gas-supply",
+            "kind": "page",
+            "route": "has-gas-supply",
+            "title": "Does the property have a gas supply or any gas appliances?",
+            "stepConfig": "HasGasSupplyStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-gas-supply/v1.jpg",
+                    "thumbnail": "img/has-gas-supply/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "has-gas-safety",
+            "kind": "page",
+            "route": "has-gas-safety",
+            "title": "Do you have a gas safety certificate for this property?",
+            "stepConfig": "HasGasCertStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-gas-safety/v1.jpg",
+                    "thumbnail": "img/has-gas-safety/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "gas-safety-certificate-issue-date",
+            "kind": "page",
+            "route": "gas-safety-certificate-issue-date",
+            "title": "What’s the issue date on the gas safety certificate?",
+            "stepConfig": "GasCertIssueDateStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/gas-safety-certificate-issue-date/v1.jpg",
+                    "thumbnail": "img/gas-safety-certificate-issue-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "gas-safety-certificate-file-upload",
+            "kind": "page",
+            "route": "gas-safety-certificate-file-upload",
+            "title": "Upload the gas safety certificate",
+            "stepConfig": "UploadGasCertStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/gas-safety-certificate-file-upload/v1.jpg",
+                    "thumbnail": "img/gas-safety-certificate-file-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-gas-safety-certificate-uploads",
+            "kind": "page",
+            "route": "check-gas-safety-certificate-uploads",
+            "title": "You’ve uploaded 1 file",
+            "stepConfig": "CheckGasCertUploadsStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-gas-safety-certificate-uploads/v1.jpg",
+                    "thumbnail": "img/check-gas-safety-certificate-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-gas-safety-certificate-uploads/v2.jpg",
+                    "thumbnail": "img/check-gas-safety-certificate-uploads/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-gas-safety-certificate-uploads/v3.jpg",
+                    "thumbnail": "img/check-gas-safety-certificate-uploads/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-gas-safety-certificate-uploads/v4.jpg",
+                    "thumbnail": "img/check-gas-safety-certificate-uploads/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-gas-safety-certificate-uploads/v5.jpg",
+                    "thumbnail": "img/check-gas-safety-certificate-uploads/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-gas-safety-answers",
+            "kind": "page",
+            "route": "check-gas-safety-answers",
+            "title": "Gas safety certificate",
+            "stepConfig": "UpdateCheckGasSafetyAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-gas-safety-answers/v1.jpg",
+                    "thumbnail": "img/check-gas-safety-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-gas-safety-answers/v2.jpg",
+                    "thumbnail": "img/check-gas-safety-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Does the property have a gas supply or any gas appliances?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-gas-safety-answers/v3.jpg",
+                    "thumbnail": "img/check-gas-safety-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-gas-safety-answers/v4.jpg",
+                    "thumbnail": "img/check-gas-safety-answers/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Does the property have a gas supply or any gas appliances?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_property-details_1/v3.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_property-details_1/v4.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the issue date on the gas safety certificate?",
+                            "answer": "Date: 23 October 2027"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/landlord_property-details_1/v5.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/landlord_property-details_1/v6.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Does the property have a gas supply or any gas appliances?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v7",
+                    "image": "img/landlord_property-details_1/v7.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v7.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:gas-safety-certificate-missing",
+            "kind": "page",
+            "route": "gas-safety-certificate-missing",
+            "title": "You must get a valid gas safety certificate for this property",
+            "stepConfig": "GasCertMissingStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_gas-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/change_gas-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Gas safety certificate",
+                            "answer": "Change Does the property have a gas supply or any gas appliances?"
+                        },
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:remove-gas-safety-certificate-upload",
+            "kind": "page",
+            "route": "remove-gas-safety-certificate-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveGasCertUploadStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_remove-gas-safety-certificate-upload/v1.jpg",
+                    "thumbnail": "img/change_remove-gas-safety-certificate-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Gas safety certificate",
+                            "answer": "Change Does the property have a gas supply or any gas appliances?"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "gas-safety-certificate-missing",
+            "kind": "page",
+            "route": "gas-safety-certificate-missing",
+            "title": "You must get a valid gas safety certificate for this property",
+            "stepConfig": "GasCertMissingStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/gas-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/gas-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/gas-safety-certificate-missing/v2.jpg",
+                    "thumbnail": "img/gas-safety-certificate-missing/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Do you have a gas safety certificate for this property?",
+                            "answer": "No, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "gas-safety-certificate-expired",
+            "kind": "page",
+            "route": "gas-safety-certificate-expired",
+            "title": "This gas safety certificate has expired",
+            "stepConfig": "GasCertExpiredStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/gas-safety-certificate-expired/v1.jpg",
+                    "thumbnail": "img/gas-safety-certificate-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the issue date on the gas safety certificate?",
+                            "answer": "Date: 23 October 2027"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-gas-safety-certificate-upload",
+            "kind": "page",
+            "route": "remove-gas-safety-certificate-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveGasCertUploadStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/remove-gas-safety-certificate-upload/v1.jpg",
+                    "thumbnail": "img/remove-gas-safety-certificate-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "kind": "decision",
+            "route": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "title": "Has any in collection",
+            "stepConfig": "HasAnyInCollectionStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-gas-safety-certificate-later",
+            "kind": "page",
+            "route": "provide-gas-safety-certificate-later",
+            "title": "Provide gas cert later",
+            "stepConfig": "ProvideGasCertLaterStepConfig",
+            "containers": [
+                "task:GasSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1#compliance-information",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1#compliance-information",
+            "title": "/landlord/property-details/1#compliance-information",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "has-gas-supply",
+            "to": "has-gas-safety",
+            "label": "Yes, Continue",
+            "mode": "HAS_SUPPLY",
+            "kind": "observed"
+        },
+        {
+            "from": "has-gas-supply",
+            "to": "check-gas-safety-answers",
+            "label": "No, Continue",
+            "mode": "NO_SUPPLY",
+            "kind": "observed"
+        },
+        {
+            "from": "has-gas-safety",
+            "to": "gas-safety-certificate-issue-date",
+            "label": "Yes, Continue",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "has-gas-safety",
+            "to": "gas-safety-certificate-missing",
+            "label": "No, Continue",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "gas-safety-certificate-issue-date",
+            "to": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "label": "Continue",
+            "mode": "GAS_SAFETY_CERTIFICATE_IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "to": "gas-safety-certificate-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "gas-safety-certificate-issue-date",
+            "to": "gas-safety-certificate-expired",
+            "label": "Date: 23 October 2027",
+            "mode": "GAS_SAFETY_CERTIFICATE_OUTDATED",
+            "kind": "observed"
+        },
+        {
+            "from": "gas-safety-certificate-file-upload",
+            "to": "check-gas-safety-certificate-uploads",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "to": "check-gas-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "to": "gas-safety-certificate-file-upload",
+            "label": "Upload another file",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "to": "remove-gas-safety-certificate-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "/landlord/property-details/1",
+            "label": "Confirm and submit update",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "has-gas-supply",
+            "label": "Change Does the property have a gas supply or any gas appliances?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "has-gas-supply",
+            "to": "check-gas-safety-answers",
+            "label": "No, Continue",
+            "mode": "NO_SUPPLY",
+            "kind": "change"
+        },
+        {
+            "from": "has-gas-safety",
+            "to": "change:gas-safety-certificate-missing",
+            "label": "No, Continue",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "change:gas-safety-certificate-missing",
+            "to": "check-gas-safety-answers",
+            "label": "Continue without a valid gas safety certificate",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "to": "check-gas-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "to": "change:remove-gas-safety-certificate-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "has-gas-safety",
+            "label": "Change Do you have a valid gas safety certificate for this property?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "gas-safety-certificate-issue-date",
+            "label": "Change Issue date",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "check-gas-safety-certificate-uploads",
+            "label": "Change Your certificate",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "gas-safety-certificate-missing",
+            "to": "check-gas-safety-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "gas-safety-certificate-expired",
+            "to": "check-gas-safety-answers",
+            "label": "Continue without a valid gas safety certificate",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "gas-safety-certificate-expired",
+            "to": "gas-safety-certificate-issue-date",
+            "label": "Change the issue date",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-gas-safety-certificate-upload",
+            "to": "gas-safety-certificate-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-gas-safety-certificate-upload",
+            "to": "check-gas-safety-certificate-uploads",
+            "label": "No / Cancel / Yes",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "has-gas-supply",
+            "to": "provide-gas-safety-certificate-later",
+            "label": "Provide later",
+            "mode": "PROVIDE_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-gas-safety-certificate-later",
+            "to": "check-gas-safety-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "to": "/landlord/property-details/1#compliance-information",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "to": "check-gas-safety-certificate-uploads",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-gas-safety-certificate-upload",
+            "writers": [
+                "gas-safety-certificate-file-upload"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "has-gas-supply",
+            "mode": "HAS_SUPPLY",
+            "to": "has-gas-safety",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-gas-supply",
+            "mode": "NO_SUPPLY",
+            "to": "check-gas-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-gas-supply",
+            "mode": "PROVIDE_LATER",
+            "to": "provide-gas-safety-certificate-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "has-gas-safety",
+            "mode": "YES",
+            "to": "gas-safety-certificate-issue-date",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-gas-safety",
+            "mode": "NO",
+            "to": "gas-safety-certificate-missing",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "gas-safety-certificate-issue-date",
+            "mode": "GAS_SAFETY_CERTIFICATE_OUTDATED",
+            "to": "gas-safety-certificate-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "gas-safety-certificate-issue-date",
+            "mode": "GAS_SAFETY_CERTIFICATE_IN_DATE",
+            "to": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "gas-safety-certificate-file-upload",
+            "mode": "COMPLETE",
+            "to": "check-gas-safety-certificate-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-gas-safety-certificate-uploads",
+            "mode": "COMPLETE",
+            "to": "check-gas-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-gas-safety-certificate-upload",
+            "mode": "NO_MEMBERS",
+            "to": "gas-safety-certificate-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-gas-safety-certificate-upload",
+            "mode": "SOME_MEMBERS",
+            "to": "check-gas-safety-certificate-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "gas-safety-certificate-expired",
+            "mode": "COMPLETE",
+            "to": "check-gas-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "gas-safety-certificate-missing",
+            "mode": "COMPLETE",
+            "to": "check-gas-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-gas-safety-certificate-later",
+            "mode": "COMPLETE",
+            "to": "check-gas-safety-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "check-gas-safety-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1#compliance-information",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "mode": "NO_MEMBERS",
+            "to": "gas-safety-certificate-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:GasSafetyDetailsTask",
+            "mode": "SOME_MEMBERS",
+            "to": "check-gas-safety-certificate-uploads",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "has-gas-supply",
+            "label": "Change"
+        }
+    ]
+}

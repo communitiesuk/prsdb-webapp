@@ -1,0 +1,268 @@
+{
+    "journey": {
+        "name": "propertyDeregistration",
+        "title": "Delete a property record",
+        "basePath": "/landlord/deregister-property/1",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:33:38.248091700Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "info",
+            "kind": "page",
+            "route": "info",
+            "title": "Deregister 1, Example Road, EG1 1AA",
+            "stepConfig": "DeregisterInfoStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/info/v1.jpg",
+                    "thumbnail": "img/info/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirm",
+            "kind": "page",
+            "route": "confirm",
+            "title": "Confirm property deregistration",
+            "stepConfig": "ConfirmStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirm/v1.jpg",
+                    "thumbnail": "img/confirm/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/deregister-property/1/confirmation",
+            "kind": "terminal",
+            "route": "/landlord/deregister-property/1/confirmation",
+            "title": "Deregistered 1, Example Road, EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_deregister-property_1_confirmation/v1.jpg",
+                    "thumbnail": "img/landlord_deregister-property_1_confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-invitations",
+            "kind": "page",
+            "route": "check-invitations",
+            "title": "Check these actions before you deregister 1, Example Road, EG1 1AA",
+            "stepConfig": "CheckPendingInvitationsStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-invitations/v1.jpg",
+                    "thumbnail": "img/check-invitations/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property has a pending joint landlord invitation"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "cannot-deregister",
+            "kind": "page",
+            "route": "cannot-deregister",
+            "title": "Deregistering a property when it has joint landlords",
+            "stepConfig": "CannotDeregisterStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/cannot-deregister/v1.jpg",
+                    "thumbnail": "img/cannot-deregister/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property has joint landlords"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "start",
+            "kind": "decision",
+            "route": "start",
+            "title": "Has pending invitations",
+            "stepConfig": "HasPendingInvitationsStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "deregister",
+            "kind": "decision",
+            "route": "deregister",
+            "title": "Check can deregister",
+            "stepConfig": "CheckCanDeregisterStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "info",
+            "to": "start",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "confirm",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "confirm",
+            "to": "/landlord/deregister-property/1/confirmation",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "check-invitations",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "check-invitations",
+            "to": "confirm",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "deregister",
+            "to": "info",
+            "label": "Single landlord",
+            "mode": "SINGLE_LANDLORD",
+            "kind": "observed"
+        },
+        {
+            "from": "deregister",
+            "to": "cannot-deregister",
+            "label": "Has joint landlords",
+            "mode": "HAS_JOINT_LANDLORDS",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "deregister",
+            "mode": "SINGLE_LANDLORD",
+            "to": "info",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "deregister",
+            "mode": "HAS_JOINT_LANDLORDS",
+            "to": "cannot-deregister",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "info",
+            "mode": "COMPLETE",
+            "to": "start",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "start",
+            "mode": "YES",
+            "to": "check-invitations",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "start",
+            "mode": "NO",
+            "to": "confirm",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-invitations",
+            "mode": "COMPLETE",
+            "to": "confirm",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "confirm",
+            "mode": "COMPLETE",
+            "to": "/landlord/deregister-property/1/confirmation",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "deregister",
+            "label": ""
+        }
+    ]
+}

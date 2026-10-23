@@ -1,0 +1,233 @@
+{
+    "journey": {
+        "name": "updateHouseholdsAndTenants",
+        "title": "Update households and tenants",
+        "basePath": "/landlord/property-details/1/update-households-and-tenants",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:36:32.466466800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:HouseholdsAndTenantsTask",
+            "kind": "task",
+            "label": "Households and tenants",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "number-of-households",
+            "kind": "page",
+            "route": "number-of-households",
+            "title": "Households in your property",
+            "stepConfig": "HouseholdStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/number-of-households/v1.jpg",
+                    "thumbnail": "img/number-of-households/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "number-of-people",
+            "kind": "page",
+            "route": "number-of-people",
+            "title": "Update how many people live in your property",
+            "stepConfig": "TenantsStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/number-of-people/v1.jpg",
+                    "thumbnail": "img/number-of-people/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "households-tenants-check-your-answers",
+            "kind": "page",
+            "route": "households-tenants-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateHouseholdsAndTenantsCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/households-tenants-check-your-answers/v1.jpg",
+                    "thumbnail": "img/households-tenants-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-tenancy-details-later",
+            "kind": "page",
+            "route": "provide-tenancy-details-later",
+            "title": "Provide tenancy details later",
+            "stepConfig": "ProvideTenancyDetailsLaterStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "number-of-households",
+            "to": "number-of-people",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "number-of-people",
+            "to": "households-tenants-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "households-tenants-check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "households-tenants-check-your-answers",
+            "to": "number-of-households",
+            "label": "Change Number of households",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "number-of-people",
+            "to": "households-tenants-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "households-tenants-check-your-answers",
+            "to": "number-of-people",
+            "label": "Change Number of tenants",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "number-of-households",
+            "to": "provide-tenancy-details-later",
+            "label": "Provide this later",
+            "mode": "PROVIDE_THIS_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-tenancy-details-later",
+            "to": "households-tenants-check-your-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "number-of-households",
+            "mode": "COMPLETE",
+            "to": "number-of-people",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "number-of-households",
+            "mode": "PROVIDE_THIS_LATER",
+            "to": "provide-tenancy-details-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "number-of-people",
+            "mode": "COMPLETE",
+            "to": "households-tenants-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-tenancy-details-later",
+            "mode": "COMPLETE",
+            "to": "households-tenants-check-your-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "households-tenants-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "number-of-households",
+            "label": "Change Number of households"
+        }
+    ]
+}

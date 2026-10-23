@@ -1,0 +1,620 @@
+{
+    "journey": {
+        "name": "updateTenancyDetails",
+        "title": "Update tenancy details",
+        "basePath": "/landlord/property-details/1/update-tenancy-details",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:37:45.643295500Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:HouseholdsAndTenantsTask",
+            "kind": "task",
+            "label": "Households and tenants",
+            "parent": null
+        },
+        {
+            "id": "task:RentIncludesBillsTask",
+            "kind": "task",
+            "label": "Rent includes bills",
+            "parent": null
+        },
+        {
+            "id": "task:RentFrequencyAndAmountTask",
+            "kind": "task",
+            "label": "Rent frequency and amount",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "number-of-households",
+            "kind": "page",
+            "route": "number-of-households",
+            "title": "Households in your property",
+            "stepConfig": "HouseholdStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/number-of-households/v1.jpg",
+                    "thumbnail": "img/number-of-households/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "number-of-people",
+            "kind": "page",
+            "route": "number-of-people",
+            "title": "Update how many people live in your property",
+            "stepConfig": "TenantsStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/number-of-people/v1.jpg",
+                    "thumbnail": "img/number-of-people/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-includes-bills",
+            "kind": "page",
+            "route": "rent-includes-bills",
+            "title": "Update whether the rent includes bills",
+            "stepConfig": "RentIncludesBillsStepConfig",
+            "containers": [
+                "task:RentIncludesBillsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-includes-bills/v1.jpg",
+                    "thumbnail": "img/rent-includes-bills/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "bills-included",
+            "kind": "page",
+            "route": "bills-included",
+            "title": "Update which of these you include in the rent",
+            "stepConfig": "BillsIncludedStepConfig",
+            "containers": [
+                "task:RentIncludesBillsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/bills-included/v1.jpg",
+                    "thumbnail": "img/bills-included/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "property-furnished",
+            "kind": "page",
+            "route": "property-furnished",
+            "title": "Update is the property furnished",
+            "stepConfig": "FurnishedStatusStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/property-furnished/v1.jpg",
+                    "thumbnail": "img/property-furnished/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-frequency",
+            "kind": "page",
+            "route": "rent-frequency",
+            "title": "Update when you charge rent",
+            "stepConfig": "RentFrequencyStepConfig",
+            "containers": [
+                "task:RentFrequencyAndAmountTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-frequency/v1.jpg",
+                    "thumbnail": "img/rent-frequency/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "rent-amount",
+            "kind": "page",
+            "route": "rent-amount",
+            "title": "Update your monthly rent",
+            "stepConfig": "RentAmountStepConfig",
+            "containers": [
+                "task:RentFrequencyAndAmountTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/rent-amount/v1.jpg",
+                    "thumbnail": "img/rent-amount/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/rent-amount/v2.jpg",
+                    "thumbnail": "img/rent-amount/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Other"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/rent-amount/v3.jpg",
+                    "thumbnail": "img/rent-amount/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "4 weekly"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/rent-amount/v4.jpg",
+                    "thumbnail": "img/rent-amount/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Weekly"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "tenancy-details-check-your-answers",
+            "kind": "page",
+            "route": "tenancy-details-check-your-answers",
+            "title": "Check your answers",
+            "stepConfig": "UpdateTenancyDetailsCyaConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/tenancy-details-check-your-answers/v1.jpg",
+                    "thumbnail": "img/tenancy-details-check-your-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/tenancy-details-check-your-answers/v2.jpg",
+                    "thumbnail": "img/tenancy-details-check-your-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether the rent includes bills",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Update whether the rent includes bills",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:rent-amount",
+            "kind": "page",
+            "route": "rent-amount",
+            "title": "Update your 4-weekly rent",
+            "stepConfig": "RentAmountStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_rent-amount/v1.jpg",
+                    "thumbnail": "img/change_rent-amount/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "4 weekly"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/change_rent-amount/v2.jpg",
+                    "thumbnail": "img/change_rent-amount/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Check your answers",
+                            "answer": "Change When rent is paid"
+                        },
+                        {
+                            "step": "Update when you charge rent",
+                            "answer": "Weekly"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-tenancy-details-later",
+            "kind": "page",
+            "route": "provide-tenancy-details-later",
+            "title": "Provide tenancy details later",
+            "stepConfig": "ProvideTenancyDetailsLaterStepConfig",
+            "containers": [
+                "task:HouseholdsAndTenantsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "number-of-households",
+            "to": "number-of-people",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "number-of-people",
+            "to": "rent-includes-bills",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-includes-bills",
+            "to": "bills-included",
+            "label": "Yes",
+            "mode": "YES",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-includes-bills",
+            "to": "property-furnished",
+            "label": "No",
+            "mode": "NO",
+            "kind": "observed"
+        },
+        {
+            "from": "bills-included",
+            "to": "property-furnished",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "property-furnished",
+            "to": "rent-frequency",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-frequency",
+            "to": "rent-amount",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "rent-amount",
+            "to": "tenancy-details-check-your-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "rent-includes-bills",
+            "label": "Change Rent includes bills",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "rent-includes-bills",
+            "to": "tenancy-details-check-your-answers",
+            "label": "No",
+            "mode": "NO",
+            "kind": "change"
+        },
+        {
+            "from": "bills-included",
+            "to": "tenancy-details-check-your-answers",
+            "label": "Gas / Electricity and 10 more",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "bills-included",
+            "label": "Change Which bills are included",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "property-furnished",
+            "label": "Change Furniture provided",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "property-furnished",
+            "to": "tenancy-details-check-your-answers",
+            "label": "Furnished / Partly furnished / Unfurnished",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "rent-frequency",
+            "label": "Change When rent is paid",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "rent-frequency",
+            "to": "change:rent-amount",
+            "label": "4 weekly / Weekly",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "rent-amount",
+            "to": "tenancy-details-check-your-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "to": "rent-amount",
+            "label": "Change Rent amount",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "number-of-households",
+            "to": "provide-tenancy-details-later",
+            "label": "Provide this later",
+            "mode": "PROVIDE_THIS_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-tenancy-details-later",
+            "to": "rent-includes-bills",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [
+        {
+            "node": "tenancy-details-check-your-answers",
+            "kind": "http-500",
+            "detail": "\"Change Number of households\" led to http://localhost:63436/landlord/property-details/1/update-tenancy-details/number-of-households?journeyId=shqjwg6"
+        },
+        {
+            "node": "tenancy-details-check-your-answers",
+            "kind": "http-500",
+            "detail": "\"Change Number of tenants\" led to http://localhost:63436/landlord/property-details/1/update-tenancy-details/number-of-people?journeyId=6u6sd2r"
+        }
+    ],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "number-of-households",
+            "mode": "COMPLETE",
+            "to": "number-of-people",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "number-of-households",
+            "mode": "PROVIDE_THIS_LATER",
+            "to": "provide-tenancy-details-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "number-of-people",
+            "mode": "COMPLETE",
+            "to": "rent-includes-bills",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-tenancy-details-later",
+            "mode": "COMPLETE",
+            "to": "rent-includes-bills",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "rent-includes-bills",
+            "mode": "YES",
+            "to": "bills-included",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-includes-bills",
+            "mode": "NO",
+            "to": "property-furnished",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "bills-included",
+            "mode": "COMPLETE",
+            "to": "property-furnished",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "property-furnished",
+            "mode": "COMPLETE",
+            "to": "rent-frequency",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-frequency",
+            "mode": "COMPLETE",
+            "to": "rent-amount",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "rent-amount",
+            "mode": "COMPLETE",
+            "to": "tenancy-details-check-your-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "tenancy-details-check-your-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "number-of-households",
+            "label": "Change Tenancy"
+        }
+    ]
+}

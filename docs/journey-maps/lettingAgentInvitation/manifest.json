@@ -1,0 +1,242 @@
+{
+    "journey": {
+        "name": "lettingAgentInvitation",
+        "title": "Accept an invitation to act as a letting agent",
+        "basePath": "/landlord/letting-agent/invitation",
+        "gitCommit": "3a5832daa",
+        "generatedAt": "2026-10-23T09:42:40.246969400Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": false,
+            "pdjb-1053-dashboard-nav-link": true,
+            "pdjb-1022-delegate-to-letting-agent": true,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1040-correspondence-address": true,
+            "pdjb-1009-payments": false,
+            "pdjb-926-landlord-dashboard-update": true,
+            "pdjb-1210-multi-user-organisations": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "set-password",
+            "kind": "page",
+            "route": "set-password",
+            "title": "Set your password for this property",
+            "stepConfig": "SetPasswordStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/set-password/v1.jpg",
+                    "thumbnail": "img/set-password/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "confirmation",
+            "kind": "page",
+            "route": "confirmation",
+            "title": "Property password created",
+            "stepConfig": "ConfirmationStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/confirmation/v1.jpg",
+                    "thumbnail": "img/confirmation/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/letting-agent/property-details/3334abcd-5678-abcd-1234-567abcd1111a",
+            "kind": "terminal",
+            "route": "/landlord/letting-agent/property-details/3334abcd-5678-abcd-1234-567abcd1111a",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_letting-agent_property-details_3334abcd-5678-abcd-1234-567abcd1111a/v1.jpg",
+                    "thumbnail": "img/landlord_letting-agent_property-details_3334abcd-5678-abcd-1234-567abcd1111a/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "enter-password",
+            "kind": "page",
+            "route": "enter-password",
+            "title": "Enter the password for this property",
+            "stepConfig": "EnterPasswordStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/enter-password/v1.jpg",
+                    "thumbnail": "img/enter-password/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Letting agent already has a password"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasPasswordStep",
+            "kind": "decision",
+            "route": "internal:HasPasswordStep",
+            "title": "Has password",
+            "stepConfig": "HasPasswordStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "start",
+            "kind": "decision",
+            "route": "start",
+            "title": "Start",
+            "stepConfig": "StartStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "set-password",
+            "to": "confirmation",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "confirmation",
+            "to": "/landlord/letting-agent/property-details/3334abcd-5678-abcd-1234-567abcd1111a",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "enter-password",
+            "to": "/landlord/letting-agent/property-details/3334abcd-5678-abcd-1234-567abcd1111a",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasPasswordStep",
+            "to": "enter-password",
+            "label": "Has password",
+            "mode": "HAS_PASSWORD",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasPasswordStep",
+            "to": "set-password",
+            "label": "No password",
+            "mode": "NO_PASSWORD",
+            "kind": "observed"
+        },
+        {
+            "from": "start",
+            "to": "internal:HasPasswordStep",
+            "label": "",
+            "mode": null,
+            "kind": "structural"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "internal:HasPasswordStep",
+            "writers": [
+                "start"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "set-password",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "hasExistingPassword",
+                "invitationToken",
+                "outcome:internal:HasPasswordStep",
+                "outcome:start"
+            ]
+        },
+        {
+            "from": "enter-password",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "hasExistingPassword",
+                "invitationToken",
+                "outcome:internal:HasPasswordStep",
+                "outcome:start"
+            ]
+        },
+        {
+            "from": "confirmation",
+            "mode": "COMPLETE",
+            "to": null,
+            "walked": true,
+            "reads": [
+                "invitationToken"
+            ]
+        },
+        {
+            "from": "internal:HasPasswordStep",
+            "mode": "HAS_PASSWORD",
+            "to": "enter-password",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasPasswordStep",
+            "mode": "NO_PASSWORD",
+            "to": "set-password",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "start",
+            "label": "Link in the invitation email"
+        }
+    ]
+}
