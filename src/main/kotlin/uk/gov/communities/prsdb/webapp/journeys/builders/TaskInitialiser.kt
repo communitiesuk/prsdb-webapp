@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyContainer
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -114,7 +115,10 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         // prefixed themselves and become "<outerTask>/<innerTask>/<routeSegment>"
         val landingStep = taskSegment?.let { elementConfiguration.buildPrefixedPath(taskSegment)?.let { createLandingStep(it) } }
 
-        return builtSteps + listOfNotNull(landingStep)
+        val taskSteps = builtSteps + listOfNotNull(landingStep)
+        val taskContainer = JourneyContainer.Task(task::class, taskSegment)
+        taskSteps.forEach { it.enclosedBy(taskContainer) }
+        return taskSteps
     }
 
     private fun createLandingStep(taskPath: String): TaskRouteRedirectStep {

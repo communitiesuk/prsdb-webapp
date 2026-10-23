@@ -330,6 +330,17 @@ class DestinationTests {
     }
 
     @Test
+    fun `NavigationalStep Destination works out its URL from the step's next destination for a link`() {
+        val mockStep = mock<JourneyStep.InternalStep<*, *>>()
+        whenever(mockStep.isStepReachable).thenReturn(true)
+        whenever(mockStep.getNextDestinationForLink()).thenReturn(Destination.ExternalUrl("/next-page"))
+
+        val urlString = Destination.NavigationalStep(mockStep).toUrlStringOrNull()
+
+        assertEquals("/next-page", urlString)
+    }
+
+    @Test
     fun `Nowhere Destination throws when converted to  a ModelAndView`() {
         // Arrange
         val destination = Destination.Nowhere()

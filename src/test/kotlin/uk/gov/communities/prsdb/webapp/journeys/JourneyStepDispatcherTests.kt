@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,15 +15,22 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 
 class JourneyStepDispatcherTests {
+    private var previousObserver: ((String, Map<String, StepLifecycleOrchestrator>) -> ModelAndView?)? = null
+
     @BeforeEach
     fun setUp() {
+        previousObserver = JourneyStepDispatcher.routingMapObserver
+        JourneyStepDispatcher.routingMapObserver = null
         val request = MockHttpServletRequest()
         request.requestURI = "/base/task-route"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
     }
 
     @AfterEach
-    fun tearDown() = RequestContextHolder.resetRequestAttributes()
+    fun tearDown() {
+        RequestContextHolder.resetRequestAttributes()
+        JourneyStepDispatcher.routingMapObserver = previousObserver
+    }
 
     @Nested
     inner class HandleInitialisableRequest {
@@ -39,6 +47,54 @@ class JourneyStepDispatcherTests {
                 JourneyStepDispatcher.handleInitialisableRequest(
                     rawStepPath = "/task-route",
                     createRoutingMap = { map },
+                    initialiseJourney = { "journey-id" },
+                    dispatch = { expected },
+                )
+
+            assertEquals(expected, result)
+        }
+
+        @Test
+        fun `returns the routing map observer's result instead of dispatching when it provides one`() {
+            val orchestrator =
+                StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator(
+                    mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>(),
+                )
+            val map = mapOf("task-route" to orchestrator)
+            val observed = ModelAndView("observed")
+            var dispatched = false
+            JourneyStepDispatcher.routingMapObserver = { stepPath, routingMap ->
+                if (stepPath == "task-route" && routingMap == map) observed else null
+            }
+
+            val result =
+                JourneyStepDispatcher.handleInitialisableRequest(
+                    rawStepPath = "/task-route",
+                    createRoutingMap = { map },
+                    initialiseJourney = { "journey-id" },
+                    dispatch = {
+                        dispatched = true
+                        ModelAndView("view")
+                    },
+                )
+
+            assertEquals(observed, result)
+            assertFalse(dispatched)
+        }
+
+        @Test
+        fun `dispatches as normal when the routing map observer returns null`() {
+            val orchestrator =
+                StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator(
+                    mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>(),
+                )
+            val expected = ModelAndView("view")
+            JourneyStepDispatcher.routingMapObserver = { _, _ -> null }
+
+            val result =
+                JourneyStepDispatcher.handleInitialisableRequest(
+                    rawStepPath = "/task-route",
+                    createRoutingMap = { mapOf("task-route" to orchestrator) },
                     initialiseJourney = { "journey-id" },
                     dispatch = { expected },
                 )
@@ -116,6 +172,31 @@ class JourneyStepDispatcherTests {
                 )
 
             assertEquals(expected, result)
+        }
+
+        @Test
+        fun `returns the routing map observer's result instead of dispatching when it provides one`() {
+            val orchestrator =
+                StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator(
+                    mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>(),
+                )
+            val observed = ModelAndView("observed")
+            var dispatched = false
+            JourneyStepDispatcher.routingMapObserver = { _, _ -> observed }
+
+            val result =
+                JourneyStepDispatcher.handleUninitialisableRequest(
+                    rawStepPath = "/task-route",
+                    createRoutingMap = { mapOf("task-route" to orchestrator) },
+                    dispatch = {
+                        dispatched = true
+                        ModelAndView("view")
+                    },
+                    getRedirect = { ModelAndView("redirect:/base") },
+                )
+
+            assertEquals(observed, result)
+            assertFalse(dispatched)
         }
 
         @Test

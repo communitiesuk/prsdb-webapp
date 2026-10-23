@@ -7,6 +7,10 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 
 object JourneyStepDispatcher {
+    // Lets local tooling inspect the routing map each controller builds; it is never set outside tests.
+    @Volatile
+    var routingMapObserver: ((stepPath: String, routingMap: Map<String, StepLifecycleOrchestrator>) -> ModelAndView?)? = null
+
     fun handleInitialisableRequest(
         rawStepPath: String,
         createRoutingMap: () -> Map<String, StepLifecycleOrchestrator>,
@@ -22,7 +26,8 @@ object JourneyStepDispatcher {
         }
         return try {
             val routingMap = createRoutingMap()
-            routingMap[stepPath]?.dispatch()
+            routingMapObserver?.invoke(stepPath, routingMap)
+                ?: routingMap[stepPath]?.dispatch()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (exception: Exception) {
             if (exception is NoSuchJourneyException || startNewJourneyOn(exception)) {
@@ -48,7 +53,8 @@ object JourneyStepDispatcher {
         }
         return try {
             val routingMap = createRoutingMap()
-            routingMap[stepPath]?.dispatch()
+            routingMapObserver?.invoke(stepPath, routingMap)
+                ?: routingMap[stepPath]?.dispatch()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (exception: Exception) {
             if (exception is NoSuchJourneyException || redirectOn(exception)) {
