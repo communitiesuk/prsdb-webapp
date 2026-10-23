@@ -57,7 +57,7 @@
     <div th:replace="~{fragments/banners/betaBanner :: betaBanner}"></div>
     <div th:replace="~{fragments/banners/featureFlagOverrideBanner :: featureFlagOverrideBanner}"></div>
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}"></a>
-    <main class="govuk-main-wrapper" th:classappend="${mainClass}" id="main-content" role="main">
+    <main class="govuk-main-wrapper" th:classappend="${mainClass}" id="main-content">
         <th:block th:replace="${content}"></th:block>
     </main>
 </div>

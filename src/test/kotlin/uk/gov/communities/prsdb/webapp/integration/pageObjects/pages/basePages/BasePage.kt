@@ -65,8 +65,8 @@ abstract class BasePage(
         assertEquals(1, page.locator("main").count(), "Page should have exactly one <main> element")
         assertEquals(
             1,
-            page.locator("main#main-content[role='main']").count(),
-            "The <main> element should have id=\"main-content\" (the skip link target) and role=\"main\"",
+            page.locator("main#main-content").count(),
+            "The <main> element should have id=\"main-content\" (the skip link target)",
         )
     }
 
