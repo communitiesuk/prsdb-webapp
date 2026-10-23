@@ -19,12 +19,8 @@
                  th:with="isSuccess=true">
                 <h3 class="govuk-notification-banner__heading"
                     th:text="#{teamMembers.accessLevelChangedBanner.heading}">teamMembers.accessLevelChangedBanner.heading</h3>
-                <th:block th:switch="${accessLevelChangedRole}">
-                    <p th:case="'ADMIN'" class="govuk-body"
-                       th:text="#{teamMembers.accessLevelChangedBanner.content.administrator(${accessLevelChangedMemberName})}">teamMembers.accessLevelChangedBanner.content.administrator</p>
-                    <p th:case="'EDITOR'" class="govuk-body"
-                       th:text="#{teamMembers.accessLevelChangedBanner.content.editor(${accessLevelChangedMemberName})}">teamMembers.accessLevelChangedBanner.content.editor</p>
-                </th:block>
+                <p class="govuk-body"
+                   th:text="#{${accessLevelChangedBannerContentKey}(${accessLevelChangedMemberName})}">teamMembers.accessLevelChangedBanner.content</p>
             </div>
         </th:block>
 

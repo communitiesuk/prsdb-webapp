@@ -162,10 +162,13 @@ class TeamMembersControllerTests(
     }
 
     @ParameterizedTest
-    @CsvSource("ADMIN, administrator", "EDITOR, editor")
+    @CsvSource(
+        "teamMembers.accessLevelChangedBanner.content.administrator, administrator",
+        "teamMembers.accessLevelChangedBanner.content.editor, editor",
+    )
     @WithMockUser(roles = ["ORG_ADMIN"], username = "user-123")
     fun `getTeamMembers renders the access level changed banner for the selected role`(
-        role: String,
+        bannerContentKey: String,
         roleDescription: String,
     ) {
         stubOrgLandlordWithCurrentUser()
@@ -174,7 +177,7 @@ class TeamMembersControllerTests(
             .get(TEAM_MEMBERS_ROUTE) {
                 flashAttr("successBanner", "accessLevelChanged")
                 flashAttr("accessLevelChangedMemberName", "Anita Locke")
-                flashAttr("accessLevelChangedRole", role)
+                flashAttr("accessLevelChangedBannerContentKey", bannerContentKey)
             }.andExpect {
                 status { isOk() }
                 content { string(containsString("Access level changed")) }
