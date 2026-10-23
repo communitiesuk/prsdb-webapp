@@ -1,0 +1,19 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block th:replace="~{fragments/forms/dateInput :: dateInput('date', 'day', 'month', 'year', #{${fieldSetHeading}}, #{${fieldSetHint}})}"></th:block>
+    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.heading}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.heading</h2>
+    <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.paragraph}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.paragraph</p>
+    <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.whenDoesItExpire.summary}, ~{::#details-content/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.whenDoesItExpire.paragraph.one}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.whenDoesItExpire.paragraph.one</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.whenDoesItExpire.paragraph.two}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.whenDoesItExpire.paragraph.two</p>
+        </div>
+    </details>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
+</html>
