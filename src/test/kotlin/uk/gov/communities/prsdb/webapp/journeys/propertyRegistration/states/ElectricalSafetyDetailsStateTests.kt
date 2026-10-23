@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -12,6 +13,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
@@ -27,6 +29,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectr
 import java.time.LocalDate
 
 class ElectricalSafetyDetailsStateTests {
+    private val currentDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
+
     @Test
     fun `getElectricalCertificateExpiryDateIfReachable returns the expiry date from state as a LocalDate`() {
         // Arrange
@@ -56,7 +60,7 @@ class ElectricalSafetyDetailsStateTests {
     @Test
     fun `getElectricalCertificateIsOutdated returns true if the certificate expiry date is in the past`() {
         electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now().minusDays(5), certType)
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), certType)
             assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
         }
     }
@@ -64,7 +68,7 @@ class ElectricalSafetyDetailsStateTests {
     @Test
     fun `getElectricalCertificateIsOutdated returns false if the certificate expiry date is in the future`() {
         electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now().plusDays(5), certType)
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.plusDays(5), certType)
             assertFalse(state.getElectricalCertificateIsOutdated()!!, "for $certType")
         }
     }
@@ -72,14 +76,14 @@ class ElectricalSafetyDetailsStateTests {
     @Test
     fun `getElectricalCertificateIsOutdated returns true if the certificate expires today`() {
         electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now(), certType)
+            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, certType)
             assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
         }
     }
 
     @Test
     fun `getElectricalCertificateIsOutdated throws if the expiry date is set but the cert type is missing`() {
-        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = AnyDateFormModel().applyFromDate(LocalDate.now()))
+        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = AnyDateFormModel().applyFromDate(currentDate))
 
         assertThrows<PrsdbWebException> { state.getElectricalCertificateIsOutdated() }
     }
