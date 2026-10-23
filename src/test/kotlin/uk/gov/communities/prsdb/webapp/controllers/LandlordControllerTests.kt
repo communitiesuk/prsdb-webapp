@@ -122,7 +122,7 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["ORG_EDITOR"], username = "removed-member")
-    fun `landlordDashboard returns 403 when session retains organisation role after membership removal`() {
+    fun `landlordDashboard forwards forbidden exception from userToLandlordService`() {
         whenever(userToLandlordService.getCurrentLandlordForUser())
             .thenThrow(ResponseStatusException(HttpStatus.FORBIDDEN))
 

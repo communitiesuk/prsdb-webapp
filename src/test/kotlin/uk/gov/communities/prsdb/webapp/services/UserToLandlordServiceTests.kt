@@ -122,7 +122,7 @@ class UserToLandlordServiceTests {
     }
 
     @Test
-    fun `getCurrentLandlordForUser returns forbidden after organisation membership is removed`() {
+    fun `getCurrentLandlordForUser throws forbidden when landlord lookup is empty on a subsequent call`() {
         val baseUserId = "organisation-user"
         val landlord = OrganisationalLandlord()
         val member =
@@ -156,7 +156,7 @@ class UserToLandlordServiceTests {
     }
 
     @Test
-    fun `getCurrentLandlordForUser preserves error when multiple landlords are found`() {
+    fun `getCurrentLandlordForUser throws a PrsdbWebException when multiple landlords are found`() {
         val baseUserId = "multiple-landlord-user"
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(MockLandlordData.createIndividualLandlord())
