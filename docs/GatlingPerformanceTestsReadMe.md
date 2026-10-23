@@ -244,6 +244,12 @@ Gatling's console output goes to a public GitHub Actions log, so `src/gatling/re
 warnings and errors. Without it logback defaults to DEBUG, which prints every request and response, including session
 cookies and OAuth codes. Diagnose failures from the uploaded Gatling report, or re-run locally with debug logging.
 
+To enable debug logging locally, temporarily change `<root level="WARN">` to `<root level="DEBUG">` in
+`src/gatling/resources/logback-test.xml`, then rerun your usual local `gatlingRun` command. Gradle copies the updated
+resource into the Gatling runtime classpath. Change the level back to `WARN` afterwards and check the diff before
+committing or pushing. Never enable debug logging in the public GitHub Actions workflow, and do not upload or share
+unredacted debug output: it can contain session cookies and OAuth codes.
+
 Each registration pass uses a separate sequential virtual user and a unique synthetic One Login subject, email,
 and phone value. It performs identity verification with synthetic claims, accepts the privacy notice, and completes
 the individual manual-address registration. Registration clears the app session to refresh the user's roles, so
