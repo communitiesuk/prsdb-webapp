@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.LocalDate
 
@@ -82,7 +83,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
                 when (electricalCertType) {
                     CertificateType.Eic -> isEicExpiryDateExpired(expiryDate)
                     CertificateType.Eicr -> isEicrExpiryDateExpired(expiryDate)
-                    else -> null
+                    else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
                 }
             }
 

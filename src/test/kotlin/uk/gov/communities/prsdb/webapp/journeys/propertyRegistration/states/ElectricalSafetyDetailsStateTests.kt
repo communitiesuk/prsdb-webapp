@@ -6,10 +6,12 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
@@ -73,6 +75,13 @@ class ElectricalSafetyDetailsStateTests {
             val state = buildTestElectricalSafetyDetailStateWithExpiryDate(LocalDate.now(), certType)
             assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
         }
+    }
+
+    @Test
+    fun `getElectricalCertificateIsOutdated throws if the expiry date is set but the cert type is missing`() {
+        val state = buildTestElectricalSafetyDetailState(expiryDateFormModel = AnyDateFormModel().applyFromDate(LocalDate.now()))
+
+        assertThrows<PrsdbWebException> { state.getElectricalCertificateIsOutdated() }
     }
 
     @Test

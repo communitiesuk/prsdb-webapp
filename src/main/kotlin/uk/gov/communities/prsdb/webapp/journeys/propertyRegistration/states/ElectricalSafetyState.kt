@@ -4,6 +4,7 @@ import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -46,10 +47,10 @@ interface ElectricalSafetyDetailState : JourneyState {
 
     fun getElectricalCertificateIsOutdated(): Boolean? =
         getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
-            when (getElectricalCertificateTypeAsCertificateType()) {
+            when (val certType = getElectricalCertificateTypeAsCertificateType()) {
                 CertificateType.Eic -> PropertyCompliance.isEicExpiryDateExpired(expiryDate.toJavaLocalDate())
                 CertificateType.Eicr -> PropertyCompliance.isEicrExpiryDateExpired(expiryDate.toJavaLocalDate())
-                else -> null
+                else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $certType")
             }
         }
 
