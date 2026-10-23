@@ -148,6 +148,8 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             val issueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
 
             assertThat(issueDatePage.heading).containsText("When was this certificate issued?")
+            assertThat(issueDatePage.renewingHeading).containsText("Renewing a gas safety certificate")
+            assertThat(issueDatePage.expiryDetailsSummary).containsText("When does a gas safety certificate expire")
         }
 
         @ParameterizedTest(name = "{0}")
