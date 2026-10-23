@@ -129,5 +129,5 @@ Enables {flag-name} in test. See {link-to-main-PR}."
 - If no config commit exists on `main` yet, do step 1 first.
 - If the feature should go live as part of a release group that does not yet exist, create the release group and
   associate the flag on `main` first (release groups cannot be empty and their names need a constant — see
-  `docs/FeatureFlagsReadMe.md`).
+  `docs/documentation/FeatureFlagsReadMe.md`).
 - If no feature-flag change is pending for the environment, no feature release is needed.

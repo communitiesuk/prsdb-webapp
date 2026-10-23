@@ -5,7 +5,7 @@ applyTo: "**/journeys/**,**/forms/**"
 # Journey Framework Instructions
 
 ## Documentation Reference
-- Full framework docs: [docs/JourneyFrameworkReadMe.md](../../docs/JourneyFrameworkReadMe.md)
+- Full framework docs: [docs/documentation/JourneyFrameworkReadMe.md](../../docs/documentation/JourneyFrameworkReadMe.md)
 - Detailed guides in `src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/docs/`:
   - `JourneyFrameworkReadMe.md` — overview
   - `JourneyFrameworkModel.md` — data model
@@ -58,7 +58,7 @@ Where a step on a shared form template needs a title different from its h1, pass
 property, and override `expectedTitleHeading` in its integration test.
 
 ### Transaction Metric Tagging
-A journey's final commit step must render its submit button via `transactionSubmitButton` (or `transactionWarningButton` for destructive actions) so the completion is counted in the transaction metric — either hardcoded in a commit-only template, or opted into with `"submitButton" to "transactionSubmitButton"` in `withAdditionalContentProperties` where the template is shared with non-commit steps. Tag exactly one button per completed journey; where that is not possible, record the gap in [MetricsReadMe](../../docs/MetricsReadMe.md) rather than risk double-counting.
+A journey's final commit step must render its submit button via `transactionSubmitButton` (or `transactionWarningButton` for destructive actions) so the completion is counted in the transaction metric — either hardcoded in a commit-only template, or opted into with `"submitButton" to "transactionSubmitButton"` in `withAdditionalContentProperties` where the template is shared with non-commit steps. Tag exactly one button per completed journey; where that is not possible, record the gap in [MetricsReadMe](../../docs/documentation/MetricsReadMe.md) rather than risk double-counting.
 
 ### Page Class Conventions
 Page class hierarchy:
