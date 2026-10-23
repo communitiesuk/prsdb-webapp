@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -14,11 +16,15 @@ class GasCertExpiredStepConfigTests {
     @Mock
     lateinit var mockState: GasSafetyDetailState
 
+    @Mock
+    lateinit var mockFeatureFlagManager: FeatureFlagManager
+
     @Test
-    fun `chooseTemplate returns occupied template when isOccupied is true`() {
+    fun `chooseTemplate returns occupied template when isOccupied is true and the 14 month expiry flag is enabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
 
         // Act
         val result = stepConfig.chooseTemplate(mockState)
@@ -28,10 +34,11 @@ class GasCertExpiredStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when isOccupied is false`() {
+    fun `chooseTemplate returns unoccupied template when isOccupied is false and the 14 month expiry flag is enabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
+        whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
 
         // Act
         val result = stepConfig.chooseTemplate(mockState)
@@ -40,8 +47,36 @@ class GasCertExpiredStepConfigTests {
         assertEquals("forms/gasSafetyCertificateExpiredForUnoccupiedProperty", result)
     }
 
+    @Test
+    fun `chooseTemplate returns before1894 occupied template when isOccupied is true and the 14 month expiry flag is disabled`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(false)
+
+        // Act
+        val result = stepConfig.chooseTemplate(mockState)
+
+        // Assert
+        assertEquals("forms/before1894GasSafetyCertificateExpiredForOccupiedProperty", result)
+    }
+
+    @Test
+    fun `chooseTemplate returns before1894 unoccupied template when isOccupied is false and the 14 month expiry flag is disabled`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(false)
+        whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(false)
+
+        // Act
+        val result = stepConfig.chooseTemplate(mockState)
+
+        // Assert
+        assertEquals("forms/before1894GasSafetyCertificateExpiredForUnoccupiedProperty", result)
+    }
+
     private fun setupStepConfig(): GasCertExpiredStepConfig {
-        val stepConfig = GasCertExpiredStepConfig()
+        val stepConfig = GasCertExpiredStepConfig(mockFeatureFlagManager)
         stepConfig.urlPath = GasCertExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
