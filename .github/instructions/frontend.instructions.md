@@ -37,8 +37,10 @@ each page title is unique and descriptive:
     ("Gas safety certificate") is not descriptive enough.
 - If the h1 fails these checks, pass a different message (usually a `pageTitle` key alongside the `heading` key) as
   the `title` argument, but this should be rare and should always be checked first. For shared journey form templates
-  where only some steps need a different title, see `pageTitleOverride` in `journeys.instructions.md`.
+  where only some steps need a different title, see the `title` step content property in `journeys.instructions.md`.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
+- Integration tests check every page object's title against its h1, or against `expectedTitleHeading` where the page
+  object overrides it (see `integration-tests.instructions.md`).
 
 ### Using Fragments
 ```html

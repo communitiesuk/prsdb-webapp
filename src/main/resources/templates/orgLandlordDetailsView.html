@@ -1,7 +1,7 @@
 <!--/*@thymesVar id="registerPropertyUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="pageTitleOverride" type="java.lang.String"*/-->
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{${pageTitleOverride ?: 'landlordDetails.pageTitle'}(${orgLandlord.name})},~{::main/content()}, false, ${backUrl}, null)}">
+<html th:replace="~{fragments/layout :: layout(#{${title ?: 'landlordDetails.pageTitle'}(${orgLandlord.name})},~{::main/content()}, false, ${backUrl}, null)}">
 <main>
     <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 

@@ -1,7 +1,6 @@
-<!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="confirmSignOutUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{${title}}, ~{::main/content()}, false, null, null)}">
+<html th:replace="~{fragments/layout :: layout(#{acceptOrganisationInvitation.userIsAlreadyLandlord.heading}, ~{::main/content()}, false, null, null)}">
 <main>
     <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">

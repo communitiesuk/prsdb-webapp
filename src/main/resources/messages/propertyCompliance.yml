@@ -204,7 +204,6 @@ electricalSafetyTask:
     eic:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
   electricalCertificateExpired:
-    title: This electrical safety certificate has expired
     heading: This electrical safety certificate has expired
     expiryDateParagraph: "You’ve told us this certificate expired on <strong>{0}</strong>."
     changeExpiryDate:

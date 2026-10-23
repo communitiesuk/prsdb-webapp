@@ -83,7 +83,8 @@ Template conventions:
 - Layouts extend `layout.html`
 - Fragments are in `components/` subdirectories
 - Form pages use `formPageWrapper.html` fragment
-- Page titles follow `<page> - <service> - GOV.UK` pattern
+- Page title = the h1. Only propose a different title if the h1 is not unique or not descriptive out of context
+  (see "Page Titles" in `.github/instructions/frontend.instructions.md`)
 
 ## Taking Screenshots for Validation
 

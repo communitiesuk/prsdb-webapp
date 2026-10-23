@@ -3,7 +3,7 @@
 <!--/*@thymesVar id="cancelLinkUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{changeOrgTeamMemberAccessLevel.removeAccess.heading}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{changeOrgTeamMemberAccessLevel.removeAccess.pageTitle(${memberName})}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
     <h1 class="govuk-heading-l" th:text="#{changeOrgTeamMemberAccessLevel.removeAccess.heading}">
         changeOrgTeamMemberAccessLevel.removeAccess.heading
     </h1>

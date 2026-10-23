@@ -30,7 +30,7 @@ class TrusteeAddressTask(
         )
 
     override val selectAddressContentProperties: Map<String, Any?> =
-        mapOf("pageTitleOverride" to "addressForms.selectAddress.trusteeRegistration.pageTitle")
+        mapOf("title" to "addressForms.selectAddress.trusteeRegistration.pageTitle")
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(

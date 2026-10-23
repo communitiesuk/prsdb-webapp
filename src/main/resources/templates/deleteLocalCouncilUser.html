@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUser.heading}, ~{::main/content()}, false, ${backLinkPath}, null)}">
+<html th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUser.pageTitle(${user.name})}, ~{::main/content()}, false, ${backLinkPath}, null)}">
 <main>
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
     <header id="header">
