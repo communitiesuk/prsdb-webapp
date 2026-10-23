@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html>
-<body th:replace="~{fragments/layout :: layout(#{manageLocalCouncilUsers.contentHeader(${localCouncil.name})}, ~{::body/content()}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{manageLocalCouncilUsers.contentHeader(${localCouncil.name})}, ~{::main/content()}, false, null, null)}">
+<main>
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <header id="header">
@@ -51,5 +50,4 @@
         </section>
     </th:block>
 </main>
-</body>
 </html>

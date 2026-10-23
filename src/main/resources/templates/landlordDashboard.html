@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(${landlordName}, ~{::main}, false)}">
-<main class="govuk-main-wrapper">
+<html th:replace="~{fragments/layout :: layout(${landlordName}, ~{::main/content()}, false, null, null)}">
+<main>
     <div id="page-content">
         <th:block
                 th:if="${landlordDashboardNotificationBannerViewModel.numberOfOutstandingActions != 0}"
