@@ -117,44 +117,44 @@ VALUES (1, 1, '2025-01-15'),
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
 VALUES
        -- 1: Provide later, occupied
-       (1, 1, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true),
+       (1, 1, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true),
        -- 2: Provide later, unoccupied
-       (2, 2, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true),
+       (2, 2, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true),
        -- 3: Valid, high rating, occupied
-       (3, 3, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
+       (3, 3, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
        -- 4: Valid, high rating, unoccupied
-       (4, 4, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
+       (4, 4, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
        -- 5: Valid, low rating, has MEES exemption, occupied
-       (5, 5, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
+       (5, 5, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
        -- 6: Valid, low rating, has MEES exemption, unoccupied
-       (6, 6, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
+       (6, 6, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
        -- 7: Valid, low rating, no exemption, occupied
-       (7, 7, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
+       (7, 7, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
        -- 8: Valid, low rating, no exemption, unoccupied
-       (8, 8, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
+       (8, 8, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
        -- 9: Expired, tenancy before expiry, high rating, occupied
-       (9, 9, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'c', null, null, true, true, true, null, null, null),
+       (9, 9, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'c', null, null, true, true, true, null, null, null),
        -- 10: Expired, tenancy before expiry, high rating, unoccupied
-       (10, 10, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
+       (10, 10, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
        -- 11: Expired, tenancy before expiry, low rating, has MEES exemption, occupied
-       (11, 11, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'g', null, 0, true, true, true, null, null, null),
+       (11, 11, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'g', null, 0, true, true, true, null, null, null),
        -- 12: Expired, tenancy before expiry, low rating, has MEES exemption, unoccupied
-       (12, 12, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'g', null, 0, true, true, true, null, null, null),
+       (12, 12, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'g', null, 0, true, true, true, null, null, null),
        -- 13: Expired, tenancy before expiry, low rating, no exemption, occupied
-       (13, 13, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'g', null, null, true, true, true, null, null, null),
+       (13, 13, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'g', null, null, true, true, true, null, null, null),
        -- 14: Expired, tenancy before expiry, low rating, no exemption, unoccupied
-       (14, 14, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'g', null, null, true, true, true, null, null, null),
+       (14, 14, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'g', null, null, true, true, true, null, null, null),
        -- 15: Expired, EPC not in date when tenancy began, occupied
-       (15, 15, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, false, 'c', null, null, true, true, true, null, null, null),
+       (15, 15, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, false, 'c', null, null, true, true, true, null, null, null),
        -- 16: Expired, EPC not in date when tenancy began, unoccupied
-       (16, 16, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
+       (16, 16, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
        -- 17: No EPC, it is required, occupied
-       (17, 17, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, null),
+       (17, 17, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, null),
        -- 18: No EPC, it is required, unoccupied
-       (18, 18, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, null),
+       (18, 18, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, null),
        -- 19: No EPC, not required (has exemption), occupied
-       (19, 19, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
+       (19, 19, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, 0, null, true, true, true, null, null, null),
        -- 20: No EPC, not required (has exemption), unoccupied
-       (20, 20, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
+       (20, 20, '01/01/25', '01/01/25', (current_date - interval '1 year 1 day')::date, true, current_date + 365, 0, null, null, null, null, 0, null, true, true, true, null, null, null),
        -- 21: Provide later, occupied after registration (no dated deadline)
-       (21, 21, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true);
+       (21, 21, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true);
