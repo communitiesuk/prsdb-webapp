@@ -15,8 +15,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class LandlordDashboardPage(
     page: Page,
 ) : BasePage(page, LANDLORD_DASHBOARD_URL) {
-    override val expectedTitleHeading = "Landlord dashboard"
-
     val authenticatedHeader = AuthenticatedHeader(page)
     val betaBanner = BetaBanner(page)
     val featureFlagOverrideBanner = FeatureFlagOverrideBanner(page)

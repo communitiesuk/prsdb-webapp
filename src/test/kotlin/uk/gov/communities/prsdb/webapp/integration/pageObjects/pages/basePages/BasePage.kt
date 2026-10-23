@@ -5,14 +5,17 @@ import com.microsoft.playwright.Page
 import kotlin.reflect.KClass
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 abstract class BasePage(
     val page: Page,
     private val urlSegment: String? = null,
 ) {
+    // Override where the title deliberately differs from the h1, to check the title heading against this exact string
     protected open val expectedTitleHeading: String? = null
+
+    // Override instead of expectedTitleHeading where the title heading includes variable data, such as a name
+    protected open val expectedTitleHeadingPattern: Regex? = null
 
     private val h1Text: String
         get() {
@@ -22,11 +25,7 @@ abstract class BasePage(
         }
 
     companion object {
-        // TODO PDJB-1364: Enable once every page's title is built from its h1
-        const val STRICT_TITLE_CHECK = false
-
-        private val TITLE_FORMAT =
-            Regex("^(Error: )?(.+) - (Register your rental property|Check a rental property or landlord) - GOV\\.UK$")
+        private const val SERVICE_NAMES = "(Register your rental property|Check a rental property or landlord)"
 
         fun <T : BasePage> createValidPage(
             page: Page,
@@ -61,27 +60,18 @@ abstract class BasePage(
         validateTitle()
     }
 
-    protected open fun validateTitle() {
+    private fun validateTitle() {
         val title = page.title()
-        val match =
-            assertNotNull(
-                TITLE_FORMAT.matchEntire(title),
-                "Page title \"$title\" does not match the format \"[Error: ]<heading> - <service name> - GOV.UK\"",
-            )
-        val titleHeading = match.groupValues[2]
-        assertNotEquals("null", titleHeading, "Page title \"$title\" is missing its heading")
-
-        expectedTitleHeading?.let {
-            assertEquals(it, titleHeading, "Page title should match the page object's expectedTitleHeading")
-        }
-
-        if (expectedTitleHeading == null && STRICT_TITLE_CHECK) {
-            assertEquals(
-                h1Text,
-                titleHeading,
-                "Page title should match the h1 (override expectedTitleHeading if it deliberately differs)",
-            )
-        }
+        // The title heading must match the first one of these that is set:
+        // 1. the expectedTitleHeadingPattern regex
+        // 2. the expectedTitleHeading string, exactly
+        // 3. the h1 text, exactly
+        val expectedHeadingPattern = expectedTitleHeadingPattern?.pattern ?: Regex.escape(expectedTitleHeading ?: h1Text)
+        assertTrue(
+            Regex("^(Error: )?$expectedHeadingPattern - $SERVICE_NAMES - GOV\\.UK$").matches(title),
+            "Page title \"$title\" should match \"[Error: ]$expectedHeadingPattern - <service name> - GOV.UK\" " +
+                "(override expectedTitleHeading or expectedTitleHeadingPattern if the title deliberately differs from the h1)",
+        )
     }
 
     private fun getAxeViolations() =

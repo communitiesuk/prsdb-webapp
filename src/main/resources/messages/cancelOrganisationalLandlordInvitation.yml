@@ -1,0 +1,9 @@
+areYouSure:
+  fieldSetHeading: 'Do you want to cancel the invitation for {0}?'
+  radios:
+    'yes':
+      label: 'Yes, cancel this invitation'
+    'no':
+      label: 'No, do not cancel this invitation (go back to team members)'
+    error:
+      missing: Select if you want to cancel this invitation

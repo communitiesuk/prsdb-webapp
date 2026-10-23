@@ -81,7 +81,6 @@ class UpdateOccupancyJourneyFactory(
                 nextStep { journey.occupancyUpdateRoutingStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.saveAndContinue",
                     )
@@ -139,7 +138,6 @@ class UpdateOccupancyJourneyFactory(
                         nextStep { journey.occupancyUpdateRoutingStep }
                         withAdditionalContentProperties {
                             mapOf(
-                                "title" to "propertyDetails.update.title",
                                 "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             )
@@ -190,7 +188,6 @@ class UpdateOccupancyJourneyFactory(
                 nextStep { journey.completeOccupancyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",

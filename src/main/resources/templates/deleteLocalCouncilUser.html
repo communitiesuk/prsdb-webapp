@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    <body th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUser.heading}, ~{::body/content()}, false)}">
+    <body th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUser.pageTitle(${user.name})}, ~{::body/content()}, false)}">
         <a th:replace="~{fragments/forms/backLink :: backLink(${backLinkPath})}">backLink</a>
         <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
         <main class="govuk-main-wrapper" id="main-content">

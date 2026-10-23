@@ -16,7 +16,6 @@ class UpdateGoverningBodyCyaStepConfig(
 
     override fun getStepSpecificContent(state: UpdateGoverningBodyJourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "landlordDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "governingBodyMemberCards" to

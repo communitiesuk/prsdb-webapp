@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.CancelOrganisationalLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
@@ -84,8 +85,10 @@ data class TeamMembersViewModel(
             actions =
                 listOf(
                     SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(invitation.id)),
-                    // TODO PDJB-1769: replace "#" with the cancel invitation URL
-                    SummaryListRowActionsViewModel("forms.links.cancel", "#"),
+                    SummaryListRowActionsViewModel(
+                        "forms.links.cancel",
+                        CancelOrganisationalLandlordInvitationController.getCancelInvitationPath(invitation.id),
+                    ),
                 ),
         )
 
