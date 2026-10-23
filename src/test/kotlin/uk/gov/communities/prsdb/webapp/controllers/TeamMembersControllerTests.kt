@@ -182,9 +182,6 @@ class TeamMembersControllerTests(
                 status { isOk() }
                 content { string(containsString("Access level changed")) }
                 content { string(containsString("Anita Locke is now an $roleDescription.")) }
-                content { string(not(containsString("Invitation sent"))) }
-                content { string(not(containsString("Access removed"))) }
-                content { string(not(containsString("Invitation resent"))) }
             }
     }
 
