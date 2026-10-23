@@ -558,7 +558,7 @@ so no infra release is required.
 Every flag is present in each environment override file, so the `application.yml` base values only affect production.
 
 Feature flags are usually created without being assigned to a release group until it is clear which release they belong
-to. If a feature should go live as part of a release group (see [Feature flags](docs/FeatureFlagsReadMe.md)) that does
+to. If a feature should go live as part of a release group (see [Feature flags](docs/documentation/FeatureFlagsReadMe.md)) that does
 not exist yet, create that release and associate the flag as part of the `main` change in the first step below.
 
 To make a feature release (the example uses `test`; other environments follow the same steps):

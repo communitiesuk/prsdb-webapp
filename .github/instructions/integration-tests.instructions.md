@@ -5,7 +5,7 @@ applyTo: "**/integration/**"
 # Integration Test Instructions
 
 ## Documentation Reference
-- Full guide: [docs/IntegrationTestReadMe.md](../../docs/IntegrationTestReadMe.md)
+- Full guide: [docs/documentation/IntegrationTestReadMe.md](../../docs/documentation/IntegrationTestReadMe.md)
 
 ## Test Base Classes
 
@@ -158,6 +158,6 @@ Test classes follow the pattern: `{JourneyName}{SinglePageTests|JourneyTests}`
 ## Feature Flags in Integration Tests
 - Flags reset automatically after each test
 - Use `FeatureFlagManager` to enable/disable flags
-- See `docs/FeatureFlagsReadMe.md` for complex flag updates
+- See `docs/documentation/FeatureFlagsReadMe.md` for complex flag updates
 
 Feature flags are automatically reset after each test via `@AfterEach` in the base `IntegrationTest` class, preventing test pollution.

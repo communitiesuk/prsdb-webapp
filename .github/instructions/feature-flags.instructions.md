@@ -5,7 +5,7 @@ applyTo: "**/featureFlags/**,**/annotations/**FeatureFlag**,**/annotations/**Fli
 # Feature Flags Instructions
 
 ## Documentation Reference
-- Full guide: [docs/FeatureFlagsReadMe.md](../../docs/FeatureFlagsReadMe.md)
+- Full guide: [docs/documentation/FeatureFlagsReadMe.md](../../docs/documentation/FeatureFlagsReadMe.md)
 
 ## Configuration
 
@@ -144,4 +144,4 @@ fun `new page available when flag enabled`() {
 
 In non-production environments, `/system-operator/feature-flags` lets a developer override flags and releases for their
 own session. It is gated by `features.overrides-enabled`, which defaults to false and is absent from `application.yml`,
-so it can never be active in production. See [docs/FeatureFlagsReadMe.md](../../docs/FeatureFlagsReadMe.md).
+so it can never be active in production. See [docs/documentation/FeatureFlagsReadMe.md](../../docs/documentation/FeatureFlagsReadMe.md).

@@ -73,4 +73,4 @@ class ExampleServiceTests {
 - Create two implementations with `@Service("bean-name")` and `@Conditional(WebServerOnly::class)`, not
   `@PrsdbWebService`: FF4J only reads bean names from a `@Service` placed directly on the class
 - Mark default implementation with `@Primary`
-- See `docs/FeatureFlagsReadMe.md` for details
+- See `docs/documentation/FeatureFlagsReadMe.md` for details
