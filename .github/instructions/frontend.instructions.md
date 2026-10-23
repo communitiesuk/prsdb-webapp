@@ -84,6 +84,16 @@ For parameterised messages, use the `#messages` helper:
 <h1 th:text="${#messages.msgWithParams(contentHeader, contentHeaderParams)}">contentHeader</h1>
 ```
 
+### Back links
+If there is a back link on the page, pass it into the layout fragment: `layout(#{example.heading}, ~{::main/content()}, false, ${backUrl}, null)}`.
+
+If there is no back link on the page, pass null as the backUrl: `layout(#{example.heading}, ~{::main/content()}, false, null, null)}`.
+
+### Main class
+You can apply classes to the <main> element by passing to layout: `layout(#{example.heading}, ~{::main/content()}, false, null, 'govuk-main-wrapper--l')`.
+
+Always confirm with the user before doing this.
+
 ## GOV.UK Design System
 - Follow [GOV.UK Design System](https://design-system.service.gov.uk/) patterns
 - Use standard class names: `govuk-*`
