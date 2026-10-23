@@ -32,7 +32,14 @@ for (const journey of journeys) {
     const destination = path.join(target, journey.name);
     fs.cpSync(path.join(source, journey.name), destination, { recursive: true });
     const viewer = path.join(destination, "index.html");
-    if (fs.existsSync(viewer)) fs.writeFileSync(viewer, fs.readFileSync(viewer, "utf8").replace("<head>", `<head>\n    ${NO_INDEX}`));
+    if (fs.existsSync(viewer)) {
+        const html = fs
+            .readFileSync(viewer, "utf8")
+            .replace("<head>", `<head>\n    ${NO_INDEX}`)
+            // Mermaid stores each arrow's coordinates in Base64, which the detect-secrets hook reports; the viewer does not use them
+            .replace(/ data-points="[^"]*"/g, "");
+        fs.writeFileSync(viewer, html);
+    }
 }
 
 // Without this file GitHub Pages runs the site through Jekyll, which renders the Markdown files and skips some paths
