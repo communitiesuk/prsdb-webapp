@@ -91,6 +91,7 @@ class CompleteRemoveOrgUserStepConfigTests {
         createStepConfig().afterStepIsReached(mockState)
 
         // Assert
+        verify(mockState).removedMemberName = "Anita Locke"
         verify(mockOrganisationalLandlordUserService).removeOrganisationalLandlordUser(42L)
     }
 

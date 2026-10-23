@@ -10,11 +10,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
 import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController.Companion.INVITE_ORGANISATIONAL_LANDLORD_USER_PATH
@@ -32,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import kotlin.test.assertEquals
 
 @WebMvcTest(TeamMembersController::class)
+@Import(MessageSourceConfig::class)
 class TeamMembersControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -194,6 +197,7 @@ class TeamMembersControllerTests(
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl("$TEAM_MEMBERS_ROUTE#$INVITATIONS_FRAGMENT")
+                flash { attribute("successBanner", "resendInvitation") }
                 flash { attribute("resendInvitationEmail", "invitee@example.com") }
             }
     }

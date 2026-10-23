@@ -49,12 +49,11 @@ class CompleteRemoveOrgUserStepConfig(
                 organisationName = removedMember.organisationalLandlord.name,
             )
 
+        state.removedMemberName = removedMember.name
         organisationalLandlordUserService.removeOrganisationalLandlordUser(state.otherOrganisationalLandlordUserId)
 
         removalConfirmationEmailSender.sendEmail(removingAdmin.email, removedConfirmationEmailModel)
         removalNotificationEmailSender.sendEmail(removedMember.email, removedNotificationEmailModel)
-
-        // TODO PDJB-1873: Show a success banner after removing the user
     }
 
     override fun resolveNextDestination(
