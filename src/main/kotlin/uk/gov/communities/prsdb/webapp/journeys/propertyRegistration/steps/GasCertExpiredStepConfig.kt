@@ -29,7 +29,7 @@ class GasCertExpiredStepConfig(
         )
 
     override fun chooseTemplate(state: GasSafetyDetailState) =
-        // TODO PDJB-1926: Remove this flag check and the before1894 templates when the flag is removed.
+        // TODO PDJB-1926: Remove this flag check and the Before14MonthExpiry templates when the flag is removed.
         if (featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)) {
             if (state.isOccupied) {
                 "forms/gasSafetyCertificateExpiredForOccupiedProperty"
@@ -38,9 +38,9 @@ class GasCertExpiredStepConfig(
             }
         } else {
             if (state.isOccupied) {
-                "forms/before1894GasSafetyCertificateExpiredForOccupiedProperty"
+                "forms/gasSafetyCertificateExpiredForOccupiedPropertyBefore14MonthExpiry"
             } else {
-                "forms/before1894GasSafetyCertificateExpiredForUnoccupiedProperty"
+                "forms/gasSafetyCertificateExpiredForUnoccupiedPropertyBefore14MonthExpiry"
             }
         }
 

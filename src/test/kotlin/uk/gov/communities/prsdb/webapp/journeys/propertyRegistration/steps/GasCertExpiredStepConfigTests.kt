@@ -48,7 +48,7 @@ class GasCertExpiredStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns before1894 occupied template when isOccupied is true and the 14 month expiry flag is disabled`() {
+    fun `chooseTemplate returns Before14MonthExpiry occupied template when isOccupied is true and the 14 month expiry flag is disabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
@@ -58,11 +58,11 @@ class GasCertExpiredStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/before1894GasSafetyCertificateExpiredForOccupiedProperty", result)
+        assertEquals("forms/gasSafetyCertificateExpiredForOccupiedPropertyBefore14MonthExpiry", result)
     }
 
     @Test
-    fun `chooseTemplate returns before1894 unoccupied template when isOccupied is false and the 14 month expiry flag is disabled`() {
+    fun `chooseTemplate returns Before14MonthExpiry unoccupied template when isOccupied is false and the 14 month expiry flag is disabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
@@ -72,7 +72,7 @@ class GasCertExpiredStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/before1894GasSafetyCertificateExpiredForUnoccupiedProperty", result)
+        assertEquals("forms/gasSafetyCertificateExpiredForUnoccupiedPropertyBefore14MonthExpiry", result)
     }
 
     private fun setupStepConfig(): GasCertExpiredStepConfig {
