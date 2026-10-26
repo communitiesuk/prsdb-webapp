@@ -44,9 +44,6 @@ class UpdateOrganisationCharityJourneyFactory(
                 initialStep()
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
                 nextStep { journey.cyaStep }
-                withAdditionalContentProperty {
-                    "title" to "landlordDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateOrganisationCharityCyaStep.ROUTE_SEGMENT)
@@ -88,11 +85,6 @@ class UpdateOrganisationCharityJourneyFactory(
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
-            }
-            configure {
-                withAdditionalContentProperty {
-                    "title" to "landlordDetails.update.title"
-                }
             }
         }
 

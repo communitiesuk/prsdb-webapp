@@ -10,13 +10,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 @Service
-@Profile("local & !use-notify")
+// The one-login-simulator profile is only active on NFT during performance runs, so no real emails are sent
+@Profile("(local & !use-notify) | one-login-simulator")
 @Primary
 class EmailNotificationStubService<EmailModel : EmailTemplateModel> : EmailNotificationService<EmailModel> {
-    @Value("\${local.emails.transientExceptionAddress}")
+    @Value("\${local.emails.transientExceptionAddress:}")
     var transientExceptionRecipient: String? = null
 
-    @Value("\${local.emails.persistentExceptionAddress}")
+    @Value("\${local.emails.persistentExceptionAddress:}")
     var persistentExceptionRecipient: String? = null
 
     override fun sendEmail(

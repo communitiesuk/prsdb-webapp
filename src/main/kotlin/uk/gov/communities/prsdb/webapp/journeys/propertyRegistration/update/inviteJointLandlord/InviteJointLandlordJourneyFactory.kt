@@ -67,9 +67,6 @@ class InviteJointLandlordJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
-            configure {
-                withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
-            }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
@@ -106,9 +103,6 @@ class InviteJointLandlordJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
-            configure {
-                withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
-            }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)

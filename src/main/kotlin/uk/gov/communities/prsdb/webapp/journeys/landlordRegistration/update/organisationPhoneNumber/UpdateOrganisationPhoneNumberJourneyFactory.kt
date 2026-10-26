@@ -29,7 +29,6 @@ class UpdateOrganisationPhoneNumberJourneyFactory(
                 nextStep { journey.completeOrganisationPhoneNumberUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "registerAsALandlord.orgPhoneNumber.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",

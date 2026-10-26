@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.AccessLevelPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.changeOrgTeamMemberAccessLevelPages.RemoveOrgUserConfirmationPage
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 private const val ADMIN_USER_ID = "urn:fdc:gov.uk:2022:ORG02"
@@ -22,6 +25,27 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
     IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
+
+    @Autowired
+    private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
+
+    @Test
+    fun `a signed in organisation admin sees the forbidden page after their membership is removed`(page: Page) {
+        // Arrange
+        val dashboard = navigator.goToLandlordDashboard()
+        BaseComponent.assertThat(dashboard.dashboardBannerHeading).hasText("Local Organisation Landlord")
+        val member = organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG01").single()
+        assertEquals(OrganisationalLandlordUserRole.ADMIN, member.role)
+
+        // Act
+        organisationalLandlordUserService.removeOrganisationalLandlordUser(member.id)
+        val response = assertNotNull(page.reload())
+
+        // Assert
+        assertEquals(403, response.status())
+        val errorPage = assertPageIs(page, ErrorPage::class)
+        BaseComponent.assertThat(errorPage.heading).hasText("You do not have permission to access this page")
+    }
 
     @Test
     fun `an admin can change another administrator's access level to editor`(page: Page) {
@@ -75,7 +99,9 @@ class ChangeOrgTeamMemberAccessLevelJourneyTests :
             .hasText("Beth Admin will no longer be able to access your organisation on the service.")
         confirmationPage.form.submit()
 
-        assertPageIs(page, TeamMembersPage::class)
+        val teamMembersPageAfter = assertPageIs(page, TeamMembersPage::class)
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content.heading).hasText("Access removed")
+        BaseComponent.assertThat(teamMembersPageAfter.successBanner.content).containsText("Beth Admin")
         assertTrue(organisationalLandlordUserRepository.findByBaseUser_Id(ADMIN_USER_ID).isEmpty())
     }
 

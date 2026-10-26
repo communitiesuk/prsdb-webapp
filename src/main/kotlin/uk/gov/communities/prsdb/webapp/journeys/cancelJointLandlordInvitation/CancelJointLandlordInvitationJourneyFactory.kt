@@ -41,9 +41,6 @@ class CancelJointLandlordInvitationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }
-            configure {
-                withAdditionalContentProperty { "title" to "cancelJointLandlordInvitation.title" }
-            }
             step(journey.areYouSureStep) {
                 routeSegment(AreYouSureStep.ROUTE_SEGMENT)
                 initialStep()

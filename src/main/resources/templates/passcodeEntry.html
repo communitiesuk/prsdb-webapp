@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{passcodeEntry.heading}, ~{::main}, ${#fields.hasErrors('${passcodeRequestModel.*}')})}">
-    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+<html th:replace="~{fragments/layout :: layout(#{passcodeEntry.heading}, ~{::main/content()}, ${#fields.hasErrors('${passcodeRequestModel.*}')}, null, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
         <!--/*/ <th:block th:object="${passcodeRequestModel}" th:if="passcodeRequestModel != null"> /*/-->
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
         <!--/*/ </th:block> /*/-->
@@ -14,5 +15,6 @@
             <input th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(label=#{passcodeEntry.passcodeLabel}, fieldName='passcode', hint=null, fieldWidth=10)}">
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
         </form>
-    </main>
+    </div>
+</main>
 </html>

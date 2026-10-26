@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
+import java.time.LocalDate
 import kotlin.String
 
 class EmailTemplateModelsTests {
@@ -81,6 +83,7 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/OrganisationalLandlordInvitationAccepted.md",
                 ),
+                // TODO PDJB-1734: Remove this entry when the PAYMENTS flag is removed
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
@@ -90,6 +93,22 @@ class EmailTemplateModelsTests {
                         jointLandlordEmails = listOf("joint1@example.com", "joint2@example.com"),
                     ),
                     "/emails/PropertyRegistrationConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    PropertyRegistrationConfirmationEmail(
+                        "P-XXX-YYY",
+                        "1 Street Name\nAB1 2CD",
+                        "prsdUrl",
+                        isOccupied = true,
+                        paymentDetails =
+                            PropertyRegistrationConfirmationEmail.PaymentDetails(
+                                amountInPence = 1000,
+                                paymentDate = LocalDate.of(2026, 10, 5),
+                                renewalDate = LocalDate.of(2027, 3, 31),
+                            ),
+                    ),
+                    "/emails/PropertyRegistrationConfirmationWithPayment.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
@@ -551,6 +570,47 @@ class EmailTemplateModelsTests {
             ),
             email.toHashMap(),
         )
+    }
+
+    @Test
+    fun `property registration email uses the template with payment information and formats the payment details when they are given`() {
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = true,
+                paymentDetails =
+                    PropertyRegistrationConfirmationEmail.PaymentDetails(
+                        amountInPence = 2550,
+                        paymentDate = LocalDate.of(2026, 10, 5),
+                        renewalDate = LocalDate.of(2027, 3, 31),
+                    ),
+            )
+
+        val hashMap = email.toHashMap()
+
+        Assertions.assertEquals(EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION_WITH_PAYMENT, email.template)
+        Assertions.assertEquals("£25.50", hashMap["payment amount"])
+        Assertions.assertEquals("5 October 2026", hashMap["payment date"])
+        Assertions.assertEquals("31 March 2027", hashMap["renewal date"])
+    }
+
+    // TODO PDJB-1734: Remove this test when the PAYMENTS flag is removed
+    @Test
+    fun `property registration email uses the template without payment information when payments is disabled`() {
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = true,
+            )
+
+        val hashMap = email.toHashMap()
+
+        Assertions.assertEquals(EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION, email.template)
+        Assertions.assertFalse(hashMap.keys.any { it in listOf("payment amount", "payment date", "renewal date") })
     }
 
     private fun isOptionalContentParameter(parameter: String): Boolean = extractOptionalContentParameter(parameter).isNotEmpty()

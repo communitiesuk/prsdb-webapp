@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::#page/content()}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{teamMembers.heading}, ~{::main/content()}, false, null, null)}">
+<main>
     <th:block id="page-contents"
               th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <th:block th:if="${successBanner != null}" th:with="isSuccess=true">
+        <th:block th:if="${successBanner == 'teamMembers.successBanner.invitationSent' or successBanner == 'teamMembers.successBanner.invitationCancelled'}"
+                  th:with="isSuccess=true, successBannerBody=${#messages.msgOrNull(successBanner + '.body')}">
             <div id="success-banner"
                  th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{teamMembers.successBanner.title}, ~{::#success-banner/content()})}">
-                <p class="govuk-notification-banner__heading" th:text="#{${successBanner}}">teamMembers.successBanner</p>
+                <p class="govuk-notification-banner__heading" th:text="${#messages.msg(successBanner + '.heading')}">teamMembers.successBanner.heading</p>
+                <p th:if="${successBannerBody != null}" class="govuk-body" th:text="${successBannerBody}">teamMembers.successBanner.body</p>
             </div>
         </th:block>
 
-        <th:block th:if="${accessLevelChangedBannerContentKey != null}" th:with="isSuccess=true">
+        <th:block th:if="${successBanner == 'accessLevelChanged'}" th:with="isSuccess=true">
             <div id="access-level-changed-banner"
                  th:replace="~{fragments/banners/notificationBanner ::
                 notificationBanner(#{teamMembers.accessLevelChangedBanner.title}, ~{::#access-level-changed-banner/content()})}"
@@ -18,11 +20,23 @@
                 <h3 class="govuk-notification-banner__heading"
                     th:text="#{teamMembers.accessLevelChangedBanner.heading}">teamMembers.accessLevelChangedBanner.heading</h3>
                 <p class="govuk-body"
-                   th:text="#{${accessLevelChangedBannerContentKey}(${accessLevelChangedMemberName})}">content</p>
+                   th:text="#{${accessLevelChangedBannerContentKey}(${accessLevelChangedMemberName})}">teamMembers.accessLevelChangedBanner.content</p>
             </div>
         </th:block>
 
-        <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
+        <th:block th:if="${successBanner == 'accessRemoved'}" th:with="isSuccess=true">
+            <div id="access-removed-banner"
+                 th:replace="~{fragments/banners/notificationBanner ::
+                notificationBanner(#{teamMembers.accessRemovedBanner.title}, ~{::#access-removed-banner/content()})}"
+                 th:with="isSuccess=true">
+                <h3 class="govuk-notification-banner__heading"
+                    th:text="#{teamMembers.accessRemovedBanner.heading}">teamMembers.accessRemovedBanner.heading</h3>
+                <p class="govuk-body"
+                   th:text="#{teamMembers.accessRemovedBanner.content(${accessRemovedMemberName})}">teamMembers.accessRemovedBanner.content</p>
+            </div>
+        </th:block>
+
+        <th:block th:if="${successBanner == 'resendInvitation'}" th:with="isSuccess=true">
             <div id="resend-invitation-banner"
                  th:replace="~{fragments/banners/notificationBanner ::
                 notificationBanner(#{teamMembers.resendInvitationBanner.title}, ~{::#resend-invitation-banner/content()})}">

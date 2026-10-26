@@ -69,7 +69,6 @@ class UpdateGasSafetyJourneyFactory(
                 nextStep { journey.updateCheckGasSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }
@@ -78,11 +77,6 @@ class UpdateGasSafetyJourneyFactory(
                 routeSegment(UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.gasSafetyDetailsTask.isComplete() }
                 nextStep { journey.completeGasSafetyUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                    )
-                }
             }
             step(journey.completeGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
@@ -104,7 +98,6 @@ class UpdateGasSafetyJourneyFactory(
             configure {
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }

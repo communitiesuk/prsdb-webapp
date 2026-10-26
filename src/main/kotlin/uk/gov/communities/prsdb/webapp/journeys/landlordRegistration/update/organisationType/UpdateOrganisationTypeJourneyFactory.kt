@@ -47,9 +47,6 @@ class UpdateOrganisationTypeJourneyFactory(
     private fun mainJourneyMap(state: UpdateOrganisationTypeJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            configure {
-                withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
-            }
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 initialStep()
@@ -129,9 +126,6 @@ class UpdateOrganisationTypeJourneyFactory(
         journey(state) {
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            configure {
-                withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
-            }
             when (state.checkingAnswersFor) {
                 OrgTypeStep.ROUTE_SEGMENT -> {
                     step(journey.orgTypeStep) {
