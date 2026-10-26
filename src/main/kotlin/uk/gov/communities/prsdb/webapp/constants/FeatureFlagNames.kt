@@ -26,6 +26,8 @@ const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
 
 const val GAS_CERTIFICATE_14_MONTH_EXPIRY = "pdjb-1894-gas-certificate-14-month-expiry"
 
+const val ASSOCIATED_PARTIES = "pdjb-955-associated-parties"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -37,4 +39,5 @@ val featureFlagNames =
         MULTI_USER_ORGANISATIONS,
         GATLING_POST_ENDPOINT,
         GAS_CERTIFICATE_14_MONTH_EXPIRY,
+        ASSOCIATED_PARTIES,
     )
