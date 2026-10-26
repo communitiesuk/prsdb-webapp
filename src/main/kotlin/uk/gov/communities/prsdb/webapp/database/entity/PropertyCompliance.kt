@@ -14,6 +14,8 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 @Entity
@@ -69,19 +71,26 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
     val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() = gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
 
     val isElectricalSafetyExpired: Boolean?
-        get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() =
+            electricalSafetyExpiryDate?.let { expiryDate ->
+                when (electricalCertType) {
+                    CertificateType.Eic -> CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate)
+                    CertificateType.Eicr -> CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate)
+                    else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
+                }
+            }
 
     val isElectricalSafetyMissing: Boolean
         get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
-        get() = epcExpiryDate?.isBefore(LocalDate.now())
+        get() = epcExpiryDate?.let { CertificateExpiryHelper.isEpcExpiryDateExpired(it) }
 
     val isEpcRatingLow: Boolean?
         get() {
@@ -124,6 +133,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         hasGasSupply: Boolean? = null,
         gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -139,6 +149,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.hasGasSupply = hasGasSupply
         this.gasSafetyFileUploads = gasSafetyFileUploads
         this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        this.electricalCertType = electricalCertType
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
         this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry

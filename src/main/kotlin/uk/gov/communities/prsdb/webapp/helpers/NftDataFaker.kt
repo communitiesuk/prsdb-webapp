@@ -301,7 +301,9 @@ object NftDataFaker {
             when {
                 // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
                 randomDouble < 0.60 -> 0
+
                 randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+
                 else -> faker.random().nextInt(2, 4)
             }
 
@@ -600,7 +602,21 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.after(Date.valueOf(referenceDate().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))) == true
+        issueDate?.let { !CertificateExpiryHelper.isGasIssueDateExpired(it.toLocalDate(), referenceDate()) } == true
+
+    fun isElectricalSafetyCertificateCurrent(
+        expiryDate: Date?,
+        certType: CertificateType?,
+        asOf: Timestamp,
+    ): Boolean {
+        if (expiryDate == null) return false
+        val asOfDate = asOf.toLocalDateTime().toLocalDate()
+        return when (certType) {
+            CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            else -> throw IllegalArgumentException("Unexpected electrical certificate type: $certType")
+        }
+    }
 
     fun generateJourneyId(): String = faker.regexify("[a-z0-9]{7}")
 

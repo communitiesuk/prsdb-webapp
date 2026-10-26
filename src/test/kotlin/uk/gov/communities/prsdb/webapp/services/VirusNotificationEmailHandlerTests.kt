@@ -31,14 +31,12 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
-import java.net.URI
 import java.util.Optional
 
 class VirusNotificationEmailHandlerTests {
     private lateinit var virusNotificationEmailHandler: VirusNotificationEmailHandler
 
     private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
     private lateinit var landlordRepository: LandlordRepository
     private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
@@ -51,19 +49,15 @@ class VirusNotificationEmailHandlerTests {
     @BeforeEach
     fun setup() {
         emailNotificationService = mock()
-        absoluteUrlProvider = mock()
         propertyOwnershipRepository = mock()
         landlordRepository = mock()
         organisationalLandlordUserRepository = mock()
         savedJourneyStateRepository = mock()
         lettingAgentAccessRepository = mock()
         landlordUserEmailService = mock()
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("https://www.example.com/landlord/dashboard"))
         virusNotificationEmailHandler =
             VirusNotificationEmailHandler(
                 emailNotificationService,
-                absoluteUrlProvider,
                 propertyOwnershipRepository,
                 landlordRepository,
                 organisationalLandlordUserRepository,
@@ -82,7 +76,6 @@ class VirusNotificationEmailHandlerTests {
             arrangeOwnedPropertyUploadCallback(
                 expectedCertType(testType),
                 listOf("test@example.com"),
-                recipientName = "Monitoring Team",
             )
 
         // Act
@@ -146,7 +139,7 @@ class VirusNotificationEmailHandlerTests {
         assertEmailSentToLandlords(landlords, expectedEmail)
         verify(emailNotificationService).sendEmail(
             eq(lettingAgentEmail),
-            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
+            eq(expectedEmail),
         )
     }
 
@@ -174,7 +167,7 @@ class VirusNotificationEmailHandlerTests {
         assertEmailSentToLandlords(landlords, expectedEmail)
         verify(emailNotificationService).sendEmail(
             eq(lettingAgentEmail),
-            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
+            eq(expectedEmail),
         )
     }
 
@@ -187,7 +180,6 @@ class VirusNotificationEmailHandlerTests {
             arrangeOwnedPropertyUploadCallbackForLandlords(
                 expectedCertType(CertificateType.GasSafetyCert),
                 listOf(orgLandlord),
-                recipientName = orgLandlord.name,
             )
 
         // Act
@@ -227,7 +219,7 @@ class VirusNotificationEmailHandlerTests {
         assertEmailSentToLandlords(landlords, expectedEmail)
         verify(emailNotificationService).sendEmail(
             eq(lettingAgentEmail),
-            eq(expectedEmail.copy(recipientName = lettingAgentEmail)),
+            eq(expectedEmail),
         )
     }
 
@@ -273,15 +265,11 @@ class VirusNotificationEmailHandlerTests {
             .thenReturn(LandlordUserDetails(name = name, email = email))
     }
 
-    private fun expectedIncompletePropertyEmail(
-        certType: CertificateType,
-        recipientName: String,
-    ) = VirusScanUnsuccessfulEmail(
-        certificateType = expectedCertType(certType),
-        recipientName = recipientName,
-        propertyAddress = "1 Main St\nAnytown",
-        landlordDashboardUrl = URI("https://www.example.com/landlord/dashboard"),
-    )
+    private fun expectedIncompletePropertyEmail(certType: CertificateType) =
+        VirusScanUnsuccessfulEmail(
+            certificateType = expectedCertType(certType),
+            propertyAddress = "1 Main St\nAnytown",
+        )
 
     @ParameterizedTest
     @EnumSource(CertificateType::class)
@@ -289,7 +277,7 @@ class VirusNotificationEmailHandlerTests {
         // Arrange
         arrangeSavedJourneyStateForUser(journeyId = "journey-1", userId = "subject-1")
         arrangeUserDetails("subject-1", "Jane Smith", "jane@example.com")
-        val expectedEmail = expectedIncompletePropertyEmail(certType, "Jane Smith")
+        val expectedEmail = expectedIncompletePropertyEmail(certType)
         val data =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 "journey-1",
@@ -334,7 +322,7 @@ class VirusNotificationEmailHandlerTests {
     fun `handleCallback for incomplete-property monitoring email sends to the monitoring team`(certType: CertificateType) {
         // Arrange
         arrangeSavedJourneyStateForUser(journeyId = "journey-1", userId = "subject-1")
-        val expectedEmail = expectedIncompletePropertyEmail(certType, "Monitoring Team")
+        val expectedEmail = expectedIncompletePropertyEmail(certType)
         val inner =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 "journey-1",
@@ -367,7 +355,7 @@ class VirusNotificationEmailHandlerTests {
         doReturn(Optional.of(landlord)).whenever(landlordRepository).findById(7L)
         arrangeSavedJourneyStateForUsers(journeyId = "journey-1", baseUserIds = listOf("subject-1"))
         arrangeUserDetails("subject-1", "Jane Smith", "jane@example.com")
-        val expectedEmail = expectedIncompletePropertyEmail(CertificateType.Eicr, "Jane Smith")
+        val expectedEmail = expectedIncompletePropertyEmail(CertificateType.Eicr)
         val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, landlordId = 7L)
 
         // Act
@@ -405,7 +393,7 @@ class VirusNotificationEmailHandlerTests {
             savedJourneyStateUserId = "org-subuser-2",
         )
         arrangeUserDetails("org-subuser-2", "Second User", "second@example.com")
-        val expectedEmail = expectedIncompletePropertyEmail(CertificateType.GasSafetyCert, "Second User")
+        val expectedEmail = expectedIncompletePropertyEmail(CertificateType.GasSafetyCert)
         val data =
             EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.GasSafetyCert, landlordId = 9L)
 
@@ -457,18 +445,15 @@ class VirusNotificationEmailHandlerTests {
     private fun arrangeOwnedPropertyUploadCallback(
         bodyCertificateType: String,
         emailAddresses: List<String>,
-        recipientName: String = "name",
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> =
         arrangeOwnedPropertyUploadCallbackForLandlords(
             bodyCertificateType,
             emailAddresses.map { MockLandlordData.createIndividualLandlord(email = it) },
-            recipientName,
         )
 
     private fun arrangeOwnedPropertyUploadCallbackForLandlords(
         bodyCertificateType: String,
         landlords: List<Landlord>,
-        recipientName: String = "name",
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
@@ -483,9 +468,7 @@ class VirusNotificationEmailHandlerTests {
             ownership.id,
             VirusScanUnsuccessfulEmail(
                 certificateType = bodyCertificateType,
-                recipientName = recipientName,
                 propertyAddress = "123 Main St\nAnytown",
-                landlordDashboardUrl = URI("https://www.example.com/landlord/dashboard"),
             ),
             landlords,
         )
@@ -498,7 +481,7 @@ class VirusNotificationEmailHandlerTests {
         landlords.forEach { landlord ->
             verify(emailNotificationService).sendEmailToLandlord(
                 eq(landlord),
-                eq(expectedEmail.copy(recipientName = landlord.name)),
+                eq(expectedEmail),
             )
         }
     }
