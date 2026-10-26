@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
@@ -38,6 +39,7 @@ import java.util.UUID
 
 class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
+    private val alreadyOnPropertyToken = "aaaabbbb-cccc-dddd-eeee-ffff00004444"
 
     @Autowired
     lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
@@ -80,6 +82,15 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         confirmPage.form.submit()
 
         assertPageIs(page, InvitationUnavailablePage::class)
+    }
+
+    @Test
+    fun `Landlord who is already on the invited property is redirected to the property record after signing in`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(alreadyOnPropertyToken)
+        acceptOrRejectPage.acceptInvitation()
+        // After pressing accept the service attempts to sign the user in
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "2"))
     }
 
     @Nested
