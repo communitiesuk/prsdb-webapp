@@ -97,7 +97,6 @@ class PropertyRegistrationCyaStepConfig(
         state: PropertyRegistrationJourneyState,
         occupancyDetails: List<SummaryListRowViewModel>,
     ) = mapOf<String, Any?>(
-        "title" to "registerProperty.title",
         "submitButtonText" to getSubmitButtonText(),
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
         "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,

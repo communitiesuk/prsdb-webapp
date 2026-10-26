@@ -18,14 +18,14 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
     @Nested
     inner class PropertyTypeStep {
         @Test
-        fun `Submitting with no propertyType selected returns an error`(page: Page) {
+        fun `Submitting with no propertyType selected returns an error`() {
             val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.form.submit()
             assertThat(propertyTypePage.form.getErrorMessage()).containsText("Select the type of property")
         }
 
         @Test
-        fun `Submitting with the Other propertyType selected but an empty customPropertyType field returns an error`(page: Page) {
+        fun `Submitting with the Other propertyType selected but an empty customPropertyType field returns an error`() {
             val propertyTypePage = navigator.skipToPropertyRegistrationPropertyTypePage()
             propertyTypePage.submitCustomPropertyType("")
             assertThat(propertyTypePage.form.getErrorMessage()).containsText("Enter the property type")
@@ -35,7 +35,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
     @Nested
     inner class OwnershipTypeStep {
         @Test
-        fun `Submitting with no ownershipType selected returns an error`(page: Page) {
+        fun `Submitting with no ownershipType selected returns an error`() {
             val ownershipTypePage = navigator.skipToPropertyRegistrationOwnershipTypePage()
             ownershipTypePage.form.submit()
             assertThat(ownershipTypePage.form.getErrorMessage()).containsText("Select the ownership type")
@@ -45,10 +45,19 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
     @Nested
     inner class LicensingTypeStep {
         @Test
-        fun `Submitting with no licensingType selected returns an error`(page: Page) {
+        fun `Submitting with no licensingType selected returns an error`() {
             val licensingTypePage = navigator.skipToPropertyRegistrationOccupiedLicensingTypePage()
             licensingTypePage.form.submitPrimaryButton()
             assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+        }
+
+        @Test
+        fun `Error summary link targets the first radio option when a divider is in the list`() {
+            val licensingTypePage = navigator.skipToPropertyRegistrationOccupiedLicensingTypePage()
+            licensingTypePage.form.submitPrimaryButton()
+
+            assertThat(licensingTypePage.page.locator(".govuk-error-summary a[href='#licensingType']")).hasCount(1)
+            assertThat(licensingTypePage.page.locator("#licensingType")).hasAttribute("type", "radio")
         }
 
         @Test
@@ -124,14 +133,14 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
     @Nested
     inner class SelectiveLicenceStep {
         @Test
-        fun `Submitting with no licence number returns an error`(page: Page) {
+        fun `Submitting with no licence number returns an error`() {
             val selectiveLicencePage = navigator.skipToPropertyRegistrationOccupiedSelectiveLicencePage()
             selectiveLicencePage.form.submit()
             assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
         }
 
         @Test
-        fun `Submitting with a very long licence number returns an error`(page: Page) {
+        fun `Submitting with a very long licence number returns an error`() {
             val selectiveLicencePage = navigator.skipToPropertyRegistrationOccupiedSelectiveLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
@@ -154,14 +163,14 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         }
 
         @Test
-        fun `Submitting with no licence number returns an error`(page: Page) {
+        fun `Submitting with no licence number returns an error`() {
             val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationOccupiedHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.form.submit()
             assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("Enter the HMO Mandatory licence number")
         }
 
         @Test
-        fun `Submitting with a very long licence number returns an error`(page: Page) {
+        fun `Submitting with a very long licence number returns an error`() {
             val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationOccupiedHmoMandatoryLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
@@ -184,14 +193,14 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         }
 
         @Test
-        fun `Submitting with no licence number returns an error`(page: Page) {
+        fun `Submitting with no licence number returns an error`() {
             val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationOccupiedHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.form.submit()
             assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("Enter the HMO additional licence number")
         }
 
         @Test
-        fun `Submitting with a very long licence number returns an error`(page: Page) {
+        fun `Submitting with a very long licence number returns an error`() {
             val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationOccupiedHmoAdditionalLicencePage()
             val aVeryLongString =
                 "This string is very long, so long that it is not feasible that it is a real licence number " +
@@ -209,35 +218,35 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         val numberOfBedroomsErrorMessage = "Enter the number of bedrooms, like 3 or 8"
 
         @Test
-        fun `Submitting with a blank numberOfBedrooms field returns an error`(page: Page) {
+        fun `Submitting with a blank numberOfBedrooms field returns an error`() {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
             bedroomsPage.form.submit()
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
         }
 
         @Test
-        fun `Submitting with a non-numerical value in the numberOfBedrooms field returns an error`(page: Page) {
+        fun `Submitting with a non-numerical value in the numberOfBedrooms field returns an error`() {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
             bedroomsPage.submitNumOfBedrooms("not-a-number")
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
         }
 
         @Test
-        fun `Submitting with a non-integer number in the numberOfBedrooms field returns an error`(page: Page) {
+        fun `Submitting with a non-integer number in the numberOfBedrooms field returns an error`() {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
             bedroomsPage.submitNumOfBedrooms("2.3")
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
         }
 
         @Test
-        fun `Submitting with a negative integer in the numberOfBedrooms field returns an error`(page: Page) {
+        fun `Submitting with a negative integer in the numberOfBedrooms field returns an error`() {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
             bedroomsPage.submitNumOfBedrooms("-2")
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)
         }
 
         @Test
-        fun `Submitting with a zero integer in the numberOfBedrooms field returns an error`(page: Page) {
+        fun `Submitting with a zero integer in the numberOfBedrooms field returns an error`() {
             val bedroomsPage = navigator.skipToPropertyRegistrationBedroomsPage()
             bedroomsPage.submitNumOfBedrooms(0)
             assertThat(bedroomsPage.form.getErrorMessage()).containsText(numberOfBedroomsErrorMessage)

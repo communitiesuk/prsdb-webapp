@@ -69,7 +69,6 @@ class UpdateEpcJourneyFactory(
                 nextStep { journey.updateCheckEpcAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }
@@ -78,11 +77,6 @@ class UpdateEpcJourneyFactory(
                 routeSegment(UpdateCheckEpcAnswersStep.ROUTE_SEGMENT)
                 parents { journey.epcDetailsTask.isComplete() }
                 nextStep { journey.completeEpcUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                    )
-                }
             }
             step(journey.completeEpcUpdateStep) {
                 parents { journey.updateCheckEpcAnswersStep.isComplete() }
@@ -104,7 +98,6 @@ class UpdateEpcJourneyFactory(
             configure {
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }

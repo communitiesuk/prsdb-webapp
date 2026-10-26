@@ -34,9 +34,6 @@ class SwitchToIndividualJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
-            configure {
-                withAdditionalContentProperty { "title" to "switchToIndividual.title" }
-            }
             step(journey.hasPendingInvitationsStep) {
                 routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
                 initialStep()

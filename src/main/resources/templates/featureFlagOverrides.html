@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{featureFlagOverrides.heading}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+<html th:replace="~{fragments/layout :: layout(#{featureFlagOverrides.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
         <h1 class="govuk-heading-l" th:text="#{featureFlagOverrides.heading}">featureFlagOverrides.heading</h1>
         <p class="govuk-body" th:text="#{featureFlagOverrides.description}">featureFlagOverrides.description</p>
 
@@ -74,5 +75,6 @@
                 <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{featureFlagOverrides.reset}, 'action', ${resetAction})}">featureFlagOverrides.reset</button>
             </div>
         </form>
-    </main>
+    </div>
+</main>
 </html>

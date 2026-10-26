@@ -1,4 +1,3 @@
-title: Register a Property
 heading: Register a property
 intro:
   paragraph: 'You’ll need to know:'
@@ -106,8 +105,6 @@ taskList:
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
 deleteIncompleteProperties:
-  incompleteProperties:
-    title: Delete incomplete property
   areYouSure:
     heading: 'Are you sure you want to delete {0,,address} from the database?'
     radios:

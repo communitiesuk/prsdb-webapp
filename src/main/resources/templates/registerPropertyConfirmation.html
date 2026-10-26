@@ -1,123 +1,123 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerProperty.confirmation.banner.heading}, ~{::main}, false)}">
-    <main class="govuk-main-wrapper" id="main-content">
-        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.confirmation.banner.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
 
-            <div class="govuk-panel govuk-panel--confirmation">
-                <h1 class="govuk-panel__title"
-                    th:text="#{registerProperty.confirmation.banner.heading}">registerProperty.confirmation.banner.heading</h1>
-                <div class="govuk-panel__body">
-                    <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
-                </div>
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title"
+                th:text="#{registerProperty.confirmation.banner.heading}">registerProperty.confirmation.banner.heading</h1>
+            <div class="govuk-panel__body">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
             </div>
-
-            <p class="govuk-body"
-               th:utext="#{registerProperty.confirmation.prn.label}">
-                registerProperty.confirmation.prn.label
-            </p>
-            <div class="govuk-inset-text">
-                <strong th:text="${prn}">L-GD47-39FX</strong>
-            </div>
-
-            <p class="govuk-body"
-               th:text="#{registerProperty.confirmation.keepNumber}">
-                registerProperty.confirmation.keepNumber
-            </p>
-            <p class="govuk-body"
-               th:text="#{registerProperty.confirmation.useInAdverts}">
-                registerProperty.confirmation.useInAdverts
-            </p>
-
-            <th:block th:if="${paymentSummaryViewModel != null}">
-                <h2 class="govuk-heading-m"
-                    th:text="#{registerProperty.confirmation.paymentSummary.heading}">
-                    registerProperty.confirmation.paymentSummary.heading
-                </h2>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${paymentSummaryViewModel.rows})}"></dl>
-            </th:block>
-
-            <!--/* TODO: PDJB-1742: Remove this entire block when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag */-->
-            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !propertyRegistrationPhaseTwoEnabled}">
-                <h2 class="govuk-heading-m"
-                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.heading
-                </h2>
-                <h3 class="govuk-heading-s"
-                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading
-                </h3>
-                <p class="govuk-body"
-                   th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
-                </p>
-            </th:block>
-
-            <!--/* TODO: PDJB-1618: Show joint landlords copy here as well */-->
-            <th:block th:if="${delegatedToLettingAgent}">
-                <h2 class="govuk-heading-m"
-                    th:text="#{registerProperty.confirmation.whatHappensNext.heading}">
-                    registerProperty.confirmation.whatHappensNext.heading
-                </h2>
-                <h3 class="govuk-heading-s"
-                    th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading}">
-                    registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading
-                </h3>
-                <p class="govuk-body"
-                   th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph}">
-                    registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph
-                </p>
-                <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails</li>
-                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate</li>
-                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate</li>
-                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.epc}">registerProperty.confirmation.whatHappensNext.lettingAgent.epc</li>
-                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails</li>
-                </ul>
-                <p class="govuk-body"
-                   th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph(${completeByDate})}">
-                    registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph
-                </p>
-            </th:block>
-
-            <th:block th:if="${provideMissingDetailsViewModel != null}">
-                <h3 class="govuk-heading-s"
-                    th:text="#{registerProperty.confirmation.provideMissingDetails.heading}">
-                    registerProperty.confirmation.provideMissingDetails.heading
-                </h3>
-                <p class="govuk-body"
-                   th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.one}">
-                    registerProperty.confirmation.provideMissingDetails.paragraph.one
-                </p>
-                <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
-                    <li th:if="${provideMissingDetailsViewModel.showLicensingDetails}"
-                        th:text="#{registerProperty.confirmation.provideMissingDetails.licensingDetails}">registerProperty.confirmation.provideMissingDetails.licensingDetails</li>
-                    <li th:if="${provideMissingDetailsViewModel.showGasSafetyCertificate}"
-                        th:text="#{registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate</li>
-                    <li th:if="${provideMissingDetailsViewModel.showElectricalSafetyCertificate}"
-                        th:text="#{registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate</li>
-                    <li th:if="${provideMissingDetailsViewModel.showEpc}"
-                        th:text="#{registerProperty.confirmation.provideMissingDetails.epc}">registerProperty.confirmation.provideMissingDetails.epc</li>
-                    <li th:if="${provideMissingDetailsViewModel.showTenancyDetails}"
-                        th:text="#{registerProperty.confirmation.provideMissingDetails.tenancyDetails}">registerProperty.confirmation.provideMissingDetails.tenancyDetails</li>
-                </ul>
-                <p class="govuk-inset-text"
-                   th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.two(${completeByDate})}">
-                    registerProperty.confirmation.provideMissingDetails.paragraph.two
-                </p>
-            </th:block>
-
-            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-                #{common.confirmationPage.feedback.heading},
-                #{registerProperty.confirmation.feedback.body},
-                ${propertyRegistrationSurveyUrl})}">
-            </div>
-
-            <p class="govuk-body">
-                <a class="govuk-link"
-                   th:href="@{${landlordDashboardUrl}}"
-                   th:text="#{registerProperty.confirmation.goToDashboard}">registerProperty.confirmation.goToDashboard</a>
-            </p>
-
         </div>
-    </main>
+
+        <p class="govuk-body"
+           th:utext="#{registerProperty.confirmation.prn.label}">
+            registerProperty.confirmation.prn.label
+        </p>
+        <div class="govuk-inset-text">
+            <strong th:text="${prn}">L-GD47-39FX</strong>
+        </div>
+
+        <p class="govuk-body"
+           th:text="#{registerProperty.confirmation.keepNumber}">
+            registerProperty.confirmation.keepNumber
+        </p>
+        <p class="govuk-body"
+           th:text="#{registerProperty.confirmation.useInAdverts}">
+            registerProperty.confirmation.useInAdverts
+        </p>
+
+        <th:block th:if="${paymentSummaryViewModel != null}">
+            <h2 class="govuk-heading-m"
+                th:text="#{registerProperty.confirmation.paymentSummary.heading}">
+                registerProperty.confirmation.paymentSummary.heading
+            </h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${paymentSummaryViewModel.rows})}"></dl>
+        </th:block>
+
+        <!--/* TODO: PDJB-1742: Remove this entire block when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag */-->
+        <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !propertyRegistrationPhaseTwoEnabled}">
+            <h2 class="govuk-heading-m"
+                th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
+                registerProperty.confirmation.whatYouNeedToDoNext.heading
+            </h2>
+            <h3 class="govuk-heading-s"
+                th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading}">
+                registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading
+            </h3>
+            <p class="govuk-body"
+               th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
+                registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
+            </p>
+        </th:block>
+
+        <!--/* TODO: PDJB-1618: Show joint landlords copy here as well */-->
+        <th:block th:if="${delegatedToLettingAgent}">
+            <h2 class="govuk-heading-m"
+                th:text="#{registerProperty.confirmation.whatHappensNext.heading}">
+                registerProperty.confirmation.whatHappensNext.heading
+            </h2>
+            <h3 class="govuk-heading-s"
+                th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading}">
+                registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading
+            </h3>
+            <p class="govuk-body"
+               th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph}">
+                registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails</li>
+                <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate</li>
+                <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate</li>
+                <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.epc}">registerProperty.confirmation.whatHappensNext.lettingAgent.epc</li>
+                <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails</li>
+            </ul>
+            <p class="govuk-body"
+               th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph(${completeByDate})}">
+                registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph
+            </p>
+        </th:block>
+
+        <th:block th:if="${provideMissingDetailsViewModel != null}">
+            <h3 class="govuk-heading-s"
+                th:text="#{registerProperty.confirmation.provideMissingDetails.heading}">
+                registerProperty.confirmation.provideMissingDetails.heading
+            </h3>
+            <p class="govuk-body"
+               th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.one}">
+                registerProperty.confirmation.provideMissingDetails.paragraph.one
+            </p>
+            <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                <li th:if="${provideMissingDetailsViewModel.showLicensingDetails}"
+                    th:text="#{registerProperty.confirmation.provideMissingDetails.licensingDetails}">registerProperty.confirmation.provideMissingDetails.licensingDetails</li>
+                <li th:if="${provideMissingDetailsViewModel.showGasSafetyCertificate}"
+                    th:text="#{registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate</li>
+                <li th:if="${provideMissingDetailsViewModel.showElectricalSafetyCertificate}"
+                    th:text="#{registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate</li>
+                <li th:if="${provideMissingDetailsViewModel.showEpc}"
+                    th:text="#{registerProperty.confirmation.provideMissingDetails.epc}">registerProperty.confirmation.provideMissingDetails.epc</li>
+                <li th:if="${provideMissingDetailsViewModel.showTenancyDetails}"
+                    th:text="#{registerProperty.confirmation.provideMissingDetails.tenancyDetails}">registerProperty.confirmation.provideMissingDetails.tenancyDetails</li>
+            </ul>
+            <p class="govuk-inset-text"
+               th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.two(${completeByDate})}">
+                registerProperty.confirmation.provideMissingDetails.paragraph.two
+            </p>
+        </th:block>
+
+        <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+            #{common.confirmationPage.feedback.heading},
+            #{registerProperty.confirmation.feedback.body},
+            ${propertyRegistrationSurveyUrl})}">
+        </div>
+
+        <p class="govuk-body">
+            <a class="govuk-link"
+               th:href="@{${landlordDashboardUrl}}"
+               th:text="#{registerProperty.confirmation.goToDashboard}">registerProperty.confirmation.goToDashboard</a>
+        </p>
+
+    </div>
+</main>
 </html>

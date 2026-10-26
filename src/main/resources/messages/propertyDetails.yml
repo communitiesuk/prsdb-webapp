@@ -242,8 +242,6 @@ propertyRecord:
       rowName: When rent is paid
       changeLinkAriaLabel: Change rent frequency or rent amount
     rentAmount: Rent amount
-update:
-  title: Update property record
 resendInvitation:
   successBanner:
     title: Success

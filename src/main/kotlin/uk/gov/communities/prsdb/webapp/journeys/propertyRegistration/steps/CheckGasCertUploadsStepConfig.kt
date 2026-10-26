@@ -22,7 +22,7 @@ class CheckGasCertUploadsStepConfig(
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getUploadCount(state),
-            "pageTitleOverride" to "uploads.checkUploads.gasSafety.pageTitle",
+            "title" to "uploads.checkUploads.gasSafety.pageTitle",
             "summaryText" to "uploads.checkUploads.paragraph",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",

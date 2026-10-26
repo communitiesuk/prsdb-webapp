@@ -22,7 +22,7 @@ class LocalCouncilUserCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
         mapOf(
-            "pageTitleOverride" to "registerLocalCouncilUser.checkAnswers.pageTitle",
+            "title" to "registerLocalCouncilUser.checkAnswers.pageTitle",
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
             "summaryListData" to getSummaryList(state),

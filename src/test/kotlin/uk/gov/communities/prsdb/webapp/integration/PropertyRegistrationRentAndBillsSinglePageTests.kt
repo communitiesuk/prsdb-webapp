@@ -28,6 +28,15 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `Error summary link targets the first checkbox`() {
+            val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
+            billsIncludedPage.form.submit()
+
+            assertThat(billsIncludedPage.page.locator(".govuk-error-summary a[href='#billsIncluded']")).hasCount(1)
+            assertThat(billsIncludedPage.page.locator("#billsIncluded")).hasAttribute("type", "checkbox")
+        }
+
+        @Test
         fun `Submitting with something else selected but no text entered returns an error`() {
             val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
             billsIncludedPage.selectGasElectricityWater()
@@ -63,6 +72,15 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             assertThat(
                 furnishedStatusPage.form.getErrorMessage(),
             ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+        }
+
+        @Test
+        fun `Error summary link targets the first radio option`() {
+            val furnishedStatusPage = navigator.skipToTenancyDetailsFurnishedStatusPage()
+            furnishedStatusPage.form.submit()
+
+            assertThat(furnishedStatusPage.page.locator(".govuk-error-summary a[href='#furnishedStatus']")).hasCount(1)
+            assertThat(furnishedStatusPage.page.locator("#furnishedStatus")).hasAttribute("type", "radio")
         }
     }
 

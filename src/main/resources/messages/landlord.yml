@@ -1,5 +1,4 @@
 dashboard:
-  pageTitle: Landlord dashboard
   banner:
     subheading: 'Landlord registration number:'
   registerProperties:
@@ -30,7 +29,6 @@ dashboard:
       subheading: 'You have {0,,number} {1,,propertyMsg} awaiting compliance information:'
       linkText: View compliance actions
 incompleteProperties:
-  title: Incomplete properties
   heading: Incomplete property details
   text: 'Complete the missing details for these properties. After 28 days, incomplete properties are deleted.'
   summaryCardTitle: 'Incomplete Property {0,,number}'

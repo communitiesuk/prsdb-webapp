@@ -136,9 +136,6 @@ class PropertyRegistrationJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "registerProperty.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
@@ -355,9 +352,6 @@ class PropertyRegistrationJourneyFactory(
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
-            configure {
-                withAdditionalContentProperty { "title" to "registerProperty.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             configureStep(journey.confirmMissingComplianceStep) {
                 withAdditionalContentProperty {

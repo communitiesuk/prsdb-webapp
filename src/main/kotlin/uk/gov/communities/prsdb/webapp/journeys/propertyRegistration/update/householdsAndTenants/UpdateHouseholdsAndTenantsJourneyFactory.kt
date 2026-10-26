@@ -60,9 +60,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
@@ -82,11 +79,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
             if (state.checkingAnswersFor == TenantsStep.ROUTE_SEGMENT) {
