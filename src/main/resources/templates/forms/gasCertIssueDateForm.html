@@ -5,7 +5,7 @@
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.pageTitle}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block th:replace="~{fragments/forms/dateInput :: dateInput('date', 'day', 'month', 'year', #{${fieldSetHeading}}, #{${fieldSetHint}})}"></th:block>
     <h2 class="govuk-heading-m" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.heading}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.heading</h2>
     <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.paragraph}">propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.renewing.paragraph</p>

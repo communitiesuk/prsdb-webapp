@@ -94,6 +94,7 @@ gasSafetyTask:
     beforePdjb1898:
       fieldSetHeading: What’s the issue date on the gas safety certificate?
       fieldSetHint: We’ll use this to calculate how long the certificate is valid for
+    pageTitle: When was the gas safety certificate issued?
     fieldSetHeading: When was this certificate issued?
     fieldSetHint: This will be the date of your last gas safety check
     renewing:
