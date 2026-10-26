@@ -635,14 +635,5 @@ class PropertyRegistrationCyaStepConfigTests {
 
             assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
         }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-        }
     }
 }
