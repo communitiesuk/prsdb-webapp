@@ -12,7 +12,7 @@ allowed-tools: 'jetbrains'
    `waitForExit: true` and a suitable timeout.
 3. Check `exitCode`. IntelliJ Gradle tests can return `output: ""` even when the
    IDE has captured the complete failure; empty MCP output is not evidence that
-   no diagnostic exists.
+   no diagnostic exists. Exit code 0 means tests pass.
 4. For a failed run, read the matching result file under
    `build/test-results/test/TEST-<fully-qualified-test-class>.xml`. Extract the
    `<failure message>` and its text content, which contains the stack trace.
