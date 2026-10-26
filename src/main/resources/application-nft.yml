@@ -35,6 +35,9 @@ features:
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-955-associated-parties"
+      enabled: false
+      expiry-date: "2026-12-31"
 
 argon2:
   iterations: 2
