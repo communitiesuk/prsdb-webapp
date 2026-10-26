@@ -356,13 +356,12 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class NonDelegatedContent {
         @BeforeEach
-        fun enableLettingAgentFlag() {
+        fun setupNonDelegatedProperty() {
             whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
         }
 
         @Test
         fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details`() {
-            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -376,7 +375,6 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details and property is unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -548,7 +546,7 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class DelegatedContent {
         @BeforeEach
-        fun enableDelegationFlag() {
+        fun setupDelegatedProperty() {
             whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
         }
 

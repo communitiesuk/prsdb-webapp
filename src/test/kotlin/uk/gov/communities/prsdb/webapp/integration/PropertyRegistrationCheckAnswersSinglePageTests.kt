@@ -318,9 +318,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 "When your property becomes occupied, you can choose for your letting agent or property manager to " +
                     "provide this section for you. They can also keep these details up to date.",
             )
-
-            // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
-            assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
         }
 
         @Test

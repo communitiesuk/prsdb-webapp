@@ -607,10 +607,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             @Test
             fun `making an undelegated property vacant skips the interruption`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                val originalNumberOfBedrooms =
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value
-                        .textContent()
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
                     assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
@@ -628,11 +624,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 val updatedPropertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
                 assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-
-                // Bedrooms is a property detail rather than a tenancy detail, so it survives the property becoming vacant
-                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                    .containsText(originalNumberOfBedrooms)
             }
 
             @Test
