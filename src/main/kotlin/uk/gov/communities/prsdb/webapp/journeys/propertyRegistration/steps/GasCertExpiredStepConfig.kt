@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -10,7 +12,9 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class GasCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyDetailState>() {
+class GasCertExpiredStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyDetailState) =
@@ -25,13 +29,20 @@ class GasCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInput
         )
 
     override fun chooseTemplate(state: GasSafetyDetailState) =
-        state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
+        // TODO PDJB-1926: Remove this flag check and the Before14MonthExpiry templates when the flag is removed.
+        if (featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)) {
+            if (state.isOccupied) {
                 "forms/gasSafetyCertificateExpiredForOccupiedProperty"
             } else {
                 "forms/gasSafetyCertificateExpiredForUnoccupiedProperty"
             }
-        } ?: throw IllegalStateException("GasCertExpiredStep should not reachable before isOccupied is set")
+        } else {
+            if (state.isOccupied) {
+                "forms/gasSafetyCertificateExpiredForOccupiedPropertyBefore14MonthExpiry"
+            } else {
+                "forms/gasSafetyCertificateExpiredForUnoccupiedPropertyBefore14MonthExpiry"
+            }
+        }
 
     override fun mode(state: GasSafetyDetailState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

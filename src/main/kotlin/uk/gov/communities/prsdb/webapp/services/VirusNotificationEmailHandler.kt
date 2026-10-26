@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.VirusMonit
 @PrsdbTaskService
 class VirusNotificationEmailHandler(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
@@ -49,13 +48,13 @@ class VirusNotificationEmailHandler(
         if (monitoringEmailAddress != null) {
             emailNotificationService.sendEmail(
                 monitoringEmailAddress,
-                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.toMultiLineAddress()),
+                buildAlertEmail(notification.certificateType, ownership.address.toMultiLineAddress()),
             )
         } else {
             ownership.landlords.forEach { landlord ->
                 emailNotificationService.sendEmailToLandlord(
                     landlord,
-                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.toMultiLineAddress()),
+                    buildAlertEmail(notification.certificateType, ownership.address.toMultiLineAddress()),
                 )
             }
 
@@ -65,7 +64,6 @@ class VirusNotificationEmailHandler(
                     lettingAgentAccess!!.invitedEmail,
                     buildAlertEmail(
                         notification.certificateType,
-                        lettingAgentAccess.invitedEmail,
                         ownership.address.toMultiLineAddress(),
                     ),
                 )
@@ -85,7 +83,6 @@ class VirusNotificationEmailHandler(
             val email =
                 buildAlertEmail(
                     notification.certificateType,
-                    MONITORING_TEAM_RECIPIENT_NAME,
                     savedJourneyState.getPropertyRegistrationMultiLineAddress(),
                 )
             emailNotificationService.sendEmail(monitoringEmailAddress, email)
@@ -94,7 +91,6 @@ class VirusNotificationEmailHandler(
             val email =
                 buildAlertEmail(
                     notification.certificateType,
-                    userDetails.name,
                     savedJourneyState.getPropertyRegistrationMultiLineAddress(),
                 )
             emailNotificationService.sendEmail(userDetails.email, email)
@@ -150,15 +146,11 @@ class VirusNotificationEmailHandler(
 
     private fun buildAlertEmail(
         certificateType: CertificateType,
-        recipientName: String,
         multiLineAddress: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
             certificateType = certificateDescriptionForBody(certificateType),
-            // TODO PDJB-1701: Remove recipientName and landlordDashboardUrl once Notify template V3 is live
-            recipientName = recipientName,
             propertyAddress = multiLineAddress,
-            landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
@@ -167,8 +159,4 @@ class VirusNotificationEmailHandler(
             CertificateType.Eicr -> "EICR"
             CertificateType.Eic -> "EIC"
         }
-
-    companion object {
-        private const val MONITORING_TEAM_RECIPIENT_NAME = "Monitoring Team"
-    }
 }
