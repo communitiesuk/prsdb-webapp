@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
@@ -140,12 +139,7 @@ class PropertyRegistrationJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "registerProperty.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-
-            val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
 
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
@@ -167,21 +161,13 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 CorrespondenceEmailStep.ROUTE_SEGMENT -> {
-                    if (correspondenceEnabled) {
-                        fromTask(journey.correspondenceTask, journey) {
-                            checkAnswerStep(task.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
-                        }
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    fromTask(journey.correspondenceTask, journey) {
+                        checkAnswerStep(task.correspondenceEmailStep, CorrespondenceEmailStep.ROUTE_SEGMENT)
                     }
                 }
 
                 "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
-                    if (correspondenceEnabled) {
-                        checkAnswerTask(journey.correspondenceTask.addressTask, CorrespondenceAddressTask.ROUTE_SEGMENT)
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
-                    }
+                    checkAnswerTask(journey.correspondenceTask.addressTask, CorrespondenceAddressTask.ROUTE_SEGMENT)
                 }
 
                 LookupAddressStep.ROUTE_SEGMENT -> {
@@ -386,9 +372,6 @@ class PropertyRegistrationJourneyFactory(
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
-            configure {
-                withAdditionalContentProperty { "title" to "registerProperty.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             configureStep(journey.confirmMissingComplianceStep) {
                 withAdditionalContentProperty {
@@ -424,25 +407,22 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
             }
-            val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
                 task(journey.ownershipAndLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.propertyDetailsTask.isComplete() }
-                    nextStep { if (correspondenceEnabled) journey.correspondenceTask.firstStep else journey.occupied }
+                    nextStep { journey.correspondenceTask.firstStep }
                     saveProgress()
                 }
             }
-            if (correspondenceEnabled) {
-                section {
-                    withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
-                    task(journey.correspondenceTask) {
-                        withDependencies { journey }
-                        parents { journey.ownershipAndLandlordsTask.isComplete() }
-                        nextStep { journey.occupied }
-                        saveProgress()
-                    }
+            section {
+                withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
+                task(journey.correspondenceTask) {
+                    withDependencies { journey }
+                    parents { journey.ownershipAndLandlordsTask.isComplete() }
+                    nextStep { journey.occupied }
+                    saveProgress()
                 }
             }
             val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
@@ -450,13 +430,7 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
-                    parents {
-                        if (correspondenceEnabled) {
-                            journey.correspondenceTask.isComplete()
-                        } else {
-                            journey.ownershipAndLandlordsTask.isComplete()
-                        }
-                    }
+                    parents { journey.correspondenceTask.isComplete() }
                     nextStep { occupancy ->
                         if (delegateEnabled) {
                             when (occupancy) {

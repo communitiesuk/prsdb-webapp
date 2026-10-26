@@ -80,10 +80,13 @@ This project uses:
 - Thymeleaf templates with fragment composition
 
 Template conventions:
-- Layouts extend `layout.html`
-- Fragments are in `components/` subdirectories
-- Form pages use `formPageWrapper.html` fragment
-- Page titles follow `<page> - <service> - GOV.UK` pattern
+- Every page renders through `fragments/layout :: layout(...)` (see "Layout Structure" in
+  `.github/instructions/frontend.instructions.md`)
+- Reusable fragments live in `templates/fragments/` subdirectories (`forms/`, `buttons/`, `banners/`, `layouts/`, etc.)
+- Journey form pages use the `fragments/forms/questionPage.html` or `fragments/forms/complexQuestionPage.html` fragment
+- Most pages use the two-thirds grid (`fragments/layouts/twoThirdsLayout.html`)
+- Page title = the h1. Only propose a different title if the h1 is not unique or not descriptive out of context
+  (see "Page Titles" in `.github/instructions/frontend.instructions.md`)
 
 ## Taking Screenshots for Validation
 
@@ -103,7 +106,7 @@ Present findings as a structured list the implementing agent can act on directly
 ```
 Page: [name]
 Template: src/main/resources/templates/[path].html
-Layout: formPageWrapper / contentPage / taskList (etc.)
+Grid: two-thirds / full width / other (describe)
 
 Components:
 - govuk-heading-xl: "[heading text]"

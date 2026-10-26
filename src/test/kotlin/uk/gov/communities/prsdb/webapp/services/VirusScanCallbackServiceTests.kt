@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
@@ -11,8 +12,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -26,7 +28,6 @@ class VirusScanCallbackServiceTests {
     private lateinit var virusScanCallbackService: VirusScanCallbackService
     private lateinit var virusScanCallbackRepository: VirusScanCallbackRepository
     private lateinit var fileUploadRepository: FileUploadRepository
-    private lateinit var featureFlagManager: FeatureFlagManager
     private lateinit var userToLandlordService: UserToLandlordService
 
     private val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
@@ -35,18 +36,21 @@ class VirusScanCallbackServiceTests {
     fun setup() {
         virusScanCallbackRepository = mock()
         fileUploadRepository = mock()
-        featureFlagManager = mock()
         userToLandlordService = mock()
         virusScanCallbackService =
             VirusScanCallbackService(
                 virusScanCallbackRepository,
                 fileUploadRepository,
-                featureFlagManager,
                 userToLandlordService,
             )
     }
 
     private fun callbackFor(data: EmailNotificationData) = VirusScanCallback(fileUpload, Json.encodeToString<EmailNotificationData>(data))
+
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
+    }
 
     @Test
     fun `saveEmailForJourney saves a journey notification callback`() {
@@ -55,13 +59,13 @@ class VirusScanCallbackServiceTests {
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
 
         // Act
-        virusScanCallbackService.saveEmailForJourney("journey-1", 42L, CertificateType.Eicr, 7L)
+        virusScanCallbackService.saveEmailForJourney("journey-1", 42L, CertificateType.Eicr, 7L, "user-1")
 
         // Assert
         val captor = argumentCaptor<VirusScanCallback>()
         verify(virusScanCallbackRepository).save(captor.capture())
         assertEquals(
-            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L, "user-1"),
             Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
         )
     }
@@ -73,14 +77,14 @@ class VirusScanCallbackServiceTests {
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
 
         // Act
-        virusScanCallbackService.saveEmailToMonitoringTeam("journey-1", 42L, CertificateType.Eicr, 7L)
+        virusScanCallbackService.saveEmailToMonitoringTeam("journey-1", 42L, CertificateType.Eicr, 7L, "user-1")
 
         // Assert
         val captor = argumentCaptor<VirusScanCallback>()
         verify(virusScanCallbackRepository).save(captor.capture())
         assertEquals(
             EmailNotificationData.VirusMonitoringEmailNotification(
-                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L, "user-1"),
             ),
             Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
         )
@@ -129,7 +133,6 @@ class VirusScanCallbackServiceTests {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
         // Act
         virusScanCallbackService.saveVirusScanFailureEmail(
@@ -156,40 +159,6 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveVirusScanFailureEmail saves journey-targeted callbacks for an update when letting agent delegation is disabled`() {
-        // Arrange
-        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
-        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        val landlord = mock<Landlord>()
-        whenever(landlord.id).thenReturn(7L)
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-
-        // Act
-        virusScanCallbackService.saveVirusScanFailureEmail(
-            journeyId = "journey-1",
-            fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
-            propertyOwnershipId = 99L,
-        )
-
-        // Assert
-        val captor = argumentCaptor<VirusScanCallback>()
-        verify(virusScanCallbackRepository, times(2)).save(captor.capture())
-        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
-        assertEquals(
-            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
-            savedData.single { it is EmailNotificationData.IncompletePropertyEmailNotification },
-        )
-        assertEquals(
-            EmailNotificationData.VirusMonitoringEmailNotification(
-                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
-            ),
-            savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
-        )
-    }
-
-    @Test
     fun `saveVirusScanFailureEmail saves journey-targeted callbacks when there is no property ownership id but there is a landlord`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
@@ -197,6 +166,7 @@ class VirusScanCallbackServiceTests {
         val landlord = mock<Landlord>()
         whenever(landlord.id).thenReturn(7L)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        setMockPrincipal("user-1")
 
         // Act
         virusScanCallbackService.saveVirusScanFailureEmail(
@@ -211,12 +181,12 @@ class VirusScanCallbackServiceTests {
         verify(virusScanCallbackRepository, times(2)).save(captor.capture())
         val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
         assertEquals(
-            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L, "user-1"),
             savedData.single { it is EmailNotificationData.IncompletePropertyEmailNotification },
         )
         assertEquals(
             EmailNotificationData.VirusMonitoringEmailNotification(
-                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L, "user-1"),
             ),
             savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
         )
@@ -276,5 +246,13 @@ class VirusScanCallbackServiceTests {
 
         // Assert
         verify(virusScanCallbackRepository, never()).updateEncodedCallbackDataById(any(), any())
+    }
+
+    private fun setMockPrincipal(name: String) {
+        val authentication = mock<Authentication>()
+        whenever(authentication.name).thenReturn(name)
+        val context = mock<SecurityContext>()
+        whenever(context.authentication).thenReturn(authentication)
+        SecurityContextHolder.setContext(context)
     }
 }

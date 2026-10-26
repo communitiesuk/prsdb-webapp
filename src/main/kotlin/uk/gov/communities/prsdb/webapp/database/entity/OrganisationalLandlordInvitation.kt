@@ -46,6 +46,7 @@ class OrganisationalLandlordInvitation(
 
     @Column(nullable = false)
     var isHidden: Boolean = false
+        private set
 
     val expiresOnDate: LocalDate
         get() =
@@ -63,6 +64,10 @@ class OrganisationalLandlordInvitation(
                 isExpired -> OrganisationalLandlordInvitationStatus.EXPIRED
                 else -> OrganisationalLandlordInvitationStatus.PENDING
             }
+
+    fun canBeDeletedByArchive(): Boolean =
+        status == OrganisationalLandlordInvitationStatus.EXPIRED ||
+            status == OrganisationalLandlordInvitationStatus.HIDDEN
 
     constructor(
         token: UUID,
@@ -91,5 +96,9 @@ class OrganisationalLandlordInvitation(
 
     fun markAsExpiredEmailSent() {
         invitationExpiredEmailSent = true
+    }
+
+    fun markAsHidden() {
+        isHidden = true
     }
 }

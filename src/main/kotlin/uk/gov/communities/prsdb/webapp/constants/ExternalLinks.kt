@@ -97,25 +97,17 @@ const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/
 
 const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"
 
-const val INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL =
-    "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUMFFDVVZKQU85N0oyRURSQ0dUNFpRRDRJSC4u"
+const val INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_6QNhSp7yMyX02Ka"
 
-const val INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL =
-    "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ0Y0UjA5SkdBTkdKSEo5R04yRk5XSFNYWS4u"
+const val INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_8AhryqCNgBWDitg"
 
-const val ORG_LANDLORD_REGISTRATION_SURVEY_URL = "https://forms.cloud.microsoft/e/UHE5vuRprx"
+const val ORG_LANDLORD_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_8DnofanOaK7OK1g"
 
-const val ORG_PROPERTY_REGISTRATION_SURVEY_URL = "https://forms.cloud.microsoft/e/w4hJvkL9XE"
+const val ORG_PROPERTY_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_bPC6nNwOlDgb9iu"
 
-const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL =
-    "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUMlhXUTNKQUFUQkxNSlpESEVYOTJOSENHSC4u"
+const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_7UkQfXziI6qUQbc"
 
-const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL =
-    "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ1ZUWEEzRzNROUo5UFJGVTNSOVozQzVDMC4u"
+const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_eaItOU1N1mExcgu"
 
 const val LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_9SqRP5awKt4XqoC"
 

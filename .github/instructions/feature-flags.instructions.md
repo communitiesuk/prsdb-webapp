@@ -41,9 +41,9 @@ features:
 ```
 
 ### Naming
-Flag names follow the epic, e.g. `pdjb-1040-correspondence-address` (lowercase
+Flag names follow the epic, e.g. `pdjb-1234-example-feature` (lowercase
 kebab-case, correct spelling). The Kotlin constant is the SCREAMING_SNAKE_CASE
-equivalent, e.g. `CORRESPONDENCE_ADDRESS`.
+equivalent, e.g. `EXAMPLE_FEATURE`.
 
 ### Reference implementation
 See PR communitiesuk/prsdb-webapp#1761 (PDJB-1397) for a complete "create a feature flag"

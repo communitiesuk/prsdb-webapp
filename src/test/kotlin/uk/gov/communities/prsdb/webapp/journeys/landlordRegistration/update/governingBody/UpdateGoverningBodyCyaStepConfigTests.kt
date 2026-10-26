@@ -80,12 +80,11 @@ class UpdateGoverningBodyCyaStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent renders member cards with correct title, warning, and submit button`() {
+    fun `getStepSpecificContent renders member cards with correct warning and submit button`() {
         whenever(mockTask.governingBodyMembersMap).thenReturn(members)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals("landlordDetails.update.title", content["title"])
         assertEquals(true, content["showWarning"])
         assertEquals("forms.buttons.confirmAndSubmitUpdate", content["submitButtonText"])
     }

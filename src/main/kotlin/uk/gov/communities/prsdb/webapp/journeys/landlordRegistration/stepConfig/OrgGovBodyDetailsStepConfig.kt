@@ -14,7 +14,6 @@ class OrgGovBodyDetailsStepConfig : AbstractRequestableStepConfig<OrgGovBodyDeta
 
     override fun getStepSpecificContent(state: OrgGovBodyState) =
         mapOf(
-            "title" to "forms.orgGovBodyDetails.title",
             "landlordTypeUrl" to JourneyStateService.urlWithJourneyState(LandlordTypeStep.ROUTE_SEGMENT, state.journeyId),
         )
 

@@ -10,4 +10,7 @@ abstract class DeleteLocalCouncilUserBasePage(
 ) : BasePage(page, urlSegment) {
     val userDetailsSection = Section.byTestId(page, "user-details-section")
     val form = PostForm(page)
+
+    override val expectedTitleHeading
+        get() = "Before you remove ${page.locator("[data-testid=user-details-section] strong").first().textContent().trim()}"
 }

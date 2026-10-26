@@ -19,8 +19,6 @@ import org.springframework.test.web.servlet.post
 import org.springframework.util.ResourceUtils
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -49,19 +47,11 @@ class LettingAgentUpdateElectricalSafetyControllerTests(
     @MockitoBean
     private lateinit var stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
     private val token: UUID = UUID.randomUUID()
 
     private val updateStepRoute =
         LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(token) +
             "/${HasElectricalCertStep.ROUTE_SEGMENT}"
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
 
     @Test
     fun `getUpdateStep dispatches the journey step for a valid token`() {

@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -20,11 +18,6 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
     private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
 
     private val seededPassword = "Password123!" // pragma: allowlist secret
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Nested
     inner class SetPasswordValidation {

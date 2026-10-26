@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateWithLettingAgentRemovedConfirmation
-import uk.gov.communities.prsdb.webapp.services.CurrentUserService.CurrentUserDetails
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
@@ -247,8 +247,8 @@ class PropertyUpdateEmailServiceTests {
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
         notifier.sendUpdateWithLettingAgentRemovedEmails(propertyId, updatedMessage, lettingAgentEmail)
@@ -277,8 +277,8 @@ class PropertyUpdateEmailServiceTests {
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
         notifier.sendUpdateWithLettingAgentRemovedEmails(propertyId, updatedMessage, lettingAgentEmail)

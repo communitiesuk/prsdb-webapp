@@ -4,13 +4,11 @@ You’ve joined ((organisation name)).
 
 # What you can do
 
-Your access level is ((role name)).
-
-You can:
+Your access level is ((role name)), you can:
 
 * register rental properties
 * update rental property information
-((isAdmin??* manage team members))
+((isAdmin??* manage team member’s accounts))
 
 [Go to dashboard](((dashboard url)))
 

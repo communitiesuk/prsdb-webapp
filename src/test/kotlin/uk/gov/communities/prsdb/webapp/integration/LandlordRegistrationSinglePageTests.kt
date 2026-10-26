@@ -135,6 +135,16 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(dateOfBirthPage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
 
+        // This tests the shared date input template fragment used by date form pages, rather than anything specific to this page.
+        // If it fails, check that fragment's error message markup.
+        // If this test is removed, add an equivalent to another page that uses the same fragment.
+        @Test
+        fun `Date error message includes a visually hidden error prefix`() {
+            val dateOfBirthPage = navigator.skipToLandlordRegistrationDateOfBirthPage()
+            dateOfBirthPage.submitDate("", "", "")
+            assertThat(dateOfBirthPage.form.getErrorMessage().locator(".govuk-visually-hidden")).containsText("Error:")
+        }
+
         @Nested
         inner class AgeValidation {
             private val dateTimeHelper = DateTimeHelper()
@@ -319,10 +329,10 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class LandlordRegistrationConfirmation {
         @Test
-        fun `Navigating here with an incomplete form returns a 500 error page`(page: Page) {
+        fun `Navigating here without a registered landlord returns a 403 error page`(page: Page) {
             navigator.navigateToLandlordRegistrationConfirmationPage()
             val errorPage = assertPageIs(page, ErrorPage::class)
-            BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+            BaseComponent.assertThat(errorPage.heading).containsText("You do not have permission to access this page")
         }
     }
 

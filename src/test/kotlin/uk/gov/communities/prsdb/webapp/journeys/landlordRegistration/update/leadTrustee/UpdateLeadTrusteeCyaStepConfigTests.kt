@@ -76,10 +76,9 @@ class UpdateLeadTrusteeCyaStepConfigTests {
         }
 
         @Test
-        fun `content includes title, warning, and submit button text`() {
+        fun `content includes warning and submit button text`() {
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("landlordDetails.update.title", content["title"])
             assertEquals(true, content["showWarning"])
             assertEquals("forms.buttons.confirmAndSubmitUpdate", content["submitButtonText"])
         }

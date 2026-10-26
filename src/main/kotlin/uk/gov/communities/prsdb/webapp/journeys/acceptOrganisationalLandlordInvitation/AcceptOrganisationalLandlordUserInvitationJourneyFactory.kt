@@ -45,9 +45,6 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     private fun mainJourneyMap(state: AcceptInvitationJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.validateTokenStep }
-            configure {
-                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
-            }
             step(journey.validateTokenStep) {
                 routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
                 initialStep()
@@ -111,9 +108,6 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 FullNameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.fullNameStep, FullNameStep.ROUTE_SEGMENT)
