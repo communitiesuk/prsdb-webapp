@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
@@ -31,6 +33,8 @@ class LettingAgentPropertyDetailsController(
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
     private val messageSource: MessageSource,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun getLettingAgentPropertyDetails(
@@ -56,7 +60,14 @@ class LettingAgentPropertyDetailsController(
 
         model.addAttribute(
             "propertyDetails",
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, propertyCompliance, messageSource, token),
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                propertyCompliance,
+                messageSource,
+                // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+                featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+                token,
+            ),
         )
         model.addAttribute(
             "complianceDetails",

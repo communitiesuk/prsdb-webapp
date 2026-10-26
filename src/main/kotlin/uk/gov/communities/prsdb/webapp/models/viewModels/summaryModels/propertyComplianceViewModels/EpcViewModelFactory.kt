@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -16,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 @PrsdbWebService
 class EpcViewModelFactory(
     messageSource: MessageSource,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
     override val provideLaterNoDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoDeadline"
@@ -23,8 +27,13 @@ class EpcViewModelFactory(
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
 
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
     override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatus
+        ComplianceStatusDataModel
+            .fromPropertyCompliance(
+                propertyCompliance,
+                featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+            ).epcStatus
 
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
