@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import java.sql.Date
@@ -166,14 +167,14 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `isElectricalSafetyCertificateCurrent returns false when the cert type is missing`() {
-        assertFalse(
+    fun `isElectricalSafetyCertificateCurrent throws when the cert type is missing`() {
+        assertThrows<IllegalArgumentException> {
             NftDataFaker.isElectricalSafetyCertificateCurrent(
                 Date.valueOf(LocalDate.of(2025, 6, 16)),
                 null,
                 Timestamp.from(MIDYEAR_REFERENCE),
-            ),
-        )
+            )
+        }
     }
 
     @Test
