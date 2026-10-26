@@ -614,7 +614,7 @@ object NftDataFaker {
         return when (certType) {
             CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
             CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
-            else -> false
+            else -> throw IllegalArgumentException("Unexpected electrical certificate type: $certType")
         }
     }
 
