@@ -20,7 +20,7 @@ class GasCertExpiredStepConfigTests {
     lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Test
-    fun `chooseTemplate returns occupied template when isOccupied is true and the 14 month expiry flag is enabled`() {
+    fun `chooseTemplate returns occupied template when isOccupied is true and 14 month expiry flag is enabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
@@ -34,7 +34,7 @@ class GasCertExpiredStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when isOccupied is false and the 14 month expiry flag is enabled`() {
+    fun `chooseTemplate returns unoccupied template when isOccupied is false and 14 month expiry flag is enabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
@@ -48,7 +48,7 @@ class GasCertExpiredStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns Before14MonthExpiry occupied template when isOccupied is true and the 14 month expiry flag is disabled`() {
+    fun `chooseTemplate returns Before14MonthExpiry occupied template when isOccupied is true and 14 month expiry flag is disabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
@@ -62,7 +62,7 @@ class GasCertExpiredStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns Before14MonthExpiry unoccupied template when isOccupied is false and the 14 month expiry flag is disabled`() {
+    fun `chooseTemplate returns Before14MonthExpiry unoccupied template when isOccupied is false and 14 month expiry flag is disabled`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
