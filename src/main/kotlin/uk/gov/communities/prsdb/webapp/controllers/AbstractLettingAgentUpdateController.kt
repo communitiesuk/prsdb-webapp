@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -22,14 +20,12 @@ abstract class AbstractLettingAgentUpdateController(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         @PathVariable token: UUID,
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath, token) { getStepModelAndView() }
 
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         @PathVariable token: UUID,

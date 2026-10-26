@@ -67,9 +67,6 @@ class InviteJointLandlordJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
-            configure {
-                withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
-            }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
@@ -106,9 +103,6 @@ class InviteJointLandlordJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
-            configure {
-                withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
-            }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
@@ -183,9 +177,8 @@ class InviteJointLandlordJourney(
     override val existingInvitedEmails: List<String>
         get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
 
-    // TODO: PDJB-1274: Update emails to account for org landlord
     override val existingLandlordEmails: List<String>
-        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { it.email }
+        get() = jointLandlordInvitationService.getInUseEmailsForProperty(propertyOwnershipService.getPropertyOwnership(propertyId))
 }
 
 interface InviteJointLandlordJourneyState :

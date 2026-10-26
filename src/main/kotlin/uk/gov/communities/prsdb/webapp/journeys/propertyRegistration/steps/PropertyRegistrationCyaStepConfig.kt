@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -112,7 +111,6 @@ class PropertyRegistrationCyaStepConfig(
         state: PropertyRegistrationJourneyState,
         occupancyDetails: List<SummaryListRowViewModel>,
     ) = mapOf<String, Any?>(
-        "title" to "registerProperty.title",
         "submitButtonText" to getSubmitButtonText(),
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
         "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
@@ -142,8 +140,7 @@ class PropertyRegistrationCyaStepConfig(
                     getOwnershipTypeRow(state),
                     getJointLandLordsSummaryRow(state),
                 ),
-            "correspondenceRows" to
-                if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)) getCorrespondenceRows(state) else emptyList(),
+            "correspondenceRows" to getCorrespondenceRows(state),
             "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
             "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
             "rentedOutGasHeadingKey" to "checkGasSafety.heading",

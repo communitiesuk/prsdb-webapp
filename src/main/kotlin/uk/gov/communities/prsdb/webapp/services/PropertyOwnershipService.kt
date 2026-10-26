@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -52,7 +50,6 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
-    private val featureFlagManager: FeatureFlagManager,
     private val addressService: AddressService,
 ) {
     @Transactional
@@ -78,18 +75,13 @@ class PropertyOwnershipService(
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
-        // TODO PDJB-1733: Make correspondenceEmail and correspondenceAddressModel non-nullable - they are only null when the
-        //  CORRESPONDENCE_ADDRESS flag is off
-        correspondenceEmail: String? = null,
-        correspondenceAddressModel: AddressDataModel? = null,
+        correspondenceEmail: String,
+        correspondenceAddressModel: AddressDataModel,
         renewalDate: LocalDate = RenewalDateHelper.getRenewalDate(anniversary),
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
-        // TODO PDJB-1733: Remove the registering landlord's address and email fallbacks (here and on correspondenceEmail below).
-        //  These are the CORRESPONDENCE_ADDRESS flag-off defaults, used when no correspondence details are passed in.
-        val correspondenceAddress =
-            correspondenceAddressModel?.let { addressService.findOrCreateAddress(it) } ?: registeringLandlord.address
+        val correspondenceAddress = addressService.findOrCreateAddress(correspondenceAddressModel)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -103,7 +95,7 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                correspondenceEmail = correspondenceEmail ?: registeringLandlord.email,
+                correspondenceEmail = correspondenceEmail,
                 correspondenceAddress = correspondenceAddress,
                 renewalDate = renewalDate,
                 isActive = isActive,
@@ -160,8 +152,6 @@ class PropertyOwnershipService(
     }
 
     fun hasLettingAgent(propertyOwnershipId: Long): Boolean {
-        if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
-
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 

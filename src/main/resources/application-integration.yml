@@ -10,9 +10,6 @@ features:
     - name: "pdjb-939-property-registration-phase-two"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "pdjb-1053-dashboard-nav-link"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-1022-delegate-to-letting-agent"
       enabled: true
       expiry-date: "2026-12-31"
@@ -22,18 +19,15 @@ features:
     - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
       expiry-date: "2026-12-31"
-    - name: "pdjb-1040-correspondence-address"
-      enabled: true
-      expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
-      enabled: true
-      expiry-date: "2026-12-31"
-    - name: "pdjb-926-landlord-dashboard-update"
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: true
       expiry-date: "2026-11-01"
+    - name: "pdjb-1894-gas-certificate-14-month-expiry"
+      enabled: true
+      expiry-date: "2026-12-31"
 
 argon2:
   iterations: 2

@@ -10,4 +10,6 @@ abstract class CancelLocalCouncilUserInvitationSuccessBasePage(
 ) : BasePage(page, urlSegment) {
     val confirmationBanner = ConfirmationBanner(page)
     val returnButton = Button.byText(page, "Return to manage users")
+
+    override val expectedTitleHeading = "Local Council invitation cancelled"
 }

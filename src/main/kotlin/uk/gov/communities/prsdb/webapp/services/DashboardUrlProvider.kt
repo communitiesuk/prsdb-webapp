@@ -2,8 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_ROLES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
@@ -13,14 +11,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 
 @PrsdbWebService
-class DashboardUrlProvider(
-    private val featureFlagManager: FeatureFlagManager,
-) {
+class DashboardUrlProvider {
     fun getDashboardUrlForCurrentUser(): String? {
-        if (!featureFlagManager.checkFeature(DASHBOARD_NAV_LINK)) {
-            return null
-        }
-
         val authorities =
             SecurityContextHolder.getContext().authentication
                 ?.authorities

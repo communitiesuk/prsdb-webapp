@@ -42,8 +42,8 @@ npm install -g @playwright/cli@latest
 playwright-cli install --skills
 ```
 
-The application requires Java 21 - Gradle should automatically install this for you the first time you run the
-application locally.
+The application requires Java 25. Install Amazon Corretto 25 and select it as the project SDK and Gradle JVM in
+IntelliJ before running the application locally.
 
 We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.com/jlleitschuh/ktlint-gradle) and the
 [ktlint Intellij plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) which can be installed from within Intellij.

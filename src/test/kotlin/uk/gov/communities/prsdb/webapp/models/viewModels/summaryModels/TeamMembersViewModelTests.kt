@@ -5,7 +5,9 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.ADMIN
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole.EDITOR
+import uk.gov.communities.prsdb.webapp.controllers.CancelOrganisationalLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -31,7 +33,9 @@ class TeamMembersViewModelTests {
         email: String,
         daysAgo: Long,
         isHidden: Boolean = false,
+        id: Long = 0,
     ) = MockLandlordData.createOrganisationalLandlordInvitation(
+        id = id,
         invitedEmail = email,
         organisationalLandlord = organisation,
         createdDate = Instant.now().minus(daysAgo, ChronoUnit.DAYS),
@@ -115,8 +119,8 @@ class TeamMembersViewModelTests {
         // Arrange
         val invitations =
             listOf(
-                invitation("newer@example.com", daysAgo = 1),
-                invitation("older@example.com", daysAgo = 10),
+                invitation("newer@example.com", daysAgo = 1, id = 1L),
+                invitation("older@example.com", daysAgo = 10, id = 2L),
             )
 
         // Act
@@ -131,8 +135,11 @@ class TeamMembersViewModelTests {
         assertEquals("teamMembers.invitations.rowHeading", viewModel.pendingInvitationRows.first().fieldHeading)
         assertEquals(
             listOf(
-                SummaryListRowActionsViewModel("forms.links.resend", "#"),
-                SummaryListRowActionsViewModel("forms.links.cancel", "#"),
+                SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(2L)),
+                SummaryListRowActionsViewModel(
+                    "forms.links.cancel",
+                    CancelOrganisationalLandlordInvitationController.getCancelInvitationPath(2L),
+                ),
             ),
             viewModel.pendingInvitationRows.first().actions,
         )
@@ -144,9 +151,9 @@ class TeamMembersViewModelTests {
         // Arrange
         val invitations =
             listOf(
-                invitation("pending@example.com", daysAgo = 1),
-                invitation("expired-newer@example.com", daysAgo = 40),
-                invitation("expired-older@example.com", daysAgo = 60),
+                invitation("pending@example.com", daysAgo = 1, id = 1L),
+                invitation("expired-newer@example.com", daysAgo = 40, id = 2L),
+                invitation("expired-older@example.com", daysAgo = 60, id = 3L),
             )
 
         // Act
@@ -162,10 +169,18 @@ class TeamMembersViewModelTests {
         assertEquals("teamMembers.invitations.expired.rowHeading", viewModel.expiredInvitationRows.first().fieldHeading)
         assertEquals(
             listOf(
-                SummaryListRowActionsViewModel("forms.links.resend", "#"),
-                SummaryListRowActionsViewModel("forms.links.remove", "#"),
+                SummaryListRowActionsViewModel("forms.links.resend", TeamMembersController.getResendInvitationPath(3L)),
+                SummaryListRowActionsViewModel("forms.links.remove", TeamMembersController.getRemoveExpiredInvitationPath(3L)),
             ),
             viewModel.expiredInvitationRows.first().actions,
+        )
+        assertEquals(
+            "/landlord/team-members/remove-expired-invite/2",
+            viewModel.expiredInvitationRows
+                .last()
+                .actions
+                .last()
+                .url,
         )
     }
 

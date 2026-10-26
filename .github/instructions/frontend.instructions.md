@@ -13,10 +13,10 @@ applyTo: "**/templates/**,**/css/**,**/js/**,**/assets/**"
 ## Thymeleaf Templates
 
 ### Layout Structure
-Every page uses `fragments/layout :: layout(title, content, hasErrors)`:
+Every page uses `fragments/layout :: layout(title, content, hasErrors, backUrl, mainClass)`.
 ```html
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{example.heading}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{example.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
 <main>
     <h1 class="govuk-heading-l" th:text="#{example.heading}">Example heading</h1>
     <!-- Page content here -->
@@ -37,8 +37,10 @@ each page title is unique and descriptive:
     ("Gas safety certificate") is not descriptive enough.
 - If the h1 fails these checks, pass a different message (usually a `pageTitle` key alongside the `heading` key) as
   the `title` argument, but this should be rare and should always be checked first. For shared journey form templates
-  where only some steps need a different title, see `pageTitleOverride` in `journeys.instructions.md`.
+  where only some steps need a different title, see the `title` step content property in `journeys.instructions.md`.
 - The `Error: ` prefix is added automatically when `hasErrors` is true.
+- Integration tests check every page object's title against its h1, or against `expectedTitleHeading` where the page
+  object overrides it (see `integration-tests.instructions.md`).
 
 ### Using Fragments
 ```html
@@ -51,7 +53,9 @@ each page title is unique and descriptive:
 
 ### Form Fragments Location
 - `templates/fragments/forms/` - Input components (text, date, checkbox, etc.)
-- `templates/fragments/buttons/` - Button variants
+- `templates/fragments/buttons/` - Button variants. All buttons with `data-module="govuk-button"` (submit buttons and
+  link-buttons) must include `data-prevent-double-click="true"` to stop accidental double submissions. The only
+  exception is client-side toggles such as the password reveal button.
 - `templates/fragments/banners/` - Notification and confirmation banners
 - `templates/fragments/layouts/` - Page layout variants
 - `templates/fragments/pagination/` - Pagination controls
@@ -79,6 +83,16 @@ For parameterised messages, use the `#messages` helper:
 ```html
 <h1 th:text="${#messages.msgWithParams(contentHeader, contentHeaderParams)}">contentHeader</h1>
 ```
+
+### Back links
+If there is a back link on the page, pass it into the layout fragment: `layout(#{example.heading}, ~{::main/content()}, false, ${backUrl}, null)}`.
+
+If there is no back link on the page, pass null as the backUrl: `layout(#{example.heading}, ~{::main/content()}, false, null, null)}`.
+
+### Main class
+You can apply classes to the <main> element by passing to layout: `layout(#{example.heading}, ~{::main/content()}, false, null, 'govuk-main-wrapper--l')`.
+
+Always confirm with the user before doing this.
 
 ## GOV.UK Design System
 - Follow [GOV.UK Design System](https://design-system.service.gov.uk/) patterns

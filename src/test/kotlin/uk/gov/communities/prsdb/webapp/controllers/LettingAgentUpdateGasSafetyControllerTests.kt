@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import jakarta.servlet.http.Cookie
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -22,8 +21,6 @@ import org.springframework.util.ResourceUtils
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
@@ -51,9 +48,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
     @MockitoBean
     private lateinit var stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
     private val token: UUID = UUID.randomUUID()
 
     private val updateStepRoute =
@@ -61,11 +55,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
             "/${BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT}"
 
     private val formContent = "hasGasSupply=true"
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
 
     private fun stubValidTokenForProperty() {
         val propertyOwnership = createOccupiedPropertyOwnership()
@@ -102,15 +91,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnership.id)))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
-
-        mvc.get(updateStepRoute).andExpect {
-            status { isNotFound() }
-        }
-    }
-
-    @Test
-    fun `getUpdateStep returns 404 when the feature flag is disabled`() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc.get(updateStepRoute).andExpect {
             status { isNotFound() }
@@ -172,20 +152,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnership.id)))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
-                status { isNotFound() }
-            }
-    }
-
-    @Test
-    fun `postUpdateStep returns 404 when the feature flag is disabled`() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .post(updateStepRoute) {

@@ -201,6 +201,8 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
                 rentAmount = registrationData.rentAmount,
                 customPropertyType = registrationData.customPropertyType,
                 renewalDate = checkNotNull(it.getArgument<PropertyRegistrationDataModel>(0).renewalDate),
+                correspondenceEmail = registrationData.correspondenceEmail,
+                correspondenceAddressModel = registrationData.correspondenceAddressModel,
             )
         }
 

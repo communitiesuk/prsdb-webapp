@@ -1,10 +1,13 @@
-title: Team members
 heading: Team members
 currentUserName: '{0,,name} (You)'
 inviteTeamMemberButton: Invite a team member
 successBanner:
   title: Success
-  invitationSent: Invitation sent
+  invitationSent:
+    heading: Invitation sent
+  invitationCancelled:
+    heading: Invitation cancelled
+    body: The invitation link will no longer work.
 administrators:
   tab: Administrators ({0,,count})
   heading: Administrators
@@ -27,6 +30,14 @@ accessLevelChangedBanner:
   content:
     administrator: '{0,,name} is now an administrator.'
     editor: '{0,,name} is now an editor.'
+accessRemovedBanner:
+  title: Success
+  heading: Access removed
+  content: '{0,,name} no longer has access to the service.'
+resendInvitationBanner:
+  title: Success
+  heading: Invitation resent
+  content: 'An invitation has been sent to {0,,email}'
 invitations:
   tab: Invitations ({0,,count})
   heading: Invitations

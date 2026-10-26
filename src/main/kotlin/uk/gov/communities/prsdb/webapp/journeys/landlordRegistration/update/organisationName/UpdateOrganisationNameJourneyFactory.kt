@@ -29,7 +29,6 @@ class UpdateOrganisationNameJourneyFactory(
                 nextStep { journey.completeOrganisationNameUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.orgName.fieldSetHeading",
                         "fieldSetHint" to "forms.orgName.fieldSetHint",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
