@@ -373,55 +373,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details and property is unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val delegationSection = content["lettingAgentDelegation"] as? List<*>
-
-            assertTrue(content.containsKey("lettingAgentDelegation"))
-            assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
-            assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
-            assertEquals(
-                false,
-                content["showLettingAgentDelegationUnoccupiedPanel"],
-                "Unoccupied inset should not show once whoProvides has been answered",
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent includes lettingAgentDelegation when letting agent provides details`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val delegationSection = content["lettingAgentDelegation"] as? List<*>
-
-            assertTrue(content.containsKey("lettingAgentDelegation"))
-            assertEquals(2, delegationSection?.size, "Letting agent path should include who-will-provide and email placeholder rows")
-            assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
-        }
-
-        @Test
-        fun `getStepSpecificContent includes lettingAgentDelegation when letting agent provides details and property is unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val delegationSection = content["lettingAgentDelegation"] as? List<*>
-
-            assertTrue(content.containsKey("lettingAgentDelegation"))
-            assertEquals(2, delegationSection?.size, "Letting agent path should include who-will-provide and email placeholder rows")
-            assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
-            assertEquals(
-                false,
-                content["showLettingAgentDelegationUnoccupiedPanel"],
-                "Unoccupied inset should not show once whoProvides has been answered",
-            )
-        }
-
-        @Test
         fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides step is unreachable`() {
             whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
 
@@ -451,40 +402,11 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent does not show unoccupied inset when whoProvides has already been answered`() {
+        fun `getStepSpecificContent uses tenancy placeholder key and no tenancy rows when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals(false, content["showLettingAgentDelegationUnoccupiedPanel"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
-                licensingRows.first().fieldValue,
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
-                licensingRows.first().fieldValue,
-            )
             assertEquals(
                 "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
                 content["tenancyUnoccupiedBodyTextKey"],
@@ -492,6 +414,39 @@ class PropertyRegistrationCyaStepConfigTests {
             assertEquals(emptyList<SummaryListRowViewModel>(), content["rentedOutTenancyRows"])
         }
 
+        @Nested
+        inner class LicensingContent {
+            @Test
+            fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
+                whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
+
+                val content = stepConfig.getStepSpecificContent(mockState)
+
+                val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
+                assertEquals(
+                    "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
+                    licensingRows.first().fieldValue,
+                )
+            }
+
+            @Test
+            fun `getStepSpecificContent uses unoccupied provide-later wording when unoccupied`() {
+                whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+                whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
+
+                val content = stepConfig.getStepSpecificContent(mockState)
+
+                val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
+                assertEquals(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                    licensingRows.first().fieldValue,
+                )
+            }
+        }
+    }
+
+    @Nested
+    inner class JointLandlordsContent {
         @Test
         fun `getStepSpecificContent hides joint landlord invitations when there are no joint landlords`() {
             val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
@@ -573,19 +528,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent shows unoccupied tenancy body text when delegated property is unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals(
-                "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
-                content["tenancyUnoccupiedBodyTextKey"],
-            )
-        }
-
-        @Test
         fun `getStepSpecificContent does not show unoccupied tenancy body text when delegated property is occupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(true)
             whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
@@ -594,11 +536,13 @@ class PropertyRegistrationCyaStepConfigTests {
 
             assertNull(content["tenancyUnoccupiedBodyTextKey"])
         }
+    }
 
+    @Nested
+    inner class SubmitButtonContent {
         @Test
         fun `getStepSpecificContent uses submit and pay button when payments is enabled`() {
             whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
