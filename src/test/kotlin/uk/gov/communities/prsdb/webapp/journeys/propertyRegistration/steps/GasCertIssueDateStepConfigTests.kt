@@ -22,7 +22,7 @@ class GasCertIssueDateStepConfigTests {
     lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
-    fun `chooseTemplate returns gas cert issue date form`() {
+    fun `chooseTemplate returns the gas certificate issue date form`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
@@ -36,7 +36,7 @@ class GasCertIssueDateStepConfigTests {
 
     // TODO PDJB-1926: Remove this template test when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
     @Test
-    fun `chooseTemplate returns date form template without 14 month expiry enabled`() {
+    fun `chooseTemplate returns the original date form without 14 month expiry support`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(false)
@@ -49,7 +49,7 @@ class GasCertIssueDateStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent returns redesigned heading and hint for 14 month expiry`() {
+    fun `getStepSpecificContent returns the issue date heading and hint`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
@@ -71,7 +71,7 @@ class GasCertIssueDateStepConfigTests {
 
     // TODO PDJB-1926: Remove this content test when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
     @Test
-    fun `getStepSpecificContent returns original heading and hint without 14 month expiry enabled`() {
+    fun `getStepSpecificContent returns the original issue date heading and hint without 14 month expiry support`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(false)
