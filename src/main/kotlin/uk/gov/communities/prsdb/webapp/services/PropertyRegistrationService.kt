@@ -48,8 +48,6 @@ class PropertyRegistrationService(
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
         with(registrationData) {
             val landlord = userToLandlordService.getCurrentLandlordForUser()
-            // TODO PDJB-1860: Derive a landlord's first anniversary from the paid renewal date when available;                                                                                                                                                                                                                                                                      ┃
-            //  retain the existing anniversary, and use today's UK date when registering without payment.
             val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
             val propertyOwnership =
