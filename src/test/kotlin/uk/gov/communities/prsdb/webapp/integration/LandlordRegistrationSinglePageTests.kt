@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -23,7 +26,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
+import kotlin.test.assertEquals
 
 class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
@@ -37,6 +42,16 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 .assertThat(
                     landlordRegistrationServiceInformationPage.heading,
                 ).containsText("Register your rental property: private beta")
+        }
+
+        // This checks the X-Robots-Tag header on a general public page, not anything specific to landlord registration.
+        // If this test is ever deleted, add an equivalent test for another public page.
+        @Test
+        fun `registerAsALandlord tells search engines not to index the page`(page: Page) {
+            val response = navigator.navigate(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
+
+            assertEquals(X_ROBOTS_TAG_VALUE, response?.headerValue(X_ROBOTS_TAG_HEADER))
+            assertPageIs(page, ServiceInformationStartPageLandlordRegistration::class)
         }
     }
 

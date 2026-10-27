@@ -65,8 +65,8 @@ Existing interceptors:
 - `BackLinkInterceptor` (`HEADERS_AND_ATTRIBUTES`) — stores/retrieves back URL via query parameter
 - `PlausibleInterceptor` (`HEADERS_AND_ATTRIBUTES`) — adds Plausible analytics attributes to the model
 - `RobotsTagInterceptor` (`HEADERS_AND_ATTRIBUTES`) — adds `X-Robots-Tag: noindex, nofollow` to every response so search engines don't index the service
-- `MaintenanceInterceptor` (`REDIRECT`) — active only with `@Profile("maintenance-mode")`
-- `PasscodeInterceptor` (`REDIRECT`) — active only with `@Profile("require-passcode")`
+- `MaintenanceInterceptor` (`REDIRECT`) — redirects every request except assets, the healthcheck and the maintenance page itself to the maintenance page. Active only with `@Profile("maintenance-mode")`
+- `PasscodeInterceptor` (`REDIRECT`) — requires users to enter a valid passcode before they can access the landlord registration journey, and redirects users who have already claimed one away from the passcode pages. Active only with `@Profile("require-passcode")`
 - `LettingAgentAccessInterceptor` (`REDIRECT`) — redirects letting agent routes when access is no longer valid
 
 ## Custom Annotations for Config Classes
