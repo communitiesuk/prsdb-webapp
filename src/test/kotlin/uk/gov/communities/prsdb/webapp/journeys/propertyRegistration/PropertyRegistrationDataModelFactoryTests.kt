@@ -14,13 +14,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -28,8 +26,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
@@ -39,6 +35,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
@@ -93,9 +92,6 @@ class PropertyRegistrationDataModelFactoryTests {
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
-
-    @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
     @Mock
@@ -114,7 +110,6 @@ class PropertyRegistrationDataModelFactoryTests {
         factory =
             PropertyRegistrationDataModelFactory(
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-                featureFlagManager = mockFeatureFlagManager,
             )
     }
 
@@ -234,7 +229,7 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.PROVIDE_LATER)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
 
         // Act
         val result = factory.fromJourneyState(mockState)
@@ -250,7 +245,7 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.NO_SUPPLY)
 
         // Act
         val result = factory.fromJourneyState(mockState)
@@ -262,29 +257,13 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState returns true when user chose provide later on legacy gas cert step`() {
-        // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome).thenReturn(GasCertOutcome.PROVIDE_LATER)
-
-        // Act
-        val result = factory.fromJourneyState(mockState)
-
-        // Assert
-        assertEquals(true, result.hasGasSupply)
-        assertEquals(true, result.gasSafetyCertProvideLater)
-        assertEquals(false, result.tenancyProvideLater)
-    }
-
-    @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     fun `fromJourneyState returns all provide-later fields as true when delegating to a letting agent`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(null)
         val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
         val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
         whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
@@ -308,9 +287,9 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
+    fun `fromJourneyState throws when hasGasSupply is null and registration is not delegated to a letting agent`() {
         // Arrange
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
 
         val mockOccupiedStep = mock<OccupiedStep>()
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
@@ -356,7 +335,9 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mock())
 
         val mockGasDetailsTask = mock<GasSafetyDetailsTask>()
-        whenever(mockGasDetailsTask.gasSupplyOutcome).thenReturn(null)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(null)
         val mockGasTask = mock<GasSafetyTask>()
         whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(mockGasDetailsTask)
         whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
@@ -536,8 +517,9 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(electricalUploadIds)
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
-        whenever(gasSafetyTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
-        whenever(gasSafetyTask.gasCertOutcome).thenReturn(GasCertOutcome.HAS_CERTIFICATE)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -601,8 +583,12 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
-        lenient().`when`(gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
-        lenient().`when`(gasSafetyDetailsTask.gasCertOutcome).thenReturn(null)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        lenient().`when`(gasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        lenient().`when`(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+        lenient().`when`(gasSafetyDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        lenient().`when`(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)

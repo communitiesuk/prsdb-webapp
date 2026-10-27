@@ -92,7 +92,7 @@ features:
     - name: "pdjb-939-property-registration-phase-two"
       enabled: false
       expiry-date: "2026-12-31"
-    - name: "pdjb-1022-delegate-to-letting-agent"
+    - name: "pdjb-939-property-registration-phase-three"
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
@@ -110,3 +110,6 @@ features:
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-955-associated-parties"
+      enabled: false
+      expiry-date: "2027-06-30"

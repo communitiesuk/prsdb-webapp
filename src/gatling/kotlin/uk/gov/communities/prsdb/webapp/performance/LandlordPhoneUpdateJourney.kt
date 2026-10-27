@@ -62,7 +62,7 @@ object LandlordPhoneUpdateJourney {
             ).exitHereIfFailed()
             .exec(
                 http("$requestNamePrefix$DETAILS_REQUEST")
-                    .get("#{phoneResultUrl}")
+                    .get { session -> HttpDestination.withCacheBuster(requireNotNull(session.getString("phoneResultUrl"))) }
                     .disableFollowRedirect()
                     .check(status().`is`(200))
                     .check(header("Content-Type").transform { it.substringBefore(';').trim().lowercase() }.`is`("text/html"))

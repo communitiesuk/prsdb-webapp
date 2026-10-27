@@ -59,7 +59,10 @@ gasSafetyTask:
       paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
   gasSafetyCertificateExpired:
     heading: This gas safety certificate has expired
-    insetText: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
+    # TODO PDJB-1926: Remove insetTextBefore1894
+    insetTextBefore1894: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
+    insetText: "A certificate issued on <strong>{0}</strong> is no longer valid."
+    legalDutyParagraph: You have a legal duty to carry out a safety check of all gas appliances and flues every 12 months.
     changeIssueDate:
       link: Change the issue date
       afterLink: if you made a mistake.
@@ -82,40 +85,34 @@ gasSafetyTask:
     unoccupied:
       whatToDoNext:
         heading: What to do next
-        learnHow:
+        # TODO PDJB-1926: Remove learnHowBefore1894
+        learnHowBefore1894:
           beforeLink: You must get a gas safety certificate before a tenant moves in. Learn how by reading
+          link: gas safety for landlords (opens in new tab)
+          afterLink: .
+        learnHow:
+          beforeLink: This means you must get a gas safety certificate before a tenant moves in. Learn how by reading
           link: gas safety for landlords (opens in new tab)
           afterLink: .
       whenToUpload:
         heading: When you’ll need to upload your gas safety certificate
         paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.
   gasSafetyCertIssueDate:
-    fieldSetHeading: What’s the issue date on the gas safety certificate?
-    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
-  # TODO PDJB-1617: Remove the provideGasCertificateLater section when the letting-agent feature flag is removed.
-  provideGasCertificateLater:
-    heading: Provide your gas safety certificate later
-    whenToUpload:
-      heading: 'When you’ll need to upload your gas safety certificate'
-    occupied:
+    # TODO PDJB-1926: Remove beforePdjb1898 when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
+    beforePdjb1898:
+      fieldSetHeading: What’s the issue date on the gas safety certificate?
+      fieldSetHint: We’ll use this to calculate how long the certificate is valid for
+    pageTitle: When was the gas safety certificate issued?
+    fieldSetHeading: When was this certificate issued?
+    fieldSetHint: This will be the date of your last gas safety check
+    renewing:
+      heading: Renewing a gas safety certificate
+      paragraph: When you get a new gas safety certificate, add it to this registration. You must always keep property registrations up to date.
+    whenDoesItExpire:
+      summary: When does a gas safety certificate expire
       paragraph:
-        one: 'You can continue now to get your Property Registration Number, but you’ll need to return later and upload your gas safety certificate.'
-      whenToUpload:
-        insetText: You must upload your gas safety certificate within 28 days.
-        paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
-      readMore:
-        beforeLink: Read more about
-        link: gas safety for landlords (opens in new tab)
-        afterLink: .
-    unoccupied:
-      paragraph:
-        one: You must get a gas safety certificate before a tenant moves in.
-      learnHow:
-        beforeLink: Learn how by reading
-        link: gas safety for landlords (opens in new tab)
-        afterLink: .
-      whenToUpload:
-        paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
+        one: A gas safety certificate lasts for 12 months.
+        two: You can renew your certificate up to 2 months early. This will add an extra year to your existing expiry date.
   provideGasSafetyDetailsLater:
     heading: Provide these details later
     pageTitle: Provide your gas safety certificate later

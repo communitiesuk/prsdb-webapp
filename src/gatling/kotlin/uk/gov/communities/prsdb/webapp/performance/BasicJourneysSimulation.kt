@@ -45,17 +45,22 @@ class BasicJourneysSimulation : Simulation() {
 
         setUp(
             profileUpdates.andThen(registrations),
-        ).protocols(http.baseUrl(config.baseUrl).acceptHeader("text/html"))
-            .assertions(
-                BasicPerformanceAssertions.forRequests(
-                    config,
-                    OneLoginAuthentication.applicationRequestNames +
-                        LandlordPhoneUpdateJourney.requestNames +
-                        LandlordEmailUpdateJourney.requestNames +
-                        OneLoginAuthentication.loginRequestNames(REGISTRATION_LOGIN_PREFIX) +
-                        IndividualLandlordRegistrationJourney.requestNames,
-                ),
-            )
+        ).protocols(
+            http
+                .baseUrl(config.baseUrl)
+                .acceptHeader("text/html")
+                // The CloudFront WAF blocks requests without a User-Agent header
+                .userAgentHeader("PRSDB-Gatling-Performance-Tests"),
+        ).assertions(
+            BasicPerformanceAssertions.forRequests(
+                config,
+                OneLoginAuthentication.applicationRequestNames +
+                    LandlordPhoneUpdateJourney.requestNames +
+                    LandlordEmailUpdateJourney.requestNames +
+                    OneLoginAuthentication.loginRequestNames(REGISTRATION_LOGIN_PREFIX) +
+                    IndividualLandlordRegistrationJourney.requestNames,
+            ),
+        )
     }
 
     companion object {

@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
@@ -144,13 +143,7 @@ class RegisterPropertyController(
         val provideMissingDetails =
             hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
 
-        // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
-        val lettingAgentFeatureEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-        model.addAttribute("lettingAgentFeatureEnabled", lettingAgentFeatureEnabled)
-
-        val delegatedToLettingAgent =
-            lettingAgentFeatureEnabled &&
-                propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
+        val delegatedToLettingAgent = propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
         val provideMissingDetailsViewModel =

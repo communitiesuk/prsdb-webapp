@@ -512,17 +512,17 @@ VALUES
        (32, 34, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (33, 35, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (34, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (35, 37, '01/01/25', null, '2023-06-15', true, '2024-03-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2030-09-15', null, 'c', null, null, true, true, true),
+       (35, 37, '01/01/25', null, '2023-06-15', true, '2024-03-01', 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2030-09-15', null, 'c', null, null, true, true, true),
        (36, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (37, 4, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (38, 38, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true),
        -- Fully compliant records for properties 41-43 (gas not required, electrical + EPC valid and
        -- in date, all declarations true) so hasComplianceIssue is false and the pure provide-later
        -- banner variants (TENANCY / LICENSING / BOTH) render instead of COMBINED.
-       (39, 41, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
-       (40, 42, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
-       (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
-       (49, 50, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (39, 41, '01/01/25', '01/01/25', null, false, '2035-01-01', 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (40, 42, '01/01/25', '01/01/25', null, false, '2035-01-01', 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (49, 50, '01/01/25', '01/01/25', null, false, '2035-01-01', 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
        -- Compliance records for the org-landlord properties (PO 47, 48) so their details pages render.
        (47, 47, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (48, 48, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
@@ -542,21 +542,21 @@ INSERT INTO property_compliance (id, property_ownership_id, created_date, last_m
                                  gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
 VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
         null, null, null, null, true, true, true, true, true, true),
-       (43, 44, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, null,
+       (43, 44, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, false, false, false),
-       (44, 45, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, null,
+       (44, 45, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
         false, 'c', null, null, true, true, true, false, false, false),
-       (45, 46, '01/01/25', '01/01/25', null, true, current_date + 730, null,
+       (45, 46, '01/01/25', '01/01/25', null, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, true, false, false),
-       (46, 40, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, null,
+       (46, 40, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, false, false, false),
        (49, 49, '08/19/26', '08/19/26', null, false, null, null, null, null,
         null, null, null, null, true, true, true, false, false, false),
-       (50, 51, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, null,
+       (50, 51, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
         null, 'c', null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
 

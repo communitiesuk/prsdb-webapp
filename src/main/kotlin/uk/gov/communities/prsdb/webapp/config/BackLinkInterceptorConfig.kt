@@ -4,6 +4,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor
+import uk.gov.communities.prsdb.webapp.config.interceptors.InterceptorOrder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 @PrsdbWebConfiguration
@@ -11,6 +12,8 @@ class BackLinkInterceptorConfig(
     private val backUrlStorageService: BackUrlStorageService,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(BackLinkInterceptor { backUrlStorageService.getBackUrl(it) })
+        registry
+            .addInterceptor(BackLinkInterceptor { backUrlStorageService.getBackUrl(it) })
+            .order(InterceptorOrder.HEADERS_AND_ATTRIBUTES.value)
     }
 }
