@@ -13,6 +13,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -142,6 +144,20 @@ class LandlordControllerTests(
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    // This checks the X-Robots-Tag header on a standard page, not anything specific to the landlord dashboard.
+    // If this test is ever deleted, add an equivalent test for another standard page.
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `landlordDashboard response tells search engines not to index the page`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
             }
     }
 
