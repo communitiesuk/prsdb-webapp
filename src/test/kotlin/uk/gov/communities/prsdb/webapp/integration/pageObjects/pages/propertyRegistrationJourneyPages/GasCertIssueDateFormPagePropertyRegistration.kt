@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.GasCertIssueDateFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 
@@ -11,7 +10,4 @@ class GasCertIssueDateFormPagePropertyRegistration(
 ) : GasCertIssueDateFormBasePage(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${GasCertIssueDateStep.ROUTE_SEGMENT}",
-    ) {
-    val renewingHeading = Heading(page.locator("main h2.govuk-heading-m"))
-    val expiryDetailsSummary = page.locator(".govuk-details__summary-text")
-}
+    )

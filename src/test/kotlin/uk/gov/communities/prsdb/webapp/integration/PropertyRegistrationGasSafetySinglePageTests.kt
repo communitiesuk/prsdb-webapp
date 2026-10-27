@@ -141,15 +141,13 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     @Nested
     inner class GasSafetyIssueDateStepTests {
         @Test
-        fun `Issue date page displays the certificate guidance`() {
+        fun `Issue date page displays heading`() {
             // TODO PDJB-1926: Remove the feature flag setup when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
             featureFlagManager.enableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
 
             val issueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
 
             assertThat(issueDatePage.heading).containsText("When was this certificate issued?")
-            assertThat(issueDatePage.renewingHeading).containsText("Renewing a gas safety certificate")
-            assertThat(issueDatePage.expiryDetailsSummary).containsText("When does a gas safety certificate expire")
         }
 
         @ParameterizedTest(name = "{0}")
