@@ -92,7 +92,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withExpiredGasSafetyCert(): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).minusDays(1)
         return this
     }
 
@@ -107,9 +107,11 @@ class PropertyComplianceBuilder {
                 "etag",
                 "versionId",
             ),
+        certType: CertificateType? = CertificateType.Eicr,
     ): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyFileUploads = mutableListOf(fileUpload)
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
+        propertyCompliance.electricalCertType = certType
         return this
     }
 
@@ -129,13 +131,18 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withElectricalSafetyExpiryDate(expiryDate: LocalDate = LocalDate.now().plusYears(5)): PropertyComplianceBuilder {
+    fun withElectricalSafetyExpiryDate(
+        expiryDate: LocalDate = LocalDate.now().plusYears(5),
+        certType: CertificateType? = CertificateType.Eicr,
+    ): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
+        propertyCompliance.electricalCertType = certType
         return this
     }
 
-    fun withExpiredElectricalSafety(): PropertyComplianceBuilder {
+    fun withExpiredElectricalSafety(certType: CertificateType? = CertificateType.Eicr): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyExpiryDate = LocalDate.now().minusDays(1)
+        propertyCompliance.electricalCertType = certType
         return this
     }
 

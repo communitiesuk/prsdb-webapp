@@ -5,6 +5,7 @@ import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -24,6 +25,7 @@ class MockPropertyComplianceData {
             gasSafetyCertIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             hasGasSupply: Boolean = true,
             electricalSafetyExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
+            electricalCertType: CertificateType? = CertificateType.Eicr,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -36,6 +38,7 @@ class MockPropertyComplianceData {
             hasGasSupply = hasGasSupply,
             gasSafetyFileUploads = gasSafetyFileUploads.toMutableList(),
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            electricalCertType = electricalCertType,
             epcUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
             tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
