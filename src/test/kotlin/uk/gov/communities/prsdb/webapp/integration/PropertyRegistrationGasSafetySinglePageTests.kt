@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -24,7 +25,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     @Nested
     inner class BeforePdjb1022HasGasSupplyStep {
         @Test
-        fun `Submitting with no option selected returns an error`(page: Page) {
+        fun `Submitting with no option selected returns an error`() {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
             hasGasSupplyPage.form.submitPrimaryButton()
             assertThat(
@@ -50,7 +51,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     @Nested
     inner class HasGasSafetyCertStep {
         @Test
-        fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
+        fun `Submitting with the Continue button with no option selected returns an error`() {
             val hasGasSafetyCertPage = navigator.skipToPropertyRegistrationHasGasCertPage()
             hasGasSafetyCertPage.form.submit()
             assertThat(
@@ -113,6 +114,16 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
 
     @Nested
     inner class GasSafetyIssueDateStepTests {
+        @Test
+        fun `Issue date page displays heading`() {
+            // TODO PDJB-1926: Remove the feature flag setup when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
+            featureFlagManager.enableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+
+            val issueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
+
+            assertThat(issueDatePage.heading).containsText("When was this certificate issued?")
+        }
+
         @ParameterizedTest(name = "{0}")
         @Suppress("ktlint:standard:max-line-length")
         @MethodSource(
@@ -126,6 +137,19 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             val gasSafetyIssueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
             gasSafetyIssueDatePage.submitDate(day, month, year)
             assertThat(gasSafetyIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    // TODO PDJB-1926: Remove this test class when GAS_CERTIFICATE_14_MONTH_EXPIRY is removed.
+    @Nested
+    inner class BeforePdjb1898GasSafetyIssueDateStepTests {
+        @Test
+        fun `Issue date page retains existing content without 14 month expiry enabled`() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+
+            val issueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
+
+            assertThat(issueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         }
     }
 
@@ -160,7 +184,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     @Nested
     inner class CheckGasSafetyAnswersStep {
         @Test
-        fun `Uploaded cert - issue date change link includes the row heading as visually hidden text`(page: Page) {
+        fun `Uploaded cert - issue date change link includes the row heading as visually hidden text`() {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
@@ -171,7 +195,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
-        fun `Uploaded cert - issue date change link is not wrapped in an actions list`(page: Page) {
+        fun `Uploaded cert - issue date change link is not wrapped in an actions list`() {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
@@ -251,7 +275,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
                 }
 
                 @Test
-                fun `a single provide this later row is shown against the gas supply question`(page: Page) {
+                fun `A single provide this later row is shown against the gas supply question`() {
                     val cyaPage =
                         navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                             PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
@@ -261,7 +285,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
                 }
 
                 @Test
-                fun `the gas supply change link navigates to has gas supply page`(page: Page) {
+                fun `The gas supply change link navigates to has gas supply page`(page: Page) {
                     val cyaPage =
                         navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                             PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
@@ -279,7 +303,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
                 }
 
                 @Test
-                fun `separate gas supply and gas cert rows are shown`(page: Page) {
+                fun `Separate gas supply and gas cert rows are shown`() {
                     val cyaPage =
                         navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                             PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert(),
@@ -289,7 +313,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
                 }
 
                 @Test
-                fun `the gas cert change link navigates to has gas cert page`(page: Page) {
+                fun `The gas cert change link navigates to has gas cert page`(page: Page) {
                     val cyaPage =
                         navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                             PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert(),

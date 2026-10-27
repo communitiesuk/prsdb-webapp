@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -7,10 +8,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 
@@ -54,8 +59,21 @@ class PropertyComplianceTests {
         expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(expiryDate).build()
-        assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired)
+        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate)
+                    .withElectricalCertType(certType)
+                    .build()
+            assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired, "for $certType")
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyExpired throws when the electrical cert type is missing`() {
+        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(currentDate.minusYears(1), certType = null).build()
+
+        assertThrows<PrsdbWebException> { propertyCompliance.isElectricalSafetyExpired }
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
@@ -83,7 +101,7 @@ class PropertyComplianceTests {
     fun `isEpcExpired returns true when expiry date has passed even if tenancy started before expiry`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
-                .withEpc(expiryDate = LocalDate.now().minusYears(1))
+                .withEpc(expiryDate = currentDate.minusYears(1))
                 .withTenancyStartedBeforeEpcExpiry()
                 .build()
 
@@ -132,6 +150,8 @@ class PropertyComplianceTests {
     }
 
     companion object {
+        private val currentDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
+
         private val propertyComplianceStatuses =
             arrayOf(
                 named("are in date", PropertyComplianceBuilder.createWithInDateCerts()),
@@ -155,25 +175,25 @@ class PropertyComplianceTests {
         @JvmStatic
         private fun provideGasCertIssueDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
+                arguments(named("was yesterday", currentDate.minusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", currentDate.minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
+                arguments(named("is tomorrow", currentDate.plusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
             )
 
         @JvmStatic
         private fun provideElectricalSafetyExpiryDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
-                arguments(named("is today", LocalDate.now()), true),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
+                arguments(named("was yesterday", currentDate.minusDays(1)), true),
+                arguments(named("is today", currentDate), true),
+                arguments(named("is tomorrow", currentDate.plusDays(1)), false),
             )
 
         @JvmStatic
         private fun provideEpcExpiryDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
-                arguments(named("is today", LocalDate.now()), false),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
+                arguments(named("was yesterday", currentDate.minusDays(1)), true),
+                arguments(named("is today", currentDate), false),
+                arguments(named("is tomorrow", currentDate.plusDays(1)), false),
             )
 
         @JvmStatic

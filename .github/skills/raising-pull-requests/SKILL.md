@@ -52,7 +52,7 @@ Be as concise as possible. The reviewer has the diff — the description explain
 
 ### Ticket number
 
-The JIRA ticket ID (e.g. `PDJB-632` or `PRSD-1021`). GitHub auto-links to JIRA when formatted correctly.
+The JIRA ticket ID (e.g. `PDJB-632`). GitHub auto-links to JIRA when formatted correctly.
 
 ### Goal of change
 

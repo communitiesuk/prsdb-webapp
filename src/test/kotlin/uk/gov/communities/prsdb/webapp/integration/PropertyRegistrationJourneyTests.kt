@@ -354,7 +354,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `completing the payment journey successfully reaches the confirmation page when payments is enabled`(page: Page) {
+        fun `completing the payment journey successfully reaches the confirmation page`(page: Page) {
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
 
@@ -685,7 +685,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Gas Cert Issue Date - render page
             assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
             gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
             var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
@@ -1431,7 +1431,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Gas Cert Issue Date - render page
             assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
             gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
             var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
@@ -1558,7 +1558,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Gas Cert Issue Date - render page
             assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
             gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
             var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
