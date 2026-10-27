@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.OUTSTANDING_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OutstandingActionViewModelBuilder
@@ -278,15 +279,25 @@ class LandlordControllerTests(
                 isComplete = false,
                 isOccupied = true,
             )
+        val outstandingActionsDataModel =
+            OutstandingActionsDataModel(
+                propertyOwnershipId = 2,
+                singleLineAddress = "456 Example Avenue, EX",
+                isOccupied = true,
+                isLicensingProvideLater = true,
+                isTenancyProvideLater = false,
+                provideLaterDeadline = null,
+                complianceStatus = nonCompliantDataModel,
+            )
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
-            PageImpl(listOf(nonCompliantDataModel)),
+        whenever(propertyOwnershipService.getOutstandingActionsForLandlord(any(), any())).thenReturn(
+            PageImpl(listOf(outstandingActionsDataModel)),
         )
 
         // Act and Assert
         val expectedOutstandingActions =
             listOf(
-                OutstandingActionViewModelBuilder.fromDataModel(nonCompliantDataModel),
+                OutstandingActionViewModelBuilder.fromDataModel(outstandingActionsDataModel),
             )
 
         mvc
@@ -304,7 +315,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getOutstandingActions returns outstandingActions view`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
+        whenever(propertyOwnershipService.getOutstandingActionsForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList()),
         )
 
@@ -320,7 +331,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getOutstandingActions redirects to first page when requested page exceeds total pages`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
+        whenever(propertyOwnershipService.getOutstandingActionsForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(5, 10), 10),
         )
 
@@ -335,7 +346,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
     fun `getOutstandingActions includes paginationViewModel`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
+        whenever(propertyOwnershipService.getOutstandingActionsForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(0, 10), 20),
         )
 
