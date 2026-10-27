@@ -20,8 +20,6 @@ const val PAYMENTS = "pdjb-1009-payments"
 
 const val PROPERTY_REGISTRATION_PHASE_TWO = "pdjb-939-property-registration-phase-two"
 
-const val PROPERTY_REGISTRATION_PHASE_THREE = "pdjb-939-property-registration-phase-three"
-
 const val MULTI_USER_ORGANISATIONS = "pdjb-1210-multi-user-organisations"
 
 const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
@@ -29,6 +27,8 @@ const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
 const val GAS_CERTIFICATE_14_MONTH_EXPIRY = "pdjb-1894-gas-certificate-14-month-expiry"
 
 const val ASSOCIATED_PARTIES = "pdjb-955-associated-parties"
+
+const val PROPERTY_REGISTRATION_PHASE_THREE = "pdjb-939-property-registration-phase-three"
 
 val featureFlagNames =
     listOf(
@@ -38,9 +38,9 @@ val featureFlagNames =
         PASSWORD_BENCHMARK_ENDPOINT,
         PAYMENTS,
         PROPERTY_REGISTRATION_PHASE_TWO,
-        PROPERTY_REGISTRATION_PHASE_THREE,
         MULTI_USER_ORGANISATIONS,
         GATLING_POST_ENDPOINT,
         GAS_CERTIFICATE_14_MONTH_EXPIRY,
         ASSOCIATED_PARTIES,
+        PROPERTY_REGISTRATION_PHASE_THREE,
     )
