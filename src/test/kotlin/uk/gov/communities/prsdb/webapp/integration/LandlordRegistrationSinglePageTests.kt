@@ -45,7 +45,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         // This checks the X-Robots-Tag header on a general public page, not anything specific to landlord registration.
-        // If this test is ever deleted, add an equivalent test for another public page.
+        // If this test is ever deleted, add an equivalent integration test for another public page.
         @Test
         fun `registerAsALandlord tells search engines not to index the page`(page: Page) {
             val response = navigator.navigate(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
