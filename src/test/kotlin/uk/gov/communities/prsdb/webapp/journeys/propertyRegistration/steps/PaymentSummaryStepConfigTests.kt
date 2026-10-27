@@ -216,6 +216,21 @@ class PaymentSummaryStepConfigTests {
     }
 
     @Test
+    fun `resolveNextDestination returns to the payment summary when the quote expires while the payment is being created`() {
+        // Arrange
+        stubAddressTask()
+        stubSummaryDestination()
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        stubPaymentCreation(nextUrl = null)
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
+    }
+
+    @Test
     fun `resolveNextDestination refreshes a missing quote without creating a payment`() {
         // Arrange
         stubAddressTask()
@@ -275,13 +290,13 @@ class PaymentSummaryStepConfigTests {
         whenever(mockPaymentSummaryStep.currentJourneyId).thenReturn(journeyId)
     }
 
-    private fun stubPaymentCreation() {
+    private fun stubPaymentCreation(nextUrl: String? = "https://pay.example.test/next") {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
         val quote = createQuote(today)
         whenever(mockState.paymentQuote).thenReturn(quote)
         whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
-            .thenReturn("https://pay.example.test/next")
+            .thenReturn(nextUrl)
     }
 
     private fun createQuote(quoteDate: LocalDate) =

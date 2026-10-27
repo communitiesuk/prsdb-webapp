@@ -95,7 +95,7 @@ class PaymentSummaryStepConfig(
                 state.journeyId,
                 state.loggedInLandlordEmailAtStartOfJourney,
                 quote,
-            )
+            ) ?: return Destination(state.paymentSummaryStep)
         return Destination.ExternalUrl(nextUrl)
     }
 
