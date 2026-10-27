@@ -37,7 +37,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource, mock()).fromEntity(propertyCompliance)
     }
 
     @ParameterizedTest(name = "{0}")
@@ -54,7 +55,9 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
+        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource, mock())
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 

@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.ElectricalSafetyViewModelFactory
@@ -44,6 +45,10 @@ class LettingAgentPropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
+
+    // TODO: PDJB-1926: Remove featureFlagManager
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Test
@@ -102,10 +107,12 @@ class LettingAgentPropertyDetailsControllerTests(
     private fun createComplianceViewModel(): PropertyComplianceViewModel {
         val messageSource = mock<MessageSource>()
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
+        // TODO: PDJB-1926: Remove the featureFlagManager mock() arguments
         return PropertyComplianceViewModelFactory(
-            GasSafetyViewModelFactory(mock(), messageSource),
-            ElectricalSafetyViewModelFactory(mock(), messageSource),
-            EpcViewModelFactory(messageSource),
+            GasSafetyViewModelFactory(mock(), messageSource, mock()),
+            ElectricalSafetyViewModelFactory(mock(), messageSource, mock()),
+            EpcViewModelFactory(messageSource, mock()),
+            mock(),
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
             viewType = PropertyDetailsViewType.LETTING_AGENT,

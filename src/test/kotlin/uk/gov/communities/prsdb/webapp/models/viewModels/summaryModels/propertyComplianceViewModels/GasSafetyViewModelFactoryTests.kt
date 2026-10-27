@@ -29,7 +29,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock())
+    // TODO: PDJB-1926: Remove featureFlagManager mock() argument
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock(), mock())
 
     override fun createRows(
         uploadService: UploadService,
@@ -41,9 +42,11 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
         return GasSafetyViewModelFactory(
             uploadService,
             messageSource,
+            mock(),
         ).fromEntity(propertyCompliance)
     }
 
@@ -87,10 +90,12 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
         val factory =
             GasSafetyViewModelFactory(
                 mock(),
                 messageSource,
+                mock(),
             )
         val rows = factory.fromEntity(missingOccupiedProvideLater)
 
@@ -111,8 +116,10 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
 
     @Test
     fun `unoccupied provide-later renders a single gas-supply row with the no-date value and no cert row`() {
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
         val factory =
             GasSafetyViewModelFactory(
+                mock(),
                 mock(),
                 mock(),
             )
@@ -131,8 +138,10 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
 
     @Test
     fun `occupied no-cert (HAS_FAULTS) is unaffected and still renders both rows`() {
+        // TODO: PDJB-1926: Remove featureFlagManager mock() argument
         val factory =
             GasSafetyViewModelFactory(
+                mock(),
                 mock(),
                 mock(),
             )

@@ -5,7 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -116,7 +116,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Gas cert issue date page - enter an expired date
         val expiredIssueDate =
             currentDate
-                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+                .minus(DatePeriod(months = GAS_SAFETY_CERT_VALIDITY_MONTHS))
                 .minus(DatePeriod(days = 5))
         issueDatePage = assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
         issueDatePage.submitDate(expiredIssueDate)

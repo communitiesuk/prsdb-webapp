@@ -31,13 +31,15 @@ class PropertyComplianceViewModelFactoryTests {
         whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
     }
 
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
-    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
+    // TODO: PDJB-1926: Remove featureFlagManager mock() arguments
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource, mock())
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mock())
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
-            EpcViewModelFactory(mockMessageSource),
+            EpcViewModelFactory(mockMessageSource, mock()),
+            mock(),
         )
 
     private val propertyOwnershipId = 1L

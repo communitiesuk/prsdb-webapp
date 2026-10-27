@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -92,7 +93,7 @@ class PropertyComplianceBuilder {
     }
 
     fun withExpiredGasSafetyCert(): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).minusDays(1)
+        propertyCompliance.gasSafetyCertIssueDate = LocalDate.now().minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).minusDays(1)
         return this
     }
 
@@ -251,7 +252,10 @@ class PropertyComplianceBuilder {
         fun createWithNaturallyExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
-                .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
+                // TODO: PDJB-1926: Use GAS_SAFETY_CERT_VALIDITY_MONTHS
+                .withGasSafetyCert(
+                    issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER.toLong() + 1),
+                )
                 .withElectricalSafety(expiryDate = LocalDate.now().minusYears(6))
                 .withElectricalCertType()
                 .withEpc()

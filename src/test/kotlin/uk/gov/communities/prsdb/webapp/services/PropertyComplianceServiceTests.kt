@@ -24,6 +24,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -86,6 +89,10 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
@@ -120,7 +127,13 @@ class PropertyComplianceServiceTests {
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
                 mockCurrentUserService,
+                // TODO: PDJB-1926: Remove mockFeatureFlagManager
+                mockFeatureFlagManager,
             )
+        // TODO: PDJB-1926: Remove this stub
+        lenient()
+            .`when`(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY))
+            .thenReturn(true)
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("https://test.example.com"))
@@ -248,7 +261,8 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
-            nonCompliantProperties.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+            nonCompliantProperties.map { ComplianceStatusDataModel.fromPropertyCompliance(it, isGas14MonthExpiryEnabled = true) }
 
         // Act
         val returnedNonCompliantProperties =
@@ -285,7 +299,8 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
-            listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1]))
+            // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+            listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1], isGas14MonthExpiryEnabled = true))
 
         // Act
         val returnedNonCompliantProperties =
@@ -838,7 +853,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -886,7 +901,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -935,7 +950,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         isJointLandlord = true,
                     ),
                 ),
@@ -984,7 +999,7 @@ class PropertyComplianceServiceTests {
                             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         propertyRecordUrl = "http://property",
                     ),
                 ),
@@ -1029,7 +1044,7 @@ class PropertyComplianceServiceTests {
                             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = expiredIssueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = expiredIssueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         propertyRecordUrl = "http://property",
                     ),
                 ),
