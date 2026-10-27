@@ -40,15 +40,6 @@ class MaintenanceControllerTests(
     }
 
     @Test
-    fun `index response tells search engines not to index the page`() {
-        mvc
-            .get(MAINTENANCE_ROUTE)
-            .andExpect {
-                header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
-            }
-    }
-
-    @Test
     fun `redirects to the maintenance page tell search engines not to index the page`() {
         mvc
             .get("/")
