@@ -47,6 +47,17 @@ class MaintenanceControllerTests(
                 header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
             }
     }
+
+    @Test
+    fun `redirects to the maintenance page tell search engines not to index the page`() {
+        mvc
+            .get("/")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(MAINTENANCE_ROUTE)
+                header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
+            }
+    }
 }
 
 @WebMvcTest(MaintenanceController::class)
