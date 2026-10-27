@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -70,6 +71,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.MonthDay
+import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.UUID
 import kotlin.test.assertContains
@@ -522,7 +524,7 @@ class PaymentServiceTests {
                     quoteDate = LocalDate.of(2027, 10, 10),
                     renewalDate = expectedRenewalDate,
                 )
-            stubGovUkPayCreatePayment()
+            stubGovUkPayCreatePayment(createdDate = Instant.parse("2027-10-10T12:00:00Z"))
 
             // Act
             paymentService.createPropertyRegistrationPayment(journeyId, email, quote)
@@ -546,7 +548,7 @@ class PaymentServiceTests {
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
             val anniversary = MonthDay.of(Month.MARCH, 1)
             val incompleteProperty = setUpIncompletePropertyAndLandlord(anniversary)
-            val createdDate = Instant.parse("2026-10-02T11:30:00Z")
+            val createdDate = Instant.now()
             stubGovUkPayCreatePayment(paymentId = "new-payment-id", createdDate = createdDate)
             val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary)
 
@@ -571,6 +573,31 @@ class PaymentServiceTests {
             assertEquals(PaymentStatus.CREATED, payment.status)
             assertEquals(incompleteProperty, payment.associatedIncompleteProperty)
             assertEquals(incompleteProperty.user, payment.payingUser)
+        }
+
+        @Test
+        fun `createPropertyRegistrationPayment cancels the new payment and returns null when GOV UK Pay creates it after the quote date`() {
+            // Arrange
+            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
+            setUpIncompletePropertyAndLandlord()
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            val quote = paymentService.getPropertyRegistrationPaymentQuote(today.minusDays(1))
+            stubGovUkPayCreatePayment(paymentId = "new-payment-id", createdDate = Instant.now())
+
+            // Act
+            val nextUrl = paymentService.createPropertyRegistrationPayment(journeyId, email, quote)
+
+            // Assert
+            assertNull(nextUrl)
+            val inOrder = inOrder(mockPaymentRepository, mockGovUkPayClient)
+            inOrder.verify(mockPaymentRepository).save(any<Payment>())
+            inOrder.verify(mockGovUkPayClient).cancelPayment("new-payment-id")
+            inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
+                eq("new-payment-id"),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
+                eq(PaymentStatus.CANCELLED),
+                any(),
+            )
         }
 
         @Test
@@ -1395,6 +1422,78 @@ class PaymentServiceTests {
             verify(mockTransactionManager).rollback(any())
             // Only recording the payment as capturable and the rolled-back claim update the status
             verify(mockPaymentRepository, times(2)).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
+        }
+
+        @Test
+        fun `finalisePayment cancels the payment without registering the property when it was started on a previous UK day`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, paymentCreatedAt = Instant.now().minus(1, ChronoUnit.DAYS)))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act, Assert
+            assertThrows<PaymentQuoteExpiredException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            }
+            verify(mockPropertyRegistrationService, never()).registerProperty(any())
+            verify(mockTransactionManager).rollback(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+            val inOrder = inOrder(mockGovUkPayClient, mockPaymentRepository)
+            inOrder.verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
+            inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
+                eq(PAYMENT_ID),
+                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.CANCELLED),
+                any(),
+            )
+        }
+
+        @Test
+        fun `finalisePayment rolls back the registration and cancels the payment when the property is registered on a later UK day`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership(createdDate = Instant.now().plus(1, ChronoUnit.DAYS)))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act, Assert
+            assertThrows<PaymentQuoteExpiredException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            }
+            verify(mockTransactionManager).rollback(any())
+            verify(mockTransactionManager, never()).commit(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
+            verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
+                eq(PAYMENT_ID),
+                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.CANCELLED),
+                any(),
+            )
+        }
+
+        @Test
+        fun `finalisePayment returns succeeded when another request finalised a payment started on a previous UK day`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, paymentCreatedAt = Instant.now().minus(1, ChronoUnit.DAYS)))
+            doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockGovUkPayClient, never()).capturePayment(any())
         }
 
         @Test

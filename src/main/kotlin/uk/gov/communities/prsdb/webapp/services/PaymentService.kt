@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -71,7 +72,7 @@ class PaymentService(
         journeyId: String,
         email: String,
         quote: PropertyRegistrationPaymentQuote,
-    ): String {
+    ): String? {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 
         val renewalDate = quote.renewalDate
@@ -103,7 +104,21 @@ class PaymentService(
                 ),
             )
 
-        paymentRepository.save(Payment.fromGovUkPay(createdGovUkPayPayment.payment, renewalDate, incompleteProperty))
+        val payment = Payment.fromGovUkPay(createdGovUkPayPayment.payment, renewalDate, incompleteProperty)
+        paymentRepository.save(payment)
+
+        val paymentStartDate = payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
+        if (paymentStartDate != quote.quoteDate) {
+            println("Cancelling payment ${payment.paymentId}: it was started on $paymentStartDate but quoted on ${quote.quoteDate}")
+            val govUkPayStatus = cancelOrGetFinishedGovUkPayStatus(payment.paymentId, "after its quote expired")
+            paymentRepository.updateStatusIfCurrentStatusIn(
+                payment.paymentId,
+                PaymentStatus.IN_PROGRESS_STATUSES,
+                govUkPayStatus,
+                Instant.now(),
+            )
+            return null
+        }
 
         return createdGovUkPayPayment.nextUrl
     }
@@ -232,6 +247,10 @@ class PaymentService(
 
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
+        } catch (exception: PaymentQuoteExpiredException) {
+            println("Cancelling payment $paymentId: ${exception.message}")
+            val status = cancelUnfinalisedPayment(paymentId, exception)
+            if (status == PaymentStatus.SUCCEEDED) status else throw exception
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
@@ -261,11 +280,13 @@ class PaymentService(
                     ) == 1
                 if (!isClaimed) return@execute getStoredPaymentStatus(paymentId)
 
+                val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
+                checkPaymentStartedOn(storedPayment, LocalDate.now(DateTimeHelper.UK_ZONE))
+
                 val otherPaymentIds = getStoredPaymentIds(incompleteProperty) - paymentId
                 checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
                 cancelInProgressPayments(otherPaymentIds, paymentId)
 
-                val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
                 val property =
                     propertyRegistrationService.registerProperty(registrationData.copy(renewalDate = storedPayment.forPeriodEnding))
                 storedPayment.associateWithProperty(property)
@@ -277,6 +298,7 @@ class PaymentService(
                 savedJourneyStateRepository.delete(incompleteProperty.savedJourneyState)
                 paymentRepository.flush()
 
+                checkPaymentStartedOn(storedPayment, property.registrationDate)
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
@@ -285,6 +307,16 @@ class PaymentService(
                 PaymentStatus.SUCCEEDED
             },
         )
+
+    private fun checkPaymentStartedOn(
+        payment: Payment,
+        date: LocalDate,
+    ) {
+        val paymentStartDate = payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
+        if (paymentStartDate != date) {
+            throw PaymentQuoteExpiredException("Payment ${payment.paymentId} was started on $paymentStartDate so cannot be taken on $date")
+        }
+    }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }

@@ -23,6 +23,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.orm.jpa.EntityManagerHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -40,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -92,6 +94,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     @Autowired
     private lateinit var addressService: AddressService
 
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
+
     @MockitoBean
     private lateinit var mockGovUkPayClient: GovUkPayClient
 
@@ -103,7 +108,10 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     private lateinit var originalPeriodEnd: LocalDate
 
     @BeforeEach
-    fun recordOriginalPaymentPeriod() {
+    fun alignFixtureDatesAndRecordOriginalPaymentPeriod() {
+        // Payments can only be taken on the UK day they were started, which must also be the day the property is registered
+        jdbcTemplate.update("UPDATE payment SET payment_created_at = now() WHERE associated_incomplete_property_user_id IS NOT NULL")
+        jdbcTemplate.update("UPDATE property_ownership SET created_date = now() WHERE id = ?", PROPERTY_OWNERSHIP_ID)
         originalPeriodEnd = paymentRepository.findById(CREATED_PAYMENT_ID).get().forPeriodEnding
     }
 
@@ -234,6 +242,32 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         assertEquals(PaymentStatus.CANCELLED, status)
         verify(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
         assertNull(landlordRepository.findById(LANDLORD_ID).get().anniversary)
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        assertEquals(PaymentStatus.CANCELLED, payment.status)
+        assertNull(payment.associatedProperty)
+        assertNotNull(payment.associatedIncompleteProperty)
+    }
+
+    @Test
+    fun `finalisePayment rolls back the registration and cancels the payment when the property is registered on a later UK day`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
+            setLandlordAnniversary()
+            jdbcTemplate.update(
+                "UPDATE property_ownership SET created_date = now() + INTERVAL '1 day' WHERE id = ?",
+                PROPERTY_OWNERSHIP_ID,
+            )
+            getProperty()
+        }
+
+        // Act, Assert
+        assertThrows<PaymentQuoteExpiredException> {
+            paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+        }
+        verify(mockGovUkPayClient, never()).capturePayment(any())
+        verify(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
+        assertNull(landlordRepository.findById(LANDLORD_ID).get().anniversary)
+        assertNotNull(savedJourneyStateRepository.findByJourneyIdAndUser_Id(JOURNEY_ID, USER_ID))
         val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
         assertEquals(PaymentStatus.CANCELLED, payment.status)
         assertNull(payment.associatedProperty)
