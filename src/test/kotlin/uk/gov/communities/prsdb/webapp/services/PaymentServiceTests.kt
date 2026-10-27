@@ -548,15 +548,16 @@ class PaymentServiceTests {
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
             val anniversary = MonthDay.of(Month.MARCH, 1)
             val incompleteProperty = setUpIncompletePropertyAndLandlord(anniversary)
-            val createdDate = Instant.now()
+            val quoteDate = LocalDate.of(2026, 10, 2)
+            val createdDate = Instant.parse("2026-10-02T11:30:00Z")
             stubGovUkPayCreatePayment(paymentId = "new-payment-id", createdDate = createdDate)
-            val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary)
+            val expectedRenewalDate = RenewalDateHelper.getRenewalDate(anniversary, quoteDate)
 
             // Act
             paymentService.createPropertyRegistrationPayment(
                 journeyId,
                 email,
-                paymentService.getPropertyRegistrationPaymentQuote(),
+                paymentService.getPropertyRegistrationPaymentQuote(quoteDate),
             )
 
             // Assert
