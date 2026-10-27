@@ -28,6 +28,8 @@ const val GAS_CERTIFICATE_14_MONTH_EXPIRY = "pdjb-1894-gas-certificate-14-month-
 
 const val ASSOCIATED_PARTIES = "pdjb-955-associated-parties"
 
+const val PROPERTY_REGISTRATION_PHASE_THREE = "pdjb-939-property-registration-phase-three"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -40,4 +42,5 @@ val featureFlagNames =
         GATLING_POST_ENDPOINT,
         GAS_CERTIFICATE_14_MONTH_EXPIRY,
         ASSOCIATED_PARTIES,
+        PROPERTY_REGISTRATION_PHASE_THREE,
     )
