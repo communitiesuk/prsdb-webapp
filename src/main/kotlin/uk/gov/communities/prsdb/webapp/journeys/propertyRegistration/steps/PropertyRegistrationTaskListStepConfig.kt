@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -88,9 +87,7 @@ class PropertyRegistrationTaskListStepConfig(
                 "registerProperty.taskList.rentedOut.heading",
                 "rented-out",
                 buildList {
-                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        add(whoProvidesDetailsItem(state))
-                    }
+                    add(whoProvidesDetailsItem(state))
                     add(rentedOutComplianceItem("registerProperty.taskList.rentedOut.licensing", state.licensingTask, state))
                     add(rentedOutComplianceItem("registerProperty.taskList.gasSafety", state.gasSafetyTask, state))
                     add(rentedOutComplianceItem("registerProperty.taskList.electricalSafety", state.electricalSafetyTask, state))
@@ -116,19 +113,13 @@ class PropertyRegistrationTaskListStepConfig(
 
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
-            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
-                status = TaskStatusViewModel.fromStatus(if (delegateEnabled) TaskStatus.NOT_NEEDED_YET else TaskStatus.NOT_REQUIRED),
-                hintKey =
-                    if (delegateEnabled) {
-                        "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint"
-                    } else {
-                        "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint"
-                    },
+                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET),
+                hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint",
                 url = null,
             )
-        } else if (isDelegatedToLettingAgent(state)) {
+        } else if (state.isDelegatedToLettingAgent()) {
             notRequiredLettingAgentItem("registerProperty.taskList.rentedOut.tenancyDetails")
         } else {
             TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
@@ -155,7 +146,7 @@ class PropertyRegistrationTaskListStepConfig(
         task: Task<*, *>,
         state: PropertyRegistrationJourneyState,
     ): TaskListItemViewModel =
-        if (isDelegatedToLettingAgent(state)) {
+        if (state.isDelegatedToLettingAgent()) {
             notRequiredLettingAgentItem(nameKey)
         } else {
             TaskListItemViewModel.fromTask(nameKey, task)
@@ -168,9 +159,6 @@ class PropertyRegistrationTaskListStepConfig(
             hintKey = "registerProperty.taskList.rentedOut.lettingAgentProvidesHint",
             url = null,
         )
-
-    private fun isDelegatedToLettingAgent(state: PropertyRegistrationJourneyState): Boolean =
-        state.isDelegatedToLettingAgent(featureFlagManager)
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "taskList"
 

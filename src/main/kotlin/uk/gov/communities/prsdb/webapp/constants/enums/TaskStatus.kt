@@ -6,7 +6,9 @@ enum class TaskStatus {
     IN_PROGRESS,
     COMPLETED,
 
-    // TODO PDJB-1617: remove NOT_REQUIRED (in favour of NOT_NEEDED_YET) this when we remove the delegation feature flag
+    // Letting agent provides these details, so they're never needed from the landlord
     NOT_REQUIRED,
+
+    // Not applicable until the property becomes occupied
     NOT_NEEDED_YET,
 }

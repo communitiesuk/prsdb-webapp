@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -12,15 +11,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 
 @JourneyFrameworkComponent
-class HasMissingComplianceStepConfig(
-    private val featureFlagManager: FeatureFlagManager,
-) : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
+class HasMissingComplianceStepConfig :
+    AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): ConfirmMissingComplianceCheckResult {
         val anyInvalid =
             isGasCertInvalid(state.gasSafetyTask) ||
                 isElectricalCertInvalid(state.electricalSafetyTask) ||
                 isEpcInvalid(state.epcTask)
-        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent(featureFlagManager)) {
+        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent()) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED

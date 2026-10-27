@@ -68,7 +68,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
-        fun `Occupied property shows updated provide later content when letting agents is enabled`(page: Page) {
+        fun `Occupied property shows the provide later content`(page: Page) {
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = true)
 
             assertThat(provideLaterPage.heading).hasText("Provide these details later")
@@ -81,39 +81,13 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
-        fun `Unoccupied property shows updated provide later content when letting agents is enabled`(page: Page) {
+        fun `Unoccupied property shows the provide later content`(page: Page) {
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = false)
 
             assertThat(provideLaterPage.heading).hasText("Provide these details later")
             assertThat(provideLaterPage.paragraphs.first()).hasText(
                 "If your property has a gas supply or any gas appliances, you must get a gas safety certificate before a tenant moves in.",
             )
-            assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
-
-            provideLaterPage.form.submit()
-            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `Occupied property keeps legacy provide later content when letting agents is disabled`(page: Page) {
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = true)
-
-            assertThat(provideLaterPage.heading).hasText("Provide your gas safety certificate later")
-            assertThat(provideLaterPage.insetText).hasText("You must upload your gas safety certificate within 28 days.")
-            assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
-
-            provideLaterPage.form.submit()
-            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `Unoccupied property keeps legacy provide later content when letting agents is disabled`(page: Page) {
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = false)
-
-            assertThat(provideLaterPage.heading).hasText("Provide your gas safety certificate later")
-            assertThat(provideLaterPage.paragraphs.first()).hasText("You must get a gas safety certificate before a tenant moves in.")
             assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
 
             provideLaterPage.form.submit()

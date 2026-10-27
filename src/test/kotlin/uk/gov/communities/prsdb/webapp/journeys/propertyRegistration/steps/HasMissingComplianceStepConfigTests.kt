@@ -11,7 +11,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -32,14 +31,11 @@ class HasMissingComplianceStepConfigTests {
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
-    @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
-
     private lateinit var stepConfig: HasMissingComplianceStepConfig
 
     @BeforeEach
     fun setUpStepConfig() {
-        stepConfig = HasMissingComplianceStepConfig(mockFeatureFlagManager)
+        stepConfig = HasMissingComplianceStepConfig()
     }
 
     @Nested
@@ -133,7 +129,7 @@ class HasMissingComplianceStepConfigTests {
         fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied and delegated to a letting agent`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
             setupGasCertMissing()
 
             // Act
@@ -147,7 +143,7 @@ class HasMissingComplianceStepConfigTests {
         fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied with missing certs and not delegated to a letting agent`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
             setupGasCertMissing()
 
             // Act
