@@ -15,7 +15,6 @@ class MeesExemptionStepConfig : AbstractRequestableStepConfig<Complete, MeesExem
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "propertyCompliance.epcTask.meesExemptionReason.heading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

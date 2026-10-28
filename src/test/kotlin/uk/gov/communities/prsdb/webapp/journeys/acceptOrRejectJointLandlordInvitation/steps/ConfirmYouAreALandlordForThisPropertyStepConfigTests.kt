@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
-import uk.gov.communities.prsdb.webapp.services.CurrentUserService.CurrentUserDetails
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -184,8 +184,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 42)
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
         setupValidTokenWithLandlord(invitation)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         val expectedPropertyUrl = "https://example.com/property"
 
         // Act
@@ -294,8 +294,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
                 correspondenceEmail = "correspondence@example.com",
             )
         setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
-        whenever(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current Editor", email = "editor@example.com"))
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current Editor", email = "editor@example.com"))
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
@@ -365,8 +365,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         setupTokenValidation(true)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
         lenient()
-            .`when`(mockCurrentUserService.getCurrentUserDetails())
-            .thenReturn(CurrentUserDetails(name = "Current User", email = "current-user@example.com"))
+            .`when`(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = "Current User", email = "current-user@example.com"))
         return invitation
     }
 

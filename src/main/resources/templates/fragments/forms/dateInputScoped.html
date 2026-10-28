@@ -11,12 +11,15 @@
             fieldSetHint
         </div>
         <p th:if="${#fields.hasErrors(dayField) && #fields.errors(dayField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span class="govuk-visually-hidden" th:text="#{forms.errorMessage.prefix}"></span>
             <span th:text="#{${#fields.errors(dayField)[0]}}"></span>
         </p>
         <p th:if="${#fields.hasErrors(monthField) && #fields.errors(monthField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span class="govuk-visually-hidden" th:text="#{forms.errorMessage.prefix}"></span>
             <span th:text="#{${#fields.errors(monthField)[0]}}"></span>
         </p>
         <p th:if="${#fields.hasErrors(yearField) && #fields.errors(yearField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span class="govuk-visually-hidden" th:text="#{forms.errorMessage.prefix}"></span>
             <span th:text="#{${#fields.errors(yearField)[0]}}"></span>
         </p>
         <div th:replace="~{fragments/forms/dateInputItems :: dateInputItems(${fieldName}, ${dayField}, ${monthField}, ${yearField})}"></div>

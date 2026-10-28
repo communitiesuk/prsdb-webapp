@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyDataExten
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel

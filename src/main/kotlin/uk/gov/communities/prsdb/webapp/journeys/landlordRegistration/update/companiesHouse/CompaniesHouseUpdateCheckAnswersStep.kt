@@ -21,7 +21,6 @@ class CompaniesHouseUpdateCheckAnswersStepConfig(
     override fun getStepSpecificContent(state: UpdateCompaniesHouseJourneyState): Map<String, Any?> {
         val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
         return mapOf(
-            "title" to "landlordDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "companyVariant" to registeredWithCompaniesHouse,

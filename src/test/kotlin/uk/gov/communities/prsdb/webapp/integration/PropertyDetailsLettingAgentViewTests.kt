@@ -2,15 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import java.util.UUID
 
@@ -20,11 +15,6 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     private val licensingAndTenancyOutstandingToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
 
     private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222d")
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `the service navigation banner is shown with the service name`(page: Page) {
@@ -108,17 +98,5 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
             "href",
             "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832",
         )
-    }
-
-    @Test
-    fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        navigator.navigate(
-            LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(allDetailsProvidedToken),
-        )
-
-        val errorPage = createValidPage(page, ErrorPage::class)
-        assertThat(errorPage.heading).containsText("Page not found")
     }
 }

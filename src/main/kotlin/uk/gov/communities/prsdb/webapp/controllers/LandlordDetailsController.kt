@@ -176,6 +176,7 @@ class LandlordDetailsController(
         )
         model.addAttribute("isLandlordView", false)
         model.addAttribute("showDeleteLandlordRecordLink", false)
+        model.addAttribute("title", "landlordDetails.localCouncilView.pageTitle")
 
         addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
 
@@ -208,7 +209,7 @@ class LandlordDetailsController(
 
         fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =
             UriTemplate(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
-                .expand(landlordId)
+                .expand(mapOf("id" to landlordId))
                 .toASCIIString()
     }
 }

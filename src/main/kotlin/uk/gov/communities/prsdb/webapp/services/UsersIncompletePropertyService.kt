@@ -20,7 +20,7 @@ class UsersIncompletePropertyService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) {
     fun getCurrentUsersIncompleteProperties(requestedPageIndex: Int): Page<IncompletePropertiesDataModel> {
-        val principalName = SecurityContextHolder.getContext().authentication.name
+        val principalName = SecurityContextHolder.getContext().authentication!!.name
         val pageRequest =
             PageRequest.of(
                 requestedPageIndex,
@@ -40,7 +40,7 @@ class UsersIncompletePropertyService(
     }
 
     fun getCurrentUsersIncompletePropertiesCount(): Int =
-        landlordIncompletePropertiesRepository.countByUser_Id(SecurityContextHolder.getContext().authentication.name).toInt()
+        landlordIncompletePropertiesRepository.countByUser_Id(SecurityContextHolder.getContext().authentication!!.name).toInt()
 
     fun deleteIncompleteProperty(
         journeyId: String,

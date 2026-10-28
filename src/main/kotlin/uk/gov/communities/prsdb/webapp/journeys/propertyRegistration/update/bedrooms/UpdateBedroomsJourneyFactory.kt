@@ -45,7 +45,6 @@ class UpdateBedroomsJourneyFactory(
                 initialStep()
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
                         "heading" to "forms.update.numberOfBedrooms.heading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",

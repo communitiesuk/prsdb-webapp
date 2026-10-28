@@ -1,4 +1,3 @@
-title: Register as a Landlord
 heading: 'Register your rental property: private beta'
 caption: Register as a landlord
 intro:
@@ -22,6 +21,7 @@ testTheService:
     two: "You'll also need to prove your identity using your GOV.UK One Login. We'll guide you through this based on which device you're using and what photo ID you have."
     three: Parts of the service may change during the private beta period.
 checkAnswers:
+  pageTitle: Check your landlord registration answers
   summaryName: Your details
   landlordTypeValue: Individual
   rowHeading:
@@ -35,6 +35,7 @@ checkAnswers:
     landlordType: Landlord type
 orgCheckAnswers:
   heading: Check your answers
+  pageTitle: Check your organisation registration answers
   yourDetails:
     cardTitle: Your details
     name: Name
@@ -73,7 +74,17 @@ confirmation:
     heading: Registered as a landlord
     body:
       beforeRegistrationNumber: Landlord Registration Number
-  emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  individual:
+    emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  organisation:
+    emailParagraph: We’ve emailed you a copy of your organisation’s Landlord Registration Number.
+    whatYouCanDoNow:
+      heading: What you can do now
+      paragraph: 'You are an administrator for your organisation. You can:'
+      bullet:
+        one: register or update properties
+        two: invite team members
+        three: update your organisation details
   whatYouNeedToDo:
     heading: What you need to do next
     paragraph:
@@ -154,6 +165,7 @@ orgTypeTrustInterruption:
       two: You must provide details including contact information for your organisation’s lead trustee.
   removingTrust:
     heading: Are you sure you want to change this?
+    pageTitle: Are you sure you want to change your organisation type?
     paragraph:
       one: "You’ve changed the type of your organisation from a trust to {0}."
       two: This means that the lead trustee details will be removed.
@@ -178,12 +190,12 @@ companiesHouseInterruption:
       two: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
   changedToCompany:
     heading: Are you sure you want to change this?
+    pageTitle: Are you sure you want to change your Companies House status?
     paragraph:
       one: You’ve changed your organisation’s Companies House registration status from No to Yes.
       two: 'This means we will remove the details you provided for:'
       three: If your organisation is still registered you can go back to undo this change.
 orgGovBodyWhoToProvide:
-  title: Who do you want to provide details for?
   fieldSetHeading: Who do you want to provide details for?
   radios:
     director: Director

@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRep
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 @ExtendWith(MockitoExtension::class)
 class LandlordUserEmailServiceTests {
@@ -114,6 +115,72 @@ class LandlordUserEmailServiceTests {
         assertEquals(emptyMap(), result)
         verify(individualLandlordRepository, never()).findByBaseUser_IdIn(any())
         verify(organisationalLandlordUserRepository, never()).findByBaseUser_IdIn(any())
+    }
+
+    @Test
+    fun `getUserDetailsByBaseUserId returns the individual landlord's name and email`() {
+        val user = MockLandlordData.createPrsdbUser("individual-user")
+        val landlord =
+            MockLandlordData.createIndividualLandlord(baseUser = user, name = "Individual Person", email = "individual@example.com")
+
+        whenever(individualLandlordRepository.findByBaseUser_Id(user.id)).thenReturn(landlord)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(user.id)).thenReturn(emptyList())
+
+        val result = landlordUserEmailService.getUserDetailsByBaseUserId(user.id)
+
+        assertEquals(LandlordUserDetails(name = "Individual Person", email = "individual@example.com"), result)
+    }
+
+    @Test
+    fun `getUserDetailsByBaseUserId returns the organisation user's own name and email`() {
+        val user = MockLandlordData.createPrsdbUser("org-user")
+        val orgUser =
+            createOrganisationalLandlordUser(
+                MockLandlordData.createOrgLandlord(),
+                user,
+                "org.user@example.com",
+                OrganisationalLandlordUserRole.ADMIN,
+            )
+
+        whenever(individualLandlordRepository.findByBaseUser_Id(user.id)).thenReturn(null)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(user.id)).thenReturn(listOf(orgUser))
+
+        val result = landlordUserEmailService.getUserDetailsByBaseUserId(user.id)
+
+        assertEquals(LandlordUserDetails(name = "Organisation user", email = "org.user@example.com"), result)
+    }
+
+    @Test
+    fun `getUserDetailsByBaseUserId throws when no landlord user is found`() {
+        val user = MockLandlordData.createPrsdbUser("unknown-user")
+
+        whenever(individualLandlordRepository.findByBaseUser_Id(user.id)).thenReturn(null)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(user.id)).thenReturn(emptyList())
+
+        assertFailsWith<IllegalStateException> {
+            landlordUserEmailService.getUserDetailsByBaseUserId(user.id)
+        }
+    }
+
+    @Test
+    fun `getUserDetailsByBaseUserId throws when multiple landlord users are found`() {
+        val user = MockLandlordData.createPrsdbUser("ambiguous-user")
+        val landlord =
+            MockLandlordData.createIndividualLandlord(baseUser = user, name = "Individual Person", email = "individual@example.com")
+        val orgUser =
+            createOrganisationalLandlordUser(
+                MockLandlordData.createOrgLandlord(),
+                user,
+                "org.user@example.com",
+                OrganisationalLandlordUserRole.ADMIN,
+            )
+
+        whenever(individualLandlordRepository.findByBaseUser_Id(user.id)).thenReturn(landlord)
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(user.id)).thenReturn(listOf(orgUser))
+
+        assertFailsWith<IllegalStateException> {
+            landlordUserEmailService.getUserDetailsByBaseUserId(user.id)
+        }
     }
 
     private fun createOrganisationalLandlordUser(

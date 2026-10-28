@@ -84,7 +84,7 @@ class LandlordRegistrationCyaStepConfig(
                 }
 
             landlordRegistrationService.registerOrganisationLandlord(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 organisationTypes = organisationTypes,
                 organisationHasCompanyNumber = hasCompanyNumber,
                 orgIsRegisteredCharity = isRegisteredCharity,
@@ -134,7 +134,7 @@ class LandlordRegistrationCyaStepConfig(
             )
         } else {
             landlordRegistrationService.registerIndividualLandlord(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 name = state.identityTask.getName(),
                 email =
                     state.emailStep.formModel
@@ -170,6 +170,7 @@ class LandlordRegistrationCyaStepConfig(
     // Individual landlord content
     private fun getIndividualStepContent(state: LandlordRegistrationState): Map<String, Any?> =
         mapOf(
+            "title" to "registerAsALandlord.checkAnswers.pageTitle",
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndContinue",
@@ -278,7 +279,6 @@ class LandlordRegistrationCyaStepConfig(
     private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> {
         val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
         return mapOf(
-            "title" to "registerAsALandlord.title",
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),

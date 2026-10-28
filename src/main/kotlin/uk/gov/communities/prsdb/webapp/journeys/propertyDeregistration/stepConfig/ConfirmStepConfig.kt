@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
@@ -23,6 +24,7 @@ class ConfirmStepConfig(
     private val propertyDeregistrationService: PropertyDeregistrationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val currentUserService: CurrentUserService,
     private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
     private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
@@ -54,15 +56,12 @@ class ConfirmStepConfig(
                 "There should be no joint landlords on the property if this step of deregistration is reached",
             )
         }
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        val landlordContacts =
-            propertyOwnership.landlords.map { landlord ->
-                landlord.name to landlord.email
-            }
         val cancelledInvitationEmailAddresses =
             jointLandlordInvitationService.getPendingInvitations(propertyOwnership).map { it.invitedEmail }
         val singleLineAddress = propertyOwnership.address.singleLineAddress
         val multiLineAddress = propertyOwnership.address.toMultiLineAddress()
+
+        val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(
@@ -70,12 +69,11 @@ class ConfirmStepConfig(
             singleLineAddress,
         )
 
-        landlordContacts.forEach { (landlordName, landlordEmail) ->
-            confirmationEmailSender.sendEmail(
-                landlordEmail,
-                PropertyDeregistrationConfirmationEmail(landlordName, multiLineAddress),
-            )
-        }
+        confirmationEmailSender.sendEmail(
+            currentUser.email,
+            PropertyDeregistrationConfirmationEmail(currentUser.name, multiLineAddress),
+        )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         if (cancelledInvitationEmailAddresses.isNotEmpty()) {
             val signInUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()

@@ -41,6 +41,13 @@ class CurrentUserServiceTests {
     }
 
     @Test
+    fun `getRegisteredUserDetails throws a null pointer exception when there is no authentication`() {
+        SecurityContextHolder.clearContext()
+
+        assertThrows<NullPointerException> { service.getRegisteredUserDetails() }
+    }
+
+    @Test
     fun `getCurrentEmail and getCurrentName return the authenticated individual landlord details`() {
         // Arrange
         val baseUserId = "individual-user"

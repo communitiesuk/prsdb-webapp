@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -34,6 +37,9 @@ class LeavePropertyServiceTests {
 
     @Mock
     private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
+    private lateinit var mockCurrentUserService: CurrentUserService
 
     @InjectMocks
     private lateinit var leavePropertyService: LeavePropertyService
@@ -93,7 +99,7 @@ class LeavePropertyServiceTests {
     }
 
     @Test
-    fun `leavePropertyOwnership removes the landlord and sends them a confirmation email`() {
+    fun `leavePropertyOwnership removes the landlord and sends the current user a confirmation email`() {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership =
@@ -101,6 +107,8 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
                 address = address,
             )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
@@ -114,7 +122,7 @@ class LeavePropertyServiceTests {
     }
 
     @Test
-    fun `leavePropertyOwnership removes an organisation landlord and sends them a confirmation email`() {
+    fun `leavePropertyOwnership removes an organisation landlord and sends the current user a confirmation email`() {
         // Arrange
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val orgLandlord = MockLandlordData.createOrgLandlord(name = "Org Landlord", registrantEmail = "org.user@example.com")
@@ -123,6 +131,8 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(orgLandlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
                 address = address,
             )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Acting User", email = "acting.user@example.com"))
 
         // Act
         leavePropertyService.leavePropertyOwnership(orgLandlord, propertyOwnership)
@@ -131,9 +141,9 @@ class LeavePropertyServiceTests {
         verify(mockPropertyOwnershipService).removeLandlord(propertyOwnership, orgLandlord)
 
         val emailCaptor = argumentCaptor<JointLandlordYouLeftConfirmation>()
-        verify(emailSender).sendEmail(eq("org.user@example.com"), emailCaptor.capture())
+        verify(emailSender).sendEmail(eq("acting.user@example.com"), emailCaptor.capture())
         val sentEmail = emailCaptor.firstValue
-        assertEquals("Org Landlord", sentEmail.recipientName)
+        assertEquals("Acting User", sentEmail.recipientName)
         assertEquals(address.toMultiLineAddress(), sentEmail.propertyAddress)
     }
 
@@ -144,10 +154,42 @@ class LeavePropertyServiceTests {
             MockLandlordData.createPropertyOwnership(
                 landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
             )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
         verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
+    }
+
+    @Test
+    fun `leavePropertyOwnership still sends the nudge email without throwing when the confirmation email fails to send`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        doThrow(RuntimeException("Email failed to send")).whenever(emailSender).sendEmail(any(), any())
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
+
+        assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
+
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
+    }
+
+    @Test
+    fun `leavePropertyOwnership does not throw when the nudge email fails to send`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        doThrow(RuntimeException("Email failed to send"))
+            .whenever(mockSwapToIndividualNudgeEmailService)
+            .sendNudgeEmailIfApplicable(propertyOwnership)
+
+        assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
     }
 
     @Test

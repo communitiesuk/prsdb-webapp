@@ -1,0 +1,28 @@
+heading: Change access level
+pageTitle: 'Change access level for {0,,name}'
+hint:
+  currentLevel:
+    administrator: '{0,,name} is currently an administrator.'
+    editor: '{0,,name} is currently an editor.'
+  email: We will send them a confirmation email.
+radios:
+  heading: Choose an access level
+  option:
+    administrator:
+      label: Administrator
+      hint: Can register or edit properties, manage team members, and change organisation information
+    editor:
+      label: Editor
+      hint: Can register or edit property information
+  error:
+    missing: Select the access level
+buttons:
+  removeAccess: Remove access
+removeAccess:
+  heading: Are you sure you want to remove their access?
+  pageTitle: 'Are you sure you want to remove access for {0,,name}?'
+  paragraph:
+    one: '{0,,name} will no longer be able to access your organisation on the service.'
+    two: To give them access again, you will need to send a new invitation.
+  confirmButton: Yes, remove access
+  cancelLink: Cancel and go back

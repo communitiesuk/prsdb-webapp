@@ -1,12 +1,3 @@
-title: Join your organisation
-validateToken:
-  fieldSetHeading: Validate the organisation invitation token (TODO PDJB-1822)
-  radios:
-    option:
-      valid: Yes, this is the correct invitation token
-      invalid: No, this is not the correct invitation token
-    error:
-      missing: Select whether this invitation token is correct or not
 joinOrganisation:
   heading: Join your organisation
   introduction: You’ve been invited to access this service as part of {0,,organisationName}.
@@ -16,6 +7,7 @@ joinOrganisation:
     two: your email address
 invalidLink:
   heading: There was a problem with this invitation link
+  pageTitle: There was a problem with this organisation invitation link
   whatsHappened:
     heading: What’s happened
     alreadyResponded:
@@ -32,13 +24,44 @@ invalidLink:
   stillNeedAccess:
     heading: If you still need access
     paragraph: Ask someone at your organisation with administrator access to invite you again.
+userIsAlreadyLandlord:
+  heading: You need to use a different GOV.UK One Login to accept this invitation
+  whatsHappened:
+    heading: What’s happened
+    paragraph:
+      one: You’ve already used this GOV.UK One Login to register as a landlord.
+      two: You can only have one landlord account associated with a GOV.UK One Login.
+  whatToDo:
+    heading: What you need to do
+    paragraph:
+      one: To accept this invitation you can create a GOV.UK One Login with a different email address.
+      two: This might be your work email instead of your personal email.
+  signOutLink:
+    link: Sign out of GOV.UK One Login
+    afterLink: .
 email:
   error:
     missing: Enter your email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
 checkAnswers:
+  pageTitle: Check your answers before joining your organisation
   summaryName: Your details
   rowHeading:
     organisation: Organisation
     name: Name
     emailAddress: Email address
+confirmation:
+  banner:
+    heading: Invitation accepted
+  joinedOrganisation: You have joined {0,,organisationName} on the service.
+  emailSent: We’ve sent a confirmation email to {0,,emailAddress}
+  whatYouCanDo:
+    heading: What you can do
+    registerProperty: register rental properties
+    updateProperty: update rental property information
+    administrator:
+      paragraph: 'Your access level is administrator, you can:'
+      manageTeamMembers: manage team member’s accounts
+    editor:
+      paragraph: 'Your access level is editor, you can:'
+  goToDashboard: Go to dashboard

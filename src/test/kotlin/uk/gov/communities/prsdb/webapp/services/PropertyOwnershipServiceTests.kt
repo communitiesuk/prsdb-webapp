@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -18,6 +19,7 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -33,8 +35,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -65,6 +65,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -99,9 +100,6 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLettingAgentAccessRepository: LettingAgentAccessRepository
-
-    @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -219,6 +217,10 @@ class PropertyOwnershipServiceTests {
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
+        val correspondenceAddress = MockLandlordData.createAddress("12 Contact Road, EG1 2AC")
+        val correspondenceModel = AddressDataModel.fromAddress(correspondenceAddress)
+        val correspondenceEmail = "chosen@example.com"
+        whenever(mockAddressService.findOrCreateAddress(correspondenceModel)).thenReturn(correspondenceAddress)
         val numberOfBedrooms = 1
         val billsIncludedList = "Electricity, Water"
         val customBillsIncluded = "Internet"
@@ -239,8 +241,8 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = null,
-                correspondenceEmail = landlord.email,
-                correspondenceAddress = landlord.address,
+                correspondenceEmail = correspondenceEmail,
+                correspondenceAddress = correspondenceAddress,
                 renewalDate =
                     RenewalDateHelper.getRenewalDate(
                         MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
@@ -280,6 +282,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            correspondenceEmail = correspondenceEmail,
+            correspondenceAddressModel = correspondenceModel,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -288,50 +292,6 @@ class PropertyOwnershipServiceTests {
             ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value),
         )
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
-    }
-
-    // TODO PDJB-1733: Remove this test when the CORRESPONDENCE_ADDRESS feature flag is removed
-    @Test
-    fun `createPropertyOwnership uses the landlord contact details when the CORRESPONDENCE_ADDRESS flag is off`() {
-        // Arrange
-        val landlordAddress = MockLandlordData.createAddress("10 Landlord Road, EG1 1AB")
-        val landlord = MockLandlordData.createIndividualLandlord(address = landlordAddress)
-
-        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
-            RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-        )
-        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
-            it.arguments[0] as PropertyOwnership
-        }
-
-        // Act
-        propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 2,
-            registeringLandlord = landlord,
-            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
-            propertyBuildType = PropertyType.OTHER,
-            customPropertyType = "End terrace",
-            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
-            numBedrooms = 1,
-            billsIncludedList = "Electricity, Water",
-            customBillsIncluded = "Internet",
-            furnishedStatus = FurnishedStatus.FURNISHED,
-            rentFrequency = RentFrequency.OTHER,
-            customRentFrequency = "Fortnightly",
-            rentAmount = 123.toBigDecimal(),
-            correspondenceEmail = null,
-            correspondenceAddressModel = null,
-        )
-
-        // Assert
-        val propertyOwnershipCaptor = captor<PropertyOwnership>()
-        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertEquals(landlord.email, propertyOwnershipCaptor.value.correspondenceEmail)
-        assertSame(landlordAddress, propertyOwnershipCaptor.value.correspondenceAddress)
-        verifyNoInteractions(mockAddressService)
     }
 
     @Test
@@ -347,6 +307,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -365,6 +327,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = RentFrequency.OTHER,
             customRentFrequency = "Fortnightly",
             rentAmount = 123.toBigDecimal(),
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -385,6 +349,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -403,11 +369,52 @@ class PropertyOwnershipServiceTests {
             rentFrequency = null,
             customRentFrequency = null,
             rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertEquals(null, propertyOwnershipCaptor.value.lastOccupiedDate)
+    }
+
+    @Test
+    fun `createPropertyOwnership preserves an explicitly supplied renewal date`() {
+        // Arrange
+        val renewalDate = LocalDate.of(2030, 6, 12)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY))
+            .thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456))
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer { it.arguments[0] as PropertyOwnership }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        // Act
+        val property =
+            propertyOwnershipService.createPropertyOwnership(
+                ownershipType = OwnershipType.FREEHOLD,
+                isOccupied = false,
+                numberOfHouseholds = 0,
+                numberOfPeople = 0,
+                registeringLandlord = landlord,
+                anniversary = MonthDay.of(3, 15),
+                propertyBuildType = PropertyType.DETACHED_HOUSE,
+                address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                customPropertyType = null,
+                renewalDate = renewalDate,
+                correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+                correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+            )
+
+        // Assert
+        assertEquals(renewalDate, property.renewalDate)
     }
 
     @Test
@@ -423,6 +430,8 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
             it.arguments[0] as PropertyOwnership
         }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
@@ -441,6 +450,8 @@ class PropertyOwnershipServiceTests {
             rentFrequency = null,
             customRentFrequency = null,
             rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
         )
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -692,19 +703,8 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetLettingAgentAccess {
         @Test
-        fun `getLettingAgentAccess returns null without loading the property when the feature is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
-
-            verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessRepository)
-        }
-
-        @Test
         fun `getLettingAgentAccess returns null when the property is unoccupied`() {
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
 
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
@@ -713,7 +713,6 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `getLettingAgentAccess returns null when the property is occupied but has no access record`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
@@ -721,10 +720,9 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `getLettingAgentAccess returns access for a delegated property when the feature is enabled`() {
+        fun `getLettingAgentAccess returns access for a delegated property`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -735,20 +733,9 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class HasLettingAgent {
         @Test
-        fun `hasLettingAgent returns false without loading the property when the feature is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            assertFalse(propertyOwnershipService.hasLettingAgent(1L))
-
-            verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessRepository)
-        }
-
-        @Test
         fun `hasLettingAgent returns false when the property is unoccupied`() {
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -758,7 +745,6 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `hasLettingAgent returns false when the property is occupied but has no access record`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
@@ -769,7 +755,6 @@ class PropertyOwnershipServiceTests {
         fun `hasLettingAgent returns true when the property is occupied and access exists`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
@@ -792,21 +777,9 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns false if the user is not a landlord and the letting agent feature flag is disabled`() {
-            val propertyOwnershipId = 1L
-            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-
-            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
-
-            assertFalse(result)
-        }
-
-        @Test
         fun `returns false if the user is not a landlord and the property has no letting agent access`() {
             val propertyOwnershipId = 1L
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId))
                 .thenReturn(MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId))
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(null)
@@ -822,7 +795,6 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
@@ -838,7 +810,6 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
@@ -1867,6 +1838,24 @@ class PropertyOwnershipServiceTests {
 
             assertFalse(propertyOwnership.landlords.any { it == landlord })
             verify(mockEmailService).sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+        }
+
+        @Test
+        fun `removeLandlord still removes the landlord without throwing when the remaining landlords fail to be notified`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val otherLandlord = MockLandlordData.createIndividualLandlord(name = "Other")
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord, otherLandlord),
+                )
+            doThrow(RuntimeException("Email failed to send"))
+                .whenever(mockEmailService)
+                .sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+
+            assertDoesNotThrow { propertyOwnershipService.removeLandlord(propertyOwnership, landlord) }
+
+            assertFalse(propertyOwnership.landlords.any { it == landlord })
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
     }
 

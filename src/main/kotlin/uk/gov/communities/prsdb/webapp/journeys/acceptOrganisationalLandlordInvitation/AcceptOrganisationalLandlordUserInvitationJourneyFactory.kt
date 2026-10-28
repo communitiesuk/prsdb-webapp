@@ -4,17 +4,21 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.AcceptOrganisationalLandlordInvitationCheckAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CheckUserIsLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.CompleteInvitationAcceptanceStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.EmailAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.FullNameStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.InvalidLinkStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.JoinOrganisationStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.LandlordAccountStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.TokenValidity
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.UserIsAlreadyLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrganisationalLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -41,15 +45,12 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     private fun mainJourneyMap(state: AcceptInvitationJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.validateTokenStep }
-            configure {
-                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
-            }
             step(journey.validateTokenStep) {
                 routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
                 initialStep()
                 nextStep { outcome ->
                     when (outcome) {
-                        TokenValidity.VALID -> journey.joinOrganisationStep
+                        TokenValidity.VALID -> journey.checkUserIsLandlordStep
                         TokenValidity.INVALID -> journey.invalidLinkStep
                     }
                 }
@@ -60,9 +61,24 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
                 backDestination { Destination.Nowhere() }
                 nextDestination { Destination.Nowhere() }
             }
+            step(journey.checkUserIsLandlordStep) {
+                routeSegment(CheckUserIsLandlordStep.ROUTE_SEGMENT)
+                parents { journey.validateTokenStep.hasOutcome(TokenValidity.VALID) }
+                nextStep { outcome ->
+                    when (outcome) {
+                        LandlordAccountStatus.NOT_A_LANDLORD -> journey.joinOrganisationStep
+                        LandlordAccountStatus.ALREADY_A_LANDLORD -> journey.userIsAlreadyLandlordStep
+                    }
+                }
+            }
+            step(journey.userIsAlreadyLandlordStep) {
+                routeSegment(UserIsAlreadyLandlordStep.ROUTE_SEGMENT)
+                parents { journey.checkUserIsLandlordStep.hasOutcome(LandlordAccountStatus.ALREADY_A_LANDLORD) }
+                noNextDestination()
+            }
             step(journey.joinOrganisationStep) {
                 routeSegment(JoinOrganisationStep.ROUTE_SEGMENT)
-                parents { journey.validateTokenStep.hasOutcome(TokenValidity.VALID) }
+                parents { journey.checkUserIsLandlordStep.hasOutcome(LandlordAccountStatus.NOT_A_LANDLORD) }
                 nextStep { journey.fullNameStep }
             }
             step(journey.fullNameStep) {
@@ -78,13 +94,11 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(AcceptOrganisationalLandlordInvitationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.emailAddressStep.isComplete() }
-                nextStep { journey.confirmationStep }
+                nextStep { journey.completeInvitationAcceptanceStep }
             }
-            step(journey.confirmationStep) {
-                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
+            step(journey.completeInvitationAcceptanceStep) {
                 parents { journey.checkAnswersStep.isComplete() }
-                backDestination { Destination.Nowhere() }
-                nextDestination { Destination.Nowhere() }
+                nextDestination { Destination.ExternalUrl(ACCEPT_INVITATION_CONFIRMATION_ROUTE) }
             }
         }
 
@@ -94,9 +108,6 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "acceptOrganisationInvitation.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 FullNameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.fullNameStep, FullNameStep.ROUTE_SEGMENT)
@@ -115,11 +126,13 @@ class AcceptOrganisationalLandlordUserInvitationJourneyFactory(
 class AcceptInvitationJourney(
     override val validateTokenStep: ValidateTokenStep,
     override val invalidLinkStep: InvalidLinkStep,
+    override val checkUserIsLandlordStep: CheckUserIsLandlordStep,
+    override val userIsAlreadyLandlordStep: UserIsAlreadyLandlordStep,
     override val joinOrganisationStep: JoinOrganisationStep,
     override val fullNameStep: FullNameStep,
     override val emailAddressStep: EmailAddressStep,
     override val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep,
-    override val confirmationStep: ConfirmationStep,
+    override val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>,
     journeyStateService: JourneyStateService,
@@ -129,6 +142,10 @@ class AcceptInvitationJourney(
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override var tokenIsValid: Boolean? by delegateProvider.nullableDelegate("tokenIsValid")
+
+    override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
@@ -142,13 +159,18 @@ class AcceptInvitationJourney(
 interface AcceptOrganisationalLandlordUserInvitationJourneyState : CheckYourAnswersJourneyState {
     val validateTokenStep: ValidateTokenStep
     val invalidLinkStep: InvalidLinkStep
+    val checkUserIsLandlordStep: CheckUserIsLandlordStep
+    val userIsAlreadyLandlordStep: UserIsAlreadyLandlordStep
     val joinOrganisationStep: JoinOrganisationStep
     val fullNameStep: FullNameStep
     val emailAddressStep: EmailAddressStep
     val checkAnswersStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
-    val confirmationStep: ConfirmationStep
+    val completeInvitationAcceptanceStep: CompleteInvitationAcceptanceStep
     override val cyaStep: AcceptOrganisationalLandlordInvitationCheckAnswersStep
         get() = checkAnswersStep
     override val finishCyaStep: FinishCyaJourneyStep
     override val stateFactory: ObjectFactory<AcceptOrganisationalLandlordUserInvitationJourneyState>
+
+    var tokenIsValid: Boolean?
+    var userIsLandlord: Boolean?
 }

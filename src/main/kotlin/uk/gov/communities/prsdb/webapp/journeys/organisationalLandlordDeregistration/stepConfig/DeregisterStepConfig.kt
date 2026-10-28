@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -18,6 +19,7 @@ class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val userToLandlordService: UserToLandlordService,
     private val securityContextService: SecurityContextService,
+    private val currentUserService: CurrentUserService,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val deregistrationEmailSender: EmailNotificationService<OrganisationalLandlordDeregistrationConfirmationEmail>,
 ) : AbstractInternalStepConfig<Complete, OrganisationalLandlordDeregistrationJourneyState>() {
@@ -31,18 +33,21 @@ class DeregisterStepConfig(
 
         val jointlyOwnedProperties = orgLandlord.landlordships.filterNot { it.isSolelyOwnedBy(orgLandlord) }
 
+        val currentUser = currentUserService.getRegisteredUserDetails()
+
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
         // Stored only once the deletion has succeeded, as this doubles as the "deregistered in this session" flag
         landlordDeregistrationService.addDeregisteredOrganisationNameToSession(organisationName)
 
         deregistrationEmailSender.sendEmail(
-            orgLandlord.registrantEmail,
+            currentUser.email,
             OrganisationalLandlordDeregistrationConfirmationEmail(
-                registrantName = orgLandlord.registrantName,
+                registrantName = currentUser.name,
                 organisationName = organisationName,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         jointlyOwnedProperties.forEach {
             swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)

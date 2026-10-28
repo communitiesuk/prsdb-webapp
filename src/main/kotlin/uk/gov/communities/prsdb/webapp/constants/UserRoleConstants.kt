@@ -15,3 +15,6 @@ const val ROLE_SYSTEM_OPERATOR = "ROLE_SYSTEM_OPERATOR"
 // The set of roles granted access by @AllowIfLandlord, for use where the "any landlord" authorities
 // are needed programmatically (e.g. dashboard routing, orphaned-user cleanup).
 val LANDLORD_ROLES = setOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_ORG_ADMIN, ROLE_ORG_EDITOR)
+
+// The set of roles granted access by @AllowIfOrgLandlordUser.
+val ORG_LANDLORD_ROLES = setOf(ROLE_ORG_ADMIN, ROLE_ORG_EDITOR)

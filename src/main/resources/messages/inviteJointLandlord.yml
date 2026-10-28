@@ -1,7 +1,7 @@
-title: Invite joint landlords
 checkInvitations:
   summaryName: Invited email addresses
   submitButtonText: Confirm and send
+  pageTitle: Check your joint landlord invitations
 confirmation:
   banner:
     heading: Joint landlord invitations sent

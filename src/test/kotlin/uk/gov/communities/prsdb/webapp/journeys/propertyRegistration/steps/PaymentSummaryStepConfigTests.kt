@@ -7,18 +7,25 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
@@ -38,22 +45,99 @@ class PaymentSummaryStepConfigTests {
     @Mock
     private lateinit var mockAddressTask: PropertyRegistrationAddressTask
 
+    @Mock
+    private lateinit var mockPaymentSummaryStep: PaymentSummaryStep
+
     private lateinit var stepConfig: PaymentSummaryStepConfig
 
     private val journeyId = "journey-123"
     private val uprn = 123L
     private val defaultDestination = Destination.ExternalUrl("default")
+    private val today = LocalDate.now(DateTimeHelper.UK_ZONE)
 
     @BeforeEach
     fun setUp() {
-        stepConfig = PaymentSummaryStepConfig(mockAddressAvailabilityService, mockPaymentService)
-        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
-        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
+        stepConfig =
+            PaymentSummaryStepConfig(
+                mockAddressAvailabilityService,
+                mockPaymentService,
+            )
+    }
+
+    @Test
+    fun `getStepSpecificContent stores a newly calculated quote in journey state`() {
+        // Arrange
+        val quote = createQuote(today)
+        stubSummaryContent(quote, firstChargeableDate = LocalDate.of(2027, 1, 1))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        verify(mockState).paymentQuote = quote
+        assertEquals("£20", content["annualFee"])
+        assertEquals("1 January 2027", content["firstChargeableDate"])
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", "£12.34"),
+                SummaryListRowViewModel(
+                    "registerProperty.paymentSummary.summary.paymentDate",
+                    today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
+                ),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", "1 March 2028"),
+            ),
+            content["summaryListRows"],
+        )
+    }
+
+    @Test
+    fun `getStepSpecificContent flags the pre-gratis period when the first chargeable date is after the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today.plusDays(1))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(true, content["isPreGratisPeriod"])
+    }
+
+    @Test
+    fun `getStepSpecificContent does not flag the pre-gratis period when charging starts on the quote date`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(false, content["isPreGratisPeriod"])
+    }
+
+    @Test
+    fun `chooseTemplate selects the payment summary template`() {
+        assertEquals("forms/paymentSummary", stepConfig.chooseTemplate(mockState))
+    }
+
+    @Test
+    fun `afterStepDataIsAdded clears the previous payment outcome and reference`() {
+        // Arrange
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = null
+        verify(mockState).paymentReference = null
     }
 
     @Test
     fun `afterStepDataIsAdded marks the address as already registered when it has been registered since the journey started`() {
         // Arrange
+        stubAddressTask()
         whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = uprn))
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(true)
 
@@ -67,6 +151,7 @@ class PaymentSummaryStepConfigTests {
     @Test
     fun `afterStepDataIsAdded does not mark the address as already registered when it is still available`() {
         // Arrange
+        stubAddressTask()
         whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = uprn))
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
 
@@ -80,6 +165,7 @@ class PaymentSummaryStepConfigTests {
     @Test
     fun `afterStepDataIsAdded does not check registration when the address has no UPRN`() {
         // Arrange
+        stubAddressTask()
         whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
 
         // Act
@@ -93,6 +179,7 @@ class PaymentSummaryStepConfigTests {
     @Test
     fun `resolveNextDestination redirects to the already registered step when the address is already registered`() {
         // Arrange
+        stubAddressTask()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
@@ -104,11 +191,13 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals(mockAlreadyRegisteredStep, assertIs<Destination.VisitableStep>(result).step)
         verifyNoInteractions(mockPaymentService)
+        verify(mockState, never()).paymentQuote
     }
 
     @Test
     fun `resolveNextDestination creates a payment and redirects to GOV UK Pay when the address is not already registered`() {
         // Arrange
+        stubAddressTask()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
         stubPaymentCreation()
 
@@ -117,12 +206,88 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals("https://pay.example.test/next", assertIs<Destination.ExternalUrl>(result).externalUrl)
+        verify(mockPaymentService).createPropertyRegistrationPayment(
+            journeyId,
+            "landlord@example.com",
+            createQuote(today),
+        )
+        verify(mockPaymentService, never()).getPropertyRegistrationPaymentQuote(any())
+        verify(mockState, never()).paymentQuote = anyOrNull()
+    }
+
+    @Test
+    fun `resolveNextDestination refreshes a missing quote without creating a payment`() {
+        // Arrange
+        stubAddressTask()
+        stubSummaryDestination()
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        val refreshedQuote = createQuote(today)
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
+        verify(mockState).paymentQuote = refreshedQuote
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
+    }
+
+    @Test
+    fun `resolveNextDestination refreshes a quote from a previous UK day without creating a payment`() {
+        // Arrange
+        stubAddressTask()
+        stubSummaryDestination()
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        whenever(mockState.paymentQuote).thenReturn(createQuote(today.minusDays(1)))
+        val refreshedQuote = createQuote(today)
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
+        verify(mockState).paymentQuote = refreshedQuote
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
+    }
+
+    private fun stubAddressTask() {
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
+    }
+
+    private fun stubSummaryContent(
+        quote: PropertyRegistrationPaymentQuote,
+        firstChargeableDate: LocalDate,
+    ) {
+        stubAddressTask()
+        whenever(mockAddressTask.getAddress()).thenReturn(
+            AddressDataModel("1 Example Road, EG1 2AB", streetName = "1 Example Road", postcode = "EG1 2AB"),
+        )
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote()).thenReturn(quote)
+        whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
+        whenever(mockPaymentService.getFirstChargeableDate(quote.quoteDate)).thenReturn(firstChargeableDate)
+    }
+
+    private fun stubSummaryDestination() {
+        whenever(mockState.paymentSummaryStep).thenReturn(mockPaymentSummaryStep)
+        whenever(mockPaymentSummaryStep.currentJourneyId).thenReturn(journeyId)
     }
 
     private fun stubPaymentCreation() {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
-        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com"))
+        val quote = createQuote(today)
+        whenever(mockState.paymentQuote).thenReturn(quote)
+        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
             .thenReturn("https://pay.example.test/next")
     }
+
+    private fun createQuote(quoteDate: LocalDate) =
+        PropertyRegistrationPaymentQuote(
+            amountInPence = 1234,
+            quoteDate = quoteDate,
+            renewalDate = LocalDate.of(2028, 3, 1),
+        )
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUserSuccess.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{deleteLocalCouncilUserSuccess.banner.heading(${deletedUserName}, ${localCouncil.name})}, ~{::main/content()}, false, null, null)}">
+<main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"

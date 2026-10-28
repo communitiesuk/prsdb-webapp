@@ -171,6 +171,10 @@ if [ -f "$ENV_FILE" ]; then
         -e "s|LANDLORD_BASE_URL=\"http://localhost:8080/landlord\"|LANDLORD_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/landlord\"|" \
         -e "s|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:8080/local-council\"|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/local-council\"|" \
         "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    # Append any port keys missing from the copied .env so defaults aren't used
+    for KV in "SERVER_PORT=$NEW_SERVER_PORT" "POSTGRES_PORT=$NEW_POSTGRES_PORT" "REDIS_PORT=$NEW_REDIS_PORT"; do
+        grep -q "^${KV%%=*}=" "$ENV_FILE" || printf '\n%s="%s"' "${KV%%=*}" "${KV#*=}" >> "$ENV_FILE"
+    done
     echo "  SERVER_PORT=$NEW_SERVER_PORT"
     echo "  POSTGRES_PORT=$NEW_POSTGRES_PORT"
     echo "  REDIS_PORT=$NEW_REDIS_PORT"

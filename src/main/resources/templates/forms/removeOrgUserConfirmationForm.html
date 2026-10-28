@@ -1,0 +1,22 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel"*/-->
+<!--/*@thymesVar id="memberName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="cancelLinkUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{changeOrgTeamMemberAccessLevel.removeAccess.pageTitle(${memberName})}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, null)}">
+    <h1 class="govuk-heading-l" th:text="#{changeOrgTeamMemberAccessLevel.removeAccess.heading}">
+        changeOrgTeamMemberAccessLevel.removeAccess.heading
+    </h1>
+    <p class="govuk-body" th:text="#{changeOrgTeamMemberAccessLevel.removeAccess.paragraph.one(${memberName})}">
+        changeOrgTeamMemberAccessLevel.removeAccess.paragraph.one
+    </p>
+    <p class="govuk-body" th:text="#{changeOrgTeamMemberAccessLevel.removeAccess.paragraph.two}">
+        changeOrgTeamMemberAccessLevel.removeAccess.paragraph.two
+    </p>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{changeOrgTeamMemberAccessLevel.removeAccess.confirmButton})}"></button>
+        <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{changeOrgTeamMemberAccessLevel.removeAccess.cancelLink}">
+            changeOrgTeamMemberAccessLevel.removeAccess.cancelLink
+        </a>
+    </div>
+</html>

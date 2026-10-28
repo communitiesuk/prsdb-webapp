@@ -27,17 +27,41 @@ class ExampleTests : IntegrationTestWithMutableData("seed-data-script.sql") {
 }
 ```
 
+### Overlay Scripts
+
+The base classes also accept a list of scripts, applied in order. Prefer a small **overlay** script on top of an
+existing base seed (usually `data-local.sql`) over copying a large base script just to change a few rows:
+
+```kotlin
+class ExampleTests : IntegrationTestWithMutableData(
+    listOf("data-local.sql", "data-overlay-mockuser-is-not-a-landlord.sql"),
+)
+```
+
+Overlay scripts are named `data-overlay-<description>.sql`, start with a header comment explaining what they change
+and what to apply them on top of, and only contain the `INSERT`/`UPDATE`/`DELETE` statements needed for that change.
+Existing overlays include:
+
+- `data-overlay-mockuser-is-not-a-landlord.sql` — removes the signed-in mock user's landlord role
+- `data-overlay-mockuser-is-org-landlord-user.sql` — makes the signed-in mock user an organisational landlord user
+
+Most older tests predate this pattern and use a bespoke standalone base script instead. Follow the overlay pattern for
+new tests, and check for an existing overlay before writing a new one.
+
+Note that the signed-in mock user's One Login subject is fixed (`urn:fdc:gov.uk:2022:UVWXY`), so changing what that
+user is requires a seed data change rather than a different login.
+
 ## Page Objects
 
 ### Structure
 ```kotlin
 class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
-    
+
     val heading: Locator
         get() = parentLocator.locator("h1")
-    
+
     val submitButton = Button(parentLocator.locator("[data-testid='submit']"))
-    
+
     val form = ExampleForm(parentLocator.locator("form"))
 }
 ```
@@ -49,12 +73,13 @@ class ExamplePage(parentLocator: Locator) : BasePage(parentLocator) {
 - Prefer **custom classes** over raw `Locator`
 
 ### Page Validation
-`BasePage.createValidPage` (used by `assertPageIs` and the Navigator) checks the URL, runs Axe, and checks the page
-`<title>` matches `[Error: ]<heading> - <service name> - GOV.UK`. On page objects whose title deliberately differs from
-the h1, override `expectedTitleHeading` with the expected title heading; the title heading is always checked against it.
-When `STRICT_TITLE_CHECK` is enabled, pages without an override also have their title heading checked against the h1
-text. Pages that don't use the shared layout (e.g. `MaintenancePage`) override `validateTitle()` with
-their own title check.
+`BasePage.createValidPage` (used by `assertPageIs` and the Navigator) validates the following:
+- Checks the URL.
+- Runs Axe.
+- Checks the page has exactly one `<main>` tag and that it looks like `<main id="main-content">`.
+- Checks the page `<title>` is `[Error: ]<h1 text> - <service name> - GOV.UK`.
+  - On page objects whose title deliberately differs from the h1, override `expectedTitleHeading` with the expected title heading, and it is checked instead of the h1.
+  - Where that heading includes variable data such as a name, override `expectedTitleHeadingPattern` with a `Regex` instead.
 
 ## Components
 
@@ -108,10 +133,10 @@ If a navigator method is called with different arguments pointing to genuinely d
 @Test
 fun `user can submit form successfully`() {
     val page = navigator.goToExamplePage()
-    
+
     page.form.fillName("Test Name")
     page.submitButton.click()
-    
+
     val resultPage = ResultPage(page.playwright.page)
     assertThat(resultPage.confirmationBanner.isVisible).isTrue()
 }

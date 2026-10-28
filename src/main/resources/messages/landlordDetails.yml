@@ -1,5 +1,7 @@
-title: Landlord record
 heading: Landlord record
+pageTitle: Your landlord record
+localCouncilView:
+  pageTitle: "Landlord record for {0,,landlordName}"
 removeRecord: Delete account
 personalDetails:
   heading: Personal details
@@ -32,13 +34,11 @@ registeredProperties:
     beforeLink: No registered properties.
     link: Register a property
 update:
-  title: Update Landlord record
   companiesHouse:
     cya:
       companyDetails:
         heading: Company details
 org:
-  title: Organisation landlord record
   removeRecord: Delete organisation
   tabs:
     organisationDetails: Organisation details

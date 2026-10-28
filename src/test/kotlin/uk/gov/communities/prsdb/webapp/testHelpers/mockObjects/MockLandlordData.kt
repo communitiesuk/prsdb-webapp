@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.util.UUID
 
 class MockLandlordData {
     companion object {
@@ -176,6 +178,30 @@ class MockLandlordData {
                 role = role,
             )
 
+        fun createOrganisationalLandlordInvitation(
+            id: Long = 1,
+            token: UUID = UUID.randomUUID(),
+            invitedEmail: String = "organisation.invitee@example.com",
+            organisationalLandlord: OrganisationalLandlord = createOrgLandlord(),
+            role: OrganisationalLandlordUserRole = OrganisationalLandlordUserRole.ADMIN,
+            createdDate: Instant = Instant.now(),
+            isHidden: Boolean = false,
+        ): OrganisationalLandlordInvitation {
+            val invitation =
+                OrganisationalLandlordInvitation(
+                    id = id,
+                    token = token,
+                    invitedEmail = invitedEmail,
+                    organisationalLandlord = organisationalLandlord,
+                    role = role,
+                )
+
+            ReflectionTestUtils.setField(invitation, "createdDate", createdDate)
+            if (isHidden) invitation.markAsHidden()
+
+            return invitation
+        }
+
         fun createPropertyOwnership(
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
@@ -186,7 +212,7 @@ class MockLandlordData {
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
-            correspondenceEmail: String = landlords.firstOrNull()?.email ?: "email@example.com",
+            correspondenceEmail: String = "email@example.com",
             correspondenceAddress: Address = createAddress(),
             id: Long = 1,
             createdDate: Instant = Instant.now(),

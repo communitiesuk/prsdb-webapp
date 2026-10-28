@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerLocalCouncilUser.invalidLink.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper">
+<html th:replace="~{fragments/layout :: layout(#{registerLocalCouncilUser.invalidLink.heading}, ~{::main/content()}, false, null, null)}">
+<main>
     <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
         <div id="page-content">
             <header>

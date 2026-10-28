@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -31,6 +32,7 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val currentUserService: CurrentUserService,
 ) {
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
         invitationRepository
@@ -56,19 +58,25 @@ class JointLandlordInvitationService(
             .filter { it.status == JointLandlordInvitationStatus.PENDING }
             .map { it.invitedEmail }
 
+    /**
+     * Returns the email addresses already in use by the property's landlords for the purpose of blocking duplicate
+     * joint landlord invitations.
+     */
+    fun getInUseEmailsForProperty(propertyOwnership: PropertyOwnership): List<String> =
+        propertyOwnership.landlords
+            // TODO: PDJB-1892: Decide how to handle org LLs in this check
+            .filterIsInstance<IndividualLandlord>()
+            .map { it.email }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,
         invitingLandlord: Landlord,
     ) {
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        val senderName = invitingLandlord.name
-        val propertyAddress = propertyOwnership.address.toMultiLineAddress()
-
         // Re-check against the current state of the database when finishing the journey. The form-level checks happen
         // when an email is submitted, so without this a concurrent journey could invite the same email twice.
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
-        val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
+        val existingLandlordEmails = getInUseEmailsForProperty(propertyOwnership)
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
                 !alreadyInvitedEmails.containsEmail(candidateEmail) &&
@@ -78,23 +86,12 @@ class JointLandlordInvitationService(
         hideExpiredPropertyInvitesForEmails(propertyOwnership, emailsToInvite)
 
         emailsToInvite.forEach { email ->
-            val token = UUID.randomUUID()
-            val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
-
-            // Save the invitation before sending the email so the link in the email always resolves to a real token.
-            // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
-            val invitation = JointLandlordInvitation(token, email, propertyOwnership, senderName)
-            invitationRepository.save(invitation)
+            // createInvitation saves the invitation before we send the email, so the link in the email always resolves to a
+            // real token. If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
+            val invitation = createInvitation(email, propertyOwnership, invitingLandlord)
 
             try {
-                invitationEmailSender.sendEmail(
-                    email,
-                    JointLandlordInvitationEmail(
-                        senderName = senderName,
-                        propertyAddress = propertyAddress,
-                        invitationUri = invitationUri,
-                    ),
-                )
+                sendInvitationEmail(invitation)
             } catch (exception: Exception) {
                 invitationRepository.delete(invitation)
                 throw exception
@@ -102,33 +99,67 @@ class JointLandlordInvitationService(
         }
 
         if (emailsToInvite.isNotEmpty()) {
-            val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
-            // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
-            confirmationEmailSender.sendEmail(
-                invitingLandlord.email,
-                JointLandlordInvitationConfirmationEmail(
-                    senderName = senderName,
+            sendInvitationConfirmationEmails(emailsToInvite, propertyOwnership, invitingLandlord)
+        }
+    }
+
+    fun createInvitations(
+        jointLandlordEmails: List<String>,
+        propertyOwnership: PropertyOwnership,
+        invitingLandlord: Landlord,
+    ): List<JointLandlordInvitation> = jointLandlordEmails.map { email -> createInvitation(email, propertyOwnership, invitingLandlord) }
+
+    fun sendInvitationEmail(invitation: JointLandlordInvitation) {
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        invitationEmailSender.sendEmail(
+            invitation.invitedEmail,
+            JointLandlordInvitationEmail(
+                senderName = invitation.invitingLandlordName,
+                propertyAddress = invitation.registeredOwnership.address.toMultiLineAddress(),
+                invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(invitation.token.toString()),
+            ),
+        )
+    }
+
+    fun sendInvitationConfirmationEmails(
+        invitedEmails: List<String>,
+        propertyOwnership: PropertyOwnership,
+        invitingLandlord: Landlord,
+    ) {
+        val propertyAddress = propertyOwnership.address.toMultiLineAddress()
+        val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+
+        confirmationEmailSender.sendEmail(
+            currentUserService.getCurrentEmail(),
+            JointLandlordInvitationConfirmationEmail(
+                senderName = invitingLandlord.name,
+                propertyAddress = propertyAddress,
+                jointLandlordEmails = invitedEmails,
+                propertyRecordUrl = propertyRecordUrl,
+            ),
+        )
+
+        val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
+        existingJointLandlords.forEach { landlord ->
+            notifyExistingEmailSender.sendEmailToLandlord(
+                landlord,
+                JointLandlordInvitationNotifyExistingEmail(
+                    recipientName = landlord.name,
                     propertyAddress = propertyAddress,
-                    jointLandlordEmails = emailsToInvite,
+                    jointLandlordEmails = invitedEmails,
                     propertyRecordUrl = propertyRecordUrl,
                 ),
             )
-
-            val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
-            existingJointLandlords.forEach { landlord ->
-                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
-                notifyExistingEmailSender.sendEmail(
-                    landlord.email,
-                    JointLandlordInvitationNotifyExistingEmail(
-                        recipientName = landlord.name,
-                        propertyAddress = propertyAddress,
-                        jointLandlordEmails = emailsToInvite,
-                        propertyRecordUrl = propertyRecordUrl,
-                    ),
-                )
-            }
         }
     }
+
+    private fun createInvitation(
+        email: String,
+        propertyOwnership: PropertyOwnership,
+        invitingLandlord: Landlord,
+    ): JointLandlordInvitation =
+        JointLandlordInvitation(UUID.randomUUID(), email, propertyOwnership, invitingLandlord.name)
+            .also { invitationRepository.save(it) }
 
     private fun hideExpiredPropertyInvitesForEmails(
         ownership: PropertyOwnership,

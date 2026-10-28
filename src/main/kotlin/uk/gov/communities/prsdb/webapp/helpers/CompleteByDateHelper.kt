@@ -4,7 +4,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import java.time.Instant
-import kotlin.time.Duration.Companion.days
 
 class CompleteByDateHelper {
     companion object {
@@ -12,6 +11,6 @@ class CompleteByDateHelper {
             getIncompletePropertyCompleteByDateFromCreatedDate(savedJourneyState.createdDate)
 
         fun getIncompletePropertyCompleteByDateFromCreatedDate(createdDate: Instant): LocalDate =
-            DateTimeHelper.getDateInUK(createdDate.toKotlinInstant().plus(28.days))
+            DateTimeHelper.get28DaysFromDate(DateTimeHelper.getDateInUK(createdDate.toKotlinInstant()))
     }
 }

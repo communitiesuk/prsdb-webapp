@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerLocalCouncilUser.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{registerLocalCouncilUser.success.banner.heading(${localCouncil})}, ~{::main/content()}, false, null, null)}">
+<main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLocalCouncilUser.success.banner.title(${localCouncil})}, ~{::#confirmation-banner/content()})}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLocalCouncilUser.success.banner.heading(${localCouncil})}, ~{::#confirmation-banner/content()})}">
         </div>
         <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.paragraph.one}">
             registerLocalCouncilUser.success.paragraph.one

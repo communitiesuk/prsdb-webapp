@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
@@ -95,6 +96,9 @@ class LandlordServiceTests {
     @Mock
     private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
+    @Mock
+    private lateinit var mockCurrentUserService: CurrentUserService
+
     private lateinit var landlordService: LandlordService
 
     @BeforeEach
@@ -112,6 +116,7 @@ class LandlordServiceTests {
                 orgUpdateConfirmationSender,
                 absoluteUrlProvider,
                 mockOrganisationGoverningBodyMemberService,
+                mockCurrentUserService,
             )
     }
 
@@ -796,12 +801,13 @@ class LandlordServiceTests {
         val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordName("New Org Name")
 
         assertEquals("New Org Name", orgLandlord.name)
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -829,12 +835,13 @@ class LandlordServiceTests {
         whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordAddress(newAddressDataModel)
 
         assertEquals(newAddress, orgLandlord.address)
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -871,11 +878,12 @@ class LandlordServiceTests {
         val orgLandlord = createOrgLandlord(email = "old-contact@example.com")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordEmail("new-contact@example.com")
 
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -934,6 +942,7 @@ class LandlordServiceTests {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordMainContact(
             name = "New Name",
@@ -942,7 +951,7 @@ class LandlordServiceTests {
         )
 
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -963,12 +972,13 @@ class LandlordServiceTests {
         orgLandlord.phoneNumber = "01111111111"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordPhoneNumber("02222222222")
 
         assertEquals("02222222222", orgLandlord.phoneNumber)
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -1011,11 +1021,12 @@ class LandlordServiceTests {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
 
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -1059,11 +1070,12 @@ class LandlordServiceTests {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationalLandlordToNonRegisteredCompany(emptyList())
 
         verify(orgUpdateConfirmationSender).sendEmail(
-            eq(orgLandlord.email),
+            eq("admin@example.com"),
             eq(
                 OrganisationalLandlordUpdateConfirmation(
                     dashboardUrl = URI("example.com/landlord-dashboard"),
@@ -1084,6 +1096,7 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordType(isCompany = false, isCharity = false, isTrust = false)
 
@@ -1092,7 +1105,7 @@ class LandlordServiceTests {
                 dashboardUrl,
                 "The organisation type.",
             )
-        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq("admin@example.com"), eq(expectedEmailModel))
     }
 
     @Test
@@ -1106,6 +1119,7 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordTypeAndLeadTrustee(
             isCompany = false,
@@ -1118,7 +1132,7 @@ class LandlordServiceTests {
                 dashboardUrl,
                 "The organisation type and lead trustee details.",
             )
-        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq("admin@example.com"), eq(expectedEmailModel))
     }
 
     @Test
@@ -1135,6 +1149,7 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordCharityRegistration(charityRegulator, "1234567")
 
@@ -1145,7 +1160,7 @@ class LandlordServiceTests {
                 dashboardUrl,
                 "The charity registration details.",
             )
-        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq("admin@example.com"), eq(expectedEmailModel))
     }
 
     @Test
@@ -1189,6 +1204,7 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         landlordService.updateOrganisationLandlordLeadTrustee(
             name = "New Trustee",
@@ -1203,7 +1219,7 @@ class LandlordServiceTests {
                 dashboardUrl,
                 "The lead trustee details.",
             )
-        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq("admin@example.com"), eq(expectedEmailModel))
     }
 
     @Test
@@ -1212,6 +1228,7 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
 
         val members =
             listOf(
@@ -1232,12 +1249,34 @@ class LandlordServiceTests {
                 dashboardUrl,
                 "The governing body members.",
             )
-        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq("admin@example.com"), eq(expectedEmailModel))
     }
 
     @Test
     fun `updateOrganisationLandlordGoverningBodyMembers is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordGoverningBodyMembers.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `organisation update confirmation emails are sent to the acting user not the organisation`() {
+        val orgLandlord = createOrgLandlord(email = "organisation@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+        whenever(mockCurrentUserService.getCurrentEmail()).thenReturn("admin@example.com")
+        lenient().`when`(mockAddressService.findOrCreateAddress(any())).thenReturn(createAddress("new address"))
+
+        landlordService.updateOrganisationLandlordName("New Org Name")
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq("admin@example.com"),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = dashboardUrl,
+                    updatedDetail = "The organisation name.",
+                ),
+            ),
+        )
     }
 
     companion object {
