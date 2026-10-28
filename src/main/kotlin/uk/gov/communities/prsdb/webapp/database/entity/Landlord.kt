@@ -30,10 +30,6 @@ abstract class Landlord : ModifiableAuditableEntity() {
     @get:Transient
     abstract val address: Address
 
-    // TODO PDJB-1274: This method is temporary - a landlord will soon not have a single email
-    @get:Transient
-    abstract val email: String
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     open val id: Long = 0

@@ -1,13 +1,12 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -17,8 +16,6 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -41,9 +38,6 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
     @MockitoBean
     private lateinit var stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
     private val token: UUID = UUID.randomUUID()
 
     private val updateStepRoute =
@@ -51,11 +45,6 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
             "/${FurnishedStatusStep.ROUTE_SEGMENT}"
 
     private val formContent = "furnishedStatus=FURNISHED"
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
 
     private fun stubValidTokenForOccupiedProperty() {
         val propertyOwnership = createOccupiedPropertyOwnership()
@@ -112,15 +101,6 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnership.id)))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
-
-        mvc.get(updateStepRoute).andExpect {
-            status { isNotFound() }
-        }
-    }
-
-    @Test
-    fun `getUpdateStep returns 404 when the feature flag is disabled`() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc.get(updateStepRoute).andExpect {
             status { isNotFound() }
@@ -191,20 +171,6 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnership.id)))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
-                status { isNotFound() }
-            }
-    }
-
-    @Test
-    fun `postUpdateStep returns 404 when the feature flag is disabled`() {
-        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .post(updateStepRoute) {

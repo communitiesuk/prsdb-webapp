@@ -1,8 +1,8 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="page" th:replace="~{fragments/layout :: layout(#{cookies.title}, ~{::#page/content()}, false)}">
-    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backLink</a>
-    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+<html th:replace="~{fragments/layout :: layout(#{cookies.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
         <!-- TODO: PDJB-727 Revisit this page with design once GA removal is confirmed -->
         <header>
             <h1 class="govuk-heading-l" th:text="#{cookies.heading}">cookies.heading</h1>
@@ -21,5 +21,6 @@
                 </tbody>
             </table>
         </section>
-    </main>
+    </div>
+</main>
 </html>

@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -48,15 +50,32 @@ class PaymentService(
 ) {
     private val gratisPeriodEndDate: LocalDate = LocalDate.parse(gratisPeriodEndDate)
 
+    fun getPropertyRegistrationPaymentQuote(
+        quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+    ): PropertyRegistrationPaymentQuote {
+        val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.from(quoteDate)
+        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary, quoteDate)
+
+        return PropertyRegistrationPaymentQuote(
+            amountInPence = calculateProRatedFeeInPence(renewalDate, quoteDate),
+            quoteDate = quoteDate,
+            renewalDate = renewalDate,
+        )
+    }
+
+    fun getAnnualFeeInPence(): Int = annualFeeInPence
+
+    fun getFirstChargeableDate(quoteDate: LocalDate): LocalDate = maxOf(quoteDate, gratisPeriodEndDate.plusDays(1))
+
     fun createPropertyRegistrationPayment(
         journeyId: String,
         email: String,
+        quote: PropertyRegistrationPaymentQuote,
     ): String {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 
-        val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
-        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
-        val amountInPence = calculateProRatedFeeInPence(renewalDate)
+        val renewalDate = quote.renewalDate
+        val amountInPence = quote.amountInPence
         check(amountInPence > 0) {
             "Cannot create a GOV.UK Pay payment for journey $journeyId: the fee for the period ending $renewalDate is " +
                 "${amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
@@ -169,6 +188,12 @@ class PaymentService(
         )
     }
 
+    fun getLatestSucceededPaymentForProperty(propertyOwnership: PropertyOwnership): Payment? =
+        paymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
+            propertyOwnership,
+            PaymentStatus.SUCCEEDED,
+        )
+
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun finalisePayment(
         paymentId: String,
@@ -208,6 +233,7 @@ class PaymentService(
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
         } catch (exception: Exception) {
+            println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
         }
     }
@@ -239,11 +265,10 @@ class PaymentService(
                 checkNoOtherPaymentHasSucceeded(otherPaymentIds, paymentId)
                 cancelInProgressPayments(otherPaymentIds, paymentId)
 
-                val property = propertyRegistrationService.registerProperty(registrationData)
-
                 val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
+                val property =
+                    propertyRegistrationService.registerProperty(registrationData.copy(renewalDate = storedPayment.forPeriodEnding))
                 storedPayment.associateWithProperty(property)
-                storedPayment.forPeriodEnding = property.renewalDate
                 storedPayment.status = PaymentStatus.SUCCEEDED
                 paymentRepository.saveAndFlush(storedPayment)
 
@@ -254,6 +279,8 @@ class PaymentService(
 
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
+                // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
+                // TODO PDJB-1853: Reconcile the payment if the transaction fails to commit after capture.
                 govUkPayClient.capturePayment(paymentId)
                 PaymentStatus.SUCCEEDED
             },
@@ -324,7 +351,7 @@ class PaymentService(
         checkNotNull(paymentRepository.findStatusByPaymentId(paymentId)) { "Payment $paymentId not found" }
 
     private fun getIncompletePropertyForCurrentUser(journeyId: String): LandlordIncompleteProperty {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         return checkNotNull(landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, baseUserId)) {
             "No incomplete property found for journey $journeyId and user $baseUserId"
         }

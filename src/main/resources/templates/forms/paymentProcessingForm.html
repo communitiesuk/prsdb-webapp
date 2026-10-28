@@ -1,0 +1,42 @@
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="serverGeneratedNonce" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{registerProperty.paymentProcessing.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentProcessing.heading}">
+            registerProperty.paymentProcessing.heading
+        </h1>
+        <div aria-live="polite">
+            <div id="payment-status-js-content" hidden>
+                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.js.doNotClose}">
+                    registerProperty.paymentProcessing.js.doNotClose
+                </p>
+                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.js.redirect}">
+                    registerProperty.paymentProcessing.js.redirect
+                </p>
+            </div>
+            <div id="payment-status-no-js-content" class="moj-js-hidden">
+                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.noJs.notConfirmed}">
+                    registerProperty.paymentProcessing.noJs.notConfirmed
+                </p>
+                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.noJs.checkStatus}">
+                    registerProperty.paymentProcessing.noJs.checkStatus
+                </p>
+                <form th:action="@{''}" method="post" novalidate>
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.paymentProcessing.noJs.button})}"></button>
+                </form>
+            </div>
+        </div>
+        <!--/* ES5 so it also runs in browsers without module support */-->
+        <script th:nonce="${serverGeneratedNonce}">
+            document.addEventListener('DOMContentLoaded', function showNoJavaScriptContentIfPollerDidNotStart() {
+                if (document.getElementById('payment-status-js-content').hasAttribute('hidden')) {
+                    document.getElementById('payment-status-no-js-content').classList.remove('moj-js-hidden');
+                }
+            });
+        </script>
+    </div>
+</main>
+</html>

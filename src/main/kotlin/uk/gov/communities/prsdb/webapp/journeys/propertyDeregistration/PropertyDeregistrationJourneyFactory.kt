@@ -34,9 +34,6 @@ class PropertyDeregistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.checkCanDeregisterStep }
-            configure {
-                withAdditionalContentProperty { "title" to "deregisterProperty.title" }
-            }
             step(journey.checkCanDeregisterStep) {
                 routeSegment(CheckCanDeregisterStep.ROUTE_SEGMENT)
                 initialStep()
@@ -73,7 +70,6 @@ class PropertyDeregistrationJourneyFactory(
             step(journey.checkPendingInvitationsStep) {
                 routeSegment(CheckPendingInvitationsStep.ROUTE_SEGMENT)
                 withAdditionalContentProperty { "messagePrefix" to "deregisterProperty" }
-                withAdditionalContentProperty { "pageTitleOverride" to "deregisterProperty.checkInvitations.pageTitle" }
                 parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
                 backUrl {
                     DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +

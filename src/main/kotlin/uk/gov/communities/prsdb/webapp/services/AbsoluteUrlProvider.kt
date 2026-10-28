@@ -9,12 +9,14 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import java.net.URI
@@ -38,6 +40,13 @@ class AbsoluteUrlProvider(
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 
+    fun buildTeamMembersUri(): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath(TeamMembersController.TEAM_MEMBERS_ROUTE)
+            .build()
+            .toUri()
+
     fun buildInvitationUri(
         token: String,
         principal: Principal,
@@ -45,6 +54,9 @@ class AbsoluteUrlProvider(
 
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
+
+    fun buildOrganisationalLandlordInvitationUri(token: String): URI =
+        uriFromMethodCall(on(AcceptOrganisationalLandlordUserInvitationController::class.java).startJourney(token))
 
     fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
         UriComponentsBuilder
@@ -95,7 +107,7 @@ class AbsoluteUrlProvider(
         return UriComponentsBuilder
             .fromUriString(baseUrl)
             .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
-            .query(methodCallUriComponents.query)
+            .replaceQuery(methodCallUriComponents.query)
             .fragment(methodCallUriComponents.fragment)
             .build()
             .toUri()

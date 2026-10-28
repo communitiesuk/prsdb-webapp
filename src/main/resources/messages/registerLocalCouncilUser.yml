@@ -1,5 +1,5 @@
-title: Register as a Local Council user
-journeyName: Registering as a local council user
+landingPage:
+  heading: Registering as a local council user
 requirementsList:
   intro: 'When registering as a local council user, you’ll be asked for:'
   personalDetails: 'your personal details, like your name'
@@ -10,10 +10,10 @@ email:
   fieldSetHint: This is the email you use for work at the local council
   label: Email address
 invalidLink:
-  title: Invalid link
   heading: There was a problem with this invitation link
   description: Ask your manager or admin user to invite you again.
 checkAnswers:
+  pageTitle: Check your registration answers
   summaryName: Your details
   rowHeading:
     localCouncil: Local council
@@ -21,7 +21,7 @@ checkAnswers:
     email: Email address
 success:
   banner:
-    title: 'You’ve registered as a {0,,localCouncil} user'
+    heading: 'You’ve registered as a {0,,localCouncil} user'
   paragraph:
     one: You can now view details about registered rental properties and landlords.
   feedback:

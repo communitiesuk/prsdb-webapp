@@ -2,30 +2,19 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentIncludesBillsJourneyPages.BillsIncludedFormPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentIncludesBillsJourneyPages.CheckRentIncludesBillsAnswersPageLettingAgentUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateRentIncludesBillsJourneyPages.RentIncludesBillsFormPageLettingAgentUpdate
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import java.util.UUID
 
 class LettingAgentUpdateRentIncludesBillsJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
     private val urlArguments = mapOf("token" to token.toString())
-
-    @BeforeEach
-    fun enableFeatureFlag() {
-        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
-    }
 
     @Test
     fun `The rent-includes-bills update journey shows Continue buttons rather than Save and continue`(page: Page) {
@@ -106,18 +95,5 @@ class LettingAgentUpdateRentIncludesBillsJourneyTests : IntegrationTestWithMutab
         val updatedPropertyDetailsPage =
             assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
         assertThat(updatedPropertyDetailsPage.summaryList.billsIncludedRow).containsText(expectedBillsIncluded)
-    }
-
-    @Test
-    fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
-        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-
-        navigator.navigate(
-            LettingAgentUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(token) +
-                "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
-        )
-
-        val errorPage = createValidPage(page, ErrorPage::class)
-        assertThat(errorPage.heading).containsText("Page not found")
     }
 }

@@ -8,15 +8,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
 @Entity
-@Table(
-    name = "organisational_landlord_user",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_landlord_id", "subject_identifier"])],
-)
-class OrganisationalLandlordUser() : AuditableEntity() {
+@Table(name = "organisational_landlord_user")
+class OrganisationalLandlordUser() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -26,7 +22,7 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     lateinit var organisationalLandlord: OrganisationalLandlord
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "subject_identifier", nullable = false)
+    @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
     lateinit var baseUser: PrsdbUser
 
     @Column(nullable = false)

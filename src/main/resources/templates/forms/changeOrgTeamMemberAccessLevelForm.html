@@ -1,0 +1,27 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="memberName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="currentLevelHintKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="removeAccessUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{changeOrgTeamMemberAccessLevel.pageTitle(${memberName})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{changeOrgTeamMemberAccessLevel.heading}"></h1>
+    <p class="govuk-body" th:if="${currentLevelHintKey} != null" th:text="#{${currentLevelHintKey}(${memberName})}"></p>
+    <p class="govuk-body" th:text="#{changeOrgTeamMemberAccessLevel.hint.email}"></p>
+</th:block>
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'role', #{changeOrgTeamMemberAccessLevel.radios.heading}, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'role',null, ${radioOptions})}"></th:block>
+    </th:block>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+        <a th:href="@{${removeAccessUrl}}" class="govuk-link" th:text="#{changeOrgTeamMemberAccessLevel.buttons.removeAccess}">
+            changeOrgTeamMemberAccessLevel.buttons.removeAccess
+        </a>
+    </div>
+</th:block>
+</html>

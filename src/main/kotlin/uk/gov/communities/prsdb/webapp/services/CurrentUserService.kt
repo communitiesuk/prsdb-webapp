@@ -13,19 +13,19 @@ class CurrentUserService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
-    fun getCurrentEmail(): String = getCurrentUserDetails().email
+    fun getCurrentEmail(): String = getRegisteredUserDetails().email
 
-    fun getCurrentName(): String = getCurrentUserDetails().name
+    fun getCurrentName(): String = getRegisteredUserDetails().name
 
-    fun getCurrentUserDetails(): CurrentUserDetails {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+    fun getRegisteredUserDetails(): RegisteredUserDetails {
+        val baseUserId = SecurityContextHolder.getContext().authentication!!.name
         val individualLandlord = individualLandlordRepository.findByBaseUser_Id(baseUserId)
         val organisationalUsers = organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)
 
         val matchingUsers =
             listOfNotNull(
-                individualLandlord?.let { CurrentUserDetails(name = it.name, email = it.email) },
-            ) + organisationalUsers.map { CurrentUserDetails(name = it.name, email = it.email) }
+                individualLandlord?.let { RegisteredUserDetails(name = it.name, email = it.email) },
+            ) + organisationalUsers.map { RegisteredUserDetails(name = it.name, email = it.email) }
 
         if (matchingUsers.size > 1) {
             throw PrsdbWebException("Multiple landlords were found for user with baseUserId $baseUserId")
@@ -38,7 +38,7 @@ class CurrentUserService(
             )
     }
 
-    data class CurrentUserDetails(
+    data class RegisteredUserDetails(
         val name: String,
         val email: String,
     )

@@ -23,9 +23,6 @@ class DelegateToLettingAgentJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
-            configure {
-                withAdditionalContentProperty { "title" to "delegateToLettingAgent.title" }
-            }
             step(journey.allowLettingAgentStep) {
                 routeSegment(AllowLettingAgentStep.ROUTE_SEGMENT)
                 initialStep()

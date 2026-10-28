@@ -23,6 +23,7 @@ class DelegateToLettingAgentEmailService(
     private val cancelLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>,
     private val invitationEmailService: EmailNotificationService<DelegateToLettingAgentInvitationEmail>,
     private val invitationWithDeadlineEmailService: EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>,
+    private val currentUserService: CurrentUserService,
 ) {
     fun sendDelegationEmailToLandlords(
         propertyOwnershipId: Long,
@@ -30,23 +31,23 @@ class DelegateToLettingAgentEmailService(
     ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         confirmationEmailService.sendEmail(
-            // TOOD: PDJB-1274: Update for sending to org landlords
-            actingLandlord.email,
+            currentUser.email,
             DelegateToLettingAgentConfirmationEmail(
-                recipientName = actingLandlord.name,
+                recipientName = currentUser.name,
                 propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 lettingAgentEmail = invitedLettingAgentEmail,
                 propertyRecordUrl = propertyRecordUrl,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         propertyOwnership.otherLandlordsTo(actingLandlord).forEach { landlord ->
-            notificationEmailService.sendEmail(
-                // TOOD: PDJB-1274: Update for sending to org landlords
-                landlord.email,
+            notificationEmailService.sendEmailToLandlord(
+                landlord,
                 JointLandlordDelegateToLettingAgentNotificationEmail(
                     recipientName = landlord.name,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
@@ -95,24 +96,24 @@ class DelegateToLettingAgentEmailService(
         lettingAgentEmail: String,
     ) {
         val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val currentUser = currentUserService.getRegisteredUserDetails()
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         cancelLandlordConfirmationEmailService.sendEmail(
-            // TOOD: PDJB-1274: Update for sending to org landlords
-            actingLandlord.email,
+            currentUser.email,
             CancelDelegationLandlordConfirmationEmail(
-                landlordName = actingLandlord.name,
+                landlordName = currentUser.name,
                 propertyAddress = propertyAddress,
                 lettingAgentEmail = lettingAgentEmail,
                 propertyRecordUrl = propertyRecordUrl,
             ),
         )
+        // TODO: PDJB-1274: Update emails to account for other users in the org
 
         propertyOwnership.otherLandlordsTo(actingLandlord).forEach { jointLandlord ->
-            cancelJointLandlordNotificationEmailService.sendEmail(
-                // TOOD: PDJB-1274: Update for sending to org landlords
-                jointLandlord.email,
+            cancelJointLandlordNotificationEmailService.sendEmailToLandlord(
+                jointLandlord,
                 CancelDelegationJointLandlordNotificationEmail(
                     jointLandlordName = jointLandlord.name,
                     propertyAddress = propertyAddress,

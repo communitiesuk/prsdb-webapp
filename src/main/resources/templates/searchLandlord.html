@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html>
-<body th:replace="~{fragments/layout :: layout(#{landlordSearch.title}, ~{::body/content()}, false)}">
-<a th:replace="~{fragments/forms/backLink :: backLink(${backURL})}">backLink</a>
-<main class="govuk-main-wrapper" id="main-content">
+<html th:replace="~{fragments/layout :: layout(#{landlordSearch.heading}, ~{::main/content()}, false, ${backURL}, null)}">
+<main>
 
     <header>
         <h1 class="govuk-heading-l" th:text="#{landlordSearch.heading}">landlordSearch.heading</h1>
@@ -79,5 +77,4 @@
     </section>
 
 </main>
-</body>
 </html>

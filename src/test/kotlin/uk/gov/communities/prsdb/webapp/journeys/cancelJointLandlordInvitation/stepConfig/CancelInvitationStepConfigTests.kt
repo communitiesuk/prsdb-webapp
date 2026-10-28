@@ -1,23 +1,30 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationCancellerEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationInviteeEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService
+import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
@@ -36,6 +43,9 @@ class CancelInvitationStepConfigTests {
 
     @Mock
     lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
+    lateinit var mockCurrentUserService: CurrentUserService
 
     @Mock
     lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -57,6 +67,8 @@ class CancelInvitationStepConfigTests {
     private val cancellerName = "Canceller Name"
     private val otherLandlordEmail = "other@example.com"
     private val otherLandlordName = "Other Landlord"
+    private val cancellerLandlordId = 1L
+    private val otherLandlordId = 2L
     private val invitationId = 1L
     private val propertyOwnershipId = 2L
 
@@ -79,29 +91,30 @@ class CancelInvitationStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends confirmation email to canceller`() {
+    fun `afterStepIsReached sends confirmation email to canceller using current user details`() {
         val stepConfig = setupStepConfig()
         setupMocks()
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockCancellerEmailSender).sendEmail(
-            eq(cancellerEmail),
-            any<JointLandlordInvitationCancellationCancellerEmail>(),
-        )
+        val emailCaptor = argumentCaptor<JointLandlordInvitationCancellationCancellerEmail>()
+        verify(mockCancellerEmailSender).sendEmail(eq(cancellerEmail), emailCaptor.capture())
+        assertEquals(cancellerName, emailCaptor.firstValue.recipientName)
     }
 
     @Test
-    fun `afterStepIsReached sends notification email to other landlords`() {
+    fun `afterStepIsReached sends notification email to each other landlord`() {
         val stepConfig = setupStepConfig()
         setupMocks()
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockOtherLandlordEmailSender).sendEmail(
-            eq(otherLandlordEmail),
+        val landlordCaptor = argumentCaptor<Landlord>()
+        verify(mockOtherLandlordEmailSender, times(1)).sendEmailToLandlord(
+            landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
+        assertEquals(otherLandlordId, landlordCaptor.firstValue.id)
     }
 
     @Test
@@ -111,10 +124,12 @@ class CancelInvitationStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockOtherLandlordEmailSender, never()).sendEmail(
-            eq(cancellerEmail),
+        val landlordCaptor = argumentCaptor<Landlord>()
+        verify(mockOtherLandlordEmailSender, times(1)).sendEmailToLandlord(
+            landlordCaptor.capture(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
+        assertNotEquals(cancellerLandlordId, landlordCaptor.firstValue.id)
     }
 
     @Test
@@ -124,7 +139,7 @@ class CancelInvitationStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockOtherLandlordEmailSender, never()).sendEmail(
+        verify(mockOtherLandlordEmailSender, never()).sendEmailToLandlord(
             any(),
             any<JointLandlordInvitationCancellationOtherLandlordEmail>(),
         )
@@ -161,7 +176,7 @@ class CancelInvitationStepConfigTests {
 
     private fun setupMocks(includeOtherLandlord: Boolean = true): uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation {
         val cancellerLandlord = MockLandlordData.createIndividualLandlord(name = cancellerName, email = cancellerEmail)
-        ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
+        ReflectionTestUtils.setField(cancellerLandlord, "id", cancellerLandlordId)
 
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -172,7 +187,7 @@ class CancelInvitationStepConfigTests {
         if (includeOtherLandlord) {
             val otherLandlord =
                 MockLandlordData.createIndividualLandlord(name = otherLandlordName, email = otherLandlordEmail)
-            ReflectionTestUtils.setField(otherLandlord, "id", 2L)
+            ReflectionTestUtils.setField(otherLandlord, "id", otherLandlordId)
             propertyOwnership.addLandlord(otherLandlord)
         }
 
@@ -189,6 +204,8 @@ class CancelInvitationStepConfigTests {
         whenever(mockJointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId))
             .thenReturn(invitation)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(cancellerLandlord)
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(RegisteredUserDetails(name = cancellerName, email = cancellerEmail))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("example.com"))
 
         return invitation
@@ -199,6 +216,7 @@ class CancelInvitationStepConfigTests {
             mockJointLandlordInvitationService,
             mockSwapToIndividualNudgeEmailService,
             mockUserToLandlordService,
+            mockCurrentUserService,
             mockAbsoluteUrlProvider,
             mockInviteeEmailSender,
             mockCancellerEmailSender,

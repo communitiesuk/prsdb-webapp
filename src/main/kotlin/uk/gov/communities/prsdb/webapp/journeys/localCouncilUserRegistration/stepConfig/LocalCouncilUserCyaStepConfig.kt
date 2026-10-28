@@ -22,6 +22,7 @@ class LocalCouncilUserCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
         mapOf(
+            "title" to "registerLocalCouncilUser.checkAnswers.pageTitle",
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
             "summaryListData" to getSummaryList(state),
@@ -36,7 +37,7 @@ class LocalCouncilUserCyaStepConfig(
 
         val localCouncilUserId =
             localCouncilDataService.registerUserAndReturnID(
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                baseUserId = SecurityContextHolder.getContext().authentication!!.name,
                 localCouncil = invitation.invitingCouncil,
                 name = name,
                 email = email,

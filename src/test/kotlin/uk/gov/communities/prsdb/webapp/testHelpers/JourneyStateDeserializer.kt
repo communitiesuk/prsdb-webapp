@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.testHelpers
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.deser.std.StdDeserializer
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
@@ -13,8 +13,8 @@ class JourneyStateDeserializer : StdDeserializer<FormData>(Map::class.java) {
         parser: JsonParser,
         context: DeserializationContext,
     ): FormData {
-        val node = parser.codec.readTree<JsonNode>(parser)
-        return node.fields().asSequence().associate { (key, value) -> (key to value.deserializeValue(parser, context)) }
+        val node = context.readTree(parser)
+        return node.properties().associate { (key, value) -> (key to value.deserializeValue(parser, context)) }
     }
 
     private fun JsonNode.deserializeValue(
@@ -43,11 +43,11 @@ class JourneyStateDeserializer : StdDeserializer<FormData>(Map::class.java) {
             }
 
             this.isArray -> {
-                this.map { it.deserializeValue(parser, context) }
+                this.mapTo(mutableListOf()) { it.deserializeValue(parser, context) }
             }
 
             this.isObject -> {
-                deserialize(this.traverse(parser.codec), context)
+                deserialize(this.traverse(parser.objectReadContext()), context)
             }
 
             else -> {

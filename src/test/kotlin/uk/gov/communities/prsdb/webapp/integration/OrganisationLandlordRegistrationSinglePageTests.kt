@@ -37,7 +37,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Are you registering as an individual or an organisation?")
             assertThat(landlordTypePage.page.locator(".govuk-details__summary-text"))
                 .containsText("Registering a partnership")
-            assertThat(landlordTypePage.page.locator("label[for='landlordType-INDIVIDUAL']")).containsText("An individual")
+            assertThat(landlordTypePage.page.locator("label[for='landlordType']")).containsText("An individual")
             assertThat(landlordTypePage.page.locator("#landlordType-INDIVIDUAL-hint"))
                 .containsText("You rent out a property as an individual, sole trader or joint landlord")
             assertThat(landlordTypePage.page.locator("label[for='landlordType-ORGANISATION']")).containsText("An organisation")
@@ -425,6 +425,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `error summary link targets the first checkbox when a divider is in the list`() {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.page.locator(".govuk-error-summary a[href='#orgTypes']")).hasCount(1)
+            assertThat(orgTypePage.page.locator("#orgTypes")).hasAttribute("type", "checkbox")
+        }
+
+        @Test
         fun `submitting None with another option returns an error`() {
             val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
 
@@ -550,7 +560,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                     "This includes Charity of Commission of England and Wales, " +
                         "Charity Commission of Northern Ireland and Scottish Charity Regulator",
                 )
-            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
+            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity']")).containsText("Yes")
             assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-no']")).containsText("No")
         }
 

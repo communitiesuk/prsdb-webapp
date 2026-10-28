@@ -17,6 +17,8 @@ class CheckLicensingAnswersPageLettingAgentUpdate(
         LettingAgentUpdateLicensingController.getUpdateLicensingRoute(UUID.fromString(urlArguments["token"]!!)) +
             "/${UpdateLicensingCyaStep.ROUTE_SEGMENT}",
     ) {
+    override val expectedTitleHeading = "Check your licensing answers"
+
     val form = Form(page)
 
     val summaryName = Heading(page.locator("#summary-name"))

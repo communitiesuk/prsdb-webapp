@@ -16,7 +16,6 @@ class HasJointLandlordsConfig :
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.title",
             "fieldSetHeading" to "jointLandlords.hasJointLandlords.heading",
             "label" to "jointLandlords.hasJointLandlords.subHeading.two",
             "radioOptions" to

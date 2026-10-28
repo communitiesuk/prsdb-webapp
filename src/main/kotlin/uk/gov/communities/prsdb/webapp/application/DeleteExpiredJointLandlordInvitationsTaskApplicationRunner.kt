@@ -15,10 +15,10 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
     private val context: ApplicationContext,
     private val taskLogic: DeleteExpiredJointLandlordInvitationsTaskLogic,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
-        println("Executing delete expired joint landlord invitations scheduled task")
+    override fun run(args: ApplicationArguments) {
+        println("Executing joint landlord invitation retention cleanup scheduled task")
 
-        taskLogic.deleteExpiredJointLandlordInvitations()
+        taskLogic.deleteJointLandlordInvitationsPastRetentionPeriod()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
@@ -33,13 +33,13 @@ class DeleteExpiredJointLandlordInvitationsTaskLogic(
     private val jointLandlordInvitationDeletionService: JointLandlordInvitationDeletionService,
 ) {
     @Transactional
-    fun deleteExpiredJointLandlordInvitations() {
-        val deletedIds = jointLandlordInvitationDeletionService.deleteExpiredInvitations()
+    fun deleteJointLandlordInvitationsPastRetentionPeriod() {
+        val deletedIds = jointLandlordInvitationDeletionService.deleteInvitationsPastRetentionPeriod()
 
         deletedIds.forEach { id ->
-            println("Deleted expired joint landlord invitation with id: $id")
+            println("Deleted joint landlord invitation past retention period with id: $id")
         }
 
-        println("Deleted ${deletedIds.size} expired joint landlord invitations.")
+        println("Deleted ${deletedIds.size} joint landlord invitations past the retention period.")
     }
 }

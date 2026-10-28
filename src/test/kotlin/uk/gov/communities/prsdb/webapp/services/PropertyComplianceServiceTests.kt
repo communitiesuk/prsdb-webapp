@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -83,6 +83,9 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
+    @Mock
+    private lateinit var mockCurrentUserService: CurrentUserService
+
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
@@ -116,6 +119,7 @@ class PropertyComplianceServiceTests {
                 mockAbsoluteUrlProvider,
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
+                mockCurrentUserService,
             )
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
@@ -131,8 +135,11 @@ class PropertyComplianceServiceTests {
         SecurityContextHolder.clearContext()
     }
 
-    private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
+    private fun setMockPrincipal(landlord: IndividualLandlord = mockLoggedInLandlord) {
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+        lenient()
+            .`when`(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = landlord.name, email = landlord.email))
     }
 
     @Test
@@ -838,6 +845,54 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `sends the acting user's compliance confirmation to their current user details rather than the landlord's`() {
+            val actingLandlord = mockLoggedInLandlord
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(actingLandlord))
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actingLandlord)
+            whenever(mockCurrentUserService.getRegisteredUserDetails())
+                .thenReturn(
+                    CurrentUserService.RegisteredUserDetails(name = "Sub User", email = "sub.user@example.com"),
+                )
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val issueDate = LocalDate.now()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq("sub.user@example.com"),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = "Sub User",
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
         fun `notifies other landlords with joint landlord email and does not send them the confirmation email`() {
             val otherLandlord =
                 MockLandlordData.createIndividualLandlord(
@@ -868,8 +923,8 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(otherLandlord.email),
+            verify(mockComplianceUpdateConfirmationSender).sendEmailToLandlord(
+                eq(otherLandlord),
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = otherLandlord.name,
@@ -919,8 +974,8 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
-                eq(landlordOne.email),
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
+                eq(landlordOne),
                 eq(
                     LettingAgentComplianceUpdateNotificationEmail(
                         recipientName = landlordOne.name,
@@ -934,8 +989,9 @@ class PropertyComplianceServiceTests {
                     ),
                 ),
             )
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(eq(landlordTwo.email), any())
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(eq(landlordTwo), any())
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
 
         @Test
@@ -963,8 +1019,8 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
-                eq(mockLoggedInLandlord.email),
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
+                eq(mockLoggedInLandlord),
                 eq(
                     LettingAgentComplianceUpdateNotificationEmail(
                         recipientName = mockLoggedInLandlord.name,
@@ -978,8 +1034,8 @@ class PropertyComplianceServiceTests {
                     ),
                 ),
             )
-            verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockLoggedInLandlord.email),
+            verify(mockComplianceUpdateConfirmationSender).sendEmailToLandlord(
+                eq(mockLoggedInLandlord),
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockLoggedInLandlord.name,
@@ -1020,8 +1076,9 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(eq(mockLoggedInLandlord.email), any())
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(eq(mockLoggedInLandlord), any())
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
 
         @Test
@@ -1055,8 +1112,8 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(otherLandlord.email),
+            verify(mockComplianceUpdateConfirmationSender).sendEmailToLandlord(
+                eq(otherLandlord),
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = otherLandlord.name,
@@ -1261,6 +1318,7 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
     }
 
@@ -1508,8 +1566,8 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
-                eq(mockLoggedInLandlord.email),
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
+                eq(mockLoggedInLandlord),
                 eq(
                     LettingAgentComplianceUpdateNotificationEmail(
                         recipientName = mockLoggedInLandlord.name,
@@ -1524,6 +1582,7 @@ class PropertyComplianceServiceTests {
                 ),
             )
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
 
         @Test
@@ -1713,6 +1772,7 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
     }
 
@@ -1882,8 +1942,8 @@ class PropertyComplianceServiceTests {
                 epcEnergyRating = "C",
             )
 
-            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
-                eq(mockLoggedInLandlord.email),
+            verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
+                eq(mockLoggedInLandlord),
                 eq(
                     LettingAgentComplianceUpdateNotificationEmail(
                         recipientName = mockLoggedInLandlord.name,
@@ -1898,6 +1958,7 @@ class PropertyComplianceServiceTests {
                 ),
             )
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
 
         @Test
@@ -2031,6 +2092,7 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
     }
 }

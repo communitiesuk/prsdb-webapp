@@ -35,7 +35,7 @@ class ProcessScanResultTaskApplicationRunner(
     @Value("\${aws.s3.quarantineBucket}")
     private lateinit var quarantineBucketName: String
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         try {
             if (quarantineBucketName != eventBucketName) {
                 throw PrsdbWebException("Invocation from scan on unexpected bucket: $eventBucketName")

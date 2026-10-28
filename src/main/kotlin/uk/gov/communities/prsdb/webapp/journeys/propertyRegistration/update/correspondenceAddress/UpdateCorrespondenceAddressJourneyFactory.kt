@@ -57,9 +57,6 @@ class UpdateCorrespondenceAddressJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             task(journey.addressTask) {
                 initialStep()
                 backUrl { returnUrl }
@@ -79,9 +76,6 @@ class UpdateCorrespondenceAddressJourneyFactory(
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepUrl { returnUrl }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 LookupAddressStep.ROUTE_SEGMENT -> {

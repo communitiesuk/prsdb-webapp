@@ -5,6 +5,7 @@ import $ from 'jquery'
 import {initAll as initMoJDS} from '@ministryofjustice/frontend'
 import {initFilterToggleButton} from "./filterToggleButton"
 import {initPlausibleEventButtons} from "./plausibleTransactionEvent"
+import {initPaymentStatusPoller} from "./paymentStatusPoller"
 import '../resources/css/custom.scss'
 
 initGDS()
@@ -17,3 +18,4 @@ window.$ = $
 initMoJDS()
 initFilterToggleButton()
 initPlausibleEventButtons()
+initPaymentStatusPoller()

@@ -26,9 +26,6 @@ class OrganisationalLandlordDeregistrationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }
-            configure {
-                withAdditionalContentProperty { "title" to "deregisterLandlord.organisational.title" }
-            }
             step(journey.areYouSureStep) {
                 routeSegment(AreYouSureStep.ROUTE_SEGMENT)
                 initialStep()

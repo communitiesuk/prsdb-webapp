@@ -33,9 +33,6 @@ class LettingAgentInvitationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.startStep }
-            configure {
-                withAdditionalContentProperty { "title" to "lettingAgentInvitation.title" }
-            }
             step(journey.startStep) {
                 routeSegment(StartStep.ROUTE_SEGMENT)
                 initialStep()

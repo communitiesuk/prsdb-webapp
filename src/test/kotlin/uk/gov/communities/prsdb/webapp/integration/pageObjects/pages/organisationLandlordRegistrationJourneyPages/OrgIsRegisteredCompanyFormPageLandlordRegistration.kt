@@ -15,7 +15,7 @@ class OrgIsRegisteredCompanyFormPageLandlordRegistration(
     class OrgIsRegisteredCompanyForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
-        val yesLabel: Locator get() = locator.locator("label[for='companiesHouse-yes']")
+        val yesLabel: Locator get() = locator.locator("label[for='companiesHouse']")
         val noLabel: Locator get() = locator.locator("label[for='companiesHouse-no']")
     }
 }

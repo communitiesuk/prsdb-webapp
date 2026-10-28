@@ -2,12 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.AreYouSureFormPageOrganisationalLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.ConfirmationPageOrganisationalLandlordDeregistration
@@ -55,13 +56,14 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
                 Int::class.java,
             )
 
-        assertEquals(3, beforeDeregistrationOrgInvitationCount)
+        assertEquals(5, beforeDeregistrationOrgInvitationCount)
         assertEquals(0, landlordCount)
         assertEquals(0, orgLandlordUserCount)
         assertEquals(0, afterDeregistrationOrgInvitationCount)
 
         // Check they can no longer access the landlord dashboard
-        val landlordDashboard = navigator.goToLandlordDashboard()
-        assertTrue(landlordDashboard.page.content().contains("You do not have permission to access this page"))
+        navigator.navigate(LANDLORD_DASHBOARD_URL)
+        val errorPage = assertPageIs(page, ErrorPage::class)
+        assertThat(errorPage.heading).containsText("You do not have permission to access this page")
     }
 }

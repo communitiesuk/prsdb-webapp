@@ -1,0 +1,6 @@
+ALTER TABLE organisational_landlord_user DROP CONSTRAINT organisational_landlord_user_org_landlord_id_subject_identifier_key;
+
+ALTER TABLE organisational_landlord_user ADD CONSTRAINT organisational_landlord_user_subject_identifier_key UNIQUE (subject_identifier);
+
+-- Superseded by the unique constraint's index
+DROP INDEX idx_organisational_landlord_user_subject;
