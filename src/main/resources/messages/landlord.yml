@@ -30,7 +30,10 @@ dashboard:
       linkText: View incomplete property details
     complianceActions:
       subheading: 'You have {0,,number} {1,,propertyMsg} awaiting compliance information:'
+      # TODO PDJB-2006: Remove complianceActions.linkText when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
       linkText: View compliance actions
+    outstandingActions:
+      linkText: View outstanding actions
 incompleteProperties:
   heading: Incomplete property details
   text: 'Complete the missing details for these properties. After 28 days, incomplete properties are deleted.'

@@ -173,6 +173,7 @@ class LandlordControllerTests(
                 model {
                     attribute("outstandingActionsUrl", OUTSTANDING_ACTIONS_URL)
                     attribute("outstandingActionsButtonKey", "landlord.dashboard.outstandingActions.button")
+                    attribute("outstandingActionsLinkTextKey", "landlord.dashboard.notificationBanner.outstandingActions.linkText")
                 }
             }
     }
@@ -294,10 +295,6 @@ class LandlordControllerTests(
                 status { isOk() }
                 model {
                     attribute("outstandingActions", expectedOutstandingActions)
-                    attribute(
-                        "viewRegisteredPropertiesUrl",
-                        "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
-                    )
                     attribute("backUrl", LANDLORD_DASHBOARD_URL)
                 }
             }
@@ -366,6 +363,7 @@ class LandlordControllerTests(
                     model {
                         attribute("outstandingActionsUrl", COMPLIANCE_ACTIONS_URL)
                         attribute("outstandingActionsButtonKey", "landlord.dashboard.complianceActions.button")
+                        attribute("outstandingActionsLinkTextKey", "landlord.dashboard.notificationBanner.complianceActions.linkText")
                     }
                 }
         }

@@ -69,8 +69,9 @@ class LandlordController(
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
         )
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-        // TODO PDJB-2006: Use the outstanding actions URL and button text unconditionally when the
-        //  PROPERTY_REGISTRATION_PHASE_THREE flag is removed
+        // TODO PDJB-2006: When the PROPERTY_REGISTRATION_PHASE_THREE flag is removed, always use OUTSTANDING_ACTIONS_URL,
+        //  and remove outstandingActionsButtonKey and outstandingActionsLinkTextKey by using the outstanding actions message
+        //  keys directly in landlordDashboard.html and landlordDashboardNotificationBanner.html
         val outstandingActionsEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_THREE)
         model.addAttribute("outstandingActionsUrl", if (outstandingActionsEnabled) OUTSTANDING_ACTIONS_URL else COMPLIANCE_ACTIONS_URL)
         model.addAttribute(
@@ -81,6 +82,15 @@ class LandlordController(
                 "landlord.dashboard.complianceActions.button"
             },
         )
+        model.addAttribute(
+            "outstandingActionsLinkTextKey",
+            if (outstandingActionsEnabled) {
+                "landlord.dashboard.notificationBanner.outstandingActions.linkText"
+            } else {
+                "landlord.dashboard.notificationBanner.complianceActions.linkText"
+            },
+        )
+
         return "landlordDashboard"
     }
 
@@ -139,11 +149,6 @@ class LandlordController(
 
         model.addAttribute("outstandingActions", outstandingActions)
         model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedNonCompliantProperties.totalPages, request))
-
-        model.addAttribute(
-            "viewRegisteredPropertiesUrl",
-            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
-        )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "outstandingActions"
