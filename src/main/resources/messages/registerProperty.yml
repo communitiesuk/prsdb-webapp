@@ -275,3 +275,21 @@ occupancyChangeInterruption:
     three: You must now complete this registration yourself, adding as many details as you can.
     four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
     five: You can go back to undo this change.
+# TODO PDJB-1959: replace with the real "Do you own the property?" content
+ownsProperty:
+  fieldSetHeading: TODO PDJB-1959 Do you own this property?
+  radios:
+    error:
+      missing: Select if you own this property
+# TODO PDJB-1960: replace with the real "What kind of ownership do you have?" content
+ownershipKind:
+  fieldSetHeading: TODO PDJB-1960 What kind of ownership do you have?
+  radios:
+    error:
+      missing: Select the kind of ownership you have
+# TODO PDJB-1961: replace with the real "What kind of freehold do you have?" content
+freeholdType:
+  fieldSetHeading: TODO PDJB-1961 What kind of freehold do you have?
+  radios:
+    error:
+      missing: Select the kind of freehold you have
