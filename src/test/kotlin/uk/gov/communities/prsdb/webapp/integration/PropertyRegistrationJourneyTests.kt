@@ -547,6 +547,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `submitting the payment summary with a quote date from a previous day refreshes the summary without creating a payment`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+            ensureIncompletePropertyExistsForCurrentJourney(page)
+            val yesterday = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", yesterday.toString())
+
+            paymentSummaryPage.form.submit()
+
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
         @Suppress("ktlint:standard:max-line-length")
         fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
             page: Page,
