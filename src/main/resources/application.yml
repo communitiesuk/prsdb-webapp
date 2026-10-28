@@ -151,7 +151,7 @@ features:
       enabled: true
       expiry-date: "2027-03-30"
     - name: "pdjb-939-property-registration-phase-two"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-phase-three"
       enabled: false
@@ -163,10 +163,10 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1210-multi-user-organisations"
-      enabled: false
+      enabled: true
       expiry-date: "2026-11-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: false
