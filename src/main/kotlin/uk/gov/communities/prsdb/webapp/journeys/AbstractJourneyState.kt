@@ -53,10 +53,6 @@ abstract class AbstractJourneyState(
     override val answersLastChanged: Instant?
         get() = readInstant(ANSWERS_LAST_CHANGED_KEY)
 
-    override var answersConfirmedAt: Instant?
-        get() = readInstant(ANSWERS_CONFIRMED_AT_KEY)
-        set(value) = journeyStateService.setValue(ANSWERS_CONFIRMED_AT_KEY, value?.toString())
-
     override fun markAnswersChanged() {
         val now = Clock.System.now()
         val newValue = if (now == answersLastChanged) now + 1.nanoseconds else now
@@ -67,6 +63,5 @@ abstract class AbstractJourneyState(
 
     companion object {
         private const val ANSWERS_LAST_CHANGED_KEY = "answersLastChanged"
-        private const val ANSWERS_CONFIRMED_AT_KEY = "answersConfirmedAt"
     }
 }

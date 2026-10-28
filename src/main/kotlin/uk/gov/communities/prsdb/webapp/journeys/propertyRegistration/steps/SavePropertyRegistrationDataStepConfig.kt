@@ -19,7 +19,7 @@ class SavePropertyRegistrationDataStepConfig(
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
-        if (state.answersLastChanged != state.answersConfirmedAt) {
+        if (state.answersChangedSinceConfirmation) {
             throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}")
         }
         try {

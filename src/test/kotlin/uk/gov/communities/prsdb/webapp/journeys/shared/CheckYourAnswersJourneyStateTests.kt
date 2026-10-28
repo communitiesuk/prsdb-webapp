@@ -241,7 +241,6 @@ class CheckYourAnswersJourneyStateTests {
         override fun clearStepData(key: String) {}
 
         override val answersLastChanged: Instant? = null
-        override var answersConfirmedAt: Instant? = null
 
         override fun markAnswersChanged() {}
 

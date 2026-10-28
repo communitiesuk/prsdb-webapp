@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -89,27 +88,6 @@ class AbstractJourneyStateTests {
         assertNotNull(second)
         assertNotEquals(first, second)
         assertEquals(second.toString(), values["answersLastChanged"])
-    }
-
-    @Test
-    fun `answersConfirmedAt is stored and read back under a fixed key`() {
-        // Arrange
-        val values = mutableMapOf<String, Any?>()
-        val journeyStateService: JourneyStateService = mock()
-        whenever(journeyStateService.getValue(any())).thenAnswer { values[it.getArgument(0)] }
-        whenever(journeyStateService.setValue(any(), anyOrNull())).thenAnswer {
-            values[it.getArgument(0)] = it.getArgument<Any?>(1)
-            Unit
-        }
-        val journeyState = object : AbstractJourneyState(journeyStateService) {}
-        val instant = Instant.parse("2026-01-01T10:15:30.123456789Z")
-
-        // Act
-        journeyState.answersConfirmedAt = instant
-
-        // Assert
-        assertEquals(instant, journeyState.answersConfirmedAt)
-        assertEquals(instant.toString(), values["answersConfirmedAt"])
     }
 
     @Test

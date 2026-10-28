@@ -33,13 +33,6 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
         return formData
     }
 
-    override fun beforeStepDataIsAdded(
-        state: TState,
-        data: FormData,
-    ) {
-        state.answersConfirmedAt = state.answersLastChanged
-    }
-
     override fun resolveNextDestination(
         state: TState,
         defaultDestination: Destination,

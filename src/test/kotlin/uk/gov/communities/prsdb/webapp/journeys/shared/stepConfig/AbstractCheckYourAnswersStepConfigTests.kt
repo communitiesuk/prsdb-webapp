@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -120,22 +119,6 @@ class AbstractCheckYourAnswersStepConfigTests {
             assertDoesNotThrow {
                 stepConfig.enrichSubmittedDataBeforeValidation(mockState, emptyMap())
             }
-        }
-    }
-
-    @Nested
-    inner class BeforeStepDataIsAdded {
-        @Test
-        fun `sets answersConfirmedAt to answersLastChanged`() {
-            // Arrange
-            val changed = Instant.parse("2026-01-01T10:15:30.123456789Z")
-            whenever(mockState.answersLastChanged).thenReturn(changed)
-
-            // Act
-            stepConfig.beforeStepDataIsAdded(mockState, emptyMap())
-
-            // Assert
-            verify(mockState).answersConfirmedAt = changed
         }
     }
 

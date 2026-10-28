@@ -45,7 +45,5 @@ interface JourneyState : DelegateKeysOwner {
 
     val answersLastChanged: Instant?
 
-    var answersConfirmedAt: Instant?
-
     fun markAnswersChanged()
 }

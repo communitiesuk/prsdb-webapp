@@ -31,7 +31,7 @@ class PaymentStatusCheckStepConfig(
             return
         }
 
-        if (govUkPayStatus.status == PaymentStatus.CAPTURABLE && answersChangedSinceConfirmation(state)) {
+        if (govUkPayStatus.status == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
             val cancelledStatus = paymentService.cancelUnfinalisedPayment(govUkPayStatus.paymentId)
             if (cancelledStatus == PaymentStatus.SUCCEEDED) {
                 state.paymentOutcome = PaymentOutcome.SUCCESS
@@ -62,9 +62,6 @@ class PaymentStatusCheckStepConfig(
     }
 
     override fun mode(state: PropertyRegistrationJourneyState) = state.paymentOutcome
-
-    private fun answersChangedSinceConfirmation(state: PropertyRegistrationJourneyState) =
-        state.answersLastChanged != state.answersConfirmedAt
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
