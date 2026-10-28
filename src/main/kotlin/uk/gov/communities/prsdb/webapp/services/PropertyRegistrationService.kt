@@ -218,7 +218,7 @@ class PropertyRegistrationService(
 
         return PropertyRegistrationConfirmationEmail.PaymentDetails(
             amountInPence = payment.amountInPence,
-            paymentDate = payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).toLocalDate(),
+            paymentDate = payment.quoteDate,
             renewalDate = propertyOwnership.renewalDate,
         )
     }

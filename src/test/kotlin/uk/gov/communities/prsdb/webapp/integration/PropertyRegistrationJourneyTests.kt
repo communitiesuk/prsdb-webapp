@@ -370,7 +370,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
                 .containsText(PaymentHelper.formatPence(payment.amountInPence))
             assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
-                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+                .containsText(payment.quoteDate.format(dateFormatter))
             assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
                 .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
