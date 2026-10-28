@@ -284,6 +284,20 @@ occupancyChangeInterruption:
     three: You must now complete this registration yourself, adding as many details as you can.
     four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
     five: You can go back to undo this change.
+freeholders:
+  provideDetails:
+    fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
+    radios:
+      error:
+        missing: Select whether you can provide details about the freeholder
+  contactType:
+    fieldSetHeading: How should we contact the freeholder? (TODO PDJB-1965)
+    radios:
+      option:
+        email: Email
+        postalAddress: Post
+      error:
+        missing: Select how we should contact the freeholder
 # TODO PDJB-1959: replace with the real "Do you own the property?" content
 ownsProperty:
   fieldSetHeading: TODO PDJB-1959 Do you own this property?
