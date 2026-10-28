@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
 import java.time.LocalDate
@@ -517,7 +517,7 @@ class EmailTemplateModelsTests {
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
-        val emailTemplateMetadata = EmailTemplateMetadataFactory(null)
+        val emailTemplateMetadata = NotifyTemplateMetadataFactory(null)
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
         val storedMetadata =
             emailTemplateMetadata.metadataList.single { metadata ->

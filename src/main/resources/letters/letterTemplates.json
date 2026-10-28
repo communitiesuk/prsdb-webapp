@@ -1,0 +1,9 @@
+[
+  {
+    "test_id": "fbe67906-5f26-4020-807b-54dcff9a2eac",
+    "prod_id": "ce7b9767-8254-4775-a2b5-f5984418eb3e",
+    "enumName": "EXAMPLE_LETTER",
+    "subject": "This is an example",
+    "bodyLocation": "/letters/ExampleLetter.md"
+  }
+]

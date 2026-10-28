@@ -8,9 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyEnvironment
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadata
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
@@ -34,7 +34,7 @@ class NotifyEmailTemplateTests {
     companion object NotifyTestsCompanion {
         private val templatesByEnvironment = mutableMapOf<NotifyEnvironment, TemplateList>()
 
-        private val metadataByEnvironment = mutableMapOf<NotifyEnvironment, List<EmailTemplateMetadata>>()
+        private val metadataByEnvironment = mutableMapOf<NotifyEnvironment, List<NotifyTemplateMetadata>>()
 
         @JvmStatic
         fun canFetchNotifyTemplates(): Boolean = NotifyEnvironment.entries.any { it.isConfigured }
@@ -50,9 +50,9 @@ class NotifyEmailTemplateTests {
                 NotificationClient(environment.apiKey!!).getAllTemplates("email")
             }
 
-        fun sourceControlledMetadata(environment: NotifyEnvironment): List<EmailTemplateMetadata> =
+        fun sourceControlledMetadata(environment: NotifyEnvironment): List<NotifyTemplateMetadata> =
             metadataByEnvironment.getOrPut(environment) {
-                EmailTemplateMetadataFactory(environment).metadataList
+                NotifyTemplateMetadataFactory(environment).metadataList
             }
     }
 
@@ -113,7 +113,7 @@ class NotifyEmailTemplateTests {
         assumeTrue(environment.isConfigured, "No notify api key configured for $environment")
 
     private fun assertBodiesMatch(
-        metadata: EmailTemplateMetadata,
+        metadata: NotifyTemplateMetadata,
         notifyTemplate: Template,
     ) {
         val storedBody = javaClass.getResource(metadata.bodyLocation)?.readText() ?: ""

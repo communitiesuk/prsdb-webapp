@@ -1,13 +1,15 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
+import uk.gov.communities.prsdb.webapp.models.dataModels.NotifyErrorDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.NotifyErrorType
+import uk.gov.communities.prsdb.webapp.models.dataModels.NotifyErrorsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
@@ -32,11 +34,17 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     }
 
     private fun throwEmailSendException(notifyException: NotificationClientException) {
-        val errors = parseNotifyExceptionErrors(notifyException.message ?: "")
+        val errors = NotifyErrorsDataModel.fromExceptionMessage(notifyException.message ?: "", Json).errors
         val errorTypes = errors.map { it.error }
         val multipleErrorMessagePrefix =
             if (errorTypes.size > 1) "There were multiple errors sending an email with Notify. " else ""
         when {
+            // These error types previously failed to parse, so they still throw a SerializationException rather than an email exception
+            NotifyErrorType.VALIDATION in errorTypes || NotifyErrorType.UNKNOWN in errorTypes -> throw SerializationException(
+                "Notify returned an error type that email sending does not handle. See inner exception for details.",
+                notifyException,
+            )
+
             isAllowlistError(errors) -> throw NotifyAllowlistException(
                 multipleErrorMessagePrefix +
                     "An email was sent to a recipient that is not on the Notify allowlist. " +
@@ -80,49 +88,13 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
 
     // A non-allowlisted recipient yields a "Can't send to this recipient ..." BadRequestError. The apostrophe in
     // "Can't" is a typographic one (U+2019), so it is normalised to a straight apostrophe before matching.
-    private fun isAllowlistError(errors: List<NotifyErrorClass>): Boolean =
+    private fun isAllowlistError(errors: List<NotifyErrorDataModel>): Boolean =
         !useProductionNotify &&
             errors.any {
                 it.error == NotifyErrorType.BAD_REQUEST &&
                     it.message.replace("\u2019", "'")
                         .contains(NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT, ignoreCase = true)
             }
-
-    private fun parseNotifyExceptionErrors(message: String): List<NotifyErrorClass> {
-        val nonJsonRegex = Regex("^Status code: \\d\\d\\d")
-        val jsonString = nonJsonRegex.replace(message, "")
-        return Json.decodeFromString<NotifyErrors>(jsonString).errors
-    }
-
-    @Serializable
-    private data class NotifyErrors(
-        val errors: List<NotifyErrorClass>,
-        val status_code: Int,
-    )
-
-    @Serializable
-    private data class NotifyErrorClass(
-        val error: NotifyErrorType,
-        val message: String,
-    )
-
-    @Serializable
-    private enum class NotifyErrorType {
-        @SerialName("AuthError")
-        AUTH,
-
-        @SerialName("BadRequestError")
-        BAD_REQUEST,
-
-        @SerialName("RateLimitError")
-        RATE_LIMIT,
-
-        @SerialName("TooManyRequestsError")
-        TOO_MANY_REQUESTS,
-
-        @SerialName("Exception")
-        EXCEPTION,
-    }
 
     companion object {
         private const val NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT = "can't send to this recipient"
