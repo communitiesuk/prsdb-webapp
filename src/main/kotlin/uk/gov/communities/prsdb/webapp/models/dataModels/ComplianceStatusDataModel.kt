@@ -47,7 +47,11 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            electricalSafetyStatus: ComplianceCertStatus,
+            electricalSafetyExpiryDate: LocalDate?,
+        ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -57,16 +61,18 @@ data class ComplianceStatusDataModel(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
-                electricalSafetyStatus = propertyCompliance.electricalSafetyStatus,
+                electricalSafetyStatus = electricalSafetyStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline = propertyCompliance.propertyOwnership.provideLaterDeadline,
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
-                electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )
+
+        internal fun gasSafetyStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.gasSafetyStatus
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
             get() =
@@ -78,14 +84,7 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        private val PropertyCompliance.electricalSafetyStatus: ComplianceCertStatus
-            get() =
-                when {
-                    this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isElectricalSafetyMissing -> ComplianceCertStatus.HAS_FAULTS
-                    this.isElectricalSafetyExpired == true -> ComplianceCertStatus.EXPIRED
-                    else -> ComplianceCertStatus.ADDED
-                }
+        internal fun epcStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.epcStatus
 
         private val PropertyCompliance.epcStatus: ComplianceCertStatus
             get() =

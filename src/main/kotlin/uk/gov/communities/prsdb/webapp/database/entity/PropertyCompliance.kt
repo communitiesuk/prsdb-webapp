@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
@@ -75,19 +74,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
-
-    val isElectricalSafetyExpired: Boolean?
-        get() =
-            electricalSafetyExpiryDate?.let { expiryDate ->
-                when (electricalCertType) {
-                    CertificateType.Eic -> CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate)
-                    CertificateType.Eicr -> CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate)
-                    else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
-                }
-            }
-
-    val isElectricalSafetyMissing: Boolean
-        get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
         get() = epcExpiryDate?.let { CertificateExpiryHelper.isEpcExpiryDateExpired(it) }

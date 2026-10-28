@@ -22,10 +22,10 @@ class GasSafetyViewModelFactory(
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "checkGasSafety.occupiedNoCertInsetText"
 
-    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
+    private fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.gasSafetyStatusOf(propertyCompliance)
 
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
+    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = getStatus(propertyCompliance)
         return when (status) {
             ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"

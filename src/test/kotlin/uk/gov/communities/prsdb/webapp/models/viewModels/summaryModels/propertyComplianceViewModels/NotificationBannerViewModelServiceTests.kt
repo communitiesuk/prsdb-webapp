@@ -1,15 +1,41 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class NotificationBannerViewModelServiceTests {
-    private val service = NotificationBannerViewModelService()
+    private val notificationBannerService = NotificationBannerViewModelService()
+    private val service =
+        object {
+            fun getComplianceNotificationMessageKeys(
+                propertyCompliance: PropertyCompliance,
+                isLandlordView: Boolean,
+            ) = notificationBannerService.getComplianceNotificationMessageKeys(
+                statusDerivingService.getComplianceStatus(propertyCompliance),
+                isLandlordView,
+            )
+
+            fun getPropertyDetailsNotificationBanner(
+                propertyCompliance: PropertyCompliance,
+                isLandlordView: Boolean,
+                isOccupied: Boolean,
+                isLicensingProvideLater: Boolean,
+                isTenancyProvideLater: Boolean,
+            ) = notificationBannerService.getPropertyDetailsNotificationBanner(
+                statusDerivingService.getComplianceStatus(propertyCompliance),
+                isLandlordView,
+                isOccupied,
+                isLicensingProvideLater,
+                isTenancyProvideLater,
+            )
+        }
 
     private val expectedLinks =
         listOf(

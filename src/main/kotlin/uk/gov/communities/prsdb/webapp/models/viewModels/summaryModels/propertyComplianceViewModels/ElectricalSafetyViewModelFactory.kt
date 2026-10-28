@@ -23,13 +23,18 @@ class ElectricalSafetyViewModelFactory(
     override val missingCertOccupiedValue = "commonText.none"
     override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"
 
-    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
+    fun getInsetTextKey(
+        propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
+    ): String? = getCouncilWillSeeInsetKey(complianceStatus.electricalSafetyStatus, propertyCompliance)
 
-    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    fun fromEntity(
+        propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
+    ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val status = getStatus(propertyCompliance)
+                val status = complianceStatus.electricalSafetyStatus
 
                 when (status) {
                     in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
@@ -72,7 +77,7 @@ class ElectricalSafetyViewModelFactory(
                     )
                 }
 
-                propertyCompliance.electricalSafetyExpiryDate?.let { expiryDate ->
+                complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
                     addRow(
                         key = "propertyDetails.complianceInformation.expiryDate",
                         value = expiryDate,

@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBu
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createComplianceStatus
 import java.util.UUID
 
 @WebMvcTest(LettingAgentPropertyDetailsController::class)
@@ -57,10 +58,13 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(propertyOwnership)
         whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(eq(propertyCompliance)))
+            .thenReturn(createComplianceStatus(propertyCompliance))
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), any(), anyOrNull()))
             .thenReturn(complianceViewModel)
 
         mvc
@@ -83,10 +87,13 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(propertyOwnership)
         whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(eq(propertyCompliance)))
+            .thenReturn(createComplianceStatus(propertyCompliance))
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), any(), anyOrNull()))
             .thenReturn(complianceViewModel)
 
         mvc
@@ -102,12 +109,14 @@ class LettingAgentPropertyDetailsControllerTests(
     private fun createComplianceViewModel(): PropertyComplianceViewModel {
         val messageSource = mock<MessageSource>()
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         return PropertyComplianceViewModelFactory(
             GasSafetyViewModelFactory(mock(), messageSource),
             ElectricalSafetyViewModelFactory(mock(), messageSource),
             EpcViewModelFactory(messageSource),
         ).create(
-            propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
+            propertyCompliance = propertyCompliance,
+            complianceStatus = createComplianceStatus(propertyCompliance),
             viewType = PropertyDetailsViewType.LETTING_AGENT,
             propertyOwnershipId = 1L,
         )
