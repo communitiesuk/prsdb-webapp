@@ -364,7 +364,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             .getFirst(JourneyIdProvider.PARAMETER_NAME)
             ?: error("No journey ID in ${page.url()}")
 
-    // The same session in a second tab changes an answer
     private fun changeBedroomsInSecondTab(
         page: Page,
         journeyId: String,
@@ -547,7 +546,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
                 val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
 
-                // The same session in a second tab changes an answer after the user has confirmed
                 changeBedroomsInSecondTab(page, journeyId)
 
                 paymentSummaryPage.form.submit()
