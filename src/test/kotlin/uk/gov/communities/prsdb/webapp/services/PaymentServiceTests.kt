@@ -535,6 +535,7 @@ class PaymentServiceTests {
             verify(mockPaymentRepository).save(paymentCaptor.capture())
             assertEquals(expectedRenewalDate, paymentCaptor.firstValue.forPeriodEnding)
             assertEquals(quote.amountInPence, paymentCaptor.firstValue.amountInPence)
+            assertEquals(quote.quoteDate, paymentCaptor.firstValue.quoteDate)
             verifyNoInteractions(mockUserToLandlordService)
             verify(mockAbsoluteUrlProvider).buildPropertyRegistrationPaymentReturnUri(journeyId, requestCaptor.firstValue.reference)
             assertEquals(returnUrl, requestCaptor.firstValue.returnUrl)

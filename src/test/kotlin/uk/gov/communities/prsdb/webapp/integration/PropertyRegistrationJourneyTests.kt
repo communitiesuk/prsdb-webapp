@@ -503,6 +503,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val payment = paymentRepository.findAll().single { it.reference == request.reference }
             assertEquals(PaymentStatus.CREATED, payment.status)
             assertEquals(request.amount, payment.amountInPence)
+            assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), payment.quoteDate)
         }
 
         @Test

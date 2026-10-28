@@ -24,6 +24,7 @@ class PaymentTests {
                 amountInPence = 100,
                 reference = "reference",
                 paymentCreatedAt = Instant.now(),
+                quoteDate = LocalDate.now(),
                 forPeriodEnding = LocalDate.now(),
                 status = PaymentStatus.CREATED,
                 incompleteProperty = incompleteProperty,
@@ -44,6 +45,7 @@ class PaymentTests {
         val user = createPrsdbUser()
         val incompleteProperty = LandlordIncompleteProperty(user, MockSavedJourneyStateData.createSavedJourneyState())
         val createdDate = Instant.now()
+        val quoteDate = LocalDate.of(2026, 10, 27)
         val periodEnding = LocalDate.now()
         val govUkPayPayment =
             createGovUkPayPayment(
@@ -55,13 +57,14 @@ class PaymentTests {
             )
 
         // Act
-        val payment = Payment.fromGovUkPay(govUkPayPayment, periodEnding, incompleteProperty)
+        val payment = Payment.fromGovUkPay(govUkPayPayment, quoteDate, periodEnding, incompleteProperty)
 
         // Assert
         assertEquals("payment-id", payment.paymentId)
         assertEquals(100, payment.amountInPence)
         assertEquals("reference", payment.reference)
         assertEquals(createdDate, payment.paymentCreatedAt)
+        assertEquals(quoteDate, payment.quoteDate)
         assertEquals(periodEnding, payment.forPeriodEnding)
         assertEquals(PaymentStatus.SUCCEEDED, payment.status)
         assertEquals(incompleteProperty, payment.associatedIncompleteProperty)
