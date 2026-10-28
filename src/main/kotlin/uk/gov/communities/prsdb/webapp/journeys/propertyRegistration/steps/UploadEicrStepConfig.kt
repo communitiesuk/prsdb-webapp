@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -28,19 +26,8 @@ class UploadEicrStepConfig(
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState): Map<String, Any?> {
         fileUploadCookieService.addFileUploadCookieToResponse()
 
-        val fieldSetHeading =
-            when (state.getElectricalCertificateType()) {
-                HasElectricalSafetyCertificate.HAS_EIC -> "forms.uploadCertificate.eic.fieldSetHeading"
-
-                HasElectricalSafetyCertificate.HAS_EICR -> "forms.uploadCertificate.eicr.fieldSetHeading"
-
-                else -> throw PrsdbWebException(
-                    "Upload electrical cert step reached without a valid electrical certificate type selection",
-                )
-            }
-
         return mapOf(
-            "fieldSetHeading" to fieldSetHeading,
+            "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
             "fieldSetHint" to null,
         )
     }
@@ -50,14 +37,11 @@ class UploadEicrStepConfig(
     override fun mode(state: ElectricalSafetyDetailState) = if (state.eicrUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     override fun afterStepDataIsAdded(state: ElectricalSafetyDetailState) {
-        val certificateType: CertificateType =
-            state.getElectricalCertificateTypeAsCertificateType()
-                ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
             virusScanCallbackService.saveVirusScanFailureEmail(
                 journeyId = state.journeyId,
                 fileUploadId = fileUploadId,
-                certificateType = certificateType,
+                certificateType = CertificateType.Eicr,
                 propertyOwnershipId = state.propertyOwnershipId,
             )
 

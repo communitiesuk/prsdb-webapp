@@ -7,13 +7,17 @@ import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -82,20 +86,21 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
         return self()
     }
 
-    fun withElectricalCertExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType {
-        val formModel =
-            AnyDateFormModel().apply {
-                day = expiryDate.dayOfMonth.toString()
-                month = expiryDate.monthNumber.toString()
-                year = expiryDate.year.toString()
-            }
-        withSubmittedValue(EicrExpiryDateStep.ROUTE_SEGMENT, formModel)
+    fun withEicExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
+        withElectricalCertExpiryDate(EicExpiryDateStep.ROUTE_SEGMENT, expiryDate)
+
+    fun withEicrExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
+        withElectricalCertExpiryDate(EicrExpiryDateStep.ROUTE_SEGMENT, expiryDate)
+
+    fun withEicUploads(uploads: Map<Int, CertificateUpload> = defaultElectricalCertUploads): SelfType {
+        additionalDataMap["eicUploadMap"] = Json.encodeToString(serializer(), uploads)
+        additionalDataMap["highestAssignedEicMemberId"] = Json.encodeToString(serializer(), uploads.keys.max())
+        withSubmittedValue(UploadEicStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(CheckEicUploadsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
-    fun withElectricalCertUploads(
-        uploads: Map<Int, CertificateUpload> = mapOf(1 to CertificateUpload(fileUploadId = 1L, fileName = "electrical-safety-cert.pdf")),
-    ): SelfType {
+    fun withEicrUploads(uploads: Map<Int, CertificateUpload> = defaultElectricalCertUploads): SelfType {
         additionalDataMap["eicrUploadMap"] = Json.encodeToString(serializer(), uploads)
         additionalDataMap["highestAssignedEicrMemberId"] = Json.encodeToString(serializer(), uploads.keys.max())
         withSubmittedValue(UploadEicrStep.ROUTE_SEGMENT, NoInputFormModel())
@@ -103,8 +108,30 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
         return self()
     }
 
-    fun withElectricalCertExpiredAcknowledged(): SelfType {
+    fun withEicExpiredAcknowledged(): SelfType {
+        withSubmittedValue(EicExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEicrExpiredAcknowledged(): SelfType {
         withSubmittedValue(EicrExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
+
+    private fun withElectricalCertExpiryDate(
+        routeSegment: String,
+        expiryDate: LocalDate,
+    ): SelfType {
+        val formModel =
+            AnyDateFormModel().apply {
+                day = expiryDate.dayOfMonth.toString()
+                month = expiryDate.monthNumber.toString()
+                year = expiryDate.year.toString()
+            }
+        withSubmittedValue(routeSegment, formModel)
+        return self()
+    }
+
+    private val defaultElectricalCertUploads: Map<Int, CertificateUpload>
+        get() = mapOf(1 to CertificateUpload(fileUploadId = 1L, fileName = "electrical-safety-cert.pdf"))
 }

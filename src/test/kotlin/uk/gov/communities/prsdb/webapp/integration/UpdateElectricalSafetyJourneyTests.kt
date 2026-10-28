@@ -11,7 +11,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckEicrUploadsFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiredFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiredFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiryDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiryDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.HasElectricalCertFormPageUpdateElectricalSafety
@@ -53,7 +54,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage.submitHasEicr()
 
         val expiryDate = currentDate.plus(DatePeriod(years = 1))
-        var expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiryDate)
 
         var uploadPage = assertPageIs(page, UploadEicrFormPageUpdateElectricalSafety::class, urlArguments)
@@ -92,10 +93,10 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage.submitHasEic()
 
         val expiredExpiryDate = currentDate.minus(DatePeriod(days = 5))
-        expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
-        expiryDatePage.submitDate(expiredExpiryDate)
+        val eicExpiryDatePage = assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        eicExpiryDatePage.submitDate(expiredExpiryDate)
 
-        val expiredPage = assertPageIs(page, EicrExpiredFormPageUpdateElectricalSafety::class, urlArguments)
+        val expiredPage = assertPageIs(page, EicExpiredFormPageUpdateElectricalSafety::class, urlArguments)
         expiredPage.form.submit()
 
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)

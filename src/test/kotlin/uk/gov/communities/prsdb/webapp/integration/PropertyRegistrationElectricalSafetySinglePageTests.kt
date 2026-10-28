@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import java.util.regex.Pattern
@@ -36,7 +36,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
     }
 
     @Nested
-    inner class CheckEicrUploadsStepTests {
+    inner class CheckEicUploadsStepTests {
         @Test
         fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
             val checkUploadsPage = navigateToCheckUploadsPage(page)
@@ -53,13 +53,13 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("electrical-safety-cert.pdf")
         }
 
-        private fun navigateToCheckUploadsPage(page: Page): CheckEicrUploadsFormPagePropertyRegistration {
+        private fun navigateToCheckUploadsPage(page: Page): CheckEicUploadsFormPagePropertyRegistration {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            return assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            return assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
         }
     }
 
@@ -82,7 +82,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+            assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -92,7 +92,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
         }
 
         @Test

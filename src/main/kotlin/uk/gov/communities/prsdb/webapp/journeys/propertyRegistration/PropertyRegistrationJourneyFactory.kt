@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Occu
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
@@ -36,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -287,10 +289,21 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
+                CheckEicUploadsStep.ROUTE_SEGMENT,
                 CheckEicrUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                     configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -510,6 +523,9 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep }
                 }
                 configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                     backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }

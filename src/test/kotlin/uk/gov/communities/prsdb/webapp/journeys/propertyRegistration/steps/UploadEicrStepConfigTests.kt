@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -11,8 +10,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -39,34 +36,13 @@ class UploadEicrStepConfigTests {
     lateinit var uploadElectricalCertStep: UploadEicrStep
 
     @Test
-    fun `getStepSpecificContent returns EIC heading when EIC is selected`() {
+    fun `getStepSpecificContent returns EICR heading and adds file upload cookie`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
-
-        val content = stepConfig.getStepSpecificContent(mockState)
-
-        assertEquals("forms.uploadCertificate.eic.fieldSetHeading", content["fieldSetHeading"])
-        verify(fileUploadCookieService).addFileUploadCookieToResponse()
-    }
-
-    @Test
-    fun `getStepSpecificContent returns EICR heading when EICR is selected`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EICR)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
         assertEquals("forms.uploadCertificate.eicr.fieldSetHeading", content["fieldSetHeading"])
-    }
-
-    @Test
-    fun `getStepSpecificContent throws exception when certificate type is null`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(null)
-
-        assertThrows<PrsdbWebException> {
-            stepConfig.getStepSpecificContent(mockState)
-        }
+        verify(fileUploadCookieService).addFileUploadCookieToResponse()
     }
 
     @Test
@@ -121,7 +97,6 @@ class UploadEicrStepConfigTests {
         whenever(mockState.eicrUploadMap).thenReturn(mapOf())
         whenever(mockState.getNextEicrUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadEicrStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
@@ -154,7 +129,6 @@ class UploadEicrStepConfigTests {
     }
 
     private fun stubStateForAfterStepDataIsAdded() {
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadEicrStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)

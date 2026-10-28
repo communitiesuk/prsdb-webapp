@@ -232,14 +232,14 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicExpiryDate()
+                .withEicUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEicr()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicrExpiryDate()
+                .withEicrUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater() =
             beforePropertyRegistrationHasElectricalCert()
@@ -252,9 +252,9 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withElectricalCertExpiryDate(expiryDate = LocalDate(2020, 1, 1))
-                .withElectricalCertUploads()
-                .withElectricalCertExpiredAcknowledged()
+                .withEicExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withEicUploads()
+                .withEicExpiredAcknowledged()
 
         fun beforePropertyRegistrationHasEpc() =
             beforePropertyRegistrationHasElectricalCert()
@@ -494,8 +494,8 @@ class PropertyStateSessionBuilder(
                 .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicExpiryDate()
+                .withEicUploads()
                 .withCheckElectricalSafetyAnswersComplete()
                 .withPropertyHasNoEpc()
                 .withIsEpcNotRequired()
