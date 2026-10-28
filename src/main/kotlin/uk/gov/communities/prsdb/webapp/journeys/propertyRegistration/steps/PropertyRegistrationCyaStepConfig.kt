@@ -262,13 +262,14 @@ class PropertyRegistrationCyaStepConfig(
                 OwnershipType.FREEHOLD,
                 actionUrl = null as String?,
             )
+        } else {
+            val ownershipTypeStep = state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep
+            return SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.ownership.ownershipType",
+                ownershipTypeStep.formModel.ownershipType,
+                Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
+            )
         }
-        val ownershipTypeStep = state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "propertyDetails.propertyRecord.ownership.ownershipType",
-            ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
-        )
     }
 
     private fun getLettingAgentDelegationSummaryContent(

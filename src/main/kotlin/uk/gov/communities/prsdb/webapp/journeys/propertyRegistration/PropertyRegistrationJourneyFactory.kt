@@ -128,8 +128,10 @@ class PropertyRegistrationJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
+        // TODO PDJB-2016: remove this check and passing the arg in
+        val associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state)
+            mainJourneyMap(state, associatedPartiesEnabled)
         } else {
             checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
@@ -144,7 +146,9 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> whoProvidesChangeCyaJourney()
+                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
+                    whoProvidesChangeCyaJourney()
+                }
 
                 LettingAgentEmailStep.ROUTE_SEGMENT -> {
                     fromTask(journey.whoProvidesDetailsTask) {
@@ -210,7 +214,9 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.tenancyDetailsTask)
                 }
 
-                OccupiedStep.ROUTE_SEGMENT -> occupancyChangeCyaJourney()
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    occupancyChangeCyaJourney()
+                }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
@@ -352,7 +358,10 @@ class PropertyRegistrationJourneyFactory(
             }
         }
 
-    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+    private fun mainJourneyMap(
+        state: PropertyRegistrationJourneyState,
+        associatedPartiesEnabled: Boolean,
+    ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
@@ -382,8 +391,7 @@ class PropertyRegistrationJourneyFactory(
                 initialStep()
                 noNextDestination()
             }
-            // TODO PDJB-955: remove the flag check and the task before associated parties once ASSOCIATED_PARTIES is released
-            val associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
+            // TODO PDJB-2016: remove the flag check and the task before associated parties once ASSOCIATED_PARTIES is released
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.propertyDetails", shouldUseNumbering = false)
                 task(journey.propertyDetailsTask) {
