@@ -24,18 +24,25 @@ class PaymentReturnStepConfig(
         state: PropertyRegistrationJourneyState,
         templateName: String,
     ): Destination {
-        // Completing this step on arrival lets the payment status be checked straight away, so the processing page is
-        // only shown while the payment is still in progress
+        markStepCompleteSoPaymentStatusCanBeChecked(state)
+        return getPaymentOutcomeDestinationIfPaymentHasFinished(state) ?: super.resolveChosenTemplate(state, templateName)
+    }
+
+    private fun markStepCompleteSoPaymentStatusCanBeChecked(state: PropertyRegistrationJourneyState) =
         state.addStepData(stepDataKey, NoInputFormModel().toPageData())
+
+    private fun getPaymentOutcomeDestinationIfPaymentHasFinished(state: PropertyRegistrationJourneyState): Destination? {
         val paymentStatusCheckStep = state.paymentStatusCheckStep
-        try {
+        return try {
             if (paymentStatusCheckStep.attemptToReachStep() && state.paymentOutcome != PaymentOutcome.IN_PROGRESS) {
-                return paymentStatusCheckStep.getNextDestination()
+                paymentStatusCheckStep.getNextDestination()
+            } else {
+                null
             }
         } catch (exception: GovUkPayException) {
             println("Failed to check payment status for journey ${state.journeyId}: ${exception.stackTraceToString()}")
+            null
         }
-        return super.resolveChosenTemplate(state, templateName)
     }
 
     override fun beforeAttemptingToReachStep(state: PropertyRegistrationJourneyState): Boolean =
