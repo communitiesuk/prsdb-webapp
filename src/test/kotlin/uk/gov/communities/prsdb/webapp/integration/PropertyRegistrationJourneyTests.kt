@@ -564,6 +564,30 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `returning from GOV UK Pay on a later day than the quote cancels the payment and shows the payment summary`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentReturnPage = submitPaymentSummary(page)
+                val payment = getCreatedPayment()
+                jdbcTemplate.update(
+                    "UPDATE payment SET quote_date = ? WHERE payment_id = ?",
+                    payment.quoteDate.minusDays(1),
+                    payment.paymentId,
+                )
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
+                verify(govUkPayClient).cancelPayment(payment.paymentId)
+                verify(govUkPayClient, never()).capturePayment(any())
+            }
+        }
+
+        @Test
         @Suppress("ktlint:standard:max-line-length")
         fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
             page: Page,
