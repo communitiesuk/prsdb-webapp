@@ -11,6 +11,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
+import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
@@ -57,6 +59,16 @@ class RegisterLandlordControllerTests(
     fun `getStart returns 200 for unauthenticated user`() {
         mvc.get(LANDLORD_REGISTRATION_START_PAGE_ROUTE).andExpect {
             status { isOk() }
+        }
+    }
+
+    // This checks the X-Robots-Tag header on a general public page, not anything specific to landlord registration.
+    // If this test is ever deleted, add an equivalent controller test for another public page.
+    @Test
+    fun `getStart response tells search engines not to index the page`() {
+        mvc.get(LANDLORD_REGISTRATION_START_PAGE_ROUTE).andExpect {
+            status { isOk() }
+            header { string(X_ROBOTS_TAG_HEADER, X_ROBOTS_TAG_VALUE) }
         }
     }
 

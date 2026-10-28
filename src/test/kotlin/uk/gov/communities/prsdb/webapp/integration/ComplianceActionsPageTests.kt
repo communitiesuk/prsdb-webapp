@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -14,7 +16,13 @@ import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// TODO PDJB-2006: Delete this class when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
 class ComplianceActionsPageTests : IntegrationTest() {
+    @BeforeEach
+    fun disableFeatureFlag() {
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_PHASE_THREE)
+    }
+
     @Nested
     inner class LandlordsWithoutComplianceActions :
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
