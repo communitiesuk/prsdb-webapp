@@ -83,8 +83,6 @@ class PaymentSummaryStepConfig(
         val submittedQuoteDate = getFormModelFromState(state).getQuoteDateOrNull()
         val quote = state.paymentQuote
 
-        // TODO PDJB-1861: Check that the quote the user was shown matches the stored quote before creating the payment (e.g. when                                                                                                                                                                                                                                               ┃
-        //  the page is open in several tabs), and explain to the user when the quoted amount has changed.
         if (submittedQuoteDate != today || quote == null || quote.quoteDate != submittedQuoteDate) {
             state.paymentQuote = paymentService.getPropertyRegistrationPaymentQuote(today)
             // TODO PDJB-1869: Inform the user about the updated payment total when a stale quote redirects them back to the payment summary
