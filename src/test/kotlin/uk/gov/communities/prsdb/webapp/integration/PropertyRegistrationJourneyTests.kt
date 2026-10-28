@@ -28,18 +28,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
-import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -94,6 +91,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcNotFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcSuperseededFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
@@ -118,10 +117,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentFailedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentReturnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
@@ -137,6 +138,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
@@ -144,6 +146,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
@@ -173,12 +177,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    // TODO PDJB-959: remove this override and update these tests for the associated parties journey
-    @BeforeEach
-    fun disableAssociatedParties() {
-        featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
-    }
-
     private val absoluteLandlordUrl = "www.example.com/landlord"
 
     private fun verifyConfirmationEmailSent(
@@ -355,11 +353,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Nested
     inner class EnableFeatureFlags {
-        @BeforeEach
-        fun enableFeatureFlags() {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_PHASE_TWO)
-        }
-
         @Test
         fun `completing the payment journey successfully reaches the confirmation page`(page: Page) {
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
@@ -595,13 +588,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
             assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
             bedroomsPage.submitNumOfBedrooms(3)
-            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
-
-            // Ownership type selection - render page
-            assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
-            assertThat(ownershipTypePage.form.sectionHeader).containsText(ownershipSectionHeader)
-            // fill in and submit
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
@@ -643,6 +629,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
+
+            // TODO PDJB-1959: update this usage when the real owns property page is added
+            val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+            ownsPropertyPage.submitOwnsProperty(true)
+            // TODO PDJB-1960: update this usage when the real ownership kind page is added
+            val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+            ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+            // TODO PDJB-1961: update this usage when the real freehold type page is added
+            val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+            freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+            // TODO PDJB-2009: update this usage when the real property manager pages are added
+            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+            propertyManagerPage.submit()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitAccountEmail()
@@ -991,13 +990,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
             assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
             bedroomsPage.submitNumOfBedrooms(3)
-            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
-
-            // Ownership type selection - render page
-            assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
-            assertThat(ownershipTypePage.form.sectionHeader).containsText(ownershipSectionHeader)
-            // fill in and submit
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
@@ -1006,6 +998,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            // TODO PDJB-1959: update this usage when the real owns property page is added
+            val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+            ownsPropertyPage.submitOwnsProperty(true)
+            // TODO PDJB-1960: update this usage when the real ownership kind page is added
+            val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+            ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+            // TODO PDJB-1961: update this usage when the real freehold type page is added
+            val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+            freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
+            // TODO PDJB-2007: update this usage when the real freeholders pages are added
+            val freeholdersPage = assertPageIs(page, FreeholdersFormPagePropertyRegistration::class)
+            freeholdersPage.submit()
+            // TODO PDJB-2008: update this usage when the real superior landlords pages are added
+            val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
+            superiorLandlordsPage.submit()
+            // TODO PDJB-2009: update this usage when the real property manager pages are added
+            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+            propertyManagerPage.submit()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
@@ -1979,11 +1990,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
             val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
             bedroomsPage.submitNumOfBedrooms(3)
-            val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
 
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            // TODO PDJB-1959: update this usage when the real owns property page is added
+            assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
+            // TODO PDJB-1960: update this usage when the real ownership kind page is added
+            assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+            // TODO PDJB-1961: update this usage when the real freehold type page is added
+            assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+            // TODO PDJB-2009: update this usage when the real property manager pages are added
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submit()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitAccountEmail()

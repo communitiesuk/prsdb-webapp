@@ -206,6 +206,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
@@ -282,6 +283,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Local
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
@@ -940,6 +942,15 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+    }
+
+    // TODO PDJB-1959: update this usage when the real owns property page is added
+    fun skipToPropertyRegistrationOwnsPropertyPage(): OwnsPropertyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationOwnsProperty().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(OwnsPropertyStep.ROUTE_SEGMENT)
+        return createValidPage(page, OwnsPropertyFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {

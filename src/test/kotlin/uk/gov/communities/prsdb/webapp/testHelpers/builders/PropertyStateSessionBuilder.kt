@@ -36,6 +36,7 @@ class PropertyStateSessionBuilder(
     ElectricalSafetyStateBuilder<PropertyStateSessionBuilder>,
     EpcStateBuilder<PropertyStateSessionBuilder>,
     JointLandlordsStateBuilder<PropertyStateSessionBuilder>,
+    AssociatedPartiesStateBuilder<PropertyStateSessionBuilder>,
     WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
@@ -122,7 +123,12 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationPropertyType() = PropertyStateSessionBuilder().withLookupAddress().withSelectedAddress()
 
         fun beforePropertyRegistrationCorrespondenceEmailAddress() =
-            beforePropertyRegistrationPropertyType().withPropertyType().withBedrooms().withOwnershipType().withHasNoJointLandlords()
+            beforePropertyRegistrationPropertyType()
+                .withPropertyType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
 
         fun beforePropertyRegistrationOwnershipType() =
             beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
@@ -134,6 +140,7 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
 
@@ -142,6 +149,7 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
 
         fun beforePropertyRegistrationRentedOutSelectiveLicence() =
             beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
@@ -185,6 +193,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationHasJointLandlords() = beforePropertyRegistrationRentAmount(RentFrequency.MONTHLY).withRentAmount()
 
+        fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
+
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
@@ -195,6 +205,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationInviteJointLandlords()
                 .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
                 .withOccupancyStatus(propertyIsOccupied)
                 .apply { if (propertyIsOccupied) withLandlordProvidesRentalDetails() }
 
@@ -444,6 +455,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withBedrooms()
                 .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
@@ -453,6 +465,7 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
+                .withOwnershipStructureAndPropertyManager()
                 .withOccupancyStatus(true)
                 .withDelegatedToLettingAgent()
 
