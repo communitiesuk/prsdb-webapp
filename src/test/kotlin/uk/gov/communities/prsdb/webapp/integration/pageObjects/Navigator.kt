@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordU
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.OUTSTANDING_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
@@ -84,6 +85,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MetricsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OutstandingActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
@@ -1513,9 +1515,15 @@ class Navigator(
         return createValidPage(page, LandlordIncompletePropertiesPage::class)
     }
 
+    // TODO PDJB-2006: Remove when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
     fun goToComplianceActions(): ComplianceActionsPage {
         navigate(COMPLIANCE_ACTIONS_URL)
         return createValidPage(page, ComplianceActionsPage::class)
+    }
+
+    fun goToOutstandingActions(): OutstandingActionsPage {
+        navigate(OUTSTANDING_ACTIONS_URL)
+        return createValidPage(page, OutstandingActionsPage::class)
     }
 
     fun goToDeleteIncompletePropertyRegistrationAreYouSurePage(contextId: String): DeleteIncompletePropertyRegistrationAreYouSurePage {
