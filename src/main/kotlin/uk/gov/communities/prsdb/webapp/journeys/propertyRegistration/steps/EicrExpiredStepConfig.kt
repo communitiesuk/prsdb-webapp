@@ -11,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class ElectricalCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyDetailState>() {
+class EicrExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState) =
         mapOf(
             "expiryDate" to state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            "changeExpiryDateUrl" to Destination.VisitableStep(state.electricalCertExpiryDateStep, state.journeyId).toUrlStringOrNull(),
+            "changeExpiryDateUrl" to Destination.VisitableStep(state.eicrExpiryDateStep, state.journeyId).toUrlStringOrNull(),
             "landlordElectricalSafetyUrl" to ELECTRICAL_SAFETY_STANDARDS_URL,
             "submitButtonText" to
                 if (state.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.saveAndContinue",
@@ -34,10 +34,10 @@ class ElectricalCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, 
 }
 
 @JourneyFrameworkComponent
-final class ElectricalCertExpiredStep(
-    stepConfig: ElectricalCertExpiredStepConfig,
+final class EicrExpiredStep(
+    stepConfig: EicrExpiredStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "electrical-safety-certificate-expired"
+        const val ROUTE_SEGMENT = "eicr-expired"
     }
 }

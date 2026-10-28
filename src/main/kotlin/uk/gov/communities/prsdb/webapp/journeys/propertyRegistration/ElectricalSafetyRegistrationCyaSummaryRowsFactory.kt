@@ -39,7 +39,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         val certType = state.getElectricalCertificateType()
         val downloadMessageKey = getDownloadMessageKey(certType)
         val uploadedFiles =
-            state.electricalUploadMap
+            state.eicrUploadMap
                 .toList()
                 .sortedBy { it.first }
                 .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
@@ -54,12 +54,12 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
-                destination = destinationProvider(state.electricalCertExpiryDateStep),
+                destination = destinationProvider(state.eicrExpiryDateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
                 fieldValue = uploadedFiles,
-                destination = destinationProvider(state.checkElectricalCertUploadsStep),
+                destination = destinationProvider(state.checkEicrUploadsStep),
             ),
         )
     }

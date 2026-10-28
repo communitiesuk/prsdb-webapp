@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckElectricalCertUploadsFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckEicrUploadsFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.ElectricalCertExpiredFormPageUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.ElectricalCertExpiryDateFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiredFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiryDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.HasElectricalCertFormPageUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.RemoveElectricalCertUploadFormPageUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.UploadElectricalCertFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.RemoveEicrUploadFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.UploadEicrFormPageUpdateElectricalSafety
 
 class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 8L
@@ -53,25 +53,25 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage.submitHasEicr()
 
         val expiryDate = currentDate.plus(DatePeriod(years = 1))
-        var expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        var expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiryDate)
 
-        var uploadPage = assertPageIs(page, UploadElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        var uploadPage = assertPageIs(page, UploadEicrFormPageUpdateElectricalSafety::class, urlArguments)
         uploadPage.uploadCertificate("validFile.png")
 
-        var checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        var checkUploadsPage = assertPageIs(page, CheckEicrUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.form.addAnotherButton.clickAndWait()
-        uploadPage = assertPageIs(page, UploadElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        uploadPage = assertPageIs(page, UploadEicrFormPageUpdateElectricalSafety::class, urlArguments)
         uploadPage.uploadCertificate("validFile.png")
-        checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage = assertPageIs(page, CheckEicrUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.table
             .getClickableCell(0, 2)
             .link
             .clickAndWait()
-        val removeUploadPage = assertPageIs(page, RemoveElectricalCertUploadFormPageUpdateElectricalSafety::class, urlArguments)
+        val removeUploadPage = assertPageIs(page, RemoveEicrUploadFormPageUpdateElectricalSafety::class, urlArguments)
         removeUploadPage.form.radios.selectValue("true")
         removeUploadPage.form.submit()
-        checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage = assertPageIs(page, CheckEicrUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.form.submit()
 
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
@@ -92,10 +92,10 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage.submitHasEic()
 
         val expiredExpiryDate = currentDate.minus(DatePeriod(days = 5))
-        expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiredExpiryDate)
 
-        val expiredPage = assertPageIs(page, ElectricalCertExpiredFormPageUpdateElectricalSafety::class, urlArguments)
+        val expiredPage = assertPageIs(page, EicrExpiredFormPageUpdateElectricalSafety::class, urlArguments)
         expiredPage.form.submit()
 
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
@@ -119,26 +119,26 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage.submitHasEicr()
 
         val expiryDate = currentDate.plus(DatePeriod(years = 1))
-        val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiryDate)
 
-        val uploadPage = assertPageIs(page, UploadElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        val uploadPage = assertPageIs(page, UploadEicrFormPageUpdateElectricalSafety::class, urlArguments)
         uploadPage.uploadCertificate("validFile.png")
 
-        var checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        var checkUploadsPage = assertPageIs(page, CheckEicrUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.form.submit()
 
         var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
         // Change the expiry date from the check answers page, then check the back link returns there
         checkAnswersPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
-        val expiryDatePageFromCya = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        val expiryDatePageFromCya = assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePageFromCya.backLink.clickAndWait()
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
         // Change the certificate from the check answers page, then check the back link returns there
         checkAnswersPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-        checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage = assertPageIs(page, CheckEicrUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.backLink.clickAndWait()
         assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
     }

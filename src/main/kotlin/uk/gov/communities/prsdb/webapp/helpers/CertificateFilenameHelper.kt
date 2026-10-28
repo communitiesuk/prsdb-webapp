@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 class CertificateFilenameHelper {
     companion object {
         private const val GAS_SAFETY_UPLOAD_STEP_NAME = "gas-safety-certificate-file-upload"
-        private const val ELECTRICAL_SAFETY_UPLOAD_STEP_NAME = "electrical-safety-certificate-file-upload"
+        private const val EICR_UPLOAD_STEP_NAME = "eicr-file-upload"
 
         fun getCertFilename(
             journeyId: String,
@@ -22,7 +22,7 @@ class CertificateFilenameHelper {
         fun getUploadStepName(certificateType: CertificateType): String =
             when (certificateType) {
                 CertificateType.GasSafetyCert -> GAS_SAFETY_UPLOAD_STEP_NAME
-                CertificateType.Eicr, CertificateType.Eic -> ELECTRICAL_SAFETY_UPLOAD_STEP_NAME
+                CertificateType.Eicr, CertificateType.Eic -> EICR_UPLOAD_STEP_NAME
             }
 
         private fun randomSuffix(): String {

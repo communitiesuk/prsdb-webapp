@@ -15,15 +15,15 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import java.time.LocalDate
@@ -160,13 +160,13 @@ class ElectricalSafetyDetailsStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyDetailState {
             override val isOccupied: Boolean = true
             override val propertyOwnershipId: Long? = null
-            override var electricalUploadMap: Map<Int, CertificateUpload> = mapOf()
-            override var highestAssignedElectricalMemberId: Int? = null
-            override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()
-            override val hasUploadedElectricalCert = mock<HasAnyInCollectionStep>()
-            override val checkElectricalCertUploadsStep = mock<CheckElectricalCertUploadsStep>()
-            override val removeElectricalCertUploadStep = mock<RemoveElectricalCertUploadStep>()
-            override val electricalCertExpiredStep = mock<ElectricalCertExpiredStep>()
+            override var eicrUploadMap: Map<Int, CertificateUpload> = mapOf()
+            override var highestAssignedEicrMemberId: Int? = null
+            override val uploadEicrStep = mock<UploadEicrStep>()
+            override val hasUploadedEicr = mock<HasAnyInCollectionStep>()
+            override val checkEicrUploadsStep = mock<CheckEicrUploadsStep>()
+            override val removeEicrUploadStep = mock<RemoveEicrUploadStep>()
+            override val eicrExpiredStep = mock<EicrExpiredStep>()
             override val electricalCertMissingStep = mock<ElectricalCertMissingStep>()
             override val allowProvideCertificateLaterRoute: Boolean = true
             override val provideElectricalCertLaterStep = mock<ProvideElectricalCertLaterStep>()
@@ -180,8 +180,8 @@ class ElectricalSafetyDetailsStateTests {
                     }
                 }
 
-            override val electricalCertExpiryDateStep =
-                mock<ElectricalCertExpiryDateStep>().apply {
+            override val eicrExpiryDateStep =
+                mock<EicrExpiryDateStep>().apply {
                     if (expiryDateStepShouldBeReachable) {
                         whenever(this.formModelIfReachableOrNull).thenReturn(expiryDateFormModel)
                     } else {

@@ -7,16 +7,16 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 
 interface ElectricalSafetyState : JourneyState {
@@ -27,12 +27,12 @@ interface ElectricalSafetyState : JourneyState {
 
 interface ElectricalSafetyDetailState : JourneyState {
     val hasElectricalCertStep: HasElectricalCertStep
-    val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
-    val uploadElectricalCertStep: UploadElectricalCertStep
-    val hasUploadedElectricalCert: HasAnyInCollectionStep
-    val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep
-    val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep
-    val electricalCertExpiredStep: ElectricalCertExpiredStep
+    val eicrExpiryDateStep: EicrExpiryDateStep
+    val uploadEicrStep: UploadEicrStep
+    val hasUploadedEicr: HasAnyInCollectionStep
+    val checkEicrUploadsStep: CheckEicrUploadsStep
+    val removeEicrUploadStep: RemoveEicrUploadStep
+    val eicrExpiredStep: EicrExpiredStep
     val electricalCertMissingStep: ElectricalCertMissingStep
     val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
 
@@ -41,7 +41,7 @@ interface ElectricalSafetyDetailState : JourneyState {
     val propertyOwnershipId: Long?
 
     fun getElectricalCertificateExpiryDateIfReachable() =
-        electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->
+        eicrExpiryDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
@@ -73,13 +73,13 @@ interface ElectricalSafetyDetailState : JourneyState {
 
     val electricalUploadIds: List<Long>
         get() =
-            if (uploadElectricalCertStep.isStepReachable) {
-                electricalUploadMap.values.map { it.fileUploadId }
+            if (uploadEicrStep.isStepReachable) {
+                eicrUploadMap.values.map { it.fileUploadId }
             } else {
                 emptyList()
             }
-    var electricalUploadMap: Map<Int, CertificateUpload>
-    var highestAssignedElectricalMemberId: Int?
+    var eicrUploadMap: Map<Int, CertificateUpload>
+    var highestAssignedEicrMemberId: Int?
 
-    fun getNextElectricalUploadMemberId(): Int = highestAssignedElectricalMemberId?.let { it + 1 } ?: 1
+    fun getNextEicrUploadMemberId(): Int = highestAssignedEicrMemberId?.let { it + 1 } ?: 1
 }

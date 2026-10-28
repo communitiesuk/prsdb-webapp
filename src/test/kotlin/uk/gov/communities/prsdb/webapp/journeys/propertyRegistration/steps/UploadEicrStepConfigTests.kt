@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class UploadElectricalCertStepConfigTests {
+class UploadEicrStepConfigTests {
     @Mock
     lateinit var mockState: ElectricalSafetyDetailState
 
@@ -36,7 +36,7 @@ class UploadElectricalCertStepConfigTests {
     lateinit var memberIdService: CollectionKeyParameterService
 
     @Mock
-    lateinit var uploadElectricalCertStep: UploadElectricalCertStep
+    lateinit var uploadElectricalCertStep: UploadEicrStep
 
     @Test
     fun `getStepSpecificContent returns EIC heading when EIC is selected`() {
@@ -70,17 +70,17 @@ class UploadElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns COMPLETE when electricalUploadMap is non-empty`() {
+    fun `mode returns COMPLETE when eicrUploadMap is non-empty`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+        whenever(mockState.eicrUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
     }
 
     @Test
-    fun `mode returns null when electricalUploadMap is empty`() {
+    fun `mode returns null when eicrUploadMap is empty`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
+        whenever(mockState.eicrUploadMap).thenReturn(mapOf())
 
         assertNull(stepConfig.mode(mockState))
     }
@@ -88,11 +88,11 @@ class UploadElectricalCertStepConfigTests {
     @Test
     fun `afterStepDataIsAdded uses the landlord id when property ownership id is not known`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadEicrStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
+        whenever(mockState.eicrUploadMap).thenReturn(mapOf())
+        whenever(mockState.getNextEicrUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
         stubStateForAfterStepDataIsAdded()
 
@@ -106,24 +106,24 @@ class UploadElectricalCertStepConfigTests {
         )
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
-        verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
+        verify(mockState).eicrUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(42L, "cert.pdf"), updatedMapCaptor.firstValue[1])
-        verify(mockState).highestAssignedElectricalMemberId = 1
+        verify(mockState).highestAssignedEicrMemberId = 1
         verify(uploadElectricalCertStep).clearFormData()
     }
 
     @Test
     fun `afterStepDataIsAdded uses the property ownership id when known`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadEicrStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
+        whenever(mockState.eicrUploadMap).thenReturn(mapOf())
+        whenever(mockState.getNextEicrUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
         whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
+        whenever(mockState.uploadEicrStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -138,36 +138,36 @@ class UploadElectricalCertStepConfigTests {
     @Test
     fun `afterStepDataIsAdded updates existing entry when memberIdService returns a key`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadEicrStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "updated.pdf", "fileUploadId" to "55"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(3 to CertificateUpload(10L, "old.pdf")))
+        whenever(mockState.eicrUploadMap).thenReturn(mapOf(3 to CertificateUpload(10L, "old.pdf")))
         whenever(memberIdService.getParameterOrNull()).thenReturn(3)
         stubStateForAfterStepDataIsAdded()
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
-        verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
+        verify(mockState).eicrUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(55L, "updated.pdf"), updatedMapCaptor.firstValue[3])
-        verify(mockState).highestAssignedElectricalMemberId = 3
+        verify(mockState).highestAssignedEicrMemberId = 3
     }
 
     private fun stubStateForAfterStepDataIsAdded() {
         whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
+        whenever(mockState.uploadEicrStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
     }
 
-    private fun setupStepConfig(): UploadElectricalCertStepConfig {
+    private fun setupStepConfig(): UploadEicrStepConfig {
         val stepConfig =
-            UploadElectricalCertStepConfig(
+            UploadEicrStepConfig(
                 virusScanCallbackService,
                 fileUploadCookieService,
                 memberIdService,
             )
-        stepConfig.urlPath = UploadElectricalCertStep.ROUTE_SEGMENT
+        stepConfig.urlPath = UploadEicrStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

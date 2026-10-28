@@ -9,11 +9,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SecondaryButton
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 
-class CheckElectricalCertUploadsFormPagePropertyRegistration(
+class CheckEicrUploadsFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckElectricalCertUploadsStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckEicrUploadsStep.ROUTE_SEGMENT}") {
     override val expectedTitleHeading: String
         get() = table.rows.count().let { "You’ve uploaded $it electrical safety certificate file${if (it == 1) "" else "s"}" }
 

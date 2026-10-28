@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalCertUploadsFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckEicrUploadsFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.EicrExpiryDateFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.HasElectricalCertFormPageLettingAgentUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.UploadElectricalCertFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.UploadEicrFormPageLettingAgentUpdateElectricalSafety
 import java.util.UUID
 
 class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -34,16 +34,16 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
 
         val expiryDate = DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 1))
         val expiryDatePage =
-            assertPageIs(page, ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+            assertPageIs(page, EicrExpiryDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
         assertThat(expiryDatePage.form.submitButton).hasText("Continue")
         expiryDatePage.submitDate(expiryDate)
 
         val uploadPage =
-            assertPageIs(page, UploadElectricalCertFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+            assertPageIs(page, UploadEicrFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
         uploadPage.uploadCertificate("validFile.png")
 
         val checkUploadsPage =
-            assertPageIs(page, CheckElectricalCertUploadsFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+            assertPageIs(page, CheckEicrUploadsFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.form.submit()
 
         val checkAnswersPage =

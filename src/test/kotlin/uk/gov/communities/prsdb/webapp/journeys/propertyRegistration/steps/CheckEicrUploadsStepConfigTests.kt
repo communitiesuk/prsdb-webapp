@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class CheckElectricalCertUploadsStepConfigTests {
+class CheckEicrUploadsStepConfigTests {
     @Mock
     lateinit var mockState: ElectricalSafetyDetailState
 
@@ -33,17 +33,17 @@ class CheckElectricalCertUploadsStepConfigTests {
     lateinit var mockUploadService: UploadService
 
     @Mock
-    lateinit var mockUploadElectricalCertStep: UploadElectricalCertStep
+    lateinit var mockUploadEicrStep: UploadEicrStep
 
     @Mock
-    lateinit var mockRemoveElectricalCertUploadStep: RemoveElectricalCertUploadStep
+    lateinit var mockRemoveEicrUploadStep: RemoveEicrUploadStep
 
-    private lateinit var stepConfig: CheckElectricalCertUploadsStepConfig
+    private lateinit var stepConfig: CheckEicrUploadsStepConfig
 
     @BeforeEach
     fun setup() {
-        stepConfig = CheckElectricalCertUploadsStepConfig(mockMemberIdService, mockUploadService)
-        stepConfig.urlPath = CheckElectricalCertUploadsStep.ROUTE_SEGMENT
+        stepConfig = CheckEicrUploadsStepConfig(mockMemberIdService, mockUploadService)
+        stepConfig.urlPath = CheckEicrUploadsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
     }
 
@@ -60,8 +60,8 @@ class CheckElectricalCertUploadsStepConfigTests {
     @Nested
     inner class Mode {
         @Test
-        fun `mode returns COMPLETE when electricalUploadMap is not empty`() {
-            whenever(mockState.electricalUploadMap).thenReturn(
+        fun `mode returns COMPLETE when eicrUploadMap is not empty`() {
+            whenever(mockState.eicrUploadMap).thenReturn(
                 mapOf(0 to CertificateUpload(1L, "eicr.pdf")),
             )
 
@@ -71,8 +71,8 @@ class CheckElectricalCertUploadsStepConfigTests {
         }
 
         @Test
-        fun `mode returns null when electricalUploadMap is empty`() {
-            whenever(mockState.electricalUploadMap).thenReturn(emptyMap())
+        fun `mode returns null when eicrUploadMap is empty`() {
+            whenever(mockState.eicrUploadMap).thenReturn(emptyMap())
 
             val result = stepConfig.mode(mockState)
 
@@ -83,11 +83,11 @@ class CheckElectricalCertUploadsStepConfigTests {
     @Nested
     inner class GetStepSpecificContent {
         private fun setupStepMocks(includeRemoveStep: Boolean = true) {
-            whenever(mockState.uploadElectricalCertStep).thenReturn(mockUploadElectricalCertStep)
-            whenever(mockUploadElectricalCertStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.uploadEicrStep).thenReturn(mockUploadEicrStep)
+            whenever(mockUploadEicrStep.currentJourneyId).thenReturn("test-journey-id")
             if (includeRemoveStep) {
-                whenever(mockState.removeElectricalCertUploadStep).thenReturn(mockRemoveElectricalCertUploadStep)
-                whenever(mockRemoveElectricalCertUploadStep.currentJourneyId).thenReturn("test-journey-id")
+                whenever(mockState.removeEicrUploadStep).thenReturn(mockRemoveEicrUploadStep)
+                whenever(mockRemoveEicrUploadStep.currentJourneyId).thenReturn("test-journey-id")
             }
             whenever(mockMemberIdService.createParameterPair(any())).thenReturn("memberId" to "0")
         }
@@ -100,7 +100,7 @@ class CheckElectricalCertUploadsStepConfigTests {
                     0 to CertificateUpload(1L, "eicr1.pdf"),
                     1 to CertificateUpload(2L, "eicr2.pdf"),
                 )
-            whenever(mockState.electricalUploadMap).thenReturn(uploadMap)
+            whenever(mockState.eicrUploadMap).thenReturn(uploadMap)
 
             val mockFileUpload1 = mock<FileUpload>()
             val mockFileUpload2 = mock<FileUpload>()
@@ -128,7 +128,7 @@ class CheckElectricalCertUploadsStepConfigTests {
         fun `getStepSpecificContent returns correct upload count in title param`() {
             setupStepMocks()
             val uploadMap = mapOf(0 to CertificateUpload(1L, "eicr.pdf"))
-            whenever(mockState.electricalUploadMap).thenReturn(uploadMap)
+            whenever(mockState.eicrUploadMap).thenReturn(uploadMap)
 
             val mockFileUpload = mock<FileUpload>()
             whenever(mockFileUpload.status).thenReturn(FileUploadStatus.SCANNED)
@@ -144,7 +144,7 @@ class CheckElectricalCertUploadsStepConfigTests {
         @Test
         fun `getStepSpecificContent returns empty upload rows when map is empty`() {
             setupStepMocks(includeRemoveStep = false)
-            whenever(mockState.electricalUploadMap).thenReturn(emptyMap())
+            whenever(mockState.eicrUploadMap).thenReturn(emptyMap())
             whenever(mockMemberIdService.createParameterPair(anyOrNull())).thenReturn("memberId" to "0")
 
             val content = stepConfig.getStepSpecificContent(mockState)

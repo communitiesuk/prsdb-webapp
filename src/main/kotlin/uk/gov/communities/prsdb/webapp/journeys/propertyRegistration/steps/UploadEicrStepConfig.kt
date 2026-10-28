@@ -18,7 +18,7 @@ import kotlin.collections.set
 import kotlin.math.max
 
 @JourneyFrameworkComponent
-class UploadElectricalCertStepConfig(
+class UploadEicrStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
@@ -47,7 +47,7 @@ class UploadElectricalCertStepConfig(
 
     override fun chooseTemplate(state: ElectricalSafetyDetailState): String = "forms/registrationCertificateForm"
 
-    override fun mode(state: ElectricalSafetyDetailState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
+    override fun mode(state: ElectricalSafetyDetailState) = if (state.eicrUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     override fun afterStepDataIsAdded(state: ElectricalSafetyDetailState) {
         val certificateType: CertificateType =
@@ -63,25 +63,25 @@ class UploadElectricalCertStepConfig(
 
             val formModel = getFormModelFromState(state)
 
-            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextElectricalUploadMemberId()
+            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextEicrUploadMemberId()
 
-            val currentMap = state.electricalUploadMap.toMutableMap()
+            val currentMap = state.eicrUploadMap.toMutableMap()
             currentMap[keyToUpdate] = CertificateUpload(fileUploadId, formModel.name)
-            state.electricalUploadMap = currentMap
+            state.eicrUploadMap = currentMap
 
             // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
-            state.highestAssignedElectricalMemberId = max(keyToUpdate, state.highestAssignedElectricalMemberId ?: 0)
+            state.highestAssignedEicrMemberId = max(keyToUpdate, state.highestAssignedEicrMemberId ?: 0)
 
-            state.uploadElectricalCertStep.clearFormData()
+            state.uploadEicrStep.clearFormData()
         }
     }
 }
 
 @JourneyFrameworkComponent
-final class UploadElectricalCertStep(
-    stepConfig: UploadElectricalCertStepConfig,
+final class UploadEicrStep(
+    stepConfig: UploadEicrStepConfig,
 ) : RequestableStep<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "electrical-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"
+        const val ROUTE_SEGMENT = "eicr-$FILE_UPLOAD_URL_SUBSTRING"
     }
 }

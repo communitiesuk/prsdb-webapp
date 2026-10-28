@@ -14,7 +14,7 @@ import kotlin.collections.get
 import kotlin.collections.remove
 
 @JourneyFrameworkComponent
-class RemoveElectricalCertUploadStepConfig(
+class RemoveEicrUploadStepConfig(
     private val collectionKeyParameterService: CollectionKeyParameterService,
     private val uploadService: UploadService,
 ) : AbstractRequestableStepConfig<AnyMembers, RemoveFileFormModel, ElectricalSafetyDetailState>() {
@@ -30,7 +30,7 @@ class RemoveElectricalCertUploadStepConfig(
     override fun chooseTemplate(state: ElectricalSafetyDetailState): String = "forms/areYouSureForm"
 
     override fun mode(state: ElectricalSafetyDetailState) =
-        if (state.electricalUploadMap.isNotEmpty()) {
+        if (state.eicrUploadMap.isNotEmpty()) {
             AnyMembers.SOME_MEMBERS
         } else {
             AnyMembers.NO_MEMBERS
@@ -38,12 +38,12 @@ class RemoveElectricalCertUploadStepConfig(
 
     private fun getFileToRemove(state: ElectricalSafetyDetailState): CertificateUpload? {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
-        return state.electricalUploadMap[keyToRemove]
+        return state.eicrUploadMap[keyToRemove]
     }
 
     override fun beforeAttemptingToReachStep(state: ElectricalSafetyDetailState): Boolean {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
-        val currentMap = state.electricalUploadMap
+        val currentMap = state.eicrUploadMap
 
         return keyToRemove != null && keyToRemove in currentMap.keys
     }
@@ -53,19 +53,19 @@ class RemoveElectricalCertUploadStepConfig(
             return
         }
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
-        val currentMap = state.electricalUploadMap.toMutableMap()
+        val currentMap = state.eicrUploadMap.toMutableMap()
 
         currentMap[keyToRemove]?.let { uploadService.deleteUploadedFile(it.fileUploadId) }
         currentMap.remove(keyToRemove)
-        state.electricalUploadMap = currentMap
+        state.eicrUploadMap = currentMap
     }
 }
 
 @JourneyFrameworkComponent
-final class RemoveElectricalCertUploadStep(
-    stepConfig: RemoveElectricalCertUploadStepConfig,
+final class RemoveEicrUploadStep(
+    stepConfig: RemoveEicrUploadStepConfig,
 ) : RequestableStep<AnyMembers, RemoveFileFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "remove-electrical-safety-certificate-upload"
+        const val ROUTE_SEGMENT = "remove-eicr-upload"
     }
 }
