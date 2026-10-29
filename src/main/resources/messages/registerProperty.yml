@@ -281,6 +281,15 @@ freeholders:
     radios:
       error:
         missing: Select whether you can provide details about the freeholder
+  name:
+    fieldSetHeading:
+      joint: What is this joint freeholder’s name?
+      single: What is this freeholder’s name?
+    fieldSetHint: This can be the name of a person, company or organisation
+    error:
+      missing:
+        joint: What is this joint freeholder’s name?
+        single: What is this freeholder’s name?
   contactType:
     fieldSetHeading: How should we contact the freeholder? (TODO PDJB-1965)
     radios:
