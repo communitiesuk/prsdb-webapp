@@ -1,17 +1,20 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import jakarta.validation.constraints.NotNull
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
 class OwnershipTypeFormModel : FormModel {
     @NotNull(message = "forms.ownershipType.radios.error.missing")
-    var ownershipType: OwnershipType? = null
+    var ownershipType: OwnershipTypeBeforePdjb955? = null
 
     companion object {
+        // TODO PDJB-1957/PDJB-2016: for rows created once pdjb-955-associated-parties is on,
+        //  ownershipTypeBeforePdjb955 is null, so this silently prefills no radio. Populate from
+        //  the new OwnershipType as part of the switch-on work.
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OwnershipTypeFormModel =
-            OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.ownershipType }
+            OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.ownershipTypeBeforePdjb955 }
     }
 }

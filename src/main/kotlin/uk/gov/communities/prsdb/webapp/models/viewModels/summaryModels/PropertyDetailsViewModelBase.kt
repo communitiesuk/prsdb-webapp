@@ -98,7 +98,11 @@ abstract class PropertyDetailsViewModelBase(
     protected fun ownershipTypeRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",
-            MessageKeyConverter.convert(propertyOwnership.ownershipType),
+            // TODO PDJB-1957/PDJB-2016: ownershipTypeBeforePdjb955 is nullable, and rows created
+            //  once pdjb-955-associated-parties is on will not populate it. This !! then throws,
+            //  surfacing as a 500 on the property record page. Render the new OwnershipType here
+            //  (with its message keys) as part of the switch-on work.
+            MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955!!),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )

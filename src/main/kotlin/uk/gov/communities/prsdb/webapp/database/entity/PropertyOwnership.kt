@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
@@ -32,6 +33,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     lateinit var ownershipType: OwnershipType
+
+    // TODO PDJB-2019: Delete this property and its column once PDJB-2016 has removed the
+    //  pdjb-955-associated-parties flag and its flag-off code paths.
+    @Column(name = "ownership_type_before_pdjb955")
+    var ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955? = null
 
     @Column(nullable = false)
     var currentNumHouseholds: Int = 0
@@ -129,6 +135,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     constructor(
         ownershipType: OwnershipType,
+        ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955?,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         isOccupied: Boolean,
@@ -155,6 +162,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         tenancyProvideLater: Boolean? = null,
     ) : this() {
         this.ownershipType = ownershipType
+        this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.isOccupied = isOccupied

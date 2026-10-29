@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -54,7 +55,7 @@ class PropertyOwnershipService(
 ) {
     @Transactional
     fun createPropertyOwnership(
-        ownershipType: OwnershipType,
+        ownershipType: OwnershipTypeBeforePdjb955,
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
@@ -85,7 +86,8 @@ class PropertyOwnershipService(
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipType = OwnershipTypeConverter.convert(ownershipType),
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
@@ -285,12 +287,13 @@ class PropertyOwnershipService(
     @Transactional
     fun updateOwnershipType(
         id: Long,
-        ownershipType: OwnershipType,
+        ownershipType: OwnershipTypeBeforePdjb955,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.ownershipType = ownershipType
+        propertyOwnership.ownershipTypeBeforePdjb955 = ownershipType
+        propertyOwnership.ownershipType = OwnershipTypeConverter.convert(ownershipType)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

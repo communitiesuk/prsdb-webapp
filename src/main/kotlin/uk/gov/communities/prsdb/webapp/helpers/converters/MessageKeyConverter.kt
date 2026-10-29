@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 
@@ -26,7 +26,7 @@ class MessageKeyConverter {
             when (enum) {
                 is PropertyType -> convertPropertyType(enum)
 
-                is OwnershipType -> convertOwnershipType(enum)
+                is OwnershipTypeBeforePdjb955 -> convertOwnershipType(enum)
 
                 is LicensingType -> convertLicensingType(enum)
 
@@ -119,12 +119,12 @@ class MessageKeyConverter {
                 LicensingType.PROVIDE_LATER -> "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater"
             }
 
-        private fun convertOwnershipType(ownershipType: OwnershipType): String =
+        private fun convertOwnershipType(ownershipType: OwnershipTypeBeforePdjb955): String =
             when (ownershipType) {
-                OwnershipType.FREEHOLD -> "forms.ownershipType.radios.option.freehold.label"
-                OwnershipType.LEASEHOLD -> "forms.ownershipType.radios.option.leasehold.label"
-                OwnershipType.SHARE_OF_FREEHOLD -> "forms.ownershipType.radios.option.shareOfFreehold.label"
-                OwnershipType.COMMONHOLD -> "forms.ownershipType.radios.option.commonhold.label"
+                OwnershipTypeBeforePdjb955.FREEHOLD -> "forms.ownershipType.radios.option.freehold.label"
+                OwnershipTypeBeforePdjb955.LEASEHOLD -> "forms.ownershipType.radios.option.leasehold.label"
+                OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD -> "forms.ownershipType.radios.option.shareOfFreehold.label"
+                OwnershipTypeBeforePdjb955.COMMONHOLD -> "forms.ownershipType.radios.option.commonhold.label"
             }
 
         private fun convertPropertyType(propertyType: PropertyType): String =
