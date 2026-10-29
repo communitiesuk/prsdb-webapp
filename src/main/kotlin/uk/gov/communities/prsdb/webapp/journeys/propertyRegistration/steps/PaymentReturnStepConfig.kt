@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -16,7 +17,12 @@ class PaymentReturnStepConfig(
 
     override val changesAnswers = false
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> = emptyMap()
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (state.answersChangedSinceConfirmation) {
+            throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}")
+        }
+        return emptyMap()
+    }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentProcessingForm"
 

@@ -546,10 +546,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
                 val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
 
-                changeBedroomsInSecondTab(page, journeyId)
-
                 paymentSummaryPage.form.submit()
                 val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
+
+                changeBedroomsInSecondTab(page, journeyId)
+
                 paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
                 val errorPage = createValidPage(page, ErrorPage::class)

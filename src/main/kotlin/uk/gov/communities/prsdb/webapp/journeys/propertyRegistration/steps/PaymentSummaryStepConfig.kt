@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -59,6 +60,12 @@ class PaymentSummaryStepConfig(
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentSummary"
 
     override fun mode(state: PropertyRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
+        if (state.answersChangedSinceConfirmation) {
+            throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}")
+        }
+    }
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         state.paymentOutcome = null
