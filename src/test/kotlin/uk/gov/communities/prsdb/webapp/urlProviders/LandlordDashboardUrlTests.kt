@@ -237,7 +237,8 @@ class LandlordDashboardUrlTests(
                 customPropertyType = propertyOwnership.customPropertyType,
                 licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
                 licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
-                ownershipType = propertyOwnership.ownershipType,
+                // TODO PDJB-2019: drop the !! when the legacy column goes.
+                ownershipType = propertyOwnership.ownershipTypeBeforePdjb955!!,
                 isOccupied = propertyOwnership.isOccupied,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numberOfPeople = propertyOwnership.currentNumTenants,

@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import java.util.Locale
@@ -51,8 +51,8 @@ class MessageKeyConverterTests {
     }
 
     @ParameterizedTest
-    @EnumSource(OwnershipType::class)
-    fun `convert returns a resolvable message key for every OwnershipType`(value: OwnershipType) {
+    @EnumSource(OwnershipTypeBeforePdjb955::class)
+    fun `convert returns a resolvable message key for every OwnershipType`(value: OwnershipTypeBeforePdjb955) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 

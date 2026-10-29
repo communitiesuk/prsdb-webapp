@@ -10,7 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.CompleteOwnershipTypeUpdateStepConfig
@@ -52,7 +52,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
         whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
         whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(mockOwnershipTypeFormModel)
-        whenever(mockOwnershipTypeFormModel.ownershipType).thenReturn(OwnershipType.FREEHOLD)
+        whenever(mockOwnershipTypeFormModel.ownershipType).thenReturn(OwnershipTypeBeforePdjb955.FREEHOLD)
     }
 
     @Test

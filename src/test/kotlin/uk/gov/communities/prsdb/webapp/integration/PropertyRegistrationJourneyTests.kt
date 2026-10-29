@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -594,7 +594,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
             assertThat(ownershipTypePage.form.sectionHeader).containsText(ownershipSectionHeader)
             // fill in and submit
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+            ownershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.FREEHOLD)
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
@@ -990,7 +990,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
             assertThat(ownershipTypePage.form.sectionHeader).containsText(ownershipSectionHeader)
             // fill in and submit
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+            ownershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.FREEHOLD)
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
@@ -1973,7 +1973,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
             bedroomsPage.submitNumOfBedrooms(3)
             val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
-            ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+            ownershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.FREEHOLD)
 
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()

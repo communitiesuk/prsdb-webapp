@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -27,7 +27,7 @@ class MockPropertyRegistrationData {
             propertyType: PropertyType = PropertyType.DETACHED_HOUSE,
             licenseType: LicensingType = LicensingType.NO_LICENSING,
             licenceNumber: String = "",
-            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            ownershipType: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied: Boolean = false,
             numberOfHouseholds: Int = 0,
             numberOfPeople: Int = 0,
