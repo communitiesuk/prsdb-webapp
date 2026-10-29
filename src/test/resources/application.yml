@@ -113,3 +113,6 @@ features:
     - name: "pdjb-955-associated-parties"
       enabled: true
       expiry-date: "2027-06-30"
+    - name: "pdjb-1666-eic-issue-date"
+      enabled: false
+      expiry-date: "2026-11-30"
