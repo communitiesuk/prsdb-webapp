@@ -38,15 +38,36 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         val propertyOwnershipId = anyPropertyOwnershipId()
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            propertyOwnership.additionalPropertyOwners.add(
-                AdditionalPropertyOwner(AdditionalPropertyOwnerType.FREEHOLDER, propertyOwnership, name = "A Freeholder"),
+            propertyOwnership.additionalPropertyOwners.addAll(
+                listOf(
+                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.FREEHOLDER, propertyOwnership, name = "A Freeholder"),
+                    // No name, email or address: a landlord may tell us they cannot provide the owner's details
+                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.SUPERIOR_LANDLORD, propertyOwnership),
+                ),
             )
             // Saved separately because the association has no cascade, matching how License is handled
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
-        assertEquals(1, countRowsIn("additional_property_owner"))
         assertEquals(1, countRowsIn("property_manager"))
+        val ownerTypes =
+            jdbcTemplate.queryForList(
+                "SELECT owner_type FROM additional_property_owner WHERE property_ownership_id = ? ORDER BY owner_type",
+                Int::class.java,
+                propertyOwnershipId,
+            )
+        assertEquals(
+            listOf(AdditionalPropertyOwnerType.FREEHOLDER.ordinal, AdditionalPropertyOwnerType.SUPERIOR_LANDLORD.ordinal),
+            ownerTypes,
+        )
+        val superiorLandlord =
+            jdbcTemplate.queryForMap(
+                "SELECT name, email, address_id FROM additional_property_owner WHERE owner_type = ?",
+                AdditionalPropertyOwnerType.SUPERIOR_LANDLORD.ordinal,
+            )
+        assertNull(superiorLandlord["name"])
+        assertNull(superiorLandlord["email"])
+        assertNull(superiorLandlord["address_id"])
 
         // Act
         inTransaction {
@@ -56,31 +77,6 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         // Assert
         assertEquals(0, countRowsIn("additional_property_owner"))
         assertEquals(0, countRowsIn("property_manager"))
-    }
-
-    @Test
-    fun `an additional property owner can be stored without a name email or address`() {
-        // Arrange
-        val propertyOwnershipId = anyPropertyOwnershipId()
-
-        // Act
-        inTransaction {
-            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            propertyOwnership.additionalPropertyOwners.add(
-                AdditionalPropertyOwner(AdditionalPropertyOwnerType.SUPERIOR_LANDLORD, propertyOwnership),
-            )
-            propertyOwnershipRepository.save(propertyOwnership)
-        }
-
-        // Assert
-        val row =
-            jdbcTemplate.queryForMap(
-                "SELECT name, email, address_id FROM additional_property_owner WHERE property_ownership_id = ?",
-                propertyOwnershipId,
-            )
-        assertNull(row["name"])
-        assertNull(row["email"])
-        assertNull(row["address_id"])
     }
 
     @Test
@@ -104,35 +100,5 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         // Assert
         assertEquals(1, countRowsIn("property_manager"))
         assertEquals("Second Manager", jdbcTemplate.queryForObject("SELECT name FROM property_manager", String::class.java))
-    }
-
-    @Test
-    fun `a property ownership can have several additional property owners of different types`() {
-        // Arrange
-        val propertyOwnershipId = anyPropertyOwnershipId()
-
-        // Act
-        inTransaction {
-            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            propertyOwnership.additionalPropertyOwners.addAll(
-                listOf(
-                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.FREEHOLDER, propertyOwnership, name = "A Freeholder"),
-                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.SUPERIOR_LANDLORD, propertyOwnership, name = "A Superior Landlord"),
-                ),
-            )
-            propertyOwnershipRepository.save(propertyOwnership)
-        }
-
-        // Assert
-        val ownerTypes =
-            jdbcTemplate.queryForList(
-                "SELECT owner_type FROM additional_property_owner WHERE property_ownership_id = ? ORDER BY owner_type",
-                Int::class.java,
-                propertyOwnershipId,
-            )
-        assertEquals(
-            listOf(AdditionalPropertyOwnerType.FREEHOLDER.ordinal, AdditionalPropertyOwnerType.SUPERIOR_LANDLORD.ordinal),
-            ownerTypes,
-        )
     }
 }

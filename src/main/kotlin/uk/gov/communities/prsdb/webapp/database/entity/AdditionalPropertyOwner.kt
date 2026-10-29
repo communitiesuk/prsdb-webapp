@@ -18,7 +18,6 @@ class AdditionalPropertyOwner() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var ownerType: AdditionalPropertyOwnerType
 
-    // Nullable: a landlord may tell us they cannot provide the owner's details
     var name: String? = null
 
     var email: String? = null
