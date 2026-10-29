@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
@@ -46,11 +47,23 @@ class PropertyComplianceTests {
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
-    @MethodSource("provideGasCertIssueDates")
+    @MethodSource("provideGasCertExpiryDates")
     fun `isGasSafetyCertExpired is`(
-        issueDate: LocalDate,
+        expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
+        val issueDate = expiryDate.minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        // Month lengths vary, so some dates e.g. 31st January will clamp to November 30th when subtracting 14 months
+        // In the codebase this is fine, but it means that if a test is run on 31st January then:
+        //   Today - 14 months == 30th November
+        //   Yesterday - 14 months == 30th November
+        // So now our test isn't actually testing anything!
+        // This is quite a rare edge case, so just skip the test if any clamping happened when working out the expiry date
+        assumeTrue(
+            issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()) == expiryDate,
+            "No gas certificate issue date expires on $expiryDate",
+        )
+
         val propertyCompliance = PropertyComplianceBuilder().withGasSafetyCert(issueDate).build()
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         assertEquals(expectedIsExpired, propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled = true))
@@ -177,11 +190,11 @@ class PropertyComplianceTests {
                 .build()
 
         @JvmStatic
-        private fun provideGasCertIssueDates() =
+        private fun provideGasCertExpiryDates() =
             arrayOf(
-                arguments(named("was yesterday", currentDate.minusDays(1).minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())), true),
-                arguments(named("is today", currentDate.minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())), false),
-                arguments(named("is tomorrow", currentDate.plusDays(1).minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())), false),
+                arguments(named("was yesterday", currentDate.minusDays(1)), true),
+                arguments(named("is today", currentDate), false),
+                arguments(named("is tomorrow", currentDate.plusDays(1)), false),
             )
 
         @JvmStatic

@@ -88,6 +88,7 @@ class CertificateExpiryHelperTests {
             listOf(
                 arguments(LocalDate.of(2024, 1, 15), LocalDate.of(2025, 3, 15)),
                 arguments(LocalDate.of(2023, 12, 31), LocalDate.of(2025, 2, 28)),
+                arguments(LocalDate.of(2024, 7, 31), LocalDate.of(2025, 9, 30)),
             )
 
         // TODO: PDJB-1926: Remove this provider

@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
@@ -75,7 +76,13 @@ class GasSafetyDetailsStateTests {
     @Test
     fun `getGasSafetyCertificateIsOutdated returns false if the certificate expires today`() {
         // Arrange
-        val issueDate = LocalDate.now().minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        val today = LocalDate.now()
+        val issueDate = today.minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        // Month lengths vary, so some issue dates (e.g. 31st January) aren't the expiry date of any issue date
+        assumeTrue(
+            issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()) == today,
+            "No gas certificate issue date expires today ($today)",
+        )
         val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
 
