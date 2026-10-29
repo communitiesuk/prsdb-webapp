@@ -8,6 +8,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
@@ -33,14 +36,22 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.SelectAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.time.LocalDate
 import java.util.UUID
 
 class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
+    private val alreadyOnPropertyToken = "aaaabbbb-cccc-dddd-eeee-ffff00004444"
 
     @Autowired
     lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
+
+    @Autowired
+    lateinit var landlordRepository: LandlordRepository
+
+    @Autowired
+    lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
@@ -80,6 +91,34 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         confirmPage.form.submit()
 
         assertPageIs(page, InvitationUnavailablePage::class)
+    }
+
+    @Test
+    fun `Landlord who is already on the invited property is redirected to the property record after signing in`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(alreadyOnPropertyToken)
+        acceptOrRejectPage.acceptInvitation()
+        // After pressing accept the service attempts to sign the user in
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "2"))
+    }
+
+    @Test
+    fun `Landlord added to the invited property while in the journey is sent back to the start`(page: Page) {
+        var acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
+        acceptOrRejectPage.acceptInvitation()
+
+        val confirmPage = assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
+
+        // Add the user to the invited property after the confirm page has rendered
+        val landlord = landlordRepository.findById(1).get()
+        propertyOwnershipService.addLandlordToPropertyOwnership(1, landlord)
+
+        confirmPage.form.submit()
+
+        acceptOrRejectPage = assertPageIs(page, AcceptOrRejectPage::class)
+        acceptOrRejectPage.acceptInvitation()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
     }
 
     @Nested

@@ -130,6 +130,19 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
+    fun `beforeAttemptingToReachStep returns whether the user is not already a landlord on the invited property`(
+        userIsLandlordOnProperty: Boolean,
+    ) {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isCurrentUserLandlordOnInvitedPropertyOwnership()).thenReturn(userIsLandlordOnProperty)
+
+        // Act & Assert
+        assertEquals(!userIsLandlordOnProperty, stepConfig.beforeAttemptingToReachStep(mockState))
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
     fun `afterStepDataIsAdded sets tokenIsValid to the result of getTokenIsValid`(tokenIsValid: Boolean) {
         // Arrange
         val stepConfig = setupStepConfig()
