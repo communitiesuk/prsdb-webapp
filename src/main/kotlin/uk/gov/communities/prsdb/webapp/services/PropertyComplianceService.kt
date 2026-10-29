@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -117,18 +116,9 @@ class PropertyComplianceService(
     fun isElectricalSafetyMissing(propertyCompliance: PropertyCompliance): Boolean =
         getElectricalSafetyExpiryDate(propertyCompliance) == null
 
-    fun getElectricalSafetyStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        when {
-            propertyCompliance.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-            isElectricalSafetyMissing(propertyCompliance) -> ComplianceCertStatus.HAS_FAULTS
-            isElectricalSafetyExpired(propertyCompliance) == true -> ComplianceCertStatus.EXPIRED
-            else -> ComplianceCertStatus.ADDED
-        }
-
     fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
         ComplianceStatusDataModel.fromPropertyCompliance(
             propertyCompliance = propertyCompliance,
-            electricalSafetyStatus = getElectricalSafetyStatus(propertyCompliance),
             electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
         )
 

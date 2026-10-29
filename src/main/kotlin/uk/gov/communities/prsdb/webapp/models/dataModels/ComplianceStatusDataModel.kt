@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 data class ComplianceStatusDataModel(
@@ -49,7 +52,6 @@ data class ComplianceStatusDataModel(
     companion object {
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
-            electricalSafetyStatus: ComplianceCertStatus,
             electricalSafetyExpiryDate: LocalDate?,
         ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
@@ -61,7 +63,7 @@ data class ComplianceStatusDataModel(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
-                electricalSafetyStatus = electricalSafetyStatus,
+                electricalSafetyStatus = electricalSafetyStatusOf(propertyCompliance, electricalSafetyExpiryDate),
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
@@ -71,6 +73,24 @@ data class ComplianceStatusDataModel(
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )
+
+        private fun electricalSafetyStatusOf(
+            propertyCompliance: PropertyCompliance,
+            expiryDate: LocalDate?,
+        ): ComplianceCertStatus =
+            when {
+                propertyCompliance.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                expiryDate == null -> ComplianceCertStatus.HAS_FAULTS
+                propertyCompliance.isElectricalSafetyExpired(expiryDate) -> ComplianceCertStatus.EXPIRED
+                else -> ComplianceCertStatus.ADDED
+            }
+
+        private fun PropertyCompliance.isElectricalSafetyExpired(expiryDate: LocalDate): Boolean =
+            when (electricalCertType) {
+                CertificateType.Eic -> CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate)
+                CertificateType.Eicr -> CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate)
+                else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
+            }
 
         internal fun gasSafetyStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.gasSafetyStatus
 
