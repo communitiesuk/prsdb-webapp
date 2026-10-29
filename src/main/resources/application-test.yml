@@ -31,6 +31,9 @@ features:
     - name: "pdjb-955-associated-parties"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-1666-eic-issue-date"
+      enabled: true
+      expiry-date: "2026-11-30"
 
 argon2:
   iterations: 2
