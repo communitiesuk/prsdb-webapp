@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
 
-class PropertyManagerTaskTests : IntegrationTestWithImmutableData("data-local.sql") {
+class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `answering no to using a property manager leaves the task`(page: Page) {
         val propertyManagerPage = navigator.skipToPropertyRegistrationPropertyManagerPage()

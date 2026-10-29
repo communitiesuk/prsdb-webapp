@@ -940,7 +940,7 @@ class Navigator(
         navigateToPropertyRegistrationJourneyStep(CheckPropertyManagerStep.ROUTE_SEGMENT)
 
     // TODO PDJB-1982: remove this and click the Remove link on CheckPropertyManagerFormPagePropertyRegistration in
-    //  PropertyManagerTaskTests once the summary page has its change and remove links
+    //  PropertyRegistrationPropertyManagerSinglePageTests once the summary page has its change and remove links
     fun navigateToPropertyRegistrationRemovePropertyManagerPage() =
         navigateToPropertyRegistrationJourneyStep(RemovePropertyManagerStep.ROUTE_SEGMENT)
 
