@@ -8,6 +8,7 @@ class CertificateExpiryHelper {
     companion object {
         // GAS_SAFETY_CERT_VALIDITY_MONTHS after the issue date, or the anniversary of the issue date when 14 month expiry is disabled
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and use GAS_SAFETY_CERT_VALIDITY_MONTHS only.
+        // Valid up to and including the date
         fun getGasExpiryDate(
             issueDate: LocalDate,
             isGas14MonthExpiryEnabled: Boolean,

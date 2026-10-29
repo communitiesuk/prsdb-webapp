@@ -30,6 +30,7 @@ class LettingAgentPropertyDetailsViewModel(
             (
                 isLicensingProvideLater ||
                     isTenancyProvideLater ||
+                    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
                     ComplianceStatusDataModel
                         .fromPropertyCompliance(propertyCompliance, isGas14MonthExpiryEnabled)
                         .isAnyProvideLater

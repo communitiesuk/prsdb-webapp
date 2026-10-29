@@ -17,7 +17,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-// TODO: PDJB-1926: Remove the isGas14MonthExpiryEnabled arguments from fromPropertyCompliance calls
+// TODO: PDJB-1926: Remove the isGas14MonthExpiryEnabled (true) arguments from fromPropertyCompliance calls
 class ComplianceStatusDataModelTests {
     @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
     @MethodSource("provideShouldShowCertCases")
