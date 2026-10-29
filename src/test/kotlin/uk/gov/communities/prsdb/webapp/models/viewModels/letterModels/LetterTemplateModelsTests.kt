@@ -11,7 +11,7 @@ class LetterTemplateModelsTests {
         @JvmStatic
         private fun templateList() =
             listOf(
-                LetterTemplateTestData(ExampleLetter("Jill Jones"), "/letters/ExampleLetter.md"),
+                LetterTemplateTestData(ExampleLetter("Jill"), "/letters/ExampleLetter.md"),
             )
     }
 
