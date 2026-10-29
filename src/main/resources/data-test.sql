@@ -380,28 +380,28 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date,
                                 property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
                                 custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
-       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365) ON CONFLICT DO NOTHING;
+VALUES (1, true, 1, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (2, true, 0, 2, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (3, true, 0, 2, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (4, true, 0, 2, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (5, true, 0, 2, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
+       (6, true, 1, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (7, true, 1, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (8, true, 1, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (9, true, 1, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (10, true, 1, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (11, true, 1, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
+       (12, true, 0, 2, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (13, true, 0, 2, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (14, true, 0, 2, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (15, true, 0, 2, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (16, true, 0, 2, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
+       (17, true, 0, 2, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
