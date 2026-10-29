@@ -125,7 +125,7 @@ class PropertyComplianceServiceTests {
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
                 mockCurrentUserService,
-                ExpiryDateBackedEicDateCalculator(),
+                BeforePdjb1666EicDateService(),
             )
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
@@ -2286,7 +2286,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `getElectricalSafetyExpiryDate goes through the EIC calculator for an EIC`() {
+        fun `getElectricalSafetyExpiryDate goes through the EIC date service for an EIC`() {
             val propertyCompliance =
                 PropertyComplianceBuilder()
                     .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)

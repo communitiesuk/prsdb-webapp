@@ -11,7 +11,7 @@ import java.time.LocalDate
 // The single place that knows how an EIC's dates map to storage. Implementations use @Service rather than
 // @PrsdbWebService so FF4J can read their bean names without creating every bean when this is flipped to
 // issue-date-backed storage.
-interface EicDateCalculator {
+interface EicDateService {
     fun issueDateFrom(propertyCompliance: PropertyCompliance): LocalDate?
 
     fun expiryDateFrom(propertyCompliance: PropertyCompliance): LocalDate?
@@ -29,8 +29,8 @@ interface EicDateCalculator {
 
 @Primary
 @Conditional(WebServerOnly::class)
-@Service("eic-date-calculator-flag-off")
-class ExpiryDateBackedEicDateCalculator : EicDateCalculator {
+@Service("eic-date-service-flag-off")
+class BeforePdjb1666EicDateService : EicDateService {
     override fun issueDateFrom(propertyCompliance: PropertyCompliance): LocalDate? =
         propertyCompliance.electricalSafetyExpiryDate?.minusYears(EIC_VALIDITY_YEARS.toLong())
 

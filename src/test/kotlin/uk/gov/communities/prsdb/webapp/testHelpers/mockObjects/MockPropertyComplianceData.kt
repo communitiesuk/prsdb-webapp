@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.services.ExpiryDateBackedEicDateCalculator
+import uk.gov.communities.prsdb.webapp.services.BeforePdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import java.time.Instant
 import java.time.LocalDate
@@ -79,7 +79,7 @@ class MockPropertyComplianceData {
                 mock(),
                 mock(),
                 mock(),
-                ExpiryDateBackedEicDateCalculator(),
+                BeforePdjb1666EicDateService(),
             )
         }
 

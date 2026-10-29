@@ -43,7 +43,7 @@ class PropertyComplianceService(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val currentUserService: CurrentUserService,
-    private val eicDateCalculator: EicDateCalculator,
+    private val eicDateService: EicDateService,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -53,12 +53,12 @@ class PropertyComplianceService(
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
     fun getEicIssueDate(propertyCompliance: PropertyCompliance): LocalDate? =
-        eicDateCalculator.issueDateFrom(
+        eicDateService.issueDateFrom(
             requireEic(propertyCompliance),
         )
 
     fun getEicExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
-        eicDateCalculator.expiryDateFrom(
+        eicDateService.expiryDateFrom(
             requireEic(propertyCompliance),
         )
 
@@ -70,7 +70,7 @@ class PropertyComplianceService(
     ) {
         val propertyCompliance = requireEic(getComplianceForProperty(propertyOwnershipId))
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
-        eicDateCalculator.applyIssueDate(propertyCompliance, issueDate)
+        eicDateService.applyIssueDate(propertyCompliance, issueDate)
         propertyComplianceRepository.save(propertyCompliance)
     }
 
@@ -82,13 +82,13 @@ class PropertyComplianceService(
     ) {
         val propertyCompliance = requireEic(getComplianceForProperty(propertyOwnershipId))
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
-        eicDateCalculator.applyExpiryDate(propertyCompliance, expiryDate)
+        eicDateService.applyExpiryDate(propertyCompliance, expiryDate)
         propertyComplianceRepository.save(propertyCompliance)
     }
 
     fun getElectricalSafetyExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
         when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> eicDateCalculator.expiryDateFrom(propertyCompliance)
+            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
             // Any other cert type, including none, keeps reading the stored column so that records predating
             // the cert type column behave exactly as they did before this date access moved onto the service.
             else -> propertyCompliance.electricalSafetyExpiryDate
@@ -97,7 +97,7 @@ class PropertyComplianceService(
     fun isElectricalSafetyExpired(propertyCompliance: PropertyCompliance): Boolean? =
         when (propertyCompliance.electricalCertType) {
             CertificateType.Eic ->
-                eicDateCalculator.expiryDateFrom(propertyCompliance)?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it) }
+                eicDateService.expiryDateFrom(propertyCompliance)?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it) }
             CertificateType.Eicr ->
                 propertyCompliance.electricalSafetyExpiryDate?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it) }
             // A record holding an electrical date without a usable cert type is inconsistent, so it is rejected
@@ -229,7 +229,7 @@ class PropertyComplianceService(
         expiryDate: LocalDate?,
     ) {
         when (record.electricalCertType) {
-            CertificateType.Eic -> eicDateCalculator.applyExpiryDate(record, expiryDate)
+            CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
             else -> record.electricalSafetyExpiryDate = expiryDate
         }
     }

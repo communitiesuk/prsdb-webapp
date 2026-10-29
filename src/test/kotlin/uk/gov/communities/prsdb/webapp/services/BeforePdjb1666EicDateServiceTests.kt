@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 
-class ExpiryDateBackedEicDateCalculatorTests {
-    private val calculator = ExpiryDateBackedEicDateCalculator()
+class BeforePdjb1666EicDateServiceTests {
+    private val service = BeforePdjb1666EicDateService()
 
     @Test
     fun `issueDateFrom returns five years before the stored expiry date`() {
@@ -17,7 +17,7 @@ class ExpiryDateBackedEicDateCalculatorTests {
                 .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
                 .build()
 
-        assertEquals(LocalDate.of(2025, 6, 1), calculator.issueDateFrom(propertyCompliance))
+        assertEquals(LocalDate.of(2025, 6, 1), service.issueDateFrom(propertyCompliance))
     }
 
     @Test
@@ -27,21 +27,21 @@ class ExpiryDateBackedEicDateCalculatorTests {
                 .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
                 .build()
 
-        assertEquals(LocalDate.of(2030, 6, 1), calculator.expiryDateFrom(propertyCompliance))
+        assertEquals(LocalDate.of(2030, 6, 1), service.expiryDateFrom(propertyCompliance))
     }
 
     @Test
     fun `issueDateFrom returns null when no expiry date is stored`() {
         val propertyCompliance = PropertyComplianceBuilder().build()
 
-        assertNull(calculator.issueDateFrom(propertyCompliance))
+        assertNull(service.issueDateFrom(propertyCompliance))
     }
 
     @Test
     fun `applyIssueDate stores an expiry date five years later`() {
         val propertyCompliance = PropertyComplianceBuilder().build()
 
-        calculator.applyIssueDate(propertyCompliance, LocalDate.of(2025, 6, 1))
+        service.applyIssueDate(propertyCompliance, LocalDate.of(2025, 6, 1))
 
         assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
     }
@@ -50,7 +50,7 @@ class ExpiryDateBackedEicDateCalculatorTests {
     fun `applyExpiryDate stores the expiry date unchanged`() {
         val propertyCompliance = PropertyComplianceBuilder().build()
 
-        calculator.applyExpiryDate(propertyCompliance, LocalDate.of(2030, 6, 1))
+        service.applyExpiryDate(propertyCompliance, LocalDate.of(2030, 6, 1))
 
         assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
     }
@@ -60,7 +60,7 @@ class ExpiryDateBackedEicDateCalculatorTests {
         val propertyCompliance =
             PropertyComplianceBuilder().withElectricalSafety(certType = CertificateType.Eic).build()
 
-        calculator.applyIssueDate(propertyCompliance, null)
+        service.applyIssueDate(propertyCompliance, null)
 
         assertNull(propertyCompliance.electricalSafetyExpiryDate)
     }
