@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.constants
 
 // TODO: PDJB-1926: Remove this
-const val GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER = 1
+const val GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY = 1
 
 const val GAS_SAFETY_CERT_VALIDITY_MONTHS = 14
 

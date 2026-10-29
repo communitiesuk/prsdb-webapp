@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -55,7 +55,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
                 LocalDate
                     .now()
                     .minusMonths(13)
-                    .plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER.toLong())
+                    .plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY.toLong())
                     .format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
         }

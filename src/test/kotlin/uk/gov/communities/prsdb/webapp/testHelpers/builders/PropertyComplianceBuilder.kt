@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -254,9 +254,8 @@ class PropertyComplianceBuilder {
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 // TODO: PDJB-1926: Use GAS_SAFETY_CERT_VALIDITY_MONTHS
                 .withGasSafetyCert(
-                    issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER.toLong() + 1),
-                )
-                .withElectricalSafety(expiryDate = LocalDate.now().minusYears(6))
+                    issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY.toLong() + 1),
+                ).withElectricalSafety(expiryDate = LocalDate.now().minusYears(6))
                 .withElectricalCertType()
                 .withEpc()
                 .build()

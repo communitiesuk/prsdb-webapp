@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
@@ -2559,7 +2559,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 gasCertIssueDatePage.submitDate(
                     DateTimeHelper()
                         .getCurrentDateInUK()
-                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER, days = 1)),
+                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY, days = 1)),
                 )
 
                 assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
@@ -2571,7 +2571,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 gasCertIssueDatePage.submitDate(
                     DateTimeHelper()
                         .getCurrentDateInUK()
-                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER)),
+                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY)),
                 )
 
                 assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)

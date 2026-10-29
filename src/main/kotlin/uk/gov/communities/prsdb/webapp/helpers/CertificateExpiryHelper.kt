@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import java.time.LocalDate
 
 class CertificateExpiryHelper {
@@ -16,7 +16,7 @@ class CertificateExpiryHelper {
             if (isGas14MonthExpiryEnabled) {
                 issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
             } else {
-                issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_LATER.toLong())
+                issueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY.toLong())
             }
 
         // Valid up to and including the expiry date
