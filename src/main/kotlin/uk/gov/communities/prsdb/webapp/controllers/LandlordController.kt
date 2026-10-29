@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OutstandingActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -38,6 +39,7 @@ class LandlordController(
     private val propertyComplianceService: PropertyComplianceService,
     private val usersIncompletePropertyService: UsersIncompletePropertyService,
     private val featureFlagManager: FeatureFlagManager,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -147,9 +149,10 @@ class LandlordController(
             return "redirect:$OUTSTANDING_ACTIONS_URL"
         }
 
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
         val outstandingActions =
             pagedOutstandingActions.content.map {
-                OutstandingActionViewModelBuilder.fromDataModel(it)
+                OutstandingActionViewModelBuilder.fromDataModel(it, backUrlKey)
             }
 
         model.addAttribute("outstandingActions", outstandingActions)

@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -829,6 +831,40 @@ class OutstandingActionViewModelBuilderTests {
 
             assertEquals(
                 PropertyDetailsController.getPropertyDetailsPath(1L),
+                viewModel.actions?.single()?.url,
+            )
+        }
+
+        @Test
+        fun `go to property link to the property details tab overrides the back link when a current url key is given`() {
+            val viewModel =
+                OutstandingActionViewModelBuilder.fromDataModel(buildDataModel(isTenancyProvideLater = true), currentUrlKey = 42)
+
+            assertEquals(
+                "${PropertyDetailsController.getPropertyDetailsPath(1L)}?$WITH_BACK_URL_PARAMETER_NAME=42",
+                viewModel.actions?.single()?.url,
+            )
+        }
+
+        @Test
+        fun `go to property link to the compliance tab overrides the back link when a current url key is given`() {
+            val complianceStatus =
+                ComplianceStatusDataModel(
+                    propertyOwnershipId = 1L,
+                    singleLineAddress = "123 Test Street",
+                    registrationNumber = "P-XXXX-XXXX",
+                    gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
+                    electricalSafetyStatus = ComplianceCertStatus.ADDED,
+                    epcStatus = ComplianceCertStatus.ADDED,
+                    isComplete = true,
+                    isOccupied = true,
+                )
+
+            val viewModel =
+                OutstandingActionViewModelBuilder.fromDataModel(buildDataModel(complianceStatus = complianceStatus), currentUrlKey = 42)
+
+            assertEquals(
+                "${PropertyDetailsController.getPropertyDetailsPath(1L)}?$WITH_BACK_URL_PARAMETER_NAME=42#$COMPLIANCE_INFO_FRAGMENT",
                 viewModel.actions?.single()?.url,
             )
         }
