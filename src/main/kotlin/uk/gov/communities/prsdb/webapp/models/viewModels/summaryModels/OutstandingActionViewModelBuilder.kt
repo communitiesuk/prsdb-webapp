@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -14,11 +15,14 @@ class OutstandingActionViewModelBuilder {
     companion object {
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
-        fun fromDataModel(dataModel: OutstandingActionsDataModel): SummaryCardViewModel =
+        fun fromDataModel(
+            dataModel: OutstandingActionsDataModel,
+            currentUrlKey: Int? = null,
+        ): SummaryCardViewModel =
             SummaryCardViewModel(
                 title = dataModel.singleLineAddress,
                 summaryList = getSummaryList(dataModel),
-                actions = getActions(dataModel),
+                actions = getActions(dataModel, currentUrlKey),
                 insetViewModel = dataModel.complianceStatus?.let { getInsetViewModel(it) },
             )
 
@@ -157,7 +161,10 @@ class OutstandingActionViewModelBuilder {
                 null
             }
 
-        private fun getActions(dataModel: OutstandingActionsDataModel): List<SummaryCardActionViewModel> =
+        private fun getActions(
+            dataModel: OutstandingActionsDataModel,
+            currentUrlKey: Int?,
+        ): List<SummaryCardActionViewModel> =
             listOf(
                 SummaryCardActionViewModel(
                     "outstandingActions.action.goToProperty",
@@ -165,7 +172,7 @@ class OutstandingActionViewModelBuilder {
                         PropertyDetailsController.getPropertyDetailsPath(dataModel.propertyOwnershipId)
                     } else {
                         PropertyDetailsController.getPropertyCompliancePath(dataModel.propertyOwnershipId)
-                    },
+                    }.overrideBackLinkForUrl(currentUrlKey),
                 ),
             )
     }

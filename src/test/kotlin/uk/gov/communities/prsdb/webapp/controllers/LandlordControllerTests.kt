@@ -293,11 +293,13 @@ class LandlordControllerTests(
         whenever(propertyOwnershipService.getOutstandingActionsForLandlord(any(), any())).thenReturn(
             PageImpl(listOf(outstandingActionsDataModel)),
         )
+        val currentUrlKey = 42
+        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
         // Act and Assert
         val expectedOutstandingActions =
             listOf(
-                OutstandingActionViewModelBuilder.fromDataModel(outstandingActionsDataModel),
+                OutstandingActionViewModelBuilder.fromDataModel(outstandingActionsDataModel, currentUrlKey),
             )
 
         mvc

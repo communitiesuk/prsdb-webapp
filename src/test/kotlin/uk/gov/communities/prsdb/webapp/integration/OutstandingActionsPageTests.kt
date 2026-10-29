@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OutstandingActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OutstandingActionViewModelBuilder.Companion.DATE_FORMATTER
@@ -286,6 +287,16 @@ class OutstandingActionsPageTests : IntegrationTest() {
             outstandingActionsPage.findSummaryCard("10 Licensing Lane").getAction("Go to property").link.clickAndWait()
             val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
             assertEquals(PROPERTY_DETAILS_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
+        }
+
+        @Test
+        fun `the property record back link returns to the outstanding actions page`(page: Page) {
+            val outstandingActionsPage = navigator.goToOutstandingActions()
+            outstandingActionsPage.findSummaryCard("10 Licensing Lane").getAction("Go to property").link.clickAndWait()
+            val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+
+            propertyDetailsPage.backLink.clickAndWait()
+            assertPageIs(page, OutstandingActionsPage::class)
         }
     }
 }
