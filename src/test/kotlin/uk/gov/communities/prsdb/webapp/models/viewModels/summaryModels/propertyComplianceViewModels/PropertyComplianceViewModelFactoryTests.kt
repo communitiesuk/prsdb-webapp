@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Start
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,15 +32,16 @@ class PropertyComplianceViewModelFactoryTests {
         whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
     }
 
-    // TODO: PDJB-1926: Remove featureFlagManager mock() arguments
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource, mock())
-    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mock())
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager and its arguments
+    private val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource, mockFeatureFlagManager)
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mockFeatureFlagManager)
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
-            EpcViewModelFactory(mockMessageSource, mock()),
-            mock(),
+            EpcViewModelFactory(mockMessageSource, mockFeatureFlagManager),
+            mockFeatureFlagManager,
         )
 
     private val propertyOwnershipId = 1L

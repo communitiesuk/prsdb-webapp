@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -107,12 +108,13 @@ class LettingAgentPropertyDetailsControllerTests(
     private fun createComplianceViewModel(): PropertyComplianceViewModel {
         val messageSource = mock<MessageSource>()
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
-        // TODO: PDJB-1926: Remove the featureFlagManager mock() arguments
+        // TODO: PDJB-1926: Remove mockFeatureFlagManager and its arguments
+        val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
         return PropertyComplianceViewModelFactory(
-            GasSafetyViewModelFactory(mock(), messageSource, mock()),
-            ElectricalSafetyViewModelFactory(mock(), messageSource, mock()),
-            EpcViewModelFactory(messageSource, mock()),
-            mock(),
+            GasSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager),
+            ElectricalSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager),
+            EpcViewModelFactory(messageSource, mockFeatureFlagManager),
+            mockFeatureFlagManager,
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
             viewType = PropertyDetailsViewType.LETTING_AGENT,
