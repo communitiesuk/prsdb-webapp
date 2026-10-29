@@ -11,11 +11,8 @@ class OwnershipTypeFormModel : FormModel {
     var ownershipType: OwnershipTypeBeforePdjb955? = null
 
     companion object {
-        // TODO PDJB-2016: check whether this form model is still used once the three new pages
-        //  ("Do you own this property" PDJB-1959, "What kind of ownership do you have" PDJB-1960
-        //  and "Which type of freehold do you have" PDJB-1961) replace the single ownership type
-        //  question. The new OwnershipType is derived from all three, so this model is likely to
-        //  be unused - if so, delete it along with the flag.
+        // TODO PDJB-2016: check whether this form model is still used once the ASSOCIATED_PARTIES
+        //  flag is always on / deleted
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OwnershipTypeFormModel =
             OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.ownershipTypeBeforePdjb955 }
     }

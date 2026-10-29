@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -238,7 +237,8 @@ class LandlordDashboardUrlTests(
                 customPropertyType = propertyOwnership.customPropertyType,
                 licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
                 licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                // TODO PDJB-1957: make this work for the new OwnershipType
+                ownershipType = propertyOwnership.ownershipTypeBeforePdjb955!!,
                 isOccupied = propertyOwnership.isOccupied,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numberOfPeople = propertyOwnership.currentNumTenants,
