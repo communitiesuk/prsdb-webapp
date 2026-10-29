@@ -97,7 +97,8 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withBedrooms()
                         .withOwnershipType()
                         .withHasNoJointLandlords()
-                        .withOwnershipStructureAndPropertyManager()
+                        .withOwnershipStructure()
+                        .withNoPropertyManager()
                         .withOccupancyStatus(true)
                         .withLandlordProvidesRentalDetails(),
                 )
@@ -123,7 +124,8 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withBedrooms()
                         .withOwnershipType()
                         .withHasNoJointLandlords()
-                        .withOwnershipStructureAndPropertyManager()
+                        .withOwnershipStructure()
+                        .withNoPropertyManager()
                         .withOccupancyStatus(false),
                 )
             taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")

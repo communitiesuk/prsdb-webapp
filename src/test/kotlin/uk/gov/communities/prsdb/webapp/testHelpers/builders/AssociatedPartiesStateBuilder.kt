@@ -8,9 +8,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryPropertyManagerYesOrNoFormModel
 
 interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder<SelfType>> {
     fun withSubmittedValue(
@@ -47,16 +47,20 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withPropertyManager(): SelfType {
-        withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
-    fun withOwnershipStructureAndPropertyManager(): SelfType {
+    fun withOwnershipStructure(): SelfType {
         withOwnsProperty()
         withOwnershipKind()
         withFreeholdType()
-        withPropertyManager()
+        return self()
+    }
+
+    // TODO PDJB-1980: update this to use the real "Are you using a property manager?" form model
+    fun withNoPropertyManager(): SelfType {
+        val propertyManagerFormModel =
+            TemporaryPropertyManagerYesOrNoFormModel().apply {
+                answer = false
+            }
+        withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
         return self()
     }
 }

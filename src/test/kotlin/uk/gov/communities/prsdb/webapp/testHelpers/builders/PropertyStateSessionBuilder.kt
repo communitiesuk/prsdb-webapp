@@ -12,11 +12,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
@@ -25,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -112,19 +106,6 @@ class PropertyStateSessionBuilder(
         return this
     }
 
-    // TODO PDJB-959: replace with the real ownership structure answers once that task's routing is finished and its
-    //  pages are built (PDJB-1959, PDJB-1960, PDJB-1961, PDJB-2007, PDJB-2008)
-    fun withCompletedOwnershipStructurePlaceholders(): PropertyStateSessionBuilder {
-        listOf(
-            OwnsPropertyStep.ROUTE_SEGMENT,
-            OwnershipKindStep.ROUTE_SEGMENT,
-            FreeholdTypeStep.ROUTE_SEGMENT,
-            FreeholdersStep.ROUTE_SEGMENT,
-            SuperiorLandlordsStep.ROUTE_SEGMENT,
-        ).forEach { withSubmittedValue(it, NoInputFormModel()) }
-        return this
-    }
-
     companion object {
         fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
             if (customLookedUpAddresses != null) {
@@ -147,7 +128,8 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
 
         fun beforePropertyRegistrationOwnershipType() =
             beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
@@ -157,7 +139,7 @@ class PropertyStateSessionBuilder(
                 .withPropertyType()
                 .withBedrooms()
                 .withHasNoJointLandlords()
-                .withCompletedOwnershipStructurePlaceholders()
+                .withOwnershipStructure()
 
         fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
 
@@ -166,7 +148,8 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
 
@@ -175,7 +158,8 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
 
         fun beforePropertyRegistrationRentedOutSelectiveLicence() =
             beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
@@ -231,7 +215,8 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationInviteJointLandlords()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
                 .withOccupancyStatus(propertyIsOccupied)
                 .apply { if (propertyIsOccupied) withLandlordProvidesRentalDetails() }
 
@@ -481,7 +466,8 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withBedrooms()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
@@ -491,7 +477,8 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
-                .withOwnershipStructureAndPropertyManager()
+                .withOwnershipStructure()
+                .withNoPropertyManager()
                 .withOccupancyStatus(true)
                 .withDelegatedToLettingAgent()
 

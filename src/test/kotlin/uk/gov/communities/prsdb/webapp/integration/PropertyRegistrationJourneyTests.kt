@@ -639,9 +639,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitAccountEmail()
@@ -1014,9 +1013,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // TODO PDJB-2008: update this usage when the real superior landlords pages are added
             val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
             superiorLandlordsPage.submit()
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
@@ -2000,8 +1998,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
             // TODO PDJB-1961: update this usage when the real freehold type page is added
             assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
-            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitNo()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitAccountEmail()

@@ -4,11 +4,13 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
@@ -31,9 +33,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
 
@@ -54,9 +55,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-2007: update this usage when the real freeholders pages are added
             val freeholdersPage = assertPageIs(page, FreeholdersFormPagePropertyRegistration::class)
             freeholdersPage.submit()
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
 
@@ -77,9 +77,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-2008: update this usage when the real superior landlords pages are added
             val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
             superiorLandlordsPage.submit()
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
 
@@ -97,9 +96,23 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-2008: update this usage when the real superior landlords pages are added
             val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
             superiorLandlordsPage.submit()
-            // TODO PDJB-2009: update this usage when the real property manager pages are added
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submit()
+            propertyManagerPage.submitNo()
+            assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class PropertyManagerTests {
+        @Test
+        fun `Landlords using a property manager provide its details and check them before leaving the task`(page: Page) {
+            val propertyManagerPage = navigator.skipToPropertyRegistrationPropertyManagerPage()
+            propertyManagerPage.submitYes()
+
+            val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+            propertyManagerDetailsPage.form.submit()
+            val checkPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+            checkPropertyManagerPage.form.submit()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
     }
