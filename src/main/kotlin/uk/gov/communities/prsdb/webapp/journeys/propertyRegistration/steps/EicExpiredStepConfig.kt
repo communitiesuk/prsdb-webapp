@@ -25,9 +25,9 @@ class EicExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
 
     override fun chooseTemplate(state: ElectricalSafetyDetailState) =
         if (state.isOccupied) {
-            "forms/electricalSafetyCertificateExpiredForOccupiedProperty"
+            "forms/eicExpiredForOccupiedProperty"
         } else {
-            "forms/electricalSafetyCertificateExpiredForUnoccupiedProperty"
+            "forms/eicExpiredForUnoccupiedProperty"
         }
 
     override fun mode(state: ElectricalSafetyDetailState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }

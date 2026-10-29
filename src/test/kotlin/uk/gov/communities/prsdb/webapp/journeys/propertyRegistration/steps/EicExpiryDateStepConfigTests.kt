@@ -8,6 +8,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
+import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -40,7 +41,7 @@ class EicExpiryDateStepConfigTests {
         val stepConfig = setupStepConfig()
         whenever(mockState.getEicIsOutdated()).thenReturn(true)
 
-        assertEquals(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED, stepConfig.mode(mockState))
+        assertEquals(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED, stepConfig.mode(mockState))
     }
 
     @Test
@@ -48,7 +49,7 @@ class EicExpiryDateStepConfigTests {
         val stepConfig = setupStepConfig()
         whenever(mockState.getEicIsOutdated()).thenReturn(false)
 
-        assertEquals(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE, stepConfig.mode(mockState))
+        assertEquals(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE, stepConfig.mode(mockState))
     }
 
     private fun setupStepConfig(): EicExpiryDateStepConfig {

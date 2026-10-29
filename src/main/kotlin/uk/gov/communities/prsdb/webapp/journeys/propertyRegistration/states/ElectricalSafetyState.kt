@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicUploadStep
@@ -60,8 +61,19 @@ interface ElectricalSafetyDetailState : JourneyState {
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
-    // Only one of the EIC and EICR branches can be reachable at a time
-    fun getElectricalCertificateExpiryDateIfReachable() = getEicExpiryDateIfReachable() ?: getEicrExpiryDateIfReachable()
+    fun <T> getEicOrEicrValue(
+        eicValue: () -> T,
+        eicrValue: () -> T,
+    ): T? =
+        when (hasElectricalCertStep.outcome) {
+            HasElectricalCertMode.HAS_EIC -> eicValue()
+            HasElectricalCertMode.HAS_EICR -> eicrValue()
+            else -> null
+        }
+
+    // TODO PDJB-1669: Remove this once EICs use an issue date rather than an expiry date
+    fun getElectricalCertificateExpiryDateIfReachable() =
+        getEicOrEicrValue({ getEicExpiryDateIfReachable() }, { getEicrExpiryDateIfReachable() })
 
     fun getEicIsOutdated(): Boolean? =
         getEicExpiryDateIfReachable()?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it.toJavaLocalDate()) }
@@ -69,7 +81,7 @@ interface ElectricalSafetyDetailState : JourneyState {
     fun getEicrIsOutdated(): Boolean? =
         getEicrExpiryDateIfReachable()?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it.toJavaLocalDate()) }
 
-    fun getElectricalCertificateIsOutdated(): Boolean? = getEicIsOutdated() ?: getEicrIsOutdated()
+    fun getElectricalCertificateIsOutdated(): Boolean? = getEicOrEicrValue({ getEicIsOutdated() }, { getEicrIsOutdated() })
 
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
         hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
@@ -83,11 +95,10 @@ interface ElectricalSafetyDetailState : JourneyState {
 
     val electricalUploadIds: List<Long>
         get() =
-            when {
-                uploadEicStep.isStepReachable -> eicUploadMap.values.map { it.fileUploadId }
-                uploadEicrStep.isStepReachable -> eicrUploadMap.values.map { it.fileUploadId }
-                else -> emptyList()
-            }
+            getEicOrEicrValue(
+                { if (uploadEicStep.isStepReachable) eicUploadMap.values.map { it.fileUploadId } else null },
+                { if (uploadEicrStep.isStepReachable) eicrUploadMap.values.map { it.fileUploadId } else null },
+            ) ?: emptyList()
 
     var eicUploadMap: Map<Int, CertificateUpload>
     var highestAssignedEicMemberId: Int?

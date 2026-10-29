@@ -41,7 +41,7 @@ class EicExpiredStepConfigTests {
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
 
-        assertEquals("forms/electricalSafetyCertificateExpiredForOccupiedProperty", stepConfig.chooseTemplate(mockState))
+        assertEquals("forms/eicExpiredForOccupiedProperty", stepConfig.chooseTemplate(mockState))
     }
 
     @Test
@@ -49,7 +49,7 @@ class EicExpiredStepConfigTests {
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
 
-        assertEquals("forms/electricalSafetyCertificateExpiredForUnoccupiedProperty", stepConfig.chooseTemplate(mockState))
+        assertEquals("forms/eicExpiredForUnoccupiedProperty", stepConfig.chooseTemplate(mockState))
     }
 
     private fun setupStepConfig(): EicExpiredStepConfig {

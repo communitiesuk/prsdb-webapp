@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEpcAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
@@ -130,6 +131,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicUploadFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicrUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
@@ -1711,14 +1713,47 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 electricalCertExpiryDatePage.heading,
             ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
             electricalCertExpiryDatePage.submitDate(validExpiryDate)
-            val uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+            var uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
 
             // Upload Electrical Cert - render page
             assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
             uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+            var checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
 
-            // Check Electrical Safety Answers - EICR variant verified by heading text
+            // Check Electrical Cert Uploads - render page
+            assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+            checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
+            uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+
+            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+            checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
+
+            checkElectricalCertUploadsPage.table
+                .getClickableCell(0, 2)
+                .link
+                .clickAndWait()
+
+            // Remove Electrical Cert Upload - render page
+            val removeElectricalCertUploadPage =
+                assertPageIs(page, RemoveEicrUploadFormPagePropertyRegistration::class)
+            removeElectricalCertUploadPage.form.radios.selectValue("true")
+            removeElectricalCertUploadPage.form.submit()
+
+            checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+            checkElectricalCertUploadsPage.form.submit()
+
+            // Check Electrical Safety Answers - render page
+            val checkElectricalSafetyAnswersPage =
+                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         }
 
         @Test

@@ -22,7 +22,7 @@ class CheckEicUploadsStepConfig(
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getUploadCount(state),
-            "title" to "uploads.checkUploads.electricalSafety.pageTitle",
+            "title" to "uploads.checkUploads.electricalSafety.eic.pageTitle",
             "summaryText" to "uploads.checkUploads.paragraph",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",

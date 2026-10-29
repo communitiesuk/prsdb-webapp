@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicEx
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
@@ -26,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 
 @JourneyFrameworkComponent("propertyRegistrationElectricalSafetyDetailsTask")
 class ElectricalSafetyDetailsTask(
@@ -80,8 +80,8 @@ class ElectricalSafetyDetailsTask(
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EIC) }
                 nextStep { mode ->
                     when (mode) {
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicExpiredStep
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEic
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicExpiredStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEic
                     }
                 }
                 savable()
@@ -89,7 +89,7 @@ class ElectricalSafetyDetailsTask(
             step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedEic) {
                 parents {
                     journey.eicExpiryDateStep.hasOutcome(
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
                     )
                 }
                 nextStep { mode ->
@@ -103,7 +103,7 @@ class ElectricalSafetyDetailsTask(
             step(journey.uploadEicStep) {
                 routeSegment(UploadEicStep.ROUTE_SEGMENT)
                 parents {
-                    journey.eicExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
+                    journey.eicExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
                 }
                 nextStep { journey.checkEicUploadsStep }
                 savable()
@@ -131,7 +131,7 @@ class ElectricalSafetyDetailsTask(
             step(journey.eicExpiredStep) {
                 routeSegment(EicExpiredStep.ROUTE_SEGMENT)
                 parents {
-                    journey.eicExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
+                    journey.eicExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { exitStep }
                 savable()
@@ -141,8 +141,8 @@ class ElectricalSafetyDetailsTask(
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EICR) }
                 nextStep { mode ->
                     when (mode) {
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicrExpiredStep
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEicr
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicrExpiredStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEicr
                     }
                 }
                 savable()
@@ -150,7 +150,7 @@ class ElectricalSafetyDetailsTask(
             step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedEicr) {
                 parents {
                     journey.eicrExpiryDateStep.hasOutcome(
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
                     )
                 }
                 nextStep { mode ->
@@ -164,7 +164,7 @@ class ElectricalSafetyDetailsTask(
             step(journey.uploadEicrStep) {
                 routeSegment(UploadEicrStep.ROUTE_SEGMENT)
                 parents {
-                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
+                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
                 }
                 nextStep { journey.checkEicrUploadsStep }
                 savable()
@@ -192,7 +192,7 @@ class ElectricalSafetyDetailsTask(
             step(journey.eicrExpiredStep) {
                 routeSegment(EicrExpiredStep.ROUTE_SEGMENT)
                 parents {
-                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
+                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { exitStep }
                 savable()

@@ -2,39 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SecondaryButton
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 
 class CheckEicUploadsFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckEicUploadsStep.ROUTE_SEGMENT}") {
-    override val expectedTitleHeading: String
-        get() = table.rows.count().let { "You’ve uploaded $it electrical safety certificate file${if (it == 1) "" else "s"}" }
-
-    val backLink = BackLink.default(page)
+) : CheckElectricalCertUploadsFormBasePage(
+        page,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckEicUploadsStep.ROUTE_SEGMENT}",
+    ) {
     val heading = Heading(page.locator("h1"))
-
-    val form = CheckUploadsForm(page)
     val sectionHeader = SectionHeader(page.locator("main"))
-
-    val table = CheckUploadsTable(page)
-
-    class CheckUploadsForm(
-        page: Page,
-    ) : PostForm(page) {
-        val addAnotherButton = SecondaryButton(locator)
-    }
-
-    class CheckUploadsTable(
-        page: Page,
-    ) : Table(page) {
-        val actionsHeader = headerRow.getCell(2)
-        val actionsHeaderVisuallyHiddenText = headerRow.getVisuallyHiddenText(2)
-    }
 }

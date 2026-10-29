@@ -4,11 +4,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
+import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 
 @JourneyFrameworkComponent
 class EicrExpiryDateStepConfig :
-    AbstractRequestableStepConfig<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>() {
+    AbstractRequestableStepConfig<ElectricalCertExpiryStatus, AnyDateFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = AnyDateFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState): Map<String, Any?> =
@@ -22,8 +23,8 @@ class EicrExpiryDateStepConfig :
     override fun mode(state: ElectricalSafetyDetailState) =
         state.getEicrIsOutdated()?.let {
             when (it) {
-                true -> ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED
-                false -> ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE
+                true -> ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED
+                false -> ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE
             }
         }
 }
@@ -31,13 +32,8 @@ class EicrExpiryDateStepConfig :
 @JourneyFrameworkComponent
 final class EicrExpiryDateStep(
     stepConfig: EicrExpiryDateStepConfig,
-) : RequestableStep<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>(stepConfig) {
+) : RequestableStep<ElectricalCertExpiryStatus, AnyDateFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "eicr-expiry-date"
     }
-}
-
-enum class ElectricalCertExpiryDateMode {
-    ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED,
-    ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
 }

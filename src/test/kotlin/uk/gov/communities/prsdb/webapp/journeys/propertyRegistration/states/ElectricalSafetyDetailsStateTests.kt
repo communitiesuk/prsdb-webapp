@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicUploadStep
@@ -37,7 +38,11 @@ class ElectricalSafetyDetailsStateTests {
     @Test
     fun `getElectricalCertificateExpiryDateIfReachable returns the EIC expiry date when the EIC branch is reachable`() {
         val expiryDate = LocalDate.of(2030, 1, 1)
-        val state = buildTestElectricalSafetyDetailState(eicExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate))
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EIC,
+                eicExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate),
+            )
 
         assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
         assertEquals(expiryDate.toKotlinLocalDate(), state.getEicExpiryDateIfReachable())
@@ -47,7 +52,11 @@ class ElectricalSafetyDetailsStateTests {
     @Test
     fun `getElectricalCertificateExpiryDateIfReachable returns the EICR expiry date when the EICR branch is reachable`() {
         val expiryDate = LocalDate.of(2030, 1, 1)
-        val state = buildTestElectricalSafetyDetailState(eicrExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate))
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EICR,
+                eicrExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate),
+            )
 
         assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
         assertEquals(expiryDate.toKotlinLocalDate(), state.getEicrExpiryDateIfReachable())
@@ -56,7 +65,11 @@ class ElectricalSafetyDetailsStateTests {
 
     @Test
     fun `getElectricalCertificateExpiryDateIfReachable returns null if the expiry date is not set`() {
-        val state = buildTestElectricalSafetyDetailState(eicrExpiryDateFormModel = AnyDateFormModel())
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EICR,
+                eicrExpiryDateFormModel = AnyDateFormModel(),
+            )
         assertNull(state.getElectricalCertificateExpiryDateIfReachable())
     }
 
@@ -110,7 +123,11 @@ class ElectricalSafetyDetailsStateTests {
 
     @Test
     fun `electricalUploadIds returns the EIC upload ids when the EIC upload step is reachable`() {
-        val state = buildTestElectricalSafetyDetailState(eicUploadStepShouldBeReachable = true)
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EIC,
+                eicUploadStepShouldBeReachable = true,
+            )
         state.eicUploadMap = mapOf(1 to CertificateUpload(11L, "eic.pdf"))
         state.eicrUploadMap = mapOf(1 to CertificateUpload(22L, "eicr.pdf"))
 
@@ -119,7 +136,11 @@ class ElectricalSafetyDetailsStateTests {
 
     @Test
     fun `electricalUploadIds returns the EICR upload ids when the EICR upload step is reachable`() {
-        val state = buildTestElectricalSafetyDetailState(eicrUploadStepShouldBeReachable = true)
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EICR,
+                eicrUploadStepShouldBeReachable = true,
+            )
         state.eicUploadMap = mapOf(1 to CertificateUpload(11L, "eic.pdf"))
         state.eicrUploadMap = mapOf(1 to CertificateUpload(22L, "eicr.pdf"))
 
@@ -133,6 +154,36 @@ class ElectricalSafetyDetailsStateTests {
         state.eicrUploadMap = mapOf(1 to CertificateUpload(22L, "eicr.pdf"))
 
         assertEquals(emptyList<Long>(), state.electricalUploadIds)
+    }
+
+    @Test
+    fun `electricalUploadIds returns an empty list when the selected branch's upload step is not reachable`() {
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EIC,
+                eicrUploadStepShouldBeReachable = true,
+            )
+        state.eicUploadMap = mapOf(1 to CertificateUpload(11L, "eic.pdf"))
+        state.eicrUploadMap = mapOf(1 to CertificateUpload(22L, "eicr.pdf"))
+
+        assertEquals(emptyList<Long>(), state.electricalUploadIds)
+    }
+
+    @Test
+    fun `getEicOrEicrValue returns the value for the selected electrical certificate type`() {
+        val eicState = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EIC)
+        assertEquals("eic", eicState.getEicOrEicrValue({ "eic" }, { "eicr" }))
+
+        val eicrState = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EICR)
+        assertEquals("eicr", eicrState.getEicOrEicrValue({ "eic" }, { "eicr" }))
+    }
+
+    @Test
+    fun `getEicOrEicrValue returns null when neither EIC nor EICR is selected`() {
+        listOf(null, HasElectricalCertMode.NO_CERTIFICATE, HasElectricalCertMode.PROVIDE_THIS_LATER).forEach { mode ->
+            val state = buildTestElectricalSafetyDetailState(electricalCertMode = mode)
+            assertNull(state.getEicOrEicrValue({ "eic" }, { "eicr" }), "for $mode")
+        }
     }
 
     @Test
@@ -193,11 +244,14 @@ class ElectricalSafetyDetailsStateTests {
             eicExpiryDateFormModel = if (certType == HasElectricalSafetyCertificate.HAS_EIC) expiryDateFormModel else null,
             eicrExpiryDateFormModel = if (certType == HasElectricalSafetyCertificate.HAS_EICR) expiryDateFormModel else null,
             hasElectricalCertFormModel = HasElectricalCertFormModel().apply { electricalCertType = certType },
+            electricalCertMode =
+                if (certType == HasElectricalSafetyCertificate.HAS_EIC) HasElectricalCertMode.HAS_EIC else HasElectricalCertMode.HAS_EICR,
         )
     }
 
     // A null expiry date form model means that expiry date step is not reachable
     private fun buildTestElectricalSafetyDetailState(
+        electricalCertMode: HasElectricalCertMode? = null,
         eicExpiryDateFormModel: AnyDateFormModel? = null,
         eicrExpiryDateFormModel: AnyDateFormModel? = null,
         eicUploadStepShouldBeReachable: Boolean = false,
@@ -226,6 +280,7 @@ class ElectricalSafetyDetailsStateTests {
 
             override val hasElectricalCertStep =
                 mock<HasElectricalCertStep>().apply {
+                    whenever(this.outcome).thenReturn(electricalCertMode)
                     if (hasElectricalCertStepShouldBeReachable) {
                         whenever(this.formModelIfReachableOrNull).thenReturn(hasElectricalCertFormModel)
                     } else {

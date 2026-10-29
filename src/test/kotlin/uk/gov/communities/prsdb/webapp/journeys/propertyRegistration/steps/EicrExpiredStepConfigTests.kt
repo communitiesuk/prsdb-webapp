@@ -24,7 +24,7 @@ class EicrExpiredStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/electricalSafetyCertificateExpiredForOccupiedProperty", result)
+        assertEquals("forms/eicrExpiredForOccupiedProperty", result)
     }
 
     @Test
@@ -37,7 +37,7 @@ class EicrExpiredStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/electricalSafetyCertificateExpiredForUnoccupiedProperty", result)
+        assertEquals("forms/eicrExpiredForUnoccupiedProperty", result)
     }
 
     private fun setupStepConfig(): EicrExpiredStepConfig {
