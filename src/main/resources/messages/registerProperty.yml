@@ -192,6 +192,15 @@ correspondenceEmail:
           error:
             missing: Enter an email address
             invalidFormat: Enter an email address in the correct format, like name@example.com
+propertyManager:
+  todo:
+    usingPropertyManager:
+      heading: 'TODO (PDJB-1980): Are you using a property manager?'
+    removePropertyManager:
+      heading: 'TODO (PDJB-1983): Are you sure you want to remove your property manager?'
+    radios:
+      error:
+        missing: 'TODO (PDJB-1980, PDJB-1983): Select yes or no'
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
