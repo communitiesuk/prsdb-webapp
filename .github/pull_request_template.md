@@ -29,6 +29,7 @@ Delete any that are not applicable, and add explanation below for any that are a
 - [ ] New journey steps have been added to the appropriate journey integration test(s)
 - [ ] A new journey integration test has been added for any new journeys
 - [ ] New email templates have been added to `/src/main/kotlin/resources/emails/emailTemplates.json`
+- [ ] New letter templates have been added to `/src/main/resources/letters/letterTemplates.json`
 - [ ] Test suite has been run in full locally and is passing
 - [ ] Branch has been rebased onto main and run locally, with everything working as expected (both for your new feature
   and any related functionality)
