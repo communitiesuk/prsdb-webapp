@@ -111,5 +111,5 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-955-associated-parties"
-      enabled: false
+      enabled: true
       expiry-date: "2027-06-30"
