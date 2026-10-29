@@ -34,12 +34,12 @@ class OwnershipTypeConverterTests {
 
     @ParameterizedTest
     @MethodSource("provideLegacyToCurrentMappings")
-    fun `convert maps to the ordinals the V1_60_0 migration backfills`(
+    fun `convert maps to the ordinals the V1_61_0 migration backfills`(
         legacy: OwnershipTypeBeforePdjb955,
         expected: OwnershipType,
     ) {
         // Arrange - these pairs are duplicated in the CASE expression in
-        // V1_60_0__add_pdjb955_ownership_type.sql and in every seed script. If this fails,
+        // V1_61_0__add_ownership_type_and_associated_party_tables.sql and in every seed script. If this fails,
         // the enum declaration order has changed and that SQL is now wrong.
         val expectedOrdinalPairs = mapOf(0 to 2, 1 to 1, 2 to 3, 3 to 5)
 

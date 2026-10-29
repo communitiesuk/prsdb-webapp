@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 
 // Verifies that the seed scripts populate ownership_type and ownership_type_before_pdjb955
-// consistently. This does NOT exercise the backfill in V1_60_0__add_pdjb955_ownership_type.sql:
+// consistently. This does NOT exercise the backfill in V1_61_0__add_ownership_type_and_associated_party_tables.sql:
 // the seed data is loaded after Flyway has already run, so the migration's UPDATE never sees
 // these rows. The backfill itself is not testable post-migration because ownership_type is
 // NOT NULL by the time the context is up.

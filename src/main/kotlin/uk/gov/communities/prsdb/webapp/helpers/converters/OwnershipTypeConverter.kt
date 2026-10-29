@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 
 // Single source of truth for the PDJB-955 ownership type mapping. The same mapping is
-// duplicated as a SQL CASE expression in V1_60_0__add_pdjb955_ownership_type.sql and in the
+// duplicated as a SQL CASE expression in V1_61_0__add_ownership_type_and_associated_party_tables.sql and in the
 // seed scripts; OwnershipTypeConverterTests pins the ordinals so the two cannot drift.
 // TODO PDJB-2019: Delete this once the legacy enum and column are gone.
 object OwnershipTypeConverter {
