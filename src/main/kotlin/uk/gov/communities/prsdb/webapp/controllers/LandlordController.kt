@@ -47,8 +47,9 @@ class LandlordController(
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         // TODO PDJB-1606: Count the same properties as the outstanding actions page (e.g. reuse
         //  PropertyOwnershipService.getOutstandingActionsForLandlord) so the banner matches the page. This includes properties
-        //  with outstanding licensing or tenancy details, and occupied properties with no compliance record, which the banner
-        //  currently counts but the page only lists when licensing or tenancy details are outstanding
+        //  with outstanding licensing or tenancy details. The banner also currently counts unoccupied properties with expired
+        //  certificates, which the page doesn't list, and occupied properties with no compliance record, which the page only
+        //  lists when licensing or tenancy details are outstanding
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)

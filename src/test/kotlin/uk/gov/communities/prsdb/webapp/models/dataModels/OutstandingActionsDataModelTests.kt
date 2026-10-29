@@ -40,6 +40,26 @@ class OutstandingActionsDataModelTests {
     }
 
     @Test
+    fun `fromPropertyOwnership does not show an unoccupied property with an expired certificate`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership()
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(propertyOwnership)
+                .withHasGasSupply()
+                .withExpiredGasSafetyCert()
+                .build()
+        ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+
+        // Act
+        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership)
+
+        // Assert
+        assertTrue(dataModel.complianceStatus!!.shouldShowOnComplianceActionsPage)
+        assertFalse(dataModel.shouldShowOnOutstandingActionsPage)
+    }
+
+    @Test
     fun `fromPropertyOwnership has no compliance status when the property has no compliance record`() {
         val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(tenancyProvideLater = true)
 

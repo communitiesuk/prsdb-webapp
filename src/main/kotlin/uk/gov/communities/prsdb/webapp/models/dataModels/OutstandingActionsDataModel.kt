@@ -22,7 +22,7 @@ data class OutstandingActionsDataModel(
         get() = shouldShowLicensingAction || shouldShowTenancyAction
 
     val shouldShowOnOutstandingActionsPage: Boolean
-        get() = hasPropertyDetailsAction || complianceStatus?.shouldShowOnComplianceActionsPage == true
+        get() = isOccupied && (hasPropertyDetailsAction || complianceStatus?.shouldShowOnComplianceActionsPage == true)
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OutstandingActionsDataModel =
