@@ -693,6 +693,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        // Drawn here rather than at its point of use below, because it consumes the shared faker stream: moving it
+        // would reorder the draws in between and change every subsequent seeded value.
         val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
         propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)

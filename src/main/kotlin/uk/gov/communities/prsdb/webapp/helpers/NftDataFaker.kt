@@ -43,9 +43,13 @@ object NftDataFaker {
     private var faker = Faker(Locale.UK, seededRandom)
     private var scenarioRandom = Random(DEFAULT_SEED)
 
-    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
-    //  The new ownership type is drawn from its own stream so that adding it does not shift the shared faker
-    //  stream, which would otherwise change every subsequent value in a seeding run.
+    // TODO PDJB-2019: once the legacy enum and column are gone, delete this field and its line in reset(), then
+    //  change generateOwnershipType() below to `faker.options().option(OwnershipType::class.java)` so that it
+    //  matches the other generators in this file. That switch is a tidy-up rather than a requirement: the seeded
+    //  ownership types change either way, so NftDataSeederTests will need re-verifying.
+    //  OwnershipType is drawn from its own stream so that adding it does not shift the shared faker stream, which
+    //  would otherwise change every subsequent value in a seeding run. OwnershipTypeBeforePdjb955 continues to draw
+    //  from the shared faker, in its original position, so that previously seeded data is unchanged.
     private var ownershipTypeRandom = Random(DEFAULT_SEED)
 
     /**
