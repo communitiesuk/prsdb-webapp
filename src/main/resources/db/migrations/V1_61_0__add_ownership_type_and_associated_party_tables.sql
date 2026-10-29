@@ -35,7 +35,6 @@ CREATE TABLE additional_property_owner (
     created_date          TIMESTAMPTZ(6) DEFAULT current_timestamp NOT NULL,
     last_modified_date    TIMESTAMPTZ(6),
     owner_type            SMALLINT NOT NULL,
-    -- nullable: a landlord may tell us they cannot provide the owner's details
     name                  VARCHAR(255),
     email                 VARCHAR(255),
     address_id            BIGINT,
