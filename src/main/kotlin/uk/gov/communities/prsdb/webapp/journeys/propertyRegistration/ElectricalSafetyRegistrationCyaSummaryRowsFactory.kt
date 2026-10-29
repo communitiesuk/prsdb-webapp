@@ -55,6 +55,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
+            // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
