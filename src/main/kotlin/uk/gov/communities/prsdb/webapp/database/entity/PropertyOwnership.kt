@@ -79,6 +79,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
+    val additionalPropertyOwners: MutableSet<AdditionalPropertyOwner> = mutableSetOf()
+
+    @OneToOne(optional = true, orphanRemoval = true)
+    @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
+    var propertyManager: PropertyManager? = null
+
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
 
