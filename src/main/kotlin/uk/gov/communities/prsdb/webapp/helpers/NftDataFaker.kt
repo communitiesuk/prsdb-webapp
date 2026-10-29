@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -448,7 +449,10 @@ object NftDataFaker {
         return Pair(propertyType, otherPropertyType)
     }
 
-    fun generateOwnershipType(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
+    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
+    fun generateOwnershipTypeBeforePdjb955(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
+
+    fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
 
     fun generateNumHouseholdsAndTenants(): Pair<Int, Int> {
         val numHouseholds = faker.random().nextInt(1, 10)

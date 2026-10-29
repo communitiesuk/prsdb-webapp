@@ -53,6 +53,10 @@ class PropertyOwnershipService(
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
 ) {
+    // TODO PDJB-1957: add the flag-on variant of this method, which takes the new OwnershipType
+    //  directly rather than deriving it from the legacy enum. Implement the flag-on and flag-off
+    //  variants so that the flag-off variant can be deleted wholesale with the feature flag in
+    //  PDJB-2016.
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipTypeBeforePdjb955,

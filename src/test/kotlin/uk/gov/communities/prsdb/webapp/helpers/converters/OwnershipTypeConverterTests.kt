@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 
+// TODO PDJB-2019: delete this whole class along with OwnershipTypeConverter, once the legacy
+//  enum and column are gone.
 class OwnershipTypeConverterTests {
     @ParameterizedTest
     @MethodSource("provideLegacyToCurrentMappings")
@@ -49,7 +51,7 @@ class OwnershipTypeConverterTests {
         @JvmStatic
         fun provideLegacyToCurrentMappings() =
             listOf(
-                Arguments.of(OwnershipTypeBeforePdjb955.FREEHOLD, OwnershipType.SOLE_OWNERSHIP),
+                Arguments.of(OwnershipTypeBeforePdjb955.FREEHOLD, OwnershipType.SOLE_FREEHOLD),
                 Arguments.of(OwnershipTypeBeforePdjb955.LEASEHOLD, OwnershipType.LEASEHOLD_ONLY),
                 Arguments.of(OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD, OwnershipType.JOINT_TENANTS),
                 Arguments.of(OwnershipTypeBeforePdjb955.COMMONHOLD, OwnershipType.COMMONHOLD),

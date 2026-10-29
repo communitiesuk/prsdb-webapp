@@ -58,7 +58,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
-import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -142,7 +141,7 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = OwnershipTypeConverter.convert(ownershipType),
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
@@ -234,7 +233,7 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = OwnershipTypeConverter.convert(ownershipType),
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,

@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.CoreLandlordDetails
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.PropertyScenario
-import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBigDecimalOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBooleanOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setDateOrNull
@@ -690,12 +689,12 @@ class NftDataSeeder(
         val furnishedStatus = if (hasTenancyDetails) NftDataFaker.generateFurnishedStatus() else null
         val rentDetails = if (hasTenancyDetails) NftDataFaker.generateRentDetails() else null
         val renewalDate = NftDataFaker.generateRenewalDate(landlordAnniversary)
-        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipType()
+        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
 
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        propertyOwnershipStmt.setInt(4, OwnershipTypeConverter.convert(ownershipTypeBeforePdjb955).ordinal)
+        propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
         propertyOwnershipStmt.setLong(7, registrationNumberId)

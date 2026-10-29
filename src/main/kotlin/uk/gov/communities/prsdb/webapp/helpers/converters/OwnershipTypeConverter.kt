@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb95
 object OwnershipTypeConverter {
     fun convert(ownershipType: OwnershipTypeBeforePdjb955): OwnershipType =
         when (ownershipType) {
-            OwnershipTypeBeforePdjb955.FREEHOLD -> OwnershipType.SOLE_OWNERSHIP
+            OwnershipTypeBeforePdjb955.FREEHOLD -> OwnershipType.SOLE_FREEHOLD
             OwnershipTypeBeforePdjb955.LEASEHOLD -> OwnershipType.LEASEHOLD_ONLY
             OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD -> OwnershipType.JOINT_TENANTS
             OwnershipTypeBeforePdjb955.COMMONHOLD -> OwnershipType.COMMONHOLD

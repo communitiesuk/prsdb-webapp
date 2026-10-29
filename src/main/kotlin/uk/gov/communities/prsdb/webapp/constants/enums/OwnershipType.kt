@@ -10,7 +10,7 @@ enum class OwnershipType {
     LEASEHOLD_ONLY,
 
     // Selected "Freehold" only
-    SOLE_OWNERSHIP,
+    SOLE_FREEHOLD,
     JOINT_TENANTS,
     TENANTS_IN_COMMON,
     COMMONHOLD,

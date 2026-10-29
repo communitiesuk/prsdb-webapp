@@ -98,10 +98,12 @@ abstract class PropertyDetailsViewModelBase(
     protected fun ownershipTypeRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",
+            // TODO PDJB-1996: convert the new OwnershipType to the required answer messages. It is
+            //  rendered as the answers to several questions rather than this single ownership type
+            //  row, so this row cannot simply switch to the new enum.
             // TODO PDJB-1957/PDJB-2016: ownershipTypeBeforePdjb955 is nullable, and rows created
             //  once pdjb-955-associated-parties is on will not populate it. This !! then throws,
-            //  surfacing as a 500 on the property record page. Render the new OwnershipType here
-            //  (with its message keys) as part of the switch-on work.
+            //  surfacing as a 500 on the property record page.
             MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955!!),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
