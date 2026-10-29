@@ -689,11 +689,11 @@ class NftDataSeeder(
         val furnishedStatus = if (hasTenancyDetails) NftDataFaker.generateFurnishedStatus() else null
         val rentDetails = if (hasTenancyDetails) NftDataFaker.generateRentDetails() else null
         val renewalDate = NftDataFaker.generateRenewalDate(landlordAnniversary)
-        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
 
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
         propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
