@@ -45,6 +45,11 @@ class LandlordController(
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
     fun landlordDashboard(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
+        // TODO PDJB-1606: Count the same properties as the outstanding actions page (e.g. reuse
+        //  PropertyOwnershipService.getOutstandingActionsForLandlord) so the banner matches the page. This includes properties
+        //  with outstanding licensing or tenancy details. The banner also currently counts unoccupied properties with expired
+        //  certificates, which the page doesn't list, and occupied properties with no compliance record, which the page only
+        //  lists when licensing or tenancy details are outstanding
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
@@ -135,20 +140,20 @@ class LandlordController(
         request: HttpServletRequest,
     ): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        val pagedNonCompliantProperties =
-            propertyComplianceService.getNonCompliantPropertiesForLandlord(landlord, page - 1)
+        val pagedOutstandingActions =
+            propertyOwnershipService.getOutstandingActionsForLandlord(landlord, page - 1)
 
-        if (pagedNonCompliantProperties.totalPages != 0 && pagedNonCompliantProperties.totalPages < page) {
+        if (pagedOutstandingActions.totalPages != 0 && pagedOutstandingActions.totalPages < page) {
             return "redirect:$OUTSTANDING_ACTIONS_URL"
         }
 
         val outstandingActions =
-            pagedNonCompliantProperties.content.map {
+            pagedOutstandingActions.content.map {
                 OutstandingActionViewModelBuilder.fromDataModel(it)
             }
 
         model.addAttribute("outstandingActions", outstandingActions)
-        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedNonCompliantProperties.totalPages, request))
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedOutstandingActions.totalPages, request))
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "outstandingActions"
