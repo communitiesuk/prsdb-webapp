@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -75,7 +76,10 @@ class EpcViewModelFactoryTests {
 
     companion object {
         private val mockMessageSource: MessageSource = mock()
-        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
+
+        // TODO: PDJB-1926: Remove featureFlagManager argument
+        private val epcViewModelFactory =
+            EpcViewModelFactory(mockMessageSource, MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled())
 
         private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
 

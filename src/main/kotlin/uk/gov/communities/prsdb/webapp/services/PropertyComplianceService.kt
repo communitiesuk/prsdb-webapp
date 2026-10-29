@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -42,6 +44,8 @@ class PropertyComplianceService(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val currentUserService: CurrentUserService,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -206,8 +210,10 @@ class PropertyComplianceService(
                     landlord.id,
                 )
 
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
+        val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
         return compliances
-            .map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            .map { ComplianceStatusDataModel.fromPropertyCompliance(it, isGas14MonthExpiryEnabled) }
             .filter { it.shouldShowOnComplianceActionsPage }
     }
 
@@ -239,12 +245,14 @@ class PropertyComplianceService(
         )
 
         if (gasSafetyCertIssueDate != null) {
+            // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and use the isGasSafetyCertExpired and gasSafetyCertExpiryDate vals again
+            val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
             sendCertificateUpdateEmail(
                 propertyCompliance,
-                isExpired = propertyCompliance.isGasSafetyCertExpired == true,
+                isExpired = propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true,
                 certificateType = "gas safety certificate",
                 certificateTypeLabel = "Gas safety certificate",
-                expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                expiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
             )
         }
     }

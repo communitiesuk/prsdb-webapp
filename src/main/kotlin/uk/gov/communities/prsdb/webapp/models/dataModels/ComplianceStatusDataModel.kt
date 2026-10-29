@@ -47,7 +47,11 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            isGas14MonthExpiryEnabled: Boolean,
+        ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -56,27 +60,28 @@ data class ComplianceStatusDataModel(
                         .fromRegistrationNumber(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
-                gasSafetyStatus = propertyCompliance.gasSafetyStatus,
+                gasSafetyStatus = propertyCompliance.getGasSafetyStatus(isGas14MonthExpiryEnabled),
                 electricalSafetyStatus = propertyCompliance.electricalSafetyStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline = propertyCompliance.propertyOwnership.provideLaterDeadline,
-                gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                gasSafetyExpiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )
 
-        private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
-            get() =
-                when {
-                    this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
-                    this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
-                    this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
-                    else -> ComplianceCertStatus.ADDED
-                }
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again (gasSafetyStatus)
+        private fun PropertyCompliance.getGasSafetyStatus(isGas14MonthExpiryEnabled: Boolean): ComplianceCertStatus {
+            return when {
+                this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
+                this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
+                isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true -> ComplianceCertStatus.EXPIRED
+                else -> ComplianceCertStatus.ADDED
+            }
+        }
 
         private val PropertyCompliance.electricalSafetyStatus: ComplianceCertStatus
             get() =

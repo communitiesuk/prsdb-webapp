@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
@@ -25,6 +27,8 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val epcViewModelFactory: EpcViewModelFactory,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
@@ -103,7 +107,13 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val isAllValid = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        val isAllValid =
+            ComplianceStatusDataModel
+                .fromPropertyCompliance(
+                    propertyCompliance,
+                    featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+                ).isAllValid
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,

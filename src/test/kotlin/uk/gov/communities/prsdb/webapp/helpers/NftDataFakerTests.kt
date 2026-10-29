@@ -127,17 +127,17 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `isGasSafetyCertificateCurrent returns true on the anniversary of the issue date`() {
+    fun `isGasSafetyCertificateCurrent returns true on the expiry date 14 months after the issue date`() {
         NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
 
-        assertTrue(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 6, 15))))
+        assertTrue(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 4, 15))))
     }
 
     @Test
-    fun `isGasSafetyCertificateCurrent returns false the day after the anniversary of the issue date`() {
+    fun `isGasSafetyCertificateCurrent returns false the day after the expiry date 14 months after the issue date`() {
         NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
 
-        assertFalse(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 6, 14))))
+        assertFalse(NftDataFaker.isGasSafetyCertificateCurrent(Date.valueOf(LocalDate.of(2024, 4, 14))))
     }
 
     @Test

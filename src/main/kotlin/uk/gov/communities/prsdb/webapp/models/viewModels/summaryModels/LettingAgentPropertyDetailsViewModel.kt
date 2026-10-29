@@ -10,6 +10,8 @@ class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     propertyCompliance: PropertyCompliance,
     messageSource: MessageSource,
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+    isGas14MonthExpiryEnabled: Boolean,
     token: UUID? = null,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
@@ -28,7 +30,10 @@ class LettingAgentPropertyDetailsViewModel(
             (
                 isLicensingProvideLater ||
                     isTenancyProvideLater ||
-                    ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAnyProvideLater
+                    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+                    ComplianceStatusDataModel
+                        .fromPropertyCompliance(propertyCompliance, isGas14MonthExpiryEnabled)
+                        .isAnyProvideLater
             )
 
     val provideDetailsInsetText: String =
