@@ -222,8 +222,8 @@ class PropertyStateSessionBuilder(
                 .withGasCertUploads()
                 .withGasCertExpiredAcknowledged()
 
-        fun beforePropertyRegistrationHasElectricalCert() =
-            beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
+        fun beforePropertyRegistrationHasElectricalCert(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied).withGasSafetyTaskCompletedWithNoGasSupply()
 
         fun beforePropertyRegistrationEicExpiryDate() =
             beforePropertyRegistrationHasElectricalCert()
@@ -498,7 +498,12 @@ class PropertyStateSessionBuilder(
                 .withCompliantEpc()
 
         fun beforePropertyRegistrationCheckAnswersEicUploaded() =
-            beforePropertyRegistrationCheckAnswersBeforeElectricalSafety()
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
                 .withEicExpiryDate()
                 .withEicUploads()
@@ -509,7 +514,12 @@ class PropertyStateSessionBuilder(
                 .withCheckEpcAnswersComplete()
 
         fun beforePropertyRegistrationCheckAnswersEicrUploaded() =
-            beforePropertyRegistrationCheckAnswersBeforeElectricalSafety()
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEicr()
                 .withEicrExpiryDate()
                 .withEicrUploads()
@@ -518,14 +528,6 @@ class PropertyStateSessionBuilder(
                 .withIsEpcNotRequired()
                 .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
                 .withCheckEpcAnswersComplete()
-
-        private fun beforePropertyRegistrationCheckAnswersBeforeElectricalSafety() =
-            beforePropertyRegistrationOccupancy()
-                .withOccupancyStatus(false)
-                .withBedrooms()
-                .withHasNoJointLandlords()
-                .withLicensingType(LicensingType.NO_LICENSING)
-                .withGasSafetyTaskCompletedWithNoGasSupply()
 
         fun beforePropertyRegistrationCheckAnswersEpcLowRatingWithExemption(
             exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,

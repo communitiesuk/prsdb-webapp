@@ -976,9 +976,9 @@ class Navigator(
         return createValidPage(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHasElectricalCertPage(): HasElectricalCertFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied: Boolean = true): HasElectricalCertFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(HasElectricalCertStep.ROUTE_SEGMENT)
         return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)

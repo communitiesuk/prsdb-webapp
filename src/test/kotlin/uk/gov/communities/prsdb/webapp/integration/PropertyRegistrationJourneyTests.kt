@@ -88,6 +88,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
@@ -748,6 +749,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // The EICR equivalent of these electrical safety steps is covered by the task-level test
+            // "The Electrical Safety task can be completed by the user uploaded an eicr" to avoid duplicating the whole journey
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
@@ -765,6 +769,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Upload Electrical Cert - render page
             assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Certificate (EIC)")
             uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
             var checkElectricalCertUploadsPage =
                 assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
@@ -1475,6 +1480,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // The EICR equivalent of these electrical safety steps is covered by the task-level test
+            // "The Electrical Safety task can be completed with an expired EICR for an occupied property"
+            // to avoid duplicating the whole journey
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
@@ -1601,6 +1610,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // The EICR equivalent of these electrical safety steps is covered by the task-level test
+            // "The Electrical Safety task can be completed with an expired EICR for an unoccupied property"
+            // to avoid duplicating the whole journey
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
@@ -1698,6 +1711,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
         }
 
+        // EICR counterpart of the EIC steps in the main whole journey test, kept separate to avoid duplicating the whole journey
         @Test
         fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
             // Skip to Has Electrical Cert page and submit "Yes"
@@ -1754,6 +1768,71 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkElectricalSafetyAnswersPage =
                 assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
             assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        }
+
+        // EICR counterpart of the EIC steps in the expired certificates occupied journey test,
+        // kept separate to avoid duplicating the whole journey
+        @Test
+        fun `The Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
+            // Skip to Has Electrical Cert page and submit EICR
+            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+            hasElectricalCertPage.submitHasEicr()
+            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date - submit an expired date
+            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expired - render page then check change expiry date link
+            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.warning)
+                .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+            assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
+            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+            electricalCertExpiryDatePage.form.submit()
+            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Back on Electrical Cert Expired page - submit
+            electricalCertExpiredPage.form.submit()
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        }
+
+        // EICR counterpart of the EIC steps in the expired certificates unoccupied journey test,
+        // kept separate to avoid duplicating the whole journey
+        @Test
+        fun `The Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
+            // Skip to Has Electrical Cert page and submit EICR
+            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied = false)
+            hasElectricalCertPage.submitHasEicr()
+            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date - submit an expired date
+            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expired - render page then check change expiry date link
+            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.warning).isHidden()
+            assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
+            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+            electricalCertExpiryDatePage.form.submit()
+            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Back on Electrical Cert Expired page - submit
+            electricalCertExpiredPage.form.submit()
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
         }
 
         @Test

@@ -45,8 +45,6 @@ class ElectricalSafetyDetailsStateTests {
             )
 
         assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
-        assertEquals(expiryDate.toKotlinLocalDate(), state.getEicExpiryDateIfReachable())
-        assertNull(state.getEicrExpiryDateIfReachable())
     }
 
     @Test
@@ -59,8 +57,22 @@ class ElectricalSafetyDetailsStateTests {
             )
 
         assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
+    }
+
+    @Test
+    fun `getEicExpiryDateIfReachable returns the EIC expiry date when the EIC expiry date step is reachable`() {
+        val expiryDate = LocalDate.of(2030, 1, 1)
+        val state = buildTestElectricalSafetyDetailState(eicExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate))
+
+        assertEquals(expiryDate.toKotlinLocalDate(), state.getEicExpiryDateIfReachable())
+    }
+
+    @Test
+    fun `getEicrExpiryDateIfReachable returns the EICR expiry date when the EICR expiry date step is reachable`() {
+        val expiryDate = LocalDate.of(2030, 1, 1)
+        val state = buildTestElectricalSafetyDetailState(eicrExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate))
+
         assertEquals(expiryDate.toKotlinLocalDate(), state.getEicrExpiryDateIfReachable())
-        assertNull(state.getEicExpiryDateIfReachable())
     }
 
     @Test
@@ -80,39 +92,63 @@ class ElectricalSafetyDetailsStateTests {
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the certificate expiry date is in the past`() {
-        electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), certType)
-            assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
-        }
+    fun `getElectricalCertificateIsOutdated returns true if the EIC expiry date is in the past`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns false if the certificate expiry date is in the future`() {
-        electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.plusDays(5), certType)
-            assertFalse(state.getElectricalCertificateIsOutdated()!!, "for $certType")
-        }
+    fun `getElectricalCertificateIsOutdated returns true if the EICR expiry date is in the past`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EICR)
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the certificate expires today`() {
-        electricalCertTypes.forEach { certType ->
-            val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, certType)
-            assertTrue(state.getElectricalCertificateIsOutdated()!!, "for $certType")
-        }
+    fun `getElectricalCertificateIsOutdated returns false if the EIC expiry date is in the future`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.plusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
-    fun `getEicIsOutdated and getEicrIsOutdated only use their own branch's expiry date`() {
-        val eicState = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
-        assertTrue(eicState.getEicIsOutdated()!!)
-        assertNull(eicState.getEicrIsOutdated())
+    fun `getElectricalCertificateIsOutdated returns false if the EICR expiry date is in the future`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.plusDays(5), HasElectricalSafetyCertificate.HAS_EICR)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
+    }
 
-        val eicrState =
-            buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EICR)
-        assertTrue(eicrState.getEicrIsOutdated()!!)
-        assertNull(eicrState.getEicIsOutdated())
+    @Test
+    fun `getElectricalCertificateIsOutdated returns true if the EIC expires today`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EIC)
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+    }
+
+    @Test
+    fun `getElectricalCertificateIsOutdated returns true if the EICR expires today`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EICR)
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns true if the EIC expiry date is in the past`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
+        assertTrue(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns null if only an EICR expiry date has been provided`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EICR)
+        assertNull(state.getEicIsOutdated())
+    }
+
+    @Test
+    fun `getEicrIsOutdated returns true if the EICR expiry date is in the past`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EICR)
+        assertTrue(state.getEicrIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicrIsOutdated returns null if only an EIC expiry date has been provided`() {
+        val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
+        assertNull(state.getEicrIsOutdated())
     }
 
     @Test
@@ -170,23 +206,6 @@ class ElectricalSafetyDetailsStateTests {
     }
 
     @Test
-    fun `getEicOrEicrValue returns the value for the selected electrical certificate type`() {
-        val eicState = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EIC)
-        assertEquals("eic", eicState.getEicOrEicrValue({ "eic" }, { "eicr" }))
-
-        val eicrState = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EICR)
-        assertEquals("eicr", eicrState.getEicOrEicrValue({ "eic" }, { "eicr" }))
-    }
-
-    @Test
-    fun `getEicOrEicrValue returns null when neither EIC nor EICR is selected`() {
-        listOf(null, HasElectricalCertMode.NO_CERTIFICATE, HasElectricalCertMode.PROVIDE_THIS_LATER).forEach { mode ->
-            val state = buildTestElectricalSafetyDetailState(electricalCertMode = mode)
-            assertNull(state.getEicOrEicrValue({ "eic" }, { "eicr" }), "for $mode")
-        }
-    }
-
-    @Test
     fun `getElectricalCertificateType returns HAS_EIC when EIC is selected`() {
         val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
         val state = buildTestElectricalSafetyDetailState(hasElectricalCertFormModel = formModel)
@@ -232,8 +251,6 @@ class ElectricalSafetyDetailsStateTests {
         val state = buildTestElectricalSafetyDetailState(hasElectricalCertFormModel = formModel)
         assertNull(state.mapElectricalCertificateTypeToGlobalCertificateType())
     }
-
-    private val electricalCertTypes = listOf(HasElectricalSafetyCertificate.HAS_EIC, HasElectricalSafetyCertificate.HAS_EICR)
 
     private fun buildTestElectricalSafetyDetailStateWithExpiryDate(
         expiryDate: LocalDate,

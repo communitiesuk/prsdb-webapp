@@ -18,9 +18,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.C
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
@@ -164,24 +162,6 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             val electricalCertExpiryDatePage = skipToExpiryDatePage(certificateType)
             electricalCertExpiryDatePage.submitDate(day, month, year)
             assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
-        }
-
-        @ParameterizedTest(name = "{0}")
-        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
-        fun `Submitting an expired date navigates to the expired page, whose change link returns to the expiry date page`(
-            certificateType: CertificateType,
-            page: Page,
-        ) {
-            skipToExpiryDatePage(certificateType).submitDate("1", "1", "2020")
-
-            val changeExpiryDateLink =
-                when (certificateType) {
-                    CertificateType.Eic -> assertPageIs(page, EicExpiredFormPagePropertyRegistration::class).changeExpiryDateLink
-                    CertificateType.Eicr -> assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class).changeExpiryDateLink
-                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
-                }
-            changeExpiryDateLink.clickAndWait()
-            assertPageIs(page, expiryDatePageClass(certificateType))
         }
 
         private fun skipToExpiryDatePage(certificateType: CertificateType): DateFormPage =

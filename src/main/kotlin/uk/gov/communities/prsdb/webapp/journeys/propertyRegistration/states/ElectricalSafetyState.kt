@@ -61,7 +61,7 @@ interface ElectricalSafetyDetailState : JourneyState {
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
-    fun <T> getEicOrEicrValue(
+    private fun <T> getEicOrEicrValue(
         eicValue: () -> T,
         eicrValue: () -> T,
     ): T? =
