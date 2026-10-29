@@ -749,8 +749,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
-            // The EICR equivalent of these electrical safety steps is covered by the task-level test
-            // "The Electrical Safety task can be completed by the user uploaded an eicr" to avoid duplicating the whole journey
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
 
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
@@ -1480,9 +1479,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
-            // The EICR equivalent of these electrical safety steps is covered by the task-level test
-            // "The Electrical Safety task can be completed with an expired EICR for an occupied property"
-            // to avoid duplicating the whole journey
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
 
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
@@ -1610,9 +1607,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
-            // The EICR equivalent of these electrical safety steps is covered by the task-level test
-            // "The Electrical Safety task can be completed with an expired EICR for an unoccupied property"
-            // to avoid duplicating the whole journey
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
 
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
@@ -1711,7 +1706,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
         }
 
-        // EICR counterpart of the EIC steps in the main whole journey test, kept separate to avoid duplicating the whole journey
+        // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
         fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
             // Skip to Has Electrical Cert page and submit "Yes"
@@ -1770,8 +1765,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         }
 
-        // EICR counterpart of the EIC steps in the expired certificates occupied journey test,
-        // kept separate to avoid duplicating the whole journey
+        // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
         fun `The Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
             // Skip to Has Electrical Cert page and submit EICR
@@ -1803,8 +1797,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
         }
 
-        // EICR counterpart of the EIC steps in the expired certificates unoccupied journey test,
-        // kept separate to avoid duplicating the whole journey
+        // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
         fun `The Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
             // Skip to Has Electrical Cert page and submit EICR
