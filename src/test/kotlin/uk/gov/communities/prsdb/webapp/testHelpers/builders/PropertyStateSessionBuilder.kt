@@ -12,6 +12,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
@@ -20,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -105,6 +111,19 @@ class PropertyStateSessionBuilder(
         return this
     }
 
+    // TODO PDJB-959: replace with the real ownership structure answers once that task's routing is finished and its
+    //  pages are built (PDJB-1959, PDJB-1960, PDJB-1961, PDJB-2007, PDJB-2008)
+    fun withCompletedOwnershipStructurePlaceholders(): PropertyStateSessionBuilder {
+        listOf(
+            OwnsPropertyStep.ROUTE_SEGMENT,
+            OwnershipKindStep.ROUTE_SEGMENT,
+            FreeholdTypeStep.ROUTE_SEGMENT,
+            FreeholdersStep.ROUTE_SEGMENT,
+            SuperiorLandlordsStep.ROUTE_SEGMENT,
+        ).forEach { withSubmittedValue(it, NoInputFormModel()) }
+        return this
+    }
+
     companion object {
         fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
             if (customLookedUpAddresses != null) {
@@ -126,6 +145,13 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnershipType() =
             beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
+
+        fun beforePropertyRegistrationPropertyManager() =
+            beforePropertyRegistrationPropertyType()
+                .withPropertyType()
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withCompletedOwnershipStructurePlaceholders()
 
         fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
 
@@ -222,24 +248,28 @@ class PropertyStateSessionBuilder(
                 .withGasCertUploads()
                 .withGasCertExpiredAcknowledged()
 
-        fun beforePropertyRegistrationHasElectricalCert() =
-            beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
+        fun beforePropertyRegistrationHasElectricalCert(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied).withGasSafetyTaskCompletedWithNoGasSupply()
 
         fun beforePropertyRegistrationEicExpiryDate() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
+        fun beforePropertyRegistrationEicrExpiryDate() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEicr()
+
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicExpiryDate()
+                .withEicUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEicr()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicrExpiryDate()
+                .withEicrUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater() =
             beforePropertyRegistrationHasElectricalCert()
@@ -249,12 +279,19 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withNoElectricalSafetyCertificate()
 
-        fun beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired() =
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersEicExpired() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withElectricalCertExpiryDate(expiryDate = LocalDate(2020, 1, 1))
-                .withElectricalCertUploads()
-                .withElectricalCertExpiredAcknowledged()
+                .withEicExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withEicUploads()
+                .withEicExpiredAcknowledged()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersEicrExpired() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEicr()
+                .withEicrExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withEicrUploads()
+                .withEicrExpiredAcknowledged()
 
         fun beforePropertyRegistrationHasEpc() =
             beforePropertyRegistrationHasElectricalCert()
@@ -486,7 +523,7 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
-        fun beforePropertyRegistrationCheckAnswersElectricalCertUploaded() =
+        fun beforePropertyRegistrationCheckAnswersEicUploaded() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
                 .withBedrooms()
@@ -494,8 +531,24 @@ class PropertyStateSessionBuilder(
                 .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
-                .withElectricalCertExpiryDate()
-                .withElectricalCertUploads()
+                .withEicExpiryDate()
+                .withEicUploads()
+                .withCheckElectricalSafetyAnswersComplete()
+                .withPropertyHasNoEpc()
+                .withIsEpcNotRequired()
+                .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
+                .withCheckEpcAnswersComplete()
+
+        fun beforePropertyRegistrationCheckAnswersEicrUploaded() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withLicensingType(LicensingType.NO_LICENSING)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withEicr()
+                .withEicrExpiryDate()
+                .withEicrUploads()
                 .withCheckElectricalSafetyAnswersComplete()
                 .withPropertyHasNoEpc()
                 .withIsEpcNotRequired()
