@@ -27,6 +27,8 @@ import uk.gov.service.notify.TemplateList
  * no circumstances should you commit an api key or configuration containing one in git. There is a prepared run
  * configuration called "notify-template-tests.run.xml" that runs these tests - if you want this ask your team lead
  * where it can be found.
+ *
+ * NotifyLetterTemplateTests checks the letter templates in the same way, so keep the two classes in step.
  */
 
 @EnabledIf("canFetchNotifyTemplates")

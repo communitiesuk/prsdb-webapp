@@ -18,6 +18,7 @@ import uk.gov.service.notify.TemplateList
 /*
  * These tests verify that the letter templates in this code base match the letter templates stored in notify. They work
  * in the same way as NotifyEmailTemplateTests, using the same api keys, and are disabled when neither key is set.
+ * Keep the two classes in step - see NotifyEmailTemplateTests for details of the api keys and running these locally.
  */
 
 @EnabledIf("canFetchNotifyTemplates")
