@@ -42,7 +42,7 @@ class OwnershipStructureTask(
                     }
                 }
             }
-            task(journey.freeholdersTask) {
+            task(journey.freeholdersTask, FreeholdersTask.ROUTE_SEGMENT) {
                 parents {
                     OrParents(
                         journey.ownershipStructureRoutingStep.hasOutcome(OwnershipStructureRouteMode.ASK_FREEHOLDERS),
@@ -59,7 +59,7 @@ class OwnershipStructureTask(
                 }
                 savable()
             }
-            task(journey.superiorLandlordsTask) {
+            task(journey.superiorLandlordsTask, SuperiorLandlordsTask.ROUTE_SEGMENT) {
                 parents {
                     OrParents(
                         journey.ownershipStructureRoutingStep.hasOutcome(OwnershipStructureRouteMode.ASK_SUPERIOR_LANDLORDS),

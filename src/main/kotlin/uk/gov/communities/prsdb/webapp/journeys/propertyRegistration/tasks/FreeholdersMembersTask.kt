@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.PersonContactType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -103,20 +103,20 @@ class FreeholdersMembersTask(
                 parents { journey.freeholderNameStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
-                        FreeholderContactType.EMAIL -> journey.freeholderEmailStep
-                        FreeholderContactType.POSTAL_ADDRESS -> journey.freeholderAddressTask.firstStep
+                        PersonContactType.EMAIL -> journey.freeholderEmailStep
+                        PersonContactType.POSTAL_ADDRESS -> journey.freeholderAddressTask.firstStep
                     }
                 }
                 savable()
             }
             step(journey.freeholderEmailStep) {
                 routeSegment(PersonEmailStep.ROUTE_SEGMENT)
-                parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.EMAIL) }
+                parents { journey.freeholderContactTypeStep.hasOutcome(PersonContactType.EMAIL) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
             task(journey.freeholderAddressTask) {
-                parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
+                parents { journey.freeholderContactTypeStep.hasOutcome(PersonContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
