@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -37,7 +38,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
+        // TODO: PDJB-1926: Remove mockFeatureFlagManager argument
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource, mockFeatureFlagManager).fromEntity(propertyCompliance)
     }
 
     @ParameterizedTest(name = "{0}")
@@ -54,7 +56,11 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+
+        // TODO: PDJB-1926: Remove mockFeatureFlagManager and its arguments
+        private val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
+        private val electricalSafetyViewModelFactory =
+            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource, mockFeatureFlagManager)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 

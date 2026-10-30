@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -16,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
     override val provideLaterNoDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedNoDeadline"
@@ -23,8 +27,13 @@ class ElectricalSafetyViewModelFactory(
     override val missingCertOccupiedValue = "commonText.none"
     override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"
 
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
     override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
+        ComplianceStatusDataModel
+            .fromPropertyCompliance(
+                propertyCompliance,
+                featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+            ).electricalSafetyStatus
 
     fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
@@ -72,6 +81,7 @@ class ElectricalSafetyViewModelFactory(
                     )
                 }
 
+                // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
                 propertyCompliance.electricalSafetyExpiryDate?.let { expiryDate ->
                     addRow(
                         key = "propertyDetails.complianceInformation.expiryDate",
