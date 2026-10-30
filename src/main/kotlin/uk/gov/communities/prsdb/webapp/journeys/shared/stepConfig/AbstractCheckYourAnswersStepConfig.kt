@@ -19,11 +19,10 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
 
     override fun mode(state: TState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    // TODO PDJB-1832: rename submittedFilteredJourneyData (it now holds answersLastChanged) in a follow-up PR
     override fun resolvePageContent(
         state: TState,
         defaultContent: Map<String, Any?>,
-    ): Map<String, Any?> = defaultContent + ("submittedFilteredJourneyData" to (state.answersLastChanged?.toString() ?: ""))
+    ): Map<String, Any?> = defaultContent + ("answersLastChangedAt" to (state.answersLastChanged?.toString() ?: ""))
 
     override fun enrichSubmittedDataBeforeValidation(
         state: TState,
@@ -45,7 +44,7 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
         state: TState,
         formData: FormData,
     ) {
-        val submittedLastChanged = formData["submittedFilteredJourneyData"] as? String ?: return
+        val submittedLastChanged = formData["answersLastChangedAt"] as? String ?: return
         val currentLastChanged = state.answersLastChanged?.toString() ?: ""
         if (submittedLastChanged != currentLastChanged) {
             throw CyaDataHasChangedException("Journey answers have changed since the page was loaded")

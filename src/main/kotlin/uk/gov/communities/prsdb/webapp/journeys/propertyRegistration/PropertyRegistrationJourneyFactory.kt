@@ -844,7 +844,7 @@ interface PropertyRegistrationJourneyState :
     override val cyaStep: PropertyRegistrationCyaStep
 
     val answersChangedSinceConfirmation: Boolean
-        get() = cyaStep.formModelOrNull?.submittedFilteredJourneyData.orEmpty() != answersLastChanged?.toString().orEmpty()
+        get() = cyaStep.formModelOrNull?.answersLastChangedAt.orEmpty() != answersLastChanged?.toString().orEmpty()
 
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
