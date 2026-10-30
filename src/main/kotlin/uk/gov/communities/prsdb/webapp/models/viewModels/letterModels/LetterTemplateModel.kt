@@ -8,5 +8,6 @@ interface LetterTemplateModel {
 
 enum class LetterTemplate {
     // An example letter for checking that letters can be sent; real letters need their own template and model
+    // TODO PDJB-1988 / PDJB-1990: Remove this (and ExampleLetter, its letterTemplates.json entry and .md file) when the first real letter is added
     EXAMPLE_LETTER,
 }
