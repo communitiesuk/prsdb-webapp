@@ -23,6 +23,9 @@ notify:
   support-email: support@example.com
   use-production-notify: false
 
+email-queue:
+  name: prsdb-email-queue
+
 argon2:
   iterations: 2
   memory: 16384
