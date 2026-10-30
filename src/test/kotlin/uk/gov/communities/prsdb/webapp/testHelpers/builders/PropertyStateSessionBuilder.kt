@@ -207,11 +207,23 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders() =
-            beforePropertyRegistrationOwnsProperty()
-                .withOwnsProperty()
-                .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-                .withFreeholdType(FreeholdType.JOINT_TENANTS)
+        fun beforePropertyRegistrationFreeholders(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+                    .withFreeholdType(FreeholdType.JOINT_TENANTS)
+            } else {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+            }
+
+        // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
+        fun beforePropertyRegistrationFreeholdersList(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholders(isJointFreeholder)
+                .withFreeholdersInfoComplete()
+                .withHasAnyFreeholdersComplete()
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

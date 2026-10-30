@@ -1021,8 +1021,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
-            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
+            freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
             // TODO PDJB-2008: update this usage when the real superior landlords pages are added
