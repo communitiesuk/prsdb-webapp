@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class ElectricalCertExpiredStepConfigTests {
+class EicrExpiredStepConfigTests {
     @Mock
     lateinit var mockState: ElectricalSafetyDetailState
 
@@ -40,9 +40,9 @@ class ElectricalCertExpiredStepConfigTests {
         assertEquals("forms/electricalSafetyCertificateExpiredForUnoccupiedProperty", result)
     }
 
-    private fun setupStepConfig(): ElectricalCertExpiredStepConfig {
-        val stepConfig = ElectricalCertExpiredStepConfig()
-        stepConfig.urlPath = ElectricalCertExpiredStep.ROUTE_SEGMENT
+    private fun setupStepConfig(): EicrExpiredStepConfig {
+        val stepConfig = EicrExpiredStepConfig()
+        stepConfig.urlPath = EicrExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

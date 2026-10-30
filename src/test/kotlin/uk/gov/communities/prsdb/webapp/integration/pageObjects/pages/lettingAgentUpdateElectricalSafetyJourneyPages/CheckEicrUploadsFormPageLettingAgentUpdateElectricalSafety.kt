@@ -2,16 +2,16 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAge
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import java.util.UUID
 
-class ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety(
+class CheckEicrUploadsFormPageLettingAgentUpdateElectricalSafety(
     page: Page,
     urlArguments: Map<String, String>,
-) : DateFormPage(
+) : CheckElectricalCertUploadsFormBasePage(
         page,
         LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(
             UUID.fromString(urlArguments["token"]!!),
-        ) + "/${ElectricalCertExpiryDateStep.ROUTE_SEGMENT}",
+        ) + "/${CheckEicrUploadsStep.ROUTE_SEGMENT}",
     )

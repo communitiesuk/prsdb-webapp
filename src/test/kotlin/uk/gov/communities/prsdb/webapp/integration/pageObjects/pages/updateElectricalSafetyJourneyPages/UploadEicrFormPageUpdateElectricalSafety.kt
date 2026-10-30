@@ -2,15 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElec
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 
-class ElectricalCertExpiryDateFormPageUpdateElectricalSafety(
+class UploadEicrFormPageUpdateElectricalSafety(
     page: Page,
     urlArguments: Map<String, String>,
-) : DateFormPage(
+) : UploadCertificateFormPage(
         page,
         LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
-            "/${ElectricalCertExpiryDateStep.ROUTE_SEGMENT}",
+            "/${UploadEicrStep.ROUTE_SEGMENT}",
     )

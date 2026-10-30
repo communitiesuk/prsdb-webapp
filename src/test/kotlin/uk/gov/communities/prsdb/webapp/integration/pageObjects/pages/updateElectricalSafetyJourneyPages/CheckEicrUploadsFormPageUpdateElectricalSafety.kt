@@ -2,18 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElec
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithRadios
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 
-class RemoveElectricalCertUploadFormPageUpdateElectricalSafety(
+class CheckEicrUploadsFormPageUpdateElectricalSafety(
     page: Page,
     urlArguments: Map<String, String>,
-) : BasePage(
+) : CheckElectricalCertUploadsFormBasePage(
         page,
         LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
-            "/${RemoveElectricalCertUploadStep.ROUTE_SEGMENT}",
-    ) {
-    val form = FormWithRadios(page)
-}
+            "/${CheckEicrUploadsStep.ROUTE_SEGMENT}",
+    )

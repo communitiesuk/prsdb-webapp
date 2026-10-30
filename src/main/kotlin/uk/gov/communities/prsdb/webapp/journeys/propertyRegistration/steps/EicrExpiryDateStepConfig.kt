@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 
 @JourneyFrameworkComponent
-class ElectricalCertExpiryDateStepConfig :
+class EicrExpiryDateStepConfig :
     AbstractRequestableStepConfig<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = AnyDateFormModel::class
 
@@ -38,11 +38,11 @@ class ElectricalCertExpiryDateStepConfig :
 }
 
 @JourneyFrameworkComponent
-final class ElectricalCertExpiryDateStep(
-    stepConfig: ElectricalCertExpiryDateStepConfig,
+final class EicrExpiryDateStep(
+    stepConfig: EicrExpiryDateStepConfig,
 ) : RequestableStep<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "electrical-safety-certificate-expiry-date"
+        const val ROUTE_SEGMENT = "eicr-expiry-date"
     }
 }
 

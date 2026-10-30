@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class ElectricalCertExpiryDateStepConfigTests {
+class EicrExpiryDateStepConfigTests {
     @Mock
     lateinit var mockState: ElectricalSafetyDetailState
 
@@ -54,9 +54,9 @@ class ElectricalCertExpiryDateStepConfigTests {
         assertEquals(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE, result)
     }
 
-    private fun setupStepConfig(): ElectricalCertExpiryDateStepConfig {
-        val stepConfig = ElectricalCertExpiryDateStepConfig()
-        stepConfig.urlPath = ElectricalCertExpiryDateStep.ROUTE_SEGMENT
+    private fun setupStepConfig(): EicrExpiryDateStepConfig {
+        val stepConfig = EicrExpiryDateStepConfig()
+        stepConfig.urlPath = EicrExpiryDateStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

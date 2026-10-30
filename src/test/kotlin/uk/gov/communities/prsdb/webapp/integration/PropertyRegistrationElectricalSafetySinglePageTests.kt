@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import java.util.regex.Pattern
@@ -36,7 +36,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
     }
 
     @Nested
-    inner class CheckElectricalCertUploadsStep {
+    inner class CheckEicrUploadsStepTests {
         @Test
         fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
             val checkUploadsPage = navigateToCheckUploadsPage(page)
@@ -53,13 +53,13 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("electrical-safety-cert.pdf")
         }
 
-        private fun navigateToCheckUploadsPage(page: Page): CheckElectricalCertUploadsFormPagePropertyRegistration {
+        private fun navigateToCheckUploadsPage(page: Page): CheckEicrUploadsFormPagePropertyRegistration {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            return assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+            return assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
         }
     }
 
@@ -82,7 +82,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+            assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -92,7 +92,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
                 )
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -137,7 +137,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
     }
 
     @Nested
-    inner class ElectricalCertExpiryDateStepTests {
+    inner class EicrExpiryDateStepTests {
         @ParameterizedTest(name = "{0}")
         @Suppress("ktlint:standard:max-line-length")
         @MethodSource(
@@ -148,7 +148,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             expectedErrorMessage: String,
         ) {
             val (day, month, year) = dayMonthYear
-            val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationElectricalCertExpiryDatePage()
+            val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationEicrExpiryDatePage()
             electricalCertExpiryDatePage.submitDate(day, month, year)
             assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }

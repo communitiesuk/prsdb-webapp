@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 
-class ElectricalCertExpiredFormPagePropertyRegistration(
+class EicrExpiredFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ElectricalCertExpiredStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EicrExpiredStep.ROUTE_SEGMENT}") {
     val changeExpiryDateLink = Link.byText(page.locator("html"), "Change the expiry date")
     val form = PostForm(page)
     val sectionHeader = SectionHeader(page.locator("main"))

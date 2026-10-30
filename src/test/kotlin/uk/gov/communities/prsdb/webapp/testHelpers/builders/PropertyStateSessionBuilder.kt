@@ -251,9 +251,9 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasElectricalCert() =
             beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
 
-        fun beforePropertyRegistrationEicExpiryDate() =
+        fun beforePropertyRegistrationEicrExpiryDate() =
             beforePropertyRegistrationHasElectricalCert()
-                .withEic()
+                .withEicr()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
             beforePropertyRegistrationHasElectricalCert()

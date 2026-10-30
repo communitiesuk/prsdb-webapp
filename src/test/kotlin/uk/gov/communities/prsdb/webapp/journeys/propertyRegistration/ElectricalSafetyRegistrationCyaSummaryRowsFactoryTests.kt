@@ -17,8 +17,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
@@ -30,8 +30,8 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
     lateinit var mockState: ElectricalSafetyDetailState
 
     private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
-    private val mockElectricalCertExpiryDateStep: ElectricalCertExpiryDateStep = mock()
-    private val mockCheckElectricalCertUploadsStep: CheckElectricalCertUploadsStep = mock()
+    private val mockEicrExpiryDateStep: EicrExpiryDateStep = mock()
+    private val mockCheckEicrUploadsStep: CheckEicrUploadsStep = mock()
     private val mockUploadService: UploadService = mock()
 
     private fun fileUploadWithStatus(status: FileUploadStatus): FileUpload =
@@ -64,11 +64,11 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             val expiryDate = LocalDate(2026, 6, 15)
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
 
-            whenever(mockState.electricalCertExpiryDateStep).thenReturn(mockElectricalCertExpiryDateStep)
-            whenever(mockState.checkElectricalCertUploadsStep).thenReturn(mockCheckElectricalCertUploadsStep)
-            whenever(mockElectricalCertExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckElectricalCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.electricalUploadMap).thenReturn(
+            whenever(mockState.eicrExpiryDateStep).thenReturn(mockEicrExpiryDateStep)
+            whenever(mockState.checkEicrUploadsStep).thenReturn(mockCheckEicrUploadsStep)
+            whenever(mockEicrExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockCheckEicrUploadsStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.eicrUploadMap).thenReturn(
                 mapOf(
                     2 to CertificateUpload(2L, "second.pdf"),
                     1 to CertificateUpload(1L, "first.pdf"),
@@ -111,11 +111,11 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2026, 6, 15))
 
-            whenever(mockState.electricalCertExpiryDateStep).thenReturn(mockElectricalCertExpiryDateStep)
-            whenever(mockState.checkElectricalCertUploadsStep).thenReturn(mockCheckElectricalCertUploadsStep)
-            whenever(mockElectricalCertExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckElectricalCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.electricalUploadMap).thenReturn(
+            whenever(mockState.eicrExpiryDateStep).thenReturn(mockEicrExpiryDateStep)
+            whenever(mockState.checkEicrUploadsStep).thenReturn(mockCheckEicrUploadsStep)
+            whenever(mockEicrExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockCheckEicrUploadsStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.eicrUploadMap).thenReturn(
                 mapOf(1 to CertificateUpload(1L, "cert.pdf")),
             )
             stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
