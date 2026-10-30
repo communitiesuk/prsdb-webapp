@@ -80,6 +80,7 @@ class MockPropertyComplianceData {
                 mock(),
                 mock(),
                 BeforePdjb1666EicDateService(),
+                MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
             )
         }
 

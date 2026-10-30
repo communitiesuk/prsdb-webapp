@@ -51,9 +51,11 @@ data class ComplianceStatusDataModel(
 
     companion object {
         // We may want to move gas/EPC date access and compliance status derivation into the service layer to follow the same pattern as EIC/EICR.
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
             electricalSafetyExpiryDate: LocalDate?,
+            isGas14MonthExpiryEnabled: Boolean,
         ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
@@ -63,13 +65,13 @@ data class ComplianceStatusDataModel(
                         .fromRegistrationNumber(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
-                gasSafetyStatus = propertyCompliance.gasSafetyStatus,
+                gasSafetyStatus = gasSafetyStatusOf(propertyCompliance, isGas14MonthExpiryEnabled),
                 electricalSafetyStatus = electricalSafetyStatusOf(propertyCompliance, electricalSafetyExpiryDate),
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline = propertyCompliance.propertyOwnership.provideLaterDeadline,
-                gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                gasSafetyExpiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
                 electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
@@ -93,17 +95,20 @@ data class ComplianceStatusDataModel(
                 else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
             }
 
-        internal fun gasSafetyStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.gasSafetyStatus
-
-        private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
-            get() =
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        internal fun gasSafetyStatusOf(
+            propertyCompliance: PropertyCompliance,
+            isGas14MonthExpiryEnabled: Boolean,
+        ): ComplianceCertStatus =
+            with(propertyCompliance) {
                 when {
                     this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
                     this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
-                    this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
+                    isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }
+            }
 
         internal fun epcStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.epcStatus
 

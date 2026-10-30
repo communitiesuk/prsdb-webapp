@@ -25,7 +25,11 @@ data class OutstandingActionsDataModel(
         get() = isOccupied && (hasPropertyDetailsAction || complianceStatus?.shouldShowOnComplianceActionsPage == true)
 
     companion object {
-        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OutstandingActionsDataModel =
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        fun fromPropertyOwnership(
+            propertyOwnership: PropertyOwnership,
+            isGas14MonthExpiryEnabled: Boolean,
+        ): OutstandingActionsDataModel =
             OutstandingActionsDataModel(
                 propertyOwnershipId = propertyOwnership.id,
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
@@ -38,6 +42,7 @@ data class OutstandingActionsDataModel(
                         ComplianceStatusDataModel.fromPropertyCompliance(
                             it,
                             propertyOwnership.propertyCompliance.electricalSafetyExpiryDate,
+                            isGas14MonthExpiryEnabled,
                         )
                     },
             )

@@ -10,7 +10,7 @@ class AnyDateValidationTestParameterProvider {
         private const val INVALID_YEAR_ERR = "Year must be a whole number greater than 1899"
 
         @JvmStatic
-        private fun provideInvalidDateStrings() =
+        fun provideInvalidDateStrings() =
             arrayOf(
                 // Blank fields
                 Arguments.of(Named.of("all fields missing", Triple("", "", "")), "Enter a date"),

@@ -77,6 +77,7 @@ class ElectricalSafetyViewModelFactory(
                     )
                 }
 
+                // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
                 complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
                     addRow(
                         key = "propertyDetails.complianceInformation.expiryDate",

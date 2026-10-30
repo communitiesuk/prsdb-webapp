@@ -38,8 +38,12 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private fun getCertUploadedRows(): List<SummaryListRowViewModel> {
         val certType = state.getElectricalCertificateType()
         val downloadMessageKey = getDownloadMessageKey(certType)
+        val isEic = state.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC
+        val uploadMap = if (isEic) state.eicUploadMap else state.eicrUploadMap
+        val expiryDateStep = if (isEic) state.eicExpiryDateStep else state.eicrExpiryDateStep
+        val checkUploadsStep = if (isEic) state.checkEicUploadsStep else state.checkEicrUploadsStep
         val uploadedFiles =
-            state.electricalUploadMap
+            uploadMap
                 .toList()
                 .sortedBy { it.first }
                 .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
@@ -51,15 +55,16 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
+            // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
-                destination = destinationProvider(state.electricalCertExpiryDateStep),
+                destination = destinationProvider(expiryDateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
                 fieldValue = uploadedFiles,
-                destination = destinationProvider(state.checkElectricalCertUploadsStep),
+                destination = destinationProvider(checkUploadsStep),
             ),
         )
     }

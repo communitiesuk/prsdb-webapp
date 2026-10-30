@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -35,6 +36,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -107,6 +110,10 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockAddressService: AddressService
+
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -1800,6 +1807,12 @@ class PropertyOwnershipServiceTests {
     inner class GetOutstandingActionsForLandlord {
         val landlord = MockLandlordData.createIndividualLandlord()
 
+        // TODO: PDJB-1926: Remove this stub
+        @BeforeEach
+        fun setup() {
+            whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
+        }
+
         private fun addGasSafetyCertProvideLaterCompliance(propertyOwnership: PropertyOwnership) {
             ReflectionTestUtils.setField(
                 propertyOwnership,
@@ -1831,8 +1844,9 @@ class PropertyOwnershipServiceTests {
             // Assert
             assertEquals(
                 listOf(
-                    OutstandingActionsDataModel.fromPropertyOwnership(tenancyProvideLaterProperty),
-                    OutstandingActionsDataModel.fromPropertyOwnership(gasProvideLaterProperty),
+                    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
+                    OutstandingActionsDataModel.fromPropertyOwnership(tenancyProvideLaterProperty, isGas14MonthExpiryEnabled = true),
+                    OutstandingActionsDataModel.fromPropertyOwnership(gasProvideLaterProperty, isGas14MonthExpiryEnabled = true),
                 ),
                 outstandingActions.content,
             )

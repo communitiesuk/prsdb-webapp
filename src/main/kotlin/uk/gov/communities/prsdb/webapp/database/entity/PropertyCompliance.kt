@@ -10,7 +10,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -68,11 +67,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val hasEpcExemption: Boolean
         get() = epcExemptionReason != null
 
-    val gasSafetyCertExpiryDate: LocalDate?
-        get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again (gasSafetyCertExpiryDate)
+    fun getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled: Boolean): LocalDate? =
+        gasSafetyCertIssueDate?.let { CertificateExpiryHelper.getGasExpiryDate(it, isGas14MonthExpiryEnabled) }
 
-    val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it) }
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again
+    fun isGasSafetyCertExpired(isGas14MonthExpiryEnabled: Boolean): Boolean? =
+        gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it, isGas14MonthExpiryEnabled) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true

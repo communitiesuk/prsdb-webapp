@@ -57,10 +57,11 @@ class PropertyDetailsControllerTests(
     @BeforeEach
     fun setUp() {
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(propertyCompliance)
         whenever(propertyComplianceService.getComplianceStatus(any()))
-            .thenReturn(statusDerivingService.getComplianceStatus(propertyCompliance))
+            .thenReturn(complianceStatus)
         whenever(
             notificationBannerViewModelService.getPropertyDetailsNotificationBanner(
                 anyOrNull(),
