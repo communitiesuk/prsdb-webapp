@@ -1,0 +1,37 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addAnotherButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="addAnotherTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="optionalAddAnotherTitleParam" type="java.lang.Int"*/-->
+
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l"
+        th:text="#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}">
+    </h1>
+    <div class="govuk-inset-text" th:if="${insetText}" th:text="#{${insetText}}">inset text</div>
+    <th:block th:each="card : ${summaryCards}">
+        <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
+    </th:block>
+</th:block>
+<th:block id="form-content">
+    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+    <div class="govuk-button-group">
+        <div>
+            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addAnotherUrl}, #{${addAnotherButtonText}})}">
+                Add another
+            </a>
+        </div>
+        <div class="govuk-!-margin-top-2">
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+        </div>
+    </div>
+</th:block>
+</html>

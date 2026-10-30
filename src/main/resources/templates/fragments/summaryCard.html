@@ -28,7 +28,7 @@
         </ul>
     </div>
     <div class="govuk-summary-card__content">
-        <dl th:replace="~{fragments/summaryList :: summaryList(${summaryList})}"></dl>
+        <dl th:if="${!#lists.isEmpty(summaryList)}" th:replace="~{fragments/summaryList :: summaryList(${summaryList})}"></dl>
         <th:block th:insert="${additionalContent}" />
     </div>
 </div>
