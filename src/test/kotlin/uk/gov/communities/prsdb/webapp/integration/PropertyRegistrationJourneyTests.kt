@@ -30,7 +30,9 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
@@ -2543,6 +2545,47 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
         }
 
+        // TODO: PDJB-1926: Remove this nested class
+        @Nested
+        inner class Gas14MonthExpiryDisabled {
+            @BeforeEach
+            fun disableGas14MonthExpiryFlag() {
+                featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+            }
+
+            @Test
+            fun `a gas safety certificate issued 12 months and 1 day ago is expired`(page: Page) {
+                val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
+                gasCertIssueDatePage.submitDate(
+                    DateTimeHelper()
+                        .getCurrentDateInUK()
+                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY, days = 1)),
+                )
+
+                assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+            }
+
+            @Test
+            fun `a gas safety certificate issued 12 months ago is valid`(page: Page) {
+                val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
+                gasCertIssueDatePage.submitDate(
+                    DateTimeHelper()
+                        .getCurrentDateInUK()
+                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY)),
+                )
+
+                assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+            }
+
+            private fun skipToGasCertIssueDatePage(page: Page): GasCertIssueDateFormPagePropertyRegistration {
+                val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+                hasGasSupplyPage.submitHasGasSupply()
+                val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+                hasGasCertPage.submitHasCertificate()
+                return assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+            }
+        }
+
         @Test
         fun `manual address selection is cached when an address search returns no results`(page: Page) {
             val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
@@ -2848,13 +2891,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val validGasSafetyCertIssueDate =
             DateTimeHelper()
                 .getCurrentDateInUK()
-                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+                .minus(DatePeriod(months = GAS_SAFETY_CERT_VALIDITY_MONTHS))
                 .plus(DatePeriod(days = 5))
 
         val expiredGasSafetyCertIssueDate =
             DateTimeHelper()
                 .getCurrentDateInUK()
-                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5))
+                .minus(DatePeriod(months = GAS_SAFETY_CERT_VALIDITY_MONTHS, days = 5))
 
         val validExpiryDate =
             DateTimeHelper()

@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyCompl
 import java.time.LocalDate
 import java.util.UUID
 
+// TODO: PDJB-1926: Remove the isGas14MonthExpiryEnabled (true) arguments from LettingAgentPropertyDetailsViewModel calls
 class LettingAgentPropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
@@ -56,7 +57,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         assertTrue(viewModel.showProvideDetailsInset)
         assertEquals(1, viewModel.licensingSection.size)
@@ -72,7 +73,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         assertTrue(viewModel.showProvideDetailsInset)
         assertEquals(1, viewModel.tenancySection.size)
@@ -89,7 +90,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, provideLaterCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, provideLaterCompliance(propertyOwnership), mockMessageSource, true)
 
         assertTrue(viewModel.showProvideDetailsInset)
     }
@@ -105,7 +106,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, missingCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, missingCompliance(propertyOwnership), mockMessageSource, true)
 
         assertFalse(viewModel.showProvideDetailsInset)
     }
@@ -121,7 +122,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, expiredCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, expiredCompliance(propertyOwnership), mockMessageSource, true)
 
         assertFalse(viewModel.showProvideDetailsInset)
     }
@@ -137,7 +138,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         assertFalse(viewModel.showProvideDetailsInset)
     }
@@ -153,7 +154,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         assertFalse(viewModel.showProvideDetailsInset)
     }
@@ -163,7 +164,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
         assertThrows<IllegalStateException> {
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
         }
     }
 
@@ -173,7 +174,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"))
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         assertEquals(
             listOf(
@@ -194,6 +195,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = tokenForActionLink,
             )
 
@@ -214,7 +216,7 @@ class LettingAgentPropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         val householdsRow =
             viewModel.tenancySection.single {
@@ -233,6 +235,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = tokenForActionLink,
             )
 
@@ -252,6 +255,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = tokenForActionLink,
             )
 
@@ -269,7 +273,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         val rentIncludesBillsRow =
             viewModel.tenancySection.first {
@@ -287,6 +291,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = tokenForActionLink,
             )
 
@@ -307,6 +312,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = tokenForActionLink,
             )
 
@@ -326,7 +332,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         val rentFrequencyRow =
             viewModel.tenancySection.single {
@@ -345,6 +351,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = token,
             )
 
@@ -367,6 +374,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = token,
             )
 
@@ -385,7 +393,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         val licensingTypeRow =
             viewModel.licensingSection.first {
@@ -404,6 +412,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
+                true,
                 token = token,
             )
 
@@ -421,7 +430,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource, true)
 
         val furnishedStatusRow =
             viewModel.tenancySection.first {
