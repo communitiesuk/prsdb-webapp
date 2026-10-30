@@ -38,6 +38,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
+    // For EIC records, access dates through PropertyComplianceService/EicDateService;
+    // direct access bypasses the feature-flagged storage logic.
     var electricalSafetyExpiryDate: LocalDate? = null
 
     var electricalCertType: CertificateType? = null

@@ -88,7 +88,7 @@ class PropertyComplianceService(
 
     fun getElectricalSafetyExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
         when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
+            CertificateType.Eic -> getEicExpiryDate(propertyCompliance)
             // Any other cert type, including none, keeps reading the stored column so that records predating
             // the cert type column behave exactly as they did before this date access moved onto the service.
             else -> propertyCompliance.electricalSafetyExpiryDate
@@ -220,15 +220,16 @@ class PropertyComplianceService(
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
         record.electricalCertType = electricalCertType
-        setElectricalSafetyExpiryDate(record, electricalSafetyExpiryDate)
+        setElectricalSafetyExpiryDate(record, electricalSafetyExpiryDate, electricalCertType)
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }
 
     private fun setElectricalSafetyExpiryDate(
         record: PropertyCompliance,
         expiryDate: LocalDate?,
+        electricalCertType: CertificateType?,
     ) {
-        when (record.electricalCertType) {
+        when (electricalCertType) {
             CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
             else -> record.electricalSafetyExpiryDate = expiryDate
         }

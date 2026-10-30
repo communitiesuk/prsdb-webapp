@@ -50,6 +50,7 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
+        // We may want to move gas/EPC date access and compliance status derivation into the service layer to follow the same pattern as EIC/EICR.
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
             electricalSafetyExpiryDate: LocalDate?,
