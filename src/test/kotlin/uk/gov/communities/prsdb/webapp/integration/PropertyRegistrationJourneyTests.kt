@@ -1020,7 +1020,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Jane Smith")
+            val freeholderNamePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(freeholderNamePage.heading).containsText("What is this joint freeholder’s name?")
+            freeholderNamePage.submitName("Jane Smith")
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
