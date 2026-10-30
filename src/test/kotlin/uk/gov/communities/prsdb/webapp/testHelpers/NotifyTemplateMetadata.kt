@@ -13,7 +13,7 @@ data class NotifyTemplateMetadata(
 
 class NotifyTemplateMetadataFactory(
     notifyEnvironment: NotifyEnvironment?,
-    templateJsonPath: String = "/emails/emailTemplates.json",
+    templateJsonPath: String,
 ) {
     private val templateIdJsonKey: String? = notifyEnvironment?.templateIdJsonKey
 

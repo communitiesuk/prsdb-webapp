@@ -517,7 +517,7 @@ class EmailTemplateModelsTests {
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
-        val emailTemplateMetadata = NotifyTemplateMetadataFactory(null)
+        val emailTemplateMetadata = NotifyTemplateMetadataFactory(null, "/emails/emailTemplates.json")
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
         val storedMetadata =
             emailTemplateMetadata.metadataList.single { metadata ->
