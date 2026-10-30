@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagCo
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createComplianceStatus
 import java.util.UUID
 
 @WebMvcTest(LettingAgentPropertyDetailsController::class)
@@ -63,10 +64,14 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(propertyOwnership)
         whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val complianceStatus = createComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(eq(propertyCompliance)))
+            .thenReturn(complianceStatus)
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), any(), anyOrNull()))
             .thenReturn(complianceViewModel)
 
         mvc
@@ -89,10 +94,14 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(propertyOwnership)
         whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val complianceStatus = createComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(eq(propertyCompliance)))
+            .thenReturn(complianceStatus)
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), any(), anyOrNull()))
             .thenReturn(complianceViewModel)
 
         mvc
@@ -108,15 +117,15 @@ class LettingAgentPropertyDetailsControllerTests(
     private fun createComplianceViewModel(): PropertyComplianceViewModel {
         val messageSource = mock<MessageSource>()
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
-        // TODO: PDJB-1926: Remove mockFeatureFlagManager and its arguments
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
         return PropertyComplianceViewModelFactory(
             GasSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager),
-            ElectricalSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager),
-            EpcViewModelFactory(messageSource, mockFeatureFlagManager),
-            mockFeatureFlagManager,
+            ElectricalSafetyViewModelFactory(mock(), messageSource),
+            EpcViewModelFactory(messageSource),
         ).create(
-            propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
+            propertyCompliance = propertyCompliance,
+            complianceStatus = createComplianceStatus(propertyCompliance),
             viewType = PropertyDetailsViewType.LETTING_AGENT,
             propertyOwnershipId = 1L,
         )
