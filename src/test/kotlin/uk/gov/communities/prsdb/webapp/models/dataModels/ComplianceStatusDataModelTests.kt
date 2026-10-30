@@ -11,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createComplianceStatus
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-// TODO: PDJB-1926: Remove the isGas14MonthExpiryEnabled (true) arguments from fromPropertyCompliance calls
 class ComplianceStatusDataModelTests {
     @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
     @MethodSource("provideShouldShowCertCases")
@@ -116,7 +116,7 @@ class ComplianceStatusDataModelTests {
                 .build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
@@ -132,7 +132,7 @@ class ComplianceStatusDataModelTests {
                 .toString()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
@@ -154,7 +154,7 @@ class ComplianceStatusDataModelTests {
         val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(
@@ -175,7 +175,7 @@ class ComplianceStatusDataModelTests {
         val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertNull(complianceStatusDataModel.provideLaterDeadline)
@@ -188,7 +188,7 @@ class ComplianceStatusDataModelTests {
         expectedCertStatus: ComplianceCertStatus,
     ) {
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
