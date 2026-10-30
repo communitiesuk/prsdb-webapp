@@ -90,7 +90,7 @@ Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `rec
   - Address lines must not start with any of the following characters: `@ ( ) = [ ] " \ / , < >`
     ([Notify's validation](https://github.com/alphagov/notifications-utils/blob/main/notifications_utils/recipient_validation/postal_address.py#L33) also rejects `~`, although its docs do not list it).
 
-  `LetterAddressDataModel` checks the rules it can; Notify rejects addresses that break the others (such as an invalid postcode).
+  Notify rejects addresses that break these rules, and `sendLetter` throws a `PersistentLetterSendException`.
 - Letter personalisation must not use the address keys (`address_line_1` to `address_line_7` or `postcode`), as these are set from the recipient address.
   Like Notify, this check ignores case, spaces, underscores and hyphens, so keys such as `Post Code` are also rejected.
 - A successful send means Notify has accepted the letter, not that it has been delivered.
