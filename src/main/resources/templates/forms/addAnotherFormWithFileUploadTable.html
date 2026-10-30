@@ -4,7 +4,6 @@
 <!--/*@thymesVar id="summaryText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryListData" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
@@ -47,7 +46,6 @@
     </th:block>
 </th:block>
 <th:block id="form-content">
-    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <div class="govuk-button-group">
         <div>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addAnotherUrl}, #{${addAnotherButtonText}})}">
