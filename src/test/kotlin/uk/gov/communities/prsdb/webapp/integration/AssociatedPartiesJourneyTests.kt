@@ -104,6 +104,28 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
+
+        @Test
+        fun `Leasehold only owners are asked about freeholders and superior landlords`(page: Page) {
+            navigator.skipToPropertyRegistrationHasJointLandlordsPage().submitHasNoJointLandlords()
+
+            // TODO PDJB-1959: update this usage when the real owns property page is added
+            val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+            ownsPropertyPage.submitOwnsProperty(true)
+            // TODO PDJB-1960: update this usage when the real ownership kind page is added
+            val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+            ownershipKindPage.submitOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+
+            // TODO PDJB-2007: update this usage when the real freeholders pages are added
+            val freeholdersPage = assertPageIs(page, FreeholdersFormPagePropertyRegistration::class)
+            freeholdersPage.submit()
+            // TODO PDJB-2008: update this usage when the real superior landlords pages are added
+            val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
+            superiorLandlordsPage.submit()
+            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+            propertyManagerPage.submitNo()
+            assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        }
     }
 
     @Nested
