@@ -4,28 +4,39 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 // TODO PDJB-1960: replace this placeholder with the real "What kind of ownership do you have?" question
-//  (content, validation and persistence). Rendered with the shared forms/todo placeholder page.
+//  (content, validation and persistence). Rendered with the shared forms/todoWithRadios placeholder page.
+//  The real question uses checkboxes - these radios stand in for the 3 valid checkbox combinations.
 @JourneyFrameworkComponent
-class OwnershipKindStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OwnershipKindStepConfig : AbstractRequestableStepConfig<OwnershipKind, OwnershipKindFormModel, JourneyState>() {
+    override val formModelClass = OwnershipKindFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1960): What kind of ownership do you have - content, input and validation to be added")
+        mapOf(
+            "fieldName" to "ownershipKind",
+            "fieldSetHeading" to "registerProperty.ownershipKind.fieldSetHeading",
+            "radioOptions" to OwnershipKind.entries.map { RadiosButtonViewModel(value = it) },
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
 
-    override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.ownershipKind
 }
 
 @JourneyFrameworkComponent
 final class OwnershipKindStep(
     stepConfig: OwnershipKindStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<OwnershipKind, OwnershipKindFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "ownership-kind"
     }
+}
+
+enum class OwnershipKind {
+    FREEHOLD_ONLY,
+    LEASEHOLD_ONLY,
+    FREEHOLD_AND_LEASEHOLD,
 }

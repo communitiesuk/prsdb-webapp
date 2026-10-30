@@ -4,27 +4,32 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 // TODO PDJB-1959: replace this placeholder with the real "Do you own the property?" question
-//  (content, validation and persistence). Rendered with the shared forms/todo placeholder page.
+//  (content, validation and persistence). Rendered with the shared forms/todoWithRadios placeholder page.
 @JourneyFrameworkComponent
-class OwnsPropertyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OwnsPropertyStepConfig : AbstractRequestableStepConfig<YesOrNo, OwnsPropertyFormModel, JourneyState>() {
+    override val formModelClass = OwnsPropertyFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1959): Do you own the property - content, input and validation to be added")
+        mapOf(
+            "fieldName" to "ownsProperty",
+            "fieldSetHeading" to "registerProperty.ownsProperty.fieldSetHeading",
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
 
-    override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.ownsProperty?.let { if (it) YesOrNo.YES else YesOrNo.NO }
 }
 
 @JourneyFrameworkComponent
 final class OwnsPropertyStep(
     stepConfig: OwnsPropertyStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<YesOrNo, OwnsPropertyFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "owns-property"
     }
