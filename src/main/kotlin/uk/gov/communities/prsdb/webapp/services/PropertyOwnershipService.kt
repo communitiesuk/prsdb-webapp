@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -54,6 +56,8 @@ class PropertyOwnershipService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -512,9 +516,11 @@ class PropertyOwnershipService(
         landlord: Landlord,
         requestedPageIndex: Int,
     ): Page<OutstandingActionsDataModel> {
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
+        val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
         val allOutstandingActions =
             retrieveAllActivePropertiesForLandlord(landlord)
-                .map { OutstandingActionsDataModel.fromPropertyOwnership(it) }
+                .map { OutstandingActionsDataModel.fromPropertyOwnership(it, isGas14MonthExpiryEnabled) }
                 .filter { it.shouldShowOnOutstandingActionsPage }
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
         val fromIndex = pageRequest.offset.toInt().coerceAtMost(allOutstandingActions.size)

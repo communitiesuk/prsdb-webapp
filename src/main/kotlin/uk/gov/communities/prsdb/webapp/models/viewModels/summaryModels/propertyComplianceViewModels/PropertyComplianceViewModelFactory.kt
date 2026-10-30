@@ -28,6 +28,7 @@ class PropertyComplianceViewModelFactory(
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
         viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
         propertyOwnershipId: Long,
         lettingAgentAccessToken: UUID? = null,
@@ -70,11 +71,11 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
-        val electricalSafetyInsetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
+        val electricalSafetyInsetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance, complianceStatus)
         val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
-                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
+                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance, complianceStatus),
                 actions = electricalSafetyChangeActions,
                 insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
@@ -103,7 +104,7 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val isAllValid = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
+        val isAllValid = complianceStatus.isAllValid
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,

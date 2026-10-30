@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
@@ -59,6 +59,7 @@ class PropertyDetailsController(
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
 
         val propertyDetails =
             PropertyDetailsViewModel(
@@ -70,6 +71,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
                 viewType = PropertyDetailsViewType.LANDLORD,
                 propertyOwnershipId = propertyOwnershipId,
             )
@@ -80,7 +82,7 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject(
             "notificationBanner",
-            buildNotificationBanner(isLandlordView = true, propertyDetails, propertyCompliance),
+            buildNotificationBanner(isLandlordView = true, propertyDetails, complianceStatus),
         )
 
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -175,6 +177,7 @@ class PropertyDetailsController(
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
 
         val propertyDetails =
             PropertyDetailsViewModel(
@@ -210,6 +213,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
                 viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 propertyOwnershipId = propertyOwnershipId,
             )
@@ -219,7 +223,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute(
             "notificationBanner",
-            buildNotificationBanner(isLandlordView = false, propertyDetails, propertyCompliance),
+            buildNotificationBanner(isLandlordView = false, propertyDetails, complianceStatus),
         )
         model.addAttribute("isLandlordView", false)
 
@@ -231,11 +235,11 @@ class PropertyDetailsController(
     private fun buildNotificationBanner(
         isLandlordView: Boolean,
         propertyDetails: PropertyDetailsViewModel,
-        propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
     ): List<NotificationMessage> =
         notificationBannerViewModelService
             .getPropertyDetailsNotificationBanner(
-                propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
                 isLandlordView = isLandlordView,
                 isOccupied = propertyDetails.isOccupied,
                 isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
