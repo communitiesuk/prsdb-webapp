@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
@@ -69,8 +70,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
-            // TODO PDJB-1964: update this usage when the real freeholder name page is added
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
+            val freeholderNamePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(freeholderNamePage.heading).containsText("What is this joint freeholder’s name?")
+            freeholderNamePage.submitName("Jane Smith")
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
@@ -120,8 +122,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
-            // TODO PDJB-1964: update this usage when the real freeholder name page is added
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
+            val freeholderNamePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(freeholderNamePage.heading).containsText("What is this freeholder’s name?")
+            freeholderNamePage.submitName("Jane Smith")
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added

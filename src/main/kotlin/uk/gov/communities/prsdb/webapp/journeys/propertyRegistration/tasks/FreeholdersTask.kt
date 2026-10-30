@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
@@ -24,9 +24,12 @@ class FreeholdersTask(
     override val freeholderAddressTask: FreeholderAddressTask,
     override val freeholdersListStep: FreeholdersListStep,
     override val removeFreeholderStep: PersonRemoveConfirmationStep,
-) : TaskWithoutDependencies<FreeholdersState>(journeyStateService),
+) : Task<FreeholdersState, FreeholdersDependencies>(journeyStateService),
     FreeholdersState {
     override val taskState get() = this
+
+    override val isJointFreeholder: Boolean
+        get() = dependencies.isJointFreeholder
 
     override fun makeSubJourney(state: FreeholdersState) =
         subJourney(state) {
@@ -80,4 +83,8 @@ class FreeholdersTask(
                 parents { journey.removeFreeholderStep.isComplete() }
             }
         }
+}
+
+interface FreeholdersDependencies {
+    val isJointFreeholder: Boolean
 }

@@ -13,7 +13,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
@@ -21,7 +24,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -41,7 +46,7 @@ class PropertyStateSessionBuilder(
     AssociatedPartiesStateBuilder<PropertyStateSessionBuilder>,
     WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
-        additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
+        additionalDataMap["isAddressAlreadyRegistered"] = Json.encodeToString(serializer(), isRegistered)
         return this
     }
 
@@ -72,6 +77,18 @@ class PropertyStateSessionBuilder(
                 this.ownershipType = ownershipType
             }
         withSubmittedValue("ownership-type", ownershipTypeFormModel)
+        return this
+    }
+
+    // TODO PDJB-1962: update this when the real freeholders intro page is added
+    fun withFreeholdersInfoComplete(): PropertyStateSessionBuilder {
+        withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
+        return this
+    }
+
+    fun withFreeholderProvideDetails(provideDetails: YesOrNo = YesOrNo.YES): PropertyStateSessionBuilder {
+        val freeholderProvideDetailsFormModel = FreeholderProvideDetailsFormModel(provideDetails = provideDetails)
+        withSubmittedValue(PersonProvideDetailsStep.ROUTE_SEGMENT, freeholderProvideDetailsFormModel)
         return this
     }
 
@@ -219,6 +236,16 @@ class PropertyStateSessionBuilder(
             } else {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
             }
+
+        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
+                beforePropertyRegistrationFreeholders()
+            } else {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+            }.withFreeholdersInfoComplete()
+                .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationInviteJointLandlords()
