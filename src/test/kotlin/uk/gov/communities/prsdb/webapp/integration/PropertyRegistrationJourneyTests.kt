@@ -443,7 +443,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
-            page.waitForResponse({ it.request().method() == "POST" && it.url().contains(PaymentReturnStep.ROUTE_SEGMENT) }) {
+            page.waitForResponse({ it.request().resourceType() == "fetch" && it.url().contains(PaymentReturnStep.ROUTE_SEGMENT) }) {
                 submitPaymentSummary(page)
             }
             val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
@@ -497,6 +497,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             browser: Browser,
         ) {
             withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
                 checkAnswersPage.confirm()
                 submitPaymentSummary(page)
@@ -505,12 +506,38 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
                 // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
                 page.context().clearCookies()
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
                 page.navigate(requestCaptor.firstValue.returnUrl)
 
-                val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
                 assertPageIs(page, ConfirmationPagePropertyRegistration::class)
                 assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, a completed payment goes straight to the confirmation page`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+
+                submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
+
+                assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, a declined payment goes straight to the payment failed page`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+
+                submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
+
+                assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
             }
         }
 
@@ -548,6 +575,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             browser: Browser,
         ) {
             withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
                 checkAnswersPage.confirm()
                 val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
@@ -557,6 +585,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
 
                 changeBedroomsInSecondTab(page, journeyId)
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
                 paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
