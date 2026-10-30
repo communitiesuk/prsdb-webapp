@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
@@ -27,11 +25,10 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val epcViewModelFactory: EpcViewModelFactory,
-    // TODO: PDJB-1926: Remove featureFlagManager
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
         viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
         propertyOwnershipId: Long,
         lettingAgentAccessToken: UUID? = null,
@@ -74,11 +71,11 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
-        val electricalSafetyInsetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
+        val electricalSafetyInsetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance, complianceStatus)
         val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
-                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
+                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance, complianceStatus),
                 actions = electricalSafetyChangeActions,
                 insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
@@ -107,13 +104,7 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
-        val isAllValid =
-            ComplianceStatusDataModel
-                .fromPropertyCompliance(
-                    propertyCompliance,
-                    featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
-                ).isAllValid
+        val isAllValid = complianceStatus.isAllValid
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
