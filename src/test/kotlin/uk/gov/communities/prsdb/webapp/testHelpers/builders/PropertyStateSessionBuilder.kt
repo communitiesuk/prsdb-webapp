@@ -46,7 +46,7 @@ class PropertyStateSessionBuilder(
     AssociatedPartiesStateBuilder<PropertyStateSessionBuilder>,
     WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
-        additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
+        additionalDataMap["isAddressAlreadyRegistered"] = Json.encodeToString(serializer(), isRegistered)
         return this
     }
 
@@ -237,9 +237,14 @@ class PropertyStateSessionBuilder(
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
             }
 
-        fun beforePropertyRegistrationFreeholderName() =
-            beforePropertyRegistrationFreeholders()
-                .withFreeholdersInfoComplete()
+        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
+                beforePropertyRegistrationFreeholders()
+            } else {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+            }.withFreeholdersInfoComplete()
                 .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
