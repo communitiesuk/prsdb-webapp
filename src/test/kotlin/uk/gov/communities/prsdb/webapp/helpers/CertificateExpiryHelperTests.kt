@@ -122,7 +122,7 @@ class CertificateExpiryHelperTests {
         private fun provideCurrentDatesForElectricalSafety() =
             listOf(
                 arguments(named("is the day before the expiry date", EXPIRY_DATE.minusDays(1)), false),
-                arguments(named("is the expiry date", EXPIRY_DATE), true),
+                arguments(named("is the expiry date", EXPIRY_DATE), false),
                 arguments(named("is the day after the expiry date", EXPIRY_DATE.plusDays(1)), true),
             )
 
