@@ -842,6 +842,10 @@ interface PropertyRegistrationJourneyState :
     override val electricalSafetyTask: ElectricalSafetyTask
     override val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+
+    val answersChangedSinceConfirmation: Boolean
+        get() = cyaStep.formModelOrNull?.submittedFilteredJourneyData.orEmpty() != answersLastChanged?.toString().orEmpty()
+
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep
