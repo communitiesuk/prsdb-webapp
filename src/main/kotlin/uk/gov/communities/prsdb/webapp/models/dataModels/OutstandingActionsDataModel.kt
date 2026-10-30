@@ -33,7 +33,13 @@ data class OutstandingActionsDataModel(
                 isLicensingProvideLater = propertyOwnership.licenseProvideLater == true,
                 isTenancyProvideLater = propertyOwnership.tenancyProvideLater == true,
                 provideLaterDeadline = propertyOwnership.provideLaterDeadline,
-                complianceStatus = propertyOwnership.propertyCompliance?.let { ComplianceStatusDataModel.fromPropertyCompliance(it) },
+                complianceStatus =
+                    propertyOwnership.propertyCompliance?.let {
+                        ComplianceStatusDataModel.fromPropertyCompliance(
+                            it,
+                            propertyOwnership.propertyCompliance.electricalSafetyExpiryDate,
+                        )
+                    },
             )
     }
 }
