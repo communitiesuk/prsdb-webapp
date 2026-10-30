@@ -575,6 +575,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             browser: Browser,
         ) {
             withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
                 checkAnswersPage.confirm()
                 val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
@@ -584,6 +585,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
 
                 changeBedroomsInSecondTab(page, journeyId)
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
                 paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
