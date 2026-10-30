@@ -177,6 +177,9 @@ features:
     - name: "pdjb-1666-eic-issue-date"
       enabled: false
       expiry-date: "2026-11-30"
+    - name: "pdjb-973-asynchronous-email-sending"
+      enabled: false
+      expiry-date: "2027-03-31"
 
 ---
 
