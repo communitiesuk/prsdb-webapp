@@ -22,7 +22,7 @@ class AbstractCheckYourAnswersStepConfigTests {
     @Nested
     inner class ResolvePageContent {
         @Test
-        fun `puts answersLastChanged into submittedFilteredJourneyData`() {
+        fun `puts answersLastChanged into answersLastChangedAt`() {
             // Arrange
             val changed = Instant.parse("2026-01-01T10:15:30.123456789Z")
             whenever(mockState.answersLastChanged).thenReturn(changed)
@@ -31,11 +31,11 @@ class AbstractCheckYourAnswersStepConfigTests {
             val content = stepConfig.resolvePageContent(mockState, emptyMap())
 
             // Assert
-            assertEquals(changed.toString(), content["submittedFilteredJourneyData"])
+            assertEquals(changed.toString(), content["answersLastChangedAt"])
         }
 
         @Test
-        fun `puts an empty string into submittedFilteredJourneyData when answersLastChanged is null`() {
+        fun `puts an empty string into answersLastChangedAt when answersLastChanged is null`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(null)
 
@@ -43,7 +43,7 @@ class AbstractCheckYourAnswersStepConfigTests {
             val content = stepConfig.resolvePageContent(mockState, emptyMap())
 
             // Assert
-            assertEquals("", content["submittedFilteredJourneyData"])
+            assertEquals("", content["answersLastChangedAt"])
         }
     }
 
@@ -53,7 +53,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         fun `throws CyaDataHasChangedException when answers have changed since the page was loaded`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(Instant.parse("2026-01-01T10:15:31Z"))
-            val formData = mapOf("submittedFilteredJourneyData" to "2026-01-01T10:15:30Z")
+            val formData = mapOf("answersLastChangedAt" to "2026-01-01T10:15:30Z")
 
             // Act & Assert
             assertThrows<CyaDataHasChangedException> {
@@ -65,7 +65,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         fun `throws CyaDataHasChangedException when the page was loaded with no change time but answers have since changed`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(Instant.parse("2026-01-01T10:15:31Z"))
-            val formData = mapOf("submittedFilteredJourneyData" to "")
+            val formData = mapOf("answersLastChangedAt" to "")
 
             // Act & Assert
             assertThrows<CyaDataHasChangedException> {
@@ -77,7 +77,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         fun `throws CyaDataHasChangedException when the page was loaded with a change time but the state has none`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(null)
-            val formData = mapOf("submittedFilteredJourneyData" to "2026-01-01T10:15:30Z")
+            val formData = mapOf("answersLastChangedAt" to "2026-01-01T10:15:30Z")
 
             // Act & Assert
             assertThrows<CyaDataHasChangedException> {
@@ -90,7 +90,7 @@ class AbstractCheckYourAnswersStepConfigTests {
             // Arrange
             val changed = Instant.parse("2026-01-01T10:15:30.123456789Z")
             whenever(mockState.answersLastChanged).thenReturn(changed)
-            val formData = mapOf("submittedFilteredJourneyData" to changed.toString())
+            val formData = mapOf("answersLastChangedAt" to changed.toString())
 
             // Act & Assert
             assertDoesNotThrow {
@@ -102,7 +102,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         fun `does not throw when neither the page nor the state has a change time`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(null)
-            val formData = mapOf("submittedFilteredJourneyData" to "")
+            val formData = mapOf("answersLastChangedAt" to "")
 
             // Act & Assert
             assertDoesNotThrow {
@@ -111,7 +111,7 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when the submitted data has no submittedFilteredJourneyData field`() {
+        fun `does not throw when the submitted data has no answersLastChangedAt field`() {
             // Arrange
             whenever(mockState.answersLastChanged).thenReturn(Instant.parse("2026-01-01T10:15:31Z"))
 

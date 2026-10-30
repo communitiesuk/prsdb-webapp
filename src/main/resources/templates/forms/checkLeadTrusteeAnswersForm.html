@@ -3,7 +3,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="leadTrusteeCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.update.checkLeadTrustee.pageTitle}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -17,7 +17,7 @@
     </th:block>
 </th:block>
     <th:block id="form-content">
-        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <input type="hidden" name="answersLastChangedAt" th:value="${answersLastChangedAt}"/>
         <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
     </th:block>
 </html>
