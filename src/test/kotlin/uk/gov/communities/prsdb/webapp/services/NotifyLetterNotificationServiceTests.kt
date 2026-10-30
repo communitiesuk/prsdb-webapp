@@ -210,6 +210,9 @@ class NotifyLetterNotificationServiceTests {
     }
 
     companion object {
+        // Error types and messages are taken from Notify's documented errors:
+        // https://docs.notifications.service.gov.uk/java.html#send-a-letter-error-codes
+        // https://docs.notifications.service.gov.uk/java.html#general-errors
         @JvmStatic
         fun getTemporaryProblemExceptionMessages(): List<Named<String>> =
             listOf(
@@ -247,13 +250,13 @@ class NotifyLetterNotificationServiceTests {
                 named(
                     "Bad Request Error",
                     "Status code: 400 {" +
-                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Must be a real UK postcode\"}]," +
+                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Service is not allowed to send letters\"}]," +
                         "\"status_code\":400}",
                 ),
                 named(
                     "Too Many Requests Error",
                     "Status code: 429 {" +
-                        "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits (50) for today\"}]," +
+                        "\"errors\":[{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits (letter: 50) for today\"}]," +
                         "\"status_code\":429}",
                 ),
                 named(
@@ -261,7 +264,7 @@ class NotifyLetterNotificationServiceTests {
                     "Status code: 400 {" +
                         "\"errors\":[" +
                         "{\"error\":\"RateLimitError\",\"message\":\"Exceeded rate limit for key type\"}," +
-                        "{\"error\":\"BadRequestError\",\"message\":\"Must be a real UK postcode\"}]," +
+                        "{\"error\":\"BadRequestError\",\"message\":\"Service is not allowed to send letters\"}]," +
                         "\"status_code\":400}",
                 ),
                 named(

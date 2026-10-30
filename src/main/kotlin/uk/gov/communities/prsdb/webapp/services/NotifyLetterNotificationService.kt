@@ -35,6 +35,8 @@ class NotifyLetterNotificationService<LetterModel : LetterTemplateModel>(
         }
     }
 
+    // Error types are from https://docs.notifications.service.gov.uk/java.html#send-a-letter-error-codes
+    // and https://docs.notifications.service.gov.uk/java.html#general-errors
     private fun throwLetterSendException(notifyException: NotificationClientException): Nothing {
         val errors =
             parseNotifyExceptionErrors(notifyException.message ?: "")
