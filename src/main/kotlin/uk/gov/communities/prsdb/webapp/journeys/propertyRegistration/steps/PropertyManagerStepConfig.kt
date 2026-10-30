@@ -19,7 +19,7 @@ class PropertyManagerStepConfig :
                 listOf(
                     RadiosButtonViewModel(
                         value = true,
-                        labelMsgKey = "forms.radios.option.yes.label",
+                        labelMsgKey = "registerProperty.propertyManager.usingPropertyManager.radios.yes",
                     ),
                     RadiosButtonViewModel(
                         value = false,
