@@ -2323,7 +2323,7 @@ class PropertyComplianceServiceTests {
         private fun provideElectricalSafetyExpiryDates() =
             arrayOf(
                 arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
-                arguments(named("is today", LocalDate.now()), true),
+                arguments(named("is today", LocalDate.now()), false),
                 arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
             )
     }
