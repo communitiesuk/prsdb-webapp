@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private val state: ElectricalSafetyDetailState,
     private val uploadService: UploadService,
+    // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
+    private val isEicIssueDateEnabled: Boolean,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: ElectricalSafetyScenario = determineScenario(state)
@@ -55,9 +57,14 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
-            // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
+            // TODO PDJB-1669: Use the EIC issue date and issue date step for EICs once they exist
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
+                fieldHeading =
+                    if (isEic && isEicIssueDateEnabled) {
+                        "checkElectricalSafety.issueDate.fieldHeading"
+                    } else {
+                        "checkElectricalSafety.expiryDate.fieldHeading"
+                    },
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
                 destination = destinationProvider(expiryDateStep),
             ),

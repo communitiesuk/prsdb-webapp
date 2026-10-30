@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.ElectricalSafetyRegistrationCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.EpcRegistrationCyaSummaryRowsFactory
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class ComplianceDetailsHelper(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val uploadService: UploadService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun getGasSafetyCyaContent(
         cyaState: CheckYourAnswersJourneyState,
@@ -37,7 +40,11 @@ class ComplianceDetailsHelper(
         electricalSafetyState: ElectricalSafetyState,
     ): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(electricalSafetyState.electricalSafetyDetailsTask, uploadService) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(
+                electricalSafetyState.electricalSafetyDetailsTask,
+                uploadService,
+                featureFlagManager.checkFeature(EIC_ISSUE_DATE),
+            ) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(

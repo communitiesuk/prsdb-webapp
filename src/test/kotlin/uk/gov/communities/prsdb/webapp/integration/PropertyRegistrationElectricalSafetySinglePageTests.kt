@@ -87,12 +87,12 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
 
         @ParameterizedTest(name = "{0}")
         @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
-        fun `Cert uploaded - expiry date change link navigates to expiry date page`(
+        fun `Cert uploaded - certificate date change link navigates to expiry date page`(
             certificateType: CertificateType,
             page: Page,
         ) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(certificateType))
-            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            cyaPage.summaryList.certificateDateRow(certificateType).clickFirstActionLinkAndWait()
             assertPageIs(page, expiryDatePageClass(certificateType))
         }
 
