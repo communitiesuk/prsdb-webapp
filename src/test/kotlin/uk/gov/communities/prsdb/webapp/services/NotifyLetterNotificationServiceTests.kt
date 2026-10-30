@@ -148,7 +148,7 @@ class NotifyLetterNotificationServiceTests {
     }
 
     @Test
-    fun `Reports a ValidationError as a rejected request rather than an unknown outcome`() {
+    fun `Reports a ValidationError as a request rejected by Notify as invalid`() {
         // Arrange
         val errorMessage =
             "Status code: 400 {" +
@@ -170,7 +170,7 @@ class NotifyLetterNotificationServiceTests {
     }
 
     @Test
-    fun `Reports a readable but unrecognised error type as unclassified rather than an unknown outcome`() {
+    fun `Reports a readable but unrecognised error type as unclassified`() {
         // Arrange
         val errorMessage =
             "Status code: 400 {" +
