@@ -545,7 +545,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         ) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(certificateType)
 
-            checkAnswersPage.complianceSummaryList.electricalCertExpiryDateRow.actions
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(certificateType).actions
                 .getActionLink("Change")
                 .clickAndWait()
             val expiryDatePage =
