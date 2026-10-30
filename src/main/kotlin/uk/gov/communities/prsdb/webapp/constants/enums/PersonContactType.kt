@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-enum class FreeholderContactType {
+enum class PersonContactType {
     EMAIL,
     POSTAL_ADDRESS,
 }

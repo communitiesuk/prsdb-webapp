@@ -6,13 +6,13 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
-// TODO PDJB-1963: delete or replace this temporary form model when the real provide details page is built
+// TODO PDJB-1963, PDJB-1972: delete or replace this temporary form model when the real provide details page is built
 @IsValidPrioritised
-class FreeholderProvideDetailsFormModel(
+class PersonProvideDetailsFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerProperty.freeholders.provideDetails.radios.error.missing",
+                messageKey = "registerProperty.person.provideDetails.radios.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],

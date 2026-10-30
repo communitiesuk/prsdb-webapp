@@ -7,14 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1964: replace this placeholder with the real freeholder name page
+// TODO PDJB-1964, PDJB-1973: replace this placeholder with the real person name page
 //  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
 class PersonNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1964): Freeholder name - content, input and validation to be added")
+        mapOf("todoComment" to "TODO (PDJB-1964, PDJB-1973): Person name - content, input and validation to be added")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -26,6 +26,6 @@ final class PersonNameStep(
     stepConfig: PersonNameStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "freeholder-name"
+        const val ROUTE_SEGMENT = "name"
     }
 }

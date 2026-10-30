@@ -1,33 +1,33 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.PersonContactType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PersonContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-1965: replace this placeholder with the real freeholder contact type page.
+// TODO PDJB-1965, PDJB-1974: replace this placeholder with the real person contact type page.
 // Implement the routing logic
 @JourneyFrameworkComponent
 class PersonContactTypeStepConfig :
-    AbstractRequestableStepConfig<FreeholderContactType, FreeholderContactTypeFormModel, JourneyState>() {
-    override val formModelClass = FreeholderContactTypeFormModel::class
+    AbstractRequestableStepConfig<PersonContactType, PersonContactTypeFormModel, JourneyState>() {
+    override val formModelClass = PersonContactTypeFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
             "fieldName" to "contactType",
-            "fieldSetHeading" to "registerProperty.freeholders.contactType.fieldSetHeading",
+            "fieldSetHeading" to "registerProperty.person.contactType.fieldSetHeading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
-                        value = FreeholderContactType.EMAIL,
-                        labelMsgKey = "registerProperty.freeholders.contactType.radios.option.email",
+                        value = PersonContactType.EMAIL,
+                        labelMsgKey = "registerProperty.person.contactType.radios.option.email",
                     ),
                     RadiosButtonViewModel(
-                        value = FreeholderContactType.POSTAL_ADDRESS,
-                        labelMsgKey = "registerProperty.freeholders.contactType.radios.option.postalAddress",
+                        value = PersonContactType.POSTAL_ADDRESS,
+                        labelMsgKey = "registerProperty.person.contactType.radios.option.postalAddress",
                     ),
                 ),
         )
@@ -40,8 +40,8 @@ class PersonContactTypeStepConfig :
 @JourneyFrameworkComponent
 final class PersonContactTypeStep(
     stepConfig: PersonContactTypeStepConfig,
-) : RequestableStep<FreeholderContactType, FreeholderContactTypeFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<PersonContactType, PersonContactTypeFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "freeholder-contact-type"
+        const val ROUTE_SEGMENT = "contact-type"
     }
 }
