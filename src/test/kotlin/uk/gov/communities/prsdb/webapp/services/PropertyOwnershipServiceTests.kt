@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -35,6 +36,9 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -58,13 +62,16 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
@@ -103,6 +110,10 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockAddressService: AddressService
+
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -1789,6 +1800,127 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(0, numberOfIncompleteCompliances)
+        }
+    }
+
+    @Nested
+    inner class GetOutstandingActionsForLandlord {
+        val landlord = MockLandlordData.createIndividualLandlord()
+
+        // TODO: PDJB-1926: Remove this stub
+        @BeforeEach
+        fun setup() {
+            whenever(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)).thenReturn(true)
+        }
+
+        private fun addGasSafetyCertProvideLaterCompliance(propertyOwnership: PropertyOwnership) {
+            ReflectionTestUtils.setField(
+                propertyOwnership,
+                "propertyCompliance",
+                PropertyComplianceBuilder()
+                    .withPropertyOwnership(propertyOwnership)
+                    .withHasGasSupply()
+                    .withGasSafetyCertProvideLater()
+                    .build(),
+            )
+        }
+
+        @Test
+        fun `returns only the landlord's properties with outstanding actions`() {
+            // Arrange
+            val tenancyProvideLaterProperty = MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true)
+            val gasProvideLaterProperty = MockLandlordData.createOccupiedPropertyOwnership(id = 2)
+            addGasSafetyCertProvideLaterCompliance(gasProvideLaterProperty)
+            val propertyWithNothingOutstanding = MockLandlordData.createOccupiedPropertyOwnership(id = 3)
+            MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyWithNothingOutstanding)
+
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(listOf(tenancyProvideLaterProperty, gasProvideLaterProperty, propertyWithNothingOutstanding))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertEquals(
+                listOf(
+                    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
+                    OutstandingActionsDataModel.fromPropertyOwnership(tenancyProvideLaterProperty, isGas14MonthExpiryEnabled = true),
+                    OutstandingActionsDataModel.fromPropertyOwnership(gasProvideLaterProperty, isGas14MonthExpiryEnabled = true),
+                ),
+                outstandingActions.content,
+            )
+        }
+
+        @Test
+        fun `returns the requested page of outstanding actions`() {
+            // Arrange
+            val properties =
+                (1L..12L).map { MockLandlordData.createOccupiedPropertyOwnership(id = it, tenancyProvideLater = true) }
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(properties)
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 1)
+
+            // Assert
+            assertEquals(2, outstandingActions.content.size)
+            assertEquals(2, outstandingActions.totalPages)
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `anchors the compliance provide-later deadline to the registration date when the property was occupied since registration`() {
+            // Arrange
+            val registrationDate = LocalDate.of(2025, 3, 1)
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                    lastOccupiedDate = registrationDate,
+                )
+            addGasSafetyCertProvideLaterCompliance(propertyOwnership)
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertEquals(
+                registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+                outstandingActions.content
+                    .single()
+                    .complianceStatus!!
+                    .provideLaterDeadline,
+            )
+        }
+
+        @Test
+        fun `leaves the compliance provide-later deadline null when the property was occupied after registration`() {
+            // Arrange
+            val registrationDate = LocalDate.of(2025, 3, 1)
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                    lastOccupiedDate = registrationDate.plusDays(30),
+                )
+            addGasSafetyCertProvideLaterCompliance(propertyOwnership)
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertNull(
+                outstandingActions.content
+                    .single()
+                    .complianceStatus!!
+                    .provideLaterDeadline,
+            )
         }
     }
 

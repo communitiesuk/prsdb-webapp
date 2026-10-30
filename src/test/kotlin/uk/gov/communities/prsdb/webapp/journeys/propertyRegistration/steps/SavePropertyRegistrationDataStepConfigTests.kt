@@ -4,13 +4,16 @@ import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -63,6 +66,29 @@ class SavePropertyRegistrationDataStepConfigTests {
     @Test
     fun `afterStepIsReached registers the property using the registration data from the factory`() {
         // Arrange
+        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(registrationData)
+    }
+
+    @Test
+    fun `afterStepIsReached throws and does not register the property when answers changed since they were confirmed`() {
+        // Arrange
+        whenever(mockState.answersChangedSinceConfirmation).thenReturn(true)
+
+        // Act & Assert
+        assertThrows<CyaDataHasChangedException> { stepConfig.afterStepIsReached(mockState) }
+        verify(mockPropertyRegistrationService, never()).registerProperty(any())
+    }
+
+    @Test
+    fun `afterStepIsReached registers the property when answers are unchanged since they were confirmed`() {
+        // Arrange
+        whenever(mockState.answersChangedSinceConfirmation).thenReturn(false)
         whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
 
         // Act

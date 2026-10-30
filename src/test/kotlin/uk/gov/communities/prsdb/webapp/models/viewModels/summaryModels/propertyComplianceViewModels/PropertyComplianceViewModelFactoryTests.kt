@@ -11,12 +11,15 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyContro
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,14 +34,34 @@ class PropertyComplianceViewModelFactoryTests {
         whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
     }
 
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
+    private val gasSafetyViewModelFactory =
+        GasSafetyViewModelFactory(
+            mock(),
+            mockMessageSource,
+            MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
+        )
     private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
-    private val propertyComplianceViewModelFactory =
+    private val factory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
         )
+    private val propertyComplianceViewModelFactory =
+        object {
+            fun create(
+                propertyCompliance: PropertyCompliance,
+                viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
+                propertyOwnershipId: Long,
+                lettingAgentAccessToken: UUID? = null,
+            ) = factory.create(
+                propertyCompliance = propertyCompliance,
+                complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance),
+                viewType = viewType,
+                propertyOwnershipId = propertyOwnershipId,
+                lettingAgentAccessToken = lettingAgentAccessToken,
+            )
+        }
 
     private val propertyOwnershipId = 1L
 

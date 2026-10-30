@@ -28,6 +28,8 @@ const val ASSOCIATED_PARTIES = "pdjb-955-associated-parties"
 
 const val PROPERTY_REGISTRATION_PHASE_THREE = "pdjb-939-property-registration-phase-three"
 
+const val EIC_ISSUE_DATE = "pdjb-1666-eic-issue-date"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -40,4 +42,5 @@ val featureFlagNames =
         GAS_CERTIFICATE_14_MONTH_EXPIRY,
         ASSOCIATED_PARTIES,
         PROPERTY_REGISTRATION_PHASE_THREE,
+        EIC_ISSUE_DATE,
     )

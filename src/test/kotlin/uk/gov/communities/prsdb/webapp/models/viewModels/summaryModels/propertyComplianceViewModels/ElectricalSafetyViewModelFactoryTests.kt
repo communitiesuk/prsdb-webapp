@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedF
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -37,7 +38,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource)
+            .fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
     }
 
     @ParameterizedTest(name = "{0}")
@@ -46,7 +48,11 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         propertyCompliance: PropertyCompliance,
         expectedKey: String?,
     ) {
-        val insetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
+        val insetTextKey =
+            electricalSafetyViewModelFactory.getInsetTextKey(
+                propertyCompliance,
+                statusDerivingService.getComplianceStatus(propertyCompliance),
+            )
 
         assertEquals(expectedKey, insetTextKey)
     }
@@ -54,7 +60,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+        private val electricalSafetyViewModelFactory =
+            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
+// TODO PDJB-2006: Delete this class when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
 class ComplianceActionsPage(
     page: Page,
 ) : BasePage(page, COMPLIANCE_ACTIONS_URL) {
