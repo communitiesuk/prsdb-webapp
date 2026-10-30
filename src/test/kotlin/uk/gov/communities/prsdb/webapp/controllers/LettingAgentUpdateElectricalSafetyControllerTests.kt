@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -100,7 +100,7 @@ class LettingAgentUpdateElectricalSafetyControllerTests(
 
         private val validFileUploadUrl =
             LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(token) +
-                "/${UploadElectricalCertStep.ROUTE_SEGMENT}?journeyId=$journeyId"
+                "/${UploadEicrStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
         private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
 
@@ -114,7 +114,7 @@ class LettingAgentUpdateElectricalSafetyControllerTests(
         @BeforeEach
         fun setUp() {
             val propertyOwnership = createOccupiedPropertyOwnership()
-            stubValidTokenJourney(propertyOwnership, UploadElectricalCertStep.ROUTE_SEGMENT)
+            stubValidTokenJourney(propertyOwnership, UploadEicrStep.ROUTE_SEGMENT)
         }
 
         @Test

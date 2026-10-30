@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
 
@@ -55,8 +56,12 @@ class PropertyDetailsControllerTests(
 
     @BeforeEach
     fun setUp() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(any()))
+            .thenReturn(complianceStatus)
         whenever(
             notificationBannerViewModelService.getPropertyDetailsNotificationBanner(
                 anyOrNull(),
