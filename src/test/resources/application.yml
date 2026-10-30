@@ -52,7 +52,7 @@ gov-uk-pay:
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
   read-timeout: 10s
-  capture-check-delay: 0s
+  payment-status-retry-delay: 0s
 
 cloudwatch-metrics:
   ecs:
