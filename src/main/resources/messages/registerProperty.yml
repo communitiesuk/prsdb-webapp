@@ -203,6 +203,7 @@ propertyManager:
     insetText: This does not include any letting agents who are only advertising the property for you.
     fieldSetHeading: Are you using a property manager?
     radios:
+      'yes': 'Yes'
       'no': No, I manage this property (or another joint landlord does)
       error:
         missing: Select if you are using a property manager
