@@ -11,10 +11,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Perso
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDependencies
 
 interface FreeholdersMembersState :
     JourneyState,
-    FreeholdersListState {
+    FreeholdersListState,
+    FreeholdersDependencies {
     val freeholderProvideDetailsStep: PersonProvideDetailsStep
     val freeholderNameStep: PersonNameStep
     val freeholderContactTypeStep: PersonContactTypeStep
@@ -32,5 +34,6 @@ class FreeholdersMembersDependencies(
     // The state slice that owns the collected freeholders. The reusable members task reads and writes the
     // freeholders list through this, so the list can live in the enclosing outer task or journey.
     val listState: FreeholdersListState,
+    val freeholdersDependencies: FreeholdersDependencies,
     val allowRemovingLastMember: Boolean = true,
 )
