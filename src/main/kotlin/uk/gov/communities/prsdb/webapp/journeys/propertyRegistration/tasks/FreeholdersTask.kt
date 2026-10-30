@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
@@ -17,9 +17,12 @@ class FreeholdersTask(
     override val freeholdersInfoStep: FreeholdersInfoStep,
     override val freeholdersMembersTask: FreeholdersMembersTask,
     override val freeholdersBackRoutingStep: FreeholdersBackRoutingStep,
-) : TaskWithoutDependencies<FreeholdersState>(journeyStateService),
+) : Task<FreeholdersState, FreeholdersDependencies>(journeyStateService),
     FreeholdersState {
     override val taskState get() = this
+
+    override val isJointFreeholder: Boolean
+        get() = dependencies.isJointFreeholder
 
     override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
     override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
@@ -39,6 +42,7 @@ class FreeholdersTask(
                 withDependencies {
                     FreeholdersMembersDependencies(
                         listState = journey,
+                        freeholdersDependencies = journey,
                     )
                 }
                 savable()
@@ -53,4 +57,8 @@ class FreeholdersTask(
                 parents { journey.freeholdersBackRoutingStep.isComplete() }
             }
         }
+}
+
+interface FreeholdersDependencies {
+    val isJointFreeholder: Boolean
 }

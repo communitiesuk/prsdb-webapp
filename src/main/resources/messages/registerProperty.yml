@@ -298,6 +298,18 @@ freeholders:
         postalAddress: Post
       error:
         missing: Select how we should contact the freeholder
+  list:
+    heading:
+      joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
+      single: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
+    insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
+    emailAddress: Email address
+    postalAddress: Postal address
+    unknownFreeholder:
+      title: Unknown freeholder
+      body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
+    buttons:
+      addAnother: Add another freeholder
 # TODO PDJB-1959: replace with the real "Do you own the property?" content
 ownsProperty:
   fieldSetHeading: TODO PDJB-1959 Do you own this property?
