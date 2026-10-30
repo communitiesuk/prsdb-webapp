@@ -8,6 +8,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
+import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -16,10 +17,22 @@ class EicrExpiryDateStepConfigTests {
     lateinit var mockState: ElectricalSafetyDetailState
 
     @Test
-    fun `mode returns null when getElectricalCertificateIsOutdated returns null`() {
+    fun `getStepSpecificContent returns EICR heading`() {
+        val stepConfig = setupStepConfig()
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(
+            "propertyCompliance.electricalSafetyTask.electricalCertExpiryDate.eicr.fieldSetHeading",
+            content["fieldSetHeading"],
+        )
+    }
+
+    @Test
+    fun `mode returns null when getEicrIsOutdated returns null`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(null)
+        whenever(mockState.getEicrIsOutdated()).thenReturn(null)
 
         // Act
         val result = stepConfig.mode(mockState)
@@ -29,29 +42,29 @@ class EicrExpiryDateStepConfigTests {
     }
 
     @Test
-    fun `mode returns ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED when getElectricalCertificateIsOutdated returns true`() {
+    fun `mode returns ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED when getEicrIsOutdated returns true`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
+        whenever(mockState.getEicrIsOutdated()).thenReturn(true)
 
         // Act
         val result = stepConfig.mode(mockState)
 
         // Assert
-        assertEquals(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED, result)
+        assertEquals(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED, result)
     }
 
     @Test
-    fun `mode returns ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE when getElectricalCertificateIsOutdated returns false`() {
+    fun `mode returns ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE when getEicrIsOutdated returns false`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
+        whenever(mockState.getEicrIsOutdated()).thenReturn(false)
 
         // Act
         val result = stepConfig.mode(mockState)
 
         // Assert
-        assertEquals(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE, result)
+        assertEquals(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE, result)
     }
 
     private fun setupStepConfig(): EicrExpiryDateStepConfig {

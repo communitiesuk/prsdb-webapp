@@ -16,7 +16,7 @@ class EicrExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState) =
         mapOf(
-            "expiryDate" to state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+            "expiryDate" to state.getEicrExpiryDateIfReachable()?.toJavaLocalDate(),
             "changeExpiryDateUrl" to Destination.VisitableStep(state.eicrExpiryDateStep, state.journeyId).toUrlStringOrNull(),
             "landlordElectricalSafetyUrl" to ELECTRICAL_SAFETY_STANDARDS_URL,
             "submitButtonText" to
@@ -25,9 +25,9 @@ class EicrExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 
     override fun chooseTemplate(state: ElectricalSafetyDetailState) =
         if (state.isOccupied) {
-            "forms/electricalSafetyCertificateExpiredForOccupiedProperty"
+            "forms/eicrExpiredForOccupiedProperty"
         } else {
-            "forms/electricalSafetyCertificateExpiredForUnoccupiedProperty"
+            "forms/eicrExpiredForUnoccupiedProperty"
         }
 
     override fun mode(state: ElectricalSafetyDetailState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }

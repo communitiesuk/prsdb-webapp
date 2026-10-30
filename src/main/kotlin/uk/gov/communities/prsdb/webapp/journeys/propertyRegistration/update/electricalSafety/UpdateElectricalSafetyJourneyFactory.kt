@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
@@ -74,6 +75,9 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
+            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                backStep { journey.electricalSafetyDetailsTask.eicExpiryDateStep }
+            }
             configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                 backStep { journey.electricalSafetyDetailsTask.eicrExpiryDateStep }
             }
@@ -108,6 +112,13 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (state.checkingAnswersFor) {
+                EicExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
                 EicrExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyDetailsTask.eicrExpiryDateStep) {
@@ -118,6 +129,9 @@ class UpdateElectricalSafetyJourneyFactory(
                 else -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
+            }
+            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                backDestination { journey.returnToCyaPageDestination }
             }
             configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                 backDestination { journey.returnToCyaPageDestination }
@@ -133,6 +147,18 @@ class UpdateElectricalSafetyJourneyFactory(
     private fun JourneyBuilder<UpdateElectricalSafetyJourney>.replaceButtons() {
         configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.electricalSafetyDetailsTask.eicExpiredStep) {
+            withAdditionalContentProperty {
+                "submitButtonText" to
+                    if (journey.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
+            }
         }
         configureStep(journey.electricalSafetyDetailsTask.eicrExpiryDateStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }

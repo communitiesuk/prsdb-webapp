@@ -73,6 +73,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEpcAnswersFormPagePropertyRegistration
@@ -87,6 +88,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
@@ -130,6 +133,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicrUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
@@ -140,6 +144,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicrFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesChangeInterruptionPagePropertyRegistration
@@ -746,12 +751,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
             val electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
             // Electrical Cert Expiry Date - render page
             assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
@@ -759,24 +766,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 electricalCertExpiryDatePage.heading,
             ).containsText("What’s the expiry date on the Electrical Installation Certificate?")
             electricalCertExpiryDatePage.submitDate(validExpiryDate)
-            var uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+            var uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
 
             // Upload Electrical Cert - render page
             assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Certificate (EIC)")
             uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
             var checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
 
             // Check Electrical Cert Uploads - render page
             assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
-            uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+            uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
 
             uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
             checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
             assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
@@ -787,13 +795,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .clickAndWait()
 
             val removeElectricalCertUploadPage =
-                assertPageIs(page, RemoveEicrUploadFormPagePropertyRegistration::class)
+                assertPageIs(page, RemoveEicUploadFormPagePropertyRegistration::class)
 
             removeElectricalCertUploadPage.form.radios.selectValue("true")
             removeElectricalCertUploadPage.form.submit()
 
             checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
             assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
@@ -1473,17 +1481,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
             var electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
             // Electrical Cert Expiry Date - render page
             assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
             electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+            var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change expiry date link
             assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
@@ -1492,14 +1502,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
             electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
             electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
             // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
             assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
             assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
             assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
             electricalCertExpiryDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+            electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
             electricalCertExpiredPage.form.submit()
@@ -1599,17 +1609,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
             val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
+            // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
             // Has Electrical Cert - render page
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
             var electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
             // Electrical Cert Expiry Date - render page
             assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
             electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+            var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change expiry date link
             assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
@@ -1617,14 +1629,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
             electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
             electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
             // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
             assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
             assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
             assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
             electricalCertExpiryDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+            electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
             electricalCertExpiredPage.form.submit()
@@ -1696,6 +1708,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
         }
 
+        // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
         fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
             // Skip to Has Electrical Cert page and submit "Yes"
@@ -1711,14 +1724,110 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 electricalCertExpiryDatePage.heading,
             ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
             electricalCertExpiryDatePage.submitDate(validExpiryDate)
-            val uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+            var uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
 
             // Upload Electrical Cert - render page
             assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
             uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+            var checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
 
-            // Check Electrical Safety Answers - EICR variant verified by heading text
+            // Check Electrical Cert Uploads - render page
+            assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+            checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
+            uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+
+            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+            checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
+
+            checkElectricalCertUploadsPage.table
+                .getClickableCell(0, 2)
+                .link
+                .clickAndWait()
+
+            // Remove Electrical Cert Upload - render page
+            val removeElectricalCertUploadPage =
+                assertPageIs(page, RemoveEicrUploadFormPagePropertyRegistration::class)
+            removeElectricalCertUploadPage.form.radios.selectValue("true")
+            removeElectricalCertUploadPage.form.submit()
+
+            checkElectricalCertUploadsPage =
+                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+            checkElectricalCertUploadsPage.form.submit()
+
+            // Check Electrical Safety Answers - render page
+            val checkElectricalSafetyAnswersPage =
+                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        }
+
+        // EICR equivalent of the EIC steps in the whole journey tests above
+        @Test
+        fun `The Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
+            // Skip to Has Electrical Cert page and submit EICR
+            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+            hasElectricalCertPage.submitHasEicr()
+            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date - submit an expired date
+            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expired - render page then check change expiry date link
+            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.warning)
+                .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+            assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
+            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+            electricalCertExpiryDatePage.form.submit()
+            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Back on Electrical Cert Expired page - submit
+            electricalCertExpiredPage.form.submit()
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        }
+
+        // EICR equivalent of the EIC steps in the whole journey tests above
+        @Test
+        fun `The Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
+            // Skip to Has Electrical Cert page and submit EICR
+            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied = false)
+            hasElectricalCertPage.submitHasEicr()
+            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date - submit an expired date
+            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expired - render page then check change expiry date link
+            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.warning).isHidden()
+            assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
+            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+            electricalCertExpiryDatePage.form.submit()
+            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+            // Back on Electrical Cert Expired page - submit
+            electricalCertExpiredPage.form.submit()
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -2660,8 +2769,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         .withGasCertIssueDate(validGasSafetyCertIssueDate)
                         .withGasCertUploads(mapOf(1 to CertificateUpload(gasUpload.id, "pdjb-1698-gas-cert.pdf")))
                         .withEicr()
-                        .withElectricalCertExpiryDate(validExpiryDate)
-                        .withElectricalCertUploads(mapOf(1 to CertificateUpload(electricalUpload.id, "pdjb-1698-electrical-cert.pdf")))
+                        .withEicrExpiryDate(validExpiryDate)
+                        .withEicrUploads(mapOf(1 to CertificateUpload(electricalUpload.id, "pdjb-1698-electrical-cert.pdf")))
                         .withCompliantEpc(acceptedEpc),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
