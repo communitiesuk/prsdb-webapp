@@ -299,7 +299,7 @@ person:
       error:
         missing: Select how we should contact this person
 superiorLandlords:
-  hasSuperiorLandlords:
+  anyoneInOwnershipChain:
     fieldSetHeading: Is there anyone else in the ownership chain? (TODO PDJB-1971)
     radios:
       error:

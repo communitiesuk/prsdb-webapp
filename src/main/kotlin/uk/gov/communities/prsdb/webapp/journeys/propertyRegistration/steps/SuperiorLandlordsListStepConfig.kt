@@ -7,14 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-2008: replace this placeholder with the real superior landlords pages
-//  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
+// TODO PDJB-1977: replace this placeholder with the real superior landlords add-another list page
+//  (content, list rows, Change/Remove links). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class SuperiorLandlordsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class SuperiorLandlordsListStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-2008): Superior landlords - content, input and validation to be added")
+        mapOf("todoComment" to "TODO (PDJB-1977): Superior landlords list - add another, change and remove to be added")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -22,10 +22,10 @@ class SuperiorLandlordsStepConfig : AbstractRequestableStepConfig<Complete, NoIn
 }
 
 @JourneyFrameworkComponent
-final class SuperiorLandlordsStep(
-    stepConfig: SuperiorLandlordsStepConfig,
+final class SuperiorLandlordsListStep(
+    stepConfig: SuperiorLandlordsListStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "superior-landlords"
+        const val ROUTE_SEGMENT = "superior-landlords-list"
     }
 }
