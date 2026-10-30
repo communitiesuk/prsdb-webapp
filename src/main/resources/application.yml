@@ -116,7 +116,7 @@ gov-uk-pay:
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
   connect-timeout: 5s
   read-timeout: 10s
-  capture-check-delay: 2s
+  payment-status-retry-delay: 2s
   manual-intervention-email-address: ${GOV_UK_PAY_MANUAL_INTERVENTION_EMAIL_ADDRESS:Team-PRSDB+payment-manual-intervention@softwire.com}
 
 cloudwatch-metrics:

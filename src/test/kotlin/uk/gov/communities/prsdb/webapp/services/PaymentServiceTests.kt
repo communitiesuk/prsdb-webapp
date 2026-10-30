@@ -1589,7 +1589,7 @@ class PaymentServiceTests {
         @Test
         fun `finalisePayment waits only once before retrying a transient status check failure`() {
             // Arrange
-            val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = CAPTURE_CHECK_DELAY)
+            val paymentServiceWithPaymentStatusRetryDelay = createPaymentService(paymentStatusRetryDelay = PAYMENT_STATUS_RETRY_DELAY)
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1610,18 +1610,18 @@ class PaymentServiceTests {
             }
 
             // Act
-            val status = paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            val status = paymentServiceWithPaymentStatusRetryDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
-            assertTrue(Duration.ofNanos(statusRetriedAt - firstStatusCheckFailedAt) >= CAPTURE_CHECK_DELAY)
+            assertTrue(Duration.ofNanos(statusRetriedAt - firstStatusCheckFailedAt) >= PAYMENT_STATUS_RETRY_DELAY)
             verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
         }
 
         @Test
         fun `finalisePayment preserves the interrupt flag when the first status check confirms capture succeeded`() {
             // Arrange
-            val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = CAPTURE_CHECK_DELAY)
+            val paymentServiceWithPaymentStatusRetryDelay = createPaymentService(paymentStatusRetryDelay = PAYMENT_STATUS_RETRY_DELAY)
             val captureFailure = GovUkPayException("Capture timed out")
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
@@ -1640,7 +1640,7 @@ class PaymentServiceTests {
             var wasInterrupted = false
             val status =
                 try {
-                    paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+                    paymentServiceWithPaymentStatusRetryDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
                 } finally {
                     // Clears the flag so it can't leak into other tests
                     wasInterrupted = Thread.interrupted()
@@ -1712,8 +1712,8 @@ class PaymentServiceTests {
         @Test
         fun `finalisePayment does not wait before the first status check after capture fails`() {
             // Arrange
-            val captureCheckDelay = Duration.ofSeconds(5)
-            val paymentServiceWithCaptureCheckDelay = createPaymentService(captureCheckDelay = captureCheckDelay)
+            val paymentStatusRetryDelay = Duration.ofSeconds(5)
+            val paymentServiceWithPaymentStatusRetryDelay = createPaymentService(paymentStatusRetryDelay = paymentStatusRetryDelay)
             stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.INDETERMINATE)
             stubConditionalUpdate(listOf(PaymentStatus.INDETERMINATE), PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1732,11 +1732,11 @@ class PaymentServiceTests {
             }
 
             // Act
-            val status = paymentServiceWithCaptureCheckDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            val status = paymentServiceWithPaymentStatusRetryDelay.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
-            assertTrue(Duration.ofNanos(statusCheckedAt - captureFailedAt) < captureCheckDelay)
+            assertTrue(Duration.ofNanos(statusCheckedAt - captureFailedAt) < paymentStatusRetryDelay)
             verify(mockGovUkPayClient).getPayment(PAYMENT_ID)
             verify(mockTransactionManager).commit(any())
             verify(mockGovUkPayClient, never()).cancelPayment(any())
@@ -2937,11 +2937,11 @@ class PaymentServiceTests {
     private fun createPaymentService(
         annualFeeInPence: Int = 2000,
         gratisPeriodEndDate: String = "2027-11-14",
-        captureCheckDelay: Duration = Duration.ZERO,
+        paymentStatusRetryDelay: Duration = Duration.ZERO,
     ) = PaymentService(
         annualFeeInPence,
         gratisPeriodEndDate,
-        captureCheckDelay,
+        paymentStatusRetryDelay,
         MANUAL_INTERVENTION_EMAIL_ADDRESS,
         mockGovUkPayClient,
         mockPaymentRepository,
@@ -3060,7 +3060,7 @@ class PaymentServiceTests {
         private const val PAYMENT_REFERENCE = "payment-reference"
         private const val OTHER_PAYMENT_ID = "other-payment-id"
         private const val FINISHED_PAYMENT_ID = "finished-payment-id"
-        private val CAPTURE_CHECK_DELAY: Duration = Duration.ofMillis(100)
+        private val PAYMENT_STATUS_RETRY_DELAY: Duration = Duration.ofMillis(100)
         private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
 
         @JvmStatic
