@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryPropertyManagerYesOrNoFormModel
@@ -44,6 +47,17 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
                 this.freeholdType = freeholdType
             }
         withSubmittedValue(FreeholdTypeStep.ROUTE_SEGMENT, freeholdTypeFormModel)
+        return self()
+    }
+
+    fun withFreeholdersInfoComplete(): SelfType {
+        withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    // TODO PDJB-1969: remove this when has any freeholders becomes an internal step
+    fun withHasAnyFreeholdersComplete(): SelfType {
+        withSubmittedValue(HasAnyFreeholdersStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
