@@ -22,6 +22,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -124,6 +125,23 @@ class PaymentStatusCheckStepConfigTests {
 
         // Assert
         verify(mockState).paymentOutcome = expectedOutcome
+    }
+
+    @Test
+    fun `afterStepIsReached stores a quote expired outcome and clears the payment reference when the quote has expired`() {
+        // Arrange
+        stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
+        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
+        whenever(mockPaymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData))
+            .thenThrow(PaymentQuoteExpiredException("Quote expired"))
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = PaymentOutcome.QUOTE_EXPIRED
+        verify(mockState).paymentReference = null
+        verifyNoInteractions(mockAddressAvailabilityService)
     }
 
     @ParameterizedTest
@@ -261,7 +279,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "IN_PROGRESS"])
+    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "IN_PROGRESS", "QUOTE_EXPIRED"])
     fun `resolveNextDestination keeps the journey and returns the default destination when the payment has not succeeded`(
         paymentOutcome: PaymentOutcome,
     ) {
@@ -311,7 +329,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentOutcome::class, names = ["SUCCESS", "IN_PROGRESS"])
+    @EnumSource(value = PaymentOutcome::class, names = ["SUCCESS", "IN_PROGRESS", "QUOTE_EXPIRED"])
     fun `resolveNextDestination ignores the already registered flag when the payment has not failed`(paymentOutcome: PaymentOutcome) {
         // Arrange
         whenever(mockState.paymentOutcome).thenReturn(paymentOutcome)

@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -535,6 +536,7 @@ class PaymentServiceTests {
             verify(mockPaymentRepository).save(paymentCaptor.capture())
             assertEquals(expectedRenewalDate, paymentCaptor.firstValue.forPeriodEnding)
             assertEquals(quote.amountInPence, paymentCaptor.firstValue.amountInPence)
+            assertEquals(quote.quoteDate, paymentCaptor.firstValue.quoteDate)
             verifyNoInteractions(mockUserToLandlordService)
             verify(mockAbsoluteUrlProvider).buildPropertyRegistrationPaymentReturnUri(journeyId, requestCaptor.firstValue.reference)
             assertEquals(returnUrl, requestCaptor.firstValue.returnUrl)
@@ -1395,6 +1397,56 @@ class PaymentServiceTests {
             verify(mockTransactionManager).rollback(any())
             // Only recording the payment as capturable and the rolled-back claim update the status
             verify(mockPaymentRepository, times(2)).updateStatusIfCurrentStatusIn(any(), any(), any(), any())
+        }
+
+        @Test
+        fun `finalisePayment rolls back, cancels the payment and throws when the property is registered on a later UK day than quoted`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, quoteDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)))
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act, Assert
+            assertThrows<PaymentQuoteExpiredException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            }
+            verify(mockTransactionManager).rollback(any())
+            verify(mockTransactionManager, never()).commit(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+            val inOrder = inOrder(mockGovUkPayClient, mockPaymentRepository)
+            inOrder.verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
+            inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
+                eq(PAYMENT_ID),
+                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.CANCELLED),
+                any(),
+            )
+        }
+
+        @Test
+        fun `finalisePayment returns succeeded when another request finalises an expired quote's payment while this one cancels it`() {
+            // Arrange
+            stubConditionalUpdate(listOf(PaymentStatus.CREATED), PaymentStatus.CAPTURABLE)
+            stubConditionalUpdate(listOf(PaymentStatus.CAPTURABLE), PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, quoteDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)))
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockTransactionManager).rollback(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
         }
 
         @Test

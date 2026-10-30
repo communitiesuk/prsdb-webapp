@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -14,6 +15,7 @@ enum class PaymentOutcome {
     SUCCESS,
     FAILURE,
     IN_PROGRESS,
+    QUOTE_EXPIRED,
 }
 
 @JourneyFrameworkComponent
@@ -31,11 +33,17 @@ class PaymentStatusCheckStepConfig(
         }
 
         val finalisedStatus =
-            paymentService.finalisePayment(
-                govUkPayStatus.paymentId,
-                govUkPayStatus.status,
-                propertyRegistrationDataModelFactory.fromJourneyState(state),
-            )
+            try {
+                paymentService.finalisePayment(
+                    govUkPayStatus.paymentId,
+                    govUkPayStatus.status,
+                    propertyRegistrationDataModelFactory.fromJourneyState(state),
+                )
+            } catch (exception: PaymentQuoteExpiredException) {
+                state.paymentOutcome = PaymentOutcome.QUOTE_EXPIRED
+                state.paymentReference = null
+                return
+            }
 
         val paymentOutcome =
             when (finalisedStatus) {

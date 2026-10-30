@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.Instant
@@ -717,15 +718,17 @@ class NftDataSeeder(
         propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.addBatch()
 
+        val paymentCreatedAt = NftDataFaker.generatePaymentCreated(createdDate)
         paymentStmt.setString(1, NftDataFaker.generatePaymentId())
         paymentStmt.setTimestamp(2, createdDate)
         paymentStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
         paymentStmt.setInt(4, NftDataFaker.generatePaymentAmount())
         paymentStmt.setString(5, NftDataFaker.generatePaymentReference())
-        paymentStmt.setTimestamp(6, NftDataFaker.generatePaymentCreated(createdDate))
-        paymentStmt.setDate(7, renewalDate)
-        paymentStmt.setString(8, landlordDetails.subjectId)
-        paymentStmt.setLong(9, propertyOwnershipId)
+        paymentStmt.setTimestamp(6, paymentCreatedAt)
+        paymentStmt.setDate(7, Date.valueOf(paymentCreatedAt.toInstant().atZone(DateTimeHelper.UK_ZONE).toLocalDate()))
+        paymentStmt.setDate(8, renewalDate)
+        paymentStmt.setString(9, landlordDetails.subjectId)
+        paymentStmt.setLong(10, propertyOwnershipId)
         paymentStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)

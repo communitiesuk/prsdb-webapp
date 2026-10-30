@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -103,7 +104,7 @@ class PaymentService(
                 ),
             )
 
-        paymentRepository.save(Payment.fromGovUkPay(createdGovUkPayPayment.payment, renewalDate, incompleteProperty))
+        paymentRepository.save(Payment.fromGovUkPay(createdGovUkPayPayment.payment, quote.quoteDate, renewalDate, incompleteProperty))
 
         return createdGovUkPayPayment.nextUrl
     }
@@ -232,6 +233,10 @@ class PaymentService(
 
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
+        } catch (exception: PaymentQuoteExpiredException) {
+            println("Cancelling payment $paymentId: ${exception.message}")
+            val status = cancelUnfinalisedPayment(paymentId, exception)
+            if (status == PaymentStatus.SUCCEEDED) status else throw exception
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
@@ -277,6 +282,7 @@ class PaymentService(
                 savedJourneyStateRepository.delete(incompleteProperty.savedJourneyState)
                 paymentRepository.flush()
 
+                checkQuoteDateMatchesRegistrationDate(storedPayment, property)
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
@@ -288,6 +294,18 @@ class PaymentService(
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
+
+    private fun checkQuoteDateMatchesRegistrationDate(
+        payment: Payment,
+        property: PropertyOwnership,
+    ) {
+        if (payment.quoteDate != property.registrationDate) {
+            throw PaymentQuoteExpiredException(
+                "Payment ${payment.paymentId} was quoted on ${payment.quoteDate} so cannot be taken for a property registered on " +
+                    "${property.registrationDate}",
+            )
+        }
+    }
 
     private fun checkNoOtherPaymentHasSucceeded(
         otherPaymentIds: List<String>,

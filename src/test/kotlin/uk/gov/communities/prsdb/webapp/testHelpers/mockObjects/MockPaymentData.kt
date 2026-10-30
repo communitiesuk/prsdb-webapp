@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.DEFAULT_PAYMENT_ID
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData.Companion.createSavedJourneyState
@@ -16,6 +17,7 @@ class MockPaymentData {
             amountInPence: Int = 1000,
             reference: String = "reference",
             paymentCreatedAt: Instant = Instant.now(),
+            quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
             forPeriodEnding: LocalDate = LocalDate.of(2027, 3, 1),
             status: PaymentStatus = PaymentStatus.CREATED,
             incompleteProperty: LandlordIncompleteProperty = LandlordIncompleteProperty(createPrsdbUser(), createSavedJourneyState()),
@@ -24,6 +26,7 @@ class MockPaymentData {
             amountInPence = amountInPence,
             reference = reference,
             paymentCreatedAt = paymentCreatedAt,
+            quoteDate = quoteDate,
             forPeriodEnding = forPeriodEnding,
             status = status,
             incompleteProperty = incompleteProperty,

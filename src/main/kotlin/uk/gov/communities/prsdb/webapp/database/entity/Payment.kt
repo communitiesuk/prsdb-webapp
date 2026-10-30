@@ -24,6 +24,9 @@ class Payment() : ModifiableAuditableEntity() {
     lateinit var paymentCreatedAt: Instant
 
     @Column(nullable = false)
+    lateinit var quoteDate: LocalDate
+
+    @Column(nullable = false)
     lateinit var forPeriodEnding: LocalDate
 
     @Column(nullable = false)
@@ -50,6 +53,7 @@ class Payment() : ModifiableAuditableEntity() {
         amountInPence: Int,
         reference: String,
         paymentCreatedAt: Instant,
+        quoteDate: LocalDate,
         forPeriodEnding: LocalDate,
         status: PaymentStatus,
         incompleteProperty: LandlordIncompleteProperty,
@@ -58,6 +62,7 @@ class Payment() : ModifiableAuditableEntity() {
         this.amountInPence = amountInPence
         this.reference = reference
         this.paymentCreatedAt = paymentCreatedAt
+        this.quoteDate = quoteDate
         this.forPeriodEnding = forPeriodEnding
         this.status = status
         associatedIncompleteProperty = incompleteProperty
@@ -67,6 +72,7 @@ class Payment() : ModifiableAuditableEntity() {
     companion object {
         fun fromGovUkPay(
             payment: GovUkPayPayment,
+            quoteDate: LocalDate,
             periodEnding: LocalDate,
             incompleteProperty: LandlordIncompleteProperty,
         ): Payment =
@@ -75,6 +81,7 @@ class Payment() : ModifiableAuditableEntity() {
                 payment.amount,
                 payment.reference,
                 payment.createdDate,
+                quoteDate,
                 periodEnding,
                 PaymentStatus.fromGovUKPayStatus(payment.state.status),
                 incompleteProperty,
