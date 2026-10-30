@@ -593,6 +593,26 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `answers changed in another tab while paying but before the payment completes cancel the payment and do not register the property`(
+            browser: Browser,
+        ) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+                val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
+
+                changeBedroomsInSecondTab(page, journeyId)
+
+                paymentSummaryPage.form.submit()
+
+                val errorPage = createValidPage(page, ErrorPage::class)
+                assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+            }
+        }
+
+        @Test
         fun `answers changed in another tab after loading the CYA page stop the user confirming`(browser: Browser) {
             withJavaScriptDisabled(browser) { page, navigator ->
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
