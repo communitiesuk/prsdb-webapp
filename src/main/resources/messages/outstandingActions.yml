@@ -1,0 +1,25 @@
+heading: Outstanding actions
+subtitle: These occupied properties are missing details or certificates
+summaryRow:
+  licensing: Licensing details
+  tenancy: Tenancy details
+  gasSafety: Gas safety certificate
+  electricalSafety: Electrical safety certificate
+  energyPerformance: Energy performance certificate
+action:
+  goToProperty: Go to property
+status:
+  hasFaults:
+    gasSafety: No valid gas safety certificate
+    electricalSafety: No valid electrical safety certificate
+    epc: No valid EPC
+  expired: Expired on {0}
+  provideLater: Provide this later (before {0})
+  provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
+none:
+  inset: You have provided all the required details for your occupied properties.
+inset:
+  epcExpired:
+    beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+    link: get a new energy certificate (opens in new tab)
+    afterLink: .

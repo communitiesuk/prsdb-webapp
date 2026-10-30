@@ -515,15 +515,15 @@ class PaymentService(
             throw exception
         }
 
-    private fun cancelUnfinalisedPayment(
+    fun cancelUnfinalisedPayment(
         paymentId: String,
-        cause: Exception,
+        cause: Exception? = null,
     ): PaymentStatus {
         val govUkPayStatus =
             try {
-                cancelOrGetFinishedGovUkPayStatus(paymentId, "after failing to finalise it")
+                cancelOrGetFinishedGovUkPayStatus(paymentId, "because it can no longer be finalised")
             } catch (cancelException: Exception) {
-                cancelException.addSuppressed(cause)
+                cause?.let { cancelException.addSuppressed(it) }
                 throw cancelException
             }
 
@@ -537,7 +537,7 @@ class PaymentService(
 
         paymentRepository.updateStatusIfCurrentStatusIn(
             paymentId,
-            listOf(PaymentStatus.INDETERMINATE),
+            PaymentStatus.IN_PROGRESS_STATUSES,
             govUkPayStatus,
             Instant.now(),
         )

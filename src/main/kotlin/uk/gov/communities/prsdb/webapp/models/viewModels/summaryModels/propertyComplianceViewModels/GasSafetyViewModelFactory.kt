@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -15,6 +17,8 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
     override val provideLaterNoDeadlineKey = "checkGasSafety.provideThisLater.occupiedNoDeadline"
@@ -22,10 +26,13 @@ class GasSafetyViewModelFactory(
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "checkGasSafety.occupiedNoCertInsetText"
 
-    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
+    private fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.gasSafetyStatusOf(
+            propertyCompliance,
+            featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+        )
 
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
+    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = getStatus(propertyCompliance)
         return when (status) {
             ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"
