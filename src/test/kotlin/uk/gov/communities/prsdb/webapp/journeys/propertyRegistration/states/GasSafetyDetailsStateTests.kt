@@ -4,11 +4,12 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
@@ -51,9 +52,9 @@ class GasSafetyDetailsStateTests {
     }
 
     @Test
-    fun `getGasSafetyCertificateIsOutdated returns true if the certificate is older than GAS_SAFETY_CERT_VALIDITY_YEARS`() {
+    fun `getGasSafetyCertificateIsOutdated returns true if the certificate is older than GAS_SAFETY_CERT_VALIDITY_MONTHS`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).minusDays(5)
+        val issueDate = LocalDate.now().minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).minusDays(5)
         val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
 
@@ -62,9 +63,9 @@ class GasSafetyDetailsStateTests {
     }
 
     @Test
-    fun `getGasSafetyCertificateIsOutdated returns false if the certificate is newer than GAS_SAFETY_CERT_VALIDITY_YEARS`() {
+    fun `getGasSafetyCertificateIsOutdated returns false if the certificate is newer than GAS_SAFETY_CERT_VALIDITY_MONTHS`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()).plusDays(5)
+        val issueDate = LocalDate.now().minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).plusDays(5)
         val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
 
@@ -75,7 +76,13 @@ class GasSafetyDetailsStateTests {
     @Test
     fun `getGasSafetyCertificateIsOutdated returns false if the certificate expires today`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val today = LocalDate.now()
+        val issueDate = today.minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        // Month lengths vary, so some issue dates (e.g. 31st January) aren't the expiry date of any issue date
+        assumeTrue(
+            issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()) == today,
+            "No gas certificate issue date expires today ($today)",
+        )
         val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
 
@@ -97,6 +104,9 @@ class GasSafetyDetailsStateTests {
             override val allowProvideCertificateLaterRoute: Boolean = true
             override val isOccupied: Boolean = false
             override val propertyOwnershipId: Long? = null
+
+            // TODO: PDJB-1926: Remove this
+            override val isGas14MonthExpiryEnabled: Boolean = true
             override var gasUploadMap: Map<Int, CertificateUpload> = emptyMap()
             override var highestAssignedGasMemberId: Int? = null
             override val hasGasSupplyStep = mock<HasGasSupplyStep>()

@@ -1,14 +1,13 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import java.util.UUID
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
-    propertyCompliance: PropertyCompliance,
+    complianceStatus: ComplianceStatusDataModel,
     messageSource: MessageSource,
     token: UUID? = null,
 ) : PropertyDetailsViewModelBase(
@@ -28,7 +27,7 @@ class LettingAgentPropertyDetailsViewModel(
             (
                 isLicensingProvideLater ||
                     isTenancyProvideLater ||
-                    ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAnyProvideLater
+                    complianceStatus.isAnyProvideLater
             )
 
     val provideDetailsInsetText: String =

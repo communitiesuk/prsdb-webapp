@@ -726,29 +726,6 @@ invalidGasSafety:
       one: prosecution
       two: unlimited fines
       three: 'imprisonment, in the most serious cases'
-invalidEicr:
-  whatNext:
-    heading: What you need to do next
-    one:
-      beforeLink: Get a new electrical inspection
-      afterLink: .
-    two: Review and fix any problems the inspection finds
-    three: Upload the new EICR to the database.
-    four: 'Give a copy of the certificate to existing tenants within 28 days of the check, and to new tenants before they move in.'
-    paragraph:
-      beforeLink: 'For full details, read the'
-      link: electrical safety standards in the private rented sector (opens in new tab)
-      afterLink: .
-  ifNoEicr:
-    heading: If you do not have a valid EICR
-    paragraph:
-      one: Your local council can contact you if you do not have a valid EICR.
-      three: 'In the meantime, you can add other compliance information to the database.'
-    bullet:
-      heading: 'They can also:'
-      one: order you to fix any electrical problems
-      two: do remedial work on your property and charge you for it
-      three: 'fine you up to £30,000'
 uploadCertificate:
   gasSafety:
     fieldSetHeading: Upload the gas safety certificate
