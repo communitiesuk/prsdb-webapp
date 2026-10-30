@@ -24,7 +24,7 @@ Use PascalCase with a descriptive business context and the `Exception` suffix:
 | State/Business Logic | `CyaDataHasChangedException`, `JourneyInitialisationException` |
 | Validation Errors | `InvalidCoreIdentityException`, `InvalidVerifiedCredentialsException` |
 | Limit Exceeded | `RateLimitExceededException`, `PasscodeLimitExceededException` |
-| External Service Errors | `PersistentEmailSendException`, `TransientEmailSentException` |
+| External Service Errors | `PersistentEmailSendException`, `TransientEmailSentException`, `PersistentLetterSendException`, `TransientLetterSendException` |
 | Invitation Errors | `InvalidInvitationException` |
 | Null Safety | `NotNullFormModelValueIsNullException` |
 | Token/Auth | `TokenNotFoundException`, `VerifiedCredentialParsingException` |

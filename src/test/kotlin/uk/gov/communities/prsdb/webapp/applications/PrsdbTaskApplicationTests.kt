@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlipStrategyF
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.local.services.LetterNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -41,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
+import uk.gov.communities.prsdb.webapp.services.NotifyLetterNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
@@ -74,6 +76,8 @@ class PrsdbTaskApplicationTests {
                 PrsdbWebappApplication::class.simpleBeanName,
                 EmailNotificationStubService::class.simpleBeanName,
                 NotifyEmailNotificationService::class.simpleBeanName,
+                LetterNotificationStubService::class.simpleBeanName,
+                NotifyLetterNotificationService::class.simpleBeanName,
                 NotifyConfig::class.simpleBeanName,
                 AwsS3QuarantinedFileDeleter::class.simpleBeanName,
                 LocalQuarantinedFileDeleter::class.simpleBeanName,

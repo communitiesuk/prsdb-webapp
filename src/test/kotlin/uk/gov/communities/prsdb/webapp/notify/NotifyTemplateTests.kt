@@ -8,17 +8,18 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadata
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyEnvironment
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadata
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
 
 /*
- * These tests verify that the templates we have in this code base match the templates stored in notify. Every
- * template is checked against both the integration and the production notify services, so that a template which has
- * only been updated in one of them is caught before it reaches production.
+ * These tests verify that the email and letter templates we have in this code base match the templates stored in
+ * notify. Every template is checked against both the integration and the production notify services, so that a
+ * template which has only been updated in one of them is caught before it reaches production.
  *
  * Each notify service needs its own api key: EMAILNOTIFICATIONS_APIKEY for integration and
  * EMAILNOTIFICATIONS_PRODUCTION_APIKEY for production. A service whose key is not set is skipped, and these tests
@@ -30,78 +31,96 @@ import uk.gov.service.notify.TemplateList
  */
 
 @EnabledIf("canFetchNotifyTemplates")
-class NotifyEmailTemplateTests {
-    companion object NotifyTestsCompanion {
-        private val templatesByEnvironment = mutableMapOf<NotifyEnvironment, TemplateList>()
+class NotifyTemplateTests {
+    enum class NotifyTemplateType(
+        val notifyName: String,
+        val templateJsonPath: String,
+        val templateNames: List<String>,
+    ) {
+        EMAIL("email", "/emails/emailTemplates.json", EmailTemplate.entries.map { it.name }),
+        LETTER("letter", "/letters/letterTemplates.json", LetterTemplate.entries.map { it.name }),
+    }
 
-        private val metadataByEnvironment = mutableMapOf<NotifyEnvironment, List<EmailTemplateMetadata>>()
+    companion object NotifyTestsCompanion {
+        private val templatesByTypeAndEnvironment = mutableMapOf<Pair<NotifyTemplateType, NotifyEnvironment>, TemplateList>()
+
+        private val metadataByTypeAndEnvironment =
+            mutableMapOf<Pair<NotifyTemplateType, NotifyEnvironment>, List<NotifyTemplateMetadata>>()
 
         @JvmStatic
         fun canFetchNotifyTemplates(): Boolean = NotifyEnvironment.entries.any { it.isConfigured }
 
         @JvmStatic
         fun templateAndEnvironmentCombinations(): List<Arguments> =
-            EmailTemplate.entries.flatMap { template ->
-                NotifyEnvironment.entries.map { environment -> Arguments.of(template, environment) }
+            NotifyTemplateType.entries.flatMap { type ->
+                type.templateNames.flatMap { templateName ->
+                    NotifyEnvironment.entries.map { environment -> Arguments.of(type, templateName, environment) }
+                }
             }
 
-        fun notifyTemplates(environment: NotifyEnvironment): TemplateList =
-            templatesByEnvironment.getOrPut(environment) {
-                NotificationClient(environment.apiKey!!).getAllTemplates("email")
+        fun notifyTemplates(
+            type: NotifyTemplateType,
+            environment: NotifyEnvironment,
+        ): TemplateList =
+            templatesByTypeAndEnvironment.getOrPut(type to environment) {
+                NotificationClient(environment.apiKey!!).getAllTemplates(type.notifyName)
             }
 
-        fun sourceControlledMetadata(environment: NotifyEnvironment): List<EmailTemplateMetadata> =
-            metadataByEnvironment.getOrPut(environment) {
-                EmailTemplateMetadataFactory(environment).metadataList
+        fun sourceControlledMetadata(
+            type: NotifyTemplateType,
+            environment: NotifyEnvironment,
+        ): List<NotifyTemplateMetadata> =
+            metadataByTypeAndEnvironment.getOrPut(type to environment) {
+                NotifyTemplateMetadataFactory(environment, type.templateJsonPath).metadataList
             }
     }
 
-    @ParameterizedTest(name = "{0} in {1}")
+    @ParameterizedTest(name = "{0} {1} in {2}")
     @MethodSource("templateAndEnvironmentCombinations")
     fun `notify contains a template for each template id`(
-        id: EmailTemplate,
+        type: NotifyTemplateType,
+        templateName: String,
         environment: NotifyEnvironment,
     ) {
         assumeEnvironmentIsConfigured(environment)
 
-        val metadata =
-            sourceControlledMetadata(environment).singleOrNull { templateMetadata ->
-                templateMetadata.enumName ==
-                    id.name
-            }
+        val metadata = sourceControlledMetadata(type, environment).singleOrNull { it.enumName == templateName }
 
-        notifyTemplates(environment).templates.single { template -> template.id.toString() == metadata?.id }
+        notifyTemplates(type, environment).templates.single { template -> template.id.toString() == metadata?.id }
     }
 
-    @ParameterizedTest(name = "{0} in {1}")
+    @ParameterizedTest(name = "{0} {1} in {2}")
     @MethodSource("templateAndEnvironmentCombinations")
     fun `there is a source controlled copy for each template id`(
-        id: EmailTemplate,
+        type: NotifyTemplateType,
+        templateName: String,
         environment: NotifyEnvironment,
     ) {
-        val metadata = sourceControlledMetadata(environment).single { templateMetadata -> templateMetadata.enumName == id.name }
+        val metadata = sourceControlledMetadata(type, environment).single { it.enumName == templateName }
 
         assertFalse(
             metadata.id.isNullOrBlank(),
-            "emailTemplates.json has no ${environment.templateIdJsonKey} for ${id.name}",
+            "${type.templateJsonPath} has no ${environment.templateIdJsonKey} for $templateName",
         )
     }
 
-    @ParameterizedTest(name = "{0} in {1}")
+    @ParameterizedTest(name = "{0} {1} in {2}")
     @MethodSource("templateAndEnvironmentCombinations")
     fun `all source controlled templates match their notify equivalent`(
-        id: EmailTemplate,
+        type: NotifyTemplateType,
+        templateName: String,
         environment: NotifyEnvironment,
     ) {
         // Arrange
         assumeEnvironmentIsConfigured(environment)
-        val metadata = sourceControlledMetadata(environment).single { templateMetadata -> templateMetadata.enumName == id.name }
+        val metadata = sourceControlledMetadata(type, environment).single { it.enumName == templateName }
 
         // Act
-        val notifyTemplate = notifyTemplates(environment).templates.single { template -> template.id.toString() == metadata.id }
+        val notifyTemplate = notifyTemplates(type, environment).templates.single { template -> template.id.toString() == metadata.id }
 
         // Assert
         assertBodiesMatch(metadata, notifyTemplate)
+        // For letters, the subject is the letter heading
         assertEquals(
             metadata.subject,
             notifyTemplate.subject.orElse(null),
@@ -113,7 +132,7 @@ class NotifyEmailTemplateTests {
         assumeTrue(environment.isConfigured, "No notify api key configured for $environment")
 
     private fun assertBodiesMatch(
-        metadata: EmailTemplateMetadata,
+        metadata: NotifyTemplateMetadata,
         notifyTemplate: Template,
     ) {
         val storedBody = javaClass.getResource(metadata.bodyLocation)?.readText() ?: ""
