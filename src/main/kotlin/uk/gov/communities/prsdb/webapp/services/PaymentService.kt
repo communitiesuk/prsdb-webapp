@@ -42,7 +42,7 @@ import java.util.UUID
 class PaymentService(
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
     @Value("\${gov-uk-pay.gratis-period-end-date}") gratisPeriodEndDate: String,
-    @Value("\${gov-uk-pay.capture-check-delay}") private val captureCheckDelay: Duration,
+    @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
     private val govUkPayClient: GovUkPayClient,
     private val paymentRepository: PaymentRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
@@ -447,7 +447,7 @@ class PaymentService(
 
             // Wait only after a transient lookup failure; the first check should be immediate.
             try {
-                Thread.sleep(captureCheckDelay)
+                Thread.sleep(paymentStatusRetryDelay)
             } catch (interruption: InterruptedException) {
                 Thread.currentThread().interrupt()
                 exception.addSuppressed(interruption)
