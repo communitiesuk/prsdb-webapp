@@ -1576,12 +1576,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expired - render page then check change expiry date link
+            // Electrical Cert Expired - render page then check change issue date link
             assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
             assertThat(electricalCertExpiredPage.warning)
                 .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
             assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
-            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
             electricalCertExpiryDatePage =
                 assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
@@ -1704,11 +1705,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expired - render page then check change expiry date link
+            // Electrical Cert Expired - render page then check change issue date link
             assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+            assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
             assertThat(electricalCertExpiredPage.warning).isHidden()
             assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
-            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+            electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
             electricalCertExpiryDatePage =
                 assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
 
