@@ -696,6 +696,9 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        // Drawn here rather than at its point of use below, because it consumes the shared faker stream: moving it
+        // would reorder the draws in between and change every subsequent seeded value.
+        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
         propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
@@ -718,6 +721,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
         propertyOwnershipStmt.setDate(23, renewalDate)
+        propertyOwnershipStmt.setInt(24, ownershipTypeBeforePdjb955.ordinal)
         propertyOwnershipStmt.addBatch()
 
         paymentStmt.setString(1, NftDataFaker.generatePaymentId())

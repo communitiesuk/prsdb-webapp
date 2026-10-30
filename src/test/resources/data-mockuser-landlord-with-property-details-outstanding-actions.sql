@@ -27,13 +27,13 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 -- 2: occupied after registration with tenancy provided later, no compliance record
 -- 3: unoccupied with licensing provided later, valid certificates
 -- 4: occupied since registration with tenancy provided later and a missing gas safety certificate
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date, is_occupied, correspondence_email, correspondence_address_id, renewal_date,
                                 license_provide_later, tenancy_provide_later)
-VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 365, true, true),
-       (2, true, 1, 1, 2, 3, 3, current_date - 30, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 335, null, true),
-       (3, true, 1, 0, 0, 4, 4, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365, true, null),
-       (4, true, 1, 1, 2, 5, 5, current_date, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 365, null, true);
+VALUES (1, true, 1, 1, 1, 2, 2, 2, current_date, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 365, true, true),
+       (2, true, 1, 1, 1, 2, 3, 3, current_date - 30, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 335, null, true),
+       (3, true, 1, 1, 0, 0, 4, 4, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365, true, null),
+       (4, true, 1, 1, 1, 2, 5, 5, current_date, 1, null, null, null, null, null, null, null, current_date, true, 'email@example.com', 1, current_date + 365, null, true);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),

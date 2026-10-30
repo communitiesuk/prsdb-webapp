@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -42,6 +43,15 @@ object NftDataFaker {
     private var faker = Faker(Locale.UK, seededRandom)
     private var scenarioRandom = Random(DEFAULT_SEED)
 
+    // TODO PDJB-2019: once the legacy enum and column are gone, delete this field and its line in reset(), then
+    //  change generateOwnershipType() below to `faker.options().option(OwnershipType::class.java)` so that it
+    //  matches the other generators in this file. That switch is a tidy-up rather than a requirement: the seeded
+    //  ownership types change either way, so NftDataSeederTests will need re-verifying.
+    //  OwnershipType is drawn from its own stream so that adding it does not shift the shared faker stream, which
+    //  would otherwise change every subsequent value in a seeding run. OwnershipTypeBeforePdjb955 continues to draw
+    //  from the shared faker, in its original position, so that previously seeded data is unchanged.
+    private var ownershipTypeRandom = Random(DEFAULT_SEED)
+
     /**
      * The reference "now" for all generated dates, pinned once per run so that a seeding run does not drift as it
      * executes. Dates stay relative to the run date, so expiry and reminder windows remain realistic.
@@ -59,6 +69,7 @@ object NftDataFaker {
         seededRandom = Random(seed)
         faker = Faker(Locale.UK, seededRandom)
         scenarioRandom = Random(seed)
+        ownershipTypeRandom = Random(seed)
         runReference = reference
     }
 
@@ -448,7 +459,10 @@ object NftDataFaker {
         return Pair(propertyType, otherPropertyType)
     }
 
-    fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
+    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
+    fun generateOwnershipTypeBeforePdjb955(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
+
+    fun generateOwnershipType(): OwnershipType = OwnershipType.entries[ownershipTypeRandom.nextInt(OwnershipType.entries.size)]
 
     fun generateNumHouseholdsAndTenants(): Pair<Int, Int> {
         val numHouseholds = faker.random().nextInt(1, 10)

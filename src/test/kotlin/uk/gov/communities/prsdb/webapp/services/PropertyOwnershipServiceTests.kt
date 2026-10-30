@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -122,7 +123,7 @@ class PropertyOwnershipServiceTests {
     @EnumSource(LandlordType::class)
     fun `createPropertyOwnership creates a property ownership with supplied correspondence details`(landlordType: LandlordType) {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -151,7 +152,8 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -219,7 +221,7 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `createPropertyOwnership can create a property ownership with no license`() {
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -242,7 +244,8 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -322,7 +325,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
@@ -364,7 +367,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -403,7 +406,7 @@ class PropertyOwnershipServiceTests {
         // Act
         val property =
             propertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -445,7 +448,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -1184,12 +1187,59 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `createPropertyOwnership stores both the legacy ownership type and its replacement`() {
+        // Arrange
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createIndividualLandlord()
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        // Act
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            numBedrooms = 1,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+        )
+
+        // Assert
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(
+            OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            propertyOwnershipCaptor.value.ownershipTypeBeforePdjb955,
+        )
+        assertEquals(OwnershipType.JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
+    }
+
+    @Test
     fun `updateOwnershipType updates the property's ownership type`() {
         // Arrange
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -1199,12 +1249,13 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateOwnershipType(
             propertyOwnership.id,
-            OwnershipType.LEASEHOLD,
+            OwnershipTypeBeforePdjb955.LEASEHOLD,
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
         // Assert
-        assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.ownershipType)
+        assertEquals(OwnershipTypeBeforePdjb955.LEASEHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
+        assertEquals(OwnershipType.LEASEHOLD_ONLY, propertyOwnership.ownershipType)
     }
 
     @Test
@@ -1213,7 +1264,7 @@ class PropertyOwnershipServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -1225,7 +1276,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateOwnershipType(
                     propertyOwnership.id,
-                    OwnershipType.LEASEHOLD,
+                    OwnershipTypeBeforePdjb955.LEASEHOLD,
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
