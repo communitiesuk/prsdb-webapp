@@ -10,10 +10,33 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.String
 
 class EmailTemplateModelsTests {
+    @ParameterizedTest
+    @CsvSource(
+        "2026-10-30T14:38:42.082Z, 30 October 2026 at 2:38pm (GMT)",
+        "2026-07-01T13:38:00Z, 1 July 2026 at 2:38pm (BST)",
+        "2026-07-01T23:05:00Z, 2 July 2026 at 12:05am (BST)",
+    )
+    fun `manual intervention email formats payment creation time in UK time`(
+        timestamp: String,
+        expected: String,
+    ) {
+        val model =
+            PaymentRequiresManualInterventionEmail(
+                paymentId = "payment-id",
+                paymentReference = "payment-reference",
+                amountInPence = 2000,
+                paymentCreatedAt = Instant.parse(timestamp),
+                reason = "reason",
+            )
+
+        Assertions.assertEquals(expected, model.toHashMap()["payment created at"])
+    }
+
     companion object {
         @JvmStatic
         private fun templateList() =
@@ -494,6 +517,16 @@ class EmailTemplateModelsTests {
                         teamMembersUrl = URI("teamMembersUrl"),
                     ),
                     "/emails/RemoveOrgTeamMemberConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PaymentRequiresManualInterventionEmail(
+                        paymentId = "payment-id",
+                        paymentReference = "payment-reference",
+                        amountInPence = 2000,
+                        paymentCreatedAt = Instant.parse("2026-01-01T12:00:00Z"),
+                        reason = "reason",
+                    ),
+                    "/emails/PaymentRequiresManualIntervention.md",
                 ),
                 EmailTemplateTestData(
                     RemoveOrgTeamMemberNotificationEmail(
