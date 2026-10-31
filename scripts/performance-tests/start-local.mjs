@@ -82,6 +82,7 @@ try {
       SERVER_PORT: appPort,
       POSTGRES_PORT: port('POSTGRES_PORT', '5433'),
       REDIS_PORT: port('REDIS_PORT', '6379'),
+      ELASTICMQ_PORT: port('ELASTICMQ_PORT', '9324'),
       SPRING_APPLICATION_JSON: JSON.stringify(config),
       JAVA_TOOL_OPTIONS: `${process.env.JAVA_TOOL_OPTIONS ?? ''} -Dspring.devtools.restart.enabled=false`,
     },

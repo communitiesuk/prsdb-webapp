@@ -43,6 +43,9 @@ notify:
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
 
+email-queue:
+  name: ${EMAIL_QUEUE_NAME:}
+
 os:
   api-key: ${OS_API_KEY}
   downloads.base-url: https://api.os.uk/downloads/v1

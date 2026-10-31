@@ -126,6 +126,7 @@ $portOffset = $maxOffset + 1
 $newServerPort = 8080 + $portOffset
 $newPostgresPort = 5433 + $portOffset
 $newRedisPort = 6379 + $portOffset
+$newElasticMqPort = 9324 + $portOffset
 
 $envFilePath = Join-Path $DestinationPath ".env"
 if (Test-Path $envFilePath) {
@@ -145,9 +146,11 @@ if (Test-Path $envFilePath) {
     $content = Set-EnvVar $content "SERVER_PORT" "$newServerPort"
     $content = Set-EnvVar $content "POSTGRES_PORT" "$newPostgresPort"
     $content = Set-EnvVar $content "REDIS_PORT" "$newRedisPort"
+    $content = Set-EnvVar $content "ELASTICMQ_PORT" "$newElasticMqPort"
 
     Set-Content -Path $envFilePath -Value $content -NoNewline
     Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
     Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
     Write-Host "  REDIS_PORT=$newRedisPort" -ForegroundColor Gray
+    Write-Host "  ELASTICMQ_PORT=$newElasticMqPort" -ForegroundColor Gray
 }
