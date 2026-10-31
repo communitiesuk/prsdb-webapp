@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
@@ -13,12 +15,14 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
@@ -47,6 +51,9 @@ class PaymentSummaryStepConfigTests {
 
     @Mock
     private lateinit var mockPaymentSummaryStep: PaymentSummaryStep
+
+    @Mock
+    private lateinit var mockPaymentReturnStep: PaymentReturnStep
 
     private lateinit var stepConfig: PaymentSummaryStepConfig
 
@@ -180,6 +187,7 @@ class PaymentSummaryStepConfigTests {
     fun `resolveNextDestination redirects to the already registered step when the address is already registered`() {
         // Arrange
         stubAddressTask()
+        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
@@ -190,8 +198,49 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(mockAlreadyRegisteredStep, assertIs<Destination.VisitableStep>(result).step)
-        verifyNoInteractions(mockPaymentService)
+        verify(mockPaymentService).findRecoverablePaymentReference(journeyId)
+        verify(mockPaymentService, never()).getPropertyRegistrationPaymentQuote(any())
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
         verify(mockState, never()).paymentQuote
+    }
+
+    @Test
+    fun `resolveNextDestination resumes a recoverable payment before checking the address or quote`() {
+        // Arrange
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        whenever(mockState.paymentReturnStep).thenReturn(mockPaymentReturnStep)
+        whenever(mockPaymentReturnStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockPaymentService.findRecoverablePaymentReference(journeyId)).thenReturn("existing-reference")
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentReturnStep, assertIs<Destination.VisitableStep>(result).step)
+        verify(mockState).paymentReference = "existing-reference"
+        verify(mockState, never()).propertyDetailsTask
+        verify(mockState, never()).paymentQuote
+        verify(mockPaymentService, never()).getPropertyRegistrationPaymentQuote(any())
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
+    }
+
+    @Test
+    fun `resolveNextDestination propagates a failure to check for a recoverable payment before checking the address or quote`() {
+        // Arrange
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        val lookupFailure = GovUkPayException("GOV.UK Pay lookup failed")
+        whenever(mockPaymentService.findRecoverablePaymentReference(journeyId)).thenThrow(lookupFailure)
+
+        // Act
+        val exception = assertThrows<GovUkPayException> { stepConfig.resolveNextDestination(mockState, defaultDestination) }
+
+        // Assert
+        assertSame(lookupFailure, exception)
+        verify(mockState, never()).propertyDetailsTask
+        verify(mockState, never()).paymentQuote
+        verify(mockState, never()).paymentReference = anyOrNull()
+        verify(mockPaymentService, never()).getPropertyRegistrationPaymentQuote(any())
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
     }
 
     @Test
@@ -216,10 +265,33 @@ class PaymentSummaryStepConfigTests {
     }
 
     @Test
+    fun `resolveNextDestination resumes an existing payment through the payment return step`() {
+        // Arrange
+        stubAddressTask()
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        whenever(mockState.paymentReturnStep).thenReturn(mockPaymentReturnStep)
+        whenever(mockPaymentReturnStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
+        val quote = createQuote(today)
+        whenever(mockState.paymentQuote).thenReturn(quote)
+        whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
+            .thenReturn(PropertyRegistrationPaymentCreationResult.ExistingPayment("existing-reference"))
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentReturnStep, assertIs<Destination.VisitableStep>(result).step)
+        verify(mockState).paymentReference = "existing-reference"
+    }
+
+    @Test
     fun `resolveNextDestination refreshes a missing quote without creating a payment`() {
         // Arrange
         stubAddressTask()
         stubSummaryDestination()
+        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
         val refreshedQuote = createQuote(today)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
@@ -230,6 +302,7 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
+        verify(mockPaymentService).findRecoverablePaymentReference(journeyId)
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
     }
 
@@ -238,6 +311,7 @@ class PaymentSummaryStepConfigTests {
         // Arrange
         stubAddressTask()
         stubSummaryDestination()
+        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
         whenever(mockState.paymentQuote).thenReturn(createQuote(today.minusDays(1)))
         val refreshedQuote = createQuote(today)
@@ -249,6 +323,7 @@ class PaymentSummaryStepConfigTests {
         // Assert
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
+        verify(mockPaymentService).findRecoverablePaymentReference(journeyId)
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
     }
 
@@ -281,7 +356,7 @@ class PaymentSummaryStepConfigTests {
         val quote = createQuote(today)
         whenever(mockState.paymentQuote).thenReturn(quote)
         whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
-            .thenReturn("https://pay.example.test/next")
+            .thenReturn(PropertyRegistrationPaymentCreationResult.NewPayment("https://pay.example.test/next"))
     }
 
     private fun createQuote(quoteDate: LocalDate) =

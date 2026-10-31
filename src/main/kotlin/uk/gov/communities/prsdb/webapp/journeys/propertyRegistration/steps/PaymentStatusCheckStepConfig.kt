@@ -50,7 +50,7 @@ class PaymentStatusCheckStepConfig(
         val paymentOutcome =
             when (finalisedStatus) {
                 PaymentStatus.SUCCEEDED -> PaymentOutcome.SUCCESS
-                PaymentStatus.FAILED, PaymentStatus.CANCELLED -> PaymentOutcome.FAILURE
+                PaymentStatus.FAILED, PaymentStatus.CANCELLED, PaymentStatus.MANUAL_INTERVENTION -> PaymentOutcome.FAILURE
                 PaymentStatus.CREATED, PaymentStatus.INDETERMINATE, PaymentStatus.CAPTURABLE -> PaymentOutcome.IN_PROGRESS
             }
         state.paymentOutcome = paymentOutcome

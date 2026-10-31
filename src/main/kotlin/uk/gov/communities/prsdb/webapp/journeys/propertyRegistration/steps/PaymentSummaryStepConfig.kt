@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -82,6 +83,10 @@ class PaymentSummaryStepConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination {
+        paymentService.findRecoverablePaymentReference(state.journeyId)?.let { reference ->
+            return resumePayment(state, reference)
+        }
+
         val addressTask = state.propertyDetailsTask.addressTask
         if (addressTask.isAddressAlreadyRegistered == true) {
             return Destination(addressTask.alreadyRegisteredStep)
@@ -99,13 +104,20 @@ class PaymentSummaryStepConfig(
             return Destination(state.paymentSummaryStep)
         }
 
-        val nextUrl =
-            paymentService.createPropertyRegistrationPayment(
-                state.journeyId,
-                state.loggedInLandlordEmailAtStartOfJourney,
-                quote,
-            )
-        return Destination.ExternalUrl(nextUrl)
+        val result =
+            paymentService.createPropertyRegistrationPayment(state.journeyId, state.loggedInLandlordEmailAtStartOfJourney, quote)
+        return when (result) {
+            is PropertyRegistrationPaymentCreationResult.NewPayment -> Destination.ExternalUrl(result.nextUrl)
+            is PropertyRegistrationPaymentCreationResult.ExistingPayment -> resumePayment(state, result.reference)
+        }
+    }
+
+    private fun resumePayment(
+        state: PropertyRegistrationJourneyState,
+        reference: String,
+    ): Destination {
+        state.paymentReference = reference
+        return Destination(state.paymentReturnStep)
     }
 
     companion object {

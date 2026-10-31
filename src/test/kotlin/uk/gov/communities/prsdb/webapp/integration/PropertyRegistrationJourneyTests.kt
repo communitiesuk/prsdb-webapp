@@ -631,6 +631,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
             doReturn(true).whenever(addressAvailabilityService).isAddressOwned(uprnForSelectedAddress)
 
+            ensureIncompletePropertyExistsForCurrentJourney(page)
             paymentSummaryPage.form.submit()
 
             assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
@@ -655,6 +656,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
             assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
 
+            ensureIncompletePropertyExistsForCurrentJourney(page)
             paymentSummaryPage.form.submit()
 
             val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
