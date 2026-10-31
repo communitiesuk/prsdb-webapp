@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EmailQueueService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
@@ -46,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.NotifyLetterNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationDeletionService
-import uk.gov.communities.prsdb.webapp.services.RoutingEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
@@ -79,7 +79,7 @@ class PrsdbTaskApplicationTests {
                 PrsdbWebappApplication::class.simpleBeanName,
                 EmailDeliveryStubService::class.simpleBeanName,
                 NotifyEmailDeliveryService::class.simpleBeanName,
-                RoutingEmailNotificationService::class.simpleBeanName,
+                EmailNotificationService::class.simpleBeanName,
                 LetterNotificationStubService::class.simpleBeanName,
                 NotifyLetterNotificationService::class.simpleBeanName,
                 EmailQueueService::class.simpleBeanName,
