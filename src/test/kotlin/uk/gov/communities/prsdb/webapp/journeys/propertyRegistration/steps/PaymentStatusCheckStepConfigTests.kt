@@ -171,7 +171,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentStatus::class, names = ["SUCCEEDED", "CAPTURABLE"])
+    @EnumSource(value = PaymentStatus::class, names = ["SUCCEEDED", "INDETERMINATE"])
     fun `afterStepIsReached does not check whether the address is registered when the payment has not failed`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
@@ -390,6 +390,7 @@ class PaymentStatusCheckStepConfigTests {
         fun provideFinalisedPaymentStatusesAndOutcomes() =
             listOf(
                 Arguments.of(PaymentStatus.SUCCEEDED, PaymentOutcome.SUCCESS),
+                Arguments.of(PaymentStatus.INDETERMINATE, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.CAPTURABLE, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
                 Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.FAILURE),
