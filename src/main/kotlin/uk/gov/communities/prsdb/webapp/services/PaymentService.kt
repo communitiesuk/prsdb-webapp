@@ -7,6 +7,7 @@ import org.springframework.context.MessageSource
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.ResourceAccessException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
@@ -18,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentNotCapturedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -25,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
@@ -37,6 +41,7 @@ import java.util.UUID
 class PaymentService(
     @Value("\${gov-uk-pay.annual-payment-amount-in-pence}") private val annualFeeInPence: Int,
     @Value("\${gov-uk-pay.gratis-period-end-date}") gratisPeriodEndDate: String,
+    @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
     private val govUkPayClient: GovUkPayClient,
     private val paymentRepository: PaymentRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
@@ -236,6 +241,11 @@ class PaymentService(
 
         return try {
             registerPropertyAndCapturePayment(paymentId, registrationData)
+        } catch (exception: PaymentCaptureOutcomeUnknownException) {
+            throw exception
+        } catch (exception: PaymentNotCapturedException) {
+            println("Failed to capture payment $paymentId, so recording its outcome: ${exception.stackTraceToString()}")
+            recordUncapturedPaymentOutcome(paymentId, exception)
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId, so cancelling it: ${exception.stackTraceToString()}")
             cancelUnfinalisedPayment(paymentId, exception)
@@ -289,11 +299,69 @@ class PaymentService(
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                // TODO PDJB-1853: Reconcile the payment if the transaction fails to commit after capture.
-                govUkPayClient.capturePayment(paymentId)
+                captureAndConfirmPayment(paymentId)
                 PaymentStatus.SUCCEEDED
             },
         )
+
+    private fun captureAndConfirmPayment(paymentId: String) {
+        val captureFailure =
+            try {
+                govUkPayClient.capturePayment(paymentId)
+                return
+            } catch (exception: GovUkPayException) {
+                exception
+            }
+        val outcomeUnknownException = PaymentCaptureOutcomeUnknownException(paymentId, captureFailure)
+
+        try {
+            when (val govUkPayStatus = getGovUkPayPaymentStatusWithRetry(paymentId).status) {
+                PaymentStatus.SUCCEEDED -> {
+                    return
+                }
+
+                PaymentStatus.CAPTURABLE -> {
+                    govUkPayClient.capturePayment(paymentId)
+                    return
+                }
+
+                PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
+                    throw PaymentNotCapturedException(paymentId, govUkPayStatus, captureFailure)
+                }
+
+                PaymentStatus.CREATED, PaymentStatus.INDETERMINATE -> {}
+            }
+        } catch (exception: GovUkPayException) {
+            outcomeUnknownException.addSuppressed(exception)
+        }
+
+        throw outcomeUnknownException
+    }
+
+    private fun getGovUkPayPaymentStatusWithRetry(paymentId: String): PaymentStatusCheckDataModel =
+        try {
+            getGovUkPayPaymentStatus(paymentId)
+        } catch (exception: GovUkPayException) {
+            val isTransientFailure = exception.httpStatus?.is5xxServerError() ?: (exception.cause is ResourceAccessException)
+            if (!isTransientFailure) throw exception
+
+            // Wait only after a transient lookup failure; the first check should be immediate.
+            try {
+                Thread.sleep(paymentStatusRetryDelay)
+            } catch (interruption: InterruptedException) {
+                Thread.currentThread().interrupt()
+                exception.addSuppressed(interruption)
+                throw exception
+            }
+
+            // Try to get the payment status one more time.
+            try {
+                getGovUkPayPaymentStatus(paymentId)
+            } catch (retryException: GovUkPayException) {
+                if (retryException !== exception) retryException.addSuppressed(exception)
+                throw retryException
+            }
+        }
 
     private fun getStoredPaymentIds(incompleteProperty: LandlordIncompleteProperty): List<String> =
         paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).map { it.paymentId }
@@ -326,6 +394,23 @@ class PaymentService(
             )
         }
     }
+
+    private fun recordUncapturedPaymentOutcome(
+        paymentId: String,
+        notCapturedException: PaymentNotCapturedException,
+    ): PaymentStatus =
+        try {
+            paymentRepository.updateStatusIfCurrentStatusIn(
+                paymentId,
+                listOf(PaymentStatus.INDETERMINATE),
+                notCapturedException.govUkPayStatus,
+                Instant.now(),
+            )
+            getStoredPaymentStatus(paymentId)
+        } catch (exception: Exception) {
+            exception.addSuppressed(notCapturedException)
+            throw exception
+        }
 
     fun cancelUnfinalisedPayment(
         paymentId: String,
