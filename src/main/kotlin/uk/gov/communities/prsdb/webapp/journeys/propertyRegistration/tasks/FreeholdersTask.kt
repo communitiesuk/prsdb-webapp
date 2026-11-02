@@ -5,25 +5,25 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderProvideDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderRemoveConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonRemoveConfirmationStep
 
 @JourneyFrameworkComponent
 class FreeholdersTask(
     journeyStateService: JourneyStateService,
     override val freeholdersInfoStep: FreeholdersInfoStep,
-    override val freeholderProvideDetailsStep: PersonProvideDetailsStep,
-    override val freeholderNameStep: PersonNameStep,
-    override val freeholderContactTypeStep: PersonContactTypeStep,
-    override val freeholderEmailStep: PersonEmailStep,
+    override val freeholderProvideDetailsStep: FreeholderProvideDetailsStep,
+    override val freeholderNameStep: FreeholderNameStep,
+    override val freeholderContactTypeStep: FreeholderContactTypeStep,
+    override val freeholderEmailStep: FreeholderEmailStep,
     override val freeholderAddressTask: FreeholderAddressTask,
     override val freeholdersListStep: FreeholdersListStep,
-    override val removeFreeholderStep: PersonRemoveConfirmationStep,
+    override val removeFreeholderConfirmationStep: FreeholderRemoveConfirmationStep,
 ) : TaskWithoutDependencies<FreeholdersState>(journeyStateService),
     FreeholdersState {
     override val taskState get() = this
@@ -36,25 +36,25 @@ class FreeholdersTask(
                 savable()
             }
             step(journey.freeholderProvideDetailsStep) {
-                routeSegment(PersonProvideDetailsStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderProvideDetailsStep.ROUTE_SEGMENT)
                 parents { journey.freeholdersInfoStep.isComplete() }
                 nextStep { journey.freeholderNameStep }
                 savable()
             }
             step(journey.freeholderNameStep) {
-                routeSegment(PersonNameStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderNameStep.ROUTE_SEGMENT)
                 parents { journey.freeholderProvideDetailsStep.isComplete() }
                 nextStep { journey.freeholderContactTypeStep }
                 savable()
             }
             step(journey.freeholderContactTypeStep) {
-                routeSegment(PersonContactTypeStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderContactTypeStep.ROUTE_SEGMENT)
                 parents { journey.freeholderNameStep.isComplete() }
                 nextStep { journey.freeholderEmailStep }
                 savable()
             }
             step(journey.freeholderEmailStep) {
-                routeSegment(PersonEmailStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderEmailStep.ROUTE_SEGMENT)
                 parents { journey.freeholderContactTypeStep.isComplete() }
                 nextStep { journey.freeholderAddressTask.firstStep }
                 savable()
@@ -67,17 +67,17 @@ class FreeholdersTask(
             step(journey.freeholdersListStep) {
                 routeSegment(FreeholdersListStep.ROUTE_SEGMENT)
                 parents { journey.freeholderAddressTask.isComplete() }
-                nextStep { journey.removeFreeholderStep }
+                nextStep { journey.removeFreeholderConfirmationStep }
                 savable()
             }
-            step(journey.removeFreeholderStep) {
-                routeSegment(PersonRemoveConfirmationStep.ROUTE_SEGMENT)
+            step(journey.removeFreeholderConfirmationStep) {
+                routeSegment(FreeholderRemoveConfirmationStep.ROUTE_SEGMENT)
                 parents { journey.freeholdersListStep.isComplete() }
                 nextStep { exitStep }
                 savable()
             }
             exitStep {
-                parents { journey.removeFreeholderStep.isComplete() }
+                parents { journey.removeFreeholderConfirmationStep.isComplete() }
             }
         }
 }

@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 // TODO PDJB-1964: replace this placeholder with the real freeholder name page
 //  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class PersonNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
@@ -22,8 +22,8 @@ class PersonNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
 }
 
 @JourneyFrameworkComponent
-final class PersonNameStep(
-    stepConfig: PersonNameStepConfig,
+final class FreeholderNameStep(
+    stepConfig: FreeholderNameStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-name"
