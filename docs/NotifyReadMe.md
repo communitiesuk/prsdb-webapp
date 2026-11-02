@@ -79,7 +79,7 @@ Letter templates follow the same process as emails, but live in `src/main/resour
 `LetterTemplateModelsTests` checks each letter model in its `templateList` matches its markdown template and doesn't use personalisation keys reserved for the recipient address (such as `address_line_1` or `postcode`), and `NotifyTemplateTests` checks the letter templates against Notify alongside the email templates.
 
 ### Sending letters
-Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `recipientAddress` is created with `LetterAddressDataModel(lines)`.
+Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `recipientAddress` is created with `LetterAddressDataModel(addressLines)`.
 - An address must follow [Notify's address rules](https://docs.notifications.service.gov.uk/java.html#send-a-letter):
   - The address must have at least 3 lines.
   - Address must be no more than 7 lines.

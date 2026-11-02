@@ -25,7 +25,7 @@ class LetterNotificationStubService<LetterModel : LetterTemplateModel> : LetterN
         recipientAddress: LetterAddressDataModel,
         letter: LetterModel,
     ) {
-        val postcode = recipientAddress.lines.last()
+        val postcode = recipientAddress.addressLines.last()
         if (postcode == persistentExceptionPostcode) {
             throw PersistentLetterSendException("Letters sent to $persistentExceptionPostcode always persistently fail")
         }
@@ -39,7 +39,7 @@ class LetterNotificationStubService<LetterModel : LetterTemplateModel> : LetterN
             STUB LETTER SENT
             ****************
             
-            Letter sent to:  ${recipientAddress.lines.joinToString(", ")}
+            Letter sent to:  ${recipientAddress.addressLines.joinToString(", ")}
             Template used:   ${letter.template.name}
             Personalisation: ${letter.toHashMap()}
             """.trimIndent()
