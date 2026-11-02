@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
@@ -39,6 +41,8 @@ class GasSafetyDetailsTask(
     override val gasCertMissingStep: GasCertMissingStep,
     override val provideGasCertLaterStep: ProvideGasCertLaterStep,
     journeyStateService: JourneyStateService,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) : Task<GasSafetyDetailState, GasSafetyDependencies>(journeyStateService),
     GasSafetyDetailState {
     override val taskState: GasSafetyDetailState
@@ -50,6 +54,10 @@ class GasSafetyDetailsTask(
         get() = dependencies.allowProvideCertificateLaterRoute
     override val propertyOwnershipId: Long?
         get() = dependencies.propertyOwnershipId
+
+    // TODO: PDJB-1926: Remove this
+    override val isGas14MonthExpiryEnabled: Boolean
+        get() = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")

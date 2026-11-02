@@ -23,13 +23,16 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock())
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager and its arguments
+    private val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock(), mockFeatureFlagManager)
 
     override fun createRows(
         uploadService: UploadService,
@@ -44,6 +47,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
         return GasSafetyViewModelFactory(
             uploadService,
             messageSource,
+            mockFeatureFlagManager,
         ).fromEntity(propertyCompliance)
     }
 
@@ -91,6 +95,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 messageSource,
+                mockFeatureFlagManager,
             )
         val rows = factory.fromEntity(missingOccupiedProvideLater)
 
@@ -115,6 +120,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 mock(),
+                mockFeatureFlagManager,
             )
         val rows = factory.fromEntity(missingUnoccupiedProvideLater)
 
@@ -135,6 +141,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 mock(),
+                mockFeatureFlagManager,
             )
         val rows = factory.fromEntity(missingOccupiedNoCert)
 

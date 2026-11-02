@@ -5,16 +5,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
@@ -30,8 +28,9 @@ class PropertyComplianceTests {
                 .withElectricalSafety(arbitraryElectricalSafetyExpiryDate)
                 .build()
 
-        val expectedGasExpiryDate = arbitraryIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
-        assertEquals(expectedGasExpiryDate, propertyCompliance.gasSafetyCertExpiryDate)
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        val expectedGasExpiryDate = arbitraryIssueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        assertEquals(expectedGasExpiryDate, propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled = true))
         assertEquals(arbitraryElectricalSafetyExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
     }
 
@@ -39,41 +38,32 @@ class PropertyComplianceTests {
     fun `Calculated expiryDate values are null when issue dates do not exist`() {
         val propertyCompliance = PropertyComplianceBuilder().build()
 
-        assertNull(propertyCompliance.gasSafetyCertExpiryDate)
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        assertNull(propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled = true))
         assertNull(propertyCompliance.electricalSafetyExpiryDate)
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
-    @MethodSource("provideGasCertIssueDates")
+    @MethodSource("provideGasCertExpiryDates")
     fun `isGasSafetyCertExpired is`(
-        issueDate: LocalDate,
-        expectedIsExpired: Boolean,
-    ) {
-        val propertyCompliance = PropertyComplianceBuilder().withGasSafetyCert(issueDate).build()
-        assertEquals(expectedIsExpired, propertyCompliance.isGasSafetyCertExpired)
-    }
-
-    @ParameterizedTest(name = "{1} when expiry date {0}")
-    @MethodSource("provideElectricalSafetyExpiryDates")
-    fun `isElectricalSafetyExpired is`(
         expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate)
-                    .withElectricalCertType(certType)
-                    .build()
-            assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired, "for $certType")
-        }
-    }
+        val issueDate = expiryDate.minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+        // Month lengths vary, so some dates e.g. 31st January will clamp to November 30th when subtracting 14 months
+        // In the codebase this is fine, but it means that if a test is run on 31st January then:
+        //   Today - 14 months == 30th November
+        //   Yesterday - 14 months == 30th November
+        // So now our test isn't actually testing anything!
+        // This is quite a rare edge case, so just skip the test if any clamping happened when working out the expiry date
+        assumeTrue(
+            issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()) == expiryDate,
+            "No gas certificate issue date expires on $expiryDate",
+        )
 
-    @Test
-    fun `isElectricalSafetyExpired throws when the electrical cert type is missing`() {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(currentDate.minusYears(1), certType = null).build()
-
-        assertThrows<PrsdbWebException> { propertyCompliance.isElectricalSafetyExpired }
+        val propertyCompliance = PropertyComplianceBuilder().withGasSafetyCert(issueDate).build()
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        assertEquals(expectedIsExpired, propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled = true))
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
@@ -92,8 +82,8 @@ class PropertyComplianceTests {
         propertyCompliance: PropertyCompliance,
         expectedIsXExpired: Boolean?,
     ) {
-        assertEquals(expectedIsXExpired, propertyCompliance.isGasSafetyCertExpired)
-        assertEquals(expectedIsXExpired, propertyCompliance.isElectricalSafetyExpired)
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        assertEquals(expectedIsXExpired, propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled = true))
         assertEquals(expectedIsXExpired, propertyCompliance.isEpcExpired)
     }
 
@@ -115,7 +105,6 @@ class PropertyComplianceTests {
         expectedIsXMissing: Boolean?,
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.epcHasFaults)
     }
 
@@ -173,18 +162,10 @@ class PropertyComplianceTests {
                 .build()
 
         @JvmStatic
-        private fun provideGasCertIssueDates() =
-            arrayOf(
-                arguments(named("was yesterday", currentDate.minusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", currentDate.minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
-                arguments(named("is tomorrow", currentDate.plusDays(1).minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())), false),
-            )
-
-        @JvmStatic
-        private fun provideElectricalSafetyExpiryDates() =
+        private fun provideGasCertExpiryDates() =
             arrayOf(
                 arguments(named("was yesterday", currentDate.minusDays(1)), true),
-                arguments(named("is today", currentDate), true),
+                arguments(named("is today", currentDate), false),
                 arguments(named("is tomorrow", currentDate.plusDays(1)), false),
             )
 

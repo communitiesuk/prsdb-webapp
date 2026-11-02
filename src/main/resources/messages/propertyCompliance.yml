@@ -201,39 +201,94 @@ electricalSafetyTask:
     eic:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
   electricalCertificateExpired:
-    heading: This electrical safety certificate has expired
-    expiryDateParagraph: "You’ve told us this certificate expired on <strong>{0}</strong>."
-    changeExpiryDate:
-      link: Change the expiry date
-      afterLink: " if you entered it incorrectly."
-    occupied:
-      noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
-      subHeading: You must get a valid electrical safety certificate for this property
-      warning: "You could face prosecution if you have tenants in a property without an electrical safety certificate."
-      paragraph:
-        one: You’ve told us this property is occupied by tenants.
-        two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
-        three: "Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one."
-        four: "Your local council can take enforcement action. They can:"
-      bullet:
-        one: order you to fix any electrical problems
-        two: do remedial work on your property and charge you for it
-        three: fine you up to £30,000
-      readMore:
-        beforeLink: Read more about
-        link: electrical safety standards in rental properties (opens in new tab)
-        afterLink: .
-    unoccupied:
-      mustGetCertParagraph: This means you must get an in-date electrical safety certificate before a tenant moves in.
-      whatToDoNext:
-        heading: What to do next
-        learnHow:
-          beforeLink: Learn how to get a new electrical safety certificate by reading
-          link: electrical safety standards for rented properties (opens in new tab)
+    eic:
+      # TODO PDJB-1679: Remove heading, expiryDateParagraph and changeExpiryDate when the EIC_ISSUE_DATE flag is removed
+      heading: This electrical safety certificate has expired
+      expiryDateParagraph: "You’ve told us this certificate expired on <strong>{0}</strong>."
+      changeExpiryDate:
+        link: Change the expiry date
+        afterLink: " if you entered it incorrectly."
+      issueDate:
+        heading: You need a different electrical safety certificate
+        issueDateParagraph: "You entered an issue date of <strong>{0}</strong>."
+        tooOldParagraph: "This means your Electrical Installation Certificate (EIC) is over 5 years old. It can no longer be used to prove the safety of your property’s electrics."
+        changeIssueDate:
+          link: Change the issue date
+          afterLink: " if you entered it incorrectly."
+        whatToDoNext:
+          heading: What to do next
+          unoccupied:
+            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+            learnHow:
+              beforeLink: Learn how to get an EICR by reading the
+              link: electrical safety standards for rented properties (opens in new tab)
+              afterLink: .
+          occupied:
+            needEicrParagraph: You need a valid Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+      occupied:
+        # TODO PDJB-1679: Remove noValidCertParagraph when the EIC_ISSUE_DATE flag is removed
+        noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
+        subHeading: You must get a valid electrical safety certificate for this property
+        warning: "You could face prosecution if you have tenants in a property without an electrical safety certificate."
+        paragraph:
+          one: You’ve told us this property is occupied by tenants.
+          two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
+          three: "Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one."
+          four: "Your local council can take enforcement action. They can:"
+        bullet:
+          one: order you to fix any electrical problems
+          two: do remedial work on your property and charge you for it
+          three: fine you up to £30,000
+        readMore:
+          beforeLink: Read more about
+          link: electrical safety standards in rental properties (opens in new tab)
           afterLink: .
-      mustUpload:
-        heading: You must upload an electrical safety certificate to this service
-        paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+      unoccupied:
+        # TODO PDJB-1679: Remove mustGetCertParagraph and whatToDoNext when the EIC_ISSUE_DATE flag is removed
+        mustGetCertParagraph: This means you must get an in-date electrical safety certificate before a tenant moves in.
+        whatToDoNext:
+          heading: What to do next
+          learnHow:
+            beforeLink: Learn how to get a new electrical safety certificate by reading
+            link: electrical safety standards for rented properties (opens in new tab)
+            afterLink: .
+        mustUpload:
+          heading: You must upload an electrical safety certificate to this service
+          paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+    eicr:
+      heading: This electrical safety certificate has expired
+      expiryDateParagraph: "You’ve told us this certificate expired on <strong>{0}</strong>."
+      changeExpiryDate:
+        link: Change the expiry date
+        afterLink: " if you entered it incorrectly."
+      occupied:
+        noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
+        subHeading: You must get a valid electrical safety certificate for this property
+        warning: "You could face prosecution if you have tenants in a property without an electrical safety certificate."
+        paragraph:
+          one: You’ve told us this property is occupied by tenants.
+          two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
+          three: "Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one."
+          four: "Your local council can take enforcement action. They can:"
+        bullet:
+          one: order you to fix any electrical problems
+          two: do remedial work on your property and charge you for it
+          three: fine you up to £30,000
+        readMore:
+          beforeLink: Read more about
+          link: electrical safety standards in rental properties (opens in new tab)
+          afterLink: .
+      unoccupied:
+        mustGetCertParagraph: This means you must get an in-date electrical safety certificate before a tenant moves in.
+        whatToDoNext:
+          heading: What to do next
+          learnHow:
+            beforeLink: Learn how to get a new electrical safety certificate by reading
+            link: electrical safety standards for rented properties (opens in new tab)
+            afterLink: .
+        mustUpload:
+          heading: You must upload an electrical safety certificate to this service
+          paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
   confirmEpcDetailsFromUprn:
     error:

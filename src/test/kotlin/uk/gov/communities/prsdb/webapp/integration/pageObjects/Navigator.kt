@@ -177,7 +177,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
@@ -206,6 +207,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
@@ -264,7 +266,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
@@ -284,6 +287,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Local
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -962,6 +966,15 @@ class Navigator(
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
+    // TODO PDJB-1959: update this usage when the real owns property page is added
+    fun skipToPropertyRegistrationOwnsPropertyPage(): OwnsPropertyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationOwnsProperty().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(OwnsPropertyStep.ROUTE_SEGMENT)
+        return createValidPage(page, OwnsPropertyFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply(propertyIsOccupied).build(),
@@ -994,20 +1007,28 @@ class Navigator(
         return createValidPage(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHasElectricalCertPage(): HasElectricalCertFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied: Boolean = true): HasElectricalCertFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(HasElectricalCertStep.ROUTE_SEGMENT)
         return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationElectricalCertExpiryDatePage(): ElectricalCertExpiryDateFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationEicExpiryDatePage(): EicExpiryDateFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationEicExpiryDate().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(ElectricalCertExpiryDateStep.ROUTE_SEGMENT)
-        return createValidPage(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        navigateToPropertyRegistrationJourneyStep(EicExpiryDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, EicExpiryDateFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationEicrExpiryDatePage(): EicrExpiryDateFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationEicrExpiryDate().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(EicrExpiryDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, EicrExpiryDateFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
@@ -1211,9 +1232,17 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded(): CheckAnswersPagePropertyRegistration {
+    fun skipToPropertyRegistrationCheckAnswersPageEicUploaded(): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersElectricalCertUploaded().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEicUploaded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageEicrUploaded(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEicrUploaded().build(),
         )
         navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)

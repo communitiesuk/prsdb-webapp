@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
@@ -12,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 @PrsdbWebService
 class NotificationBannerViewModelService {
     fun getPropertyDetailsNotificationBanner(
-        propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
         isLandlordView: Boolean,
         isOccupied: Boolean,
         isLicensingProvideLater: Boolean,
         isTenancyProvideLater: Boolean,
     ): PropertyDetailsNotificationBannerViewModel {
-        val complianceMessages = getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView)
+        val complianceMessages = getComplianceNotificationMessageKeys(complianceStatus, isLandlordView)
 
         return PropertyDetailsNotificationBannerViewModel.fromState(
             isLandlordView = isLandlordView,
@@ -30,11 +29,9 @@ class NotificationBannerViewModelService {
     }
 
     fun getComplianceNotificationMessageKeys(
-        propertyCompliance: PropertyCompliance,
+        statusModel: ComplianceStatusDataModel,
         isLandlordView: Boolean,
     ): List<NotificationMessage> {
-        val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
-
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
         val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED

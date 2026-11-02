@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -28,6 +29,15 @@ class PaymentStatusCheckStepConfig(
         if (govUkPayStatus.isCreated()) {
             state.paymentOutcome = PaymentOutcome.IN_PROGRESS
             return
+        }
+
+        if (govUkPayStatus.status == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
+            val cancelledStatus = paymentService.cancelUnfinalisedPayment(govUkPayStatus.paymentId)
+            if (cancelledStatus == PaymentStatus.SUCCEEDED) {
+                state.paymentOutcome = PaymentOutcome.SUCCESS
+                return
+            }
+            throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}; payment cancelled")
         }
 
         val finalisedStatus =

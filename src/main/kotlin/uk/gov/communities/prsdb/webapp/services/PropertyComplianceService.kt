@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
@@ -42,6 +45,9 @@ class PropertyComplianceService(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val currentUserService: CurrentUserService,
+    private val eicDateService: EicDateService,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -49,6 +55,86 @@ class PropertyComplianceService(
 
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
+
+    fun getEicIssueDate(propertyCompliance: PropertyCompliance): LocalDate? =
+        eicDateService.issueDateFrom(
+            requireEic(propertyCompliance),
+        )
+
+    fun getEicExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
+        eicDateService.expiryDateFrom(
+            requireEic(propertyCompliance),
+        )
+
+    @Transactional
+    fun setEicIssueDate(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        issueDate: LocalDate?,
+    ) {
+        val propertyCompliance = requireEic(getComplianceForProperty(propertyOwnershipId))
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+        eicDateService.applyIssueDate(propertyCompliance, issueDate)
+        propertyComplianceRepository.save(propertyCompliance)
+    }
+
+    @Transactional
+    fun setEicExpiryDate(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        expiryDate: LocalDate?,
+    ) {
+        val propertyCompliance = requireEic(getComplianceForProperty(propertyOwnershipId))
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+        eicDateService.applyExpiryDate(propertyCompliance, expiryDate)
+        propertyComplianceRepository.save(propertyCompliance)
+    }
+
+    fun getElectricalSafetyExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
+        when (propertyCompliance.electricalCertType) {
+            CertificateType.Eic -> getEicExpiryDate(propertyCompliance)
+            // Any other cert type, including none, keeps reading the stored column so that records predating
+            // the cert type column behave exactly as they did before this date access moved onto the service.
+            else -> propertyCompliance.electricalSafetyExpiryDate
+        }
+
+    fun isElectricalSafetyExpired(propertyCompliance: PropertyCompliance): Boolean? =
+        when (propertyCompliance.electricalCertType) {
+            CertificateType.Eic ->
+                eicDateService.expiryDateFrom(propertyCompliance)?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it) }
+            CertificateType.Eicr ->
+                propertyCompliance.electricalSafetyExpiryDate?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it) }
+            // A record holding an electrical date without a usable cert type is inconsistent, so it is rejected
+            // rather than reported as having no certificate.
+            else ->
+                if (propertyCompliance.electricalSafetyExpiryDate == null) {
+                    null
+                } else {
+                    throw unexpectedElectricalCertType(propertyCompliance)
+                }
+        }
+
+    private fun unexpectedElectricalCertType(propertyCompliance: PropertyCompliance) =
+        PrsdbWebException("Electrical cert type must be EIC or EICR but was ${propertyCompliance.electricalCertType}")
+
+    fun isElectricalSafetyMissing(propertyCompliance: PropertyCompliance): Boolean =
+        getElectricalSafetyExpiryDate(propertyCompliance) == null
+
+    fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        ComplianceStatusDataModel.fromPropertyCompliance(
+            propertyCompliance = propertyCompliance,
+            electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
+            isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+        )
+
+    private fun requireEic(propertyCompliance: PropertyCompliance): PropertyCompliance {
+        if (propertyCompliance.electricalCertType != CertificateType.Eic) {
+            throw PrsdbWebException(
+                "Electrical cert type must be EIC but was ${propertyCompliance.electricalCertType}",
+            )
+        }
+        return propertyCompliance
+    }
 
     @Transactional
     fun saveRegistrationComplianceData(
@@ -138,9 +224,20 @@ class PropertyComplianceService(
             electricalSafetyFileUploadIds
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
-        record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         record.electricalCertType = electricalCertType
+        setElectricalSafetyExpiryDate(record, electricalSafetyExpiryDate, electricalCertType)
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
+    }
+
+    private fun setElectricalSafetyExpiryDate(
+        record: PropertyCompliance,
+        expiryDate: LocalDate?,
+        electricalCertType: CertificateType?,
+    ) {
+        when (electricalCertType) {
+            CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
+            else -> record.electricalSafetyExpiryDate = expiryDate
+        }
     }
 
     private fun populateEpcFields(
@@ -207,7 +304,7 @@ class PropertyComplianceService(
                 )
 
         return compliances
-            .map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            .map { getComplianceStatus(it) }
             .filter { it.shouldShowOnComplianceActionsPage }
     }
 
@@ -239,12 +336,14 @@ class PropertyComplianceService(
         )
 
         if (gasSafetyCertIssueDate != null) {
+            // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and use the isGasSafetyCertExpired and gasSafetyCertExpiryDate vals again
+            val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
             sendCertificateUpdateEmail(
                 propertyCompliance,
-                isExpired = propertyCompliance.isGasSafetyCertExpired == true,
+                isExpired = propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true,
                 certificateType = "gas safety certificate",
                 certificateTypeLabel = "Gas safety certificate",
-                expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                expiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
             )
         }
     }
@@ -282,10 +381,10 @@ class PropertyComplianceService(
             val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,
-                isExpired = propertyCompliance.isElectricalSafetyExpired == true,
+                isExpired = isElectricalSafetyExpired(propertyCompliance) == true,
                 certificateType = "electrical safety certificate",
                 certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
-                expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                expiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
                 lettingAgentCertificateTypeLabel = "Electrical safety certificate",
             )
         }

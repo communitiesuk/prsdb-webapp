@@ -1,8 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -26,6 +30,45 @@ class OutstandingActionsPageTests : IntegrationTest() {
             assertThat(
                 outstandingActionsPage.insetText,
             ).containsText("You have provided all the required details for your occupied properties.")
+        }
+    }
+
+    // TODO: PDJB-1926: Remove this section
+    @Nested
+    inner class LandlordWithThirteenMonthOldGasCert :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-landlord-with-compliance-actions.sql", "data-overlay-gas-cert-issued-13-months-ago.sql"),
+        ) {
+        // 2 Fake Way (property ownership 1) is occupied, has a 13 month old gas cert, and is missing other certs so is always listed
+
+        @Test
+        fun `gas safety row shows expired on date when 14 month expiry is disabled`() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+            val outstandingActionsPage = navigator.goToOutstandingActions()
+            val card = outstandingActionsPage.findSummaryCard("2 Fake Way")
+            val expectedDate =
+                LocalDate
+                    .now()
+                    .minusMonths(13)
+                    .plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY.toLong())
+                    .format(DATE_FORMATTER)
+            assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
+        }
+
+        @Test
+        fun `gas safety row is hidden when 14 month expiry is enabled`() {
+            val outstandingActionsPage = navigator.goToOutstandingActions()
+            val card = outstandingActionsPage.findSummaryCard("2 Fake Way")
+            assertThat(card.summaryList.gasSafetyRow).isHidden()
+        }
+
+        @Test
+        fun `property details gas safety card shows the certificate as expired when 14 month expiry is disabled`() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            propertyDetailsPage.tabs.goToComplianceInformation()
+            val certificateStatus = propertyDetailsPage.gasSafetyCard.summaryList.certificateStatusRow.value
+            PlaywrightAssertions.assertThat(certificateStatus).containsText("Expired")
         }
     }
 
@@ -80,7 +123,14 @@ class OutstandingActionsPageTests : IntegrationTest() {
         fun `gas safety row shows expired on date for expired certificate`() {
             val outstandingActionsPage = navigator.goToOutstandingActions()
             val card = outstandingActionsPage.findSummaryCard("7 Mythical Drive")
-            val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
+            // The certificate was issued 14 months and 1 day ago
+            val expectedDate =
+                LocalDate
+                    .now()
+                    .minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+                    .minusDays(1)
+                    .plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+                    .format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
         }
 
@@ -284,7 +334,11 @@ class OutstandingActionsPageTests : IntegrationTest() {
         @Test
         fun `go to property links to the property details tab when licensing or tenancy details are outstanding`(page: Page) {
             val outstandingActionsPage = navigator.goToOutstandingActions()
-            outstandingActionsPage.findSummaryCard("10 Licensing Lane").getAction("Go to property").link.clickAndWait()
+            outstandingActionsPage
+                .findSummaryCard("10 Licensing Lane")
+                .getAction("Go to property")
+                .link
+                .clickAndWait()
             val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
             assertEquals(PROPERTY_DETAILS_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
