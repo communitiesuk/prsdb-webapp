@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymen
 // Stored by ordinal, so changing the order needs a migration
 enum class PaymentStatus {
     CREATED,
-    CANCELLING,
+    CANCELLING, // Only stored by us, never reported by GOV.UK Pay
     SUCCEEDED,
     FAILED, // Includes payments cancelled by the user
     CANCELLED, // Only payments cancelled by our service
-    MANUAL_INTERVENTION,
+    MANUAL_INTERVENTION, // Only stored by us, never reported by GOV.UK Pay
     CAPTURABLE, // Reported by GOV.UK Pay but never stored
     ;
 
