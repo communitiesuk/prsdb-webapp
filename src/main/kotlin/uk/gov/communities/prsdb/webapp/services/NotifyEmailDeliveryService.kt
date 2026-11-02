@@ -13,14 +13,14 @@ import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 
 @Service
-class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
+class NotifyEmailDeliveryService(
     private val notificationClient: NotificationClient,
     private val notifyIdService: NotifyIdService,
     @Value("\${notify.use-production-notify}") private val useProductionNotify: Boolean,
-) : EmailNotificationService<EmailModel> {
-    override fun sendEmail(
+) : EmailDeliveryService {
+    override fun deliverEmail(
         recipientAddress: String,
-        email: EmailModel,
+        email: EmailTemplateModel,
     ) {
         val emailParameters = email.toHashMap()
         try {
@@ -84,7 +84,8 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         !useProductionNotify &&
             errors.any {
                 it.error == NotifyErrorType.BAD_REQUEST &&
-                    it.message.replace("\u2019", "'")
+                    it.message
+                        .replace("\u2019", "'")
                         .contains(NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT, ignoreCase = true)
             }
 
