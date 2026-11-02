@@ -108,20 +108,20 @@ try {
 }
 
 # Assign unique ports for parallel worktree execution.
-# Derive the offset from the highest SERVER_PORT found in sibling worktrees' .env files,
-# rather than worktree count, to avoid port collisions after worktree removal.
-$maxOffset = 0
+# Use the smallest offset (>= 1) for which none of the offset ports are already assigned to any port key in
+# sibling worktrees' .env files, so offsets freed by removed worktrees are reused rather than creeping ever higher.
+$usedPorts = @{}
 $siblingEnvFiles = Get-ChildItem -Path $workTreeBase -Filter ".env" -Recurse -Depth 1 -ErrorAction SilentlyContinue
 foreach ($siblingEnv in $siblingEnvFiles) {
     if ($siblingEnv.FullName -eq (Join-Path $DestinationPath ".env")) { continue }
-    $portLine = Get-Content $siblingEnv.FullName | Where-Object { $_ -match '^SERVER_PORT=' } | Select-Object -First 1
-    if ($portLine -match '(\d+)') {
-        $siblingPort = [int]$Matches[1]
-        $offset = $siblingPort - 8080
-        if ($offset -gt $maxOffset) { $maxOffset = $offset }
+    foreach ($line in Get-Content $siblingEnv.FullName) {
+        if ($line -match '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT)=\D*(\d+)') { $usedPorts[[int]$Matches[2]] = $true }
     }
 }
-$portOffset = $maxOffset + 1
+$portOffset = 1
+while ($usedPorts.ContainsKey(8080 + $portOffset) -or $usedPorts.ContainsKey(5433 + $portOffset) -or $usedPorts.ContainsKey(6379 + $portOffset)) {
+    $portOffset++
+}
 
 $newServerPort = 8080 + $portOffset
 $newPostgresPort = 5433 + $portOffset
