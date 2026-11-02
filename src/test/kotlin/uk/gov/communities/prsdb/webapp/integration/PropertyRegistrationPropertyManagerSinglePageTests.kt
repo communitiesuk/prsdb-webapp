@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
@@ -56,11 +57,46 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
         assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
+    @Test
+    fun `the details page shows name and email inputs and a save and continue button`(page: Page) {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+
+        assertThat(propertyManagerDetailsPage.form.fieldsetHeading).containsText("Provide your property manager’s details")
+        assertThat(propertyManagerDetailsPage.form.nameInput).isVisible()
+        assertThat(propertyManagerDetailsPage.form.emailInput).isVisible()
+        assertThat(propertyManagerDetailsPage.form.submitButton).containsText("Save and continue")
+    }
+
+    @Test
+    fun `submitting whitespace-only details shows errors for both the name and the email address`(page: Page) {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+
+        propertyManagerDetailsPage.submitDetails(name = "   ", email = "   ")
+
+        assertThat(propertyManagerDetailsPage.errorSummary).containsText("Enter a name of a person or company")
+        assertThat(propertyManagerDetailsPage.errorSummary).containsText("Enter an email address")
+    }
+
+    @Test
+    fun `submitting a name with an invalid email address shows an email format error`(page: Page) {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+
+        propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "not-an-email")
+
+        assertThat(propertyManagerDetailsPage.errorSummary)
+            .containsText("Enter an email address in the correct format, like name@example.com")
+        assertThat(propertyManagerDetailsPage.errorSummary).not().containsText("Enter a name of a person or company")
+    }
+
     private fun addPropertyManager(page: Page): CheckPropertyManagerFormPagePropertyRegistration {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+        propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "manager@example.com")
+        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+    }
+
+    private fun navigateToPropertyManagerDetailsPage(page: Page): PropertyManagerDetailsFormPagePropertyRegistration {
         val propertyManagerPage = navigator.skipToPropertyRegistrationPropertyManagerPage()
         propertyManagerPage.submitYes()
-        val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-        propertyManagerDetailsPage.form.submit()
-        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+        return assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
     }
 }
