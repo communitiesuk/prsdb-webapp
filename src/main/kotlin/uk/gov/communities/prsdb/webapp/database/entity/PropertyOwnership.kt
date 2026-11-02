@@ -78,10 +78,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
-    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val freeholders: MutableSet<Freeholder> = mutableSetOf()
 
-    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
     // landlords are asked separately whether there are more people in the ownership chain, so an

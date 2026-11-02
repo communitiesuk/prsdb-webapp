@@ -11,12 +11,20 @@ import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.database.repository.SuperiorLandlordRepository
 
 class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @Autowired
+    private lateinit var freeholderRepository: FreeholderRepository
+
+    @Autowired
+    private lateinit var superiorLandlordRepository: SuperiorLandlordRepository
 
     @Autowired
     private lateinit var propertyManagerRepository: PropertyManagerRepository
@@ -48,10 +56,11 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         val propertyOwnershipId = anyPropertyOwnershipId()
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            propertyOwnership.freeholders.add(Freeholder(propertyOwnership, name = "A Freeholder"))
+            // Saved via their own repositories because these associations have no cascade,
+            // matching how License is handled
+            propertyOwnership.freeholders.add(freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder")))
             // No name, email or address: "no details known"
-            propertyOwnership.superiorLandlords.add(SuperiorLandlord(propertyOwnership))
-            // Saved separately because the association has no cascade, matching how License is handled
+            propertyOwnership.superiorLandlords.add(superiorLandlordRepository.save(SuperiorLandlord(propertyOwnership)))
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
