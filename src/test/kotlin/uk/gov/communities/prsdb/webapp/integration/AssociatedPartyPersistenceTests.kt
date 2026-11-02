@@ -49,7 +49,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
             propertyOwnership.freeholders.add(Freeholder(propertyOwnership, name = "A Freeholder"))
-            // No name, email or address: a landlord may tell us they cannot provide the party's details
+            // No name, email or address: "no details known"
             propertyOwnership.superiorLandlords.add(SuperiorLandlord(propertyOwnership))
             // Saved separately because the association has no cascade, matching how License is handled
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
@@ -86,8 +86,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `every seeded property whose ownership type implies another freeholder has at least one`() {
-        // Ownership types whose holder is not the sole freeholder: NONE, LEASEHOLD_ONLY,
-        // JOINT_TENANTS, TENANTS_IN_COMMON, SHARE_OF_JOINT_TENANTS, SHARE_OF_TENANTS_IN_COMMON.
+        // Types where the landlord is not the sole freeholder
         val propertiesWithoutAFreeholder =
             jdbcTemplate.queryForList(
                 "SELECT po.id FROM property_ownership po " +

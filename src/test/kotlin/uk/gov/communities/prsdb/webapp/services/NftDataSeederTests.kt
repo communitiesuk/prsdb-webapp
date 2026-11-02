@@ -280,8 +280,8 @@ class NftDataSeederTests(
 
         assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
 
-        // The placeholders record "no details known", and must stay that way: generating a name,
-        // email or address would consume the shared faker stream and shift every later seeded value
+        // Must stay as "no details known": generating a name, email or address would consume the
+        // shared faker stream and shift every later seeded value
         val placeholders = jdbcTemplate.queryForList("SELECT name, email, address_id FROM freeholder")
         assertTrue(placeholders.isNotEmpty(), "Expected placeholder freeholders to be seeded")
         assertTrue(placeholders.all { it["name"] == null && it["email"] == null && it["address_id"] == null }) {

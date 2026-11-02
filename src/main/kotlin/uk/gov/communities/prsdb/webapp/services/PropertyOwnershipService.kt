@@ -60,16 +60,12 @@ class PropertyOwnershipService(
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-1957: add the flag-on variant of this method, which takes the new OwnershipType
-    //  directly rather than deriving it from the legacy enum. Implement the flag-on and flag-off
-    //  variants so that the flag-off variant can be deleted wholesale with the feature flag in
-    //  PDJB-2016.
-    //  The flag-on variant must still populate ownershipTypeBeforePdjb955, converting the new
-    //  OwnershipType back to its closest legacy equivalent. The column is NOT NULL, and
-    //  PropertyDetailsViewModelBase renders it until PDJB-1996 switches that page to the new enum,
-    //  so a row without it would break the property details page.
-    // TODO PDJB-2016/PDJB-2019: stop populating ownershipTypeBeforePdjb955 here once nothing reads
-    //  the legacy column and it has been dropped.
+    // TODO PDJB-1957: add a flag-on variant of this method taking the new OwnershipType directly,
+    //  so that the flag-off variant can be deleted wholesale with the flag in PDJB-2016. It must
+    //  still populate ownershipTypeBeforePdjb955, since the column is NOT NULL and
+    //  PropertyDetailsViewModelBase renders it until PDJB-1996.
+    // TODO PDJB-2016/PDJB-2019: stop populating ownershipTypeBeforePdjb955 here once the legacy
+    //  column has been dropped.
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipTypeBeforePdjb955,

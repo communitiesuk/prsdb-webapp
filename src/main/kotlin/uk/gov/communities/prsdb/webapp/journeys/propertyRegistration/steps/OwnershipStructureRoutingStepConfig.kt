@@ -28,20 +28,16 @@ class OwnershipStructureRoutingStepConfig : AbstractInternalStepConfig<Ownership
         }
     }
 
-    // This is the same rule as OwnershipType.impliesAnotherFreeholder(), expressed over the
-    // journey's answers rather than the persisted enum. The two agree exactly, since OwnershipType
-    // is the product of ownsProperty, ownershipKind and freeholdType.
-    // TODO PDJB-2015: once the mapping from these answers to an OwnershipType exists, replace this
-    //  method body with a call to OwnershipType.impliesAnotherFreeholder() on the mapped value, so
-    //  the rule is only stated once.
+    // TODO PDJB-2015: this is the same rule as OwnershipType.impliesAnotherFreeholder(), expressed
+    //  over the journey's answers. Once those answers can be mapped to an OwnershipType, delegate
+    //  to it so the rule is only stated once.
     private fun asksFreeholders(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||
             ownershipType.ownershipKindStep.outcome == OwnershipKind.LEASEHOLD_ONLY ||
             ownershipType.freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
 
-    // Note this is whether the question is asked, not the answer. The answer is recorded in
-    // property_ownership.has_superior_landlords, since a landlord who is asked may still say there
-    // is nobody else in the ownership chain.
+    // Note this is whether the question is asked, not the answer, which is recorded in
+    // property_ownership.has_superior_landlords.
     private fun asksSuperiorLandlords(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||
             ownershipType.ownershipKindStep.outcome in setOf(OwnershipKind.LEASEHOLD_ONLY, OwnershipKind.FREEHOLD_AND_LEASEHOLD)

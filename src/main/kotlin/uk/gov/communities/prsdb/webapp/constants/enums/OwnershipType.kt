@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-// Persisted as an ordinal in property_ownership.ownership_type. The declaration order is
-// load-bearing: new values must only ever be appended.
+// Persisted as an ordinal, so new values must only ever be appended.
 enum class OwnershipType {
     // Does not own the property
     NONE,
@@ -22,16 +21,10 @@ enum class OwnershipType {
     SHARE_OF_COMMONHOLD,
     ;
 
-    // Whether the property has a freeholder other than the landlord themselves, in which case it
-    // must have at least one freeholder record. The same rule is repeated as a list of ordinals in
-    // V1_61_0__add_ownership_type_and_associated_party_tables.sql and in the seed scripts, which
-    // cannot call into Kotlin.
-    // It is also expressed over the registration journey's answers, as
-    // OwnershipStructureRoutingStepConfig.asksFreeholders. The two agree exactly, since this enum
-    // is the product of those answers.
-    // TODO PDJB-2015: once the mapping from the journey's answers to an OwnershipType exists,
-    //  make OwnershipStructureRoutingStepConfig.asksFreeholders delegate to this method instead of
-    //  restating the rule.
+    // Whether there is a freeholder other than the landlord, in which case the property must have
+    // at least one freeholder record. Repeated as ordinals in V1_61_0 and the seed scripts.
+    // TODO PDJB-2015: make OwnershipStructureRoutingStepConfig.asksFreeholders delegate to this
+    //  once the journey's answers can be mapped to an OwnershipType.
     fun impliesAnotherFreeholder() =
         this in
             setOf(

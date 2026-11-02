@@ -68,9 +68,8 @@ VALUES
        (10, 10, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true, null, null),
        (11, 11, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true, null, null);
 
--- PDJB-1956: every property whose ownership type implies a freeholder other than the landlord
--- must have at least one freeholder row. Seed data is inserted after the V1_61_0 backfill has
--- run, so these rows are added here instead. No name, email or address: "no details known".
+-- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
+-- placeholder freeholder get one here instead.
 INSERT INTO freeholder (property_ownership_id)
 SELECT po.id
 FROM property_ownership po

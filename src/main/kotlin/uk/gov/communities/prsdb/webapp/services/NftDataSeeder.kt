@@ -702,8 +702,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        // Drawn here rather than at its point of use below, because it consumes the shared faker stream: moving it
-        // would reorder the draws in between and change every subsequent seeded value.
+        // Drawn here, not at its point of use below, because moving it would reorder the shared
+        // faker stream and change every subsequent seeded value.
         val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
         val ownershipType = NftDataFaker.generateOwnershipType()
         propertyOwnershipStmt.setInt(4, ownershipType.ordinal)
@@ -731,9 +731,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setInt(24, ownershipTypeBeforePdjb955.ordinal)
         propertyOwnershipStmt.addBatch()
 
-        // A "no details known" placeholder, so that seeded properties satisfy the same invariant as
-        // registered ones. Deliberately draws nothing: a name, email or address would consume the
-        // shared faker stream and change every subsequent seeded value.
+        // A "no details known" placeholder. Deliberately draws nothing: a name, email or address
+        // would consume the shared faker stream and change every subsequent seeded value.
         if (ownershipType.impliesAnotherFreeholder()) {
             freeholderStmt.setTimestamp(1, createdDate)
             freeholderStmt.setLong(2, propertyOwnershipId)

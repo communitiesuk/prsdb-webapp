@@ -8,8 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 
-// TODO PDJB-2019: delete this whole class along with OwnershipTypeConverter, once the legacy
-//  enum and column are gone.
+// TODO PDJB-2019: delete this class with OwnershipTypeConverter once the legacy enum is gone.
 class OwnershipTypeConverterTests {
     @ParameterizedTest
     @MethodSource("provideLegacyToCurrentMappings")
@@ -38,9 +37,8 @@ class OwnershipTypeConverterTests {
         legacy: OwnershipTypeBeforePdjb955,
         expected: OwnershipType,
     ) {
-        // Arrange - these pairs are duplicated in the CASE expression in
-        // V1_61_0__add_ownership_type_and_associated_party_tables.sql and in every seed script. If this fails,
-        // the enum declaration order has changed and that SQL is now wrong.
+        // Arrange - these pairs are duplicated in the CASE expression in V1_61_0 and in every seed
+        // script. If this fails, the enum declaration order has changed and that SQL is now wrong.
         val expectedOrdinalPairs = mapOf(0 to 2, 1 to 1, 2 to 3, 3 to 5)
 
         // Act, Assert

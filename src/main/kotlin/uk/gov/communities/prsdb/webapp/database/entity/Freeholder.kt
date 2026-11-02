@@ -7,9 +7,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
-// A freeholder of the property other than the landlord themselves. Name, email and address are
-// all nullable: a landlord may tell us they cannot provide the freeholder's details, and a row
-// with none of them set is how we record "no details known".
+// A freeholder other than the landlord. A row with no name, email or address records
+// "no details known".
 @Entity
 class Freeholder() : ModifiableAuditableEntity() {
     @Id

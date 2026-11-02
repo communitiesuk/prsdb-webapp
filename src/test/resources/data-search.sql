@@ -348,9 +348,8 @@ VALUES (34, 34, '2025-01-15');
 INSERT INTO property_compliance (id, property_ownership_id, has_gas_supply, epc_exemption_reason)
 VALUES (34, 34, null, null);
 
--- PDJB-1956: every property whose ownership type implies a freeholder other than the landlord
--- must have at least one freeholder row. Seed data is inserted after the V1_61_0 backfill has
--- run, so these rows are added here instead. No name, email or address: "no details known".
+-- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
+-- placeholder freeholder get one here instead.
 INSERT INTO freeholder (property_ownership_id)
 SELECT po.id
 FROM property_ownership po

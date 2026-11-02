@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 
 // Verifies that the seed scripts populate ownership_type and ownership_type_before_pdjb955
-// consistently. This does NOT exercise the backfill in V1_61_0__add_ownership_type_and_associated_party_tables.sql:
-// the seed data is loaded after Flyway has already run, so the migration's UPDATE never sees
-// these rows. The backfill itself is not testable post-migration because ownership_type is
-// NOT NULL by the time the context is up.
+// consistently. This does NOT exercise the V1_61_0 backfill: seed data is loaded after Flyway has
+// run, and the backfill is not testable afterwards because ownership_type is NOT NULL by then.
 // TODO PDJB-2019: delete this class once the legacy column is dropped.
 class OwnershipTypeSeedDataTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Autowired
@@ -36,8 +34,7 @@ class OwnershipTypeSeedDataTests : IntegrationTestWithImmutableData("data-local.
 
         // Act
         // Deliberately not DISTINCT and not collapsed into a map: every row is asserted
-        // individually so that a single mis-mapped row cannot be masked by a correct one
-        // sharing the same legacy value.
+        // individually so a mis-mapped row cannot be masked by a correct one.
         val rows =
             jdbcTemplate.queryForList(
                 "SELECT id, ownership_type_before_pdjb955 AS legacy, ownership_type AS current " +

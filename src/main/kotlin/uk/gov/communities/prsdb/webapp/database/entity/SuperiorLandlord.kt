@@ -7,9 +7,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
-// Someone further up the ownership chain than the landlord, e.g. the landlord's own landlord.
-// Name, email and address are all nullable: a landlord may tell us they cannot provide the
-// superior landlord's details, and a row with none of them set records "no details known".
+// Someone further up the ownership chain than the landlord. A row with no name, email or address
+// records "no details known".
 @Entity
 class SuperiorLandlord() : ModifiableAuditableEntity() {
     @Id
