@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-1963: replace this placeholder with the real "can you provide details about the freeholder" page
+//  Swap to inherit from PageWithYesNoRadios
 class FreeholderProvideDetailsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FreeholderProvideDetailsStep.ROUTE_SEGMENT}") {
