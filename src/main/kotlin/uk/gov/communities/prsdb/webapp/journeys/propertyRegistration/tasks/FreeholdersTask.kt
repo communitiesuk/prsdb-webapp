@@ -1,83 +1,56 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
 class FreeholdersTask(
     journeyStateService: JourneyStateService,
     override val freeholdersInfoStep: FreeholdersInfoStep,
-    override val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep,
-    override val freeholderNameStep: FreeholderNameStep,
-    override val freeholderContactTypeStep: FreeholderContactTypeStep,
-    override val freeholderEmailStep: FreeholderEmailStep,
-    override val freeholderAddressTask: FreeholderAddressTask,
-    override val freeholdersListStep: FreeholdersListStep,
-    override val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep,
+    override val freeholdersDetailsTask: FreeholdersDetailsTask,
+    override val freeholdersBackRoutingStep: FreeholdersBackRoutingStep,
 ) : TaskWithoutDependencies<FreeholdersState>(journeyStateService),
     FreeholdersState {
     override val taskState get() = this
+
+    override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
+    override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
+    override var editingFreeholderId: Int? by delegateProvider.nullableDelegate("editingFreeholderId")
 
     override fun makeSubJourney(state: FreeholdersState) =
         subJourney(state) {
             step(journey.freeholdersInfoStep) {
                 routeSegment(FreeholdersInfoStep.ROUTE_SEGMENT)
-                nextStep { journey.freeholderProvideDetailsStep }
+                nextStep { journey.freeholdersDetailsTask.firstStep }
                 savable()
             }
-            step(journey.freeholderProvideDetailsStep) {
-                routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+            task(journey.freeholdersDetailsTask) {
                 parents { journey.freeholdersInfoStep.isComplete() }
-                nextStep { journey.freeholderNameStep }
+                backDestination { Destination(journey.freeholdersInfoStep) }
+                nextStep { journey.freeholdersBackRoutingStep }
+                withDependencies {
+                    FreeholdersDetailsDependencies(
+                        listState = journey,
+                    )
+                }
                 savable()
             }
-            step(journey.freeholderNameStep) {
-                routeSegment(FreeholderNameStep.ROUTE_SEGMENT)
-                parents { journey.freeholderProvideDetailsStep.isComplete() }
-                nextStep { journey.freeholderContactTypeStep }
-                savable()
-            }
-            step(journey.freeholderContactTypeStep) {
-                routeSegment(FreeholderContactTypeStep.ROUTE_SEGMENT)
-                parents { journey.freeholderNameStep.isComplete() }
-                nextStep { journey.freeholderEmailStep }
-                savable()
-            }
-            step(journey.freeholderEmailStep) {
-                routeSegment(FreeholderEmailStep.ROUTE_SEGMENT)
-                parents { journey.freeholderContactTypeStep.isComplete() }
-                nextStep { journey.freeholderAddressTask.firstStep }
-                savable()
-            }
-            task(journey.freeholderAddressTask) {
-                parents { journey.freeholderEmailStep.isComplete() }
-                nextStep { journey.freeholdersListStep }
-                savable()
-            }
-            step(journey.freeholdersListStep) {
-                routeSegment(FreeholdersListStep.ROUTE_SEGMENT)
-                parents { journey.freeholderAddressTask.isComplete() }
-                nextStep { journey.confirmRemoveFreeholderStep }
-                savable()
-            }
-            step(journey.confirmRemoveFreeholderStep) {
-                routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
-                parents { journey.freeholdersListStep.isComplete() }
+            step(journey.freeholdersBackRoutingStep) {
+                routeSegment(FreeholdersBackRoutingStep.ROUTE_SEGMENT)
+                parents { journey.freeholdersDetailsTask.isComplete() }
                 nextStep { exitStep }
                 savable()
             }
             exitStep {
-                parents { journey.confirmRemoveFreeholderStep.isComplete() }
+                parents { journey.freeholdersBackRoutingStep.isComplete() }
             }
         }
 }

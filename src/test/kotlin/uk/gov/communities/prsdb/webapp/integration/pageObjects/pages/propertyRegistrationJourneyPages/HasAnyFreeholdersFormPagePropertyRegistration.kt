@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
 
-// TODO PDJB-1970: replace this placeholder with the real remove freeholder confirmation page
-class RemoveFreeholderFormPagePropertyRegistration(
+// TODO PDJB-1969: remove this placeholder page when the has any freeholders step becomes an internal step
+class HasAnyFreeholdersFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ConfirmRemoveFreeholderStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${HasAnyFreeholdersStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
 
