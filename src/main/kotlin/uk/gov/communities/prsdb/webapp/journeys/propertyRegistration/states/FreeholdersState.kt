@@ -19,4 +19,5 @@ interface FreeholdersState : JourneyState {
     val freeholderAddressTask: FreeholderAddressTask
     val freeholdersListStep: FreeholdersListStep
     val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
+    val isJointFreeholder: Boolean
 }
