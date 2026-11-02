@@ -733,6 +733,9 @@ class NftDataSeeder(
 
         // A "no details known" placeholder. Deliberately draws nothing: a name, email or address
         // would consume the shared faker stream and change every subsequent seeded value.
+        // TODO PDJB-1957: seed realistic associated parties once the journey defines their shape -
+        //  named freeholders, superior landlords with has_superior_landlords set to match, and
+        //  property managers - so that NFT exercises those joins at a representative volume.
         if (ownershipType.impliesAnotherFreeholder()) {
             freeholderStmt.setTimestamp(1, createdDate)
             freeholderStmt.setLong(2, propertyOwnershipId)

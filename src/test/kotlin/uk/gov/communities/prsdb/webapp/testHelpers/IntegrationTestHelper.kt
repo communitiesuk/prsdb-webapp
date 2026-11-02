@@ -12,6 +12,8 @@ class IntegrationTestHelper {
         // Any future migration that inserts reference data must add its table to this set.
         val PRESERVED_TABLES = setOf("flyway_schema_history", "local_council")
 
+        private const val PLACEHOLDER_FREEHOLDERS_SCRIPT = "data-placeholder-freeholders.sql"
+
         fun resetAndSeedDatabase(
             scripts: List<String>,
             jdbcTemplate: JdbcTemplate,
@@ -38,7 +40,7 @@ class IntegrationTestHelper {
             scripts: List<String>,
             jdbcTemplate: JdbcTemplate,
         ) {
-            scripts.forEach { script ->
+            (scripts + PLACEHOLDER_FREEHOLDERS_SCRIPT).forEach { script ->
                 val scriptContents = ResourceUtils.getFile("classpath:$script").readText()
                 jdbcTemplate.execute(scriptContents)
             }

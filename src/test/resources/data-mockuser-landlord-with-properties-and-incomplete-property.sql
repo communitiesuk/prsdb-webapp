@@ -56,11 +56,3 @@ VALUES
        (1, 1, current_date, true, 0),
        (2, 2, current_date, true, 0),
        (3, 3, current_date, true, 0);
-
--- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
--- placeholder freeholder get one here instead.
-INSERT INTO freeholder (property_ownership_id)
-SELECT po.id
-FROM property_ownership po
-WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
-  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

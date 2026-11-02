@@ -67,11 +67,3 @@ VALUES
        (9, 9, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true, null, null),
        (10, 10, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true, null, null),
        (11, 11, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true, null, null);
-
--- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
--- placeholder freeholder get one here instead.
-INSERT INTO freeholder (property_ownership_id)
-SELECT po.id
-FROM property_ownership po
-WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
-  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

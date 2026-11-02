@@ -347,11 +347,3 @@ VALUES (34, 34, '2025-01-15');
 
 INSERT INTO property_compliance (id, property_ownership_id, has_gas_supply, epc_exemption_reason)
 VALUES (34, 34, null, null);
-
--- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
--- placeholder freeholder get one here instead.
-INSERT INTO freeholder (property_ownership_id)
-SELECT po.id
-FROM property_ownership po
-WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
-  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

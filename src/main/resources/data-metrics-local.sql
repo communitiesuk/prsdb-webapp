@@ -253,11 +253,3 @@ SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM addr
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
-
--- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
--- placeholder freeholder get one here instead.
-INSERT INTO freeholder (property_ownership_id)
-SELECT po.id
-FROM property_ownership po
-WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
-  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

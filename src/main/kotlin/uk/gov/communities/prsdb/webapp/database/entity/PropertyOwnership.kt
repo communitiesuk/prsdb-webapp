@@ -84,8 +84,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
-    // landlords are asked separately whether there are more people in the ownership chain, so an
-    // empty superiorLandlords is ambiguous. null means never asked, i.e. anything before PDJB-1957.
     var hasSuperiorLandlords: Boolean? = null
 
     @OneToOne(optional = true, orphanRemoval = true)

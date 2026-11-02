@@ -52,11 +52,3 @@ VALUES
        (4, 2, '01/01/25', '01/01/25', current_date, true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', current_date+30, null, 'g', null, null, true, true, true, null, null),
        (5, 5, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', current_date+30, null, 'c', null, null, true, true, true, true, true),
        (6, 6, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date - 1, 0, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', current_date+30, null, 'c', null, null, true, true, true, null, null);
-
--- Seed data is loaded after the V1_61_0 freeholder backfill, so properties needing a
--- placeholder freeholder get one here instead.
-INSERT INTO freeholder (property_ownership_id)
-SELECT po.id
-FROM property_ownership po
-WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
-  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);
