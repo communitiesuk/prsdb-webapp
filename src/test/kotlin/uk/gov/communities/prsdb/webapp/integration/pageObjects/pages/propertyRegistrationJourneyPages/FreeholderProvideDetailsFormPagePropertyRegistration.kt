@@ -5,13 +5,14 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderProvideDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-1963: replace this placeholder with the real "can you provide details about the freeholder" page
+//  Swap to inherit from PageWithYesNoRadios
 class FreeholderProvideDetailsFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PersonProvideDetailsStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FreeholderProvideDetailsStep.ROUTE_SEGMENT}") {
     val form = FreeholderProvideDetailsForm(page)
 
     fun submitProvideDetails(provideDetails: YesOrNo) {

@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 // TODO PDJB-1966: replace this placeholder with the real freeholder email page
 //  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class PersonEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class FreeholderEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
@@ -22,8 +22,8 @@ class PersonEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 }
 
 @JourneyFrameworkComponent
-final class PersonEmailStep(
-    stepConfig: PersonEmailStepConfig,
+final class FreeholderEmailStep(
+    stepConfig: FreeholderEmailStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-email"
