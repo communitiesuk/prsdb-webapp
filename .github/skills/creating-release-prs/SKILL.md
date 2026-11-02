@@ -51,10 +51,10 @@ repeat the conflict check and diff review. If more source changes are included, 
 
 ## Release Notes Format
 
-- Group commits by ticket number (PRSD-\*, PDJB-\*)
+- Group commits by ticket number (PDJB-\*)
 - Order tickets by the position of their first commit in the git log (oldest first)
 - Combine related commits under a single ticket entry
-- Group PRSD-NONE/PDJB-NONE items together at the end
+- Group PDJB-NONE items together at the end
 - Use format: `TICKET: Brief description`
 
 Example:
@@ -64,8 +64,7 @@ Example:
 PDJB-119: Send joint landlord invitations
 PDJB-273: Join a registered property as a joint landlord
 PDJB-467: Gas safety task, EICR task, EPC task
-PRSD-1021: NGD Address Update Task Runner
-PRSD-NONE: Fixes bug on windows, Updates test seed data
+PDJB-NONE: Fixes bug on windows, Updates test seed data
 ```
 
 ## PR Title Format
