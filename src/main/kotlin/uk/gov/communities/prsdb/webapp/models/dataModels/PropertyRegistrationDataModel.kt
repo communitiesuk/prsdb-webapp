@@ -52,4 +52,5 @@ data class PropertyRegistrationDataModel(
     val correspondenceEmail: String,
     val correspondenceAddressModel: AddressDataModel,
     val renewalDate: LocalDate? = null,
+    val propertyManager: PropertyManagerDataModel? = null,
 )

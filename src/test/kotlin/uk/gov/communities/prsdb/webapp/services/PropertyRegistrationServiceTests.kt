@@ -38,13 +38,16 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
@@ -104,6 +107,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockPaymentRepository: PaymentRepository
+
+    @Mock
+    private lateinit var mockPropertyManagerRepository: PropertyManagerRepository
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -422,6 +428,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -524,6 +531,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -1296,6 +1304,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -1349,6 +1358,7 @@ class PropertyRegistrationServiceTests {
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
+            propertyManager = anyOrNull(),
             isActive = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
@@ -1395,6 +1405,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -1448,6 +1459,7 @@ class PropertyRegistrationServiceTests {
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
+            propertyManager = anyOrNull(),
             isActive = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
@@ -1491,6 +1503,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -1563,6 +1576,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),
@@ -1811,6 +1825,71 @@ class PropertyRegistrationServiceTests {
         verifyNoInteractions(mockPaymentRepository)
     }
 
+    @Test
+    fun `registerProperty saves the property manager and links it to the property ownership`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        val savedPropertyManager = PropertyManager("Best Property Managers Ltd", "manager@example.com")
+        whenever(mockPropertyManagerRepository.save(any<PropertyManager>())).thenReturn(savedPropertyManager)
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                propertyManager = PropertyManagerDataModel("Best Property Managers Ltd", "manager@example.com"),
+            ),
+        )
+
+        // Assert
+        verify(mockPropertyManagerRepository).save(
+            argThat<PropertyManager> { name == "Best Property Managers Ltd" && email == "manager@example.com" },
+        )
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            registeringLandlord = any(),
+            anniversary = any(),
+            propertyBuildType = any(),
+            address = any(),
+            license = anyOrNull(),
+            propertyManager = eq(savedPropertyManager),
+            isActive = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            markedJointLandlord = any(),
+            licenseProvideLater = anyOrNull(),
+            tenancyProvideLater = anyOrNull(),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
+            renewalDate = any(),
+        )
+    }
+
+    @Test
+    fun `registerProperty does not save a property manager when none is provided`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+
+        // Assert
+        verifyNoInteractions(mockPropertyManagerRepository)
+    }
+
     private fun stubPropertyOwnershipCreation(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
@@ -1828,6 +1907,7 @@ class PropertyRegistrationServiceTests {
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
+                propertyManager = anyOrNull(),
                 isActive = any(),
                 numBedrooms = anyOrNull(),
                 billsIncludedList = anyOrNull(),

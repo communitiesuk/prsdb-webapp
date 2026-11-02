@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb95
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -62,6 +63,7 @@ class MockPropertyRegistrationData {
             isDelegatedToLettingAgent: Boolean = false,
             correspondenceEmail: String = DEFAULT_CORRESPONDENCE_EMAIL,
             correspondenceAddressModel: AddressDataModel = DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+            propertyManager: PropertyManagerDataModel? = null,
         ) = PropertyRegistrationDataModel(
             addressModel = addressModel,
             propertyType = propertyType,
@@ -102,6 +104,7 @@ class MockPropertyRegistrationData {
             isDelegatedToLettingAgent = isDelegatedToLettingAgent,
             correspondenceEmail = correspondenceEmail,
             correspondenceAddressModel = correspondenceAddressModel,
+            propertyManager = propertyManager,
         )
     }
 }

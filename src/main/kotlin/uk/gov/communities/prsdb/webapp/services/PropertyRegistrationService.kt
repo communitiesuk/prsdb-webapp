@@ -11,8 +11,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
@@ -43,6 +45,7 @@ class PropertyRegistrationService(
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentRepository: PaymentRepository,
+    private val propertyManagerRepository: PropertyManagerRepository,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -119,6 +122,9 @@ class PropertyRegistrationService(
                     null
                 }
 
+            val savedPropertyManager =
+                propertyManager?.let { propertyManagerRepository.save(PropertyManager(it.name, it.email)) }
+
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
@@ -140,6 +146,7 @@ class PropertyRegistrationService(
                 tenancyProvideLater = tenancyProvideLater,
                 address = address,
                 license = license,
+                propertyManager = savedPropertyManager,
                 licenseProvideLater = licenseProvideLater,
                 correspondenceEmail = correspondenceEmail,
                 correspondenceAddressModel = correspondenceAddressModel,

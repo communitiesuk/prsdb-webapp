@@ -8,10 +8,17 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.constants.enums.AdditionalPropertyOwnerType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.AdditionalPropertyOwner
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.AddressService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.MonthDay
 
 class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
@@ -19,6 +26,15 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     @Autowired
     private lateinit var propertyManagerRepository: PropertyManagerRepository
+
+    @Autowired
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @Autowired
+    private lateinit var landlordRepository: LandlordRepository
+
+    @Autowired
+    private lateinit var addressService: AddressService
 
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
@@ -100,5 +116,50 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         // Assert
         assertEquals(1, countRowsIn("property_manager"))
         assertEquals("Second Manager", jdbcTemplate.queryForObject("SELECT name FROM property_manager", String::class.java))
+    }
+
+    @Test
+    fun `creating a property ownership with a property manager links the saved property manager`() {
+        // Arrange
+        var propertyOwnershipId = 0L
+        inTransaction {
+            val propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
+            val address =
+                addressService.findOrCreateAddress(AddressDataModel("1 Property Manager Test Road, EG1 2AB", postcode = "EG1 2AB"))
+            val propertyOwnership =
+                propertyOwnershipService.createPropertyOwnership(
+                    ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                    isOccupied = false,
+                    numberOfHouseholds = 0,
+                    numberOfPeople = 0,
+                    registeringLandlord = landlordRepository.findAll().first(),
+                    anniversary = MonthDay.of(1, 1),
+                    propertyBuildType = PropertyType.DETACHED_HOUSE,
+                    address = address,
+                    propertyManager = propertyManager,
+                    numBedrooms = 1,
+                    billsIncludedList = null,
+                    customBillsIncluded = null,
+                    furnishedStatus = null,
+                    rentFrequency = null,
+                    customRentFrequency = null,
+                    rentAmount = null,
+                    customPropertyType = null,
+                    correspondenceEmail = "correspondence@example.com",
+                    correspondenceAddressModel = AddressDataModel("2 Correspondence Road, EG1 2AB", postcode = "EG1 2AB"),
+                )
+            propertyOwnershipId = propertyOwnership.id
+        }
+
+        // Act
+        val linkedName =
+            jdbcTemplate.queryForObject(
+                "SELECT pm.name FROM property_ownership po JOIN property_manager pm ON pm.id = po.property_manager_id WHERE po.id = ?",
+                String::class.java,
+                propertyOwnershipId,
+            )
+
+        // Assert
+        assertEquals("A Manager", linkedName)
     }
 }

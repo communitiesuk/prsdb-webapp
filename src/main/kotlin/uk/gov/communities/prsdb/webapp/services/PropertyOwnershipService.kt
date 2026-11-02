@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -75,6 +76,7 @@ class PropertyOwnershipService(
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
+        propertyManager: PropertyManager? = null,
         isActive: Boolean = true,
         numBedrooms: Int?,
         billsIncludedList: String?,
@@ -122,6 +124,7 @@ class PropertyOwnershipService(
                 markedJointLandlord = markedJointLandlord,
                 licenseProvideLater = licenseProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
+                propertyManager = propertyManager,
             ).apply {
                 if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
             },

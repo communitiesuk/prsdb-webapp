@@ -54,6 +54,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
@@ -390,6 +391,48 @@ class PropertyOwnershipServiceTests {
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertEquals(null, propertyOwnershipCaptor.value.lastOccupiedDate)
+    }
+
+    @Test
+    fun `createPropertyOwnership links the supplied property manager`() {
+        // Arrange
+        val propertyManager = PropertyManager("Best Property Managers Ltd", "manager@example.com")
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        // Act
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = MockLandlordData.createIndividualLandlord(),
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+            propertyBuildType = PropertyType.DETACHED_HOUSE,
+            customPropertyType = null,
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            propertyManager = propertyManager,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+        )
+
+        // Assert
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertSame(propertyManager, propertyOwnershipCaptor.value.propertyManager)
     }
 
     @Test

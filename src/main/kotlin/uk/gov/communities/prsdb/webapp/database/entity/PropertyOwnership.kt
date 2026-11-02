@@ -167,6 +167,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        propertyManager: PropertyManager? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
@@ -194,6 +195,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.markedJointLandlord = markedJointLandlord
         this.licenseProvideLater = licenseProvideLater
         this.tenancyProvideLater = tenancyProvideLater
+        this.propertyManager = propertyManager
     }
 
     val licenseType: LicensingType

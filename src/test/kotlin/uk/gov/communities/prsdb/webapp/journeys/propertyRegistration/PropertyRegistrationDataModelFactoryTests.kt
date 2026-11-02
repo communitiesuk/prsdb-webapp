@@ -21,6 +21,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -62,8 +63,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTaskBeforeAssociatedParties
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyManagerTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
@@ -71,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoPr
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
@@ -440,6 +444,41 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(true, result.tenancyProvideLater)
     }
 
+    @Test
+    fun `fromJourneyState returns the property manager from the property manager task`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        val propertyManager = PropertyManagerDataModel("Best Property Managers Ltd", "manager@example.com")
+        whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+        val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
+        val mockPropertyManagerTask = mock<PropertyManagerTask>()
+        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
+        whenever(mockPropertyManagerTask.getPropertyManagerOrNull()).thenReturn(propertyManager)
+
+        // Act
+        val result = factory.fromJourneyState(mockState)
+
+        // Assert
+        assertEquals(propertyManager, result.propertyManager)
+    }
+
+    // TODO PDJB-2016: remove this test once ASSOCIATED_PARTIES is released
+    @Test
+    fun `fromJourneyState returns no property manager when associated parties is disabled`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+
+        // Act
+        val result = factory.fromJourneyState(mockState)
+
+        // Assert
+        assertNull(result.propertyManager)
+        verify(mockState, never()).ownershipAndLandlordsTask
+    }
+
     private fun setupStateForPropertyRegistration() {
         val mockOccupiedStep = mock<OccupiedStep>()
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
@@ -476,11 +515,12 @@ class PropertyRegistrationDataModelFactoryTests {
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD }
-        whenever(
-            mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
-        ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
-        whenever(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
-        whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
+        lenient()
+            .`when`(
+                mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
+            ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
+        lenient().`when`(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        lenient().`when`(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
 
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
         whenever(mockState.getJointLandlordsTask(any())).thenReturn(mockJointLandlordsTask)

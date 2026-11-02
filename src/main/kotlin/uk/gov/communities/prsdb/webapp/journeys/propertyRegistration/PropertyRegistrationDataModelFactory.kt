@@ -43,6 +43,7 @@ class PropertyRegistrationDataModelFactory(
                 ?.values
                 ?.toList()
         val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
 
         return PropertyRegistrationDataModel(
             addressModel = state.propertyDetailsTask.addressTask.getAddress(),
@@ -59,7 +60,7 @@ class PropertyRegistrationDataModelFactory(
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
             // TODO PDJB-2015: derive the ownership type from the associated parties answers
             ownershipType =
-                if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+                if (associatedPartiesEnabled) {
                     OwnershipTypeBeforePdjb955.FREEHOLD
                 } else {
                     state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
@@ -188,6 +189,13 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
+            // TODO PDJB-2016: remove the flag check once ASSOCIATED_PARTIES is released
+            propertyManager =
+                if (associatedPartiesEnabled) {
+                    state.ownershipAndLandlordsTask.propertyManagerTask.getPropertyManagerOrNull()
+                } else {
+                    null
+                },
         )
     }
 }
