@@ -6,13 +6,18 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -24,6 +29,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -37,9 +45,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -86,6 +94,10 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
+    // TODO: PDJB-1926: Remove mockFeatureFlagManager
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
@@ -120,7 +132,13 @@ class PropertyComplianceServiceTests {
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
                 mockCurrentUserService,
+                BeforePdjb1666EicDateService(),
+                mockFeatureFlagManager,
             )
+        // TODO: PDJB-1926: Remove this stub
+        lenient()
+            .`when`(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY))
+            .thenReturn(true)
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("https://test.example.com"))
@@ -224,6 +242,7 @@ class PropertyComplianceServiceTests {
         assertEquals(1, returnedCount)
     }
 
+    // TODO PDJB-2006: Delete the getNonCompliantPropertiesForLandlord tests when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
     @Test
     fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
         // Arrange
@@ -248,7 +267,7 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
-            nonCompliantProperties.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            nonCompliantProperties.map { propertyComplianceService.getComplianceStatus(it) }
 
         // Act
         val returnedNonCompliantProperties =
@@ -285,7 +304,7 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
-            listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1]))
+            listOf(propertyComplianceService.getComplianceStatus(nonCompliantProperties[1]))
 
         // Act
         val returnedNonCompliantProperties =
@@ -838,7 +857,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -886,7 +905,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -935,7 +954,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         isJointLandlord = true,
                     ),
                 ),
@@ -984,7 +1003,7 @@ class PropertyComplianceServiceTests {
                             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = issueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         propertyRecordUrl = "http://property",
                     ),
                 ),
@@ -1029,7 +1048,7 @@ class PropertyComplianceServiceTests {
                             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = expiredIssueDate.plusYears(1).format(dateFormatter),
+                        expiryDate = expiredIssueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong()).format(dateFormatter),
                         propertyRecordUrl = "http://property",
                     ),
                 ),
@@ -2094,5 +2113,218 @@ class PropertyComplianceServiceTests {
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmailToLandlord(any(), any())
         }
+    }
+
+    @ParameterizedTest(name = "{1} when expiry date {0}")
+    @MethodSource("provideElectricalSafetyExpiryDates")
+    fun `isElectricalSafetyExpired is`(
+        expiryDate: LocalDate,
+        expectedIsExpired: Boolean,
+    ) {
+        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate)
+                    .withElectricalCertType(certType)
+                    .build()
+            assertEquals(
+                expectedIsExpired,
+                propertyComplianceService.isElectricalSafetyExpired(propertyCompliance),
+                "for $certType",
+            )
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyExpired throws when the electrical cert type is missing`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withElectricalSafety(LocalDate.now().minusYears(1), certType = null)
+                .build()
+
+        assertThrows<PrsdbWebException> {
+            propertyComplianceService.isElectricalSafetyExpired(propertyCompliance)
+        }
+    }
+
+    @Test
+    fun `isElectricalSafetyExpired returns null when there is no electrical certificate`() {
+        val propertyCompliance = PropertyComplianceBuilder().build()
+
+        assertNull(propertyComplianceService.isElectricalSafetyExpired(propertyCompliance))
+    }
+
+    @Test
+    fun `isElectricalSafetyMissing is true when there is no electrical certificate`() {
+        val propertyCompliance = PropertyComplianceBuilder().build()
+
+        assertTrue(propertyComplianceService.isElectricalSafetyMissing(propertyCompliance))
+    }
+
+    @Test
+    fun `isElectricalSafetyMissing is false when an electrical certificate is present`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder().withElectricalSafety(certType = CertificateType.Eicr).build()
+
+        assertFalse(propertyComplianceService.isElectricalSafetyMissing(propertyCompliance))
+    }
+
+    // Records created between the migrations that added the expiry date and the cert type columns hold a date
+    // with no cert type. They must keep reporting the stored date rather than appearing to have no certificate.
+    @Test
+    fun `isElectricalSafetyMissing is false when a date is stored without a cert type`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder().withElectricalSafety(LocalDate.now().plusYears(1), certType = null).build()
+
+        assertFalse(propertyComplianceService.isElectricalSafetyMissing(propertyCompliance))
+        assertEquals(
+            propertyCompliance.electricalSafetyExpiryDate,
+            propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
+        )
+    }
+
+    @Nested
+    inner class EicDateTests {
+        @Test
+        fun `getEicIssueDate derives the issue date from the stored expiry date`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
+                    .build()
+
+            assertEquals(LocalDate.of(2025, 6, 1), propertyComplianceService.getEicIssueDate(propertyCompliance))
+        }
+
+        @Test
+        fun `getEicExpiryDate returns the stored expiry date`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
+                    .build()
+
+            assertEquals(LocalDate.of(2030, 6, 1), propertyComplianceService.getEicExpiryDate(propertyCompliance))
+        }
+
+        @Test
+        fun `getEicIssueDate throws when the record is not an EIC`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder().withElectricalSafety(certType = CertificateType.Eicr).build()
+
+            assertThrows<PrsdbWebException> { propertyComplianceService.getEicIssueDate(propertyCompliance) }
+        }
+
+        private fun eicComplianceWithLastModifiedDate(): PropertyCompliance {
+            val propertyCompliance =
+                PropertyComplianceBuilder().withElectricalSafety(certType = CertificateType.Eic).build()
+            ReflectionTestUtils.setField(propertyCompliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(propertyCompliance, "lastModifiedDate", initialLastModifiedDate)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(propertyCompliance)
+            return propertyCompliance
+        }
+
+        @Test
+        fun `setEicIssueDate stores the derived expiry date and saves`() {
+            val propertyCompliance = eicComplianceWithLastModifiedDate()
+
+            propertyComplianceService.setEicIssueDate(propertyOwnershipId, initialLastModifiedDate, LocalDate.of(2025, 6, 1))
+
+            assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
+            verify(mockPropertyComplianceRepository).save(propertyCompliance)
+        }
+
+        @Test
+        fun `setEicExpiryDate stores the expiry date and saves`() {
+            val propertyCompliance = eicComplianceWithLastModifiedDate()
+
+            propertyComplianceService.setEicExpiryDate(propertyOwnershipId, initialLastModifiedDate, LocalDate.of(2030, 6, 1))
+
+            assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
+            verify(mockPropertyComplianceRepository).save(propertyCompliance)
+        }
+
+        @Test
+        fun `setEicExpiryDate throws when the record was modified after the update session started`() {
+            eicComplianceWithLastModifiedDate()
+
+            assertThrows<UpdateConflictException> {
+                propertyComplianceService.setEicExpiryDate(
+                    propertyOwnershipId,
+                    initialLastModifiedDate.plusSeconds(1),
+                    LocalDate.of(2030, 6, 1),
+                )
+            }
+            verify(mockPropertyComplianceRepository, never()).save(any<PropertyCompliance>())
+        }
+
+        @Test
+        fun `setEicIssueDate throws when the record was modified after the update session started`() {
+            eicComplianceWithLastModifiedDate()
+
+            assertThrows<UpdateConflictException> {
+                propertyComplianceService.setEicIssueDate(
+                    propertyOwnershipId,
+                    initialLastModifiedDate.plusSeconds(1),
+                    LocalDate.of(2025, 6, 1),
+                )
+            }
+            verify(mockPropertyComplianceRepository, never()).save(any<PropertyCompliance>())
+        }
+
+        @Test
+        fun `setEicExpiryDate throws when the record is not an EIC`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder().withElectricalSafety(certType = CertificateType.Eicr).build()
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(propertyCompliance)
+
+            assertThrows<PrsdbWebException> {
+                propertyComplianceService.setEicExpiryDate(propertyOwnershipId, initialLastModifiedDate, LocalDate.of(2030, 6, 1))
+            }
+            verify(mockPropertyComplianceRepository, never()).save(any<PropertyCompliance>())
+        }
+
+        @Test
+        fun `getElectricalSafetyExpiryDate returns the stored date for an EICR`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eicr)
+                    .build()
+
+            assertEquals(
+                LocalDate.of(2030, 6, 1),
+                propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
+            )
+        }
+
+        @Test
+        fun `getElectricalSafetyExpiryDate goes through the EIC date service for an EIC`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
+                    .build()
+
+            assertEquals(
+                LocalDate.of(2030, 6, 1),
+                propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
+            )
+        }
+
+        @Test
+        fun `getElectricalSafetyExpiryDate returns null when there is no cert type`() {
+            val propertyCompliance = PropertyComplianceBuilder().build()
+
+            assertNull(propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance))
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        private fun provideElectricalSafetyExpiryDates() =
+            arrayOf(
+                arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
+                arguments(named("is today", LocalDate.now()), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
+            )
     }
 }

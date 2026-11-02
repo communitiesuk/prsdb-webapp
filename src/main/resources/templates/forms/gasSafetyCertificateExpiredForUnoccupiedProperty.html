@@ -1,4 +1,4 @@
-﻿<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="issueDate" type="java.lang.String"*/-->
@@ -20,10 +20,10 @@
         </p>
         <section>
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.heading}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.heading</h2>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.legalDutyParagraph}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.legalDutyParagraph</p>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.beforeLink}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.beforeLink</span>
-                <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.link</a>
-                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.afterLink}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.afterLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.link</a><span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.afterLink}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whatToDoNext.learnHow.afterLink</span>
             </p>
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whenToUpload.heading}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whenToUpload.heading</h3>
             <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whenToUpload.paragraph}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpired.unoccupied.whenToUpload.paragraph</p>

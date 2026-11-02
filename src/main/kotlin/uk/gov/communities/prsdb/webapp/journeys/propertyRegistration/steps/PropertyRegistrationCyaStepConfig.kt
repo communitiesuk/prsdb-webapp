@@ -3,9 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -32,28 +33,17 @@ class PropertyRegistrationCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        // TODO PDJB-1617: Remove this check once the feature flag is removed and the letting agent journey is fully implemented
-        val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-        if (!isLettingAgentEnabled) {
-            return getContentBeforePdjb1022(state)
-        }
-
-        // TODO PDJB-1617: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
-        return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        if (state.isDelegatedToLettingAgent()) {
             getDelegatedContent(state)
         } else {
             getNonDelegatedContent(state)
         }
-    }
-
-    // TODO PDJB-1617: Remove this method once the feature flag is removed and the letting agent journey is fully implemented
-    private fun getContentBeforePdjb1022(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        return getContent(state, emptyMap())
-    }
 
     private fun getNonDelegatedContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val whoProvides = state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+        val whoProvides =
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
+                ?.whoProvides
         val delegationContent = whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()
         return getContent(state, delegationContent) +
             mapOf(
@@ -92,7 +82,8 @@ class PropertyRegistrationCyaStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val occupancyDetails = occupancyDetailsHelper.getOccupancySummaryList(state)
         val whoProvides =
-            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
+                ?.whoProvides
         return getBaseContent(state, occupancyDetails) +
             (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
             mapOf(
@@ -113,7 +104,10 @@ class PropertyRegistrationCyaStepConfig(
     ) = mapOf<String, Any?>(
         "submitButtonText" to getSubmitButtonText(),
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
-        "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
+        "propertyName" to
+            state.propertyDetailsTask.addressTask
+                .getAddress()
+                .singleLineAddress,
         "propertyDetails" to getPropertyDetailsSummaryList(state),
         "occupancyDetails" to occupancyDetails,
     )
@@ -131,8 +125,8 @@ class PropertyRegistrationCyaStepConfig(
         licensingDetails: List<SummaryListRowViewModel>,
         tenancyDetails: List<SummaryListRowViewModel>,
         occupancyDetails: List<SummaryListRowViewModel>,
-    ): Map<String, Any?> {
-        return mapOf(
+    ): Map<String, Any?> =
+        mapOf(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
             "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
             "ownershipAndLandlordsRows" to
@@ -152,7 +146,6 @@ class PropertyRegistrationCyaStepConfig(
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
         )
-    }
 
     private fun getCorrespondenceRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
         val emailStep = state.correspondenceTask.correspondenceEmailStep
@@ -189,12 +182,12 @@ class PropertyRegistrationCyaStepConfig(
     ): Destination = defaultDestination
 
     private fun hasJointLandlords(state: PropertyRegistrationJourneyState): Boolean =
-        state.ownershipAndLandlordsTask.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+        state.getJointLandlordsTask(featureFlagManager).hasJointLandlordsStep.formModel.notNullValue(
             HasJointLandlordsFormModel::hasJointLandlords,
         )
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
+        val jointLandlordsTask = state.getJointLandlordsTask(featureFlagManager)
         return if (hasJointLandlords(state)) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
@@ -262,12 +255,21 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "propertyDetails.propertyRecord.ownership.ownershipType",
-            ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
-        )
+        // TODO PDJB-2014: replace with rows for the associated parties answers
+        if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+            return SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.ownership.ownershipType",
+                OwnershipType.FREEHOLD,
+                actionUrl = null as String?,
+            )
+        } else {
+            val ownershipTypeStep = state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep
+            return SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.ownership.ownershipType",
+                ownershipTypeStep.formModel.ownershipType,
+                Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
+            )
+        }
     }
 
     private fun getLettingAgentDelegationSummaryContent(

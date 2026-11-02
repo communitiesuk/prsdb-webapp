@@ -21,6 +21,9 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setLongOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -796,17 +799,23 @@ class NftDataSeeder(
             gasSafetyFileUploadsStmt.setLong(2, gasSafetyUploadId)
             gasSafetyFileUploadsStmt.addBatch()
         }
-        if (complianceData.electricalSafetyExpiryDate?.after(createdDate) == true) {
-            val eicrUploadId = (++updatedFileUploadCount).toLong()
+        if (
+            NftDataFaker.isElectricalSafetyCertificateCurrent(
+                complianceData.electricalSafetyExpiryDate,
+                complianceData.electricalCertType,
+                createdDate,
+            )
+        ) {
+            val electricalSafetyUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
                 propertyOwnershipId,
                 createdDate,
                 complianceData.electricalCertType!!,
-                eicrUploadId,
+                electricalSafetyUploadId,
             )
             electricalSafetyFileUploadsStmt.setLong(1, complianceId)
-            electricalSafetyFileUploadsStmt.setLong(2, eicrUploadId)
+            electricalSafetyFileUploadsStmt.setLong(2, electricalSafetyUploadId)
             electricalSafetyFileUploadsStmt.addBatch()
         }
 
@@ -842,7 +851,7 @@ class NftDataSeeder(
         certificateType: CertificateType,
         fileUploadId: Long,
     ) {
-        val stepName = CertificateFilenameHelper.getUploadStepName(certificateType)
+        val stepName = getUploadStepName(certificateType)
         val fakeJourneyId = "seed-$propertyOwnershipId"
         val fakeMemberId = "member-$fileUploadId"
 
@@ -854,6 +863,13 @@ class NftDataSeeder(
         fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
     }
+
+    private fun getUploadStepName(certificateType: CertificateType): String =
+        when (certificateType) {
+            CertificateType.GasSafetyCert -> UploadGasCertStep.ROUTE_SEGMENT
+            CertificateType.Eic -> UploadEicStep.ROUTE_SEGMENT
+            CertificateType.Eicr -> UploadEicrStep.ROUTE_SEGMENT
+        }
 
     private fun log(message: String) {
         println("${LocalDateTime.now()} $message")

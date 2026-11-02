@@ -17,11 +17,6 @@ abstract class ComplianceViewModelFactoryBase(
     protected abstract val missingCertOccupiedValue: String
     protected abstract val occupiedNoCertInsetKey: String
 
-    protected abstract fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus
-
-    open fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
-        getCouncilWillSeeInsetKey(getStatus(propertyCompliance), propertyCompliance)
-
     protected fun getCouncilWillSeeInsetKey(
         status: ComplianceCertStatus,
         propertyCompliance: PropertyCompliance,

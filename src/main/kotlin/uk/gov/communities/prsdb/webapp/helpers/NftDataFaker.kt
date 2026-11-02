@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import net.datafaker.Faker
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
@@ -301,7 +301,9 @@ object NftDataFaker {
             when {
                 // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
                 randomDouble < 0.60 -> 0
+
                 randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+
                 else -> faker.random().nextInt(2, 4)
             }
 
@@ -508,7 +510,7 @@ object NftDataFaker {
         val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
             if (!gasCertificateSafetyMissing) {
-                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
+                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_MONTHS / 12.0 * 365 * 1.5).toLong())
             } else {
                 null
             }
@@ -600,7 +602,27 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.after(Date.valueOf(referenceDate().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))) == true
+        issueDate?.let {
+            !CertificateExpiryHelper.isGasIssueDateExpired(
+                it.toLocalDate(),
+                isGas14MonthExpiryEnabled = true,
+                currentDate = referenceDate(),
+            )
+        } == true
+
+    fun isElectricalSafetyCertificateCurrent(
+        expiryDate: Date?,
+        certType: CertificateType?,
+        asOf: Timestamp,
+    ): Boolean {
+        if (expiryDate == null) return false
+        val asOfDate = asOf.toLocalDateTime().toLocalDate()
+        return when (certType) {
+            CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            else -> throw IllegalArgumentException("Unexpected electrical certificate type: $certType")
+        }
+    }
 
     fun generateJourneyId(): String = faker.regexify("[a-z0-9]{7}")
 

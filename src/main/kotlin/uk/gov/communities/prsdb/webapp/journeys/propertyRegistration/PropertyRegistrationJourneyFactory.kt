@@ -5,8 +5,8 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
@@ -28,17 +28,17 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Comb
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -46,6 +46,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
@@ -89,9 +91,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTaskBeforeAssociatedParties
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
@@ -113,9 +117,9 @@ import java.security.Principal
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
-    private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentsStrategy: PaymentsPropertyRegistrationStrategy,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -126,8 +130,10 @@ class PropertyRegistrationJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
+        // TODO PDJB-2016: remove this check and passing the arg in
+        val associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state)
+            mainJourneyMap(state, associatedPartiesEnabled)
         } else {
             checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
@@ -143,20 +149,12 @@ class PropertyRegistrationJourneyFactory(
 
             when (checkingAnswersFor) {
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        whoProvidesChangeCyaJourney()
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
-                    }
+                    whoProvidesChangeCyaJourney()
                 }
 
                 LettingAgentEmailStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask) {
-                            checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
-                        }
-                    } else {
-                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    fromTask(journey.whoProvidesDetailsTask) {
+                        checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                     }
                 }
 
@@ -187,7 +185,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OwnershipTypeStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.ownershipAndLandlordsTask) {
+                    fromTask(journey.ownershipAndLandlordsTaskBeforeAssociatedParties) {
                         checkAnswerStep(task.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
                     }
                 }
@@ -219,12 +217,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-                    if (isDelegateEnabled) {
-                        occupancyChangeCyaJourney()
-                    } else {
-                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
-                    }
+                    occupancyChangeCyaJourney()
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
@@ -270,20 +263,18 @@ class PropertyRegistrationJourneyFactory(
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.ownershipAndLandlordsTask.jointLandlordsTask, { journey })
-                    configureStep(journey.ownershipAndLandlordsTask.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep) {
+                    val jointLandlordsTask = journey.getJointLandlordsTask(featureFlagManager)
+                    checkAnswerTask(jointLandlordsTask, { journey })
+                    configureStep(jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
-                BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT,
-                BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT,
+                HasGasSupplyStep.ROUTE_SEGMENT,
+                HasGasCertStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
-                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.beforePdjb1022HasGasCertStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
                     configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
@@ -298,17 +289,28 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
-                CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
+                CheckEicUploadsStep.ROUTE_SEGMENT,
+                CheckEicrUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
-                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicrExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -369,7 +371,10 @@ class PropertyRegistrationJourneyFactory(
             }
         }
 
-    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+    private fun mainJourneyMap(
+        state: PropertyRegistrationJourneyState,
+        associatedPartiesEnabled: Boolean,
+    ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
@@ -399,91 +404,99 @@ class PropertyRegistrationJourneyFactory(
                 initialStep()
                 noNextDestination()
             }
+            // TODO PDJB-2016: remove the flag check and the task before associated parties once ASSOCIATED_PARTIES is released
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.propertyDetails", shouldUseNumbering = false)
                 task(journey.propertyDetailsTask) {
                     parents { journey.taskListStep.always() }
-                    nextStep { journey.ownershipAndLandlordsTask.firstStep }
+                    nextStep {
+                        if (associatedPartiesEnabled) {
+                            journey.ownershipAndLandlordsTask.firstStep
+                        } else {
+                            journey.ownershipAndLandlordsTaskBeforeAssociatedParties.firstStep
+                        }
+                    }
                     saveProgress()
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
-                task(journey.ownershipAndLandlordsTask) {
-                    withDependencies { journey }
-                    parents { journey.propertyDetailsTask.isComplete() }
-                    nextStep { journey.correspondenceTask.firstStep }
-                    saveProgress()
+                if (associatedPartiesEnabled) {
+                    task(journey.ownershipAndLandlordsTask) {
+                        withDependencies { journey }
+                        parents { journey.propertyDetailsTask.isComplete() }
+                        nextStep { journey.correspondenceTask.firstStep }
+                        saveProgress()
+                    }
+                } else {
+                    task(journey.ownershipAndLandlordsTaskBeforeAssociatedParties) {
+                        withDependencies { journey }
+                        parents { journey.propertyDetailsTask.isComplete() }
+                        nextStep { journey.correspondenceTask.firstStep }
+                        saveProgress()
+                    }
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
                 task(journey.correspondenceTask) {
                     withDependencies { journey }
-                    parents { journey.ownershipAndLandlordsTask.isComplete() }
+                    parents {
+                        if (associatedPartiesEnabled) {
+                            journey.ownershipAndLandlordsTask.isComplete()
+                        } else {
+                            journey.ownershipAndLandlordsTaskBeforeAssociatedParties.isComplete()
+                        }
+                    }
                     nextStep { journey.occupied }
                     saveProgress()
                 }
             }
-            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
                     parents { journey.correspondenceTask.isComplete() }
                     nextStep { occupancy ->
-                        if (delegateEnabled) {
-                            when (occupancy) {
-                                YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
-                                YesOrNo.NO -> journey.licensingTask.firstStep
-                            }
-                        } else {
-                            journey.licensingTask.firstStep
+                        when (occupancy) {
+                            YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
+                            YesOrNo.NO -> journey.licensingTask.firstStep
                         }
                     }
                     saveProgress()
                 }
             }
-            if (delegateEnabled) {
-                task(journey.whoProvidesDetailsTask) {
-                    withDependencies { journey }
-                    parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                    nextStep {
-                        if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
-                            WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
-                        ) {
-                            journey.cyaStep
-                        } else {
-                            journey.licensingTask.firstStep
-                        }
+            task(journey.whoProvidesDetailsTask) {
+                withDependencies { journey }
+                parents { journey.occupied.hasOutcome(YesOrNo.YES) }
+                nextStep {
+                    if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
+                        WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+                    ) {
+                        journey.cyaStep
+                    } else {
+                        journey.licensingTask.firstStep
                     }
-                    saveProgress()
                 }
+                saveProgress()
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {
-                        if (delegateEnabled) {
-                            OrParents(
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                                AndParents(
-                                    journey.whoProvidesDetailsTask.isComplete(),
-                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
-                                        WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES,
-                                    ),
+                        OrParents(
+                            journey.occupied.hasOutcome(YesOrNo.NO),
+                            AndParents(
+                                journey.whoProvidesDetailsTask.isComplete(),
+                                journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                    WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES,
                                 ),
-                            )
-                        } else {
-                            OrParents(
-                                journey.occupied.hasOutcome(YesOrNo.YES),
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                            )
-                        }
+                            ),
+                        )
                     }
                     backStep {
-                        if (delegateEnabled && journey.occupied.outcome == YesOrNo.YES) {
+                        if (journey.occupied.outcome == YesOrNo.YES) {
                             journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep
                         } else {
                             journey.occupied
@@ -511,8 +524,11 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep }
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
                 }
             }
             section {
@@ -551,27 +567,21 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
-                        val landlordProvidesPath =
+                        OrParents(
                             AndParents(
                                 journey.epcTask.isComplete(),
                                 OrParents(
                                     journey.tenancyDetailsTask.isComplete(),
                                     journey.occupied.hasOutcome(YesOrNo.NO),
                                 ),
-                            )
-                        if (delegateEnabled) {
-                            OrParents(
-                                landlordProvidesPath,
-                                AndParents(
-                                    journey.whoProvidesDetailsTask.isComplete(),
-                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
-                                        WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES,
-                                    ),
+                            ),
+                            AndParents(
+                                journey.whoProvidesDetailsTask.isComplete(),
+                                journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                    WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES,
                                 ),
-                            )
-                        } else {
-                            landlordProvidesPath
-                        }
+                            ),
+                        )
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
@@ -688,6 +698,7 @@ class PropertyRegistrationJourney(
     // ===== Journey-structure tasks (grouping tasks for the task-list structure) =====
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
+    override val ownershipAndLandlordsTaskBeforeAssociatedParties: OwnershipAndLandlordsTaskBeforeAssociatedParties,
     override val correspondenceTask: CorrespondenceTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
@@ -820,6 +831,9 @@ interface PropertyRegistrationJourneyState :
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
 
+    // TODO PDJB-955: remove once ASSOCIATED_PARTIES is released
+    val ownershipAndLandlordsTaskBeforeAssociatedParties: OwnershipAndLandlordsTaskBeforeAssociatedParties
+
     val correspondenceTask: CorrespondenceTask
     val tenancyDetailsTask: TenancyDetailsTask
     val whoProvidesDetailsTask: WhoProvidesDetailsTask
@@ -828,6 +842,10 @@ interface PropertyRegistrationJourneyState :
     override val electricalSafetyTask: ElectricalSafetyTask
     override val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+
+    val answersChangedSinceConfirmation: Boolean
+        get() = cyaStep.formModelOrNull?.submittedFilteredJourneyData.orEmpty() != answersLastChanged?.toString().orEmpty()
+
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep
@@ -847,9 +865,14 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1617: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
-    //  once the feature flag is removed and the letting agent journey is fully implemented
-    fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
-        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-            whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+    fun isDelegatedToLettingAgent(): Boolean =
+        whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+
+    // TODO PDJB-955: replace with ownershipAndLandlordsTask.jointLandlordsTask once ASSOCIATED_PARTIES is released
+    fun getJointLandlordsTask(featureFlagManager: FeatureFlagManager): JointLandlordsPropertyRegistrationTask =
+        if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+            ownershipAndLandlordsTask.jointLandlordsTask
+        } else {
+            ownershipAndLandlordsTaskBeforeAssociatedParties.jointLandlordsTask
+        }
 }
