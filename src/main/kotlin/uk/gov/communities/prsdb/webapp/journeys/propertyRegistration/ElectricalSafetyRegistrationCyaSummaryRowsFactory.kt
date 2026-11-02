@@ -40,7 +40,13 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         val downloadMessageKey = getDownloadMessageKey(certType)
         val isEic = state.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC
         val uploadMap = if (isEic) state.eicUploadMap else state.eicrUploadMap
-        val expiryDateStep = if (isEic) state.eicExpiryDateStep else state.eicrExpiryDateStep
+        // TODO PDJB-1679: Always use the EIC issue date step for EICs when the EIC_ISSUE_DATE flag is removed
+        val dateStep =
+            when {
+                !isEic -> state.eicrExpiryDateStep
+                state.isEicIssueDateEnabled -> state.eicIssueDateStep
+                else -> state.eicExpiryDateStep
+            }
         val checkUploadsStep = if (isEic) state.checkEicUploadsStep else state.checkEicrUploadsStep
         val uploadedFiles =
             uploadMap
@@ -58,8 +64,10 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
+                // TODO PDJB-1669: Show the EIC issue date for EICs. With EIC_ISSUE_DATE enabled this value is blank for EICs,
+                //  because it reads the EIC expiry date step, which can't be reached when the flag is on
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
-                destination = destinationProvider(expiryDateStep),
+                destination = destinationProvider(dateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",

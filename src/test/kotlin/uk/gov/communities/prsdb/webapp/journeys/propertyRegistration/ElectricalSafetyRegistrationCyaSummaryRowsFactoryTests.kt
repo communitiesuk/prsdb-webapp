@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -35,6 +36,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
     private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
     private val mockEicExpiryDateStep: EicExpiryDateStep = mock()
+    private val mockEicIssueDateStep: EicIssueDateStep = mock()
     private val mockCheckEicUploadsStep: CheckEicUploadsStep = mock()
     private val mockEicrExpiryDateStep: EicrExpiryDateStep = mock()
     private val mockCheckEicrUploadsStep: CheckEicrUploadsStep = mock()
@@ -110,6 +112,29 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             )
 
             assertNull(factory.getInsetTextKey())
+        }
+
+        @Test
+        fun `factory links the EIC date row to the EIC issue date step when the EIC issue date flag is enabled`() {
+            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
+            whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
+            whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
+            whenever(mockState.isEicIssueDateEnabled).thenReturn(true)
+            whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
+            whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
+            whenever(mockState.eicUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
+
+            val requestedSteps = mutableListOf<JourneyStep.RequestableStep<*, *, *>>()
+            val factory =
+                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService) {
+                    requestedSteps.add(it)
+                    Destination.Nowhere()
+                }
+
+            factory.createRows()
+            assertEquals(listOf(mockHasElectricalCertStep, mockEicIssueDateStep, mockCheckEicUploadsStep), requestedSteps)
         }
 
         @Test
