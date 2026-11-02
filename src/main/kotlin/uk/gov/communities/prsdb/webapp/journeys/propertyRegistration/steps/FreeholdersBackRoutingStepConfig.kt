@@ -15,7 +15,7 @@ class FreeholdersBackRoutingStepConfig : AbstractRequestableStepConfig<Complete,
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
             "todoComment" to
-                "TODO (PDJB-1969): internal step routing back to the freeholders intro when the last freeholder is removed to be added",
+                "TODO (PDJB-1969): internal step routing back to the freeholders intro when the last freeholder is removed",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"

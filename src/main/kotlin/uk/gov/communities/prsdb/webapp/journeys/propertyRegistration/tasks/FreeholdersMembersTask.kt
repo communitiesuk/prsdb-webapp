@@ -59,6 +59,7 @@ class FreeholdersMembersTask(
         subJourney(state) {
             step(journey.hasAnyFreeholdersStep) {
                 routeSegment(HasAnyFreeholdersStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
@@ -68,6 +69,7 @@ class FreeholdersMembersTask(
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
+            // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
             step(journey.confirmRemoveFreeholderStep) {
                 routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
@@ -83,6 +85,7 @@ class FreeholdersMembersTask(
             }
             step(journey.freeholderProvideDetailsStep) {
                 routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -115,6 +118,7 @@ class FreeholdersMembersTask(
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
+            // TODO: PDJB-1967: Update this wiring to match OrgGovBodyMembersTask
             task(journey.freeholderAddressTask) {
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }
