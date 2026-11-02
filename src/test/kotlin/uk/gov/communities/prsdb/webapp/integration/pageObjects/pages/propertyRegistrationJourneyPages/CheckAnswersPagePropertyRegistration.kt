@@ -140,7 +140,6 @@ class CheckAnswersPagePropertyRegistration(
         val gasCertUploadRow = getRow("Your certificate")
         val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
         val electricalCertExpiryDateRow = getRow("Expiry date")
-        val electricalCertIssueDateRow = getRow("Issue date")
         val electricalCertUploadRow = getRow("Your certificate")
         val hasEpcRow = getRow("Do you have an EPC for this property?")
         val epcTenancyCheckRow = getRow("Was the EPC still in date when the current tenancy began?")

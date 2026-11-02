@@ -138,10 +138,13 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
-        // Change the certificate date from the check answers page, then check the back link returns there
-        certDateRow(checkAnswersPage, certificateType).clickFirstActionLinkAndWait()
-        assertCertDatePage(page, certificateType).backLink.clickAndWait()
-        checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        // TODO PDJB-1669: Check the EIC date change link once the check answers date row links to the EIC issue date step
+        if (certificateType == CertificateType.Eicr) {
+            // Change the expiry date from the check answers page, then check the back link returns there
+            checkAnswersPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            assertCertDatePage(page, certificateType).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        }
 
         // Change the certificate from the check answers page, then check the back link returns there
         checkAnswersPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
@@ -170,14 +173,6 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
             CertificateType.Eic -> currentDate.minus(DatePeriod(years = 6))
             else -> currentDate.minus(DatePeriod(days = 5))
         }
-
-    private fun certDateRow(
-        checkAnswersPage: CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety,
-        certificateType: CertificateType,
-    ) = when (certificateType) {
-        CertificateType.Eic -> checkAnswersPage.summaryList.issueDateRow
-        else -> checkAnswersPage.summaryList.expiryDateRow
-    }
 
     private fun assertCertDatePage(
         page: Page,

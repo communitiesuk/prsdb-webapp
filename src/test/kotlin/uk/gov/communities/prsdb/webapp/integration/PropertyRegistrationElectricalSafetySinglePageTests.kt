@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicFormPagePropertyRegistration
@@ -89,18 +88,12 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
 
+        // TODO PDJB-1669: Add an EIC case once the check answers date row links to the EIC issue date step
         @Test
         fun `Cert uploaded - EICR expiry date change link navigates to expiry date page`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eicr))
             cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
             assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `Cert uploaded - EIC issue date change link navigates to issue date page`(page: Page) {
-            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eic))
-            cyaPage.summaryList.issueDateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
         }
 
         @ParameterizedTest(name = "{0}")
