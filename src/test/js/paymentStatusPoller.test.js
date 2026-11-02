@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { afterEach, beforeEach, describe, test } from 'node:test';
+import { afterEach, beforeEach, describe, mock, test } from 'node:test';
 import jsdom from 'global-jsdom';
 import {
     createPaymentStatusPoller,
@@ -20,11 +20,9 @@ const POLLER_HTML = `
 
 describe('Payment status poller', () => {
     let cleanup;
-    let originalFormData;
     let originalFetch;
     let jsContent;
     let noJsContent;
-    let form;
     let fetchCalls;
     let navigatedTo;
     let scheduled;
@@ -35,7 +33,7 @@ describe('Payment status poller', () => {
     const isShowingNoJavaScriptContent = () => jsContent.hidden && !noJsContent.classList.contains('moj-js-hidden');
 
     const createPoller = (respond = stillProcessing) =>
-        createPaymentStatusPoller({ jsContent, noJsContent, form }, {
+        createPaymentStatusPoller({ jsContent, noJsContent }, {
             fetchFn: async (url, options) => {
                 fetchCalls.push({ url, options });
                 return respond();
@@ -44,23 +42,24 @@ describe('Payment status poller', () => {
             schedule: (callback, delayMs) => scheduled.push({ callback, delayMs }),
         });
 
+    const startAndRunFirstCheck = async (respond) => {
+        createPoller(respond).start();
+        await scheduled[0].callback();
+    };
+
     beforeEach(() => {
         cleanup = jsdom(`<!DOCTYPE html><html><body>${POLLER_HTML}</body></html>`, { url: PAGE_URL });
-        // global-jsdom does not replace Node's own FormData, which cannot read jsdom forms
-        originalFormData = globalThis.FormData;
-        globalThis.FormData = window.FormData;
         originalFetch = globalThis.fetch;
 
         jsContent = document.getElementById('payment-status-js-content');
         noJsContent = document.getElementById('payment-status-no-js-content');
-        form = noJsContent.querySelector('form');
         fetchCalls = [];
         navigatedTo = [];
         scheduled = [];
     });
 
     afterEach(() => {
-        globalThis.FormData = originalFormData;
+        mock.timers.reset();
         globalThis.fetch = originalFetch;
         cleanup();
     });
@@ -77,64 +76,79 @@ describe('Payment status poller', () => {
         assert.strictEqual(fetchCalls.length, 0);
     });
 
-    test('initialising shows the JavaScript content and checks the payment status straight away', async () => {
+    test('initialising shows the JavaScript content and checks the payment status after the poll interval', async () => {
+        mock.timers.enable({ apis: ['setTimeout'] });
         globalThis.fetch = (url) => {
             fetchCalls.push({ url });
             return new Promise(() => {});
         };
 
         initPaymentStatusPoller();
+        mock.timers.tick(POLL_INTERVAL_MS - 1);
         await new Promise((resolve) => setImmediate(resolve));
 
         assert.ok(isShowingJavaScriptContent());
+        assert.strictEqual(fetchCalls.length, 0);
+
+        mock.timers.tick(1);
+        await new Promise((resolve) => setImmediate(resolve));
+
         assert.strictEqual(fetchCalls.length, 1);
     });
 
-    test('checking posts the form, including its CSRF token, URL-encoded as multipart posts are handled as file uploads', async () => {
-        await createPoller().start();
+    test('starting waits for the poll interval before the first check, as loading the page checked the payment status', () => {
+        createPoller().start();
+
+        assert.strictEqual(fetchCalls.length, 0);
+        assert.strictEqual(scheduled.length, 1);
+        assert.strictEqual(scheduled[0].delayMs, POLL_INTERVAL_MS);
+    });
+
+    test('checking loads the current page without using a cached response', async () => {
+        await startAndRunFirstCheck();
 
         assert.strictEqual(fetchCalls[0].url, PAGE_URL);
-        assert.strictEqual(fetchCalls[0].options.method, 'POST');
-        assert.ok(fetchCalls[0].options.body instanceof URLSearchParams);
-        assert.strictEqual(fetchCalls[0].options.body.get('_csrf'), 'csrf-token');
+        assert.strictEqual(fetchCalls[0].options.method, undefined);
+        assert.strictEqual(fetchCalls[0].options.cache, 'no-store');
     });
 
     test('redirects to the outcome page when the check ends on a different page', async () => {
-        await createPoller(() => ({ ok: true, url: OUTCOME_URL })).start();
+        await startAndRunFirstCheck(() => ({ ok: true, url: OUTCOME_URL }));
 
         assert.deepStrictEqual(navigatedTo, [OUTCOME_URL]);
     });
 
     test('schedules another check when the payment is still processing', async () => {
-        await createPoller().start();
+        await startAndRunFirstCheck();
 
-        assert.strictEqual(scheduled.length, 1);
-        assert.strictEqual(scheduled[0].delayMs, POLL_INTERVAL_MS);
+        assert.strictEqual(scheduled.length, 2);
+        assert.strictEqual(scheduled[1].delayMs, POLL_INTERVAL_MS);
     });
 
     test('shows the no-JavaScript content and stops checking after the maximum number of attempts', async () => {
-        await createPoller().start();
-        for (let attempt = 1; attempt < MAX_ATTEMPTS; attempt++) {
+        createPoller().start();
+        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             await scheduled.at(-1).callback();
         }
 
-        assert.strictEqual(scheduled.length, MAX_ATTEMPTS - 1);
+        assert.strictEqual(fetchCalls.length, MAX_ATTEMPTS);
+        assert.strictEqual(scheduled.length, MAX_ATTEMPTS);
         assert.ok(isShowingNoJavaScriptContent());
     });
 
     test('shows the no-JavaScript content and stops checking when the check returns an error', async () => {
-        await createPoller(() => ({ ok: false, url: STILL_PROCESSING_URL })).start();
+        await startAndRunFirstCheck(() => ({ ok: false, url: STILL_PROCESSING_URL }));
 
         assert.ok(isShowingNoJavaScriptContent());
-        assert.strictEqual(scheduled.length, 0);
+        assert.strictEqual(scheduled.length, 1);
     });
 
     test('shows the no-JavaScript content and stops checking when the check fails', async () => {
-        await createPoller(() => {
+        await startAndRunFirstCheck(() => {
             throw new TypeError('Failed to fetch');
-        }).start();
+        });
 
         assert.ok(isShowingNoJavaScriptContent());
-        assert.strictEqual(scheduled.length, 0);
+        assert.strictEqual(scheduled.length, 1);
     });
 });

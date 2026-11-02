@@ -22,7 +22,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -62,7 +62,7 @@ class LandlordUpdateElectricalSafetyControllerTests(
     private val validFileUploadUrl =
         LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
-            "/${UploadElectricalCertStep.ROUTE_SEGMENT}?journeyId=$journeyId"
+            "/${UploadEicrStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
 
@@ -79,7 +79,7 @@ class LandlordUpdateElectricalSafetyControllerTests(
         fun setUp() {
             val returnUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
             whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), eq(returnUrl)))
-                .thenReturn(mapOf(UploadElectricalCertStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+                .thenReturn(mapOf(UploadEicrStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         }
 
         @Test

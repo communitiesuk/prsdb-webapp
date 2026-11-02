@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -34,6 +36,12 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
 
     @Nested
     inner class OwnershipTypeStep {
+        // TODO PDJB-955: remove this nested class once ASSOCIATED_PARTIES is released
+        @BeforeEach
+        fun disableAssociatedPartiesFlag() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `Submitting with no ownershipType selected returns an error`() {
             val ownershipTypePage = navigator.skipToPropertyRegistrationOwnershipTypePage()
@@ -89,6 +97,8 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withBedrooms()
                         .withOwnershipType()
                         .withHasNoJointLandlords()
+                        .withOwnershipStructure()
+                        .withNoPropertyManager()
                         .withOccupancyStatus(true)
                         .withLandlordProvidesRentalDetails(),
                 )
@@ -114,6 +124,8 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withBedrooms()
                         .withOwnershipType()
                         .withHasNoJointLandlords()
+                        .withOwnershipStructure()
+                        .withNoPropertyManager()
                         .withOccupancyStatus(false),
                 )
             taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")

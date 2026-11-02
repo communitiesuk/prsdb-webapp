@@ -10,10 +10,10 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 @Entity
@@ -37,6 +37,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
+    // For EIC records, access dates through PropertyComplianceService/EicDateService;
+    // direct access bypasses the feature-flagged storage logic.
     var electricalSafetyExpiryDate: LocalDate? = null
 
     var electricalCertType: CertificateType? = null
@@ -65,23 +67,19 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val hasEpcExemption: Boolean
         get() = epcExemptionReason != null
 
-    val gasSafetyCertExpiryDate: LocalDate?
-        get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again (gasSafetyCertExpiryDate)
+    fun getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled: Boolean): LocalDate? =
+        gasSafetyCertIssueDate?.let { CertificateExpiryHelper.getGasExpiryDate(it, isGas14MonthExpiryEnabled) }
 
-    val isGasSafetyCertExpired: Boolean?
-        get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again
+    fun isGasSafetyCertExpired(isGas14MonthExpiryEnabled: Boolean): Boolean? =
+        gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it, isGas14MonthExpiryEnabled) }
 
     val isGasSafetyCertMissing: Boolean
         get() = gasSafetyCertIssueDate == null && hasGasSupply == true
 
-    val isElectricalSafetyExpired: Boolean?
-        get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
-
-    val isElectricalSafetyMissing: Boolean
-        get() = electricalSafetyExpiryDate == null
-
     val isEpcExpired: Boolean?
-        get() = epcExpiryDate?.isBefore(LocalDate.now())
+        get() = epcExpiryDate?.let { CertificateExpiryHelper.isEpcExpiryDateExpired(it) }
 
     val isEpcRatingLow: Boolean?
         get() {
@@ -124,6 +122,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         hasGasSupply: Boolean? = null,
         gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -139,6 +138,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.hasGasSupply = hasGasSupply
         this.gasSafetyFileUploads = gasSafetyFileUploads
         this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        this.electricalCertType = electricalCertType
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
         this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry

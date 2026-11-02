@@ -4,7 +4,9 @@ import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
+import org.mockito.kotlin.mock
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -12,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.services.BeforePdjb1666EicDateService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import java.time.Instant
 import java.time.LocalDate
 
@@ -24,6 +29,7 @@ class MockPropertyComplianceData {
             gasSafetyCertIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             hasGasSupply: Boolean = true,
             electricalSafetyExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
+            electricalCertType: CertificateType? = CertificateType.Eicr,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -36,6 +42,7 @@ class MockPropertyComplianceData {
             hasGasSupply = hasGasSupply,
             gasSafetyFileUploads = gasSafetyFileUploads.toMutableList(),
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            electricalCertType = electricalCertType,
             epcUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
             tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
@@ -58,5 +65,26 @@ class MockPropertyComplianceData {
         val defaultElectricalSafetyExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR).toJavaLocalDate()
         val defaultEpcExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(5, DAY).toJavaLocalDate()
         val defaultGoodEpcEnergyRating = "C"
+
+        // Derives dates and statuses through the real service so tests do not duplicate the production rules.
+        val statusDerivingService: PropertyComplianceService by lazy {
+            PropertyComplianceService(
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                mock(),
+                BeforePdjb1666EicDateService(),
+                MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
+            )
+        }
+
+        fun createComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+            statusDerivingService.getComplianceStatus(propertyCompliance)
     }
 }

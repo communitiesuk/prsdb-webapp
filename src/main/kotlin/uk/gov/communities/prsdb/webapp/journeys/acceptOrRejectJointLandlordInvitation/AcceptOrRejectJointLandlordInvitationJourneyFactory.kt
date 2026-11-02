@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -27,6 +28,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
 class AcceptOrRejectJointLandlordInvitationJourneyFactory(
@@ -70,10 +73,22 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.checkUserRoleStep) {
                 routeSegment(CheckUserRoleStep.ROUTE_SEGMENT)
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
-                nextStep { mode ->
+                nextDestination { mode ->
                     when (mode) {
-                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> journey.landlordRegistrationTask.firstStep
-                        UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> journey.confirmYouAreALandlordForThisPropertyStep
+                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> Destination(journey.landlordRegistrationTask.firstStep)
+
+                        UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> {
+                            Destination(journey.confirmYouAreALandlordForThisPropertyStep)
+                        }
+
+                        UserRoleStatus.USER_IS_ALREADY_LANDLORD_ON_PROPERTY -> {
+                            val propertyOwnershipId =
+                                journey.propertyOwnershipIdUserIsAlreadyLandlordOn
+                                    ?: throw NotNullFormModelValueIsNullException(
+                                        "propertyOwnershipIdUserIsAlreadyLandlordOn is null when user is already landlord on property",
+                                    )
+                            Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+                        }
                     }
                 }
             }
@@ -145,6 +160,8 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
+    private val invitationService: JointLandlordInvitationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     AcceptOrRejectJointLandlordInvitationJourneyState {
@@ -154,12 +171,26 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
+    override var propertyOwnershipIdUserIsAlreadyLandlordOn: Long? by delegateProvider.nullableDelegate(
+        "propertyOwnershipIdUserIsAlreadyLandlordOn",
+    )
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(
         "userCompletedLandlordRegistrationThisJourney",
     )
     override var registeredLandlordRegistrationNumber: String? by delegateProvider.nullableDelegate(
         "registeredLandlordRegistrationNumber",
     )
+
+    override fun getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt(): Long? {
+        val token = invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)
+        if (!invitationService.getTokenIsValid(token)) return null
+
+        val propertyOwnershipId = invitationService.getInvitationFromToken(token).registeredOwnership.id
+        return propertyOwnershipId.takeIf { propertyOwnershipService.isCurrentUserLandlord(it) }
+    }
+
+    override fun isCurrentUserLandlordOnInvitedPropertyOwnership(): Boolean =
+        getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt() != null
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
@@ -184,6 +215,11 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState {
 
     var tokenIsValid: Boolean?
     var userIsLandlord: Boolean?
+    var propertyOwnershipIdUserIsAlreadyLandlordOn: Long?
     var userCompletedLandlordRegistrationThisJourney: Boolean?
     var registeredLandlordRegistrationNumber: String?
+
+    fun getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt(): Long?
+
+    fun isCurrentUserLandlordOnInvitedPropertyOwnership(): Boolean
 }
