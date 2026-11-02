@@ -120,40 +120,40 @@ features:
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "subject-identifier-page"
       enabled: true
-      expiry-date: "2027-03-30"
+      expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-two"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-three"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1009-payments"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: true
-      expiry-date: "2026-11-01"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-955-associated-parties"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1666-eic-issue-date"
       enabled: true
-      expiry-date: "2026-11-30"
+      expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
       enabled: false
-      expiry-date: "2027-03-31"
+      expiry-date: "2027-01-01"
 
 ---
 
