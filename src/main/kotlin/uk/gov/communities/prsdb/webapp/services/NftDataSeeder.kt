@@ -239,6 +239,7 @@ class NftDataSeeder(
 
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
+        val freeholderStmt = nftDataSeederDao.prepareFreeholderStatement()
         val ownershipPaymentStmt = nftDataSeederDao.prepareOwnedPropertyPaymentStatement()
         val landlordMembershipStmt = nftDataSeederDao.prepareLandlordshipMembersStatement()
         val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
@@ -311,6 +312,7 @@ class NftDataSeeder(
                             addPropertyOwnershipToBatch(
                                 registrationNumberStmt,
                                 propertyOwnershipStmt,
+                                freeholderStmt,
                                 ownershipPaymentStmt,
                                 landlordMembershipStmt,
                                 licenceStmt,
@@ -352,6 +354,7 @@ class NftDataSeeder(
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
+                            freeholderStmt.executeBatch()
                             ownershipPaymentStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
@@ -380,6 +383,7 @@ class NftDataSeeder(
             registrationNumberStmt.executeBatch()
             licenceStmt.executeBatch()
             propertyOwnershipStmt.executeBatch()
+            freeholderStmt.executeBatch()
             ownershipPaymentStmt.executeBatch()
             landlordMembershipStmt.executeBatch()
             fileUploadStmt.executeBatch()
@@ -402,6 +406,7 @@ class NftDataSeeder(
 
             licenceStmt.close()
             propertyOwnershipStmt.close()
+            freeholderStmt.close()
             ownershipPaymentStmt.close()
             landlordMembershipStmt.close()
             fileUploadStmt.close()
@@ -650,6 +655,7 @@ class NftDataSeeder(
     private fun addPropertyOwnershipToBatch(
         registrationNumberStmt: PreparedStatement,
         propertyOwnershipStmt: PreparedStatement,
+        freeholderStmt: PreparedStatement,
         paymentStmt: PreparedStatement,
         membershipStmt: PreparedStatement,
         licenceStmt: PreparedStatement,
@@ -696,7 +702,8 @@ class NftDataSeeder(
         // Drawn here rather than at its point of use below, because it consumes the shared faker stream: moving it
         // would reorder the draws in between and change every subsequent seeded value.
         val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
-        propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
+        val ownershipType = NftDataFaker.generateOwnershipType()
+        propertyOwnershipStmt.setInt(4, ownershipType.ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
         propertyOwnershipStmt.setLong(7, registrationNumberId)
@@ -720,6 +727,15 @@ class NftDataSeeder(
         propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.setInt(24, ownershipTypeBeforePdjb955.ordinal)
         propertyOwnershipStmt.addBatch()
+
+        // A "no details known" placeholder, so that seeded properties satisfy the same invariant as
+        // registered ones. Deliberately draws nothing: a name, email or address would consume the
+        // shared faker stream and change every subsequent seeded value.
+        if (ownershipType.impliesAnotherFreeholder()) {
+            freeholderStmt.setTimestamp(1, createdDate)
+            freeholderStmt.setLong(2, propertyOwnershipId)
+            freeholderStmt.addBatch()
+        }
 
         paymentStmt.setString(1, NftDataFaker.generatePaymentId())
         paymentStmt.setTimestamp(2, createdDate)

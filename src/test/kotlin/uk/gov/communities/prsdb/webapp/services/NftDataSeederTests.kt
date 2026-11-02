@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -262,6 +263,29 @@ class NftDataSeederTests(
         }
         assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.EDITOR.ordinal)) {
             "Expected at least one organisational landlord invitation to have the EDITOR role"
+        }
+    }
+
+    @Test
+    fun `seedDatabase gives every property that implies another freeholder a placeholder freeholder`() {
+        newSeeder().seedDatabase()
+
+        val propertiesWithoutAFreeholder =
+            jdbcTemplate.queryForList<Long>(
+                "SELECT po.id FROM property_ownership po " +
+                    "WHERE po.ownership_type IN (${
+                        OwnershipType.entries.filter { it.impliesAnotherFreeholder() }.joinToString(", ") { it.ordinal.toString() }
+                    }) AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id)",
+            )
+
+        assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
+
+        // The placeholders record "no details known", and must stay that way: generating a name,
+        // email or address would consume the shared faker stream and shift every later seeded value
+        val placeholders = jdbcTemplate.queryForList("SELECT name, email, address_id FROM freeholder")
+        assertTrue(placeholders.isNotEmpty(), "Expected placeholder freeholders to be seeded")
+        assertTrue(placeholders.all { it["name"] == null && it["email"] == null && it["address_id"] == null }) {
+            "Expected every seeded freeholder to have no name, email or address"
         }
     }
 

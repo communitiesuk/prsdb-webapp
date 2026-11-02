@@ -163,6 +163,16 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
+    fun prepareFreeholderStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO freeholder 
+            (created_date, property_ownership_id) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
     fun prepareOwnedPropertyPaymentStatement(): PreparedStatement {
         val query =
             """
