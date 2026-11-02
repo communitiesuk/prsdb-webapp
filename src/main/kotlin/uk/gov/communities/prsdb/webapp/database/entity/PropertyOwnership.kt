@@ -85,6 +85,12 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
+    // this is a separate property to whether the property currently has any superior landlords.
+    // landlords are asked separately whether there are more people in the ownership chain, so an
+    // empty superiorLandlords is ambiguous on its own: it could mean the landlord answered no, or
+    // that we never asked. null means never asked, which is every registration before PDJB-1957.
+    var hasSuperiorLandlords: Boolean? = null
+
     @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
     var propertyManager: PropertyManager? = null
@@ -170,6 +176,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        hasSuperiorLandlords: Boolean? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
@@ -197,6 +204,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.markedJointLandlord = markedJointLandlord
         this.licenseProvideLater = licenseProvideLater
         this.tenancyProvideLater = tenancyProvideLater
+        this.hasSuperiorLandlords = hasSuperiorLandlords
     }
 
     val licenseType: LicensingType

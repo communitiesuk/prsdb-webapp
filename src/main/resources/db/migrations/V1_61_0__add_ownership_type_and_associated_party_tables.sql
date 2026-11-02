@@ -65,6 +65,13 @@ CREATE TABLE superior_landlord (
 CREATE INDEX idx_superior_landlord_property_ownership
     ON superior_landlord (property_ownership_id);
 
+-- Landlords are asked separately whether there are more people in the ownership chain, so an
+-- absence of superior_landlord rows is ambiguous on its own: it could mean the landlord answered
+-- no, or that we never asked. This records the answer, as marked_joint_landlord does for joint
+-- landlords. It is nullable and left NULL for existing registrations, which were never asked.
+-- Populated from PDJB-1957 onwards.
+ALTER TABLE property_ownership ADD COLUMN has_superior_landlords BOOLEAN;
+
 -- Every property whose ownership type implies a freeholder other than the landlord must have at
 -- least one freeholder row, and a landlord cannot later edit a property to have none. Existing
 -- registrations were never asked the question, so give each one a "no details known" placeholder
