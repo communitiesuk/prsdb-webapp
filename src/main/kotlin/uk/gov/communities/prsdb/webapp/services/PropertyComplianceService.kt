@@ -154,6 +154,7 @@ class PropertyComplianceService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
+        eicIssueDate: LocalDate? = null,
     ) {
         val propertyOwnership =
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
@@ -172,6 +173,7 @@ class PropertyComplianceService(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                    eicIssueDate = eicIssueDate,
                     electricalCertType = electricalCertType,
                     electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 )
@@ -217,6 +219,7 @@ class PropertyComplianceService(
         record: PropertyCompliance,
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
+        eicIssueDate: LocalDate?,
         electricalCertType: CertificateType?,
         electricalSafetyCertProvideLater: Boolean? = null,
     ) {
@@ -225,17 +228,19 @@ class PropertyComplianceService(
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
         record.electricalCertType = electricalCertType
-        setElectricalSafetyExpiryDate(record, electricalSafetyExpiryDate, electricalCertType)
+        setElectricalSafetyDate(record, electricalSafetyExpiryDate, eicIssueDate, electricalCertType)
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }
 
-    private fun setElectricalSafetyExpiryDate(
+    private fun setElectricalSafetyDate(
         record: PropertyCompliance,
         expiryDate: LocalDate?,
+        eicIssueDate: LocalDate?,
         electricalCertType: CertificateType?,
     ) {
-        when (electricalCertType) {
-            CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
+        when {
+            electricalCertType == CertificateType.Eic && eicIssueDate != null -> eicDateService.applyIssueDate(record, eicIssueDate)
+            electricalCertType == CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
             else -> record.electricalSafetyExpiryDate = expiryDate
         }
     }
@@ -355,6 +360,7 @@ class PropertyComplianceService(
         electricalCertType: CertificateType? = null,
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalSafetyCertUploadIds: List<Long> = listOf(),
+        eicIssueDate: LocalDate? = null,
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
@@ -364,6 +370,7 @@ class PropertyComplianceService(
                 record = this,
                 electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
                 electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                eicIssueDate = eicIssueDate,
                 electricalCertType = electricalCertType,
             )
         }
@@ -377,7 +384,7 @@ class PropertyComplianceService(
             electricalCertType = electricalCertType,
         )
 
-        if (electricalSafetyExpiryDate != null) {
+        if (electricalSafetyExpiryDate != null || eicIssueDate != null) {
             val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,

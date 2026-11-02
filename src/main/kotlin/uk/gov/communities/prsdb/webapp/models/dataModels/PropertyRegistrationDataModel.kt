@@ -37,6 +37,7 @@ data class PropertyRegistrationDataModel(
     val gasSafetyCertProvideLater: Boolean,
     val electricalSafetyFileUploadIds: List<Long>,
     val electricalSafetyExpiryDate: LocalDate?,
+    val eicIssueDate: LocalDate?,
     val electricalCertType: CertificateType?,
     val electricalSafetyCertProvideLater: Boolean,
     val epcCertificateUrl: String?,

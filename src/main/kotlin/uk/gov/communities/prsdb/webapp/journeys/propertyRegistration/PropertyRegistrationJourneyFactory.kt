@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -308,6 +309,13 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
+                EicIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
                 EicrExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep) {
@@ -525,7 +533,15 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
                 configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep }
+                    backStep {
+                        val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
+                        // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+                        if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
+                            electricalSafetyDetailsTask.eicIssueDateStep
+                        } else {
+                            electricalSafetyDetailsTask.eicExpiryDateStep
+                        }
+                    }
                 }
                 configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                     backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }

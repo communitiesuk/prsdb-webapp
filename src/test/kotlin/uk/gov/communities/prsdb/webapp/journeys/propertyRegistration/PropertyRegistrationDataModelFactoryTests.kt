@@ -215,6 +215,18 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
+    fun `fromJourneyState returns the EIC issue date from state`() {
+        val eicIssueDate = LocalDate(2024, 3, 20)
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = CertificateType.Eic, eicIssueDate = eicIssueDate)
+
+        val result = factory.fromJourneyState(mockState)
+
+        assertEquals(eicIssueDate.toJavaLocalDate(), result.eicIssueDate)
+        assertNull(result.electricalSafetyExpiryDate)
+    }
+
+    @Test
     fun `fromJourneyState returns licenseProvideLater as true when the user provides licensing later`() {
         // Arrange
         setupStateForPropertyRegistration()
@@ -513,6 +525,7 @@ class PropertyRegistrationDataModelFactoryTests {
         gasCertIssueDate: LocalDate? = null,
         electricalUploadIds: List<Long> = emptyList(),
         electricalCertExpiryDate: LocalDate? = null,
+        eicIssueDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         acceptedEpc: EpcDataModel? = null,
         epcUrl: String? = null,
@@ -544,6 +557,7 @@ class PropertyRegistrationDataModelFactoryTests {
 
         whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
         whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+        whenever(electricalSafetyDetailsTask.getEicIssueDateIfReachable()).thenReturn(eicIssueDate)
 
         if (acceptedEpc != null) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)

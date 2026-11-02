@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
 import java.time.LocalDate
@@ -26,6 +27,14 @@ class CertificateExpiryHelper {
             isGas14MonthExpiryEnabled: Boolean,
             currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
         ): Boolean = currentDate > getGasExpiryDate(issueDate, isGas14MonthExpiryEnabled)
+
+        // EIC_VALIDITY_YEARS after the issue date. Valid up to and including the date
+        fun getEicExpiryDate(issueDate: LocalDate): LocalDate = issueDate.plusYears(EIC_VALIDITY_YEARS.toLong())
+
+        fun isEicIssueDateExpired(
+            issueDate: LocalDate,
+            currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+        ): Boolean = isEicExpiryDateExpired(getEicExpiryDate(issueDate), currentDate)
 
         // Valid up to and including the expiry date
         fun isEicExpiryDateExpired(

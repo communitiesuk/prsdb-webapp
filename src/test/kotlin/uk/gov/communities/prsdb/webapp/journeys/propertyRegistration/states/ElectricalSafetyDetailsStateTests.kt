@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
 
 class ElectricalSafetyDetailsStateTests {
@@ -158,6 +160,49 @@ class ElectricalSafetyDetailsStateTests {
     }
 
     @Test
+    fun `getEicIssueDateIfReachable returns the EIC issue date when the EIC issue date step is reachable`() {
+        val issueDate = LocalDate.of(2024, 3, 20)
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EIC,
+                eicIssueDateFormModel = TodayOrPastDateFormModel().applyFromDate(issueDate),
+            )
+
+        assertEquals(issueDate.toKotlinLocalDate(), state.getEicIssueDateIfReachable())
+    }
+
+    @Test
+    fun `getEicIssueDateIfReachable returns null when the EIC issue date step is not reachable`() {
+        val state = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EIC)
+
+        assertNull(state.getEicIssueDateIfReachable())
+    }
+
+    @Test
+    fun `getEicIsOutdated returns false if the EIC was issued today`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate)
+        assertFalse(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns false if the EIC was issued exactly 5 years ago`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(5))
+        assertFalse(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns true if the EIC was issued 5 years and 1 day ago`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(5).minusDays(1))
+        assertTrue(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getElectricalCertificateIsOutdated uses the EIC issue date when the EIC issue date step is reachable`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(6))
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+    }
+
+    @Test
     fun `electricalUploadIds returns the EIC upload ids when the EIC upload step is reachable`() {
         val state =
             buildTestElectricalSafetyDetailState(
@@ -266,10 +311,19 @@ class ElectricalSafetyDetailsStateTests {
         )
     }
 
+    private fun buildTestElectricalSafetyDetailStateWithIssueDate(issueDate: LocalDate): ElectricalSafetyDetailState =
+        buildTestElectricalSafetyDetailState(
+            eicIssueDateFormModel = TodayOrPastDateFormModel().applyFromDate(issueDate),
+            hasElectricalCertFormModel =
+                HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC },
+            electricalCertMode = HasElectricalCertMode.HAS_EIC,
+        )
+
     // A null expiry date form model means that expiry date step is not reachable
     private fun buildTestElectricalSafetyDetailState(
         electricalCertMode: HasElectricalCertMode? = null,
         eicExpiryDateFormModel: AnyDateFormModel? = null,
+        eicIssueDateFormModel: TodayOrPastDateFormModel? = null,
         eicrExpiryDateFormModel: AnyDateFormModel? = null,
         eicUploadStepShouldBeReachable: Boolean = false,
         eicrUploadStepShouldBeReachable: Boolean = false,
@@ -279,6 +333,7 @@ class ElectricalSafetyDetailsStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyDetailState {
             override val isOccupied: Boolean = true
             override val propertyOwnershipId: Long? = null
+            override val isEicIssueDateEnabled: Boolean = true
             override var eicrUploadMap: Map<Int, CertificateUpload> = mapOf()
             override var highestAssignedEicrMemberId: Int? = null
             override var eicUploadMap: Map<Int, CertificateUpload> = mapOf()
@@ -310,6 +365,11 @@ class ElectricalSafetyDetailsStateTests {
                     whenever(this.formModelIfReachableOrNull).thenReturn(eicExpiryDateFormModel)
                 }
 
+            override val eicIssueDateStep =
+                mock<EicIssueDateStep>().apply {
+                    whenever(this.formModelIfReachableOrNull).thenReturn(eicIssueDateFormModel)
+                }
+
             override val eicrExpiryDateStep =
                 mock<EicrExpiryDateStep>().apply {
                     whenever(this.formModelIfReachableOrNull).thenReturn(eicrExpiryDateFormModel)
@@ -327,6 +387,13 @@ class ElectricalSafetyDetailsStateTests {
         }
 
     private fun AnyDateFormModel.applyFromDate(date: LocalDate): AnyDateFormModel =
+        apply {
+            day = date.dayOfMonth.toString()
+            month = date.monthValue.toString()
+            year = date.year.toString()
+        }
+
+    private fun TodayOrPastDateFormModel.applyFromDate(date: LocalDate): TodayOrPastDateFormModel =
         apply {
             day = date.dayOfMonth.toString()
             month = date.monthValue.toString()

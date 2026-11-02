@@ -89,6 +89,7 @@ class PropertyRegistrationService(
                 epcExemptionReason,
                 epcMeesExemptionReason,
                 epcProvideLater = epcProvideLater,
+                eicIssueDate = eicIssueDate,
             )
 
             runAfterTransactionCommits {

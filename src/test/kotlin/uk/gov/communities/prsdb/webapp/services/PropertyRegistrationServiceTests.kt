@@ -395,7 +395,7 @@ class PropertyRegistrationServiceTests {
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15)
-        val electricalSafetyExpiryDate = LocalDate.of(2029, 3, 20)
+        val eicIssueDate = LocalDate.of(2024, 3, 20)
         val epcUrl = "https://epc.example.com/cert/1234"
         val epcExpiryDate = LocalDate.of(2030, 1, 1)
         val epcEnergyRating = "B"
@@ -464,8 +464,9 @@ class PropertyRegistrationServiceTests {
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                 gasSafetyFileUploadIds = listOf(10L, 20L),
                 electricalSafetyFileUploadIds = listOf(30L),
-                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
-                electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+                electricalSafetyExpiryDate = null,
+                eicIssueDate = eicIssueDate,
+                electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eic,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
                 epcEnergyRating = epcEnergyRating,
@@ -483,8 +484,8 @@ class PropertyRegistrationServiceTests {
             gasSafetyFileUploadIds = listOf(10L, 20L),
             gasSafetyCertProvideLater = false,
             electricalSafetyFileUploadIds = listOf(30L),
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
-            electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+            electricalSafetyExpiryDate = null,
+            electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eic,
             electricalSafetyCertProvideLater = false,
             epcCertificateUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
@@ -493,6 +494,7 @@ class PropertyRegistrationServiceTests {
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = meesExemptionReason,
             epcProvideLater = false,
+            eicIssueDate = eicIssueDate,
         )
     }
 

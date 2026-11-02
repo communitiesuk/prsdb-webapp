@@ -29,6 +29,7 @@ class CompleteElectricalSafetyUpdateStepConfig(
                     state.electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()
                         ?.toJavaLocalDate(),
                 electricalSafetyCertUploadIds = state.electricalSafetyDetailsTask.electricalUploadIds,
+                eicIssueDate = state.electricalSafetyDetailsTask.getEicIssueDateIfReachable()?.toJavaLocalDate(),
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

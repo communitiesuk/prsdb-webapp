@@ -29,6 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
@@ -88,7 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
@@ -865,15 +866,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            val electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            val eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(
-                electricalCertExpiryDatePage.heading,
-            ).containsText("What’s the expiry date on the Electrical Installation Certificate?")
-            electricalCertExpiryDatePage.submitDate(validExpiryDate)
+                eicIssueDatePage.heading,
+            ).containsText("What’s the issue date on the Electrical Installation Certificate (EIC)?")
+            eicIssueDatePage.submitDate(validEicIssueDate)
             var uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
 
             // Upload Electrical Cert - render page
@@ -1606,12 +1607,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            var electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            var eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            eicIssueDatePage.submitDate(expiredEicIssueDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change issue date link
@@ -1621,14 +1622,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
             assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
             electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
+            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+            eicIssueDatePage.form.submit()
             electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
@@ -1735,12 +1736,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            var electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            var eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            eicIssueDatePage.submitDate(expiredEicIssueDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change issue date link
@@ -1749,14 +1750,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(electricalCertExpiredPage.warning).isHidden()
             assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
             electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
+            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+            eicIssueDatePage.form.submit()
             electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
@@ -3144,6 +3145,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             DateTimeHelper()
                 .getCurrentDateInUK()
                 .minus(DatePeriod(days = 5))
+
+        val validEicIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = 1))
+
+        val expiredEicIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
     }

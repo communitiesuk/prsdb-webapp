@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -33,6 +34,7 @@ interface ElectricalSafetyState : JourneyState {
 interface ElectricalSafetyDetailState : JourneyState {
     val hasElectricalCertStep: HasElectricalCertStep
     val eicExpiryDateStep: EicExpiryDateStep
+    val eicIssueDateStep: EicIssueDateStep
     val uploadEicStep: UploadEicStep
     val hasUploadedEic: HasAnyInCollectionStep
     val checkEicUploadsStep: CheckEicUploadsStep
@@ -51,8 +53,16 @@ interface ElectricalSafetyDetailState : JourneyState {
     val allowProvideCertificateLaterRoute: Boolean
     val propertyOwnershipId: Long?
 
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    val isEicIssueDateEnabled: Boolean
+
     fun getEicExpiryDateIfReachable() =
         eicExpiryDateStep.formModelIfReachableOrNull?.let { date ->
+            DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
+        }
+
+    fun getEicIssueDateIfReachable() =
+        eicIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
         }
 
@@ -75,8 +85,10 @@ interface ElectricalSafetyDetailState : JourneyState {
     fun getElectricalCertificateExpiryDateIfReachable() =
         getEicOrEicrValue({ getEicExpiryDateIfReachable() }, { getEicrExpiryDateIfReachable() })
 
+    // TODO PDJB-1679: Remove the expiry date fallback when the EIC_ISSUE_DATE flag is removed
     fun getEicIsOutdated(): Boolean? =
-        getEicExpiryDateIfReachable()?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it.toJavaLocalDate()) }
+        getEicIssueDateIfReachable()?.let { CertificateExpiryHelper.isEicIssueDateExpired(it.toJavaLocalDate()) }
+            ?: getEicExpiryDateIfReachable()?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it.toJavaLocalDate()) }
 
     fun getEicrIsOutdated(): Boolean? =
         getEicrExpiryDateIfReachable()?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it.toJavaLocalDate()) }

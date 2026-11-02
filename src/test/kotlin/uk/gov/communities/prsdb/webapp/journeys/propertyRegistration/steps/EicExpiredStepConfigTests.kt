@@ -22,6 +22,9 @@ class EicExpiredStepConfigTests {
     lateinit var mockEicExpiryDateStep: EicExpiryDateStep
 
     @Mock
+    lateinit var mockEicIssueDateStep: EicIssueDateStep
+
+    @Mock
     lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Test
@@ -42,23 +45,22 @@ class EicExpiredStepConfigTests {
         assertEquals(true, (content["changeExpiryDateUrl"] as String).contains(EicExpiryDateStep.ROUTE_SEGMENT))
     }
 
-    // TODO PDJB-1669: Update this test to use the EIC issue date and issue date step once they exist
     @Test
-    fun `getStepSpecificContent uses the EIC expiry date and expiry date step for the issue date content when EIC_ISSUE_DATE is enabled`() {
+    fun `getStepSpecificContent uses the EIC issue date and links back to the EIC issue date step when EIC_ISSUE_DATE is enabled`() {
         val stepConfig = setupStepConfig()
-        val date = LocalDate(2020, 1, 1)
+        val issueDate = LocalDate(2020, 1, 1)
         whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
-        whenever(mockState.getEicExpiryDateIfReachable()).thenReturn(date)
-        whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
-        whenever(mockEicExpiryDateStep.isStepReachable).thenReturn(true)
-        whenever(mockEicExpiryDateStep.urlPath).thenReturn(EicExpiryDateStep.ROUTE_SEGMENT)
+        whenever(mockState.getEicIssueDateIfReachable()).thenReturn(issueDate)
+        whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
+        whenever(mockEicIssueDateStep.isStepReachable).thenReturn(true)
+        whenever(mockEicIssueDateStep.urlPath).thenReturn(EicIssueDateStep.ROUTE_SEGMENT)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.isOccupied).thenReturn(false)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals(date.toJavaLocalDate(), content["issueDate"])
-        assertEquals(true, (content["changeIssueDateUrl"] as String).contains(EicExpiryDateStep.ROUTE_SEGMENT))
+        assertEquals(issueDate.toJavaLocalDate(), content["issueDate"])
+        assertEquals(true, (content["changeIssueDateUrl"] as String).contains(EicIssueDateStep.ROUTE_SEGMENT))
     }
 
     @Test

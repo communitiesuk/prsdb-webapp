@@ -77,6 +77,29 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
         }
 
         @Test
+        fun `calls updateElectricalSafety with the EIC issue date when one is reachable`() {
+            val issueDate = LocalDate(2024, 3, 20)
+
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eic)
+            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailsTask.getEicIssueDateIfReachable()).thenReturn(issueDate)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(listOf(1L))
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockPropertyComplianceService).updateElectricalSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                electricalSafetyExpiryDate = null,
+                electricalSafetyCertUploadIds = listOf(1L),
+                eicIssueDate = issueDate.toJavaLocalDate(),
+            )
+        }
+
+        @Test
         fun `calls updateElectricalSafety with null expiry date and empty uploads`() {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())

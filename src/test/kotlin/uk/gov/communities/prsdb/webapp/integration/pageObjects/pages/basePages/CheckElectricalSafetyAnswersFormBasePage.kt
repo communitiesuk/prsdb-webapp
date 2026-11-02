@@ -23,5 +23,6 @@ class CheckElectricalSafetyAnswersSummaryList(
 ) : SummaryList(page, 0) {
     val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
     val expiryDateRow = getRow("Expiry date")
+    val issueDateRow = getRow("Issue date")
     val yourCertificateRow = getRow("Your certificate")
 }

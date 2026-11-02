@@ -148,6 +148,10 @@ class PropertyRegistrationDataModelFactory(
                 state.electricalSafetyTask.electricalSafetyDetailsTask
                     .getElectricalCertificateExpiryDateIfReachable()
                     ?.toJavaLocalDate(),
+            eicIssueDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getEicIssueDateIfReachable()
+                    ?.toJavaLocalDate(),
             electricalCertType =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
                     .mapElectricalCertificateTypeToGlobalCertificateType(),

@@ -40,7 +40,6 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         val downloadMessageKey = getDownloadMessageKey(certType)
         val isEic = state.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC
         val uploadMap = if (isEic) state.eicUploadMap else state.eicrUploadMap
-        val expiryDateStep = if (isEic) state.eicExpiryDateStep else state.eicrExpiryDateStep
         val checkUploadsStep = if (isEic) state.checkEicUploadsStep else state.checkEicrUploadsStep
         val uploadedFiles =
             uploadMap
@@ -55,12 +54,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
-            // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
-                fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
-                destination = destinationProvider(expiryDateStep),
-            ),
+            getDateRow(isEic),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
                 fieldValue = uploadedFiles,
@@ -68,6 +62,22 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             ),
         )
     }
+
+    // TODO PDJB-1679: Remove the EIC expiry date row when the EIC_ISSUE_DATE flag is removed
+    private fun getDateRow(isEic: Boolean): SummaryListRowViewModel =
+        if (isEic && state.isEicIssueDateEnabled) {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                fieldHeading = "checkElectricalSafety.issueDate.fieldHeading",
+                fieldValue = state.getEicIssueDateIfReachable(),
+                destination = destinationProvider(state.eicIssueDateStep),
+            )
+        } else {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
+                fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
+                destination = destinationProvider(if (isEic) state.eicExpiryDateStep else state.eicrExpiryDateStep),
+            )
+        }
 
     private fun getDownloadMessageKey(certType: HasElectricalSafetyCertificate?): String =
         when (certType) {
