@@ -42,7 +42,7 @@ class FreeholdersTask(
                 withDependencies {
                     FreeholdersMembersDependencies(
                         listState = journey,
-                        freeholdersDependencies = journey,
+                        isJointFreeholder = journey.isJointFreeholder,
                     )
                 }
                 savable()

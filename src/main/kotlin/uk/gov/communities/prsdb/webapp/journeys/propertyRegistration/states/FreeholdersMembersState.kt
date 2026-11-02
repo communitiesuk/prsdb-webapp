@@ -31,9 +31,9 @@ interface FreeholdersMembersState :
 }
 
 class FreeholdersMembersDependencies(
+    val isJointFreeholder: Boolean,
+    val allowRemovingLastMember: Boolean = true,
     // The state slice that owns the collected freeholders. The reusable members task reads and writes the
     // freeholders list through this, so the list can live in the enclosing outer task or journey.
     val listState: FreeholdersListState,
-    val freeholdersDependencies: FreeholdersDependencies,
-    val allowRemovingLastMember: Boolean = true,
 )

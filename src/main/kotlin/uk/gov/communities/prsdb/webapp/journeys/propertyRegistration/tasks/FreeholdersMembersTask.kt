@@ -54,7 +54,7 @@ class FreeholdersMembersTask(
             dependencies.listState.editingFreeholderId = value
         }
     override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
-    override val isJointFreeholder: Boolean get() = dependencies.freeholdersDependencies.isJointFreeholder
+    override val isJointFreeholder: Boolean get() = dependencies.isJointFreeholder
 
     override fun makeSubJourney(state: FreeholdersMembersState) =
         subJourney(state) {
