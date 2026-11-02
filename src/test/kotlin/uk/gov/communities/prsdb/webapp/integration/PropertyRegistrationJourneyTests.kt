@@ -16,6 +16,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -56,6 +57,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
@@ -165,6 +167,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -537,6 +540,39 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
                 assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
                 assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
+            }
+        }
+
+        @Test
+        fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment not completed page`(
+            browser: Browser,
+        ) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                submitPaymentSummary(page)
+                val replacedPayment = getCreatedPayment()
+                val replacedPaymentReturnUrl = page.url()
+                // GOV.UK Pay refuses to cancel a payment while the user is part-way through 3D Secure, so it stays CANCELLING
+                doThrow(GovUkPayException("Cancel refused")).whenever(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+                val otherPage = page.context().newPage()
+                Navigator(otherPage, port).navigate(
+                    "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentSummaryStep.ROUTE_SEGMENT}" +
+                        "?${JourneyIdProvider.PARAMETER_NAME}=${getJourneyId(page)}",
+                )
+                createValidPage(otherPage, PaymentSummaryFormPagePropertyRegistration::class).form.submit()
+                createValidPage(otherPage, PaymentReturnFormPagePropertyRegistration::class)
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                page.navigate(replacedPaymentReturnUrl)
+
+                val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+                assertThat(paymentFailedPage.heading).containsText("Your payment could not be completed")
+                assertThat(paymentFailedPage.tryAgainLink).isVisible()
+                assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
+                verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+                verify(govUkPayClient, never()).capturePayment(any())
             }
         }
 
