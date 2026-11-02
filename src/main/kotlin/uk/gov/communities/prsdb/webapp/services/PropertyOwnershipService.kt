@@ -297,6 +297,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    // TODO PDJB-1957: changing to a type that no longer implies another freeholder leaves any
+    //  placeholder freeholder behind. Decide what should happen to existing freeholders here
+    //  once the freeholders journey exists.
     @Transactional
     fun updateOwnershipType(
         id: Long,
