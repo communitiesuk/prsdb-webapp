@@ -36,8 +36,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     // TODO PDJB-2019: Delete this property and its column once PDJB-2016 has removed the
     //  pdjb-955-associated-parties flag and its flag-off code paths.
-    @Column(name = "ownership_type_before_pdjb955")
-    var ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955? = null
+    @Column(name = "ownership_type_before_pdjb955", nullable = false)
+    lateinit var ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955
 
     @Column(nullable = false)
     var currentNumHouseholds: Int = 0
@@ -142,7 +142,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     constructor(
         ownershipType: OwnershipType,
-        ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955?,
+        ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         isOccupied: Boolean,

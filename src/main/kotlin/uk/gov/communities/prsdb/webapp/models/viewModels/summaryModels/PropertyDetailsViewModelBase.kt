@@ -101,7 +101,7 @@ abstract class PropertyDetailsViewModelBase(
             // TODO PDJB-1996: convert the new OwnershipType to the required answer messages. It is
             //  rendered as the answers to several questions rather than this single ownership type
             //  row, so this row cannot simply switch to the new enum.
-            MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955!!),
+            MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )

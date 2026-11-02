@@ -238,7 +238,7 @@ class LandlordDashboardUrlTests(
                 licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
                 licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
                 // TODO PDJB-1957: make this work for the new OwnershipType
-                ownershipType = propertyOwnership.ownershipTypeBeforePdjb955!!,
+                ownershipType = propertyOwnership.ownershipTypeBeforePdjb955,
                 isOccupied = propertyOwnership.isOccupied,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numberOfPeople = propertyOwnership.currentNumTenants,
