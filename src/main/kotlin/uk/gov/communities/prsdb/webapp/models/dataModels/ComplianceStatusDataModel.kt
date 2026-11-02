@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 data class ComplianceStatusDataModel(
@@ -47,9 +50,11 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
+        // We may want to move gas/EPC date access and compliance status derivation into the service layer to follow the same pattern as EIC/EICR.
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
+            electricalSafetyExpiryDate: LocalDate?,
             isGas14MonthExpiryEnabled: Boolean,
         ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
@@ -60,37 +65,52 @@ data class ComplianceStatusDataModel(
                         .fromRegistrationNumber(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
-                gasSafetyStatus = propertyCompliance.getGasSafetyStatus(isGas14MonthExpiryEnabled),
-                electricalSafetyStatus = propertyCompliance.electricalSafetyStatus,
+                gasSafetyStatus = gasSafetyStatusOf(propertyCompliance, isGas14MonthExpiryEnabled),
+                electricalSafetyStatus = electricalSafetyStatusOf(propertyCompliance, electricalSafetyExpiryDate),
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline = propertyCompliance.propertyOwnership.provideLaterDeadline,
                 gasSafetyExpiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
-                electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )
 
-        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and make this a val again (gasSafetyStatus)
-        private fun PropertyCompliance.getGasSafetyStatus(isGas14MonthExpiryEnabled: Boolean): ComplianceCertStatus {
-            return when {
-                this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
-                this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
-                isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true -> ComplianceCertStatus.EXPIRED
+        private fun electricalSafetyStatusOf(
+            propertyCompliance: PropertyCompliance,
+            expiryDate: LocalDate?,
+        ): ComplianceCertStatus =
+            when {
+                propertyCompliance.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                expiryDate == null -> ComplianceCertStatus.HAS_FAULTS
+                propertyCompliance.isElectricalSafetyExpired(expiryDate) -> ComplianceCertStatus.EXPIRED
                 else -> ComplianceCertStatus.ADDED
             }
-        }
 
-        private val PropertyCompliance.electricalSafetyStatus: ComplianceCertStatus
-            get() =
+        private fun PropertyCompliance.isElectricalSafetyExpired(expiryDate: LocalDate): Boolean =
+            when (electricalCertType) {
+                CertificateType.Eic -> CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate)
+                CertificateType.Eicr -> CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate)
+                else -> throw PrsdbWebException("Electrical cert type must be EIC or EICR but was $electricalCertType")
+            }
+
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+        internal fun gasSafetyStatusOf(
+            propertyCompliance: PropertyCompliance,
+            isGas14MonthExpiryEnabled: Boolean,
+        ): ComplianceCertStatus =
+            with(propertyCompliance) {
                 when {
-                    this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isElectricalSafetyMissing -> ComplianceCertStatus.HAS_FAULTS
-                    this.isElectricalSafetyExpired == true -> ComplianceCertStatus.EXPIRED
+                    this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
+                    this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
+                    isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }
+            }
+
+        internal fun epcStatusOf(propertyCompliance: PropertyCompliance): ComplianceCertStatus = propertyCompliance.epcStatus
 
         private val PropertyCompliance.epcStatus: ComplianceCertStatus
             get() =

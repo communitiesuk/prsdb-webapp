@@ -1,29 +1,23 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 
 @PrsdbWebService
-class NotificationBannerViewModelService(
-    // TODO: PDJB-1926: Remove featureFlagManager
-    private val featureFlagManager: FeatureFlagManager,
-) {
+class NotificationBannerViewModelService {
     fun getPropertyDetailsNotificationBanner(
-        propertyCompliance: PropertyCompliance,
+        complianceStatus: ComplianceStatusDataModel,
         isLandlordView: Boolean,
         isOccupied: Boolean,
         isLicensingProvideLater: Boolean,
         isTenancyProvideLater: Boolean,
     ): PropertyDetailsNotificationBannerViewModel {
-        val complianceMessages = getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView)
+        val complianceMessages = getComplianceNotificationMessageKeys(complianceStatus, isLandlordView)
 
         return PropertyDetailsNotificationBannerViewModel.fromState(
             isLandlordView = isLandlordView,
@@ -35,16 +29,9 @@ class NotificationBannerViewModelService(
     }
 
     fun getComplianceNotificationMessageKeys(
-        propertyCompliance: PropertyCompliance,
+        statusModel: ComplianceStatusDataModel,
         isLandlordView: Boolean,
     ): List<NotificationMessage> {
-        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
-        val statusModel =
-            ComplianceStatusDataModel.fromPropertyCompliance(
-                propertyCompliance,
-                featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
-            )
-
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
         val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED

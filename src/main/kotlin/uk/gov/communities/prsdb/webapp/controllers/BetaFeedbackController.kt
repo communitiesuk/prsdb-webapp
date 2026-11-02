@@ -17,12 +17,12 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
-import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 @PrsdbController
 @RequestMapping
 class BetaFeedbackController(
-    private val emailService: NotifyEmailNotificationService<BetaFeedbackEmail>,
+    private val emailService: EmailNotificationService<BetaFeedbackEmail>,
 ) {
     @Value("\${beta-feedback.team-email-address}")
     private lateinit var feedbackTeamEmailAddress: String

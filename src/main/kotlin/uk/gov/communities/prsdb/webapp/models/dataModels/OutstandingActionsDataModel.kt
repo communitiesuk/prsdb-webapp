@@ -39,7 +39,11 @@ data class OutstandingActionsDataModel(
                 provideLaterDeadline = propertyOwnership.provideLaterDeadline,
                 complianceStatus =
                     propertyOwnership.propertyCompliance?.let {
-                        ComplianceStatusDataModel.fromPropertyCompliance(it, isGas14MonthExpiryEnabled)
+                        ComplianceStatusDataModel.fromPropertyCompliance(
+                            it,
+                            propertyOwnership.propertyCompliance.electricalSafetyExpiryDate,
+                            isGas14MonthExpiryEnabled,
+                        )
                     },
             )
     }

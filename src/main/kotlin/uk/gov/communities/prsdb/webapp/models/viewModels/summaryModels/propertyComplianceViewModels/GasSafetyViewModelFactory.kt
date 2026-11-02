@@ -26,15 +26,13 @@ class GasSafetyViewModelFactory(
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "checkGasSafety.occupiedNoCertInsetText"
 
-    // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
-    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel
-            .fromPropertyCompliance(
-                propertyCompliance,
-                featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
-            ).gasSafetyStatus
+    private fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.gasSafetyStatusOf(
+            propertyCompliance,
+            featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
+        )
 
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
+    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = getStatus(propertyCompliance)
         return when (status) {
             ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"

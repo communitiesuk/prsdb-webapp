@@ -9,13 +9,10 @@ import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
@@ -70,29 +67,6 @@ class PropertyComplianceTests {
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
-    @MethodSource("provideElectricalSafetyExpiryDates")
-    fun `isElectricalSafetyExpired is`(
-        expiryDate: LocalDate,
-        expectedIsExpired: Boolean,
-    ) {
-        listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate)
-                    .withElectricalCertType(certType)
-                    .build()
-            assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired, "for $certType")
-        }
-    }
-
-    @Test
-    fun `isElectricalSafetyExpired throws when the electrical cert type is missing`() {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(currentDate.minusYears(1), certType = null).build()
-
-        assertThrows<PrsdbWebException> { propertyCompliance.isElectricalSafetyExpired }
-    }
-
-    @ParameterizedTest(name = "{1} when expiry date {0}")
     @MethodSource("provideEpcExpiryDates")
     fun `isEpcExpired is`(
         expiryDate: LocalDate,
@@ -110,7 +84,6 @@ class PropertyComplianceTests {
     ) {
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         assertEquals(expectedIsXExpired, propertyCompliance.isGasSafetyCertExpired(isGas14MonthExpiryEnabled = true))
-        assertEquals(expectedIsXExpired, propertyCompliance.isElectricalSafetyExpired)
         assertEquals(expectedIsXExpired, propertyCompliance.isEpcExpired)
     }
 
@@ -132,7 +105,6 @@ class PropertyComplianceTests {
         expectedIsXMissing: Boolean?,
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.epcHasFaults)
     }
 
@@ -194,14 +166,6 @@ class PropertyComplianceTests {
             arrayOf(
                 arguments(named("was yesterday", currentDate.minusDays(1)), true),
                 arguments(named("is today", currentDate), false),
-                arguments(named("is tomorrow", currentDate.plusDays(1)), false),
-            )
-
-        @JvmStatic
-        private fun provideElectricalSafetyExpiryDates() =
-            arrayOf(
-                arguments(named("was yesterday", currentDate.minusDays(1)), true),
-                arguments(named("is today", currentDate), true),
                 arguments(named("is tomorrow", currentDate.plusDays(1)), false),
             )
 

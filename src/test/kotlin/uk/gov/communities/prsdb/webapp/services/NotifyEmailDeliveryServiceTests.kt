@@ -22,17 +22,17 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.service.notify.NotificationClient
 import uk.gov.service.notify.NotificationClientException
 
-class NotifyEmailNotificationServiceTests {
+class NotifyEmailDeliveryServiceTests {
     private lateinit var notifyClient: NotificationClient
     private lateinit var notifyIdService: NotifyIdService
-    private lateinit var emailNotificationService: NotifyEmailNotificationService<TestEmailTemplate>
+    private lateinit var emailDeliveryService: NotifyEmailDeliveryService
 
     @BeforeEach
     fun setup() {
         notifyClient = mock()
         notifyIdService = mock()
 
-        emailNotificationService = NotifyEmailNotificationService(notifyClient, notifyIdService, false)
+        emailDeliveryService = NotifyEmailDeliveryService(notifyClient, notifyIdService, false)
     }
 
     private class TestEmailTemplate(
@@ -45,7 +45,7 @@ class NotifyEmailNotificationServiceTests {
     }
 
     @Test
-    fun `sendEmail sends a matching email using the notification client`() {
+    fun `deliverEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
         val expectedTemplateId = EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL
@@ -56,7 +56,7 @@ class NotifyEmailNotificationServiceTests {
         whenever(notifyIdService.getNotifyIdValue(expectedTemplateId)).thenReturn(expectedNotifyIdValue)
 
         // Act
-        emailNotificationService.sendEmail(recipientEmail, email)
+        emailDeliveryService.deliverEmail(recipientEmail, email)
 
         // Assert
         Mockito
@@ -77,7 +77,7 @@ class NotifyEmailNotificationServiceTests {
             .sendEmail(any(), any(), any(), any())
 
         var thrownException =
-            assertThrows<PersistentEmailSendException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+            assertThrows<PersistentEmailSendException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
@@ -93,7 +93,7 @@ class NotifyEmailNotificationServiceTests {
             .sendEmail(any(), any(), any(), any())
 
         var thrownException =
-            assertThrows<TransientEmailSentException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+            assertThrows<TransientEmailSentException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
@@ -108,14 +108,14 @@ class NotifyEmailNotificationServiceTests {
             .sendEmail(any(), any(), any(), any())
 
         val thrownException =
-            assertThrows<NotifyAllowlistException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+            assertThrows<NotifyAllowlistException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
 
         assertEquals(thrownException.cause, innerException)
     }
 
     @Test
     fun `Throws PersistentEmailSendException not NotifyAllowlistException for allowlist errors when using production Notify`() {
-        val productionService = NotifyEmailNotificationService<TestEmailTemplate>(notifyClient, notifyIdService, true)
+        val productionService = NotifyEmailDeliveryService(notifyClient, notifyIdService, true)
         val errorMessage =
             "Status code: 400 {" +
                 "\"errors\":[{\"error\":\"BadRequestError\"," +
@@ -128,7 +128,7 @@ class NotifyEmailNotificationServiceTests {
             .sendEmail(any(), any(), any(), any())
 
         val thrownException =
-            assertThrows<PersistentEmailSendException> { productionService.sendEmail("", TestEmailTemplate()) }
+            assertThrows<PersistentEmailSendException> { productionService.deliverEmail("", TestEmailTemplate()) }
 
         assertFalse(thrownException is NotifyAllowlistException)
         assertEquals(thrownException.cause, innerException)

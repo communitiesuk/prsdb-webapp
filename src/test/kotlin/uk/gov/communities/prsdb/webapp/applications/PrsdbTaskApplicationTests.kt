@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlipStrategyFacto
 import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlipStrategyFactory
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
-import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
+import uk.gov.communities.prsdb.webapp.local.services.EmailDeliveryStubService
 import uk.gov.communities.prsdb.webapp.local.services.LetterNotificationStubService
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
@@ -40,10 +40,11 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionS
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
-import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.NotifyLetterNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationDeletionService
+import uk.gov.communities.prsdb.webapp.services.RoutingEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
@@ -74,8 +75,9 @@ class PrsdbTaskApplicationTests {
         val expectedBeansByName =
             listOf(
                 PrsdbWebappApplication::class.simpleBeanName,
-                EmailNotificationStubService::class.simpleBeanName,
-                NotifyEmailNotificationService::class.simpleBeanName,
+                EmailDeliveryStubService::class.simpleBeanName,
+                NotifyEmailDeliveryService::class.simpleBeanName,
+                RoutingEmailNotificationService::class.simpleBeanName,
                 LetterNotificationStubService::class.simpleBeanName,
                 NotifyLetterNotificationService::class.simpleBeanName,
                 NotifyConfig::class.simpleBeanName,
