@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderRemoveConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Freeh
 interface FreeholdersMembersState :
     JourneyState,
     FreeholdersListState {
-    val freeholderProvideDetailsStep: FreeholderProvideDetailsStep
+    val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep
     val freeholderNameStep: FreeholderNameStep
     val freeholderContactTypeStep: FreeholderContactTypeStep
     val freeholderEmailStep: FreeholderEmailStep
@@ -24,7 +24,7 @@ interface FreeholdersMembersState :
     val hasAnyFreeholdersStep: HasAnyFreeholdersStep
     val saveFreeholderStep: SaveFreeholderStep
     val setStateForFreeholderEditStep: SetStateForFreeholderEditStep
-    val removeFreeholderConfirmationStep: FreeholderRemoveConfirmationStep
+    val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
     val allowRemovingLastMember: Boolean
 }
 

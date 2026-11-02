@@ -9,13 +9,13 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderRemoveConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 @JourneyFrameworkComponent
 class FreeholdersMembersTask(
     journeyStateService: JourneyStateService,
-    override val freeholderProvideDetailsStep: FreeholderProvideDetailsStep,
+    override val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep,
     override val freeholderNameStep: FreeholderNameStep,
     override val freeholderContactTypeStep: FreeholderContactTypeStep,
     override val freeholderEmailStep: FreeholderEmailStep,
@@ -33,7 +33,7 @@ class FreeholdersMembersTask(
     override val hasAnyFreeholdersStep: HasAnyFreeholdersStep,
     override val saveFreeholderStep: SaveFreeholderStep,
     override val setStateForFreeholderEditStep: SetStateForFreeholderEditStep,
-    override val removeFreeholderConfirmationStep: FreeholderRemoveConfirmationStep,
+    override val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep,
 ) : Task<FreeholdersMembersState, FreeholdersMembersDependencies>(journeyStateService),
     FreeholdersMembersState {
     override val taskState get() = this
@@ -68,8 +68,8 @@ class FreeholdersMembersTask(
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
-            step(journey.removeFreeholderConfirmationStep) {
-                routeSegment(FreeholderRemoveConfirmationStep.ROUTE_SEGMENT)
+            step(journey.confirmRemoveFreeholderStep) {
+                routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 backStep { journey.freeholdersListStep }
                 nextStep { journey.freeholdersListStep }
@@ -82,7 +82,7 @@ class FreeholdersMembersTask(
                 savable()
             }
             step(journey.freeholderProvideDetailsStep) {
-                routeSegment(FreeholderProvideDetailsStep.ROUTE_SEGMENT)
+                routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {

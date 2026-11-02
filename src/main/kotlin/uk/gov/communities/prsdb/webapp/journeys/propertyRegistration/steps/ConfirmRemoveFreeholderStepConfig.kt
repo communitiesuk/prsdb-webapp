@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 // TODO PDJB-1970: replace this placeholder with the real "are you sure you want to remove this freeholder" page
 //  (content, input, validation and removal). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class FreeholderRemoveConfirmationStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class ConfirmRemoveFreeholderStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
@@ -25,8 +25,8 @@ class FreeholderRemoveConfirmationStepConfig : AbstractRequestableStepConfig<Com
 }
 
 @JourneyFrameworkComponent
-final class FreeholderRemoveConfirmationStep(
-    stepConfig: FreeholderRemoveConfirmationStepConfig,
+final class ConfirmRemoveFreeholderStep(
+    stepConfig: ConfirmRemoveFreeholderStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-freeholder"
