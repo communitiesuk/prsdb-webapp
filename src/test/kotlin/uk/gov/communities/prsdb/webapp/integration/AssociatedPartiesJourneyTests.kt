@@ -151,9 +151,22 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
 
-            // TODO PDJB-2007: update this usage when the real freeholders pages are added
-            val freeholdersPage = assertPageIs(page, FreeholdersFormPagePropertyRegistration::class)
-            freeholdersPage.submit()
+            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
+            assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1963: update this usage when the real provide details page is added
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
+            // TODO PDJB-1964: update this usage when the real freeholder name page is added
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1965: update this usage when the real contact type page is added
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
+            // TODO PDJB-1966: update this usage when the real freeholder email page is added
+            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1967: update this usage when the real freeholder address pages are added
+            assertPageIs(page, FreeholderAddressFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1968: update this usage when the real freeholders list page is added
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1970: update this usage when the real remove freeholder page is added
+            assertPageIs(page, RemoveFreeholderFormPagePropertyRegistration::class).submit()
             // TODO PDJB-2008: update this usage when the real superior landlords pages are added
             val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
             superiorLandlordsPage.submit()
