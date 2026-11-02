@@ -564,7 +564,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `answers changed in another tab after confirming but before the payment completes cancel the payment and do not register the property`(
+        fun `answers changed in another tab after confirming but before the payment is captured cancel the payment and do not register the property`(
             browser: Browser,
         ) {
             withJavaScriptDisabled(browser) { page, navigator ->
@@ -594,9 +594,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `answers changed in another tab while paying but before the payment completes cancel the payment and do not register the property`(
-            browser: Browser,
-        ) {
+        fun `answers changed in another tab before accepting the payment summary does not create the payment`(browser: Browser) {
             withJavaScriptDisabled(browser) { page, navigator ->
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
                 checkAnswersPage.confirm()
@@ -608,6 +606,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 paymentSummaryPage.form.submit()
 
                 val errorPage = createValidPage(page, ErrorPage::class)
+                verify(govUkPayClient, never()).createPayment(any())
                 assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
             }
         }
