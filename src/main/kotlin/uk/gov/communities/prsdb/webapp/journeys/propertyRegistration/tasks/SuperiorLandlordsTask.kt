@@ -66,8 +66,4 @@ class SuperiorLandlordsTask(
                 }
             }
         }
-
-    companion object {
-        const val ROUTE_SEGMENT = "superior-landlord"
-    }
 }

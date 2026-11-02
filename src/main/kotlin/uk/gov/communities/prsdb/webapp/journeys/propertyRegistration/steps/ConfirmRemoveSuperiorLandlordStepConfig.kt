@@ -7,14 +7,17 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1966, PDJB-1975: replace this placeholder with the real person email page
-//  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
+// TODO PDJB-1979: replace this placeholder with the real "are you sure you want to remove this superior landlord" page
+//  (content, input, validation and removal). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class PersonEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class ConfirmRemoveSuperiorLandlordStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1966, PDJB-1975): Person email address - content, input and validation to be added")
+        mapOf(
+            "todoComment" to
+                "TODO (PDJB-1979): Are you sure you want to remove this superior landlord? - content, input and validation to be added",
+        )
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -22,10 +25,10 @@ class PersonEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 }
 
 @JourneyFrameworkComponent
-final class PersonEmailStep(
-    stepConfig: PersonEmailStepConfig,
+final class ConfirmRemoveSuperiorLandlordStep(
+    stepConfig: ConfirmRemoveSuperiorLandlordStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "email"
+        const val ROUTE_SEGMENT = "remove-superior-landlord"
     }
 }

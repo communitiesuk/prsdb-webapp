@@ -303,8 +303,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
@@ -986,7 +984,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationFreeholders().build(),
         )
-        navigateToPropertyRegistrationJourneyStep("${FreeholdersTask.ROUTE_SEGMENT}/${FreeholdersInfoStep.ROUTE_SEGMENT}")
+        navigateToPropertyRegistrationJourneyStep(FreeholdersInfoStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholdersFormPagePropertyRegistration::class)
     }
 
@@ -995,7 +993,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlords().build(),
         )
-        navigateToPropertyRegistrationJourneyStep("${SuperiorLandlordsTask.ROUTE_SEGMENT}/${AnyoneInOwnershipChainStep.ROUTE_SEGMENT}")
+        navigateToPropertyRegistrationJourneyStep(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
         return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
     }
 

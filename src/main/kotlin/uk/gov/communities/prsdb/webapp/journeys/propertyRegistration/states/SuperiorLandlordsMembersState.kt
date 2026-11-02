@@ -1,30 +1,30 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveSuperiorLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonRemoveConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveSuperiorLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForSuperiorLandlordEditStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 
 interface SuperiorLandlordsMembersState :
     JourneyState,
     SuperiorLandlordsListState {
-    val superiorLandlordProvideDetailsStep: PersonProvideDetailsStep
-    val superiorLandlordNameStep: PersonNameStep
-    val superiorLandlordContactTypeStep: PersonContactTypeStep
-    val superiorLandlordEmailStep: PersonEmailStep
+    val superiorLandlordProvideDetailsStep: ProvideSuperiorLandlordDetailsStep
+    val superiorLandlordNameStep: SuperiorLandlordNameStep
+    val superiorLandlordContactTypeStep: SuperiorLandlordContactTypeStep
+    val superiorLandlordEmailStep: SuperiorLandlordEmailStep
     val superiorLandlordAddressTask: SuperiorLandlordAddressTask
     val superiorLandlordsListStep: SuperiorLandlordsListStep
     val hasAnySuperiorLandlordsStep: HasAnySuperiorLandlordsStep
     val saveSuperiorLandlordStep: SaveSuperiorLandlordStep
     val setStateForSuperiorLandlordEditStep: SetStateForSuperiorLandlordEditStep
-    val removeSuperiorLandlordStep: PersonRemoveConfirmationStep
+    val confirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep
     val allowRemovingLastMember: Boolean
 }
 

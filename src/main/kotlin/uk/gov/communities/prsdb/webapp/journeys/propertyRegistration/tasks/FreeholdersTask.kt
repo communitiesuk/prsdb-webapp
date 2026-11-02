@@ -53,8 +53,4 @@ class FreeholdersTask(
                 parents { journey.freeholdersBackRoutingStep.isComplete() }
             }
         }
-
-    companion object {
-        const val ROUTE_SEGMENT = "freeholder"
-    }
 }

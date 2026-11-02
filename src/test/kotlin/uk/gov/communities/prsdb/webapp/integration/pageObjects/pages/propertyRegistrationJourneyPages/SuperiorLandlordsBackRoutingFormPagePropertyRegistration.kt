@@ -6,15 +6,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsBackRoutingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 
 // TODO PDJB-1978: remove this placeholder page when the superior landlords back routing step becomes an internal step
 class SuperiorLandlordsBackRoutingFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${SuperiorLandlordsTask.ROUTE_SEGMENT}/" +
-            SuperiorLandlordsBackRoutingStep.ROUTE_SEGMENT,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${SuperiorLandlordsBackRoutingStep.ROUTE_SEGMENT}",
     ) {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)

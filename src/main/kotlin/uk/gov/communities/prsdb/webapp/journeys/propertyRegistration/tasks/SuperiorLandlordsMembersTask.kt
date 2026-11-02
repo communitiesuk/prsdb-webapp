@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.PersonContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -9,14 +9,14 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveSuperiorLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonRemoveConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveSuperiorLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForSuperiorLandlordEditStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
@@ -24,16 +24,16 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataMod
 @JourneyFrameworkComponent
 class SuperiorLandlordsMembersTask(
     journeyStateService: JourneyStateService,
-    override val superiorLandlordProvideDetailsStep: PersonProvideDetailsStep,
-    override val superiorLandlordNameStep: PersonNameStep,
-    override val superiorLandlordContactTypeStep: PersonContactTypeStep,
-    override val superiorLandlordEmailStep: PersonEmailStep,
+    override val superiorLandlordProvideDetailsStep: ProvideSuperiorLandlordDetailsStep,
+    override val superiorLandlordNameStep: SuperiorLandlordNameStep,
+    override val superiorLandlordContactTypeStep: SuperiorLandlordContactTypeStep,
+    override val superiorLandlordEmailStep: SuperiorLandlordEmailStep,
     override val superiorLandlordAddressTask: SuperiorLandlordAddressTask,
     override val superiorLandlordsListStep: SuperiorLandlordsListStep,
     override val hasAnySuperiorLandlordsStep: HasAnySuperiorLandlordsStep,
     override val saveSuperiorLandlordStep: SaveSuperiorLandlordStep,
     override val setStateForSuperiorLandlordEditStep: SetStateForSuperiorLandlordEditStep,
-    override val removeSuperiorLandlordStep: PersonRemoveConfirmationStep,
+    override val confirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep,
 ) : Task<SuperiorLandlordsMembersState, SuperiorLandlordsMembersDependencies>(journeyStateService),
     SuperiorLandlordsMembersState {
     override val taskState get() = this
@@ -68,8 +68,8 @@ class SuperiorLandlordsMembersTask(
                 nextStep { journey.superiorLandlordProvideDetailsStep }
                 savable()
             }
-            step(journey.removeSuperiorLandlordStep) {
-                routeSegment(PersonRemoveConfirmationStep.ROUTE_SEGMENT)
+            step(journey.confirmRemoveSuperiorLandlordStep) {
+                routeSegment(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
                 parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
                 backStep { journey.superiorLandlordsListStep }
                 nextStep { journey.superiorLandlordsListStep }
@@ -82,7 +82,7 @@ class SuperiorLandlordsMembersTask(
                 savable()
             }
             step(journey.superiorLandlordProvideDetailsStep) {
-                routeSegment(PersonProvideDetailsStep.ROUTE_SEGMENT)
+                routeSegment(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT)
                 parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -93,30 +93,30 @@ class SuperiorLandlordsMembersTask(
                 savable()
             }
             step(journey.superiorLandlordNameStep) {
-                routeSegment(PersonNameStep.ROUTE_SEGMENT)
+                routeSegment(SuperiorLandlordNameStep.ROUTE_SEGMENT)
                 parents { journey.superiorLandlordProvideDetailsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.superiorLandlordContactTypeStep }
                 savable()
             }
             step(journey.superiorLandlordContactTypeStep) {
-                routeSegment(PersonContactTypeStep.ROUTE_SEGMENT)
+                routeSegment(SuperiorLandlordContactTypeStep.ROUTE_SEGMENT)
                 parents { journey.superiorLandlordNameStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
-                        PersonContactType.EMAIL -> journey.superiorLandlordEmailStep
-                        PersonContactType.POSTAL_ADDRESS -> journey.superiorLandlordAddressTask.firstStep
+                        SuperiorLandlordContactType.EMAIL -> journey.superiorLandlordEmailStep
+                        SuperiorLandlordContactType.POSTAL_ADDRESS -> journey.superiorLandlordAddressTask.firstStep
                     }
                 }
                 savable()
             }
             step(journey.superiorLandlordEmailStep) {
-                routeSegment(PersonEmailStep.ROUTE_SEGMENT)
-                parents { journey.superiorLandlordContactTypeStep.hasOutcome(PersonContactType.EMAIL) }
+                routeSegment(SuperiorLandlordEmailStep.ROUTE_SEGMENT)
+                parents { journey.superiorLandlordContactTypeStep.hasOutcome(SuperiorLandlordContactType.EMAIL) }
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
             }
             task(journey.superiorLandlordAddressTask) {
-                parents { journey.superiorLandlordContactTypeStep.hasOutcome(PersonContactType.POSTAL_ADDRESS) }
+                parents { journey.superiorLandlordContactTypeStep.hasOutcome(SuperiorLandlordContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
             }

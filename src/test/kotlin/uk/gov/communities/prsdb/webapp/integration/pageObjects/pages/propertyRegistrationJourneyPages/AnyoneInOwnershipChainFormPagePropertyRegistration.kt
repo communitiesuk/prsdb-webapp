@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-1971: replace this placeholder with the real "is there anyone else in the ownership chain" page
@@ -14,8 +13,7 @@ class AnyoneInOwnershipChainFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${SuperiorLandlordsTask.ROUTE_SEGMENT}/" +
-            AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${AnyoneInOwnershipChainStep.ROUTE_SEGMENT}",
     ) {
     val form = AnyoneInOwnershipChainForm(page)
 

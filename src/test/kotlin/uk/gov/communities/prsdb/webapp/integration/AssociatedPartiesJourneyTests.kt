@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.constants.enums.PersonContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
@@ -185,7 +186,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-1964: update this usage when the real freeholder name page is added
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1965: update this usage when the real contact type page is added
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(PersonContactType.EMAIL)
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
@@ -209,7 +210,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(PersonContactType.POSTAL_ADDRESS)
+                .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
             // TODO PDJB-1967: update this usage when the real freeholder address pages are added
             assertPageIs(page, FreeholderAddressFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
@@ -259,7 +260,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-1973: update this usage when the real superior landlord name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
-            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).submitContactType(PersonContactType.EMAIL)
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
             // TODO PDJB-1975: update this usage when the real superior landlord email page is added
             assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
@@ -285,7 +287,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(PersonContactType.POSTAL_ADDRESS)
+                .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
             // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
             assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
