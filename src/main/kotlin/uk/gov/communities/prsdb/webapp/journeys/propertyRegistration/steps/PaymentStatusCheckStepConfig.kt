@@ -10,11 +10,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
+import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 
 enum class PaymentOutcome {
     SUCCESS,
     FAILURE,
+    NOT_COMPLETED,
     IN_PROGRESS,
     QUOTE_EXPIRED,
 }
@@ -22,6 +24,7 @@ enum class PaymentOutcome {
 @JourneyFrameworkComponent
 class PaymentStatusCheckStepConfig(
     private val paymentService: PaymentService,
+    private val paymentReconciliationService: PaymentReconciliationService,
     private val propertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory,
     private val addressAvailabilityService: AddressAvailabilityService,
 ) : AbstractInternalStepConfig<PaymentOutcome, PropertyRegistrationJourneyState>() {
@@ -34,12 +37,14 @@ class PaymentStatusCheckStepConfig(
         }
 
         if (govUkPayStatus.status == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
-            val cancelledStatus = paymentService.cancelUnfinalisedPayment(govUkPayStatus.paymentId)
-            if (cancelledStatus == PaymentStatus.SUCCEEDED) {
+            val storedStatus = paymentReconciliationService.markForCancellation(govUkPayStatus.paymentId)
+            if (storedStatus == PaymentStatus.SUCCEEDED) {
                 state.paymentOutcome = PaymentOutcome.SUCCESS
                 return
             }
-            throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}; payment cancelled")
+            throw CyaDataHasChangedException(
+                "Answers changed after confirmation for journey ${state.journeyId}; payment marked for cancellation",
+            )
         }
 
         val finalisedStatus =
@@ -58,12 +63,16 @@ class PaymentStatusCheckStepConfig(
         val paymentOutcome =
             when (finalisedStatus) {
                 PaymentStatus.SUCCEEDED -> PaymentOutcome.SUCCESS
-                PaymentStatus.FAILED, PaymentStatus.CANCELLED -> PaymentOutcome.FAILURE
-                PaymentStatus.CREATED, PaymentStatus.CAPTURABLE -> PaymentOutcome.IN_PROGRESS
+                PaymentStatus.FAILED -> PaymentOutcome.FAILURE
+                PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, PaymentStatus.MANUAL_INTERVENTION -> PaymentOutcome.NOT_COMPLETED
+                PaymentStatus.CREATED -> PaymentOutcome.IN_PROGRESS
+                PaymentStatus.CAPTURABLE -> throw IllegalStateException(
+                    "Payment ${govUkPayStatus.paymentId} for journey ${state.journeyId} is stored as capturable",
+                )
             }
         state.paymentOutcome = paymentOutcome
 
-        if (paymentOutcome == PaymentOutcome.FAILURE) {
+        if (paymentOutcome.isUnsuccessful()) {
             val addressTask = state.propertyDetailsTask.addressTask
             addressTask.isAddressAlreadyRegistered = addressTask.getAddress().uprn?.let { addressAvailabilityService.isAddressOwned(it) }
         }
@@ -78,7 +87,7 @@ class PaymentStatusCheckStepConfig(
         if (state.paymentOutcome == PaymentOutcome.SUCCESS) {
             state.deleteJourney()
         }
-        if (state.paymentOutcome == PaymentOutcome.FAILURE) {
+        if (state.paymentOutcome?.isUnsuccessful() == true) {
             val addressTask = state.propertyDetailsTask.addressTask
             if (addressTask.isAddressAlreadyRegistered == true) {
                 return Destination(addressTask.alreadyRegisteredStep)
@@ -86,6 +95,8 @@ class PaymentStatusCheckStepConfig(
         }
         return defaultDestination
     }
+
+    private fun PaymentOutcome.isUnsuccessful() = this == PaymentOutcome.FAILURE || this == PaymentOutcome.NOT_COMPLETED
 }
 
 @JourneyFrameworkComponent

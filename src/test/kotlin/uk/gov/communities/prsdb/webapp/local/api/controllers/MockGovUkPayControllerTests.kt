@@ -309,6 +309,8 @@ class MockGovUkPayControllerTests {
         "SUCCEEDED, success, true",
         "FAILED, failed, true",
         "CANCELLED, cancelled, true",
+        "CANCELLING, capturable, false",
+        "MANUAL_INTERVENTION, success, true",
     )
     fun `getting a payment created before the mock started returns it with its status from the database`(
         savedStatus: PaymentStatus,

@@ -11,8 +11,15 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class PaymentFailedStepConfig : AbstractRequestableStepConfig<Nothing, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
-        mapOf("tryAgainUrl" to Destination(state.paymentSummaryStep).toUrlStringOrNull())
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val isNotCompleted = state.paymentOutcome == PaymentOutcome.NOT_COMPLETED
+        return mapOf(
+            "tryAgainUrl" to Destination(state.paymentSummaryStep).toUrlStringOrNull(),
+            "isNotCompleted" to isNotCompleted,
+            "heading" to
+                if (isNotCompleted) "registerProperty.paymentNotCompleted.heading" else "registerProperty.paymentFailed.heading",
+        )
+    }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentFailedForm"
 

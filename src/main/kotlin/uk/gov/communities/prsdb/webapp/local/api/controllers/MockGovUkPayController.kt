@@ -180,6 +180,8 @@ class MockGovUkPayController(
             PaymentStatus.SUCCEEDED -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
             PaymentStatus.FAILED -> storedPayment.markFailed()
             PaymentStatus.CANCELLED -> storedPayment.markCancelled()
+            PaymentStatus.CANCELLING -> storedPayment.markCapturable()
+            PaymentStatus.MANUAL_INTERVENTION -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
         }
         return storedPayment
     }
