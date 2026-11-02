@@ -1,6 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from "@rollup/plugin-node-resolve";
-import copyAssets from "./scripts/copy-assets.mjs";
+import copy from "@rollup-extras/plugin-copy";
 import del from "rollup-plugin-delete";
 import babel from "@rollup/plugin-babel";
 import sass from 'rollup-plugin-sass';
@@ -26,26 +26,29 @@ export default {
                 includePaths: ['node_modules/govuk-frontend/dist'],
             }
         }),
-        copyAssets({
+        copy({
+                flatten: true,
+                emitFiles: false,
+                copyOnce: false,
                 targets: [
                     {
                         src: 'node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css',
                         dest: 'dist/css',
                     },
                     {
-                        src: 'node_modules/govuk-frontend/dist/govuk/assets/images',
+                        src: 'node_modules/govuk-frontend/dist/govuk/assets/images/**/*',
                         dest: 'dist/images',
                     },
                     {
-                        src: 'node_modules/govuk-frontend/dist/govuk/assets/rebrand/images',
+                        src: 'node_modules/govuk-frontend/dist/govuk/assets/rebrand/images/**/*',
                         dest: 'dist/rebrand/images',
                     },
                     {
-                        src: 'node_modules/govuk-frontend/dist/govuk/assets/fonts',
+                        src: 'node_modules/govuk-frontend/dist/govuk/assets/fonts/**/*',
                         dest: 'dist/fonts',
                     },
                     {
-                        src: 'node_modules/govuk-frontend/dist/govuk/assets/rebrand/fonts',
+                        src: 'node_modules/govuk-frontend/dist/govuk/assets/rebrand/fonts/**/*',
                         dest: 'dist/rebrand/fonts',
                     },
                     {
@@ -73,11 +76,11 @@ export default {
                         dest: 'dist/css'
                     },
                     {
-                        src: 'node_modules/@ministryofjustice/frontend/moj/assets/images',
+                        src: 'node_modules/@ministryofjustice/frontend/moj/assets/images/**/*',
                         dest: 'dist/images',
                     },
                     {
-                        src: 'node_modules/@ministryofjustice/frontend/moj/assets/fonts',
+                        src: 'node_modules/@ministryofjustice/frontend/moj/assets/fonts/**/*',
                         dest: 'dist/fonts',
                     },
                 ],
