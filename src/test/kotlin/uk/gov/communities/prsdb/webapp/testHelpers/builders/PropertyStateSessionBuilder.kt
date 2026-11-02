@@ -46,7 +46,7 @@ class PropertyStateSessionBuilder(
     AssociatedPartiesStateBuilder<PropertyStateSessionBuilder>,
     WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
-        additionalDataMap["isAddressAlreadyRegistered"] = Json.encodeToString(serializer(), isRegistered)
+        additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
     }
 
