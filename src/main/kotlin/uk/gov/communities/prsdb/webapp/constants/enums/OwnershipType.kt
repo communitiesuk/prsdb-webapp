@@ -26,6 +26,12 @@ enum class OwnershipType {
     // must have at least one freeholder record. The same rule is repeated as a list of ordinals in
     // V1_61_0__add_ownership_type_and_associated_party_tables.sql and in the seed scripts, which
     // cannot call into Kotlin.
+    // It is also expressed over the registration journey's answers, as
+    // OwnershipStructureRoutingStepConfig.asksFreeholders. The two agree exactly, since this enum
+    // is the product of those answers.
+    // TODO PDJB-2015: once the mapping from the journey's answers to an OwnershipType exists,
+    //  make OwnershipStructureRoutingStepConfig.asksFreeholders delegate to this method instead of
+    //  restating the rule.
     fun impliesAnotherFreeholder() =
         this in
             setOf(
