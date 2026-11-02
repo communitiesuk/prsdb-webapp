@@ -57,14 +57,19 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
-            // TODO PDJB-1669: Use the EIC issue date and issue date step for EICs once they exist
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading =
-                    if (isEic && isEicIssueDateEnabled) {
-                        "checkElectricalSafety.issueDate.fieldHeading"
+                    if (isEic) {
+                        // TODO PDJB-1679: Remove this check and always use the issue date heading when the EIC_ISSUE_DATE flag is removed
+                        if (isEicIssueDateEnabled) {
+                            "checkElectricalSafety.issueDate.fieldHeading"
+                        } else {
+                            "checkElectricalSafety.expiryDate.fieldHeading"
+                        }
                     } else {
                         "checkElectricalSafety.expiryDate.fieldHeading"
                     },
+                // TODO PDJB-1669: Use the EIC issue date and issue date step for EICs once they exist
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
                 destination = destinationProvider(expiryDateStep),
             ),
