@@ -2,14 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
-import uk.gov.communities.prsdb.webapp.constants.enums.AdditionalPropertyOwnerType
-import uk.gov.communities.prsdb.webapp.database.entity.AdditionalPropertyOwner
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 
@@ -28,42 +29,45 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     private fun countRowsIn(table: String) = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $table", Int::class.java)!!
 
+    private fun countRowsFor(
+        table: String,
+        propertyOwnershipId: Long,
+    ) = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM $table WHERE property_ownership_id = ?",
+        Int::class.java,
+        propertyOwnershipId,
+    )!!
+
     private fun anyPropertyOwnershipId() = propertyOwnershipRepository.findAll().minOf { it.id }
 
     private fun inTransaction(block: () -> Unit) = TransactionTemplate(transactionManager).executeWithoutResult { block() }
 
     @Test
-    fun `deleting a property ownership deletes its additional property owners and property manager`() {
+    fun `deleting a property ownership deletes its freeholders, superior landlords and property manager`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            propertyOwnership.additionalPropertyOwners.addAll(
-                listOf(
-                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.FREEHOLDER, propertyOwnership, name = "A Freeholder"),
-                    // No name, email or address: a landlord may tell us they cannot provide the owner's details
-                    AdditionalPropertyOwner(AdditionalPropertyOwnerType.SUPERIOR_LANDLORD, propertyOwnership),
-                ),
-            )
+            propertyOwnership.freeholders.add(Freeholder(propertyOwnership, name = "A Freeholder"))
+            // No name, email or address: a landlord may tell us they cannot provide the party's details
+            propertyOwnership.superiorLandlords.add(SuperiorLandlord(propertyOwnership))
             // Saved separately because the association has no cascade, matching how License is handled
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
         assertEquals(1, countRowsIn("property_manager"))
-        val ownerTypes =
+        // The seed data already gives this property a "no details known" placeholder freeholder
+        val freeholderNames =
             jdbcTemplate.queryForList(
-                "SELECT owner_type FROM additional_property_owner WHERE property_ownership_id = ? ORDER BY owner_type",
-                Int::class.java,
+                "SELECT name FROM freeholder WHERE property_ownership_id = ?",
+                String::class.java,
                 propertyOwnershipId,
             )
-        assertEquals(
-            listOf(AdditionalPropertyOwnerType.FREEHOLDER.ordinal, AdditionalPropertyOwnerType.SUPERIOR_LANDLORD.ordinal),
-            ownerTypes,
-        )
+        assertTrue(freeholderNames.contains("A Freeholder"))
         val superiorLandlord =
             jdbcTemplate.queryForMap(
-                "SELECT name, email, address_id FROM additional_property_owner WHERE owner_type = ?",
-                AdditionalPropertyOwnerType.SUPERIOR_LANDLORD.ordinal,
+                "SELECT name, email, address_id FROM superior_landlord WHERE property_ownership_id = ?",
+                propertyOwnershipId,
             )
         assertNull(superiorLandlord["name"])
         assertNull(superiorLandlord["email"])
@@ -75,8 +79,24 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         }
 
         // Assert
-        assertEquals(0, countRowsIn("additional_property_owner"))
+        assertEquals(0, countRowsFor("freeholder", propertyOwnershipId))
+        assertEquals(0, countRowsFor("superior_landlord", propertyOwnershipId))
         assertEquals(0, countRowsIn("property_manager"))
+    }
+
+    @Test
+    fun `every seeded property whose ownership type implies another freeholder has at least one`() {
+        // Ownership types whose holder is not the sole freeholder: NONE, LEASEHOLD_ONLY,
+        // JOINT_TENANTS, TENANTS_IN_COMMON, SHARE_OF_JOINT_TENANTS, SHARE_OF_TENANTS_IN_COMMON.
+        val propertiesWithoutAFreeholder =
+            jdbcTemplate.queryForList(
+                "SELECT po.id FROM property_ownership po " +
+                    "WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8) " +
+                    "AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id)",
+                Long::class.java,
+            )
+
+        assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
     }
 
     @Test

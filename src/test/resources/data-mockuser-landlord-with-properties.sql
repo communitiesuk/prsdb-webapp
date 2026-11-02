@@ -53,3 +53,12 @@ VALUES
        (1, 1, current_date, true, current_date + 365, 0, 0),
        (2, 2, current_date, true, current_date + 365, 0, 0),
        (3, 3, current_date, true, current_date + 365, 0, 0);
+
+-- PDJB-1956: every property whose ownership type implies a freeholder other than the landlord
+-- must have at least one freeholder row. Seed data is inserted after the V1_61_0 backfill has
+-- run, so these rows are added here instead. No name, email or address: "no details known".
+INSERT INTO freeholder (property_ownership_id)
+SELECT po.id
+FROM property_ownership po
+WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
+  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

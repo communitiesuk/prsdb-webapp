@@ -39,3 +39,12 @@ VALUES (2, 1, '2025-01-15');
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'Original Landlord',current_date);
 SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));
+
+-- PDJB-1956: every property whose ownership type implies a freeholder other than the landlord
+-- must have at least one freeholder row. Seed data is inserted after the V1_61_0 backfill has
+-- run, so these rows are added here instead. No name, email or address: "no details known".
+INSERT INTO freeholder (property_ownership_id)
+SELECT po.id
+FROM property_ownership po
+WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
+  AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);

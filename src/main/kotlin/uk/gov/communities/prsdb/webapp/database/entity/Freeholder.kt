@@ -1,22 +1,20 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import uk.gov.communities.prsdb.webapp.constants.enums.AdditionalPropertyOwnerType
 
+// A freeholder of the property other than the landlord themselves. Name, email and address are
+// all nullable: a landlord may tell us they cannot provide the freeholder's details, and a row
+// with none of them set is how we record "no details known".
 @Entity
-class AdditionalPropertyOwner() : ModifiableAuditableEntity() {
+class Freeholder() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
-
-    @Column(nullable = false)
-    lateinit var ownerType: AdditionalPropertyOwnerType
 
     var name: String? = null
 
@@ -32,13 +30,11 @@ class AdditionalPropertyOwner() : ModifiableAuditableEntity() {
         private set
 
     constructor(
-        ownerType: AdditionalPropertyOwnerType,
         propertyOwnership: PropertyOwnership,
         name: String? = null,
         email: String? = null,
         address: Address? = null,
     ) : this() {
-        this.ownerType = ownerType
         this.propertyOwnership = propertyOwnership
         this.name = name
         this.email = email
