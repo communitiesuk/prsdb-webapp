@@ -89,7 +89,7 @@ Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `rec
     A country is only accepted if sending letters to international addresses is turned on in the Notify service's settings;
     otherwise Notify rejects the address with "Must be a real UK postcode".
   - Address lines must not start with any of the following characters: `@ ( ) = [ ] " \ / , < >`
-    ([Notify's validation](https://github.com/alphagov/notifications-utils/blob/main/notifications_utils/recipient_validation/postal_address.py#L33) also rejects `~`, although its docs do not list it).
+    ([Notify's validation](https://github.com/alphagov/notifications-utils/blob/19fb1303290242bdf1183979e01c0b6c62b6f3c3/notifications_utils/recipient_validation/postal_address.py#L33) also rejects `~`, although its docs do not list it).
 
   Notify rejects addresses that break these rules, and `sendLetter` throws a `PersistentLetterSendException`.
 - Letter personalisation must not use the address keys (`address_line_1` to `address_line_7` or `postcode`), as these are set from the recipient address.
