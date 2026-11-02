@@ -99,7 +99,7 @@ class JourneyIntrospector(
             is Destination.VisitableStep, is Destination.NavigationalStep ->
                 IntrospectedDestination(route.mode, step = stepOf(destination)?.let { ids[it] ?: stepId(it) }, reads = reads)
             is Destination.ExternalUrl ->
-                IntrospectedDestination(route.mode, url = destination.externalUrl.substringBefore('?'), reads = reads)
+                IntrospectedDestination(route.mode, url = destination.externalUrl.substringBefore('?').substringBefore('#'), reads = reads)
             is Destination.StepRoute -> IntrospectedDestination(route.mode, url = destination.routeSegment, reads = reads)
             else -> IntrospectedDestination(route.mode, reads = reads)
         }

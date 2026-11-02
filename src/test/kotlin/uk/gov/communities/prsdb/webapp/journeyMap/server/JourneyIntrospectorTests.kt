@@ -58,6 +58,15 @@ class JourneyIntrospectorTests {
     }
 
     @Test
+    fun `a destination that opens a tab of a page leads to that page`() {
+        val routing = RoutingStep().also { step -> initialise(step) { Destination.ExternalUrl("/team-members#invitations") } }
+
+        val structure = JourneyIntrospector(null).introspect("routing", routingMap(routing), null)
+
+        assertEquals(listOf("/team-members"), structure.stepById("internal:RoutingStep")?.destinations?.map { it.url }?.distinct())
+    }
+
+    @Test
     fun `journey state that routing code reads besides the outcome is recorded with the destination`() {
         val reads = mutableListOf<String>()
         val introspector =
