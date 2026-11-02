@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordIn
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
+import uk.gov.communities.prsdb.webapp.controllers.CancelOrganisationalLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
@@ -67,6 +68,7 @@ object JourneyDescriptors {
     private const val PROPERTY_WITH_PENDING_INVITATION_ID = 2L
     private const val PENDING_INVITATION_ID = 3L
     private const val ORGANISATION_INVITATION_TOKEN = "1234abcd-5678-abcd-1234-567abcd2222a"
+    private const val PENDING_ORGANISATION_INVITATION_ID = 1L
     private const val LETTING_AGENT_TOKEN = "3334abcd-5678-abcd-1234-567abcd1111a"
     private const val LOCAL_COUNCIL_INVITATION_TOKEN = "c0c0c0c0-1111-2222-3333-444455556666"
     private const val INVITATION_EMAIL_LINK = "Link in the invitation email"
@@ -360,6 +362,17 @@ object JourneyDescriptors {
                 basePath = ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelBasePath(TEAM_MEMBER_EDITOR_ID),
                 seedScripts = organisationAdminSeeds + "journey-map/seeds/org-team-members.sql",
                 start = { it.navigate(TeamMembersController.TEAM_MEMBERS_ROUTE) },
+                arrange = { it.enableFeature(MULTI_USER_ORGANISATIONS) },
+                startsFromLink = true,
+            ),
+            JourneyDescriptor(
+                name = "cancelOrganisationInvitation",
+                title = "Cancel a team member invitation",
+                basePath =
+                    CancelOrganisationalLandlordInvitationController.CANCEL_ORGANISATIONAL_LANDLORD_INVITATION_ROUTE +
+                        "/$PENDING_ORGANISATION_INVITATION_ID",
+                seedScripts = organisationAdminSeeds,
+                start = { it.navigate(TeamMembersController.TEAM_MEMBERS_INVITATIONS_TAB_PATH) },
                 arrange = { it.enableFeature(MULTI_USER_ORGANISATIONS) },
                 startsFromLink = true,
             ),
