@@ -31,7 +31,7 @@
 <!--/*@thymesVar id="rentedOutTenancyHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutTenancyRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="tenancyUnoccupiedBodyTextKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="warningTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="lettingAgentDelegation" type="java.util.List"*/-->
@@ -127,7 +127,7 @@
         <div th:replace="~{fragments/warningText :: warningText(#{${warningTextKey}})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">
-        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <input type="hidden" name="answersLastChangedAt" th:value="${answersLastChangedAt}"/>
         <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
     </th:block>
 </html>
