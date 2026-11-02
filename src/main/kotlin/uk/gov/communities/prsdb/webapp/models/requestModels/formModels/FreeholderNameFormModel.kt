@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class PersonNameFormModel : FormModel {
+class FreeholderNameFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
