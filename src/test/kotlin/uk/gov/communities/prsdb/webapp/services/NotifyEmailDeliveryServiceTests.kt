@@ -45,7 +45,7 @@ class NotifyEmailDeliveryServiceTests {
     }
 
     @Test
-    fun `deliverEmail sends a matching email using the notification client`() {
+    fun `DeliverEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
         val expectedTemplateId = EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL
@@ -144,7 +144,7 @@ class NotifyEmailDeliveryServiceTests {
             .sendEmail(any(), any(), any(), any())
 
         // Act & Assert
-        assertThrows<SerializationException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+        assertThrows<SerializationException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
     }
 
     companion object {
