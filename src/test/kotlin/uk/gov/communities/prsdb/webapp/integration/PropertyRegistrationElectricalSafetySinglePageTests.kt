@@ -97,8 +97,10 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
         }
 
         @Test
-        fun `Cert uploaded - EIC date change link navigates to issue date page`(page: Page) {
+        fun `Cert uploaded - EIC date row has a blank value and its change link navigates to issue date page`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eic))
+            // TODO PDJB-1669: Check the row shows the EIC issue date
+            assertThat(cyaPage.summaryList.expiryDateRow.value).isEmpty()
             cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
             assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
         }

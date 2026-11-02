@@ -115,7 +115,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         }
 
         @Test
-        fun `factory links the EIC date row to the EIC issue date step when the EIC issue date flag is enabled`() {
+        fun `factory links the EIC date row to the EIC issue date step with a blank value when the EIC issue date flag is enabled`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
@@ -133,8 +133,9 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
                     Destination.Nowhere()
                 }
 
-            factory.createRows()
+            val rows = factory.createRows()
             assertEquals(listOf(mockHasElectricalCertStep, mockEicIssueDateStep, mockCheckEicUploadsStep), requestedSteps)
+            assertEquals("", rows[1].fieldValue)
         }
 
         @Test

@@ -65,8 +65,9 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 // TODO PDJB-1669: Show the EIC issue date for EICs. With EIC_ISSUE_DATE enabled this value is blank for EICs,
-                //  because it reads the EIC expiry date step, which can't be reached when the flag is on
-                fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
+                //  because it reads the EIC expiry date step, which can't be reached when the flag is on.
+                //  The empty string keeps the value cell so the change link stays in the actions column
+                fieldValue = state.getElectricalCertificateExpiryDateIfReachable() ?: "",
                 destination = destinationProvider(dateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
