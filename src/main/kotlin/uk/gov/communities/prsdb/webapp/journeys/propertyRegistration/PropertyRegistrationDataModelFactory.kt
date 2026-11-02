@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
@@ -60,7 +60,7 @@ class PropertyRegistrationDataModelFactory(
             // TODO PDJB-2015: derive the ownership type from the associated parties answers
             ownershipType =
                 if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                    OwnershipType.FREEHOLD
+                    OwnershipTypeBeforePdjb955.FREEHOLD
                 } else {
                     state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
                         .notNullValue(OwnershipTypeFormModel::ownershipType)

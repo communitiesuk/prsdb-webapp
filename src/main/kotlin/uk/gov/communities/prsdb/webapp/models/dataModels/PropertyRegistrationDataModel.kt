@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import java.math.BigDecimal
@@ -16,7 +16,7 @@ data class PropertyRegistrationDataModel(
     val propertyType: PropertyType,
     val licenseType: LicensingType,
     val licenceNumber: String,
-    val ownershipType: OwnershipType,
+    val ownershipType: OwnershipTypeBeforePdjb955,
     val isOccupied: Boolean,
     val numberOfHouseholds: Int,
     val numberOfPeople: Int,

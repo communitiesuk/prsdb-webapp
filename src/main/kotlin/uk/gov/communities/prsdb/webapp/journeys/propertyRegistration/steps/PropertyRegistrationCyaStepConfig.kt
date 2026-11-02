@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -259,7 +259,7 @@ class PropertyRegistrationCyaStepConfig(
         if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
             return SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyDetails.propertyRecord.ownership.ownershipType",
-                OwnershipType.FREEHOLD,
+                OwnershipTypeBeforePdjb955.FREEHOLD,
                 actionUrl = null as String?,
             )
         } else {

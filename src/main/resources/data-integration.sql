@@ -1,11 +1,11 @@
 -- =============================================================================
--- Addresses for the QA and metrics cohorts below, at reserved ids far above the range
--- the AddressBase/NGD loader allocates from. The cohorts used to claim whichever
+-- Addresses for the seeded properties below, at reserved ids far above the range
+-- the AddressBase/NGD loader allocates from. These used to claim whichever
 -- existing addresses were not yet used by an active property, which meant an unbounded
 -- scan of the 35m-row address table on every boot and left each property in whichever
 -- council happened to own the address it claimed.
 --
---   9000000001-9000000009  provide-later property record QA cohort (properties 49-57)
+--   9000000001             shared correspondence address for every seeded property
 --   9000001001-9000001101  metrics test cohort 1 (properties 1201-1301)
 --   9000002001-9000002100  metrics test cohort 2 (properties 1601-1700)
 --
@@ -18,9 +18,8 @@
 -- A NULL uprn also keeps them out of the address lookup, which requires uprn IS NOT NULL.
 -- =============================================================================
 INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
-SELECT 9000000000 + i, current_timestamp, null::bigint,
-       i || ' Provide Later Road, Testville, QA1 1AA', 'QA1 1AA', i || '', 2
-FROM generate_series(1, 9) AS s(i)
+SELECT 9000000001, current_timestamp, null::bigint,
+       '1 Correspondence Road, Testville, QA1 1AA', 'QA1 1AA', '1', 2
 UNION ALL
 SELECT 9000001000 + i, current_timestamp, null::bigint,
        i || ' Metrics Property Street, MT2 2BB', 'MT2 2BB', i || '', 2
@@ -166,21 +165,6 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
--- PDJB-1048 / PDJB-1305 provide-later + compliance-banner property record QA (landlord 1):
--- registration numbers for property_ownership 49-57
-INSERT INTO registration_number (id, created_date, number, type)
-VALUES (57, '2026-04-14 00:00:00+00', 210000000057, 0),
-       (58, '2026-04-14 00:00:00+00', 210000000058, 0),
-       (59, '2026-04-14 00:00:00+00', 210000000059, 0),
-       (60, '2026-04-14 00:00:00+00', 210000000060, 0),
-       (61, '2026-04-14 00:00:00+00', 210000000061, 0),
-       (62, '2026-04-14 00:00:00+00', 210000000062, 0),
-       (63, '2026-04-14 00:00:00+00', 210000000063, 0),
-       (64, '2026-04-14 00:00:00+00', 210000000064, 0),
-       (65, '2026-04-14 00:00:00+00', 210000000065, 0) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
-
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
@@ -310,164 +294,110 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('organisation_governing_body_member', 'id'), (SELECT MAX(id) FROM organisation_governing_body_member));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
                                 custom_rent_frequency, rent_amount, custom_property_type, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, true, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
+VALUES (1, true, 1, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (2, true, 0, 0, 0, 10, 2, '2025-01-15 00:00:00+00', null, 1,
+       (2, true, 0, 2, 0, 0, 10, 2, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (3, true, 0, 0, 0, 11, 3, '2025-01-15 00:00:00+00', null, 1,
+       (3, true, 0, 2, 0, 0, 11, 3, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (4, true, 0, 0, 0, 12, 4, '2025-01-15 00:00:00+00', null, 1,
+       (4, true, 0, 2, 0, 0, 12, 4, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (5, true, 1, 1, 2, 13, 5, '2024-10-15 00:00:00+00', null, 1,
+       (5, true, 1, 1, 1, 2, 13, 5, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (6, true, 1, 1, 2, 14, 6, '2024-10-15 00:00:00+00', null, 1,
+       (6, true, 1, 1, 1, 2, 14, 6, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (7, true, 1, 1, 2, 15, 7, '2024-10-15 00:00:00+00', null, 1,
+       (7, true, 1, 1, 1, 2, 15, 7, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (8, true, 1, 1, 2, 16, 8, '2024-10-15 00:00:00+00', null, 1,
+       (8, true, 1, 1, 1, 2, 16, 8, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (9, true, 1, 1, 2, 17, 9, '2025-07-24 00:00:00+00', null, 1,
+       (9, true, 1, 1, 1, 2, 17, 9, '2025-07-24 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (10, true, 1, 1, 2, 18, 10, '2026-02-27 00:00:00+00', null, 4,
+       (10, true, 1, 1, 1, 2, 18, 10, '2026-02-27 00:00:00+00', null, 4,
         1, null, null, 2, 1, null, 123.12, 'End terrace', true, 'email@example.com', 9000000001, current_date + 365),
-       (11, true, 1, 1, 2, 19, 7449159, '2026-03-02 00:00:00+00', null, 1,
+       (11, true, 1, 1, 1, 2, 19, 7449159, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (12, true, 1, 1, 2, 20, 7449160, '2026-03-02 00:00:00+00', null, 1,
+       (12, true, 1, 1, 1, 2, 20, 7449160, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (13, true, 1, 1, 2, 21, 7449165, '2026-03-02 00:00:00+00', null, 1,
+       (13, true, 1, 1, 1, 2, 21, 7449165, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (14, true, 1, 1, 2, 22, 7449169, '2026-03-02 00:00:00+00', null, 1,
+       (14, true, 1, 1, 1, 2, 22, 7449169, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (15, true, 1, 1, 2, 23, 7449173, '2026-03-02 00:00:00+00', null, 1,
+       (15, true, 1, 1, 1, 2, 23, 7449173, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (16, true, 1, 1, 2, 24, 7449174, '2026-03-02 00:00:00+00', null, 1,
+       (16, true, 1, 1, 1, 2, 24, 7449174, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (17, true, 1, 1, 2, 25, 7449179, '2026-03-02 00:00:00+00', null, 1,
+       (17, true, 1, 1, 1, 2, 25, 7449179, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (18, true, 1, 1, 2, 26, 7449180, '2026-03-02 00:00:00+00', null, 1,
+       (18, true, 1, 1, 1, 2, 26, 7449180, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (19, true, 1, 1, 2, 27, 7449185, '2026-03-02 00:00:00+00', null, 1,
+       (19, true, 1, 1, 1, 2, 27, 7449185, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (20, true, 1, 1, 2, 28, 7449193, '2026-03-02 00:00:00+00', null, 1,
+       (20, true, 1, 1, 1, 2, 28, 7449193, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (21, true, 1, 1, 2, 29, 7449194, '2026-03-02 00:00:00+00', null, 1,
+       (21, true, 1, 1, 1, 2, 29, 7449194, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (22, true, 1, 1, 2, 30, 7449198, '2026-03-02 00:00:00+00', null, 1,
+       (22, true, 1, 1, 1, 2, 30, 7449198, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (23, true, 1, 1, 2, 31, 7449199, '2026-03-02 00:00:00+00', null, 1,
+       (23, true, 1, 1, 1, 2, 31, 7449199, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (24, true, 1, 1, 2, 32, 7449203, '2026-03-02 00:00:00+00', null, 1,
+       (24, true, 1, 1, 1, 2, 32, 7449203, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (25, true, 1, 1, 2, 33, 7449206, '2026-03-02 00:00:00+00', null, 1,
+       (25, true, 1, 1, 1, 2, 33, 7449206, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (26, true, 1, 1, 2, 34, 7449208, '2026-03-02 00:00:00+00', null, 1,
+       (26, true, 1, 1, 1, 2, 34, 7449208, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (27, true, 1, 1, 2, 35, 7449213, '2026-03-02 00:00:00+00', null, 1,
+       (27, true, 1, 1, 1, 2, 35, 7449213, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (28, true, 1, 1, 2, 36, 7449214, '2026-03-02 00:00:00+00', null, 1,
+       (28, true, 1, 1, 1, 2, 36, 7449214, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (29, true, 1, 1, 2, 37, 7449217, '2026-03-02 00:00:00+00', null, 1,
+       (29, true, 1, 1, 1, 2, 37, 7449217, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (30, true, 1, 1, 2, 38, 7449222, '2026-03-02 00:00:00+00', null, 1,
+       (30, true, 1, 1, 1, 2, 38, 7449222, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (31, true, 1, 1, 2, 39, 7449226, '2026-03-02 00:00:00+00', null, 1,
+       (31, true, 1, 1, 1, 2, 39, 7449226, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (32, true, 1, 1, 2, 40, 7449227, '2026-03-02 00:00:00+00', null, 1,
+       (32, true, 1, 1, 1, 2, 40, 7449227, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (33, true, 1, 1, 2, 41, 7449231, '2026-03-02 00:00:00+00', null, 1,
+       (33, true, 1, 1, 1, 2, 41, 7449231, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (34, true, 1, 1, 2, 42, 7449235, '2026-03-02 00:00:00+00', null, 1,
+       (34, true, 1, 1, 1, 2, 42, 7449235, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (35, true, 1, 1, 2, 43, 7449239, '2026-03-02 00:00:00+00', null, 1,
+       (35, true, 1, 1, 1, 2, 43, 7449239, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (36, true, 1, 1, 2, 44, 7449250, '2026-03-02 00:00:00+00', null, 1,
+       (36, true, 1, 1, 1, 2, 44, 7449250, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (37, true, 1, 1, 2, 45, 7449252, '2026-03-02 00:00:00+00', null, 1,
+       (37, true, 1, 1, 1, 2, 45, 7449252, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (38, true, 1, 1, 2, 46, 7449253, '2026-03-02 00:00:00+00', null, 1,
+       (38, true, 1, 1, 1, 2, 46, 7449253, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (39, true, 1, 1, 2, 47, 7449254, '2026-03-02 00:00:00+00', null, 1,
+       (39, true, 1, 1, 1, 2, 47, 7449254, '2026-03-02 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (40, true, 1, 1, 2, 48, 7449161, '2026-04-14 00:00:00+00', null, 1,
+       (40, true, 1, 1, 1, 2, 48, 7449161, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (41, true, 1, 1, 2, 49, 7449162, '2026-04-14 00:00:00+00', null, 1,
+       (41, true, 1, 1, 1, 2, 49, 7449162, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (42, true, 1, 1, 2, 50, 7449163, '2026-04-14 00:00:00+00', null, 1,
+       (42, true, 1, 1, 1, 2, 50, 7449163, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
-       (43, true, 0, 0, 0, 51, 7449166, '2026-04-14 00:00:00+00', null, 1,
+       (43, true, 0, 2, 0, 0, 51, 7449166, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (44, true, 0, 0, 0, 52, 7449167, '2026-04-14 00:00:00+00', null, 1,
+       (44, true, 0, 2, 0, 0, 52, 7449167, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (45, true, 0, 0, 0, 53, 7449170, '2026-04-14 00:00:00+00', null, 1,
+       (45, true, 0, 2, 0, 0, 53, 7449170, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (46, true, 0, 0, 0, 54, 7449175, '2026-04-14 00:00:00+00', null, 1,
+       (46, true, 0, 2, 0, 0, 54, 7449175, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (47, true, 0, 0, 0, 55, 7449181, '2026-04-14 00:00:00+00', null, 1,
+       (47, true, 0, 2, 0, 0, 55, 7449181, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (48, true, 0, 0, 0, 56, 7449182, '2026-04-14 00:00:00+00', null, 1,
+       (48, true, 0, 2, 0, 0, 56, 7449182, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
-
--- =============================================================================
--- PDJB-1048 provide-later property record QA properties (landlord 1), ids 49-56.
--- For manual QA of the notification banners and "Provide this later"
--- rows in the property record. Each property takes one
--- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
--- properties set last_occupied_date so the "within 28 days" deadline renders.
--- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
---   49  occupied, licensing + tenancy skipped, compliance all provide-later -> COMBINED banner
---   50  occupied, everything provided, fully compliant          -> no banner (control)
---   51  occupied, tenancy skipped (licence held), compliant     -> TENANCY banner
---   52  occupied, licensing skipped (tenancy held), compliant   -> LICENSING banner
---   53  occupied, licensing + tenancy skipped, fully compliant  -> BOTH banner
---   54  unoccupied, licensing skipped                           -> licensing provide-later row (no banner)
--- PDJB-1305 compliance-banner QA (occupied, licensing + tenancy fully provided so only the
--- compliance banner shows):
---   55  gas cert expired, electrical + EPC valid                -> single "certificate expired" banner
---   56  gas cert + EPC expired, electrical valid                -> "multiple certificates expired" banner
---   57  gas cert "provide later", electrical + EPC valid        -> "add compliance certificates" (missing) banner
--- =============================================================================
-INSERT INTO license (id, license_type, license_number)
-VALUES (1, 1, 'LQA0000050'),
-       (2, 1, 'LQA0000051') ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
-
--- rn doubles as the reserved QA address selector (9000000000 + rn), so every row below
--- gets a distinct address.
-WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
-                     furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
-                     license_provide_later, tenancy_provide_later) AS (
-         VALUES (1, 49, 57, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (2, 50, 58, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (3, 51, 59, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
-                (4, 52, 60, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
-                (5, 53, 61, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (6, 54, 62, null, 0, 0, null, null, null, false, null, true, false),
-                (7, 55, 63, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (8, 56, 64, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (9, 57, 65, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
-                                license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
-SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
-       9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
-       null, null, np.furnished_status, np.rent_frequency, null,
-       np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
-       np.license_provide_later, np.tenancy_provide_later, 'email@example.com', 9000000001, current_date + 365
-FROM new_properties np
-ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
@@ -523,21 +453,6 @@ SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
 -- Only insert links for landlords that were actually seeded, so that a landlord skipped above
 -- (because the user is now an organisation landlord) drops only its own links rather than aborting
 -- the whole statement with a foreign key violation.
-WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
-ON CONFLICT DO NOTHING;
-
--- PDJB-1048 / PDJB-1305 QA (landlord 1): ownership links for property_ownership 49-57
-INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-SELECT * FROM (VALUES (1, 49, '2025-01-15'::timestamp),
-       (1, 50, '2025-01-15'),
-       (1, 51, '2025-01-15'),
-       (1, 52, '2025-01-15'),
-       (1, 53, '2025-01-15'),
-       (1, 54, '2025-01-15'),
-       (1, 55, '2025-01-15'),
-       (1, 56, '2025-01-15'),
-       (1, 57, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
--- Only insert links for landlords that were actually seeded (see note above).
 WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
 ON CONFLICT DO NOTHING;
 
@@ -630,43 +545,6 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
--- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
--- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
-                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
-                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
-                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
-VALUES (49, 50, current_date, current_date, null, false, '2035-01-01', 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (50, 51, current_date, current_date, null, false, '2035-01-01', 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (51, 52, current_date, current_date, null, false, '2035-01-01', 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (52, 53, current_date, current_date, null, false, '2035-01-01', 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: scenario A (PO 49) compliance record with all three certs "provide later".
-       (53, 49, current_date, current_date, null, true, null, null, null, null,
-        null, null, null, null, true, true, true, true, true, true),
-       -- PDJB-1305: PO 55 gas cert expired (issued 730 days ago), electrical + EPC valid.
-       (54, 55, current_date, current_date, current_date - 730, true, current_date + 730, 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: PO 56 gas cert + EPC expired, electrical valid.
-       (55, 56, current_date, current_date, current_date - 730, true, current_date + 730, 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
-        false, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: PO 57 gas cert "provide later", electrical + EPC valid -> "add compliance certificates" banner.
-       (56, 57, current_date, current_date, null, true, current_date + 730, 0,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
-
 INSERT INTO passcode (passcode, created_date, last_modified_date, subject_identifier)
 VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        ('PRSD23', current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
@@ -719,10 +597,10 @@ SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 0
 FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-SELECT 1200 + i, true, 1, 1, 2, 1200 + i, 9000001000 + i,
+SELECT 1200 + i, true, 1, 1, 1, 2, 1200 + i, 9000001000 + i,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true, 'email@example.com', 9000000001, current_date + 365
 FROM generate_series(1, 101) AS s(i)
@@ -787,7 +665,7 @@ ON CONFLICT DO NOTHING;
 --   81..90 -> 20..30 hours       (around the p90 = 1 day point)
 --   91..100-> 1.4..2.8 days      (around the p95 = 2 days point)
 -- These exact boundary values make median/p90/p95 land on 22 minutes / 1 day / 2 days.
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
 WITH p AS (
@@ -802,7 +680,7 @@ WITH p AS (
                  END)::int) AS created
     FROM generate_series(1, 100) AS s(i)
 )
-SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 9000002000 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 9000000001, current_date + 365
+SELECT 1600 + i, true, 1, 1, 1, 2, 1600 + i, 9000002000 + i, created, created, NULL, 1, 2, false, true, 'email@example.com', 9000000001, current_date + 365
 FROM p
 ON CONFLICT DO NOTHING;
 

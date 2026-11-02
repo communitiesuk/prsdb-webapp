@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
@@ -11,7 +11,7 @@ abstract class OwnershipTypeFormPage(
 ) : BasePage(page, urlSegment) {
     val form = OwnershipTypeForm(page)
 
-    fun submitOwnershipType(ownershipType: OwnershipType) {
+    fun submitOwnershipType(ownershipType: OwnershipTypeBeforePdjb955) {
         form.ownershipTypeRadios.selectValue(ownershipType)
         form.submit()
     }
