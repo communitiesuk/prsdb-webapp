@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipStructureState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipStructureRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipStructureRoutingStep
 
@@ -24,7 +23,7 @@ class OwnershipStructureTask(
     override val taskState get() = this
 
     override val isJointFreeholder: Boolean
-        get() = ownershipTypeTask.freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
+        get() = ownershipTypeTask.isJointFreeholder
 
     override fun makeSubJourney(state: OwnershipStructureState) =
         subJourney(state) {

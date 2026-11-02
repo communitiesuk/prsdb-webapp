@@ -33,11 +33,12 @@ class OwnershipStructureRoutingStepConfigTests {
         val ownershipKindStep = mock<OwnershipKindStep> { on { outcome } doReturn ownershipKind }
         val freeholdTypeStep = mock<FreeholdTypeStep> { on { outcome } doReturn freeholdType }
         val ownershipTypeTask =
-            mock<OwnershipTypeTask> {
-                on { this.ownsPropertyStep } doReturn ownsPropertyStep
-                on { this.ownershipKindStep } doReturn ownershipKindStep
-                on { this.freeholdTypeStep } doReturn freeholdTypeStep
-            }
+            OwnershipTypeTask(
+                journeyStateService = mock(),
+                ownsPropertyStep = ownsPropertyStep,
+                ownershipKindStep = ownershipKindStep,
+                freeholdTypeStep = freeholdTypeStep,
+            )
         return mock<OwnershipStructureState> { on { this.ownershipTypeTask } doReturn ownershipTypeTask }
     }
 

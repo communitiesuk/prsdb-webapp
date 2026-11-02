@@ -6,11 +6,11 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class FreeholderNameFormModel : FormModel {
+class EntityNameFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerProperty.freeholders.name.error.missing",
+                messageKey = "forms.entityName.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
