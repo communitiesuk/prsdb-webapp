@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EntityNameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 
 @JourneyFrameworkComponent
-class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, EntityNameFormModel, FreeholdersDetailsState>() {
-    override val formModelClass = EntityNameFormModel::class
+class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, FreeholderNameFormModel, FreeholdersDetailsState>() {
+    override val formModelClass = FreeholderNameFormModel::class
 
     override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> =
         mapOf(
@@ -28,7 +28,7 @@ class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, EntityN
 @JourneyFrameworkComponent
 final class FreeholderNameStep(
     stepConfig: FreeholderNameStepConfig,
-) : RequestableStep<Complete, EntityNameFormModel, FreeholdersDetailsState>(stepConfig) {
+) : RequestableStep<Complete, FreeholderNameFormModel, FreeholdersDetailsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-name"
     }
