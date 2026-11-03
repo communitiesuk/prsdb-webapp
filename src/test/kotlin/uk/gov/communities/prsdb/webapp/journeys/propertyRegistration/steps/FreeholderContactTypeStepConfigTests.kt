@@ -51,4 +51,9 @@ class FreeholderContactTypeStepConfigTests {
             content,
         )
     }
+
+    @Test
+    fun `chooseTemplate returns the contact type form template`() {
+        assertEquals("forms/contactTypeForm", FreeholderContactTypeStepConfig().chooseTemplate(state))
+    }
 }
