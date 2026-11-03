@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Free
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderAddressStep
 
 // TODO PDJB-1967: replace the placeholder step with the real address search, select and manual entry steps
+// Make sure that address autofill and clearing works for the change/remove steps
+// see how OrgGovBodyMembersTask prefills/clears the address steps
 @JourneyFrameworkComponent
 class FreeholderAddressTask(
     journeyStateService: JourneyStateService,
@@ -26,4 +28,8 @@ class FreeholderAddressTask(
                 parents { journey.freeholderAddressStep.isComplete() }
             }
         }
+
+    fun clearFormData() {
+        freeholderAddressStep.clearFormData()
+    }
 }

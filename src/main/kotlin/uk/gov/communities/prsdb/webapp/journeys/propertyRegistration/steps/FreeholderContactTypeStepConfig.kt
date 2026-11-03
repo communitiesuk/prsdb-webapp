@@ -10,6 +10,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 // TODO PDJB-1965: replace this placeholder with the real freeholder contact type page.
 // Implement the routing logic
+// TODO PDJB-1965: when changing a freeholder, prefill this page with the contact type from
+//  state.editingFreeholder by overriding resolvePageContent, as in OrgGovBodyMemberNameStepConfig.
+//  Check when adding a second freeholder that the page starts empty, as SaveFreeholderStepConfig clears the form data after each save.
 @JourneyFrameworkComponent
 class FreeholderContactTypeStepConfig :
     AbstractRequestableStepConfig<FreeholderContactType, FreeholderContactTypeFormModel, JourneyState>() {
