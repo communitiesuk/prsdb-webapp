@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -23,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPay
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -62,6 +66,8 @@ class PaymentSummaryStepConfigTests {
                 mockAddressAvailabilityService,
                 mockPaymentService,
             )
+        stepConfig.urlPath = PaymentSummaryStep.ROUTE_SEGMENT
+        stepConfig.validator = AlwaysTrueValidator()
     }
 
     @Test
@@ -77,6 +83,7 @@ class PaymentSummaryStepConfigTests {
         verify(mockState).paymentQuote = quote
         assertEquals("£20", content["annualFee"])
         assertEquals("1 January 2027", content["firstChargeableDate"])
+        assertEquals(today.toString(), content["quoteDate"])
         assertEquals(
             listOf(
                 SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
@@ -221,6 +228,7 @@ class PaymentSummaryStepConfigTests {
         stubAddressTask()
         stubSummaryDestination()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        stubSubmittedQuoteDate(today.toString())
         val refreshedQuote = createQuote(today)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
 
@@ -240,6 +248,7 @@ class PaymentSummaryStepConfigTests {
         stubSummaryDestination()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
         whenever(mockState.paymentQuote).thenReturn(createQuote(today.minusDays(1)))
+        stubSubmittedQuoteDate(today.toString())
         val refreshedQuote = createQuote(today)
         whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
 
@@ -250,6 +259,34 @@ class PaymentSummaryStepConfigTests {
         assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState).paymentQuote = refreshedQuote
         verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideStaleSubmittedQuoteDates")
+    fun `resolveNextDestination refreshes the quote without creating a payment when the submitted quote date is not today`(
+        submittedQuoteDate: String?,
+    ) {
+        // Arrange
+        stubAddressTask()
+        stubSummaryDestination()
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
+        whenever(mockState.paymentQuote).thenReturn(createQuote(today))
+        stubSubmittedQuoteDate(submittedQuoteDate)
+        val refreshedQuote = createQuote(today)
+        whenever(mockPaymentService.getPropertyRegistrationPaymentQuote(today)).thenReturn(refreshedQuote)
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(mockPaymentSummaryStep, assertIs<Destination.VisitableStep>(result).step)
+        verify(mockState).paymentQuote = refreshedQuote
+        verify(mockPaymentService, never()).createPropertyRegistrationPayment(any(), any(), any())
+    }
+
+    private fun stubSubmittedQuoteDate(quoteDate: String?) {
+        whenever(mockState.getStepData(PaymentSummaryStep.ROUTE_SEGMENT))
+            .thenReturn(quoteDate?.let { mapOf("quoteDate" to it) } ?: emptyMap())
     }
 
     private fun stubAddressTask() {
@@ -280,6 +317,7 @@ class PaymentSummaryStepConfigTests {
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")
         val quote = createQuote(today)
         whenever(mockState.paymentQuote).thenReturn(quote)
+        stubSubmittedQuoteDate(today.toString())
         whenever(mockPaymentService.createPropertyRegistrationPayment(journeyId, "landlord@example.com", quote))
             .thenReturn("https://pay.example.test/next")
     }
@@ -290,4 +328,14 @@ class PaymentSummaryStepConfigTests {
             quoteDate = quoteDate,
             renewalDate = LocalDate.of(2028, 3, 1),
         )
+
+    companion object {
+        @JvmStatic
+        fun provideStaleSubmittedQuoteDates() =
+            listOf(
+                Arguments.of(LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1).toString()),
+                Arguments.of("not-a-date"),
+                Arguments.of(null),
+            )
+    }
 }

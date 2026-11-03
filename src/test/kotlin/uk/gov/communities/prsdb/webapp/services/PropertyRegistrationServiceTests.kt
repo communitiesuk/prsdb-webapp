@@ -53,7 +53,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.net.URI
-import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import java.util.UUID
@@ -1736,11 +1735,10 @@ class PropertyRegistrationServiceTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         stubConfirmationEmailDependencies()
-        // 23:30 UTC on 4 October is 00:30 BST on 5 October
         val payment =
             MockPaymentData.createPayment(
                 amountInPence = 2550,
-                paymentCreatedAt = Instant.parse("2026-10-04T23:30:00Z"),
+                quoteDate = LocalDate.of(2026, 10, 5),
                 status = PaymentStatus.SUCCEEDED,
             )
         whenever(

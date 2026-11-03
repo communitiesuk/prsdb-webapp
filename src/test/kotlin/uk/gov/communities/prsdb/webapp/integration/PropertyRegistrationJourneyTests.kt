@@ -406,7 +406,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
                 .containsText(PaymentHelper.formatPence(payment.amountInPence))
             assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
-                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+                .containsText(payment.quoteDate.format(dateFormatter))
             assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
                 .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
@@ -566,6 +566,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val payment = paymentRepository.findAll().single { it.reference == request.reference }
             assertEquals(PaymentStatus.CREATED, payment.status)
             assertEquals(request.amount, payment.amountInPence)
+            assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), payment.quoteDate)
         }
 
         @Test
@@ -663,9 +664,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `submitting the payment summary with a quote from a previous day refreshes the summary without creating a payment`(
-            page: Page,
-        ) {
+        fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
             val today = LocalDate.now(DateTimeHelper.UK_ZONE)
             val staleQuote =
                 PropertyRegistrationPaymentQuote(
@@ -685,6 +684,49 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
             assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `submitting a payment summary page with an older quote than the stored quote refreshes the summary without creating a payment`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+            ensureIncompletePropertyExistsForCurrentJourney(page)
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", today.minusDays(1).toString())
+
+            paymentSummaryPage.form.submit()
+
+            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
+            verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `returning from GOV UK Pay on a later day than the quote cancels the payment and shows the payment summary`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentReturnPage = submitPaymentSummary(page)
+                val payment = getCreatedPayment()
+                jdbcTemplate.update(
+                    "UPDATE payment SET quote_date = ? WHERE payment_id = ?",
+                    payment.quoteDate.minusDays(1),
+                    payment.paymentId,
+                )
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
+                verify(govUkPayClient).cancelPayment(payment.paymentId)
+                verify(govUkPayClient, never()).capturePayment(any())
+            }
         }
 
         @Test
