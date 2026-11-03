@@ -15,7 +15,7 @@ class SuperiorLandlordsBackRoutingStepConfig : AbstractRequestableStepConfig<Com
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
             "todoComment" to
-                "TODO (PDJB-1978): internal step routing back to the has superior landlords page when the last one is removed to be added",
+                "TODO (PDJB-1978): internal step routing back to the has superior landlords page when the last one is removed",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"

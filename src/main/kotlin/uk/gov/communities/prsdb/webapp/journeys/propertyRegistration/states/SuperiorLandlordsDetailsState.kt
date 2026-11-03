@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 
-interface SuperiorLandlordsMembersState :
+interface SuperiorLandlordsDetailsState :
     JourneyState,
     SuperiorLandlordsListState {
     val superiorLandlordProvideDetailsStep: ProvideSuperiorLandlordDetailsStep
@@ -25,12 +25,10 @@ interface SuperiorLandlordsMembersState :
     val saveSuperiorLandlordStep: SaveSuperiorLandlordStep
     val setStateForSuperiorLandlordEditStep: SetStateForSuperiorLandlordEditStep
     val confirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep
-    val allowRemovingLastMember: Boolean
 }
 
-class SuperiorLandlordsMembersDependencies(
-    // The state slice that owns the collected superior landlords. The reusable members task reads and writes the
+class SuperiorLandlordsDetailsDependencies(
+    // The state slice that owns the collected superior landlords. The reusable details task reads and writes the
     // superior landlords list through this, so the list can live in the enclosing outer task or journey.
     val listState: SuperiorLandlordsListState,
-    val allowRemovingLastMember: Boolean = true,
 )

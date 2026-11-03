@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersDependencies
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
-class FreeholdersMembersTask(
+class FreeholdersDetailsTask(
     journeyStateService: JourneyStateService,
     override val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep,
     override val freeholderNameStep: FreeholderNameStep,
@@ -34,8 +34,8 @@ class FreeholdersMembersTask(
     override val saveFreeholderStep: SaveFreeholderStep,
     override val setStateForFreeholderEditStep: SetStateForFreeholderEditStep,
     override val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep,
-) : Task<FreeholdersMembersState, FreeholdersMembersDependencies>(journeyStateService),
-    FreeholdersMembersState {
+) : Task<FreeholdersDetailsState, FreeholdersDetailsDependencies>(journeyStateService),
+    FreeholdersDetailsState {
     override val taskState get() = this
 
     override var freeholdersMap: Map<Int, FreeholderDataModel>?
@@ -55,10 +55,11 @@ class FreeholdersMembersTask(
         }
     override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
 
-    override fun makeSubJourney(state: FreeholdersMembersState) =
+    override fun makeSubJourney(state: FreeholdersDetailsState) =
         subJourney(state) {
             step(journey.hasAnyFreeholdersStep) {
                 routeSegment(HasAnyFreeholdersStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
@@ -68,6 +69,7 @@ class FreeholdersMembersTask(
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
+            // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
             step(journey.confirmRemoveFreeholderStep) {
                 routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
@@ -83,6 +85,7 @@ class FreeholdersMembersTask(
             }
             step(journey.freeholderProvideDetailsStep) {
                 routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -115,6 +118,7 @@ class FreeholdersMembersTask(
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
+            // TODO: PDJB-1967: Update this wiring to match OrgGovBodyMembersTask
             task(journey.freeholderAddressTask) {
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }

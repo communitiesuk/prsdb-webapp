@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsMembersDependencies
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveSuperiorLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
 @JourneyFrameworkComponent
-class SuperiorLandlordsMembersTask(
+class SuperiorLandlordsDetailsTask(
     journeyStateService: JourneyStateService,
     override val superiorLandlordProvideDetailsStep: ProvideSuperiorLandlordDetailsStep,
     override val superiorLandlordNameStep: SuperiorLandlordNameStep,
@@ -34,8 +34,8 @@ class SuperiorLandlordsMembersTask(
     override val saveSuperiorLandlordStep: SaveSuperiorLandlordStep,
     override val setStateForSuperiorLandlordEditStep: SetStateForSuperiorLandlordEditStep,
     override val confirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep,
-) : Task<SuperiorLandlordsMembersState, SuperiorLandlordsMembersDependencies>(journeyStateService),
-    SuperiorLandlordsMembersState {
+) : Task<SuperiorLandlordsDetailsState, SuperiorLandlordsDetailsDependencies>(journeyStateService),
+    SuperiorLandlordsDetailsState {
     override val taskState get() = this
 
     override var superiorLandlordsMap: Map<Int, SuperiorLandlordDataModel>?
@@ -53,12 +53,12 @@ class SuperiorLandlordsMembersTask(
         set(value) {
             dependencies.listState.editingSuperiorLandlordId = value
         }
-    override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
 
-    override fun makeSubJourney(state: SuperiorLandlordsMembersState) =
+    override fun makeSubJourney(state: SuperiorLandlordsDetailsState) =
         subJourney(state) {
             step(journey.hasAnySuperiorLandlordsStep) {
                 routeSegment(HasAnySuperiorLandlordsStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
                 nextStep { journey.superiorLandlordProvideDetailsStep }
                 savable()
             }
@@ -68,6 +68,7 @@ class SuperiorLandlordsMembersTask(
                 nextStep { journey.superiorLandlordProvideDetailsStep }
                 savable()
             }
+            // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
             step(journey.confirmRemoveSuperiorLandlordStep) {
                 routeSegment(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
                 parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
@@ -83,6 +84,7 @@ class SuperiorLandlordsMembersTask(
             }
             step(journey.superiorLandlordProvideDetailsStep) {
                 routeSegment(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
                 parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -115,6 +117,7 @@ class SuperiorLandlordsMembersTask(
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
             }
+            // TODO: PDJB-1976: Update this wiring to match OrgGovBodyMembersTask
             task(journey.superiorLandlordAddressTask) {
                 parents { journey.superiorLandlordContactTypeStep.hasOutcome(SuperiorLandlordContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveSuperiorLandlordStep }

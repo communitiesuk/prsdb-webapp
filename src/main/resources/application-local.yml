@@ -72,6 +72,9 @@ local:
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
+  letters:
+    transientExceptionPostcode: TE99 9TF
+    persistentExceptionPostcode: PE99 9PF
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
 
 argon2:

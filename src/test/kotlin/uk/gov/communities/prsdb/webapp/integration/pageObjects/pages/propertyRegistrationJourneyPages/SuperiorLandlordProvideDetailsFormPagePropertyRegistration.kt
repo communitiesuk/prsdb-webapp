@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-1972: replace this placeholder with the real "can you provide details about the superior landlord" page
+//  Swap to inherit from PageWithYesNoRadios
 class SuperiorLandlordProvideDetailsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(

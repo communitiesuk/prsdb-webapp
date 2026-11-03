@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Anyon
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 // TODO PDJB-1971: replace this placeholder with the real "is there anyone else in the ownership chain" page
+//  Swap to inherit from PageWithYesNoRadios
 class AnyoneInOwnershipChainFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsMembersDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsBackRoutingStep
@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataMod
 class SuperiorLandlordsTask(
     journeyStateService: JourneyStateService,
     override val anyoneInOwnershipChainStep: AnyoneInOwnershipChainStep,
-    override val superiorLandlordsMembersTask: SuperiorLandlordsMembersTask,
+    override val superiorLandlordsDetailsTask: SuperiorLandlordsDetailsTask,
     override val superiorLandlordsBackRoutingStep: SuperiorLandlordsBackRoutingStep,
 ) : TaskWithoutDependencies<SuperiorLandlordsState>(journeyStateService),
     SuperiorLandlordsState {
@@ -34,18 +34,18 @@ class SuperiorLandlordsTask(
                 routeSegment(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.superiorLandlordsMembersTask.firstStep
+                        YesOrNo.YES -> journey.superiorLandlordsDetailsTask.firstStep
                         YesOrNo.NO -> exitStep
                     }
                 }
                 savable()
             }
-            task(journey.superiorLandlordsMembersTask) {
+            task(journey.superiorLandlordsDetailsTask) {
                 parents { journey.anyoneInOwnershipChainStep.hasOutcome(YesOrNo.YES) }
                 backDestination { Destination(journey.anyoneInOwnershipChainStep) }
                 nextStep { journey.superiorLandlordsBackRoutingStep }
                 withDependencies {
-                    SuperiorLandlordsMembersDependencies(
+                    SuperiorLandlordsDetailsDependencies(
                         listState = journey,
                     )
                 }
@@ -53,7 +53,7 @@ class SuperiorLandlordsTask(
             }
             step(journey.superiorLandlordsBackRoutingStep) {
                 routeSegment(SuperiorLandlordsBackRoutingStep.ROUTE_SEGMENT)
-                parents { journey.superiorLandlordsMembersTask.isComplete() }
+                parents { journey.superiorLandlordsDetailsTask.isComplete() }
                 nextStep { exitStep }
                 savable()
             }
