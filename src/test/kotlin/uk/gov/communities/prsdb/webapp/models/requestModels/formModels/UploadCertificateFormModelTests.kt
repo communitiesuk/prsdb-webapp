@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.springframework.beans.MutablePropertyValues
 import org.springframework.mock.web.MockHttpSession
@@ -15,9 +17,84 @@ import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInput
 import java.io.File
 import kotlin.reflect.KClass
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class UploadCertificateFormModelTests {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideUppercaseSupportedFileTypes")
+    fun `isFileTypeValid accepts supported uppercase extensions`(
+        fileName: String,
+        contentType: String,
+    ) {
+        // Arrange
+        val model =
+            UploadCertificateFormModel().apply {
+                name = fileName
+                this.contentType = contentType
+            }
+
+        // Act
+        val isValid = model.isFileTypeValid()
+
+        // Assert
+        assertTrue(isValid)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = ["certificate.EXE", "certificate.DOCX"])
+    fun `isFileTypeValid rejects unsupported extensions`(fileName: String) {
+        // Arrange
+        val model =
+            UploadCertificateFormModel().apply {
+                name = fileName
+                contentType = "application/pdf"
+            }
+
+        // Act
+        val isValid = model.isFileTypeValid()
+
+        // Assert
+        assertFalse(isValid)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = ["text/plain", "application/octet-stream"])
+    fun `isFileTypeValid rejects invalid MIME types`(contentType: String) {
+        // Arrange
+        val model =
+            UploadCertificateFormModel().apply {
+                name = "certificate.pdf"
+                this.contentType = contentType
+            }
+
+        // Act
+        val isValid = model.isFileTypeValid()
+
+        // Assert
+        assertFalse(isValid)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = ["certificate.PDF", "certificate.pdf"])
+    fun `isContentLengthValid rejects oversized uploads`(fileName: String) {
+        // Arrange
+        val model =
+            UploadCertificateFormModel().apply {
+                name = fileName
+                contentType = "application/pdf"
+                contentLength = UploadCertificateFormModel.maxContentLength.toLong() + 1
+            }
+
+        // Act
+        val isFileTypeValid = model.isFileTypeValid()
+        val isContentLengthValid = model.isContentLengthValid()
+
+        // Assert
+        assertTrue(isFileTypeValid)
+        assertFalse(isContentLengthValid)
+    }
+
     @Test
     fun `fromUploadedFile returns a corresponding UploadCertificateFormModel`() {
         val fileName = "fileName"
@@ -97,6 +174,15 @@ class UploadCertificateFormModelTests {
     }
 
     companion object {
+        @JvmStatic
+        private fun provideUppercaseSupportedFileTypes() =
+            listOf(
+                Arguments.of("certificate.PDF", "application/pdf"),
+                Arguments.of("certificate.PNG", "image/png"),
+                Arguments.of("certificate.JPEG", "image/jpeg"),
+                Arguments.of("certificate.JPG", "image/jpeg"),
+            )
+
         @JvmStatic
         private fun provideUploadCertificateFormModelClasses() =
             listOf(
