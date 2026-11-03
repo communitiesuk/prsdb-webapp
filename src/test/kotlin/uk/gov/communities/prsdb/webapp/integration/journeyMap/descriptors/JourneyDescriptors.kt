@@ -62,7 +62,7 @@ object JourneyDescriptors {
     private const val PROPERTY_WITHOUT_LETTING_AGENT_ID = 4L
     private const val PROPERTY_WITH_PENDING_INVITATIONS_ID = 13L
     private const val JOINT_PROPERTY_ID = 2L
-    private const val TEAM_MEMBER_EDITOR_ID = 902L
+    private const val TEAM_MEMBER_EDITOR_ID = 3L
     private const val JOINT_LANDLORD_INVITATION_SEED = "data-joint-landlord-invitation.sql"
     private const val JOINT_LANDLORD_INVITATION_TOKEN = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
     private const val PROPERTY_WITH_PENDING_INVITATION_ID = 2L
@@ -309,6 +309,10 @@ object JourneyDescriptors {
                 listOf(
                     StartingPoint("Invited user is not a landlord", listOf("data-joint-landlord-invitation-mockuser-not-landlord.sql")),
                     StartingPoint(
+                        "Invited user is already a landlord for the property",
+                        listOf(JOINT_LANDLORD_INVITATION_SEED, "journey-map/seeds/joint-landlord-already-on-property.sql"),
+                    ),
+                    StartingPoint(
                         "Invitation has expired",
                         listOf(JOINT_LANDLORD_INVITATION_SEED, "journey-map/seeds/joint-landlord-invitation-expired.sql"),
                     ),
@@ -360,7 +364,7 @@ object JourneyDescriptors {
                 name = "changeOrgTeamMemberAccessLevel",
                 title = "Change a team member's access level",
                 basePath = ChangeOrgTeamMemberAccessLevelController.getChangeAccessLevelBasePath(TEAM_MEMBER_EDITOR_ID),
-                seedScripts = organisationAdminSeeds + "journey-map/seeds/org-team-members.sql",
+                seedScripts = organisationAdminSeeds,
                 start = { it.navigate(TeamMembersController.TEAM_MEMBERS_ROUTE) },
                 arrange = { it.enableFeature(MULTI_USER_ORGANISATIONS) },
                 startsFromLink = true,
