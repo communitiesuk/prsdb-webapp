@@ -64,8 +64,8 @@ class PropertyOwnershipService(
     //  so that the flag-off variant can be deleted wholesale with the flag in PDJB-2016. It must
     //  still populate ownershipTypeBeforePdjb955, since the column is NOT NULL and
     //  PropertyDetailsViewModelBase renders it until PDJB-1996.
-    // TODO PDJB-2016/PDJB-2019: stop populating ownershipTypeBeforePdjb955 here once the legacy
-    //  column has been dropped.
+    // TODO PDJB-2016 then PDJB-2019, in that order: PDJB-2016 deletes the flag-off variant, leaving
+    //  a single method for PDJB-2019 to stop populating ownershipTypeBeforePdjb955 in.
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipTypeBeforePdjb955,
@@ -297,6 +297,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    // TODO PDJB-1957: mirror the flag-on/flag-off split in createPropertyOwnership.
     // TODO PDJB-1957: changing to a type that no longer implies another freeholder leaves any
     //  placeholder freeholder behind. Decide what should happen to existing freeholders here
     //  once the freeholders journey exists.

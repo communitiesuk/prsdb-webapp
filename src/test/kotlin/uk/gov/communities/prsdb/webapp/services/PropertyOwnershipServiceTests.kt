@@ -1186,6 +1186,9 @@ class PropertyOwnershipServiceTests {
         )
     }
 
+    // The flag-off path, where createPropertyOwnership takes the legacy enum and derives the new one.
+    // TODO PDJB-2016: delete this test along with the flag-off variant of createPropertyOwnership.
+    //  Do not extend it to cover the flag-on path, which takes the new enum directly.
     @Test
     fun `createPropertyOwnership stores both the legacy ownership type and its replacement`() {
         // Arrange

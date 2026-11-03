@@ -11,8 +11,8 @@ class OwnershipTypeFormModel : FormModel {
     var ownershipType: OwnershipTypeBeforePdjb955? = null
 
     companion object {
-        // TODO PDJB-2016: check whether this form model is still used once the ASSOCIATED_PARTIES
-        //  flag is always on / deleted
+        // TODO PDJB-2016: remove this form model once the ASSOCIATED_PARTIES flag is always on /
+        //  deleted - the new ownership type journey does not use it
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OwnershipTypeFormModel =
             OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.ownershipTypeBeforePdjb955 }
     }

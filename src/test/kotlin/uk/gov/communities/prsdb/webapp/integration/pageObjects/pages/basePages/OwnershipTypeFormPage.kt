@@ -5,6 +5,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb95
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
+// TODO PDJB-2016: delete this page object once the ASSOCIATED_PARTIES flag is always on / deleted -
+//  it drives the legacy single-radio ownership type page
 abstract class OwnershipTypeFormPage(
     page: Page,
     urlSegment: String,

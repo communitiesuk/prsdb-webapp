@@ -8,7 +8,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
 // Someone further up the ownership chain than the landlord. A row with no name, email or address
-// records "no details known".
+// means "no details known".
 @Entity
 class SuperiorLandlord() : ModifiableAuditableEntity() {
     @Id
@@ -39,4 +39,7 @@ class SuperiorLandlord() : ModifiableAuditableEntity() {
         this.email = email
         this.address = address
     }
+
+    // TODO PDJB-1997: use this on the property record
+    fun detailsKnown(): Boolean = name != null
 }

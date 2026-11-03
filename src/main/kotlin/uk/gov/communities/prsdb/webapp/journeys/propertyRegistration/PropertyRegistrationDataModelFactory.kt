@@ -57,7 +57,8 @@ class PropertyRegistrationDataModelFactory(
                 },
             licenseType = if (isDelegatedToLettingAgent) LicensingType.PROVIDE_LATER else state.licensingTask.getLicensingType(),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            // TODO PDJB-2015: derive the ownership type from the associated parties answers
+            // TODO PDJB-2015: derive the ownership type from the associated parties answers, via the
+            //  mapping on OwnershipTypeState
             ownershipType =
                 if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
                     OwnershipTypeBeforePdjb955.FREEHOLD
