@@ -988,9 +988,9 @@ class Navigator(
         return createValidPage(page, FreeholdersFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationFreeholderNamePage(isJointFreeholder: Boolean = true): FreeholderNameFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholderNamePage(leaseholdOnly: Boolean = false): FreeholderNameFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderName(isJointFreeholder).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderName(leaseholdOnly).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderNameStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderNameFormPagePropertyRegistration::class)

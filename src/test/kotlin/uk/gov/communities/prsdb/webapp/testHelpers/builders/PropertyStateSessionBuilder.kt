@@ -231,25 +231,25 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(isJointFreeholder: Boolean = true) =
-            if (isJointFreeholder) {
+        fun beforePropertyRegistrationFreeholders(leaseholdOnly: Boolean = false) =
+            if (leaseholdOnly) {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+            } else {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
                     .withFreeholdType(FreeholdType.JOINT_TENANTS)
-            } else {
-                beforePropertyRegistrationOwnsProperty()
-                    .withOwnsProperty()
-                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
-        fun beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder: Boolean = true) =
-            beforePropertyRegistrationFreeholders(isJointFreeholder)
+        fun beforePropertyRegistrationFreeholderProvideDetails(leaseholdOnly: Boolean = false) =
+            beforePropertyRegistrationFreeholders(leaseholdOnly)
                 .withFreeholdersInfoComplete()
                 .withHasAnyFreeholdersComplete()
 
-        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
-            beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
+        fun beforePropertyRegistrationFreeholderName(leaseholdOnly: Boolean = false) =
+            beforePropertyRegistrationFreeholderProvideDetails(leaseholdOnly)
                 .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =

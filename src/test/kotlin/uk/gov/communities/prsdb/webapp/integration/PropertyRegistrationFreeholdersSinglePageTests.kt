@@ -13,13 +13,13 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     inner class FreeholderNameStep {
         @Test
         fun `Joint freeholders see the joint freeholder heading`() {
-            val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage(isJointFreeholder = true)
+            val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage()
             assertThat(freeholderNamePage.heading).containsText("What is this joint freeholder’s name?")
         }
 
         @Test
         fun `Leasehold only landlords see the single freeholder heading`() {
-            val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage(isJointFreeholder = false)
+            val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage(leaseholdOnly = true)
             assertThat(freeholderNamePage.heading).containsText("What is this freeholder’s name?")
         }
 
