@@ -219,6 +219,12 @@ class PropertyStateSessionBuilder(
                     .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
+        // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
+        fun beforePropertyRegistrationFreeholdersList(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholders(jointFreeholders)
+                .withFreeholdersInfoComplete()
+                .withHasAnyFreeholdersComplete()
+
         fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
             beforePropertyRegistrationFreeholders(jointFreeholders)
                 .withFreeholdersInfoComplete()
