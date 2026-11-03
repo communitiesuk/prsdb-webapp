@@ -147,7 +147,7 @@ class PaymentService(
         }
     }
 
-    fun getPropertyRegistrationPaymentStatus(
+    fun getStoredPropertyRegistrationPaymentStatus(
         journeyId: String,
         paymentReference: String,
     ): PaymentStatusCheckDataModel {
@@ -156,12 +156,7 @@ class PaymentService(
             checkNotNull(paymentRepository.findByReferenceAndAssociatedIncompleteProperty(paymentReference, incompleteProperty)) {
                 "No payment with reference $paymentReference found for journey $journeyId"
             }
-
-        val storedStatus = getStoredPaymentStatus(payment.paymentId)
-        if (storedStatus != PaymentStatus.CREATED) {
-            return PaymentStatusCheckDataModel(payment.paymentId, storedStatus)
-        }
-        return getGovUkPayPaymentStatus(payment.paymentId)
+        return PaymentStatusCheckDataModel(payment.paymentId, getStoredPaymentStatus(payment.paymentId))
     }
 
     fun getGovUkPayPaymentStatus(paymentId: String): PaymentStatusCheckDataModel {
@@ -212,8 +207,12 @@ class PaymentService(
                 getStoredPaymentStatus(paymentId)
             }
 
-            PaymentStatus.SUCCEEDED, PaymentStatus.CANCELLING, PaymentStatus.MANUAL_INTERVENTION -> {
+            PaymentStatus.SUCCEEDED -> {
                 getStoredPaymentStatus(paymentId)
+            }
+
+            PaymentStatus.CANCELLING, PaymentStatus.MANUAL_INTERVENTION -> {
+                throw IllegalArgumentException("$govUkPayStatus is not a GOV.UK Pay status")
             }
         }
 

@@ -97,11 +97,27 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(
-        value = PaymentStatus::class,
-        names = ["CAPTURABLE", "SUCCEEDED", "FAILED", "CANCELLING", "CANCELLED", "MANUAL_INTERVENTION"],
-    )
-    fun `afterStepIsReached finalises the payment with the checked status and the journey's registration data`(
+    @MethodSource("provideNonCreatedPaymentStatusesAndOutcomes")
+    fun `afterStepIsReached stores the outcome for a payment no longer stored as created without asking GOV UK Pay`(
+        storedPaymentStatus: PaymentStatus,
+        expectedOutcome: PaymentOutcome,
+    ) {
+        // Arrange
+        stubStoredPaymentStatus(storedPaymentStatus)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = expectedOutcome
+        verify(mockPaymentService, never()).getGovUkPayPaymentStatus(any())
+        verify(mockPaymentService, never()).finalisePayment(any(), any(), any())
+        verifyNoInteractions(mockPaymentReconciliationService)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = PaymentStatus::class, names = ["CAPTURABLE", "SUCCEEDED", "FAILED", "CANCELLED"])
+    fun `afterStepIsReached finalises the payment with the GOV UK Pay status and the journey's registration data`(
         govUkPayStatus: PaymentStatus,
     ) {
         // Arrange
@@ -117,23 +133,16 @@ class PaymentStatusCheckStepConfigTests {
         verify(mockPaymentService).finalisePayment(paymentId, govUkPayStatus, registrationData)
     }
 
-    @ParameterizedTest
-    @MethodSource("provideFinalisedPaymentStatusesAndOutcomes")
-    fun `afterStepIsReached stores the outcome for the finalised payment status`(
-        finalisedPaymentStatus: PaymentStatus,
-        expectedOutcome: PaymentOutcome,
-    ) {
+    @Test
+    fun `afterStepIsReached stores the outcome for the finalised payment status rather than the GOV UK Pay status`() {
         // Arrange
-        stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
-        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
-        whenever(mockPaymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData))
-            .thenReturn(finalisedPaymentStatus)
+        stubFinalisedPaymentStatus(PaymentStatus.CANCELLING)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockState).paymentOutcome = expectedOutcome
+        verify(mockState).paymentOutcome = PaymentOutcome.NOT_COMPLETED
     }
 
     @Test
@@ -243,7 +252,8 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentService).getPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+        verify(mockPaymentService).getStoredPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+        verify(mockPaymentService).getGovUkPayPaymentStatus(paymentId)
     }
 
     @Test
@@ -412,10 +422,16 @@ class PaymentStatusCheckStepConfigTests {
         whenever(mockState.answersChangedSinceConfirmation).thenReturn(true)
     }
 
-    private fun stubGovUkPayStatus(status: PaymentStatus) {
+    private fun stubStoredPaymentStatus(status: PaymentStatus) {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.paymentReference).thenReturn(paymentReference)
-        whenever(mockPaymentService.getPropertyRegistrationPaymentStatus(journeyId, paymentReference))
+        whenever(mockPaymentService.getStoredPropertyRegistrationPaymentStatus(journeyId, paymentReference))
+            .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status))
+    }
+
+    private fun stubGovUkPayStatus(status: PaymentStatus) {
+        stubStoredPaymentStatus(PaymentStatus.CREATED)
+        whenever(mockPaymentService.getGovUkPayPaymentStatus(paymentId))
             .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status))
     }
 
@@ -428,10 +444,9 @@ class PaymentStatusCheckStepConfigTests {
 
     companion object {
         @JvmStatic
-        fun provideFinalisedPaymentStatusesAndOutcomes() =
+        fun provideNonCreatedPaymentStatusesAndOutcomes() =
             listOf(
                 Arguments.of(PaymentStatus.SUCCEEDED, PaymentOutcome.SUCCESS),
-                Arguments.of(PaymentStatus.CREATED, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
                 Arguments.of(PaymentStatus.CANCELLING, PaymentOutcome.NOT_COMPLETED),
                 Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.NOT_COMPLETED),

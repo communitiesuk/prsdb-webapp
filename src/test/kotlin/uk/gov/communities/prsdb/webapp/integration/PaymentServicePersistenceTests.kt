@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
-import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
@@ -53,7 +52,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.time.Instant
@@ -633,28 +631,27 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `getPropertyRegistrationPaymentStatus returns the GOV UK Pay status of the journey's payment with the given reference`() {
+    fun `getStoredPropertyRegistrationPaymentStatus returns the stored status of the journey's payment with the given reference`() {
         // Arrange
         JourneyTestHelper.setMockUser(USER_ID)
-        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
-            .thenReturn(createGovUkPayPayment(CREATED_PAYMENT_ID, GovUkPayPaymentStatus.CAPTURABLE))
 
         // Act
-        val paymentStatusCheck = paymentService.getPropertyRegistrationPaymentStatus(JOURNEY_ID, CREATED_PAYMENT_REFERENCE)
+        val paymentStatusCheck = paymentService.getStoredPropertyRegistrationPaymentStatus(JOURNEY_ID, CREATED_PAYMENT_REFERENCE)
 
         // Assert
         assertEquals(CREATED_PAYMENT_ID, paymentStatusCheck.paymentId)
-        assertEquals(PaymentStatus.CAPTURABLE, paymentStatusCheck.status)
+        assertEquals(PaymentStatus.CREATED, paymentStatusCheck.status)
+        verify(mockGovUkPayClient, never()).getPayment(any())
     }
 
     @Test
-    fun `getPropertyRegistrationPaymentStatus does not find a payment with the given reference for another property`() {
+    fun `getStoredPropertyRegistrationPaymentStatus does not find a payment with the given reference for another property`() {
         // Arrange
         JourneyTestHelper.setMockUser(USER_ID)
 
         // Act, Assert
         assertThrows<IllegalStateException> {
-            paymentService.getPropertyRegistrationPaymentStatus(JOURNEY_ID, SUCCEEDED_PAYMENT_REFERENCE)
+            paymentService.getStoredPropertyRegistrationPaymentStatus(JOURNEY_ID, SUCCEEDED_PAYMENT_REFERENCE)
         }
         verify(mockGovUkPayClient, never()).getPayment(any())
     }

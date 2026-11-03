@@ -1137,58 +1137,40 @@ class PaymentServiceTests {
     }
 
     @Nested
-    inner class GetPropertyRegistrationPaymentStatusTests {
+    inner class GetStoredPropertyRegistrationPaymentStatusTests {
         @Test
-        fun `getPropertyRegistrationPaymentStatus returns the GOV UK Pay status of the journey's CREATED payment with that reference`() {
+        fun `getStoredPropertyRegistrationPaymentStatus returns the stored status without asking GOV UK Pay`() {
             // Arrange
             val incompleteProperty = setUpIncompleteProperty()
             val payment = createPayment(paymentId = PAYMENT_ID, reference = PAYMENT_REFERENCE, incompleteProperty = incompleteProperty)
             whenever(mockPaymentRepository.findByReferenceAndAssociatedIncompleteProperty(PAYMENT_REFERENCE, incompleteProperty))
                 .thenReturn(payment)
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CREATED)
-            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
 
             // Act
-            val paymentStatusCheck = paymentService.getPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE)
+            val paymentStatusCheck = paymentService.getStoredPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE)
 
             // Assert
-            assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, PaymentStatus.SUCCEEDED), paymentStatusCheck)
-        }
-
-        @ParameterizedTest
-        @EnumSource(PaymentStatus::class, names = ["CANCELLING", "CANCELLED", "MANUAL_INTERVENTION", "SUCCEEDED", "FAILED"])
-        fun `getPropertyRegistrationPaymentStatus returns the stored status without asking GOV UK Pay once the payment is not CREATED`(
-            storedStatus: PaymentStatus,
-        ) {
-            // Arrange
-            val incompleteProperty = setUpIncompleteProperty()
-            val payment = createPayment(paymentId = PAYMENT_ID, reference = PAYMENT_REFERENCE, incompleteProperty = incompleteProperty)
-            whenever(mockPaymentRepository.findByReferenceAndAssociatedIncompleteProperty(PAYMENT_REFERENCE, incompleteProperty))
-                .thenReturn(payment)
-            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(storedStatus)
-
-            // Act
-            val paymentStatusCheck = paymentService.getPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE)
-
-            // Assert
-            assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, storedStatus), paymentStatusCheck)
+            assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, PaymentStatus.CREATED), paymentStatusCheck)
             verifyNoInteractions(mockGovUkPayClient)
         }
 
         @Test
-        fun `getPropertyRegistrationPaymentStatus throws when there is no incomplete property for the journey`() {
+        fun `getStoredPropertyRegistrationPaymentStatus throws when there is no incomplete property for the journey`() {
             // Arrange
             setMockPrincipal(userId)
             whenever(mockLandlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, userId))
                 .thenReturn(null)
 
             // Act, Assert
-            assertThrows<IllegalStateException> { paymentService.getPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE) }
+            assertThrows<IllegalStateException> {
+                paymentService.getStoredPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE)
+            }
             verifyNoInteractions(mockGovUkPayClient, mockPaymentRepository)
         }
 
         @Test
-        fun `getPropertyRegistrationPaymentStatus throws when the journey has no payment with the given reference`() {
+        fun `getStoredPropertyRegistrationPaymentStatus throws when the journey has no payment with the given reference`() {
             // Arrange
             val incompleteProperty = setUpIncompleteProperty()
             whenever(mockPaymentRepository.findByReferenceAndAssociatedIncompleteProperty(PAYMENT_REFERENCE, incompleteProperty))
@@ -1196,7 +1178,9 @@ class PaymentServiceTests {
 
             // Act
             val exception =
-                assertThrows<IllegalStateException> { paymentService.getPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE) }
+                assertThrows<IllegalStateException> {
+                    paymentService.getStoredPropertyRegistrationPaymentStatus(journeyId, PAYMENT_REFERENCE)
+                }
 
             // Assert
             assertContains(exception.message!!, journeyId)

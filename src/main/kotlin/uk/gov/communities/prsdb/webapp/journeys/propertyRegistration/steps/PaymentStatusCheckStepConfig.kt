@@ -30,44 +30,28 @@ class PaymentStatusCheckStepConfig(
 ) : AbstractInternalStepConfig<PaymentOutcome, PropertyRegistrationJourneyState>() {
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
         val paymentReference = checkNotNull(state.paymentReference) { "No payment reference for journey ${state.journeyId}" }
-        val govUkPayStatus = paymentService.getPropertyRegistrationPaymentStatus(state.journeyId, paymentReference)
-        if (govUkPayStatus.isCreated()) {
-            state.paymentOutcome = PaymentOutcome.IN_PROGRESS
-            return
-        }
-
-        if (govUkPayStatus.status == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
-            val storedStatus = paymentReconciliationService.markForCancellation(govUkPayStatus.paymentId)
-            if (storedStatus == PaymentStatus.SUCCEEDED) {
-                state.paymentOutcome = PaymentOutcome.SUCCESS
-                return
-            }
-            throw CyaDataHasChangedException(
-                "Answers changed after confirmation for journey ${state.journeyId}; payment marked for cancellation",
-            )
-        }
-
-        val finalisedStatus =
-            try {
-                paymentService.finalisePayment(
-                    govUkPayStatus.paymentId,
-                    govUkPayStatus.status,
-                    propertyRegistrationDataModelFactory.fromJourneyState(state),
-                )
-            } catch (exception: PaymentQuoteExpiredException) {
-                state.paymentOutcome = PaymentOutcome.QUOTE_EXPIRED
-                state.paymentReference = null
-                return
+        val storedPaymentStatus = paymentService.getStoredPropertyRegistrationPaymentStatus(state.journeyId, paymentReference)
+        val paymentStatus =
+            if (storedPaymentStatus.isCreated()) {
+                try {
+                    checkWithGovUkPay(storedPaymentStatus.paymentId, state)
+                } catch (exception: PaymentQuoteExpiredException) {
+                    state.paymentOutcome = PaymentOutcome.QUOTE_EXPIRED
+                    state.paymentReference = null
+                    return
+                }
+            } else {
+                storedPaymentStatus.status
             }
 
         val paymentOutcome =
-            when (finalisedStatus) {
+            when (paymentStatus) {
                 PaymentStatus.SUCCEEDED -> PaymentOutcome.SUCCESS
                 PaymentStatus.FAILED -> PaymentOutcome.FAILURE
                 PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, PaymentStatus.MANUAL_INTERVENTION -> PaymentOutcome.NOT_COMPLETED
                 PaymentStatus.CREATED -> PaymentOutcome.IN_PROGRESS
                 PaymentStatus.CAPTURABLE -> throw IllegalStateException(
-                    "Payment ${govUkPayStatus.paymentId} for journey ${state.journeyId} is stored as capturable",
+                    "Payment ${storedPaymentStatus.paymentId} for journey ${state.journeyId} is stored as capturable",
                 )
             }
         state.paymentOutcome = paymentOutcome
@@ -76,6 +60,28 @@ class PaymentStatusCheckStepConfig(
             val addressTask = state.propertyDetailsTask.addressTask
             addressTask.isAddressAlreadyRegistered = addressTask.getAddress().uprn?.let { addressAvailabilityService.isAddressOwned(it) }
         }
+    }
+
+    private fun checkWithGovUkPay(
+        paymentId: String,
+        state: PropertyRegistrationJourneyState,
+    ): PaymentStatus {
+        val govUkPayStatus = paymentService.getGovUkPayPaymentStatus(paymentId).status
+        if (govUkPayStatus == PaymentStatus.CREATED) {
+            return PaymentStatus.CREATED
+        }
+
+        if (govUkPayStatus == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
+            val storedStatus = paymentReconciliationService.markForCancellation(paymentId)
+            if (storedStatus == PaymentStatus.SUCCEEDED) {
+                return storedStatus
+            }
+            throw CyaDataHasChangedException(
+                "Answers changed after confirmation for journey ${state.journeyId}; payment marked for cancellation",
+            )
+        }
+
+        return paymentService.finalisePayment(paymentId, govUkPayStatus, propertyRegistrationDataModelFactory.fromJourneyState(state))
     }
 
     override fun mode(state: PropertyRegistrationJourneyState) = state.paymentOutcome
