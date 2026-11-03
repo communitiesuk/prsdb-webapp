@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalSafetyAnswersSummaryList
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import java.util.regex.Pattern
 
@@ -141,7 +142,6 @@ class CheckAnswersPagePropertyRegistration(
         val gasCertUploadRow = getRow("Your certificate")
         val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
         val electricalCertExpiryDateRow = getRow("Expiry date")
-        val electricalCertIssueDateRow = getRow("Issue date")
         val electricalCertUploadRow = getRow("Your certificate")
         val hasEpcRow = getRow("Do you have an EPC for this property?")
         val epcTenancyCheckRow = getRow("Was the EPC still in date when the current tenancy began?")
@@ -151,10 +151,6 @@ class CheckAnswersPagePropertyRegistration(
         val meesExemptionRow = getRow("Registered exemption")
 
         fun electricalCertDateRow(certificateType: CertificateType) =
-            when (certificateType) {
-                CertificateType.Eic -> electricalCertIssueDateRow
-                CertificateType.Eicr -> electricalCertExpiryDateRow
-                else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
-            }
+            getRow(CheckElectricalSafetyAnswersSummaryList.certificateDateKey(certificateType))
     }
 }

@@ -537,6 +537,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
+        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
         @ParameterizedTest(name = "{0}")
         @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
         fun `The back link on the electrical certificate expiry date page returns to the CYA page when reached from there`(

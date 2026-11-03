@@ -139,6 +139,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
         // Change the certificate date from the check answers page, then check the back link returns there
+        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
         checkAnswersPage.summaryList.certificateDateRow(certificateType).clickFirstActionLinkAndWait()
         assertExpiryDatePage(page, certificateType).backLink.clickAndWait()
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)

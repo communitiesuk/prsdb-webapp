@@ -24,13 +24,16 @@ class CheckElectricalSafetyAnswersSummaryList(
 ) : SummaryList(page, 0) {
     val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
     val expiryDateRow = getRow("Expiry date")
-    val issueDateRow = getRow("Issue date")
     val yourCertificateRow = getRow("Your certificate")
 
-    fun certificateDateRow(certificateType: CertificateType) =
-        when (certificateType) {
-            CertificateType.Eic -> issueDateRow
-            CertificateType.Eicr -> expiryDateRow
-            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
-        }
+    fun certificateDateRow(certificateType: CertificateType) = getRow(certificateDateKey(certificateType))
+
+    companion object {
+        fun certificateDateKey(certificateType: CertificateType) =
+            when (certificateType) {
+                CertificateType.Eic -> "Issue date"
+                CertificateType.Eicr -> "Expiry date"
+                else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+            }
+    }
 }

@@ -85,6 +85,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
 
+        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
         @ParameterizedTest(name = "{0}")
         @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
         fun `Cert uploaded - certificate date change link navigates to expiry date page`(

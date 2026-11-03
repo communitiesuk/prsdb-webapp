@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DateTimeUnit.Companion.YEAR
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
@@ -15,6 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -39,6 +41,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
     private val mockEicrExpiryDateStep: EicrExpiryDateStep = mock()
     private val mockCheckEicrUploadsStep: CheckEicrUploadsStep = mock()
     private val mockUploadService: UploadService = mock()
+    private val inDateExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR)
 
     private fun fileUploadWithStatus(status: FileUploadStatus): FileUpload =
         mock<FileUpload>().also { whenever(it.status).thenReturn(status) }
@@ -63,7 +66,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
         whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
         whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2026, 6, 15))
+        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
         whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
         whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
         whenever(mockEicExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
@@ -81,8 +84,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
 
-            val expiryDate = LocalDate(2026, 6, 15)
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
+            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
 
             whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
             whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
@@ -106,7 +108,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             assertEquals(3, rows.size)
             assertEquals(listOf(mockHasElectricalCertStep, mockEicExpiryDateStep, mockCheckEicUploadsStep), requestedSteps)
             assertEquals("checkElectricalSafety.eicLabel", rows[0].fieldValue)
-            assertEquals(expiryDate, rows[1].fieldValue)
+            assertEquals(inDateExpiryDate, rows[1].fieldValue)
             assertEquals(
                 listOf(
                     UploadedFileUrl(
@@ -153,7 +155,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EICR)
 
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2026, 6, 15))
+            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
 
             whenever(mockState.eicrExpiryDateStep).thenReturn(mockEicrExpiryDateStep)
             whenever(mockState.checkEicrUploadsStep).thenReturn(mockCheckEicrUploadsStep)

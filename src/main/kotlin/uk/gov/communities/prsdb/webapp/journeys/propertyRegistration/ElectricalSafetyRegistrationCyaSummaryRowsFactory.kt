@@ -69,8 +69,9 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                     } else {
                         "checkElectricalSafety.expiryDate.fieldHeading"
                     },
-                // TODO PDJB-1669: Use the EIC issue date and issue date step for EICs once they exist
+                // TODO PDJB-1669: Show the EIC issue date for EICs
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
+                // TODO PDJB-1671: Use the EIC issue date step for EICs
                 destination = destinationProvider(expiryDateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
