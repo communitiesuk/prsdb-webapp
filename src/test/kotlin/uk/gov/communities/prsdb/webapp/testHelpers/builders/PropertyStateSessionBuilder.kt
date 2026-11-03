@@ -207,25 +207,25 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(leaseholdOnly: Boolean = false) =
-            if (leaseholdOnly) {
-                beforePropertyRegistrationOwnsProperty()
-                    .withOwnsProperty()
-                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
-            } else {
+        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
+            if (jointFreeholders) {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
                     .withFreeholdType(FreeholdType.JOINT_TENANTS)
+            } else {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
-        fun beforePropertyRegistrationFreeholderProvideDetails(leaseholdOnly: Boolean = false) =
-            beforePropertyRegistrationFreeholders(leaseholdOnly)
+        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholders(jointFreeholders)
                 .withFreeholdersInfoComplete()
                 .withHasAnyFreeholdersComplete()
 
-        fun beforePropertyRegistrationFreeholderName(leaseholdOnly: Boolean = false) =
-            beforePropertyRegistrationFreeholderProvideDetails(leaseholdOnly)
+        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
                 .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationSuperiorLandlords() =
