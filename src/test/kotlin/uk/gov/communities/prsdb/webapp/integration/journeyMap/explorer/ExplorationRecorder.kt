@@ -190,7 +190,7 @@ class ExplorationRecorder(
     fun unseenModes(stepId: String): List<String> {
         val step = stepsById[stepId] ?: return emptyList()
         if (step.modeValues.size < 2 || step.exit || stepId in unobservableSteps) return emptyList()
-        return step.modeValues - observedModes[stepId].orEmpty()
+        return step.modeValues - observedModes[stepId].orEmpty() - outcomesPassed[stepId].orEmpty().toSet()
     }
 
     fun gap(

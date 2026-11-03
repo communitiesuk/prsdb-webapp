@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.journeyMap.walker
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
+import com.microsoft.playwright.Route
 import com.microsoft.playwright.options.LoadState
 import com.microsoft.playwright.options.RequestOptions
 import kotlinx.serialization.json.Json
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeyMap.server.JourneyIntrospectionObs
 import uk.gov.communities.prsdb.webapp.journeyMap.server.JourneyMapSessionController
 import java.nio.file.Path
 import java.security.MessageDigest
+import java.util.function.Predicate
 
 data class Navigation(
     val status: Int,
@@ -31,6 +33,13 @@ class JourneyWalker(
 
     // A session that began before the seed data was last restored can refer to records the restore removed
     val sessionPredatesDatabaseReset: Boolean get() = sessionResets < databaseResets
+
+    init {
+        // A page that polls itself, such as the payment processing page, would otherwise move on without the walker
+        page.route(Predicate { url: String -> url.substringBefore('?') == page.url().substringBefore('?').substringBefore('#') }) { route ->
+            if (route.request().resourceType() == "fetch") route.fulfill(Route.FulfillOptions().setStatus(200)) else route.fallback()
+        }
+    }
 
     fun databaseWasReset() {
         databaseResets++

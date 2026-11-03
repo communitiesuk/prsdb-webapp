@@ -52,6 +52,9 @@ class JourneyExplorer(
     private val resumePoints = ArrayDeque<WalkStart>()
     private val resumesByOrigin = mutableMapOf<String?, Int>()
     private val scenarioBaseActions = mutableMapOf<String, MutableMap<String, String>>()
+
+    // Scenario options in force instead of their scenario's default, for the opening or the walk under way
+    private val activeScenarioOptions = mutableMapOf<String, ScenarioOption>()
     private var openingStepConfigs = emptySet<String>()
     private var otherEntryLinks: List<PageLink>? = null
 
@@ -82,6 +85,7 @@ class JourneyExplorer(
             }
             opening.option?.let { option ->
                 option.arrange(harness)
+                opening.scenario?.let { activeScenarioOptions[it.name] = option }
                 usedScenarioOptions += "${opening.scenario?.name}: ${option.label}"
             }
             try {
@@ -98,6 +102,7 @@ class JourneyExplorer(
                 drainQueue()
                 resumeBranchesForCoverage()
             } finally {
+                opening.scenario?.let { activeScenarioOptions.remove(it.name) }
                 opening.scenario?.options?.first()?.arrange(harness)
             }
         }
@@ -159,6 +164,7 @@ class JourneyExplorer(
     private fun resumeBranchesForCoverage() {
         var unproductive = 0
         while (resumePoints.isNotEmpty() && !budget.exceeded) {
+            refreshOutcomesPassed()
             val gaps = recorder.coverageGaps().size
             if (gaps == 0) return
             val origins = (resumePoints.map { it.origin } + resumesByOrigin.keys).toSet().size
@@ -168,8 +174,14 @@ class JourneyExplorer(
             resumesByOrigin.merge(next.origin, 1, Int::plus)
             queue += next
             drainQueue()
+            refreshOutcomesPassed()
             if (recorder.coverageGaps().size < gaps) unproductive = 0 else unproductive++
         }
+    }
+
+    // An outcome reached on the way back from an external service, such as a successful payment, is only seen by the server
+    private fun refreshOutcomesPassed() {
+        recorder.outcomesPassed = walker.dependencies().outcomesPassedOutside(changeFlows.journeyIds)
     }
 
     private fun startJourney(opening: Opening): WalkStart? {
@@ -230,12 +242,27 @@ class JourneyExplorer(
 
     private fun walk(start: WalkStart) {
         val trail = mutableListOf<String>()
+        // A walk on from a page reached with a scenario option, such as a payment still being processed, keeps that option
+        val walkOptions =
+            start.conditions
+                .mapNotNull { JourneyMapRegistry.scenarioOptionFor(it) }
+                .filter { (scenario, _) -> scenario.name !in activeScenarioOptions }
         try {
+            walkOptions.forEach { (scenario, option) ->
+                activeScenarioOptions[scenario.name] = option
+                option.arrange(harness)
+            }
             walk(start, trail)
         } finally {
+            walkOptions.forEach { (scenario, _) ->
+                activeScenarioOptions.remove(scenario.name)
+                scenario.options.first().arrange(harness)
+            }
             if (settings.verbose) log("walked ${trail.joinToString(" > ")}")
         }
     }
+
+    private fun restoreScenario(scenario: Scenario) = (activeScenarioOptions[scenario.name] ?: scenario.options.first()).arrange(harness)
 
     // A walk always handles its first step, so that a branch which loops back to an earlier step (such as uploading
     // another file) submits it again, and later steps only when they were chosen as its continuation
@@ -244,7 +271,14 @@ class JourneyExplorer(
         trail: MutableList<String>,
     ) {
         walker.restore(start.sessionSnapshot)
-        walker.navigate(start.url)
+        val navigation = walker.navigate(start.url)
+        if (navigation.status >= 400) {
+            if (!walker.sessionPredatesDatabaseReset) {
+                val node = urls.stepPathOf(start.url) ?: start.url
+                recorder.error(node, "http-${navigation.status}", "Returning to it led to ${navigation.url}")
+            }
+            return
+        }
         val visited = start.visited.toMutableSet()
         val visits = mutableMapOf<String, Int>()
         var expectedStepId: String? = null
@@ -391,7 +425,21 @@ class JourneyExplorer(
         conditions: List<ManifestCondition>,
     ) {
         walker.restore(landing.sessionSnapshot!!)
-        walker.navigate(landing.url)
+        val scenarioOption = landing.condition?.let { JourneyMapRegistry.scenarioOptionFor(it) }
+        val navigation =
+            try {
+                scenarioOption?.second?.arrange(harness)
+                walker.navigate(landing.url)
+            } finally {
+                scenarioOption?.first?.let { restoreScenario(it) }
+            }
+        if (navigation.status >= 400) {
+            if (!walker.sessionPredatesDatabaseReset) {
+                recorder.error(landing.nodeId!!, "http-${navigation.status}", "Showing it again led to ${navigation.url}")
+            }
+            return
+        }
+        if (urls.stepPathOf(navigation.url) != urls.stepPathOf(landing.url)) return
         recorder.recordRender(
             landing.nodeId!!,
             ManifestNode.PAGE,
@@ -494,7 +542,7 @@ class JourneyExplorer(
                     val condition = ManifestCondition(scenario.name, option.label)
                     performer.perform(context, base, condition)
                 } finally {
-                    scenario.options.first().arrange(harness)
+                    restoreScenario(scenario)
                 }
             recorder.recordTransition(context.step.id, landing)
             results[key] = landing

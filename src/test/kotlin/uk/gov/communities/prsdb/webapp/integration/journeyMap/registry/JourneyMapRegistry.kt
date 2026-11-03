@@ -5,6 +5,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.journeyMap.JourneyMapHarness
+import uk.gov.communities.prsdb.webapp.journeyMap.model.ManifestCondition
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.HasAnyGovBodyMembersStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStepConfig
@@ -237,6 +238,11 @@ object JourneyMapRegistry {
     fun applyDefaults(harness: JourneyMapHarness) = scenarios.forEach { it.options.first().arrange(harness) }
 
     fun scenariosFor(stepConfigNames: Set<String>) = scenarios.filter { it.appliesTo(stepConfigNames) }
+
+    fun scenarioOptionFor(condition: ManifestCondition): Pair<Scenario, ScenarioOption>? {
+        val scenario = scenarios.firstOrNull { it.name == condition.step } ?: return null
+        return scenario.options.firstOrNull { it.label == condition.answer }?.let { scenario to it }
+    }
 
     fun exemptionFor(
         journey: String,
