@@ -2,19 +2,21 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SuperiorLandlordRepository
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
@@ -28,6 +30,9 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     @Autowired
     private lateinit var propertyManagerRepository: PropertyManagerRepository
+
+    @Autowired
+    private lateinit var addressRepository: AddressRepository
 
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
@@ -48,31 +53,37 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     private fun anyPropertyOwnershipId() = propertyOwnershipRepository.findAll().minOf { it.id }
 
+    private fun countAddressesWithId(addressId: Long) =
+        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM address WHERE id = ?", Int::class.java, addressId)!!
+
     private fun inTransaction(block: () -> Unit) = TransactionTemplate(transactionManager).executeWithoutResult { block() }
 
+    private fun <T : Any> inTransactionReturning(block: () -> T): T = TransactionTemplate(transactionManager).execute { block() }!!
+
     @Test
-    fun `deleting a property ownership deletes its freeholders, superior landlords and property manager`() {
+    fun `deleting a property ownership deletes its associated parties but not their addresses`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
-        inTransaction {
-            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-            // Saved via their own repositories because these associations have no cascade,
-            // matching how License is handled
-            propertyOwnership.freeholders.add(freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder")))
-            // No name, email or address: "no details known"
-            propertyOwnership.superiorLandlords.add(superiorLandlordRepository.save(SuperiorLandlord(propertyOwnership)))
-            propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
-            propertyOwnershipRepository.save(propertyOwnership)
-        }
+        val freeholderId =
+            inTransactionReturning {
+                val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+                // Referenced only by the freeholder, so the delete orphans it
+                val freeholderAddress =
+                    addressRepository.save(
+                        Address(AddressDataModel(singleLineAddress = "1 Freeholder Way, EG1 2AB", postcode = "EG1 2AB")),
+                    )
+                val freeholder =
+                    freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder", address = freeholderAddress))
+                propertyOwnership.freeholders.add(freeholder)
+                // A superior landlord with no name, email or address: "no details known"
+                propertyOwnership.superiorLandlords.add(superiorLandlordRepository.save(SuperiorLandlord(propertyOwnership)))
+                propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
+                propertyOwnershipRepository.save(propertyOwnership)
+                freeholder.id
+            }
         assertEquals(1, countRowsIn("property_manager"))
-        // The seed data already gives this property a "no details known" placeholder freeholder
-        val freeholderNames =
-            jdbcTemplate.queryForList(
-                "SELECT name FROM freeholder WHERE property_ownership_id = ?",
-                String::class.java,
-                propertyOwnershipId,
-            )
-        assertTrue(freeholderNames.contains("A Freeholder"))
+        val freeholderAddressId =
+            jdbcTemplate.queryForObject("SELECT address_id FROM freeholder WHERE id = ?", Long::class.java, freeholderId)!!
         val superiorLandlord =
             jdbcTemplate.queryForMap(
                 "SELECT name, email, address_id FROM superior_landlord WHERE property_ownership_id = ?",
@@ -91,6 +102,8 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         assertEquals(0, countRowsFor("freeholder", propertyOwnershipId))
         assertEquals(0, countRowsFor("superior_landlord", propertyOwnershipId))
         assertEquals(0, countRowsIn("property_manager"))
+        // Addresses are never deleted, even once nothing references them
+        assertEquals(1, countAddressesWithId(freeholderAddressId))
     }
 
     @Test
