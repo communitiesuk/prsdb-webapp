@@ -702,9 +702,6 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        // Drawn here, not at its point of use below, because moving it would reorder the shared
-        // faker stream and change every subsequent seeded value.
-        val ownershipTypeBeforePdjb955 = NftDataFaker.generateOwnershipTypeBeforePdjb955()
         val ownershipType = NftDataFaker.generateOwnershipType()
         propertyOwnershipStmt.setInt(4, ownershipType.ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
@@ -728,14 +725,15 @@ class NftDataSeeder(
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
         propertyOwnershipStmt.setDate(23, renewalDate)
-        propertyOwnershipStmt.setInt(24, ownershipTypeBeforePdjb955.ordinal)
+        propertyOwnershipStmt.setInt(24, NftDataFaker.generateOwnershipTypeBeforePdjb955().ordinal)
         propertyOwnershipStmt.addBatch()
 
-        // A "no details known" placeholder. Deliberately draws nothing: a name, email or address
-        // would consume the shared faker stream and change every subsequent seeded value.
+        // A "no details known" placeholder.
         // TODO PDJB-1957: seed realistic associated parties once the journey defines their shape -
         //  named freeholders, superior landlords with has_superior_landlords set to match, and
         //  property managers - so that NFT exercises those joins at a representative volume.
+        //  Their addresses should come from landlordAddressGenerator, which is unrestricted: unlike
+        //  property addresses they can be duplicated and must not consume the available pool.
         if (ownershipType.impliesAnotherFreeholder()) {
             freeholderStmt.setTimestamp(1, createdDate)
             freeholderStmt.setLong(2, propertyOwnershipId)
