@@ -1,0 +1,31 @@
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
+
+import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+
+// TODO PDJB-1972: replace this placeholder with the real "can you provide details about the superior landlord" page
+//  Swap to inherit from PageWithYesNoRadios
+class SuperiorLandlordProvideDetailsFormPagePropertyRegistration(
+    page: Page,
+) : BasePage(
+        page,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT}",
+    ) {
+    val form = SuperiorLandlordProvideDetailsForm(page)
+
+    fun submitProvideDetails(provideDetails: YesOrNo) {
+        form.radios.selectValue(provideDetails)
+        form.submit()
+    }
+
+    class SuperiorLandlordProvideDetailsForm(
+        page: Page,
+    ) : FormWithSectionHeader(page) {
+        val radios = Radios(locator)
+    }
+}

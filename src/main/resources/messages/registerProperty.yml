@@ -310,6 +310,25 @@ freeholders:
         postalAddress: Post
       error:
         missing: Select how we should contact the freeholder
+superiorLandlords:
+  provideDetails:
+    fieldSetHeading: Can you provide details about the superior landlord? (TODO PDJB-1972)
+    radios:
+      error:
+        missing: Select whether you can provide details about the superior landlord
+  contactType:
+    fieldSetHeading: How should we contact the superior landlord? (TODO PDJB-1974)
+    radios:
+      option:
+        email: Email
+        postalAddress: Post
+      error:
+        missing: Select how we should contact the superior landlord
+  anyoneInOwnershipChain:
+    fieldSetHeading: Is there anyone else in the ownership chain? (TODO PDJB-1971)
+    radios:
+      error:
+        missing: Select whether there is anyone else in the ownership chain
 # TODO PDJB-1959: replace with the real "Do you own the property?" content
 ownsProperty:
   fieldSetHeading: TODO PDJB-1959 Do you own this property?

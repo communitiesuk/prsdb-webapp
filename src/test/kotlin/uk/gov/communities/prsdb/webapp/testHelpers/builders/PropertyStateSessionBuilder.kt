@@ -213,6 +213,12 @@ class PropertyStateSessionBuilder(
                 .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
                 .withFreeholdType(FreeholdType.JOINT_TENANTS)
 
+        fun beforePropertyRegistrationSuperiorLandlords() =
+            beforePropertyRegistrationOwnsProperty()
+                .withOwnsProperty()
+                .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+                .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
