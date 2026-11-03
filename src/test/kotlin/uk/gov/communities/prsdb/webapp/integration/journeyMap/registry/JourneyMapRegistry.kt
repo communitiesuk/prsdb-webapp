@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.integration.journeyMap.registry
 
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.journeyMap.JourneyMapHarness
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStepConfig
@@ -22,12 +24,17 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentStatusCheckStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.IdentityVerificationStatus
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckLandlordIdentityVerifiedStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentState
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 import kotlin.reflect.KClass
@@ -89,6 +96,17 @@ object JourneyMapRegistry {
         }
     }
 
+    // The local GOV.UK Pay mock completes every payment, so other outcomes are reported in place of its status
+    private fun reportPaymentStatus(
+        harness: JourneyMapHarness,
+        status: GovUkPayPaymentStatus,
+    ) {
+        doAnswer { invocation ->
+            val payment = invocation.callRealMethod() as GovUkPayPayment
+            payment.copy(state = GovUkPayPaymentState(status, finished = status in GovUkPayPaymentStatus.FINISHED_STATUSES))
+        }.whenever(harness.govUkPayClient).getPayment(any())
+    }
+
     val scenarios =
         listOf(
             Scenario(
@@ -138,6 +156,17 @@ object JourneyMapRegistry {
                             stubEpcByCertificateNumber(it, epcFound(expiryDate = MockEpcData.expiryDateInThePast))
                         },
                         ScenarioOption("Low rated certificate found") { stubEpcByCertificateNumber(it, epcFound(energyRating = "F")) },
+                    ),
+            ),
+            // The status is checked on the way back from GOV.UK Pay, so each outcome is explored from the payment summary
+            Scenario(
+                name = "GOV.UK Pay payment status",
+                stepConfigs = setOf(PaymentSummaryStepConfig::class, PaymentStatusCheckStepConfig::class),
+                options =
+                    listOf(
+                        ScenarioOption("Payment completed") { reset(it.govUkPayClient) },
+                        ScenarioOption("Payment still processing") { reportPaymentStatus(it, GovUkPayPaymentStatus.CREATED) },
+                        ScenarioOption("Payment failed") { reportPaymentStatus(it, GovUkPayPaymentStatus.FAILED) },
                     ),
             ),
         )

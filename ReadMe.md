@@ -167,7 +167,7 @@ doesn't hit the `exitProcess()` behaviour described above.
 
 The `generateJourneyMap` task walks every route through a journey in the integration test harness (so Docker must be
 running), screenshots each page and each distinct version of it, and draws a map of the journey. External services
-such as One Login and the EPC register are stubbed by the scenarios in `JourneyMapRegistry`.
+such as One Login, the EPC register and GOV.UK Pay are stubbed by the scenarios in `JourneyMapRegistry`.
 
 ```bash
 ./gradlew generateJourneyMap                                       # every journey in JourneyDescriptors
