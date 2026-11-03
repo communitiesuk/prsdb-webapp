@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
@@ -85,8 +86,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
-            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            // TODO PDJB-1969: verify that the information the user submitted is visible
+            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
+            freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -131,8 +135,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
-            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 3 freeholders")
+            freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1971: update this usage when the real has superior landlords page is added
@@ -161,8 +166,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
-            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 3 freeholders")
+            freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1971: update this usage when the real has superior landlords page is added
@@ -183,15 +189,13 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            // TODO PDJB-1964: update this usage when the real freeholder name page is added
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
@@ -206,8 +210,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            // TODO PDJB-1964: update this usage when the real freeholder name page is added
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
             // TODO PDJB-1965: update this usage when the real contact type page is added
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
@@ -215,7 +218,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderAddressFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
@@ -232,7 +234,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1968: update this usage when the real freeholders list page is added
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
