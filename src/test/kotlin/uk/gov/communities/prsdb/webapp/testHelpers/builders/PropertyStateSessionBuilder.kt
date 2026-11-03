@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -207,8 +208,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
-            if (jointFreeholders) {
+        fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
@@ -219,19 +220,31 @@ class PropertyStateSessionBuilder(
                     .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
-        // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
-        fun beforePropertyRegistrationFreeholdersList(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        val DEFAULT_FREEHOLDERS =
+            mapOf(
+                1 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Freeholder With Address",
+                        address = AddressDataModel.fromManualAddressData("1 Freehold Street", "Freeholdtown", "FH1 1AA"),
+                    ),
+                2 to FreeholderDataModel(detailsKnown = true, name = "Freeholder With Email", email = "freeholder@example.com"),
+                3 to FreeholderDataModel(detailsKnown = false),
+            )
 
-        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        fun beforePropertyRegistrationFreeholdersList(
+            isJointFreeholder: Boolean = true,
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+            .withFreeholdersInfoComplete()
+            .withFreeholders(freeholders)
 
-        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
+        fun beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+                .withFreeholdersInfoComplete()
+
+        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
                 .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationSuperiorLandlords() =
