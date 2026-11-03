@@ -18,7 +18,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `Leasehold only landlords see the single freeholder heading`() {
+        fun `Leasehold only landlords see the non-joint freeholder heading`() {
             val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage(leaseholdOnly = true)
             assertThat(freeholderNamePage.heading).containsText("What is this freeholder’s name?")
         }

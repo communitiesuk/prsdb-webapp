@@ -13,7 +13,7 @@ class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, Freehol
 
     override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "registerProperty.freeholders.name.fieldSetHeading.${jointOrSingle(state)}",
+            "fieldSetHeading" to "registerProperty.freeholders.name.fieldSetHeading.${jointOrNonJoint(state)}",
             "fieldSetHint" to "registerProperty.freeholders.name.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
@@ -22,7 +22,7 @@ class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, Freehol
 
     override fun mode(state: FreeholdersDetailsState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    private fun jointOrSingle(state: FreeholdersDetailsState) = if (state.isJointFreeholder) "joint" else "single"
+    private fun jointOrNonJoint(state: FreeholdersDetailsState) = if (state.isJointFreeholder) "joint" else "nonJoint"
 }
 
 @JourneyFrameworkComponent

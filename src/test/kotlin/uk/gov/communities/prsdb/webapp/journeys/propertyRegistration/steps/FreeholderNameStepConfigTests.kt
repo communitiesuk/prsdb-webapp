@@ -14,7 +14,7 @@ class FreeholderNameStepConfigTests {
     lateinit var mockJourneyState: FreeholdersDetailsState
 
     @Test
-    fun `getStepSpecificContent returns the single freeholder heading, hint and save and continue button`() {
+    fun `getStepSpecificContent returns the non-joint freeholder heading, hint and save and continue button`() {
         // Arrange
         val stepConfig = FreeholderNameStepConfig()
         whenever(mockJourneyState.isJointFreeholder).thenReturn(false)
@@ -25,7 +25,7 @@ class FreeholderNameStepConfigTests {
         // Assert
         assertEquals(
             mapOf(
-                "fieldSetHeading" to "registerProperty.freeholders.name.fieldSetHeading.single",
+                "fieldSetHeading" to "registerProperty.freeholders.name.fieldSetHeading.nonJoint",
                 "fieldSetHint" to "registerProperty.freeholders.name.fieldSetHint",
                 "submitButtonText" to "forms.buttons.saveAndContinue",
             ),
