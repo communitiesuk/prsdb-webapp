@@ -159,11 +159,11 @@ try {
     foreach ($siblingEnv in $siblingEnvFiles) {
         if ($siblingEnv.FullName -eq (Join-Path $newWorktreePath ".env")) { continue }
         foreach ($line in Get-Content $siblingEnv.FullName) {
-            if ($line -match '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT)=\D*(\d+)') { $usedPorts[[int]$Matches[2]] = $true }
+            if ($line -match '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT|ELASTICMQ_PORT)=\D*(\d+)') { $usedPorts[[int]$Matches[2]] = $true }
         }
     }
     $portOffset = 1
-    while ($usedPorts.ContainsKey(8080 + $portOffset) -or $usedPorts.ContainsKey(5433 + $portOffset) -or $usedPorts.ContainsKey(6379 + $portOffset)) {
+    while ($usedPorts.ContainsKey(8080 + $portOffset) -or $usedPorts.ContainsKey(5433 + $portOffset) -or $usedPorts.ContainsKey(6379 + $portOffset) -or $usedPorts.ContainsKey(9324 + $portOffset)) {
         $portOffset++
     }
 

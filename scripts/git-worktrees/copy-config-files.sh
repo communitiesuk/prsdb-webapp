@@ -107,12 +107,12 @@ USED_PORTS=" "
 for SIBLING_ENV in "$WORKTREE_BASE"/*/.env; do
     [ -f "$SIBLING_ENV" ] || continue
     [ "$SIBLING_ENV" = "$DEST_PATH/.env" ] && continue
-    SIBLING_PORTS=$(grep -E '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT)=' "$SIBLING_ENV" 2>/dev/null | sed -E 's/^[^=]*=[^0-9]*([0-9]+).*/\1/' | tr '\n' ' ' || true)
+    SIBLING_PORTS=$(grep -E '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT|ELASTICMQ_PORT)=' "$SIBLING_ENV" 2>/dev/null | sed -E 's/^[^=]*=[^0-9]*([0-9]+).*/\1/' | tr '\n' ' ' || true)
     USED_PORTS="$USED_PORTS$SIBLING_PORTS "
 done
 is_port_used() { [[ "$USED_PORTS" == *" $1 "* ]]; }
 PORT_OFFSET=1
-while is_port_used $((8080 + PORT_OFFSET)) || is_port_used $((5433 + PORT_OFFSET)) || is_port_used $((6379 + PORT_OFFSET)); do
+while is_port_used $((8080 + PORT_OFFSET)) || is_port_used $((5433 + PORT_OFFSET)) || is_port_used $((6379 + PORT_OFFSET)) || is_port_used $((9324 + PORT_OFFSET)); do
     PORT_OFFSET=$((PORT_OFFSET + 1))
 done
 
