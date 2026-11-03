@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const NO_INDEX = '<meta name="robots" content="noindex">';
+const INDEX_LINK = '<a href="../index.html" style="flex-basis: 100%; color: #1d70b8; font-size: 14px;">All journey maps</a>';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const source = path.resolve(process.argv[2] ?? path.join(repoRoot, "build", "journey-maps"));
@@ -36,6 +37,7 @@ for (const journey of journeys) {
         const html = fs
             .readFileSync(viewer, "utf8")
             .replace("<head>", `<head>\n    ${NO_INDEX}`)
+            .replace("<header>", `<header>\n    ${INDEX_LINK}`)
             // Mermaid stores each arrow's coordinates in Base64, which the detect-secrets hook reports; the viewer does not use them
             .replace(/ data-points="[^"]*"/g, "");
         fs.writeFileSync(viewer, html);
