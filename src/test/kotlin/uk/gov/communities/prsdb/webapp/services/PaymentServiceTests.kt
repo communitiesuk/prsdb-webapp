@@ -37,11 +37,13 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.TransactionSystemException
 import org.springframework.transaction.support.SimpleTransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
@@ -887,16 +889,21 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment returns the current status without updating it when GOV UK Pay reports the payment succeeded`() {
+        fun `finalisePayment records manual intervention when GOV UK Pay reports the payment succeeded`() {
             // Arrange
-            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+            whenever(
+                mockPaymentReconciliationService.recordManualIntervention(
+                    PAYMENT_ID,
+                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED,
+                    PaymentStatus.CREATED,
+                ),
+            ).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
 
             // Assert
-            assertEquals(PaymentStatus.SUCCEEDED, status)
-            verify(mockPaymentRepository, never()).updateStatusIfCurrentStatusIs(any(), any(), any(), any())
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verifyNoInteractions(mockGovUkPayClient, mockPropertyRegistrationService, mockSavedJourneyStateRepository)
         }
 
@@ -907,7 +914,7 @@ class PaymentServiceTests {
 
             // Act, Assert
             assertThrows<IllegalStateException> {
-                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.SUCCEEDED, registrationData)
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.FAILED, registrationData)
             }
         }
 
@@ -1062,6 +1069,32 @@ class PaymentServiceTests {
             val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
             inOrder.verify(mockTransactionManager).rollback(any())
             inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
+        }
+
+        @Test
+        fun `finalisePayment records manual intervention instead of cancelling when the transaction fails to commit after capture`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            stubStoredPayment()
+            doThrow(TransactionSystemException("Commit failed")).whenever(mockTransactionManager).commit(any())
+            whenever(
+                mockPaymentReconciliationService.recordManualIntervention(
+                    PAYMENT_ID,
+                    PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
+                    PaymentStatus.CREATED,
+                ),
+            ).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
         }
 
         @Test

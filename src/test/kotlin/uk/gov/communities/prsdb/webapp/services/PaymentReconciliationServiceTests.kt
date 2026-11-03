@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
@@ -19,9 +20,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class PaymentReconciliationServiceTests {
@@ -31,11 +36,20 @@ class PaymentReconciliationServiceTests {
     @Mock
     private lateinit var mockGovUkPayClient: GovUkPayClient
 
+    @Mock
+    private lateinit var mockManualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>
+
     private lateinit var paymentReconciliationService: PaymentReconciliationService
 
     @BeforeEach
     fun setUp() {
-        paymentReconciliationService = PaymentReconciliationService(mockPaymentRepository, mockGovUkPayClient)
+        paymentReconciliationService =
+            PaymentReconciliationService(
+                MANUAL_INTERVENTION_EMAIL_ADDRESS,
+                mockPaymentRepository,
+                mockGovUkPayClient,
+                mockManualInterventionEmailSender,
+            )
     }
 
     @Nested
@@ -106,6 +120,48 @@ class PaymentReconciliationServiceTests {
         }
     }
 
+    @Nested
+    inner class RecordManualIntervention {
+        @Test
+        fun `records manual intervention then emails support when the payment has the expected status`() {
+            // Arrange
+            val payment = createPayment(paymentId = PAYMENT_ID)
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.MANUAL_INTERVENTION, rowsUpdated = 1)
+            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment))
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
+
+            // Act
+            val result = paymentReconciliationService.recordManualIntervention(PAYMENT_ID, REASON, PaymentStatus.CREATED)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, result)
+            verify(mockManualInterventionEmailSender).sendEmail(
+                MANUAL_INTERVENTION_EMAIL_ADDRESS,
+                PaymentRequiresManualInterventionEmail(
+                    payment.paymentId,
+                    payment.reference,
+                    payment.amountInPence,
+                    payment.paymentCreatedAt,
+                    REASON.description,
+                ),
+            )
+        }
+
+        @Test
+        fun `returns the stored status without emailing support when the payment no longer has the expected status`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.MANUAL_INTERVENTION, rowsUpdated = 0)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+
+            // Act
+            val result = paymentReconciliationService.recordManualIntervention(PAYMENT_ID, REASON, PaymentStatus.CREATED)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, result)
+            verifyNoInteractions(mockManualInterventionEmailSender)
+        }
+    }
+
     private fun stubConditionalUpdate(
         expectedStatus: PaymentStatus,
         newStatus: PaymentStatus,
@@ -117,5 +173,7 @@ class PaymentReconciliationServiceTests {
 
     companion object {
         private const val PAYMENT_ID = "payment-id"
+        private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
+        private val REASON = PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED
     }
 }

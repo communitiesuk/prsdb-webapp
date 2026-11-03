@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -27,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
@@ -45,7 +47,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import uk.gov.communities.prsdb.webapp.services.AddressService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -107,6 +111,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    @MockitoBean
+    private lateinit var mockManualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
@@ -612,6 +619,28 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
+    fun `finalisePayment records manual intervention and emails support when the transaction fails to commit after capture`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doAnswer {
+            TransactionSynchronizationManager.registerSynchronization(
+                object : TransactionSynchronization {
+                    override fun beforeCommit(readOnly: Boolean): Unit = throw IllegalStateException("Commit failed")
+                },
+            )
+        }.whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, paymentRepository.findStatusByPaymentId(CREATED_PAYMENT_ID))
+        verify(mockManualInterventionEmailSender).sendEmail(eq(MANUAL_INTERVENTION_EMAIL_ADDRESS), any())
+        verify(mockGovUkPayClient, never()).cancelPayment(any())
+    }
+
+    @Test
     fun `finalisePayment cancels a payment whose journey has been deleted`() {
         // Arrange
         TransactionTemplate(transactionManager).executeWithoutResult { deleteJourney() }
@@ -726,6 +755,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         private const val JOURNEY_ID = "example-incomplete-journey-with-payments"
         private val INCOMPLETE_PROPERTY_ID = LandlordIncompletePropertyId(USER_ID, 6L)
         private const val TIMEOUT_SECONDS = 10L
+        private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
         private val NOW = Instant.parse("2026-01-01T12:00:00Z")
     }
 }
