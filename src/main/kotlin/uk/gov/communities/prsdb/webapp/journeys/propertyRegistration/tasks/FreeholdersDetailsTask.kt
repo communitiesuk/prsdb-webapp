@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
@@ -39,12 +38,6 @@ class FreeholdersDetailsTask(
     FreeholdersDetailsState {
     override val taskState get() = this
 
-    override val freeholdersInfoStep: uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
-        get() = (dependencies.listState as FreeholdersState).freeholdersInfoStep
-    override val freeholdersDetailsTask: FreeholdersDetailsTask
-        get() = (dependencies.listState as FreeholdersState).freeholdersDetailsTask
-    override val freeholdersBackRoutingStep: uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
-        get() = (dependencies.listState as FreeholdersState).freeholdersBackRoutingStep
     override val isJointFreeholder: Boolean
         get() = dependencies.listState.isJointFreeholder
 

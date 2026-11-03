@@ -13,7 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetSt
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 
 interface FreeholdersDetailsState :
-    FreeholdersState {
+    JourneyState,
+    FreeholdersListState {
     val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep
     val freeholderNameStep: FreeholderNameStep
     val freeholderContactTypeStep: FreeholderContactTypeStep
