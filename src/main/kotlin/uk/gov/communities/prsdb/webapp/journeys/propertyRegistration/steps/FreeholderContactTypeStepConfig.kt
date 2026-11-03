@@ -34,7 +34,7 @@ class FreeholderContactTypeStepConfig :
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/personContactTypeForm"
+    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/contactTypeForm"
 
     override fun mode(state: FreeholdersDetailsState) = getFormModelFromStateOrNull(state)?.contactType
 }
