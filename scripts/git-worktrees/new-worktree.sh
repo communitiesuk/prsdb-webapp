@@ -157,6 +157,7 @@ PORT_OFFSET=$((MAX_OFFSET + 1))
 NEW_SERVER_PORT=$((8080 + PORT_OFFSET))
 NEW_POSTGRES_PORT=$((5433 + PORT_OFFSET))
 NEW_REDIS_PORT=$((6379 + PORT_OFFSET))
+NEW_ELASTICMQ_PORT=$((9324 + PORT_OFFSET))
 
 ENV_FILE="$NEW_WORKTREE_PATH/.env"
 if [ -f "$ENV_FILE" ]; then
@@ -166,18 +167,20 @@ if [ -f "$ENV_FILE" ]; then
         -e "s/SERVER_PORT=\"8080\"/SERVER_PORT=\"$NEW_SERVER_PORT\"/" \
         -e "s/POSTGRES_PORT=\"5433\"/POSTGRES_PORT=\"$NEW_POSTGRES_PORT\"/" \
         -e "s/REDIS_PORT=\"6379\"/REDIS_PORT=\"$NEW_REDIS_PORT\"/" \
+        -e "s/ELASTICMQ_PORT=\"9324\"/ELASTICMQ_PORT=\"$NEW_ELASTICMQ_PORT\"/" \
         -e "s|RDS_URL=\"jdbc:postgresql://localhost:5433/prsdblocal\"|RDS_URL=\"jdbc:postgresql://localhost:$NEW_POSTGRES_PORT/prsdblocal\"|" \
         -e "s/ELASTICACHE_PORT=\"6379\"/ELASTICACHE_PORT=\"$NEW_REDIS_PORT\"/" \
         -e "s|LANDLORD_BASE_URL=\"http://localhost:8080/landlord\"|LANDLORD_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/landlord\"|" \
         -e "s|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:8080/local-council\"|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/local-council\"|" \
         "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
     # Append any port keys missing from the copied .env so defaults aren't used
-    for KV in "SERVER_PORT=$NEW_SERVER_PORT" "POSTGRES_PORT=$NEW_POSTGRES_PORT" "REDIS_PORT=$NEW_REDIS_PORT"; do
+    for KV in "SERVER_PORT=$NEW_SERVER_PORT" "POSTGRES_PORT=$NEW_POSTGRES_PORT" "REDIS_PORT=$NEW_REDIS_PORT" "ELASTICMQ_PORT=$NEW_ELASTICMQ_PORT"; do
         grep -q "^${KV%%=*}=" "$ENV_FILE" || printf '\n%s="%s"' "${KV%%=*}" "${KV#*=}" >> "$ENV_FILE"
     done
     echo "  SERVER_PORT=$NEW_SERVER_PORT"
     echo "  POSTGRES_PORT=$NEW_POSTGRES_PORT"
     echo "  REDIS_PORT=$NEW_REDIS_PORT"
+    echo "  ELASTICMQ_PORT=$NEW_ELASTICMQ_PORT"
 fi
 
 # Install npm dependencies

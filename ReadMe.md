@@ -19,17 +19,21 @@ of [testcontainers](https://testcontainers.com/).
 ### Running multiple worktrees in parallel
 
 The local build can be run from multiple git worktrees simultaneously. Each worktree
-needs unique ports to avoid conflicts. Three environment variables in `.env` control this:
+needs unique ports to avoid conflicts. Four environment variables in `.env` control this:
 
-| Variable        | Default | Purpose                   |
-|-----------------|---------|---------------------------|
-| `SERVER_PORT`   | `8080`  | Spring Boot server port   |
-| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port |
-| `REDIS_PORT`    | `6379`  | Host-side Redis port      |
+| Variable         | Default | Purpose                        |
+|------------------|---------|--------------------------------|
+| `SERVER_PORT`    | `8080`  | Spring Boot server port        |
+| `POSTGRES_PORT`  | `5433`  | Host-side PostgreSQL port      |
+| `REDIS_PORT`     | `6379`  | Host-side Redis port           |
+| `ELASTICMQ_PORT` | `9324`  | Host-side ElasticMQ (SQS) port |
 
 When creating a worktree with the `scripts/git-worktrees/new-worktree` script, unique
 ports are assigned automatically. To adjust ports manually, edit `.env` in the worktree
 root.
+
+Worktrees created before `ELASTICMQ_PORT` was introduced need it adding to their `.env` by hand, using the same
+offset as their other ports (e.g. `SERVER_PORT="8085"` → `ELASTICMQ_PORT="9329"`).
 
 #### Playwright CLI for browser testing
 
