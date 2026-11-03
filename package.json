@@ -23,10 +23,10 @@
     "@rollup/plugin-commonjs": "^28.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
-    "@rollup-extras/plugin-copy": "^2.2.0",
     "csv-parser": "^3.2.0",
     "global-jsdom": "^26.0.0",
     "rollup": "^4.59.0",
+    "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^3.0.2",
     "rollup-plugin-sass": "^1.15.2"
   },
@@ -36,5 +36,10 @@
     "govuk-frontend": "^5.11.0",
     "govuk-one-login-service-header": "github:govuk-one-login/service-header#v4.0.0",
     "jquery": "^3.7.1"
+  },
+  "overrides": {
+    "rollup-plugin-copy": {
+      "globby": "^11.1.0"
+    }
   }
 }

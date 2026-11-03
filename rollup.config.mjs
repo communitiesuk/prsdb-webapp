@@ -1,6 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from "@rollup/plugin-node-resolve";
-import copy from "@rollup-extras/plugin-copy";
+import copy from "rollup-plugin-copy";
 import del from "rollup-plugin-delete";
 import babel from "@rollup/plugin-babel";
 import sass from 'rollup-plugin-sass';
@@ -27,9 +27,6 @@ export default {
             }
         }),
         copy({
-                flatten: true,
-                emitFiles: false,
-                copyOnce: false,
                 targets: [
                     {
                         src: 'node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.css',
