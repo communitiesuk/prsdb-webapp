@@ -144,7 +144,7 @@ class PropertyComplianceService(
         gasSafetyFileUploadIds: List<Long> = listOf(),
         gasSafetyCertProvideLater: Boolean? = null,
         electricalSafetyFileUploadIds: List<Long> = listOf(),
-        electricalSafetyExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         electricalSafetyCertProvideLater: Boolean? = null,
         epcCertificateUrl: String? = null,
@@ -155,6 +155,8 @@ class PropertyComplianceService(
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
         eicIssueDate: LocalDate? = null,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate: LocalDate? = null,
     ) {
         val propertyOwnership =
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
@@ -172,8 +174,10 @@ class PropertyComplianceService(
                 populateElectricalSafetyFields(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
-                    electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                    eicrExpiryDate = eicrExpiryDate,
                     eicIssueDate = eicIssueDate,
+                    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                    eicExpiryDate = eicExpiryDate,
                     electricalCertType = electricalCertType,
                     electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 )
@@ -218,8 +222,10 @@ class PropertyComplianceService(
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
         electricalSafetyFileUploadIds: List<Long>,
-        electricalSafetyExpiryDate: LocalDate?,
+        eicrExpiryDate: LocalDate?,
         eicIssueDate: LocalDate?,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate: LocalDate?,
         electricalCertType: CertificateType?,
         electricalSafetyCertProvideLater: Boolean? = null,
     ) {
@@ -228,22 +234,32 @@ class PropertyComplianceService(
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
         record.electricalCertType = electricalCertType
-        setElectricalSafetyDate(record, electricalSafetyExpiryDate, eicIssueDate, electricalCertType)
+        when (electricalCertType) {
+            // TODO PDJB-1679: Always set the EIC issue date when the EIC_ISSUE_DATE flag is removed
+            CertificateType.Eic ->
+                if (eicIssueDate != null) setEicIssueDate(record, eicIssueDate) else setEicExpiryDate(record, eicExpiryDate)
+            else -> setEicrExpiryDate(record, eicrExpiryDate)
+        }
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }
 
-    private fun setElectricalSafetyDate(
+    private fun setEicrExpiryDate(
         record: PropertyCompliance,
         expiryDate: LocalDate?,
-        eicIssueDate: LocalDate?,
-        electricalCertType: CertificateType?,
     ) {
-        when {
-            electricalCertType == CertificateType.Eic && eicIssueDate != null -> eicDateService.applyIssueDate(record, eicIssueDate)
-            electricalCertType == CertificateType.Eic -> eicDateService.applyExpiryDate(record, expiryDate)
-            else -> record.electricalSafetyExpiryDate = expiryDate
-        }
+        record.electricalSafetyExpiryDate = expiryDate
     }
+
+    private fun setEicIssueDate(
+        record: PropertyCompliance,
+        issueDate: LocalDate,
+    ) = eicDateService.applyIssueDate(record, issueDate)
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    private fun setEicExpiryDate(
+        record: PropertyCompliance,
+        expiryDate: LocalDate?,
+    ) = eicDateService.applyExpiryDate(record, expiryDate)
 
     private fun populateEpcFields(
         record: PropertyCompliance,
@@ -358,9 +374,11 @@ class PropertyComplianceService(
         propertyOwnershipId: Long,
         initialLastModifiedDate: Instant,
         electricalCertType: CertificateType? = null,
-        electricalSafetyExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
         electricalSafetyCertUploadIds: List<Long> = listOf(),
         eicIssueDate: LocalDate? = null,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate: LocalDate? = null,
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
@@ -369,8 +387,10 @@ class PropertyComplianceService(
             populateElectricalSafetyFields(
                 record = this,
                 electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
-                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                eicrExpiryDate = eicrExpiryDate,
                 eicIssueDate = eicIssueDate,
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                eicExpiryDate = eicExpiryDate,
                 electricalCertType = electricalCertType,
             )
         }
@@ -384,7 +404,8 @@ class PropertyComplianceService(
             electricalCertType = electricalCertType,
         )
 
-        if (electricalSafetyExpiryDate != null || eicIssueDate != null) {
+        // TODO PDJB-1679: Remove the eicExpiryDate check when the EIC_ISSUE_DATE flag is removed
+        if (eicrExpiryDate != null || eicIssueDate != null || eicExpiryDate != null) {
             val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,

@@ -415,7 +415,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyCertIssueDate = gasCertIssueDate,
-                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                eicrExpiryDate = electricalSafetyExpiryDate,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
                 epcEnergyRating = epcEnergyRating,
@@ -448,6 +448,25 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 electricalCertType = CertificateType.Eic,
                 eicIssueDate = LocalDate.of(2024, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `saves the EIC expiry date when an EIC expiry date is provided`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                electricalCertType = CertificateType.Eic,
+                eicExpiryDate = LocalDate.of(2029, 3, 20),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1380,7 +1399,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L, 20L),
             )
 
@@ -1501,7 +1520,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1523,7 +1542,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1547,7 +1566,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1604,7 +1623,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
@@ -1649,7 +1668,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1692,7 +1711,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1732,7 +1751,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1774,7 +1793,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1818,7 +1837,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = emptyList(),
             )
 
@@ -1858,7 +1877,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = emptyList(),
             )
 

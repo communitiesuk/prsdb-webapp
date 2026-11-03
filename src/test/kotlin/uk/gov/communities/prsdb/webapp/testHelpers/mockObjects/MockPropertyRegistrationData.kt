@@ -47,8 +47,10 @@ class MockPropertyRegistrationData {
             gasSafetyFileUploadIds: List<Long> = emptyList(),
             gasSafetyCertProvideLater: Boolean = false,
             electricalSafetyFileUploadIds: List<Long> = emptyList(),
-            electricalSafetyExpiryDate: LocalDate? = null,
+            eicrExpiryDate: LocalDate? = null,
             eicIssueDate: LocalDate? = null,
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate: LocalDate? = null,
             electricalCertType: CertificateType? = null,
             electricalSafetyCertProvideLater: Boolean = false,
             epcCertificateUrl: String? = null,
@@ -88,8 +90,10 @@ class MockPropertyRegistrationData {
             gasSafetyFileUploadIds = gasSafetyFileUploadIds,
             gasSafetyCertProvideLater = gasSafetyCertProvideLater,
             electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
             eicIssueDate = eicIssueDate,
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate = eicExpiryDate,
             electricalCertType = electricalCertType,
             electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
             epcCertificateUrl = epcCertificateUrl,

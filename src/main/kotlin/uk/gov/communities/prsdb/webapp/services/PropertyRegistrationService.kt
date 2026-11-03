@@ -79,7 +79,7 @@ class PropertyRegistrationService(
                 gasSafetyFileUploadIds,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyFileUploadIds,
-                electricalSafetyExpiryDate,
+                eicrExpiryDate,
                 electricalCertType,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcCertificateUrl,
@@ -90,6 +90,8 @@ class PropertyRegistrationService(
                 epcMeesExemptionReason,
                 epcProvideLater = epcProvideLater,
                 eicIssueDate = eicIssueDate,
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                eicExpiryDate = eicExpiryDate,
             )
 
             runAfterTransactionCommits {
