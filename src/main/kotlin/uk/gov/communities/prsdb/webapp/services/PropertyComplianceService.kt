@@ -238,7 +238,9 @@ class PropertyComplianceService(
             // TODO PDJB-1679: Always set the EIC issue date when the EIC_ISSUE_DATE flag is removed
             CertificateType.Eic ->
                 if (eicIssueDate != null) setEicIssueDate(record, eicIssueDate) else setEicExpiryDate(record, eicExpiryDate)
-            else -> setEicrExpiryDate(record, eicrExpiryDate)
+            CertificateType.Eicr -> setEicrExpiryDate(record, eicrExpiryDate)
+            null -> record.electricalSafetyExpiryDate = null
+            CertificateType.GasSafetyCert -> throw unexpectedElectricalCertType(record)
         }
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }

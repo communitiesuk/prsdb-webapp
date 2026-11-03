@@ -42,10 +42,10 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         val uploadMap = if (isEic) state.eicUploadMap else state.eicrUploadMap
         // TODO PDJB-1679: Always use the EIC issue date step for EICs when the EIC_ISSUE_DATE flag is removed
         val dateStep =
-            when {
-                !isEic -> state.eicrExpiryDateStep
-                state.isEicIssueDateEnabled -> state.eicIssueDateStep
-                else -> state.eicExpiryDateStep
+            when (state.hasElectricalCertStep.outcome) {
+                HasElectricalCertMode.HAS_EIC -> if (state.isEicIssueDateEnabled) state.eicIssueDateStep else state.eicExpiryDateStep
+                HasElectricalCertMode.HAS_EICR -> state.eicrExpiryDateStep
+                else -> throw IllegalStateException("Cert uploaded scenario requires a certificate type")
             }
         val checkUploadsStep = if (isEic) state.checkEicUploadsStep else state.checkEicrUploadsStep
         val uploadedFiles =
