@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="summaryName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryListData" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
@@ -22,7 +22,7 @@
     </th:block>
 </th:block>
     <th:block id="form-content">
-        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <input type="hidden" name="answersLastChangedAt" th:value="${answersLastChangedAt}"/>
         <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
     </th:block>
 </html>
