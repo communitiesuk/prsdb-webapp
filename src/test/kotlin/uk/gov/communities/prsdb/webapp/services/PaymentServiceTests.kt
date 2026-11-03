@@ -1106,6 +1106,46 @@ class PaymentServiceTests {
             verify(mockGovUkPayClient, never()).capturePayment(any())
             verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
         }
+
+        @Test
+        fun `finalisePayment marks the payment for cancellation and throws when the quote expires before registration`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, quoteDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)))
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act, Assert
+            assertThrows<PaymentQuoteExpiredException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+            }
+            verify(mockTransactionManager, never()).commit(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+            val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
+            inOrder.verify(mockTransactionManager).rollback(any())
+            inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
+        }
+
+        @Test
+        fun `finalisePayment returns succeeded when another request finalises an expired quote's payment before it can be marked`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createPayment(paymentId = PAYMENT_ID, quoteDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)))
+            whenever(mockPropertyRegistrationService.registerProperty(any()))
+                .thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockTransactionManager).rollback(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+        }
     }
 
     @Nested

@@ -12,7 +12,7 @@ WHERE status = 0
               WHERE newer.status = 0
                 AND newer.associated_incomplete_property_user_id = older.associated_incomplete_property_user_id
                 AND newer.associated_incomplete_property_saved_journey_state_id = older.associated_incomplete_property_saved_journey_state_id
-                AND newer.payment_created_at > older.payment_created_at);
+                AND (newer.payment_created_at, newer.payment_id) > (older.payment_created_at, older.payment_id));
 
 CREATE UNIQUE INDEX uc_payment_one_created_per_incomplete_property
     ON payment (associated_incomplete_property_user_id, associated_incomplete_property_saved_journey_state_id)

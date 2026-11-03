@@ -13,7 +13,7 @@ class PaymentReconciliationService(
     private val govUkPayClient: GovUkPayClient,
 ) {
     // Marking the payment waits for any finalisation of it that is in progress, because that holds the row lock from its
-    // CREATED -> SUCCEEDED claim. A CANCELLING payment has not been captured and never will be.
+    // CREATED -> SUCCEEDED claim. A CANCELLING payment can never be captured.
     fun markForCancellation(paymentId: String): PaymentStatus {
         val isMarked =
             paymentRepository.updateStatusIfCurrentStatusIs(
