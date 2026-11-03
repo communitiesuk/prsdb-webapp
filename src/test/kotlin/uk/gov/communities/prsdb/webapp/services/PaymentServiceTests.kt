@@ -658,41 +658,13 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `createPropertyRegistrationPayment does not create another payment when the property already has a succeeded payment`() {
-            // Arrange
-            paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
-            val incompleteProperty = setUpIncompletePropertyAndLandlord()
-            val succeededPayment = createPayment(status = PaymentStatus.SUCCEEDED, incompleteProperty = incompleteProperty)
-            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
-                .thenReturn(listOf(succeededPayment))
-
-            // Act
-            val exception =
-                assertThrows<IllegalStateException> {
-                    paymentService.createPropertyRegistrationPayment(
-                        journeyId,
-                        email,
-                        paymentService.getPropertyRegistrationPaymentQuote(),
-                    )
-                }
-
-            // Assert
-            assertContains(exception.message!!, succeededPayment.paymentId)
-            assertContains(exception.message!!, journeyId)
-            verifyNoInteractions(mockGovUkPayClient)
-            verify(mockPaymentRepository, never()).saveAndFlush(any<Payment>())
-        }
-
-        @Test
-        fun `createPropertyRegistrationPayment marks the draft's CREATED payments for cancellation before creating a new one`() {
+        fun `createPropertyRegistrationPayment marks the draft's CREATED payment for cancellation before creating a new one`() {
             // Arrange
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
             val incompleteProperty = setUpIncompletePropertyAndLandlord()
             val createdPayment = createPayment(paymentId = OTHER_PAYMENT_ID, incompleteProperty = incompleteProperty)
-            val failedPayment =
-                createPayment(paymentId = FINISHED_PAYMENT_ID, status = PaymentStatus.FAILED, incompleteProperty = incompleteProperty)
-            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty))
-                .thenReturn(listOf(createdPayment, failedPayment))
+            whenever(mockPaymentRepository.findByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED))
+                .thenReturn(createdPayment)
             whenever(mockPaymentReconciliationService.markForCancellation(OTHER_PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLING)
             stubGovUkPayCreatePayment()
 
@@ -707,7 +679,6 @@ class PaymentServiceTests {
             val inOrder = inOrder(mockPaymentReconciliationService, mockGovUkPayClient)
             inOrder.verify(mockPaymentReconciliationService).markForCancellation(OTHER_PAYMENT_ID)
             inOrder.verify(mockGovUkPayClient).createPayment(any())
-            verify(mockPaymentReconciliationService, never()).markForCancellation(FINISHED_PAYMENT_ID)
         }
 
         @Test
@@ -716,7 +687,8 @@ class PaymentServiceTests {
             paymentService = createPaymentService(gratisPeriodEndDate = pastGratisPeriodEndDate)
             val incompleteProperty = setUpIncompletePropertyAndLandlord()
             val createdPayment = createPayment(paymentId = OTHER_PAYMENT_ID, incompleteProperty = incompleteProperty)
-            whenever(mockPaymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty)).thenReturn(listOf(createdPayment))
+            whenever(mockPaymentRepository.findByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED))
+                .thenReturn(createdPayment)
             whenever(mockPaymentReconciliationService.markForCancellation(OTHER_PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
 
             // Act
@@ -1326,7 +1298,6 @@ class PaymentServiceTests {
         private const val PAYMENT_ID = "payment-id"
         private const val PAYMENT_REFERENCE = "payment-reference"
         private const val OTHER_PAYMENT_ID = "other-payment-id"
-        private const val FINISHED_PAYMENT_ID = "finished-payment-id"
 
         @JvmStatic
         fun provideWorkedExamples() =

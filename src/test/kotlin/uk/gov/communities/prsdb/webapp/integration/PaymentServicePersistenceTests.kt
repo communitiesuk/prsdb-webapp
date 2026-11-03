@@ -547,12 +547,8 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             val savedPaymentId = newPayment.nextUrl.removePrefix(NEXT_URL_PREFIX)
             val unsavedPaymentId = setOf("concurrent-payment-1", "concurrent-payment-2").minus(savedPaymentId).single()
             val incompleteProperty = landlordIncompletePropertiesRepository.findById(INCOMPLETE_PROPERTY_ID).get()
-            val createdPaymentIds =
-                paymentRepository
-                    .findAllByAssociatedIncompleteProperty(incompleteProperty)
-                    .filter { it.status == PaymentStatus.CREATED }
-                    .map { it.paymentId }
-            assertEquals(listOf(savedPaymentId), createdPaymentIds)
+            val createdPayment = paymentRepository.findByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED)
+            assertEquals(savedPaymentId, createdPayment?.paymentId)
             assertFalse(paymentRepository.existsById(unsavedPaymentId))
             verify(mockGovUkPayClient).cancelPayment(unsavedPaymentId)
             verify(mockGovUkPayClient, never()).cancelPayment(savedPaymentId)

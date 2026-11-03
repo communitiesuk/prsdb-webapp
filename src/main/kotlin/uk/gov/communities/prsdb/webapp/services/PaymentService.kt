@@ -86,14 +86,7 @@ class PaymentService(
                 "${amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
         }
 
-        val storedStatuses = markCreatedPaymentsForCancellation(incompleteProperty)
-
-        storedStatuses.filterValues { it == PaymentStatus.SUCCEEDED }.keys.firstOrNull()?.let { succeededPaymentId ->
-            throw IllegalStateException(
-                "Cannot create a GOV.UK Pay payment for journey $journeyId: payment $succeededPaymentId for this " +
-                    "property has already succeeded",
-            )
-        }
+        markPreviousPaymentForCancellation(incompleteProperty, journeyId)
 
         val reference = UUID.randomUUID().toString()
         val returnUrl = absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(journeyId, reference).toString()
@@ -118,15 +111,18 @@ class PaymentService(
         }
     }
 
-    private fun markCreatedPaymentsForCancellation(incompleteProperty: LandlordIncompleteProperty): Map<String, PaymentStatus> =
-        paymentRepository.findAllByAssociatedIncompleteProperty(incompleteProperty).associate { storedPayment ->
-            storedPayment.paymentId to
-                if (storedPayment.status == PaymentStatus.CREATED) {
-                    paymentReconciliationService.markForCancellation(storedPayment.paymentId)
-                } else {
-                    storedPayment.status
-                }
+    private fun markPreviousPaymentForCancellation(
+        incompleteProperty: LandlordIncompleteProperty,
+        journeyId: String,
+    ) {
+        val previousPayment =
+            paymentRepository.findByAssociatedIncompletePropertyAndStatus(incompleteProperty, PaymentStatus.CREATED) ?: return
+        val statusAfterMarking = paymentReconciliationService.markForCancellation(previousPayment.paymentId)
+        check(statusAfterMarking != PaymentStatus.SUCCEEDED) {
+            "Cannot create a GOV.UK Pay payment for journey $journeyId: payment ${previousPayment.paymentId} for this " +
+                "property has already succeeded"
         }
+    }
 
     private fun DataIntegrityViolationException.isViolationOf(constraintName: String): Boolean =
         generateSequence<Throwable>(this) { it.cause }

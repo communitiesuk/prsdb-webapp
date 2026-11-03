@@ -11,7 +11,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.Instant
 
 interface PaymentRepository : JpaRepository<Payment, String> {
-    fun findAllByAssociatedIncompleteProperty(associatedIncompleteProperty: LandlordIncompleteProperty): List<Payment>
+    fun findByAssociatedIncompletePropertyAndStatus(
+        associatedIncompleteProperty: LandlordIncompleteProperty,
+        status: PaymentStatus,
+    ): Payment?
 
     fun findByReferenceAndAssociatedIncompleteProperty(
         reference: String,
