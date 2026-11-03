@@ -112,8 +112,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
-            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
@@ -140,8 +139,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
@@ -171,8 +169,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
@@ -246,14 +243,14 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         @Test
         fun `Answering no to having superior landlords skips the rest of the task`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
-            anyoneInOwnershipChainPage.submitAnyoneInOwnershipChain(YesOrNo.NO)
+            anyoneInOwnershipChainPage.submitNo()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
 
         @Test
         fun `Choosing email as the superior landlord contact type goes through the email page before leaving the task`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
-            anyoneInOwnershipChainPage.submitAnyoneInOwnershipChain(YesOrNo.YES)
+            anyoneInOwnershipChainPage.submitYes()
             // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
             assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1972: update this usage when the real provide details page is added
@@ -279,7 +276,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             page: Page,
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
-            anyoneInOwnershipChainPage.submitAnyoneInOwnershipChain(YesOrNo.YES)
+            anyoneInOwnershipChainPage.submitYes()
             // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
             assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1972: update this usage when the real provide details page is added
@@ -305,7 +302,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             page: Page,
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
-            anyoneInOwnershipChainPage.submitAnyoneInOwnershipChain(YesOrNo.YES)
+            anyoneInOwnershipChainPage.submitYes()
             // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
             assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1972: update this usage when the real provide details page is added

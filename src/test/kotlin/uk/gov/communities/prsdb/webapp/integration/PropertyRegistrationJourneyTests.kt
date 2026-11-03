@@ -1207,8 +1207,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             freeholdersListPage.submit()
             // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
             assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
 
