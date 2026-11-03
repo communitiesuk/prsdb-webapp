@@ -11,7 +11,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 // TODO PDJB-1972: replace this placeholder with the real "can you provide details about the superior landlord" page.
 // Implement the routing logic
 @JourneyFrameworkComponent
-class ProvideSuperiorLandlordDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, SuperiorLandlordProvideDetailsFormModel, JourneyState>() {
+class ProvideSuperiorLandlordDetailsStepConfig :
+    AbstractRequestableStepConfig<YesOrNo, SuperiorLandlordProvideDetailsFormModel, JourneyState>() {
     override val formModelClass = SuperiorLandlordProvideDetailsFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
