@@ -40,11 +40,11 @@ class FreeholdersDetailsTask(
     override val taskState get() = this
 
     override val freeholdersInfoStep: uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
-        get() = dependencies.listState.freeholdersInfoStep
+        get() = (dependencies.listState as FreeholdersState).freeholdersInfoStep
     override val freeholdersDetailsTask: FreeholdersDetailsTask
-        get() = dependencies.listState.freeholdersDetailsTask
+        get() = (dependencies.listState as FreeholdersState).freeholdersDetailsTask
     override val freeholdersBackRoutingStep: uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
-        get() = dependencies.listState.freeholdersBackRoutingStep
+        get() = (dependencies.listState as FreeholdersState).freeholdersBackRoutingStep
     override val isJointFreeholder: Boolean
         get() = dependencies.listState.isJointFreeholder
 

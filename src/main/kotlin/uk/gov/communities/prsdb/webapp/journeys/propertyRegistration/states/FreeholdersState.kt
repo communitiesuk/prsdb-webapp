@@ -11,5 +11,5 @@ interface FreeholdersState :
     val freeholdersInfoStep: FreeholdersInfoStep
     val freeholdersDetailsTask: FreeholdersDetailsTask
     val freeholdersBackRoutingStep: FreeholdersBackRoutingStep
-    val isJointFreeholder: Boolean
+    override val isJointFreeholder: Boolean
 }

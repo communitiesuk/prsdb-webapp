@@ -9,6 +9,7 @@ interface FreeholdersListState {
     var freeholdersMap: Map<Int, FreeholderDataModel>?
     var nextFreeholderId: Int?
     var editingFreeholderId: Int?
+    val isJointFreeholder: Boolean
 
     val editingFreeholder: FreeholderDataModel?
         get() = editingFreeholderId?.let { freeholdersMap?.get(it) }
