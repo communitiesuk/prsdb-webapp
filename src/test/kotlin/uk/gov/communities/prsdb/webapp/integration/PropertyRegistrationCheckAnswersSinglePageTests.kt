@@ -541,7 +541,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `The back link on the EICR expiry date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eicr)
 
-            checkAnswersPage.complianceSummaryList.electricalCertExpiryDateRow.actions
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eicr).actions
                 .getActionLink("Change")
                 .clickAndWait()
             val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
@@ -553,7 +553,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `The back link on the EIC issue date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
 
-            checkAnswersPage.complianceSummaryList.electricalCertExpiryDateRow.actions
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).actions
                 .getActionLink("Change")
                 .clickAndWait()
             val issueDatePage = assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)

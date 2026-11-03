@@ -92,7 +92,7 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
         @Test
         fun `Cert uploaded - EICR expiry date change link navigates to expiry date page`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eicr))
-            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            cyaPage.summaryList.certificateDateRow(CertificateType.Eicr).clickFirstActionLinkAndWait()
             assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
         }
 
@@ -100,8 +100,8 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
         fun `Cert uploaded - EIC date row has a blank value and its change link navigates to issue date page`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eic))
             // TODO PDJB-1669: Check the row shows the EIC issue date
-            assertThat(cyaPage.summaryList.expiryDateRow.value).isEmpty()
-            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            assertThat(cyaPage.summaryList.certificateDateRow(CertificateType.Eic).value).isEmpty()
+            cyaPage.summaryList.certificateDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
             assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
         }
 

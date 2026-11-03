@@ -4,6 +4,8 @@ electricalCert:
   fieldHeading: Which electrical safety certificate do you have for this property?
 expiryDate:
   fieldHeading: Expiry date
+issueDate:
+  fieldHeading: Issue date
 yourCertificate:
   fieldHeading: Your certificate
 eicLabel: Electrical Installation Certificate (EIC)

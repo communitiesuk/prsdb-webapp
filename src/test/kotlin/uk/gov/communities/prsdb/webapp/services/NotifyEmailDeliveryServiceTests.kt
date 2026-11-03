@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.serialization.SerializationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +45,7 @@ class NotifyEmailDeliveryServiceTests {
     }
 
     @Test
-    fun `deliverEmail sends a matching email using the notification client`() {
+    fun `DeliverEmail sends a matching email using the notification client`() {
         // Arrange
         val expectedHashmap = hashMapOf("test key 1" to "test value", "test key 2" to "test value")
         val expectedTemplateId = EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL
@@ -131,6 +132,19 @@ class NotifyEmailDeliveryServiceTests {
 
         assertFalse(thrownException is NotifyAllowlistException)
         assertEquals(thrownException.cause, innerException)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUnhandledErrorTypeExceptionMessages")
+    fun `Throws SerializationException when Notify returns an error type that email sending does not handle`(errorMessage: String) {
+        // Arrange
+        Mockito
+            .doThrow(NotificationClientException(errorMessage))
+            .whenever(notifyClient)
+            .sendEmail(any(), any(), any(), any())
+
+        // Act & Assert
+        assertThrows<SerializationException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
     }
 
     companion object {
@@ -222,6 +236,29 @@ class NotifyEmailDeliveryServiceTests {
                         "{\"error\":\"TooManyRequestsError\",\"message\":\"Exceeded send limits for today\"}," +
                         "{\"error\":\"Exception\",\"message\":\"Internal server error\"}]," +
                         "\"status_code\":429}",
+                ),
+            )
+
+        @JvmStatic
+        fun getUnhandledErrorTypeExceptionMessages(): List<Named<String>> =
+            listOf(
+                named(
+                    "Validation Error",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"ValidationError\",\"message\":\"email_address Not a valid email address\"}]," +
+                        "\"status_code\":400}",
+                ),
+                named(
+                    "Unrecognised error type",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"UnrecognisedError\",\"message\":\"Something new\"}]," +
+                        "\"status_code\":400}",
+                ),
+                named(
+                    "Missing error type",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"message\":\"Something new\"}]," +
+                        "\"status_code\":400}",
                 ),
             )
     }
