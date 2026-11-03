@@ -415,6 +415,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyCertIssueDate = gasCertIssueDate,
+                electricalCertType = CertificateType.Eicr,
                 eicrExpiryDate = electricalSafetyExpiryDate,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
