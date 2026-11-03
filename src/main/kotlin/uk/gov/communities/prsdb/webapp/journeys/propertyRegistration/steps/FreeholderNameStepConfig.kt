@@ -7,17 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1970: replace this placeholder with the real "are you sure you want to remove this freeholder" page
-//  (content, input, validation and removal). Rendered with the shared forms/todo placeholder page.
+// TODO PDJB-1964: replace this placeholder with the real freeholder name page
+//  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class PersonRemoveConfirmationStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class FreeholderNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf(
-            "todoComment" to
-                "TODO (PDJB-1970): Are you sure you want to remove this freeholder? - content, input and validation to be added",
-        )
+        mapOf("todoComment" to "TODO (PDJB-1964): Freeholder name - content, input and validation to be added")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -25,10 +22,10 @@ class PersonRemoveConfirmationStepConfig : AbstractRequestableStepConfig<Complet
 }
 
 @JourneyFrameworkComponent
-final class PersonRemoveConfirmationStep(
-    stepConfig: PersonRemoveConfirmationStepConfig,
+final class FreeholderNameStep(
+    stepConfig: FreeholderNameStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "remove-freeholder"
+        const val ROUTE_SEGMENT = "freeholder-name"
     }
 }

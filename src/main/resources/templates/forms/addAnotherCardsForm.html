@@ -3,7 +3,6 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
-<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
@@ -22,7 +21,6 @@
     </th:block>
 </th:block>
 <th:block id="form-content">
-    <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
     <div class="govuk-button-group">
         <div>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addAnotherUrl}, #{${addAnotherButtonText}})}">

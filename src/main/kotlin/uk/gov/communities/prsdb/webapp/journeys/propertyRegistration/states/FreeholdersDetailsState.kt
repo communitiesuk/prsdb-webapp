@@ -1,39 +1,40 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonRemoveConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDependencies
 
-interface FreeholdersMembersState :
+interface FreeholdersDetailsState :
     JourneyState,
     FreeholdersListState,
     FreeholdersDependencies {
-    val freeholderProvideDetailsStep: PersonProvideDetailsStep
-    val freeholderNameStep: PersonNameStep
-    val freeholderContactTypeStep: PersonContactTypeStep
-    val freeholderEmailStep: PersonEmailStep
+    val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep
+    val freeholderNameStep: FreeholderNameStep
+    val freeholderContactTypeStep: FreeholderContactTypeStep
+    val freeholderEmailStep: FreeholderEmailStep
     val freeholderAddressTask: FreeholderAddressTask
     val freeholdersListStep: FreeholdersListStep
     val hasAnyFreeholdersStep: HasAnyFreeholdersStep
     val saveFreeholderStep: SaveFreeholderStep
     val setStateForFreeholderEditStep: SetStateForFreeholderEditStep
-    val removeFreeholderStep: PersonRemoveConfirmationStep
+    val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
     val allowRemovingLastMember: Boolean
 }
 
-class FreeholdersMembersDependencies(
-    val isJointFreeholder: Boolean,
-    val allowRemovingLastMember: Boolean = true,
+class FreeholdersDetailsDependencies(
+    val isJointFreeholder: () -> Boolean,
     // The state slice that owns the collected freeholders. The reusable members task reads and writes the
     // freeholders list through this, so the list can live in the enclosing outer task or journey.
     val listState: FreeholdersListState,
+    // TOOD: PDJB-1993: Set this to false on the update journey
+    val allowRemovingLastMember: Boolean = true,
 )

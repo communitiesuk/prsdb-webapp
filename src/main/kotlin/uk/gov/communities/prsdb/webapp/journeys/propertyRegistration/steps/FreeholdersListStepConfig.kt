@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -17,10 +17,10 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 @JourneyFrameworkComponent
 class FreeholdersListStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, FreeholdersMembersState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, FreeholdersDetailsState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: FreeholdersMembersState) =
+    override fun getStepSpecificContent(state: FreeholdersDetailsState) =
         mapOf(
             "addAnotherTitle" to "registerProperty.freeholders.list.heading.${if (state.isJointFreeholder) "joint" else "single"}",
             "optionalAddAnotherTitleParam" to temporaryFreeholders.size,
@@ -31,7 +31,7 @@ class FreeholdersListStepConfig(
             "addAnotherUrl" to Destination(state.freeholderProvideDetailsStep).toUrlStringOrNull(),
         )
 
-    private fun getFreeholderCards(state: FreeholdersMembersState): List<SummaryCardViewModel> {
+    private fun getFreeholderCards(state: FreeholdersDetailsState): List<SummaryCardViewModel> {
         // TODO PDJB-1969: use state.freeholdersMap once freeholders are saved by the journey
         val freeholdersMap = temporaryFreeholders
         val showRemove = freeholdersMap.size > 1 || state.allowRemovingLastMember
@@ -57,14 +57,14 @@ class FreeholdersListStepConfig(
     }
 
     private fun getCardActions(
-        state: FreeholdersMembersState,
+        state: FreeholdersDetailsState,
         freeholderId: Int,
         showRemove: Boolean,
     ): List<SummaryCardActionViewModel> {
         val urlParameter = urlParameterService.createParameterPair(freeholderId)
         val changeUrl = Destination(state.setStateForFreeholderEditStep).withUrlParameter(urlParameter).toUrlStringOrNull()
         val removeUrl =
-            if (showRemove) Destination(state.removeFreeholderStep).withUrlParameter(urlParameter).toUrlStringOrNull() else null
+            if (showRemove) Destination(state.confirmRemoveFreeholderStep).withUrlParameter(urlParameter).toUrlStringOrNull() else null
         return listOfNotNull(
             changeUrl?.let { SummaryCardActionViewModel(text = "forms.links.change", url = it) },
             removeUrl?.let { SummaryCardActionViewModel(text = "forms.links.remove", url = it) },
@@ -84,9 +84,9 @@ class FreeholdersListStepConfig(
             },
         )
 
-    override fun chooseTemplate(state: FreeholdersMembersState) = "forms/addAnotherCardsForm"
+    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/addAnotherCardsForm"
 
-    override fun mode(state: FreeholdersMembersState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: FreeholdersDetailsState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     companion object {
         // TODO PDJB-1969: remove these temporary freeholders once freeholders are saved by the journey
@@ -112,7 +112,7 @@ class FreeholdersListStepConfig(
 @JourneyFrameworkComponent
 final class FreeholdersListStep(
     stepConfig: FreeholdersListStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, FreeholdersMembersState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, FreeholdersDetailsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholders-list"
     }

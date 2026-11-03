@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 class FreeholdersTask(
     journeyStateService: JourneyStateService,
     override val freeholdersInfoStep: FreeholdersInfoStep,
-    override val freeholdersMembersTask: FreeholdersMembersTask,
+    override val freeholdersDetailsTask: FreeholdersDetailsTask,
     override val freeholdersBackRoutingStep: FreeholdersBackRoutingStep,
 ) : Task<FreeholdersState, FreeholdersDependencies>(journeyStateService),
     FreeholdersState {
@@ -32,24 +32,24 @@ class FreeholdersTask(
         subJourney(state) {
             step(journey.freeholdersInfoStep) {
                 routeSegment(FreeholdersInfoStep.ROUTE_SEGMENT)
-                nextStep { journey.freeholdersMembersTask.firstStep }
+                nextStep { journey.freeholdersDetailsTask.firstStep }
                 savable()
             }
-            task(journey.freeholdersMembersTask) {
+            task(journey.freeholdersDetailsTask) {
                 parents { journey.freeholdersInfoStep.isComplete() }
                 backDestination { Destination(journey.freeholdersInfoStep) }
                 nextStep { journey.freeholdersBackRoutingStep }
                 withDependencies {
-                    FreeholdersMembersDependencies(
+                    FreeholdersDetailsDependencies(
                         listState = journey,
-                        isJointFreeholder = journey.isJointFreeholder,
+                        isJointFreeholder = { journey.isJointFreeholder },
                     )
                 }
                 savable()
             }
             step(journey.freeholdersBackRoutingStep) {
                 routeSegment(FreeholdersBackRoutingStep.ROUTE_SEGMENT)
-                parents { journey.freeholdersMembersTask.isComplete() }
+                parents { journey.freeholdersDetailsTask.isComplete() }
                 nextStep { exitStep }
                 savable()
             }

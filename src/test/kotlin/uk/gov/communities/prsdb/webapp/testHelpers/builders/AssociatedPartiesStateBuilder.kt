@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryPropertyManagerYesOrNoFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 
 interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder<SelfType>> {
     fun withSubmittedValue(
@@ -68,11 +68,10 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1980: update this to use the real "Are you using a property manager?" form model
     fun withNoPropertyManager(): SelfType {
         val propertyManagerFormModel =
-            TemporaryPropertyManagerYesOrNoFormModel().apply {
-                answer = false
+            PropertyManagerFormModel().apply {
+                usingPropertyManager = false
             }
         withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
         return self()

@@ -7,35 +7,35 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersDependencies
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmRemoveFreeholderStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonContactTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonNameStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonProvideDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PersonRemoveConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
-class FreeholdersMembersTask(
+class FreeholdersDetailsTask(
     journeyStateService: JourneyStateService,
-    override val freeholderProvideDetailsStep: PersonProvideDetailsStep,
-    override val freeholderNameStep: PersonNameStep,
-    override val freeholderContactTypeStep: PersonContactTypeStep,
-    override val freeholderEmailStep: PersonEmailStep,
+    override val freeholderProvideDetailsStep: ProvideFreeholderDetailsStep,
+    override val freeholderNameStep: FreeholderNameStep,
+    override val freeholderContactTypeStep: FreeholderContactTypeStep,
+    override val freeholderEmailStep: FreeholderEmailStep,
     override val freeholderAddressTask: FreeholderAddressTask,
     override val freeholdersListStep: FreeholdersListStep,
     override val hasAnyFreeholdersStep: HasAnyFreeholdersStep,
     override val saveFreeholderStep: SaveFreeholderStep,
     override val setStateForFreeholderEditStep: SetStateForFreeholderEditStep,
-    override val removeFreeholderStep: PersonRemoveConfirmationStep,
-) : Task<FreeholdersMembersState, FreeholdersMembersDependencies>(journeyStateService),
-    FreeholdersMembersState {
+    override val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep,
+) : Task<FreeholdersDetailsState, FreeholdersDetailsDependencies>(journeyStateService),
+    FreeholdersDetailsState {
     override val taskState get() = this
 
     override var freeholdersMap: Map<Int, FreeholderDataModel>?
@@ -54,12 +54,13 @@ class FreeholdersMembersTask(
             dependencies.listState.editingFreeholderId = value
         }
     override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
-    override val isJointFreeholder: Boolean get() = dependencies.isJointFreeholder
+    override val isJointFreeholder: Boolean get() = dependencies.isJointFreeholder()
 
-    override fun makeSubJourney(state: FreeholdersMembersState) =
+    override fun makeSubJourney(state: FreeholdersDetailsState) =
         subJourney(state) {
             step(journey.hasAnyFreeholdersStep) {
                 routeSegment(HasAnyFreeholdersStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
@@ -69,8 +70,9 @@ class FreeholdersMembersTask(
                 nextStep { journey.freeholderProvideDetailsStep }
                 savable()
             }
-            step(journey.removeFreeholderStep) {
-                routeSegment(PersonRemoveConfirmationStep.ROUTE_SEGMENT)
+            // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
+            step(journey.confirmRemoveFreeholderStep) {
+                routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 backStep { journey.freeholdersListStep }
                 nextStep { journey.freeholdersListStep }
@@ -83,7 +85,8 @@ class FreeholdersMembersTask(
                 savable()
             }
             step(journey.freeholderProvideDetailsStep) {
-                routeSegment(PersonProvideDetailsStep.ROUTE_SEGMENT)
+                routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
                 parents { journey.hasAnyFreeholdersStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -94,13 +97,13 @@ class FreeholdersMembersTask(
                 savable()
             }
             step(journey.freeholderNameStep) {
-                routeSegment(PersonNameStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderNameStep.ROUTE_SEGMENT)
                 parents { journey.freeholderProvideDetailsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.freeholderContactTypeStep }
                 savable()
             }
             step(journey.freeholderContactTypeStep) {
-                routeSegment(PersonContactTypeStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderContactTypeStep.ROUTE_SEGMENT)
                 parents { journey.freeholderNameStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
@@ -111,11 +114,12 @@ class FreeholdersMembersTask(
                 savable()
             }
             step(journey.freeholderEmailStep) {
-                routeSegment(PersonEmailStep.ROUTE_SEGMENT)
+                routeSegment(FreeholderEmailStep.ROUTE_SEGMENT)
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.EMAIL) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
+            // TODO: PDJB-1967: Update this wiring to match OrgGovBodyMembersTask
             task(journey.freeholderAddressTask) {
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }

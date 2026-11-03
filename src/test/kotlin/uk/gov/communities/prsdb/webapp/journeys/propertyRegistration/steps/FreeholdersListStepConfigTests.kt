@@ -8,7 +8,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersMembersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -16,19 +16,19 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class FreeholdersListStepConfigTests {
     @Mock
-    lateinit var mockState: FreeholdersMembersState
+    lateinit var mockState: FreeholdersDetailsState
 
     @Mock
     lateinit var urlParameterService: CollectionKeyParameterService
 
     @Mock
-    lateinit var freeholderProvideDetailsStep: PersonProvideDetailsStep
+    lateinit var freeholderProvideDetailsStep: ProvideFreeholderDetailsStep
 
     @Mock
     lateinit var setStateForFreeholderEditStep: SetStateForFreeholderEditStep
 
     @Mock
-    lateinit var removeFreeholderStep: PersonRemoveConfirmationStep
+    lateinit var confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
 
     @Test
     fun `heading uses the joint message key when the freeholders are joint`() {
@@ -116,17 +116,17 @@ class FreeholdersListStepConfigTests {
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
-        whenever(freeholderProvideDetailsStep.urlPath).thenReturn(PersonProvideDetailsStep.ROUTE_SEGMENT)
+        whenever(freeholderProvideDetailsStep.urlPath).thenReturn(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
         whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
         whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
         whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
         whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
         whenever(setStateForFreeholderEditStep.currentJourneyId).thenReturn("journey-123")
         whenever(setStateForFreeholderEditStep.isStepReachable).thenReturn(true)
-        whenever(mockState.removeFreeholderStep).thenReturn(removeFreeholderStep)
-        whenever(removeFreeholderStep.urlPath).thenReturn(PersonRemoveConfirmationStep.ROUTE_SEGMENT)
-        whenever(removeFreeholderStep.currentJourneyId).thenReturn("journey-123")
-        whenever(removeFreeholderStep.isStepReachable).thenReturn(true)
+        whenever(mockState.confirmRemoveFreeholderStep).thenReturn(confirmRemoveFreeholderStep)
+        whenever(confirmRemoveFreeholderStep.urlPath).thenReturn(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
+        whenever(confirmRemoveFreeholderStep.currentJourneyId).thenReturn("journey-123")
+        whenever(confirmRemoveFreeholderStep.isStepReachable).thenReturn(true)
         whenever(urlParameterService.createParameterPair(any())).thenAnswer {
             "freeholderId" to it.getArgument<Int>(0).toString()
         }

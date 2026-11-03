@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 // TODO PDJB-1965: replace this placeholder with the real freeholder contact type page.
 // Implement the routing logic
 @JourneyFrameworkComponent
-class PersonContactTypeStepConfig :
+class FreeholderContactTypeStepConfig :
     AbstractRequestableStepConfig<FreeholderContactType, FreeholderContactTypeFormModel, JourneyState>() {
     override val formModelClass = FreeholderContactTypeFormModel::class
 
@@ -38,8 +38,8 @@ class PersonContactTypeStepConfig :
 }
 
 @JourneyFrameworkComponent
-final class PersonContactTypeStep(
-    stepConfig: PersonContactTypeStepConfig,
+final class FreeholderContactTypeStep(
+    stepConfig: FreeholderContactTypeStepConfig,
 ) : RequestableStep<FreeholderContactType, FreeholderContactTypeFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-contact-type"

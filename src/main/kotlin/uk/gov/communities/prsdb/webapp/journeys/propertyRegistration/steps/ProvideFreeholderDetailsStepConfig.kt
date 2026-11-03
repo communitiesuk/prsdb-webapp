@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 // TODO PDJB-1963: replace this placeholder with the real "can you provide details about the freeholder" page.
 // Implement the routing logic
 @JourneyFrameworkComponent
-class PersonProvideDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>() {
+class ProvideFreeholderDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>() {
     override val formModelClass = FreeholderProvideDetailsFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
@@ -31,8 +31,8 @@ class PersonProvideDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, Fr
 }
 
 @JourneyFrameworkComponent
-final class PersonProvideDetailsStep(
-    stepConfig: PersonProvideDetailsStepConfig,
+final class ProvideFreeholderDetailsStep(
+    stepConfig: ProvideFreeholderDetailsStepConfig,
 ) : RequestableStep<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-provide-details"
