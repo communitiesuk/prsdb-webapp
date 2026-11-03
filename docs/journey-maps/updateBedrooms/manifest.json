@@ -1,0 +1,93 @@
+{
+    "journey": {
+        "name": "updateBedrooms",
+        "title": "Update the number of bedrooms",
+        "basePath": "/landlord/property-details/1/update-bedrooms",
+        "gitCommit": "f960f1073",
+        "generatedAt": "2026-11-03T12:28:10.015220500Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": true,
+            "pdjb-939-property-registration-phase-three": false,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1009-payments": true,
+            "pdjb-1210-multi-user-organisations": true,
+            "pdjb-1894-gas-certificate-14-month-expiry": false,
+            "pdjb-955-associated-parties": false,
+            "pdjb-1666-eic-issue-date": false,
+            "pdjb-973-asynchronous-email-sending": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "number-of-bedrooms",
+            "kind": "page",
+            "route": "number-of-bedrooms",
+            "title": "Update how many bedrooms are in your property",
+            "stepConfig": "BedroomsStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/number-of-bedrooms/v1.jpg",
+                    "thumbnail": "img/number-of-bedrooms/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "number-of-bedrooms",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "number-of-bedrooms",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "number-of-bedrooms",
+            "label": "Change Number of bedrooms"
+        }
+    ]
+}

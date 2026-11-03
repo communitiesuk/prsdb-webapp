@@ -1,0 +1,125 @@
+{
+    "journey": {
+        "name": "updateLandlordDateOfBirth",
+        "title": "Update your date of birth",
+        "basePath": "/landlord/landlord-details/update-date-of-birth",
+        "gitCommit": "f960f1073",
+        "generatedAt": "2026-11-03T12:32:36.621494800Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": true,
+            "pdjb-939-property-registration-phase-three": false,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1009-payments": true,
+            "pdjb-1210-multi-user-organisations": true,
+            "pdjb-1894-gas-certificate-14-month-expiry": false,
+            "pdjb-955-associated-parties": false,
+            "pdjb-1666-eic-issue-date": false,
+            "pdjb-973-asynchronous-email-sending": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "date-of-birth",
+            "kind": "page",
+            "route": "date-of-birth",
+            "title": "Update your date of birth",
+            "stepConfig": "DateOfBirthStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/date-of-birth/v1.jpg",
+                    "thumbnail": "img/date-of-birth/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Alexander Smith",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:CheckLandlordIdentityVerifiedStep",
+            "kind": "decision",
+            "route": "internal:CheckLandlordIdentityVerifiedStep",
+            "title": "Check landlord identity verified",
+            "stepConfig": "CheckLandlordIdentityVerifiedStepConfig",
+            "containers": [],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "date-of-birth",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "to": "date-of-birth",
+            "label": "Verified / Not verified",
+            "mode": "VERIFIED",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "date-of-birth",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "mode": "VERIFIED",
+            "to": "date-of-birth",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "internal:CheckLandlordIdentityVerifiedStep",
+            "mode": "NOT_VERIFIED",
+            "to": "date-of-birth",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "internal:CheckLandlordIdentityVerifiedStep",
+            "label": "Change Date of birth"
+        }
+    ]
+}

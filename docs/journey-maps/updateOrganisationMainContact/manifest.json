@@ -1,0 +1,93 @@
+{
+    "journey": {
+        "name": "updateOrganisationMainContact",
+        "title": "Update the organisation's main contact",
+        "basePath": "/landlord/landlord-details/update-organisation-main-contact",
+        "gitCommit": "f960f1073",
+        "generatedAt": "2026-11-03T12:34:14.496767200Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": true,
+            "pdjb-939-property-registration-phase-three": false,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1009-payments": true,
+            "pdjb-1210-multi-user-organisations": true,
+            "pdjb-1894-gas-certificate-14-month-expiry": false,
+            "pdjb-955-associated-parties": false,
+            "pdjb-1666-eic-issue-date": false,
+            "pdjb-973-asynchronous-email-sending": false
+        }
+    },
+    "containers": [],
+    "nodes": [
+        {
+            "id": "organisation-main-contact",
+            "kind": "page",
+            "route": "organisation-main-contact",
+            "title": "Who is the main contact for your organisation?",
+            "stepConfig": "OrgMainContactStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/organisation-main-contact/v1.jpg",
+                    "thumbnail": "img/organisation-main-contact/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/landlord-details",
+            "kind": "terminal",
+            "route": "/landlord/landlord-details",
+            "title": "Local Organisation Landlord",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_landlord-details/v1.jpg",
+                    "thumbnail": "img/landlord_landlord-details/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "organisation-main-contact",
+            "to": "/landlord/landlord-details",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [],
+    "arrows": [
+        {
+            "from": "organisation-main-contact",
+            "mode": "COMPLETE",
+            "to": "/landlord/landlord-details",
+            "walked": true,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "organisation-main-contact",
+            "label": "Change"
+        }
+    ]
+}

@@ -1,0 +1,1455 @@
+{
+    "journey": {
+        "name": "updateElectricalSafety",
+        "title": "Update electrical safety",
+        "basePath": "/landlord/property-details/1/update-electrical-safety",
+        "gitCommit": "f960f1073",
+        "generatedAt": "2026-11-03T12:29:05.004354100Z",
+        "featureFlags": {
+            "failover-test-endpoints": false,
+            "subject-identifier-page": true,
+            "pdjb-939-property-registration-phase-two": true,
+            "pdjb-939-property-registration-phase-three": false,
+            "pdjb-1664-password-benchmark-endpoint": false,
+            "pdjb-238-gatling-post-endpoint": false,
+            "pdjb-1009-payments": true,
+            "pdjb-1210-multi-user-organisations": true,
+            "pdjb-1894-gas-certificate-14-month-expiry": false,
+            "pdjb-955-associated-parties": false,
+            "pdjb-1666-eic-issue-date": false,
+            "pdjb-973-asynchronous-email-sending": false
+        }
+    },
+    "containers": [
+        {
+            "id": "task:ElectricalSafetyDetailsTask",
+            "kind": "task",
+            "label": "Electrical safety details",
+            "parent": null
+        },
+        {
+            "id": "changes",
+            "kind": "changes",
+            "label": "Changing answers",
+            "parent": null
+        }
+    ],
+    "nodes": [
+        {
+            "id": "has-electrical-safety",
+            "kind": "page",
+            "route": "has-electrical-safety",
+            "title": "Which electrical safety certificate do you have for this property?",
+            "stepConfig": "HasElectricalCertStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/has-electrical-safety/v1.jpg",
+                    "thumbnail": "img/has-electrical-safety/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eic-expiry-date",
+            "kind": "page",
+            "route": "eic-expiry-date",
+            "title": "What’s the expiry date on the Electrical Installation Certificate?",
+            "stepConfig": "EicExpiryDateStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eic-expiry-date/v1.jpg",
+                    "thumbnail": "img/eic-expiry-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eic-file-upload",
+            "kind": "page",
+            "route": "eic-file-upload",
+            "title": "Upload the Electrical Installation Certificate (EIC)",
+            "stepConfig": "UploadEicStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eic-file-upload/v1.jpg",
+                    "thumbnail": "img/eic-file-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-eic-uploads",
+            "kind": "page",
+            "route": "check-eic-uploads",
+            "title": "You’ve uploaded 1 file",
+            "stepConfig": "CheckEicUploadsStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-eic-uploads/v1.jpg",
+                    "thumbnail": "img/check-eic-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-eic-uploads/v2.jpg",
+                    "thumbnail": "img/check-eic-uploads/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Are you sure you want to remove validFile.png?",
+                            "answer": "No"
+                        }
+                    ],
+                    "origin": "change"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-eic-uploads/v3.jpg",
+                    "thumbnail": "img/check-eic-uploads/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-eic-uploads/v4.jpg",
+                    "thumbnail": "img/check-eic-uploads/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-eic-uploads/v5.jpg",
+                    "thumbnail": "img/check-eic-uploads/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v6",
+                    "image": "img/check-eic-uploads/v6.jpg",
+                    "thumbnail": "img/check-eic-uploads/v6.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-electrical-safety-answers",
+            "kind": "page",
+            "route": "check-electrical-safety-answers",
+            "title": "Electrical safety certificate",
+            "stepConfig": "UpdateCheckElectricalSafetyAnswersStepConfig",
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-electrical-safety-answers/v1.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-electrical-safety-answers/v2.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-electrical-safety-answers/v3.jpg",
+                    "thumbnail": "img/check-electrical-safety-answers/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "/landlord/property-details/1",
+            "kind": "terminal",
+            "route": "/landlord/property-details/1",
+            "title": "1 Example Road EG1 1AA",
+            "stepConfig": null,
+            "containers": [],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/landlord_property-details_1/v1.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/landlord_property-details_1/v2.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/landlord_property-details_1/v3.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the expiry date on the Electrical Installation Certificate?",
+                            "answer": "Date: 3 October 2026"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/landlord_property-details_1/v4.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/landlord_property-details_1/v5.jpg",
+                    "thumbnail": "img/landlord_property-details_1/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:eicr-expiry-date",
+            "kind": "page",
+            "route": "eicr-expiry-date",
+            "title": "What’s the expiry date on the Electrical Installation Condition Report?",
+            "stepConfig": "EicrExpiryDateStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_eicr-expiry-date/v1.jpg",
+                    "thumbnail": "img/change_eicr-expiry-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:electrical-safety-certificate-missing",
+            "kind": "page",
+            "route": "electrical-safety-certificate-missing",
+            "title": "You must get a valid electrical safety certificate for this property",
+            "stepConfig": "ElectricalCertMissingStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_electrical-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/change_electrical-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:eicr-file-upload",
+            "kind": "page",
+            "route": "eicr-file-upload",
+            "title": "Upload the Electrical Installation Condition Report (EICR)",
+            "stepConfig": "UploadEicrStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_eicr-file-upload/v1.jpg",
+                    "thumbnail": "img/change_eicr-file-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:remove-eic-upload",
+            "kind": "page",
+            "route": "remove-eic-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveEicUploadStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_remove-eic-upload/v1.jpg",
+                    "thumbnail": "img/change_remove-eic-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:check-eicr-uploads",
+            "kind": "page",
+            "route": "check-eicr-uploads",
+            "title": "You’ve uploaded 1 file",
+            "stepConfig": "CheckEicrUploadsStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_check-eicr-uploads/v1.jpg",
+                    "thumbnail": "img/change_check-eicr-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:check-eic-uploads",
+            "kind": "page",
+            "route": "check-eic-uploads",
+            "title": "You’ve uploaded 2 files",
+            "stepConfig": "CheckEicUploadsStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_check-eic-uploads/v1.jpg",
+                    "thumbnail": "img/change_check-eic-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "change:remove-eicr-upload",
+            "kind": "page",
+            "route": "remove-eicr-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveEicrUploadStepConfig",
+            "containers": [
+                "changes"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/change_remove-eicr-upload/v1.jpg",
+                    "thumbnail": "img/change_remove-eicr-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Electrical safety certificate",
+                            "answer": "Change Which electrical safety certificate do you have for this property?"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "change"
+                }
+            ],
+            "origin": "change",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eicr-expiry-date",
+            "kind": "page",
+            "route": "eicr-expiry-date",
+            "title": "What’s the expiry date on the Electrical Installation Condition Report?",
+            "stepConfig": "EicrExpiryDateStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eicr-expiry-date/v1.jpg",
+                    "thumbnail": "img/eicr-expiry-date/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eicr-file-upload",
+            "kind": "page",
+            "route": "eicr-file-upload",
+            "title": "Upload the Electrical Installation Condition Report (EICR)",
+            "stepConfig": "UploadEicrStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eicr-file-upload/v1.jpg",
+                    "thumbnail": "img/eicr-file-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "check-eicr-uploads",
+            "kind": "page",
+            "route": "check-eicr-uploads",
+            "title": "You’ve uploaded 1 file",
+            "stepConfig": "CheckEicrUploadsStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/check-eicr-uploads/v1.jpg",
+                    "thumbnail": "img/check-eicr-uploads/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/check-eicr-uploads/v2.jpg",
+                    "thumbnail": "img/check-eicr-uploads/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v3",
+                    "image": "img/check-eicr-uploads/v3.jpg",
+                    "thumbnail": "img/check-eicr-uploads/v3.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v4",
+                    "image": "img/check-eicr-uploads/v4.jpg",
+                    "thumbnail": "img/check-eicr-uploads/v4.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Upload another file"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v5",
+                    "image": "img/check-eicr-uploads/v5.jpg",
+                    "thumbnail": "img/check-eicr-uploads/v5.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Upload another file"
+                        },
+                        {
+                            "step": "You’ve uploaded 2 files",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "electrical-safety-certificate-missing",
+            "kind": "page",
+            "route": "electrical-safety-certificate-missing",
+            "title": "You must get a valid electrical safety certificate for this property",
+            "stepConfig": "ElectricalCertMissingStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/electrical-safety-certificate-missing/v1.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-missing/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                },
+                {
+                    "id": "v2",
+                    "image": "img/electrical-safety-certificate-missing/v2.jpg",
+                    "thumbnail": "img/electrical-safety-certificate-missing/v2.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Starting point",
+                            "answer": "Property is vacant"
+                        },
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "None of the above, Continue"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eic-expired",
+            "kind": "page",
+            "route": "eic-expired",
+            "title": "This electrical safety certificate has expired",
+            "stepConfig": "EicExpiredStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eic-expired/v1.jpg",
+                    "thumbnail": "img/eic-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "What’s the expiry date on the Electrical Installation Certificate?",
+                            "answer": "Date: 3 October 2026"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-eic-upload",
+            "kind": "page",
+            "route": "remove-eic-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveEicUploadStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/remove-eic-upload/v1.jpg",
+                    "thumbnail": "img/remove-eic-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "eicr-expired",
+            "kind": "page",
+            "route": "eicr-expired",
+            "title": "This electrical safety certificate has expired",
+            "stepConfig": "EicrExpiredStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/eicr-expired/v1.jpg",
+                    "thumbnail": "img/eicr-expired/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "What’s the expiry date on the Electrical Installation Condition Report?",
+                            "answer": "Date: 3 October 2026"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "remove-eicr-upload",
+            "kind": "page",
+            "route": "remove-eicr-upload",
+            "title": "Are you sure you want to remove validFile.png?",
+            "stepConfig": "RemoveEicrUploadStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [
+                {
+                    "id": "v1",
+                    "image": "img/remove-eicr-upload/v1.jpg",
+                    "thumbnail": "img/remove-eicr-upload/v1.thumb.jpg",
+                    "mobileImage": null,
+                    "conditions": [
+                        {
+                            "step": "Which electrical safety certificate do you have for this property?",
+                            "answer": "Electrical Installation Condition Report (EICR), Continue"
+                        },
+                        {
+                            "step": "You’ve uploaded 1 file",
+                            "answer": "Remove validFile.png"
+                        }
+                    ],
+                    "origin": "main"
+                }
+            ],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "kind": "decision",
+            "route": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "title": "Has any in collection",
+            "stepConfig": "HasAnyInCollectionStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "kind": "decision",
+            "route": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "title": "Has any in collection",
+            "stepConfig": "HasAnyInCollectionStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        },
+        {
+            "id": "provide-electrical-safety-certificate-later",
+            "kind": "page",
+            "route": "provide-electrical-safety-certificate-later",
+            "title": "Provide electrical cert later",
+            "stepConfig": "ProvideElectricalCertLaterStepConfig",
+            "containers": [
+                "task:ElectricalSafetyDetailsTask"
+            ],
+            "variants": [],
+            "origin": "main",
+            "skippedVariants": 0
+        }
+    ],
+    "edges": [
+        {
+            "from": "has-electrical-safety",
+            "to": "eic-expiry-date",
+            "label": "Electrical Installation Certificate (EIC), Continue",
+            "mode": "HAS_EIC",
+            "kind": "observed"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "eicr-expiry-date",
+            "label": "Electrical Installation Condition Report (EICR), Continue",
+            "mode": "HAS_EICR",
+            "kind": "observed"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "electrical-safety-certificate-missing",
+            "label": "None of the above, Continue",
+            "mode": "NO_CERTIFICATE",
+            "kind": "observed"
+        },
+        {
+            "from": "eic-expiry-date",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "label": "Continue",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "to": "eic-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "eic-expiry-date",
+            "to": "eic-expired",
+            "label": "Date: 3 October 2026",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "kind": "observed"
+        },
+        {
+            "from": "eic-file-upload",
+            "to": "check-eic-uploads",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eic-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eic-uploads",
+            "to": "eic-file-upload",
+            "label": "Upload another file",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eic-uploads",
+            "to": "remove-eic-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "/landlord/property-details/1",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "has-electrical-safety",
+            "label": "Change Which electrical safety certificate do you have for this property?",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "change:eicr-expiry-date",
+            "label": "Electrical Installation Condition Report (EICR), Continue",
+            "mode": "HAS_EICR",
+            "kind": "change"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "change:electrical-safety-certificate-missing",
+            "label": "None of the above, Continue",
+            "mode": "NO_CERTIFICATE",
+            "kind": "change"
+        },
+        {
+            "from": "change:eicr-expiry-date",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "label": "Continue",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "kind": "change"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "to": "change:eicr-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "change:electrical-safety-certificate-missing",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue without a valid electrical safety certificate",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-eic-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-eic-uploads",
+            "to": "change:remove-eic-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:eicr-file-upload",
+            "to": "change:check-eicr-uploads",
+            "label": "Upload a file",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "eic-file-upload",
+            "to": "change:check-eic-uploads",
+            "label": "Upload a file",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:remove-eic-upload",
+            "to": "eic-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "change:remove-eic-upload",
+            "to": "check-eic-uploads",
+            "label": "No / Cancel",
+            "mode": "SOME_MEMBERS",
+            "kind": "change"
+        },
+        {
+            "from": "change:check-eicr-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:check-eicr-uploads",
+            "to": "change:eicr-file-upload",
+            "label": "Upload another file",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "change:check-eicr-uploads",
+            "to": "change:remove-eicr-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "eic-expiry-date",
+            "label": "Change Expiry date",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "check-eic-uploads",
+            "label": "Change Your certificate",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "eicr-expiry-date",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "label": "Continue",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "kind": "observed"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "to": "eicr-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "eicr-expiry-date",
+            "to": "eicr-expired",
+            "label": "Date: 3 October 2026",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "kind": "observed"
+        },
+        {
+            "from": "eicr-file-upload",
+            "to": "check-eicr-uploads",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eicr-uploads",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eicr-uploads",
+            "to": "eicr-file-upload",
+            "label": "Upload another file",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-eicr-uploads",
+            "to": "remove-eicr-upload",
+            "label": "Remove validFile.png",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "eicr-expiry-date",
+            "label": "Change Expiry date",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "to": "check-eicr-uploads",
+            "label": "Change Your certificate",
+            "mode": null,
+            "kind": "change"
+        },
+        {
+            "from": "electrical-safety-certificate-missing",
+            "to": "check-electrical-safety-answers",
+            "label": "",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "eic-expired",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue without a valid electrical safety certificate",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "eic-expired",
+            "to": "eic-expiry-date",
+            "label": "Change the expiry date",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-eic-upload",
+            "to": "eic-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-eic-upload",
+            "to": "check-eic-uploads",
+            "label": "No / Cancel / Yes",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "eicr-expired",
+            "to": "check-electrical-safety-answers",
+            "label": "Continue without a valid electrical safety certificate",
+            "mode": "COMPLETE",
+            "kind": "observed"
+        },
+        {
+            "from": "eicr-expired",
+            "to": "eicr-expiry-date",
+            "label": "Change the expiry date",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-eicr-upload",
+            "to": "eicr-file-upload",
+            "label": "Yes",
+            "mode": null,
+            "kind": "observed"
+        },
+        {
+            "from": "remove-eicr-upload",
+            "to": "check-eicr-uploads",
+            "label": "No / Cancel / Yes",
+            "mode": "SOME_MEMBERS",
+            "kind": "observed"
+        },
+        {
+            "from": "has-electrical-safety",
+            "to": "provide-electrical-safety-certificate-later",
+            "label": "Provide this later",
+            "mode": "PROVIDE_THIS_LATER",
+            "kind": "not walked"
+        },
+        {
+            "from": "provide-electrical-safety-certificate-later",
+            "to": "check-electrical-safety-answers",
+            "label": "Complete",
+            "mode": "COMPLETE",
+            "kind": "not walked"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "to": "check-eic-uploads",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "to": "eicr-file-upload",
+            "label": "No members",
+            "mode": "NO_MEMBERS",
+            "kind": "not walked"
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "to": "check-eicr-uploads",
+            "label": "Some members",
+            "mode": "SOME_MEMBERS",
+            "kind": "not walked"
+        }
+    ],
+    "gaps": [],
+    "errors": [],
+    "dependencies": [
+        {
+            "decision": "remove-eic-upload",
+            "writers": [
+                "eic-file-upload"
+            ],
+            "readsAllAnswers": false
+        },
+        {
+            "decision": "remove-eicr-upload",
+            "writers": [
+                "eicr-file-upload"
+            ],
+            "readsAllAnswers": false
+        }
+    ],
+    "arrows": [
+        {
+            "from": "has-electrical-safety",
+            "mode": "HAS_EIC",
+            "to": "eic-expiry-date",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "HAS_EICR",
+            "to": "eicr-expiry-date",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "NO_CERTIFICATE",
+            "to": "electrical-safety-certificate-missing",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "has-electrical-safety",
+            "mode": "PROVIDE_THIS_LATER",
+            "to": "provide-electrical-safety-certificate-later",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "eic-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "to": "eic-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eic-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eic-file-upload",
+            "mode": "COMPLETE",
+            "to": "check-eic-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-eic-uploads",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-eic-upload",
+            "mode": "NO_MEMBERS",
+            "to": "eic-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-eic-upload",
+            "mode": "SOME_MEMBERS",
+            "to": "check-eic-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eic-expired",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eicr-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED",
+            "to": "eicr-expired",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eicr-expiry-date",
+            "mode": "ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE",
+            "to": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eicr-file-upload",
+            "mode": "COMPLETE",
+            "to": "check-eicr-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "check-eicr-uploads",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-eicr-upload",
+            "mode": "NO_MEMBERS",
+            "to": "eicr-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "remove-eicr-upload",
+            "mode": "SOME_MEMBERS",
+            "to": "check-eicr-uploads",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "eicr-expired",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "electrical-safety-certificate-missing",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "provide-electrical-safety-certificate-later",
+            "mode": "COMPLETE",
+            "to": "check-electrical-safety-answers",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "check-electrical-safety-answers",
+            "mode": "COMPLETE",
+            "to": "/landlord/property-details/1",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "mode": "NO_MEMBERS",
+            "to": "eic-file-upload",
+            "walked": true,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask",
+            "mode": "SOME_MEMBERS",
+            "to": "check-eic-uploads",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "mode": "NO_MEMBERS",
+            "to": "eicr-file-upload",
+            "walked": false,
+            "reads": []
+        },
+        {
+            "from": "internal:HasAnyInCollectionStep@task:ElectricalSafetyDetailsTask#2",
+            "mode": "SOME_MEMBERS",
+            "to": "check-eicr-uploads",
+            "walked": false,
+            "reads": []
+        }
+    ],
+    "entries": [
+        {
+            "node": "has-electrical-safety",
+            "label": "Change"
+        }
+    ]
+}
