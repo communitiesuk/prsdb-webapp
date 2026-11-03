@@ -189,9 +189,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
-            // TODO PDJB-1965: update this usage when the real contact type page is added
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            contactTypePage.submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
@@ -210,10 +210,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
-            // TODO PDJB-1965: update this usage when the real contact type page is added
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
             // TODO PDJB-1967: update this usage when the real freeholder address pages are added
             assertPageIs(page, FreeholderAddressFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step

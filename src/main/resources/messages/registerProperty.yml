@@ -310,13 +310,17 @@ freeholders:
     error:
       missing: Enter a name
   contactType:
-    fieldSetHeading: How should we contact the freeholder? (TODO PDJB-1965)
+    fieldSetHeading: Which contact information can you provide for {0}?
+    fieldSetHint: You only need to provide one
     radios:
       option:
-        email: Email
-        postalAddress: Post
+        email:
+          label: Email address
+          hint: This will let us contact them quicker
+        postalAddress:
+          label: Postal address
       error:
-        missing: Select how we should contact the freeholder
+        missing: Select which contact information you can provide
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'

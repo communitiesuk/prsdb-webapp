@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnyFreeholdersFormPagePropertyRegistration
 
@@ -36,6 +37,31 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
             val freeholderNamePage = navigator.skipToPropertyRegistrationFreeholderNamePage()
             freeholderNamePage.backLink.clickAndWait()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholderContactTypeStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val contactTypePage = navigator.skipToPropertyRegistrationFreeholderContactTypePage(freeholderName = "Test Freeholder")
+            assertThat(contactTypePage.heading)
+                .containsText("Which contact information can you provide for Test Freeholder?")
+        }
+
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val contactTypePage = navigator.skipToPropertyRegistrationFreeholderContactTypePage()
+            contactTypePage.form.submit()
+            assertThat(contactTypePage.form.getErrorMessage())
+                .containsText("Select which contact information you can provide")
+        }
+
+        @Test
+        fun `Back link returns to the freeholder name page`(page: Page) {
+            val contactTypePage = navigator.skipToPropertyRegistrationFreeholderContactTypePage()
+            contactTypePage.backLink.clickAndWait()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
         }
     }
 
