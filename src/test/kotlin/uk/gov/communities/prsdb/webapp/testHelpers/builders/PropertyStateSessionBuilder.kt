@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
@@ -22,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
@@ -43,7 +41,7 @@ class PropertyStateSessionBuilder(
     AssociatedPartiesStateBuilder<PropertyStateSessionBuilder>,
     WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
-        additionalDataMap["isAddressAlreadyRegistered"] = Json.encodeToString(serializer(), isRegistered)
+        additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
     }
 
@@ -74,12 +72,6 @@ class PropertyStateSessionBuilder(
                 this.ownershipType = ownershipType
             }
         withSubmittedValue("ownership-type", ownershipTypeFormModel)
-        return this
-    }
-
-    fun withFreeholderName(name: String = "Test Freeholder"): PropertyStateSessionBuilder {
-        val freeholderNameFormModel = FreeholderNameFormModel().apply { this.name = name }
-        withSubmittedValue(FreeholderNameStep.ROUTE_SEGMENT, freeholderNameFormModel)
         return this
     }
 

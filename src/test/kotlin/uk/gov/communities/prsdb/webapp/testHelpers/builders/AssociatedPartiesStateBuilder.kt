@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
@@ -66,6 +68,12 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
                 usingPropertyManager = false
             }
         withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
+        return self()
+    }
+
+    fun withFreeholderName(name: String = "Test Freeholder"): SelfType {
+        val freeholderNameFormModel = FreeholderNameFormModel().apply { this.name = name }
+        withSubmittedValue(FreeholderNameStep.ROUTE_SEGMENT, freeholderNameFormModel)
         return self()
     }
 
