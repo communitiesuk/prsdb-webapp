@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDependencies
 
 interface FreeholdersDetailsState :
     JourneyState,
@@ -26,12 +27,15 @@ interface FreeholdersDetailsState :
     val setStateForFreeholderEditStep: SetStateForFreeholderEditStep
     val confirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
     val allowRemovingLastMember: Boolean
+    val isJointFreeholder: Boolean
 }
 
 class FreeholdersDetailsDependencies(
     // The state slice that owns the collected freeholders. The reusable members task reads and writes the
     // freeholders list through this, so the list can live in the enclosing outer task or journey.
     val listState: FreeholdersListState,
+    // Passed by reference so isJointFreeholder is read lazily, after the ownership steps have been initialised.
+    val freeholdersDependencies: FreeholdersDependencies,
     // TOOD: PDJB-1993: Set this to false on the update journey
     val allowRemovingLastMember: Boolean = true,
 )

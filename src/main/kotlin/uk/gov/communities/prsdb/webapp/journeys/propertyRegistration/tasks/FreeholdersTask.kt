@@ -21,9 +21,6 @@ class FreeholdersTask(
     FreeholdersState {
     override val taskState get() = this
 
-    override val isJointFreeholder: Boolean
-        get() = dependencies.isJointFreeholder
-
     override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
     override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
     override var editingFreeholderId: Int? by delegateProvider.nullableDelegate("editingFreeholderId")
@@ -42,6 +39,7 @@ class FreeholdersTask(
                 withDependencies {
                     FreeholdersDetailsDependencies(
                         listState = journey,
+                        freeholdersDependencies = dependencies,
                     )
                 }
                 savable()

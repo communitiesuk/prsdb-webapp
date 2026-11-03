@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -83,6 +84,12 @@ class PropertyStateSessionBuilder(
     // TODO PDJB-1962: update this when the real freeholders intro page is added
     fun withFreeholdersInfoComplete(): PropertyStateSessionBuilder {
         withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
+        return this
+    }
+
+    // TODO PDJB-1969: remove this when has any freeholders becomes an internal step
+    fun withHasAnyFreeholdersComplete(): PropertyStateSessionBuilder {
+        withSubmittedValue(HasAnyFreeholdersStep.ROUTE_SEGMENT, NoInputFormModel())
         return this
     }
 
@@ -239,6 +246,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder: Boolean = true) =
             beforePropertyRegistrationFreeholders(isJointFreeholder)
                 .withFreeholdersInfoComplete()
+                .withHasAnyFreeholdersComplete()
 
         fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
             beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
