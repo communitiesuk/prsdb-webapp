@@ -8,8 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
@@ -50,17 +53,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withFreeholdersInfoComplete(): SelfType {
-        withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
-    // TODO PDJB-1969: remove this when has any freeholders becomes an internal step
-    fun withHasAnyFreeholdersComplete(): SelfType {
-        withSubmittedValue(HasAnyFreeholdersStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
     fun withOwnershipStructure(): SelfType {
         withOwnsProperty()
         withOwnershipKind()
@@ -74,6 +66,24 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
                 usingPropertyManager = false
             }
         withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
+        return self()
+    }
+
+    // TODO PDJB-1962: update this when the real freeholders intro page is added
+    fun withFreeholdersInfoComplete(): SelfType {
+        withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    // TODO PDJB-1969: remove this when has any freeholders becomes an internal step
+    fun withHasAnyFreeholdersComplete(): SelfType {
+        withSubmittedValue(HasAnyFreeholdersStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withFreeholderProvideDetails(provideDetails: YesOrNo = YesOrNo.YES): SelfType {
+        val freeholderProvideDetailsFormModel = FreeholderProvideDetailsFormModel(provideDetails = provideDetails)
+        withSubmittedValue(ProvideFreeholderDetailsStep.ROUTE_SEGMENT, freeholderProvideDetailsFormModel)
         return self()
     }
 }

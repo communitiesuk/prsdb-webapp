@@ -38,6 +38,9 @@ class FreeholdersDetailsTask(
     FreeholdersDetailsState {
     override val taskState get() = this
 
+    override val isJointFreeholder: Boolean
+        get() = dependencies.isJointFreeholder()
+
     override var freeholdersMap: Map<Int, FreeholderDataModel>?
         get() = dependencies.listState.freeholdersMap
         set(value) {
@@ -54,7 +57,6 @@ class FreeholdersDetailsTask(
             dependencies.listState.editingFreeholderId = value
         }
     override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
-    override val isJointFreeholder: Boolean get() = dependencies.isJointFreeholder()
 
     override fun makeSubJourney(state: FreeholdersDetailsState) =
         subJourney(state) {

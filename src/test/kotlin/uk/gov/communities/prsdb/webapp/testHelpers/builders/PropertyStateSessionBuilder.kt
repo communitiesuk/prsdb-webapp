@@ -207,8 +207,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(isJointFreeholder: Boolean = true) =
-            if (isJointFreeholder) {
+        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
+            if (jointFreeholders) {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
@@ -220,10 +220,19 @@ class PropertyStateSessionBuilder(
             }
 
         // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
-        fun beforePropertyRegistrationFreeholdersList(isJointFreeholder: Boolean = true) =
-            beforePropertyRegistrationFreeholders(isJointFreeholder)
+        fun beforePropertyRegistrationFreeholdersList(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholders(jointFreeholders)
                 .withFreeholdersInfoComplete()
                 .withHasAnyFreeholdersComplete()
+
+        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholders(jointFreeholders)
+                .withFreeholdersInfoComplete()
+                .withHasAnyFreeholdersComplete()
+
+        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
+                .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationSuperiorLandlords() =
             beforePropertyRegistrationOwnsProperty()

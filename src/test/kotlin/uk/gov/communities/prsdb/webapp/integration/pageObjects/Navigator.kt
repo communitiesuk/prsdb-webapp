@@ -185,6 +185,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
@@ -275,6 +276,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -990,12 +992,20 @@ class Navigator(
         return createValidPage(page, FreeholdersFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationFreeholdersListPage(isJointFreeholder: Boolean = true): FreeholdersListFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholdersListPage(jointFreeholders: Boolean = true): FreeholdersListFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersList(isJointFreeholder).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersList(jointFreeholders).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholdersListStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholdersListFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationFreeholderNamePage(jointFreeholders: Boolean = true): FreeholderNameFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderName(jointFreeholders).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(FreeholderNameStep.ROUTE_SEGMENT)
+        return createValidPage(page, FreeholderNameFormPagePropertyRegistration::class)
     }
 
     // TODO PDJB-1971: update this usage when the real has superior landlords page is added

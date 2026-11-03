@@ -658,6 +658,10 @@ class PropertyRegistrationJourneyFactory(
                                 PaymentOutcome.IN_PROGRESS -> {
                                     Destination(journey.paymentReturnStep)
                                 }
+
+                                PaymentOutcome.QUOTE_EXPIRED -> {
+                                    Destination(journey.paymentSummaryStep)
+                                }
                             }
                         }
                     }
