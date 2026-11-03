@@ -207,11 +207,26 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders() =
-            beforePropertyRegistrationOwnsProperty()
-                .withOwnsProperty()
-                .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-                .withFreeholdType(FreeholdType.JOINT_TENANTS)
+        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
+            if (jointFreeholders) {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+                    .withFreeholdType(FreeholdType.JOINT_TENANTS)
+            } else {
+                beforePropertyRegistrationOwnsProperty()
+                    .withOwnsProperty()
+                    .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+            }
+
+        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholders(jointFreeholders)
+                .withFreeholdersInfoComplete()
+                .withHasAnyFreeholdersComplete()
+
+        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
+                .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationSuperiorLandlords() =
             beforePropertyRegistrationOwnsProperty()

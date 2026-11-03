@@ -22,6 +22,9 @@ class OwnershipStructureTask(
     OwnershipStructureState {
     override val taskState get() = this
 
+    override val isJointFreeholder: Boolean
+        get() = ownershipTypeTask.isJointFreeholder
+
     override fun makeSubJourney(state: OwnershipStructureState) =
         subJourney(state) {
             task(journey.ownershipTypeTask) {
@@ -57,6 +60,7 @@ class OwnershipStructureTask(
                         else -> exitStep
                     }
                 }
+                withDependencies { journey }
                 savable()
             }
             task(journey.superiorLandlordsTask) {
