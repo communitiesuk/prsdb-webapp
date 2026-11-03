@@ -6,12 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 
 @ExtendWith(MockitoExtension::class)
 class FreeholderNameStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: FreeholdersState
+    lateinit var mockJourneyState: FreeholdersDetailsState
 
     @Test
     fun `getStepSpecificContent returns the single freeholder heading, hint and save and continue button`() {
