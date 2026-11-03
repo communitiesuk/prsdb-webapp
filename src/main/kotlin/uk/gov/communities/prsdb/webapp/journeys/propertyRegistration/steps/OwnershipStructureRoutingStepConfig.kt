@@ -31,7 +31,7 @@ class OwnershipStructureRoutingStepConfig : AbstractInternalStepConfig<Ownership
     private fun asksFreeholders(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||
             ownershipType.ownershipKindStep.outcome == OwnershipKind.LEASEHOLD_ONLY ||
-            ownershipType.freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
+            ownershipType.isJointFreeholder
 
     private fun asksSuperiorLandlords(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||
