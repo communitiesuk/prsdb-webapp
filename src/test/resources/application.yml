@@ -24,9 +24,17 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
   use-production-notify: false
+  allowlist-fallback-address: ""
 
 email-queue:
   name: prsdb-email-queue
+  listener:
+    # Started only in tests that import TestcontainersConfiguration, which provides ElasticMQ
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2

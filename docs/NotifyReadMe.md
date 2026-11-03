@@ -46,6 +46,14 @@ In your `.env` file you should add the Notify - Integration API Key instead as t
 
 Then when you run the app locally the emails will be sent when they are triggered.
 
+### Sending emails asynchronously
+When the `pdjb-973-asynchronous-email-sending` feature flag is enabled, emails are added to an SQS queue instead of being sent straight to Notify.
+The email worker then sends the emails on the queue and retries any that fail.
+Emails that still can't be sent are moved to a dead letter queue, which raises an alarm.
+Once the problem is fixed, you can resend them by redriving the dead letter queue in the AWS console.
+
+Locally, ElasticMQ (started by `docker-compose.local.yml`) is used in place of SQS, and the app processes the queue itself.
+
 ### Testing
 
 #### Unit tests
