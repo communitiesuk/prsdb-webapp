@@ -1231,7 +1231,7 @@ class PaymentServiceTests {
             inOrder.verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
-                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
                 eq(PaymentStatus.CANCELLED),
                 any(),
             )
@@ -1285,7 +1285,7 @@ class PaymentServiceTests {
             verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
-                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
                 eq(PaymentStatus.CANCELLED),
                 any(),
             )
@@ -1342,7 +1342,7 @@ class PaymentServiceTests {
             assertEquals(expectedStatus, status)
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
-                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
                 eq(expectedStatus),
                 any(),
             )
@@ -1472,7 +1472,7 @@ class PaymentServiceTests {
             verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
-                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
                 eq(PaymentStatus.CANCELLED),
                 any(),
             )
@@ -1500,7 +1500,7 @@ class PaymentServiceTests {
             verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
             verify(mockPaymentRepository).updateStatusIfCurrentStatusIn(
                 eq(PAYMENT_ID),
-                eq(listOf(PaymentStatus.CAPTURABLE)),
+                eq(PaymentStatus.IN_PROGRESS_STATUSES),
                 eq(PaymentStatus.CANCELLED),
                 any(),
             )

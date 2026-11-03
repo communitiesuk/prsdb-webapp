@@ -53,15 +53,22 @@ class LettingAgentPropertyDetailsController(
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
+        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
 
         model.addAttribute(
             "propertyDetails",
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, propertyCompliance, messageSource, token),
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                complianceStatus,
+                messageSource,
+                token,
+            ),
         )
         model.addAttribute(
             "complianceDetails",
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
                 viewType = PropertyDetailsViewType.LETTING_AGENT,
                 propertyOwnershipId = propertyOwnership.id,
                 lettingAgentAccessToken = token,

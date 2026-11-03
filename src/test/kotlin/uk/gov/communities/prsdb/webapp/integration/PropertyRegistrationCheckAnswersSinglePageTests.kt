@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -11,6 +13,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -21,14 +25,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
@@ -78,6 +84,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
         fun `after changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
+            // TODO PDJB-2014: change an associated parties answer instead once the ownership CYA rows are implemented
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -529,29 +537,55 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        @Test
-        fun `The back link on the electrical certificate expiry date page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded()
+        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `The back link on the electrical certificate expiry date page returns to the CYA page when reached from there`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(certificateType)
 
-            checkAnswersPage.complianceSummaryList.electricalCertExpiryDateRow.actions
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(certificateType).actions
                 .getActionLink("Change")
                 .clickAndWait()
-            val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+            val expiryDatePage =
+                when (certificateType) {
+                    CertificateType.Eic -> assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+                    CertificateType.Eicr -> assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+                }
             expiryDatePage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        @Test
-        fun `The back link on the electrical certificate uploads page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded()
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `The back link on the electrical certificate uploads page returns to the CYA page when reached from there`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(certificateType)
 
             checkAnswersPage.complianceSummaryList.electricalCertUploadRow.actions
                 .getActionLink("Change")
                 .clickAndWait()
-            val electricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+            val electricalCertUploadsPage =
+                when (certificateType) {
+                    CertificateType.Eic -> assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
+                    CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+                }
             electricalCertUploadsPage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
+
+        private fun skipToCheckAnswersPageWithElectricalCertUploaded(certificateType: CertificateType) =
+            when (certificateType) {
+                CertificateType.Eic -> navigator.skipToPropertyRegistrationCheckAnswersPageEicUploaded()
+                CertificateType.Eicr -> navigator.skipToPropertyRegistrationCheckAnswersPageEicrUploaded()
+                else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+            }
 
         @Test
         fun `The back link on the registered energy efficiency exemption answer page returns to the CYA page when reached from there`(
@@ -646,8 +680,10 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             )
             assertThat(checkAnswersPage.correspondenceRowKeys).hasText(arrayOf("Email address", "Postal address"))
             assertThat(checkAnswersPage.summaryList.correspondenceEmailRow.value).hasText("alex.surname@example.com")
-            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
-                .hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
         }
 
         @Test
@@ -673,10 +709,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             selectPage.selectAddressAndSubmit("2 Fake Way")
 
             checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.summaryList.correspondencePostalAddressRow.value.locator("p"))
-                .hasText(arrayOf("2 Fake Way", "FA1 1AB"))
-            assertThat(checkAnswersPage.summaryList.propertyAddressRow.value.locator("p"))
-                .hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
+            assertThat(
+                checkAnswersPage.summaryList.correspondencePostalAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("2 Fake Way", "FA1 1AB"))
+            assertThat(
+                checkAnswersPage.summaryList.propertyAddressRow.value
+                    .locator("p"),
+            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
         }
 
         @Test

@@ -10,7 +10,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
     inner class TaskListStep {
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`() {
-            navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            navigator.skipToPropertyRegistrationOwnsPropertyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))

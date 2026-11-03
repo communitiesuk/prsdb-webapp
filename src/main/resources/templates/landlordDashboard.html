@@ -4,7 +4,7 @@
     <div id="page-content">
         <th:block
                 th:if="${landlordDashboardNotificationBannerViewModel.numberOfOutstandingActions != 0}"
-                  th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${landlordDashboardNotificationBannerViewModel}, ${viewIncompletePropertiesUrl}, ${addComplianceUrl})}">
+                  th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${landlordDashboardNotificationBannerViewModel}, ${viewIncompletePropertiesUrl}, ${outstandingActionsUrl}, ${outstandingActionsLinkTextKey})}">
             </th:block>
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
@@ -40,8 +40,9 @@
                     </a>
                 </div>
                 <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
-                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addComplianceUrl}, #{landlord.dashboard.complianceActions.button})}">
-                        landlord.dashboard.addComplianceInformation.button
+                    <!--/* TODO PDJB-2006: Replace ${outstandingActionsButtonKey} with landlord.dashboard.outstandingActions.button when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed */-->
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${outstandingActionsUrl}, #{${outstandingActionsButtonKey}})}">
+                        landlord.dashboard.outstandingActions.button
                     </a>
                 </div>
             </div>

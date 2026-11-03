@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createComplianceStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createPropertyCompliance
 import java.time.LocalDate
 import java.util.UUID
@@ -32,18 +33,25 @@ class LettingAgentPropertyDetailsViewModelTests {
     private val occupiedAtRegistrationInstant =
         occupiedAtRegistrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
 
-    private fun validCompliance(propertyOwnership: PropertyOwnership) = createPropertyCompliance(propertyOwnership = propertyOwnership)
+    private fun validCompliance(propertyOwnership: PropertyOwnership) =
+        createComplianceStatus(createPropertyCompliance(propertyOwnership = propertyOwnership))
 
     private fun missingCompliance(propertyOwnership: PropertyOwnership) =
-        createPropertyCompliance(propertyOwnership = propertyOwnership, gasSafetyCertIssueDate = null)
+        createComplianceStatus(
+            createPropertyCompliance(propertyOwnership = propertyOwnership, gasSafetyCertIssueDate = null),
+        )
 
     private fun provideLaterCompliance(propertyOwnership: PropertyOwnership) =
-        validCompliance(propertyOwnership).apply { gasSafetyCertProvideLater = true }
+        createComplianceStatus(
+            createPropertyCompliance(propertyOwnership = propertyOwnership).apply { gasSafetyCertProvideLater = true },
+        )
 
     private fun expiredCompliance(propertyOwnership: PropertyOwnership) =
-        createPropertyCompliance(
-            propertyOwnership = propertyOwnership,
-            electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+        createComplianceStatus(
+            createPropertyCompliance(
+                propertyOwnership = propertyOwnership,
+                electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+            ),
         )
 
     @Test

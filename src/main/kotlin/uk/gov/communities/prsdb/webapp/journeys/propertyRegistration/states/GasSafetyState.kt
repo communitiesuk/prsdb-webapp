@@ -39,6 +39,9 @@ interface GasSafetyDetailState : JourneyState {
     val allowProvideCertificateLaterRoute: Boolean
     val propertyOwnershipId: Long?
 
+    // TODO: PDJB-1926: Remove this
+    val isGas14MonthExpiryEnabled: Boolean
+
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
@@ -46,7 +49,8 @@ interface GasSafetyDetailState : JourneyState {
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
         getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
-            CertificateExpiryHelper.isGasIssueDateExpired(issueDate.toJavaLocalDate())
+            // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
+            CertificateExpiryHelper.isGasIssueDateExpired(issueDate.toJavaLocalDate(), isGas14MonthExpiryEnabled)
         }
 
     val gasUploadIds: List<Long>

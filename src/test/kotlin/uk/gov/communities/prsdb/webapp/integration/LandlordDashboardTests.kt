@@ -2,10 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OutstandingActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
@@ -50,7 +52,18 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the add compliance information button links to the compliance actions page`(page: Page) {
+    fun `the outstanding actions button links to the outstanding actions page`(page: Page) {
+        val dashboard = navigator.goToLandlordDashboard()
+        dashboard.outstandingActionsButton.clickAndWait()
+        assertPageIs(page, OutstandingActionsPage::class)
+    }
+
+    // TODO PDJB-2006: Delete this test when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
+    @Test
+    fun `the compliance actions button links to the compliance actions page when PROPERTY_REGISTRATION_PHASE_THREE is disabled`(
+        page: Page,
+    ) {
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_PHASE_THREE)
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.addComplianceInformationButton.clickAndWait()
         assertPageIs(page, ComplianceActionsPage::class)
@@ -108,7 +121,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 fun `the notification banner loads with correct message for one compliance action`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 1 property awaiting compliance information: View compliance actions")
+                        .containsText("You have 1 property awaiting compliance information: View outstanding actions")
                 }
             }
 
@@ -118,14 +131,14 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 fun `the notification banner loads with correct message for multiple compliance actions`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 5 properties awaiting compliance information: View compliance actions")
+                        .containsText("You have 5 properties awaiting compliance information: View outstanding actions")
                 }
 
                 @Test
-                fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
+                fun `the view outstanding actions link redirects to the outstanding actions page`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
-                    dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                    assertPageIs(page, ComplianceActionsPage::class)
+                    dashboard.notificationBanner.outstandingActionsLink.clickAndWait()
+                    assertPageIs(page, OutstandingActionsPage::class)
                 }
             }
         }
@@ -147,10 +160,10 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
             }
 
             @Test
-            fun `the add compliance information link redirects to the compliance actions page`(page: Page) {
+            fun `the view outstanding actions link redirects to the outstanding actions page`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
-                dashboard.notificationBanner.addComplianceInformationLink.clickAndWait()
-                assertPageIs(page, ComplianceActionsPage::class)
+                dashboard.notificationBanner.outstandingActionsLink.clickAndWait()
+                assertPageIs(page, OutstandingActionsPage::class)
             }
         }
     }

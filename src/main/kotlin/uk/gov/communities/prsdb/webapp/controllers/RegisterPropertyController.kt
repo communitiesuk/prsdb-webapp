@@ -193,7 +193,7 @@ class RegisterPropertyController(
             (
                 propertyCompliance == null ||
                     propertyCompliance.isGasSafetyCertMissing ||
-                    propertyCompliance.isElectricalSafetyMissing ||
+                    propertyComplianceService.isElectricalSafetyMissing(propertyCompliance) ||
                     propertyCompliance.epcHasFaults
             )
 

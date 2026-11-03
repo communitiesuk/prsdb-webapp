@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import net.datafaker.Faker
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
@@ -510,7 +510,7 @@ object NftDataFaker {
         val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
             if (!gasCertificateSafetyMissing) {
-                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
+                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_MONTHS / 12.0 * 365 * 1.5).toLong())
             } else {
                 null
             }
@@ -602,7 +602,13 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.let { !CertificateExpiryHelper.isGasIssueDateExpired(it.toLocalDate(), referenceDate()) } == true
+        issueDate?.let {
+            !CertificateExpiryHelper.isGasIssueDateExpired(
+                it.toLocalDate(),
+                isGas14MonthExpiryEnabled = true,
+                currentDate = referenceDate(),
+            )
+        } == true
 
     fun isElectricalSafetyCertificateCurrent(
         expiryDate: Date?,
