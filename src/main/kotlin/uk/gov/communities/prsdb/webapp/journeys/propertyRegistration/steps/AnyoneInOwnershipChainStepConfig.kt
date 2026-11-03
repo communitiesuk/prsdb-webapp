@@ -8,25 +8,26 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-1971: replace this placeholder with the real "is there anyone else in the ownership chain" page.
 @JourneyFrameworkComponent
 class AnyoneInOwnershipChainStepConfig : AbstractRequestableStepConfig<YesOrNo, AnyoneInOwnershipChainFormModel, JourneyState>() {
     override val formModelClass = AnyoneInOwnershipChainFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "fieldName" to "anyoneInOwnershipChain",
-            "fieldSetHeading" to "registerProperty.superiorLandlords.anyoneInOwnershipChain.fieldSetHeading",
             "radioOptions" to
                 listOf(
-                    RadiosButtonViewModel(value = YesOrNo.YES, labelMsgKey = "forms.radios.option.yes.label"),
-                    RadiosButtonViewModel(value = YesOrNo.NO, labelMsgKey = "forms.radios.option.no.label"),
+                    RadiosButtonViewModel(
+                        value = true,
+                        labelMsgKey = "registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.option.yes",
+                    ),
+                    RadiosButtonViewModel(value = false, labelMsgKey = "forms.radios.option.no.label"),
                 ),
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: JourneyState) = "forms/anyoneInOwnershipChainForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.anyoneInOwnershipChain
+    override fun mode(state: JourneyState): YesOrNo? =
+        getFormModelFromStateOrNull(state)?.anyoneInOwnershipChain?.let { if (it) YesOrNo.YES else YesOrNo.NO }
 }
 
 @JourneyFrameworkComponent
