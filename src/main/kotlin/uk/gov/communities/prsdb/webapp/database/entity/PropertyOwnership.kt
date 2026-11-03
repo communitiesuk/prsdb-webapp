@@ -84,8 +84,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
-    var hasSuperiorLandlords: Boolean? = null
-
     @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
     var propertyManager: PropertyManager? = null
@@ -171,7 +169,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
-        hasSuperiorLandlords: Boolean? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
@@ -199,7 +196,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.markedJointLandlord = markedJointLandlord
         this.licenseProvideLater = licenseProvideLater
         this.tenancyProvideLater = tenancyProvideLater
-        this.hasSuperiorLandlords = hasSuperiorLandlords
     }
 
     val licenseType: LicensingType

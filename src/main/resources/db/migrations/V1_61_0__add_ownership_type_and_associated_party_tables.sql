@@ -62,10 +62,6 @@ SET ownership_type = CASE ownership_type_before_pdjb955
 
 ALTER TABLE property_ownership ALTER COLUMN ownership_type SET NOT NULL;
 
--- Landlords are asked separately whether there are more people in the ownership chain, so an
--- absence of superior_landlord rows is ambiguous.
-ALTER TABLE property_ownership ADD COLUMN has_superior_landlords BOOLEAN;
-
 ALTER TABLE property_ownership ADD COLUMN property_manager_id BIGINT UNIQUE;
 
 ALTER TABLE property_ownership ADD CONSTRAINT fk_property_ownership_property_manager

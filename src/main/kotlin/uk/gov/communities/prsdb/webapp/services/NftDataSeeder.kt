@@ -730,8 +730,8 @@ class NftDataSeeder(
 
         // A "no details known" placeholder.
         // TODO PDJB-1957: seed realistic associated parties once the journey defines their shape -
-        //  named freeholders, superior landlords with has_superior_landlords set to match, and
-        //  property managers - so that NFT exercises those joins at a representative volume.
+        //  named freeholders, superior landlords and property managers - so that NFT exercises
+        //  those joins at a representative volume.
         //  Their addresses should come from landlordAddressGenerator, which is unrestricted: unlike
         //  property addresses they can be duplicated and must not consume the available pool.
         if (ownershipType.requiresFreeholderRecords()) {
