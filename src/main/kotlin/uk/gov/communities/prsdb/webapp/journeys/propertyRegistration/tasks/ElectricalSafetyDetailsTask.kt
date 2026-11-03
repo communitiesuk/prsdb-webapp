@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatu
 @JourneyFrameworkComponent("propertyRegistrationElectricalSafetyDetailsTask")
 class ElectricalSafetyDetailsTask(
     override val hasElectricalCertStep: HasElectricalCertStep,
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     override val eicExpiryDateStep: EicExpiryDateStep,
     override val eicIssueDateStep: EicIssueDateStep,
     override val hasUploadedEic: HasAnyInCollectionStep,
@@ -106,6 +107,7 @@ class ElectricalSafetyDetailsTask(
             }
             step(journey.eicIssueDateStep) {
                 routeSegment(EicIssueDateStep.ROUTE_SEGMENT)
+                // TODO PDJB-1679: Use hasElectricalCertStep.hasOutcome(HAS_EIC) when the EIC_ISSUE_DATE flag is removed
                 parents {
                     SingleParent(journey.hasElectricalCertStep) {
                         journey.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC && journey.isEicIssueDateEnabled

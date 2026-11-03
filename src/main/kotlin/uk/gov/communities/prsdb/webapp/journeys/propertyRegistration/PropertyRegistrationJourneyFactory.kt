@@ -302,6 +302,7 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {

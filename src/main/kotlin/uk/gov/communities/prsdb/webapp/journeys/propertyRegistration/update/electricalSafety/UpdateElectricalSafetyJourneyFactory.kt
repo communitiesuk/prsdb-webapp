@@ -120,6 +120,7 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (state.checkingAnswersFor) {
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
@@ -163,6 +164,7 @@ class UpdateElectricalSafetyJourneyFactory(
         configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
         configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }

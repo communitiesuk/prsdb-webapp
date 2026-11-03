@@ -18,15 +18,18 @@ class EicExpiredStepConfigTests {
     @Mock
     lateinit var mockState: ElectricalSafetyDetailState
 
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     @Mock
     lateinit var mockEicExpiryDateStep: EicExpiryDateStep
 
     @Mock
     lateinit var mockEicIssueDateStep: EicIssueDateStep
 
+    // TODO PDJB-1679: Remove this and the EIC_ISSUE_DATE stubs when the EIC_ISSUE_DATE flag is removed
     @Mock
     lateinit var mockFeatureFlagManager: FeatureFlagManager
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getStepSpecificContent uses the EIC expiry date and links back to the EIC expiry date step when EIC_ISSUE_DATE is disabled`() {
         val stepConfig = setupStepConfig()
@@ -63,6 +66,7 @@ class EicExpiredStepConfigTests {
         assertEquals(true, (content["changeIssueDateUrl"] as String).contains(EicIssueDateStep.ROUTE_SEGMENT))
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `chooseTemplate returns occupied template when isOccupied is true and EIC_ISSUE_DATE is disabled`() {
         val stepConfig = setupStepConfig()
@@ -72,6 +76,7 @@ class EicExpiredStepConfigTests {
         assertEquals("forms/eicExpiredForOccupiedProperty", stepConfig.chooseTemplate(mockState))
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `chooseTemplate returns unoccupied template when isOccupied is false and EIC_ISSUE_DATE is disabled`() {
         val stepConfig = setupStepConfig()

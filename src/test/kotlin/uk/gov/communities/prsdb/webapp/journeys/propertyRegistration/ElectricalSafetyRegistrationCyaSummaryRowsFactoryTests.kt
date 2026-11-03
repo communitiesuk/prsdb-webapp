@@ -35,6 +35,8 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
     lateinit var mockState: ElectricalSafetyDetailState
 
     private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     private val mockEicExpiryDateStep: EicExpiryDateStep = mock()
     private val mockEicIssueDateStep: EicIssueDateStep = mock()
     private val mockCheckEicUploadsStep: CheckEicUploadsStep = mock()
@@ -62,6 +64,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
     @Nested
     inner class CertUploaded {
+        // TODO PDJB-1679: Use the EIC issue date step instead of the EIC expiry date step when the EIC_ISSUE_DATE flag is removed
         @Test
         fun `factory uses the EIC branch steps and uploads, wires up EIC download messageKey and sorts uploads by map index`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -120,6 +123,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
             whenever(mockState.isEicIssueDateEnabled).thenReturn(true)
             whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
             whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)

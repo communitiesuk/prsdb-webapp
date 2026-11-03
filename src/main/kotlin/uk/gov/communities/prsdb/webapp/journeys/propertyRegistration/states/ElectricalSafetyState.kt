@@ -33,6 +33,8 @@ interface ElectricalSafetyState : JourneyState {
 
 interface ElectricalSafetyDetailState : JourneyState {
     val hasElectricalCertStep: HasElectricalCertStep
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     val eicExpiryDateStep: EicExpiryDateStep
     val eicIssueDateStep: EicIssueDateStep
     val uploadEicStep: UploadEicStep
@@ -56,6 +58,7 @@ interface ElectricalSafetyDetailState : JourneyState {
     // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     val isEicIssueDateEnabled: Boolean
 
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     fun getEicExpiryDateIfReachable() =
         eicExpiryDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
