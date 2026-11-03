@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 
-// TODO PDJB-2007: replace this placeholder with the real freeholders pages
+// TODO PDJB-1962: replace this placeholder with the real freeholders intro page
 class FreeholdersFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FreeholdersStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FreeholdersInfoStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
 
