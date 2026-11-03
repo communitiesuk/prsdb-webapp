@@ -170,6 +170,7 @@ try {
     $newServerPort = 8080 + $portOffset
     $newPostgresPort = 5433 + $portOffset
     $newRedisPort = 6379 + $portOffset
+    $newElasticMqPort = 9324 + $portOffset
 
     $envFilePath = Join-Path $newWorktreePath ".env"
     if (Test-Path $envFilePath) {
@@ -178,12 +179,13 @@ try {
         $content = $content -replace 'SERVER_PORT="8080"', "SERVER_PORT=`"$newServerPort`""
         $content = $content -replace 'POSTGRES_PORT="5433"', "POSTGRES_PORT=`"$newPostgresPort`""
         $content = $content -replace 'REDIS_PORT="6379"', "REDIS_PORT=`"$newRedisPort`""
+        $content = $content -replace 'ELASTICMQ_PORT="9324"', "ELASTICMQ_PORT=`"$newElasticMqPort`""
         $content = $content -replace 'RDS_URL="jdbc:postgresql://localhost:5433/prsdblocal"', "RDS_URL=`"jdbc:postgresql://localhost:${newPostgresPort}/prsdblocal`""
         $content = $content -replace 'ELASTICACHE_PORT="6379"', "ELASTICACHE_PORT=`"$newRedisPort`""
         $content = $content -replace 'LANDLORD_BASE_URL="http://localhost:8080/landlord"', "LANDLORD_BASE_URL=`"http://localhost:${newServerPort}/landlord`""
         $content = $content -replace 'LOCAL_AUTHORITY_BASE_URL="http://localhost:8080/local-council"', "LOCAL_AUTHORITY_BASE_URL=`"http://localhost:${newServerPort}/local-council`""
         # Append any port keys missing from the copied .env so defaults aren't used
-        $portKeys = [ordered]@{ SERVER_PORT = $newServerPort; POSTGRES_PORT = $newPostgresPort; REDIS_PORT = $newRedisPort }
+        $portKeys = [ordered]@{ SERVER_PORT = $newServerPort; POSTGRES_PORT = $newPostgresPort; REDIS_PORT = $newRedisPort; ELASTICMQ_PORT = $newElasticMqPort }
         foreach ($key in $portKeys.Keys) {
             if ($content -notmatch "(?m)^${key}=") { $content = $content.TrimEnd() + "`n${key}=`"$($portKeys[$key])`"" }
         }
@@ -191,6 +193,7 @@ try {
         Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
         Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
         Write-Host "  REDIS_PORT=$newRedisPort" -ForegroundColor Gray
+        Write-Host "  ELASTICMQ_PORT=$newElasticMqPort" -ForegroundColor Gray
     }
 } finally {
     Pop-Location
