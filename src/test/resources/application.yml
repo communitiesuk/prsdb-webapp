@@ -5,6 +5,8 @@ spring:
     aws:
       region:
         static: eu-west-2
+      sqs:
+        queue-not-found-strategy: fail
   mvc:
     format:
       date: "d MMMM yyyy"

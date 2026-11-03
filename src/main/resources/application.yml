@@ -32,6 +32,11 @@ spring:
     multipart:
       enabled: false
 
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: fail
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
