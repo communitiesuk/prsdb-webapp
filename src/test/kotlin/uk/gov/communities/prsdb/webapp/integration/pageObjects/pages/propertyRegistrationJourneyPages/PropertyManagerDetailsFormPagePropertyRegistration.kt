@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -12,7 +11,6 @@ class PropertyManagerDetailsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PropertyManagerDetailsStep.ROUTE_SEGMENT}") {
     val form = PropertyManagerDetailsForm(page)
-    val errorSummary = ErrorSummary(page)
 
     fun submitDetails(
         name: String,
