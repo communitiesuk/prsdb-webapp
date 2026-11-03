@@ -107,9 +107,6 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
-freeholderName:
-  error:
-    missing: Enter a name
 orgGovBodyMustProvideInfo:
   heading: You need to provide more information to register
   provideAtLeastOne: 'You must provide at least one of:'
