@@ -1010,15 +1010,6 @@ class Navigator(
         return createValidPage(page, FreeholderNameFormPagePropertyRegistration::class)
     }
 
-    // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-    fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(): AnyoneInOwnershipChainFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlords().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
-        return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
-    }
-
     fun skipToPropertyRegistrationFreeholderContactTypePage(
         freeholderName: String = "Test Freeholder",
     ): FreeholderContactTypeFormPagePropertyRegistration {
@@ -1027,6 +1018,15 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+    }
+
+    // TODO PDJB-1971: update this usage when the real has superior landlords page is added
+    fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(): AnyoneInOwnershipChainFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlords().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
+        return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {

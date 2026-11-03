@@ -1,31 +1,35 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class FreeholderContactTypeStepConfigTests {
-    private val state = mock<FreeholdersDetailsState>()
-    private val freeholderNameStep = mock<FreeholderNameStep>()
+    @Mock
+    lateinit var mockJourneyState: FreeholdersDetailsState
+
+    @Mock
+    lateinit var mockFreeholderNameStep: FreeholderNameStep
 
     @Test
     fun `getStepSpecificContent includes freeholder name and contact type content`() {
         // Arrange
-        whenever(state.freeholderNameStep).thenReturn(freeholderNameStep)
-        whenever(freeholderNameStep.formModelOrNull).thenReturn(
+        val stepConfig = FreeholderContactTypeStepConfig()
+        whenever(mockJourneyState.freeholderNameStep).thenReturn(mockFreeholderNameStep)
+        whenever(mockFreeholderNameStep.formModelOrNull).thenReturn(
             FreeholderNameFormModel().apply { name = "James Hassan" },
         )
 
         // Act
-        val content = FreeholderContactTypeStepConfig().getStepSpecificContent(state)
+        val content = stepConfig.getStepSpecificContent(mockJourneyState)
 
         // Assert
         assertEquals(
@@ -54,6 +58,6 @@ class FreeholderContactTypeStepConfigTests {
 
     @Test
     fun `chooseTemplate returns the contact type form template`() {
-        assertEquals("forms/contactTypeForm", FreeholderContactTypeStepConfig().chooseTemplate(state))
+        assertEquals("forms/contactTypeForm", FreeholderContactTypeStepConfig().chooseTemplate(mockJourneyState))
     }
 }
