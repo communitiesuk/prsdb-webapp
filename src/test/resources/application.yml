@@ -65,6 +65,7 @@ gov-uk-pay:
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: payments-support@example.com
 
 cloudwatch-metrics:
   ecs:
