@@ -9,15 +9,13 @@ enum class PaymentStatus {
     SUCCEEDED,
     FAILED, // Includes payments cancelled by the user
     CANCELLED, // Only payments cancelled by our service
-    CANCELLING, // Only stored by us, never reported by GOV.UK Pay
     MANUAL_INTERVENTION, // Only stored by us, never reported by GOV.UK Pay
+    CANCELLING, // Only stored by us, never reported by GOV.UK Pay
     ;
 
     fun isFailedOrCancelled() = this == FAILED || this == CANCELLED
 
     companion object {
-        val IN_PROGRESS_STATUSES = listOf(CREATED)
-
         fun fromGovUKPayStatus(status: GovUkPayPaymentStatus): PaymentStatus =
             when (status) {
                 GovUkPayPaymentStatus.CREATED -> CREATED

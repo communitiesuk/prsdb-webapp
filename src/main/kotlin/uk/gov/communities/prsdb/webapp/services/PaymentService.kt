@@ -203,9 +203,9 @@ class PaymentService(
             }
 
             PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
-                paymentRepository.updateStatusIfCurrentStatusIn(
+                paymentRepository.updateStatusIfCurrentStatusIs(
                     paymentId,
-                    PaymentStatus.IN_PROGRESS_STATUSES,
+                    PaymentStatus.CREATED,
                     govUkPayStatus,
                     Instant.now(),
                 )
@@ -241,9 +241,9 @@ class PaymentService(
                 // The claim locks the payment's row until this transaction ends, so any other finalisation or
                 // cancellation of this payment waits for it, then sees the result.
                 val isClaimed =
-                    paymentRepository.updateStatusIfCurrentStatusIn(
+                    paymentRepository.updateStatusIfCurrentStatusIs(
                         paymentId,
-                        listOf(PaymentStatus.CREATED),
+                        PaymentStatus.CREATED,
                         PaymentStatus.SUCCEEDED,
                         Instant.now(),
                     ) == 1

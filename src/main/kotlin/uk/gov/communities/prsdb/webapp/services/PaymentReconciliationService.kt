@@ -16,9 +16,9 @@ class PaymentReconciliationService(
     // CREATED -> SUCCEEDED claim. A CANCELLING payment has not been captured and never will be.
     fun markForCancellation(paymentId: String): PaymentStatus {
         val isMarked =
-            paymentRepository.updateStatusIfCurrentStatusIn(
+            paymentRepository.updateStatusIfCurrentStatusIs(
                 paymentId,
-                listOf(PaymentStatus.CREATED),
+                PaymentStatus.CREATED,
                 PaymentStatus.CANCELLING,
                 Instant.now(),
             ) == 1
@@ -26,9 +26,9 @@ class PaymentReconciliationService(
         if (isMarked) {
             try {
                 govUkPayClient.cancelPayment(paymentId)
-                paymentRepository.updateStatusIfCurrentStatusIn(
+                paymentRepository.updateStatusIfCurrentStatusIs(
                     paymentId,
-                    listOf(PaymentStatus.CANCELLING),
+                    PaymentStatus.CANCELLING,
                     PaymentStatus.CANCELLED,
                     Instant.now(),
                 )

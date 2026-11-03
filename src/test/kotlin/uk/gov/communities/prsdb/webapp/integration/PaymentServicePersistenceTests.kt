@@ -131,12 +131,12 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `updateStatusIfCurrentStatusIn updates the status and last modified date when the payment has an expected status`() {
+    fun `updateStatusIfCurrentStatusIs updates the status and last modified date when the payment has the expected status`() {
         // Act
         val rowsUpdated =
-            paymentRepository.updateStatusIfCurrentStatusIn(
+            paymentRepository.updateStatusIfCurrentStatusIs(
                 CREATED_PAYMENT_ID,
-                listOf(PaymentStatus.CREATED),
+                PaymentStatus.CREATED,
                 PaymentStatus.CANCELLING,
                 NOW,
             )
@@ -150,15 +150,15 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
     @ParameterizedTest
     @ValueSource(strings = [SUCCEEDED_PAYMENT_ID, FAILED_PAYMENT_ID, CANCELLED_PAYMENT_ID])
-    fun `updateStatusIfCurrentStatusIn does not overwrite a finished payment's status`(paymentId: String) {
+    fun `updateStatusIfCurrentStatusIs does not overwrite a finished payment's status`(paymentId: String) {
         // Arrange
         val originalStatus = paymentRepository.findStatusByPaymentId(paymentId)
 
         // Act
         val rowsUpdated =
-            paymentRepository.updateStatusIfCurrentStatusIn(
+            paymentRepository.updateStatusIfCurrentStatusIs(
                 paymentId,
-                PaymentStatus.IN_PROGRESS_STATUSES,
+                PaymentStatus.CREATED,
                 PaymentStatus.FAILED,
                 NOW,
             )

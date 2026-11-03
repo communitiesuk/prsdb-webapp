@@ -1,11 +1,11 @@
--- Payment status ordinals: 0 = CREATED, 1 = CAPTURABLE (no longer stored), 5 = CANCELLING.
+-- Payment status ordinals: 0 = CREATED, 1 = CAPTURABLE (no longer stored), 6 = CANCELLING.
 -- Capturable payments, and all but the newest created payment for each draft, are marked for cancellation.
 UPDATE payment
-SET status = 5
+SET status = 6
 WHERE status = 1;
 
 UPDATE payment older
-SET status = 5
+SET status = 6
 WHERE status = 0
   AND EXISTS (SELECT 1
               FROM payment newer
