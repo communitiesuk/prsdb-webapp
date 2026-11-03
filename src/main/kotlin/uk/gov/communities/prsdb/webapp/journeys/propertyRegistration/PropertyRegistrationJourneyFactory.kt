@@ -651,7 +651,7 @@ class PropertyRegistrationJourneyFactory(
                                     Destination.ExternalUrl("$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
                                 }
 
-                                PaymentOutcome.FAILURE, PaymentOutcome.NOT_COMPLETED -> {
+                                PaymentOutcome.FAILURE -> {
                                     Destination(journey.paymentFailedStep)
                                 }
 
@@ -667,12 +667,7 @@ class PropertyRegistrationJourneyFactory(
                     }
                     step(journey.paymentFailedStep) {
                         routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
-                        parents {
-                            OrParents(
-                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE),
-                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.NOT_COMPLETED),
-                            )
-                        }
+                        parents { journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE) }
                         noNextDestination()
                         backUrl { null }
                     }

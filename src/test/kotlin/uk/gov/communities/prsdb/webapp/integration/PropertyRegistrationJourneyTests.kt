@@ -544,9 +544,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment not completed page`(
-            browser: Browser,
-        ) {
+        fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment failed page`(browser: Browser) {
             withJavaScriptDisabled(browser) { page, navigator ->
                 stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
                 val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
@@ -568,7 +566,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 page.navigate(replacedPaymentReturnUrl)
 
                 val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
-                assertThat(paymentFailedPage.heading).containsText("Your payment could not be completed")
                 assertThat(paymentFailedPage.tryAgainLink).isVisible()
                 assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
                 verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
