@@ -7,7 +7,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EntityNameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import kotlin.test.assertEquals
 
@@ -21,7 +21,7 @@ class FreeholderContactTypeStepConfigTests {
         // Arrange
         whenever(state.freeholderNameStep).thenReturn(freeholderNameStep)
         whenever(freeholderNameStep.formModelOrNull).thenReturn(
-            EntityNameFormModel().apply { name = "James Hassan" },
+            FreeholderNameFormModel().apply { name = "James Hassan" },
         )
 
         // Act
