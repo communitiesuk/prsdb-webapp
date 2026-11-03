@@ -11,6 +11,9 @@ interface OwnershipTypeState : JourneyState {
     val ownershipKindStep: OwnershipKindStep
     val freeholdTypeStep: FreeholdTypeStep
 
+    // TODO: PDJB-1957: Reassess this ownership-type mapping and centralise the freeholder/joint-freeholder/superior-landlord
+    // checks in one place. This logic is currently duplicated by the journey wiring and should be
+    // consolidated when the single source of truth is introduced.
     val isJointFreeholder: Boolean
         get() = freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
 }
