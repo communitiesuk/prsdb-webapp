@@ -522,9 +522,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `submitting the payment summary with a quote from a previous day refreshes the summary without creating a payment`(
-            page: Page,
-        ) {
+        fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
             val today = LocalDate.now(DateTimeHelper.UK_ZONE)
             val staleQuote =
                 PropertyRegistrationPaymentQuote(
@@ -547,19 +545,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `submitting the payment summary with a quote date from a previous day refreshes the summary without creating a payment`(
+        fun `submitting a payment summary page with an older quote than the stored quote refreshes the summary without creating a payment`(
             page: Page,
         ) {
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
             val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
             ensureIncompletePropertyExistsForCurrentJourney(page)
-            val yesterday = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
-            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", yesterday.toString())
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", today.minusDays(1).toString())
 
             paymentSummaryPage.form.submit()
 
-            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
         }
 
