@@ -32,6 +32,11 @@ spring:
     multipart:
       enabled: false
 
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: fail
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
@@ -42,6 +47,9 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
+
+email-queue:
+  name: ${EMAIL_QUEUE_NAME:}
 
 os:
   api-key: ${OS_API_KEY}

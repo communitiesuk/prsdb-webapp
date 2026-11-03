@@ -70,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
@@ -99,11 +100,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcSuperseededFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersBackRoutingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertMissingFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnyFreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
@@ -143,10 +148,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SaveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicrFormPagePropertyRegistration
@@ -160,6 +165,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -400,7 +406,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
                 .containsText(PaymentHelper.formatPence(payment.amountInPence))
             assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
-                .containsText(payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).format(dateFormatter))
+                .containsText(payment.quoteDate.format(dateFormatter))
             assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
                 .containsText(payment.forPeriodEnding.format(dateFormatter))
         }
@@ -560,6 +566,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val payment = paymentRepository.findAll().single { it.reference == request.reference }
             assertEquals(PaymentStatus.CREATED, payment.status)
             assertEquals(request.amount, payment.amountInPence)
+            assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), payment.quoteDate)
         }
 
         @Test
@@ -657,9 +664,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `submitting the payment summary with a quote from a previous day refreshes the summary without creating a payment`(
-            page: Page,
-        ) {
+        fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
             val today = LocalDate.now(DateTimeHelper.UK_ZONE)
             val staleQuote =
                 PropertyRegistrationPaymentQuote(
@@ -679,6 +684,49 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
             assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
             verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `submitting a payment summary page with an older quote than the stored quote refreshes the summary without creating a payment`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+            ensureIncompletePropertyExistsForCurrentJourney(page)
+            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", today.minusDays(1).toString())
+
+            paymentSummaryPage.form.submit()
+
+            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
+            verify(govUkPayClient, never()).createPayment(any())
+        }
+
+        @Test
+        fun `returning from GOV UK Pay on a later day than the quote cancels the payment and shows the payment summary`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                val paymentReturnPage = submitPaymentSummary(page)
+                val payment = getCreatedPayment()
+                jdbcTemplate.update(
+                    "UPDATE payment SET quote_date = ? WHERE payment_id = ?",
+                    payment.quoteDate.minusDays(1),
+                    payment.paymentId,
+                )
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+                assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+                assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
+                verify(govUkPayClient).cancelPayment(payment.paymentId)
+                verify(govUkPayClient, never()).capturePayment(any())
+            }
         }
 
         @Test
@@ -1146,12 +1194,20 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
-            // TODO PDJB-2007: update this usage when the real freeholders pages are added
-            val freeholdersPage = assertPageIs(page, FreeholdersFormPagePropertyRegistration::class)
-            freeholdersPage.submit()
-            // TODO PDJB-2008: update this usage when the real superior landlords pages are added
-            val superiorLandlordsPage = assertPageIs(page, SuperiorLandlordsFormPagePropertyRegistration::class)
-            superiorLandlordsPage.submit()
+            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
+            assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1969: remove this usage when has any freeholders becomes an internal step
+            assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1963: update this usage when the real provide details page is added
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
+            // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
+            assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1968: update this usage when the real freeholders list page is added
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
+            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
 

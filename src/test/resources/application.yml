@@ -5,6 +5,8 @@ spring:
     aws:
       region:
         static: eu-west-2
+      sqs:
+        queue-not-found-strategy: fail
   mvc:
     format:
       date: "d MMMM yyyy"
@@ -22,6 +24,9 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
   use-production-notify: false
+
+email-queue:
+  name: prsdb-email-queue
 
 argon2:
   iterations: 2

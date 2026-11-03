@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -48,8 +49,9 @@ class ComplianceDetailsHelperTests {
     lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     private val mockUploadService: UploadService = mock()
+    private val mockFeatureFlagManager: FeatureFlagManager = mock()
 
-    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider, mockUploadService) }
+    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider, mockUploadService, mockFeatureFlagManager) }
 
     @Nested
     inner class GetGasSafetyCyaContent {

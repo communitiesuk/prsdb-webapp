@@ -1,10 +1,11 @@
-<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel"*/-->
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="annualFee" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="firstChargeableDate" type="java.lang.String"*/-->
 <!--/*@thymesVar id="isPreGratisPeriod" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="quoteDate" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentSummary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -34,6 +35,7 @@
         registerProperty.paymentSummary.prnHint
     </div>
 
+    <input type="hidden" name="quoteDate" th:value="${quoteDate}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.paymentSummary.button})}"></button>
 </th:block>
 </html>
