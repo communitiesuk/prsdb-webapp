@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalSafetyAnswersSummaryList
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import java.util.regex.Pattern
 
@@ -147,5 +149,8 @@ class CheckAnswersPagePropertyRegistration(
         val epcExemptionRow = getRow("Why does this property not need an EPC?")
         val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
         val meesExemptionRow = getRow("Registered exemption")
+
+        fun electricalCertDateRow(certificateType: CertificateType) =
+            getRow(CheckElectricalSafetyAnswersSummaryList.certificateDateKey(certificateType))
     }
 }

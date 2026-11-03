@@ -32,6 +32,11 @@ spring:
     multipart:
       enabled: false
 
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: fail
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
@@ -42,6 +47,9 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
+
+email-queue:
+  name: ${EMAIL_QUEUE_NAME:}
 
 os:
   api-key: ${OS_API_KEY}
@@ -113,7 +121,7 @@ gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
-  gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2027-11-14}
+  gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2026-11-01}
   connect-timeout: 5s
   read-timeout: 10s
 
