@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Super
 
 interface OwnershipStructureState :
     JourneyState,
-    FreeholdersListState {
+    FreeholdersDependencies {
     val ownershipTypeTask: OwnershipTypeTask
     val ownershipStructureRoutingStep: OwnershipStructureRoutingStep
     val freeholdersTask: FreeholdersTask
