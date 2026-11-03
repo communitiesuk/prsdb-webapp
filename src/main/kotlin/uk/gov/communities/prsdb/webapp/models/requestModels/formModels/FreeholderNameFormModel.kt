@@ -10,7 +10,7 @@ class FreeholderNameFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.entityName.error.missing",
+                messageKey = "forms.freeholderName.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],

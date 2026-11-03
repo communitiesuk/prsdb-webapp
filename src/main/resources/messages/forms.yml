@@ -107,7 +107,7 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
-entityName:
+freeholderName:
   error:
     missing: Enter a name
 orgGovBodyMustProvideInfo:
