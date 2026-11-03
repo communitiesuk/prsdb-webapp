@@ -298,7 +298,7 @@ class PropertyOwnershipService(
     }
 
     // TODO PDJB-1957: mirror the flag-on/flag-off split in createPropertyOwnership.
-    // TODO PDJB-1957: changing to a type that no longer implies another freeholder leaves any
+    // TODO PDJB-1957: changing to a type that no longer requires freeholder records leaves any
     //  placeholder freeholder behind. Decide what should happen to existing freeholders here
     //  once the freeholders journey exists.
     @Transactional

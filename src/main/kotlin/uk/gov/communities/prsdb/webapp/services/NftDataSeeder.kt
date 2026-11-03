@@ -734,7 +734,7 @@ class NftDataSeeder(
         //  property managers - so that NFT exercises those joins at a representative volume.
         //  Their addresses should come from landlordAddressGenerator, which is unrestricted: unlike
         //  property addresses they can be duplicated and must not consume the available pool.
-        if (ownershipType.impliesAnotherFreeholder()) {
+        if (ownershipType.requiresFreeholderRecords()) {
             freeholderStmt.setTimestamp(1, createdDate)
             freeholderStmt.setLong(2, propertyOwnershipId)
             freeholderStmt.addBatch()

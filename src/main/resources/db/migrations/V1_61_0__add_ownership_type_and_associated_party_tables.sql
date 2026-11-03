@@ -1,6 +1,6 @@
 -- Tables for associated parties. Other than the freeholder backfill at the end of this migration,
 -- these are populated from PDJB-1957 onwards.
--- In freeholder and superior_landlord, a row with no name, email or address records
+-- In freeholder and superior_landlord, a row with no name, email or address means
 -- "no details known".
 
 CREATE TABLE property_manager (

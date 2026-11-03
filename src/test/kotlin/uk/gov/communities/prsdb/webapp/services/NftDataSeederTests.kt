@@ -267,14 +267,14 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase gives every property that implies another freeholder a placeholder freeholder`() {
+    fun `seedDatabase gives every property that requires freeholder records a placeholder freeholder`() {
         newSeeder().seedDatabase()
 
         val propertiesWithoutAFreeholder =
             jdbcTemplate.queryForList<Long>(
                 "SELECT po.id FROM property_ownership po " +
                     "WHERE po.ownership_type IN (${
-                        OwnershipType.entries.filter { it.impliesAnotherFreeholder() }.joinToString(", ") { it.ordinal.toString() }
+                        OwnershipType.entries.filter { it.requiresFreeholderRecords() }.joinToString(", ") { it.ordinal.toString() }
                     }) AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id)",
             )
 

@@ -94,7 +94,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
     }
 
     @Test
-    fun `every seeded property whose ownership type implies another freeholder has at least one`() {
+    fun `every seeded property whose ownership type requires freeholder records has at least one`() {
         // Types where the landlord is not the sole freeholder
         val propertiesWithoutAFreeholder =
             jdbcTemplate.queryForList(
