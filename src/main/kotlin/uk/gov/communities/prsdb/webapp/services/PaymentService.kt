@@ -102,7 +102,9 @@ class PaymentService(
             )
 
         return try {
-            paymentRepository.saveAndFlush(Payment.fromGovUkPay(createdGovUkPayPayment.payment, quote.quoteDate, renewalDate, incompleteProperty))
+            paymentRepository.saveAndFlush(
+                Payment.fromGovUkPay(createdGovUkPayPayment.payment, quote.quoteDate, renewalDate, incompleteProperty),
+            )
             PropertyRegistrationPaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
         } catch (exception: DataIntegrityViolationException) {
             if (!exception.isViolationOf(ONE_CREATED_PAYMENT_PER_DRAFT_CONSTRAINT)) throw exception
