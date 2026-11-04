@@ -42,7 +42,7 @@ class UploadCertificateFormModelTests {
     }
 
     @ParameterizedTest(name = "{0}")
-    @ValueSource(strings = ["certificate.EXE", "certificate.DOCX"])
+    @ValueSource(strings = ["certificate.EXE", "certificate.DOCX", "bad_script.sh"])
     fun `isFileTypeValid rejects unsupported extensions`(fileName: String) {
         // Arrange
         val model =
