@@ -240,6 +240,12 @@ class PropertyStateSessionBuilder(
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
+        fun beforePropertyRegistrationFreeholderContactType(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
+            .withFreeholderName(freeholderName)
+
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
