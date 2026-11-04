@@ -601,14 +601,14 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
        ('urn:fdc:gov.uk:2022:UVWXY', 6);
 
 -- Payments in each status. The local GOV.UK Pay mock restores these from the database when they're first requested.
-INSERT INTO payment (payment_id, created_date, amount_in_pence, reference, payment_created_at, for_period_ending, status,
+INSERT INTO payment (payment_id, created_date, amount_in_pence, reference, payment_created_at, quote_date, for_period_ending, status,
                      paying_user_id, associated_property_id, associated_incomplete_property_user_id,
                      associated_incomplete_property_saved_journey_state_id)
-VALUES ('created-payment', current_date, 2000, 'created-payment-reference', current_date, current_date + 365, 0, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
-       ('capturable-payment', current_date, 2000, 'capturable-payment-reference', current_date, current_date + 365, 1, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
-       ('failed-payment', current_date, 2000, 'failed-payment-reference', current_date, current_date + 365, 3, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
-       ('cancelled-payment', current_date, 2000, 'cancelled-payment-reference', current_date, current_date + 365, 4, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
-       ('succeeded-payment', '01/15/25', 2000, 'succeeded-payment-reference', '01/15/25', current_date + 365, 2, 'urn:fdc:gov.uk:2022:UVWXY', 51, null, null);
+VALUES ('created-payment', current_date, 2000, 'created-payment-reference', current_date, current_date, current_date + 365, 0, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('capturable-payment', current_date, 2000, 'capturable-payment-reference', current_date, current_date, current_date + 365, 1, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('failed-payment', current_date, 2000, 'failed-payment-reference', current_date, current_date, current_date + 365, 3, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('cancelled-payment', current_date, 2000, 'cancelled-payment-reference', current_date, current_date, current_date + 365, 4, 'urn:fdc:gov.uk:2022:UVWXY', null, 'urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('succeeded-payment', '01/15/25', 2000, 'succeeded-payment-reference', '01/15/25', '01/15/25', current_date + 365, 2, 'urn:fdc:gov.uk:2022:UVWXY', 51, null, null);
 
 INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),
