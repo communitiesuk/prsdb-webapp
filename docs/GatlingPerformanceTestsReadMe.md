@@ -269,31 +269,114 @@ The basic slice covers seeded phone and email updates and individual registratio
 branch. It does not cover other registration branches, council or letting-agent journeys. See ADRs 0035-0040
 for the basic/load distinction, API-level measurement, runner, scheduling, Gatling and fixture-restoration decisions.
 
+### Generating the large NFT dataset (PDJB-1748)
+
+`NftDataSeeder` adds records alongside the existing small fixture. Explicit IDs start above each table's existing
+maximum, and sequences are aligned without rewinding an already-ahead sequence. Generation requires exclusive
+database access: stop application and scheduled writers before running it. This is not an idempotent startup
+script; start each generation from a freshly reset fixture, rather than rerunning the same random seed over a
+previously generated dataset.
+
+Bulk property addresses must be active, have a UPRN and belong to an English local council. The five reserved
+`EG1 2AA` lookup addresses remain outside bulk property allocation so the existing registration journey keeps
+working. `NFT_SEED_MINIMUM_FREE_ADDRESSES` (default `0`) reserves additional address capacity for subsequent
+registration journeys; choose it from the planned test volume rather than assuming the total address count
+represents usable capacity. Generation fails and rolls back if there are not enough addresses or if the
+configured landlords produce fewer property registrations than requested.
+
+The property settings are **additional** records, excluding the small fixture. Completed and incomplete registrations
+have separate exact targets:
+
+| Environment variable | Deployed default | Meaning |
+| --- | ---: | --- |
+| `NFT_SEED_SYSTEM_OPERATORS` | 150 | Additional system operators |
+| `NFT_SEED_LOCAL_COUNCIL_USERS` | 3,000 | Additional local-council users |
+| `NFT_SEED_PROPERTIES` | 2,450,000 | Completed property registrations |
+| `NFT_SEED_INCOMPLETE_PROPERTIES` | 272,223 | Incomplete property-registration journeys |
+| `NFT_SEED_LANDLORDS` | 0 | Derive landlord count from the existing synthetic portfolio distribution |
+| `NFT_SEED_BATCH_SIZE` | 10,000 | Records processed per seeding batch |
+| `NFT_SEED_RANDOM_SEED` | 239 | Random seed for reproducible generated data |
+| `NFT_SEED_GENERATED_ADDRESSES` | 0 | Generate no extra addresses; use the existing address dataset |
+| `NFT_SEED_MINIMUM_FREE_ADDRESSES` | 0 | Extra eligible addresses to leave unallocated |
+
+A positive landlord count requests that many additional landlords instead; generation fails if their portfolios
+cannot supply both property targets. Automatic mode includes landlords with no properties according to the existing
+distribution and stops after the batch that meets both targets. It is a synthetic population, not a landlord demand
+forecast. The final portfolio can be truncated to reach the exact property targets. Local defaults remain small:
+30 landlords, 40 completed properties and 5 incomplete journeys.
+
+#### Workload assumptions and arithmetic
+
+The team's fee-model figures supplied on 23 October 2026 forecast 4.9 million eligible properties with 50% uptake in
+year one. The baseline represents the resulting year-one database volume while tests exercise new registrations
+and other journeys against it.
+
+```text
+completed properties = eligible properties * year-one uptake
+                     = 4,900,000 * 0.50 = 2,450,000
+incomplete journeys  = ceil(completed properties * 0.10 / 0.90)
+                     = 272,223
+total generated property registrations = 2,722,223
+
+registration journeys/minute = annual registrations / working days / active hours per day / 60
+                             = 2,450,000 / 200 / 8 / 60 = 25.520833
+rounded annual estimate      = 2,500,000 / 200 / 8 / 60 = 26.041667
+```
+
+The 200 working days and 8 active hours/day are planning assumptions, not observed traffic. The 90% completed /
+10% incomplete mix retains the existing synthetic seed assumption; it is not part of the fee-model forecast.
+All counts can be overridden independently. `NFT_SEED_PROPERTIES` now counts **completed** registrations, unlike
+its previous combined-total meaning; update any existing task/environment overrides accordingly.
+
+The registration rate is neither HTTP request rate nor concurrent users. Other journey traffic is additional and
+needs its own agreed mix; concurrent sessions depend on journey duration and thinking time. Future spike tests
+can reuse this database, but must check account/address capacity against their independently agreed surge profile.
+The team's later-year uptake percentages (55%, 65%, 70%) are not used to size this year-one baseline.
+
+Generated certificate metadata does not provide actual certificate files in S3. Record the tested image revision,
+random seed, reference date and actual generated counts when creating a dump. The existing ECS seeder task has its
+own image and environment settings: override its old `NFT_SEED_LANDLORDS=2820000` and `NFT_SEED_PROPERTIES=4700000`
+with `0` and `2450000`, and explicitly supply `NFT_SEED_INCOMPLETE_PROPERTIES=272223`. Use the tested image and a
+deliberately selected reference date rather than assuming the task definition inherits these new defaults.
+
+The large dump is intended to be created once and loaded before performance testing, with migrations applied to
+match the deployed NFT revision. Post-test cleanup must still reset NFT to its small fixture without changing the
+stored dump. The loader verifies at least the configured completed and incomplete registration counts before the
+performance workflow continues. Its defaults match the deployed seeder targets, and can be overridden with GitHub
+Environment variables `NFT_SEED_PROPERTIES` and `NFT_SEED_INCOMPLETE_PROPERTIES`. The minimum eligible free-address
+check is independently configurable with GitHub Environment variable `NFT_LOAD_MINIMUM_FREE_ADDRESSES` (default
+`1`) because the basic registration journey needs an eligible free address. These loader checks do not change the
+dataset or the seeder's own configuration.
+
 ### NFT basic performance workflow (PDJB-430)
 
 `.github/workflows/run-performance-tests.yml` is dispatched on the `nft` branch. It first checks whether the NFT
 head differs from the last successful run; if unchanged, it skips all AWS and database operations unless `force`
-is selected. The deployed app image must carry the workflow's NFT SHA. The performance job runs the existing
-`BasicJourneysSimulation` in baseline mode after the One Login simulator is prepared, uploads the report, and
-always attempts to restore the original app/simulator state and its own WAF/security-group changes.
+is selected. The deployed app image must carry the workflow's NFT SHA. Before testing, the workflow stops the
+one-task NFT app, restores the versioned (or ETag-conditional) `s3://prsdb-seed-data-nft/seed-data.dump`, validates
+the archive, migrates it to the deployed NFT revision and verifies required data. It then starts the app and runs
+the existing `BasicJourneysSimulation` in baseline mode after the One Login simulator is prepared. Additional
+load/spike/performance suites should run against this same restored dataset before cleanup; do not reset between
+suites in a combined run. The performance job uploads Gatling reports and always attempts to restore the original
+app/simulator state and its own WAF/security-group changes.
 
 After the prepare/test/restore job completes, every selected execution invokes the shared database reset, even
-when preparation, Gatling or environment restoration failed. The reset cleans and migrates the NFT schema and
-restarts the application. The NFT Spring profile loads the existing `data-test.sql` fixture, restoring the
-synthetic landlord and other predefined test records. This does not restore the full-scale `pg_dump` described
-in ADR-0040. The manual `Reset Database - NFT` workflow uses the same reset sequence and shares the
-`nft-app-service-operation` concurrency lock with performance runs and webapp NFT deployments.
+when dump loading, preparation, Gatling or environment restoration failed. This is the final cleanup: it cleans
+and migrates the NFT schema, then returns NFT to the small `data-test.sql` fixture for day-to-day use. It does
+not reload the large dump. The manual `Reset Database - NFT` workflow has the same small-fixture semantics and
+shares the `nft-app-service-operation` concurrency lock with performance runs and webapp NFT deployments. After
+the reset succeeds, the workflow ensures the one-task app is running and healthy.
 
-After this profile change is deployed, run the manual `Reset Database - NFT` workflow once before the first
-performance run. This clean reset seeds the fixture on the existing NFT database; thereafter the performance
-workflow performs the post-run reset automatically. Verify the configured landlord is available before Gatling
-starts because SQL initialization continues on error and app health alone does not prove the fixture loaded.
+The large baseline is created separately, normally once, by the existing NFT ECS seed-and-dump task. It may be
+deliberately regenerated in the future, but normal performance runs only read it; neither loading nor the final
+small-fixture reset writes or deletes the S3 object. A run that needs a replacement baseline must use the
+separately approved seed-and-dump operation.
 
 The manual `fail-smoke` input injects a failure after simulator setup but before Gatling. The separate
 `fail-gatling` input uses an unseeded synthetic landlord so the journey fails after Gatling starts. Both inputs
 force the workflow past the unchanged-head check. Gatling reports are uploaded even when the simulation fails.
-The successful NFT head marker advances only when both the performance job and post-run database reset succeed;
-failed test or reset attempts do not advance it.
+The successful NFT head marker advances only when dump restore, preparation, all configured performance suites,
+post-run small-fixture reset and app recovery succeed. Failed test or reset attempts do not advance it.
 
 The scripts record the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
 entries in logs (and in the handoff state file). They require a stable one-task app using `default,nft`

@@ -11,6 +11,16 @@ class NftDataSeederDao(
     private val session: StatelessSession,
     private val connection: Connection,
 ) {
+    fun findStartingIds(): Map<String, Long> =
+        EXPLICIT_ID_TABLES.associateWith { table ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery("SELECT COALESCE(MAX(id), 0) FROM $table").use { resultSet ->
+                    resultSet.next()
+                    resultSet.getLong(1)
+                }
+            }
+        }
+
     fun prepareAddressStatement(): PreparedStatement {
         val query =
             """
@@ -267,6 +277,10 @@ class NftDataSeederDao(
             SELECT * FROM address a
             WHERE a.local_council_id IS NOT NULL
             AND (
+                NOT :restrictToAvailable
+                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN 9100000001 AND 9100000005)
+            )
+            AND (
                 NOT EXISTS (
                     SELECT 1 FROM property_ownership po
                     WHERE po.is_active AND po.address_id = a.id
@@ -294,6 +308,10 @@ class NftDataSeederDao(
             SELECT count(*) FROM address a
             WHERE a.local_council_id IS NOT NULL
             AND (
+                NOT ?
+                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN 9100000001 AND 9100000005)
+            )
+            AND (
                 NOT EXISTS (
                     SELECT 1 FROM property_ownership po
                     WHERE po.is_active AND po.address_id = a.id
@@ -303,6 +321,7 @@ class NftDataSeederDao(
             """
         connection.prepareStatement(query).use { statement ->
             statement.setBoolean(1, restrictToAvailable)
+            statement.setBoolean(2, restrictToAvailable)
             statement.executeQuery().use { resultSet ->
                 resultSet.next()
                 return resultSet.getInt(1)
@@ -316,7 +335,26 @@ class NftDataSeederDao(
     }
 
     fun updateIdSequences() {
-        val manuallyInsertedIdTables =
+        (EXPLICIT_ID_TABLES + IMPLICIT_ID_TABLES).forEach { table ->
+            val query =
+                """
+                SELECT setval(
+                    pg_get_serial_sequence('$table', 'id'),
+                    GREATEST(
+                        (SELECT COALESCE(MAX(id), 1) FROM $table),
+                        (SELECT COALESCE(last_value, 1) FROM pg_sequences
+                         WHERE schemaname = 'public'
+                         AND sequencename = pg_get_serial_sequence('$table', 'id')::regclass::text)
+                    )
+                )
+                WHERE EXISTS (SELECT 1 FROM $table)
+                """.trimIndent()
+            session.createNativeQuery(query, Long::class.java).resultList
+        }
+    }
+
+    private companion object {
+        val EXPLICIT_ID_TABLES =
             listOf(
                 "registration_number",
                 "landlord",
@@ -327,9 +365,14 @@ class NftDataSeederDao(
                 "reminder_email_sent",
                 "saved_journey_state",
             )
-        manuallyInsertedIdTables.forEach { table ->
-            val query = "SELECT setval(pg_get_serial_sequence('$table', 'id'), (SELECT COALESCE(MAX(id), 1) FROM $table))"
-            session.createNativeQuery(query, Long::class.java).singleResult
-        }
+        val IMPLICIT_ID_TABLES =
+            listOf(
+                "system_operator",
+                "local_council_user",
+                "local_council_invitation",
+                "organisational_landlord_user",
+                "organisational_landlord_invitation",
+                "organisation_governing_body_member",
+            )
     }
 }

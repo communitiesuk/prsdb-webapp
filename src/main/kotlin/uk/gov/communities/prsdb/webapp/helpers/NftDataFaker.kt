@@ -70,8 +70,9 @@ object NftDataFaker {
 
     fun <T> shuffle(values: List<T>): List<T> = values.shuffled(seededRandom)
 
-    fun generatePropertyScenario(): PropertyScenario {
-        val isRegistrationComplete = scenarioRandom.nextDouble() < 0.9
+    fun generatePropertyScenario(completed: Boolean? = null): PropertyScenario {
+        val randomCompletion = scenarioRandom.nextDouble() < 0.9
+        val isRegistrationComplete = completed ?: randomCompletion
         if (!isRegistrationComplete) {
             return PropertyScenario(
                 isRegistrationComplete = false,

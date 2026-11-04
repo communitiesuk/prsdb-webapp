@@ -75,12 +75,121 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Stop NFT app while replacing the database
+        run: |
+          set -euo pipefail
+          app_service="$(aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json)"
+          jq -e --arg prefix "arn:aws:ecs:eu-west-2:448120078528:task-definition/prsdb-webapp-nft:" '
+            (.services | length == 1) and
+            (.services[0].status == "ACTIVE") and
+            (.services[0].desiredCount == 1) and
+            (.services[0].runningCount == 1) and
+            (.services[0].pendingCount == 0) and
+            (.services[0].taskDefinition | startswith($prefix)) and
+            (.services[0].deployments | length == 1) and
+            (.services[0].deployments[0].rolloutState == "COMPLETED")
+          ' <<< "$app_service" >/dev/null
+          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 0 >/dev/null
+          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
+          aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
+            jq -e '(.services[0].desiredCount == 0) and (.services[0].runningCount == 0) and (.services[0].pendingCount == 0)' >/dev/null
+      - name: Configure NFT database credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-rds-access
+          role-session-name: nft-seed-load-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Read NFT database password
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.8
+        with:
+          secret-ids: |
+            FLYWAY_PASSWORD, tf-nft-prsdb-database-password
+      - name: Restore and verify the seeded NFT database
+        env:
+          DEPLOYMENT_ENVIRONMENT: nft
+          AWS_ACCOUNT_ID: 448120078528
+          NFT_SEED_DUMP_BUCKET: prsdb-seed-data-nft
+          NFT_SEED_DUMP_KEY: seed-data.dump
+          NFT_SEED_PROPERTIES: ${{ vars.NFT_SEED_PROPERTIES }}
+          NFT_SEED_INCOMPLETE_PROPERTIES: ${{ vars.NFT_SEED_INCOMPLETE_PROPERTIES }}
+          NFT_LOAD_MINIMUM_FREE_ADDRESSES: ${{ vars.NFT_LOAD_MINIMUM_FREE_ADDRESSES }}
+          FLYWAY_URL: jdbc:postgresql://localhost:5432/prsdb
+        run: |
+          set -euo pipefail
+          bastion_id="$(aws ec2 describe-instances --region eu-west-2 --output text \
+            --filters "Name=tag:Name,Values=nft-bastion-1" "Name=instance-state-name,Values=running" \
+            --query "Reservations[*].Instances[].InstanceId | [0]")"
+          db_url="$(aws ssm get-parameter --region eu-west-2 --output text \
+            --name nft-prsdb-database-url --query Parameter.Value)"
+          db_endpoint="${db_url%:*}"
+          export FLYWAY_USER
+          FLYWAY_USER="$(aws ssm get-parameter --region eu-west-2 --output text \
+            --name nft-prsdb-database-username --query Parameter.Value)"
+          echo "::add-mask::$FLYWAY_USER"
+
+          session_log="$RUNNER_TEMP/nft-ssm-session.log"
+          session_id=""
+          aws ssm start-session --region eu-west-2 --target "$bastion_id" \
+            --document-name AWS-StartPortForwardingSessionToRemoteHost \
+            --parameters "host=$db_endpoint,portNumber=5432,localPortNumber=5432" >"$session_log" 2>&1 &
+          session_pid=$!
+          cleanup_tunnel() {
+            if [[ -n "$session_id" ]]; then
+              aws ssm terminate-session --region eu-west-2 --session-id "$session_id" >/dev/null ||
+                echo "::warning::Could not terminate the NFT database port-forwarding session."
+            fi
+            if kill -0 "$session_pid" 2>/dev/null; then
+              kill "$session_pid" 2>/dev/null || true
+              wait "$session_pid" 2>/dev/null || true
+            fi
+            rm -f "$session_log"
+          }
+          trap cleanup_tunnel EXIT
+          for _ in $(seq 1 60); do
+            session_id="$(grep -oE 'SessionId: [a-zA-Z0-9-]+' "$session_log" | head -1 | cut -d' ' -f2 || true)"
+            if [[ -n "$session_id" ]] && nc -z 127.0.0.1 5432; then
+              break
+            fi
+            if ! kill -0 "$session_pid" 2>/dev/null; then
+              echo "::error::NFT database port-forwarding session exited during startup."
+              exit 1
+            fi
+            sleep 2
+          done
+          if [[ -z "$session_id" ]] || ! nc -z 127.0.0.1 5432; then
+            echo "::error::NFT database port-forwarding session did not become ready."
+            exit 1
+          fi
+          node scripts/performance-tests/nft-load-dump.mjs
+      - name: Configure NFT performance-test credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-readiness-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Start NFT app after database restore
+        run: |
+          set -euo pipefail
+          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
+          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
+          for _ in $(seq 1 60); do
+            if curl --fail --silent --show-error --max-time 10 \
+              https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::NFT app did not become healthy after loading the seeded database."
+          exit 1
       - name: Read runner IPv4 address
         run: |
           runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
           echo "::add-mask::$runner_ip"
           echo "RUNNER_IP=$runner_ip" >> "$GITHUB_ENV"
       - name: Prepare environment
+        id: prepare
         env:
           EXPECTED_NFT_SHA: ${{ needs.changes.outputs.sha }}
           FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
@@ -111,7 +220,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
       - name: Restore environment
-        if: always()
+        if: always() && steps.prepare.outcome != 'skipped'
         env:
           READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
         run: node scripts/performance-tests/nft-restore.mjs
@@ -130,13 +239,51 @@ jobs:
       contents: read
       id-token: write
 
-  marker:
-    name: Record successful NFT head
-    needs: [changes, performance-tests, reset-database]
+  restore-app-after-database-reset:
+    name: Start NFT app after small-fixture reset
+    needs: [changes, reset-database]
     if: >-
       always() && needs.changes.result == 'success' &&
-      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success') ||
+      needs.changes.outputs.run == 'true' &&
+      needs.reset-database.result == 'success'
+    environment: nft
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Configure NFT runner credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-reset-recovery-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Start NFT app and verify the small-fixture reset
+        run: |
+          set -euo pipefail
+          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
+          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
+          for _ in $(seq 1 60); do
+            if curl --fail --silent --show-error --max-time 10 \
+              https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::NFT app did not become healthy after the small-fixture reset."
+          exit 1
+
+  marker:
+    name: Record successful NFT head
+    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success') ||
       (needs.performance-tests.result == 'skipped' && needs.reset-database.result == 'skipped' &&
+      needs.restore-app-after-database-reset.result == 'skipped' &&
       needs.changes.outputs.run == 'false'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
