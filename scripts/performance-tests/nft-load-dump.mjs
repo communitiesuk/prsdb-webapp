@@ -41,6 +41,25 @@ async function run(command, args, options = {}) {
   }
 }
 
+async function timedStage(name, operation, log) {
+  const started = Date.now();
+  const elapsed = () => ((Date.now() - started) / 1000).toFixed(1);
+  const report = message => log(`${new Date().toISOString()} ${name}: ${message}`);
+  report('started');
+  const heartbeat = setInterval(() => report(`still running (${elapsed()}s elapsed)`), 60000);
+  heartbeat.unref();
+  try {
+    const result = await operation();
+    report(`completed in ${elapsed()}s`);
+    return result;
+  } catch (error) {
+    report(`failed after ${elapsed()}s`);
+    throw error;
+  } finally {
+    clearInterval(heartbeat);
+  }
+}
+
 function postgresEnvironment(env = process.env) {
   requireCondition(env.FLYWAY_USER && env.FLYWAY_PASSWORD, 'NFT database credentials are required');
   requireCondition(
@@ -95,8 +114,8 @@ async function inspectArchive(archivePath) {
   ]));
 }
 
-async function runPsql(environment, sql) {
-  const {stdout} = await run('docker', postgresDockerArgs(environment, [], [
+async function runPsql(environment, sql, executeCommand = run) {
+  const {stdout} = await executeCommand('docker', postgresDockerArgs(environment, [], [
     'psql',
     '--no-psqlrc',
     '--set',
@@ -109,10 +128,11 @@ async function runPsql(environment, sql) {
   return stdout.trim();
 }
 
-async function restoreDatabase(archivePath, environment) {
-  await runPsql(environment, 'DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION CURRENT_USER;');
-  await run('docker', postgresDockerArgs(environment, ['--volume', `${archivePath}:/seed-data.dump:ro`], [
+export async function restoreDatabase(archivePath, environment, executeCommand = run) {
+  await runPsql(environment, 'DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION CURRENT_USER;', executeCommand);
+  await executeCommand('docker', postgresDockerArgs(environment, ['--volume', `${archivePath}:/seed-data.dump:ro`], [
     'pg_restore',
+    '--jobs=4',
     '--clean',
     '--if-exists',
     '--exit-on-error',
@@ -211,23 +231,23 @@ export async function loadSeededDataset(config, {
     const availableBytes = disk.bavail * disk.bsize;
     requireCondition(availableBytes >= size, 'Insufficient runner disk space for NFT seed dump');
 
-    await download({
+    await timedStage('Download seed dump', () => download({
       bucket,
       key,
       versionId,
       ifMatch: versionId ? undefined : etag,
       destinationPath: archivePath,
-    });
+    }), log);
     const archive = await fileStat(archivePath);
     requireCondition(archive.size === size, 'Downloaded NFT seed dump size does not match S3 metadata');
-    await inspect(archivePath);
+    await timedStage('Inspect PostgreSQL archive', () => inspect(archivePath), log);
     log(
       `Validated NFT seed dump: s3://${bucket}/${key}, version ${versionId ?? 'unversioned'}, ETag ${etag}, size ${size} bytes.`,
     );
 
-    await restore(archivePath, environment);
-    await migrate(env);
-    const counts = await verify(environment, requirements);
+    await timedStage('Restore database (4 workers)', () => restore(archivePath, environment), log);
+    await timedStage('Apply Flyway migrations', () => migrate(env), log);
+    const counts = await timedStage('Verify dataset and analyze', () => verify(environment, requirements), log);
     if (counts) {
       log(
         `Restored dataset counts: ${counts.completed} completed, ${counts.incomplete} incomplete, ` +

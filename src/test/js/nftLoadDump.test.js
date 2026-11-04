@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 import {test} from 'node:test';
-import {loadSeededDataset} from '../../../scripts/performance-tests/nft-load-dump.mjs';
+import {loadSeededDataset, restoreDatabase} from '../../../scripts/performance-tests/nft-load-dump.mjs';
 
 const config = {
   target: 'nft',
@@ -43,6 +43,66 @@ function dependencies(overrides = {}) {
 
 test('accepts omitted dependency overrides when invoked by the CLI', async () => {
   await assert.rejects(loadSeededDataset({...config, target: 'test'}), /NFT only/);
+});
+
+test('restores with four workers after clearing the schema and preserves fail-fast flags', async () => {
+  const calls = [];
+  const execute = async (...args) => {
+    calls.push(args);
+    return {stdout: ''};
+  };
+  const environment = {PGPASSWORD: 'test-password', PGDATABASE: 'prsdb'};
+
+  await restoreDatabase('/tmp/seed-data.dump', environment, execute);
+
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0][0], 'docker');
+  assert.ok(calls[0][1].includes('psql'));
+  assert.ok(calls[0][1].includes('DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION CURRENT_USER;'));
+  assert.equal(calls[1][0], 'docker');
+  assert.ok(calls[1][1].includes('pg_restore'));
+  for (const flag of ['--jobs=4', '--exit-on-error', '--no-owner', '--no-acl']) {
+    assert.ok(calls[1][1].includes(flag), `Missing restore flag ${flag}`);
+  }
+  assert.equal(calls[1][2].env.PGPASSWORD, environment.PGPASSWORD);
+  assert.equal(calls[1][1].includes(environment.PGPASSWORD), false);
+});
+
+test('reports timed phases and a heartbeat without exposing restore error details', async t => {
+  t.mock.timers.enable({apis: ['Date', 'setInterval'], now: 0});
+  const logs = [];
+  let markStarted;
+  const started = new Promise(resolve => { markStarted = resolve; });
+  let failRestore;
+  const restoration = new Promise((resolve, reject) => { failRestore = reject; });
+  const deps = dependencies({
+    log: message => logs.push(message),
+    restoreDatabase: async () => {
+      markStarted();
+      await restoration;
+    },
+  });
+  const loading = loadSeededDataset(config, deps);
+  const rejected = assert.rejects(loading, /sensitive restore details/);
+  await started;
+  t.mock.timers.tick(60000);
+  failRestore(new Error('sensitive restore details'));
+  await rejected;
+
+  const phases = logs.filter(message => message.includes(': started'));
+  assert.deepEqual(phases.map(message => message.replace(/^.*Z /, '')), [
+    'Download seed dump: started',
+    'Inspect PostgreSQL archive: started',
+    'Restore database (4 workers): started',
+  ]);
+  assert.ok(logs.some(message => /Z Download seed dump: completed in \d+\.\ds$/.test(message)));
+  assert.ok(logs.some(message => /Z Restore database \(4 workers\): still running \(60\.0s elapsed\)$/.test(message)));
+  assert.ok(logs.some(message => /Z Restore database \(4 workers\): failed after 60\.0s$/.test(message)));
+  assert.equal(logs.some(message => message.includes('sensitive restore details')), false);
+  const logCount = logs.length;
+  t.mock.timers.tick(60000);
+  assert.equal(logs.length, logCount);
+  assert.equal(deps.calls.some(([kind]) => kind === 'migrate'), false);
 });
 
 test('rejects non-NFT targets before making AWS or database calls', async () => {
@@ -88,7 +148,8 @@ test('rejects insufficient disk space before downloading or restoring the databa
 });
 
 test('downloads the selected immutable dump version, verifies it, restores and migrates in order', async () => {
-  const deps = dependencies();
+  const logs = [];
+  const deps = dependencies({log: message => logs.push(message)});
 
   const result = await loadSeededDataset(config, deps);
 
@@ -123,6 +184,15 @@ test('downloads the selected immutable dump version, verifies it, restores and m
     minimumIncomplete: 272223,
     minimumFreeAddresses: 1,
   });
+  assert.deepEqual(logs.filter(message => message.includes(': started'))
+    .map(message => message.replace(/^.*Z /, '')), [
+    'Download seed dump: started',
+    'Inspect PostgreSQL archive: started',
+    'Restore database (4 workers): started',
+    'Apply Flyway migrations: started',
+    'Verify dataset and analyze: started',
+  ]);
+  assert.equal(logs.filter(message => /: completed in \d+\.\ds$/.test(message)).length, 5);
 });
 
 test('uses configured minimum dataset counts when verifying the restored dump', async () => {

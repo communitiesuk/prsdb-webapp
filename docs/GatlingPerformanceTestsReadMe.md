@@ -316,6 +316,21 @@ The performance workflow resets the small fixture using migrations from its own 
 application. Other reset callers retain their environment-branch default. Startup checks outside the runner's WAF
 allow-list window use ECS rollout health; HTTP readiness checks remain inside the existing preparation window.
 
+The loader uses `pg_restore --jobs=4` against the custom-format dump. Parallel workers can load independent tables
+and build indexes concurrently, but do not split a single table's `COPY` across workers or remove a shared SSM
+tunnel throughput limit. This is an experiment, not a measured fourfold speedup. The database instance and storage
+configuration stay unchanged so timings can be compared.
+
+Logs include UTC start/completion/failure timestamps and elapsed seconds for download, archive inspection,
+restore, Flyway migrations and dataset verification (including `ANALYZE`). Each active phase emits an elapsed-time
+heartbeat every minute; this is not a percentage-complete estimate. Raw PostgreSQL output and credentials are
+not streamed to the Actions log.
+
+An interrupted restore can leave the preserved address/council tables without their post-data keys and indexes.
+The normal small-fixture reset preserves these tables, so it may require explicit repair of their constraints
+and names from the verified dump schema before it can migrate successfully. Keep the app stopped until recovery
+has completed; do not assume that cancelling the restore alone returns NFT to a usable state.
+
 The fee-model forecast is based on **properties, not landlords**: 4.9 million eligible properties, with uptake of
 50% in year one, 55% in year two, 65% in year three and 70% in year four. The reusable load-test baseline is the
 year-one database volume; the tests exercise new registrations and other journeys against it.
