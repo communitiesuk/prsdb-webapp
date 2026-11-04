@@ -38,6 +38,9 @@ class FreeholdersDetailsTask(
     FreeholdersDetailsState {
     override val taskState get() = this
 
+    override val isJointFreeholder: Boolean
+        get() = dependencies.isJointFreeholder()
+
     override var freeholdersMap: Map<Int, FreeholderDataModel>?
         get() = dependencies.listState.freeholdersMap
         set(value) {
