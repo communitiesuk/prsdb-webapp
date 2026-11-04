@@ -190,7 +190,7 @@ export async function loadSeededDataset(config, {
   fileStatFs = statfs,
   env = process.env,
   log = console.log,
-}) {
+} = {}) {
   requireCondition(config?.target === 'nft', 'Seed dump loading is NFT only');
   requireCondition(config.account === account, 'Unexpected NFT AWS account configuration');
   requireCondition(config.bucket === bucket && config.key === key, 'Unexpected NFT seed dump location');

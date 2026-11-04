@@ -41,6 +41,10 @@ function dependencies(overrides = {}) {
   };
 }
 
+test('accepts omitted dependency overrides when invoked by the CLI', async () => {
+  await assert.rejects(loadSeededDataset({...config, target: 'test'}), /NFT only/);
+});
+
 test('rejects non-NFT targets before making AWS or database calls', async () => {
   const deps = dependencies();
 
