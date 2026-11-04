@@ -7,7 +7,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
-// A freeholder of the property. A row with no name, email or address means "no details known".
+/**
+ * A freeholder of the property. A row with no name, email or address means "no details known".
+ */
 @Entity
 class Freeholder() : ModifiableAuditableEntity() {
     @Id

@@ -7,8 +7,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
-// Someone further up the ownership chain than the landlord. A row with no name, email or address
-// means "no details known".
+/**
+ * Someone further up the ownership chain than the landlord. A row with no name, email or address
+ * means "no details known".
+ */
 @Entity
 class SuperiorLandlord() : ModifiableAuditableEntity() {
     @Id

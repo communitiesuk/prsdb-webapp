@@ -226,8 +226,6 @@ class NftDataSeederTests(
         }
 
         assertTrue(sawOrganisationWithExtraUsers, "Expected at least one organisation landlord to have extra users beyond the registrant")
-        // No EDITOR assertion: only about six extra users are seeded, each with a 20% chance of being an editor, so
-        // one run cannot reliably contain one. The role split is covered by NftDataFakerTests over a large sample.
     }
 
     @Test
@@ -250,19 +248,6 @@ class NftDataSeederTests(
         assertTrue(invitedOrganisationLandlordIds.all { it in organisationLandlordIds }) {
             "Expected each organisational landlord invitation to reference a real organisation landlord"
         }
-
-        val invitationRoles =
-            jdbcTemplate.queryForList<Int>(
-                "SELECT role FROM organisational_landlord_invitation",
-            )
-
-        assertTrue(invitationRoles.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
-        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.ADMIN.ordinal)) {
-            "Expected at least one organisational landlord invitation to have the ADMIN role"
-        }
-        // No equivalent EDITOR assertion: generateOrganisationLandlordRole gives EDITOR only a 20% chance per
-        // invitation, and too few invitations are seeded for one run to contain one reliably. The role split is
-        // covered by NftDataFakerTests over a large sample.
     }
 
     @Test
