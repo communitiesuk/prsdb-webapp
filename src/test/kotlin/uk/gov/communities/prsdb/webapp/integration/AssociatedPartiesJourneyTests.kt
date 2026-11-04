@@ -189,8 +189,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
-            // TODO PDJB-1965: update this usage when the real contact type page is added
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             // TODO PDJB-1966: update this usage when the real freeholder email page is added
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
@@ -210,8 +209,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test freeholder")
-            // TODO PDJB-1965: update this usage when the real contact type page is added
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
             // TODO PDJB-1967: update this usage when the real freeholder address pages are added
@@ -328,7 +326,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             propertyManagerPage.submitYes()
 
             val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-            propertyManagerDetailsPage.form.submit()
+            propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "manager@example.com")
             val checkPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
             checkPropertyManagerPage.form.submit()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)

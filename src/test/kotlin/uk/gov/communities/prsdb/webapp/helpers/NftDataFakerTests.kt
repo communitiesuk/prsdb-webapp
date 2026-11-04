@@ -141,9 +141,9 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `isElectricalSafetyCertificateCurrent returns false on the expiry date`() {
+    fun `isElectricalSafetyCertificateCurrent returns true on the expiry date`() {
         listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
-            assertFalse(
+            assertTrue(
                 NftDataFaker.isElectricalSafetyCertificateCurrent(
                     Date.valueOf(LocalDate.of(2025, 6, 15)),
                     certType,
