@@ -243,18 +243,18 @@ class PropertyStateSessionBuilder(
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
         fun beforePropertyRegistrationFreeholderContactType(
-            freeholderName: String = "Test Freeholder",
             jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
         ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
             .withFreeholderName(freeholderName)
 
         fun beforePropertyRegistrationFreeholderEmail(
+            jointFreeholders: Boolean = true,
             freeholderName: String = "Test Freeholder",
             existingFreeholders: Map<Int, FreeholderDataModel>? = null,
-            jointFreeholders: Boolean = true,
         ) = beforePropertyRegistrationFreeholderContactType(
-            freeholderName = freeholderName,
             jointFreeholders = jointFreeholders,
+            freeholderName = freeholderName,
         )
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { existingFreeholders?.let { withFreeholders(it) } }
