@@ -85,6 +85,7 @@ class FreeholdersDetailsTask(
                         AnyMembers.NO_MEMBERS -> exitStep
                     }
                 }
+                savable()
             }
             step(journey.freeholdersListStep) {
                 routeSegment(FreeholdersListStep.ROUTE_SEGMENT)
@@ -148,6 +149,7 @@ class FreeholdersDetailsTask(
                     )
                 }
                 nextStep { journey.freeholdersListStep }
+                savable()
             }
             exitStep {
                 parents {
