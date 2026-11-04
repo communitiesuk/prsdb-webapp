@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -12,12 +14,17 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 @JourneyFrameworkComponent
 class UpdateCheckElectricalSafetyAnswersStepConfig(
     private val uploadService: UploadService,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, UpdateElectricalSafetyJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: UpdateElectricalSafetyJourneyState): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state.electricalSafetyDetailsTask, uploadService) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(
+                state.electricalSafetyDetailsTask,
+                uploadService,
+                featureFlagManager.checkFeature(EIC_ISSUE_DATE),
+            ) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(

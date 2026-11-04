@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
+import org.testcontainers.utility.MountableFile
 
 // The containers are shared by every Spring test context in the JVM, so they must outlive any one context.
 // Spring closes container beans when a context is destroyed, which would take the containers away from every
@@ -23,7 +24,17 @@ class SharedRedisContainer(
     override fun close() = Unit
 }
 
+class SharedElasticMqContainer(
+    image: DockerImageName,
+) : GenericContainer<SharedElasticMqContainer>(image) {
+    override fun stop() = Unit
+
+    override fun close() = Unit
+}
+
 object SharedContainers {
+    const val ELASTICMQ_PORT = 9324
+
     val postgres: SharedPostgresContainer =
         SharedPostgresContainer(DockerImageName.parse("postgres:latest")).apply {
             // One Postgres now serves every context, so it needs headroom for all their connection pools.
@@ -34,6 +45,13 @@ object SharedContainers {
     val redis: SharedRedisContainer =
         SharedRedisContainer(DockerImageName.parse("redis:latest")).apply {
             addExposedPort(6379)
+            start()
+        }
+
+    val elasticMq: SharedElasticMqContainer =
+        SharedElasticMqContainer(DockerImageName.parse("softwaremill/elasticmq-native:1.7.1")).apply {
+            addExposedPort(ELASTICMQ_PORT)
+            withCopyFileToContainer(MountableFile.forHostPath("docker/elasticmq.conf"), "/opt/elasticmq.conf")
             start()
         }
 }
