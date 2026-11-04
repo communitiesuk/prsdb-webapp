@@ -236,7 +236,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
                 .withFreeholderProvideDetails()
 
-        fun beforePropertyRegistrationSuperiorLandlords() =
+        fun beforePropertyRegistrationHasSuperiorLandlords() =
             beforePropertyRegistrationOwnsProperty()
                 .withOwnsProperty()
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)

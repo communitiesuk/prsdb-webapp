@@ -368,10 +368,18 @@ superiorLandlords:
       error:
         missing: Select how we should contact the superior landlord
   anyoneInOwnershipChain:
-    fieldSetHeading: Is there anyone else in the ownership chain? (TODO PDJB-1971)
+    heading: Other people in the ownership chain
+    paragraph:
+      one: We need to know if there’s anyone else in the property’s ownership chain.
+      two: These people are sometimes called ‘superior landlords’.
+    insetText: There will be other people in the ownership chain if your lease is not directly with the freeholder.
     radios:
+      heading: Is there anyone else in the ownership chain?
+      option:
+        'yes': Yes, add first person in the ownership chain
+        'no': 'No'
       error:
-        missing: Select whether there is anyone else in the ownership chain
+        missing: Select if there is anyone else in the ownership chain
 # TODO PDJB-1959: replace with the real "Do you own the property?" content
 ownsProperty:
   fieldSetHeading: TODO PDJB-1959 Do you own this property?
