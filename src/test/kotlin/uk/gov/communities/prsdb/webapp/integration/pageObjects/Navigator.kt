@@ -1042,6 +1042,7 @@ class Navigator(
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
     }
+
     // TODO PDJB-1971: update this usage when the real has superior landlords page is added
     fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(): AnyoneInOwnershipChainFormPagePropertyRegistration {
         setJourneyStateInSession(
