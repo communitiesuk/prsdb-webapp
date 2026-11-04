@@ -117,6 +117,7 @@ class PropertyRegistrationService(
                     null
                 }
 
+            // TODO PDJB-1986: save the property manager (if provided) and link it to the new property ownership
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,

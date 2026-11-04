@@ -188,6 +188,8 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
+            // TODO PDJB-1986: add the property manager's name and email address from
+            //  ownershipAndLandlordsTask.propertyManagerTask when the landlord is using a property manager
         )
     }
 }
