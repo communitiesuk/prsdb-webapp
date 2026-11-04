@@ -351,7 +351,8 @@ class NftDataSeeder(
                                 licenceStmt,
                                 scenario.isOccupied,
                                 registrationNumberId = startingIds.getValue("registration_number") + ++registrationNumbersAdded,
-                                licenceIdIfHasLicence = if (scenario.hasLicence) startingIds.getValue("license") + ++licencesAdded else null,
+                                licenceIdIfHasLicence =
+                                    if (scenario.hasLicence) startingIds.getValue("license") + ++licencesAdded else null,
                                 propertyOwnershipId,
                                 registrationDate,
                                 landlord.details,
@@ -378,7 +379,11 @@ class NftDataSeeder(
                                 savedJourneyStateStmt,
                                 incompletePropertyStmt,
                                 reminderEmailSentIdIfSent =
-                                    if (hasReminderEmailBeenSent) startingIds.getValue("reminder_email_sent") + ++reminderEmailsAdded else null,
+                                    if (hasReminderEmailBeenSent) {
+                                        startingIds.getValue("reminder_email_sent") + ++reminderEmailsAdded
+                                    } else {
+                                        null
+                                    },
                                 savedJourneyStateId = startingIds.getValue("saved_journey_state") + ++incompletePropertiesAdded,
                                 landlord.details,
                             )
