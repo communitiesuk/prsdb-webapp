@@ -5,8 +5,10 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithRadios
@@ -20,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElect
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckEicrUploadsFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiredFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiryDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicIssueDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiredFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiryDateFormPageUpdateElectricalSafety
@@ -148,6 +151,40 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         checkUploadsPage = assertCheckUploadsPage(page, certificateType)
         checkUploadsPage.backLink.clickAndWait()
         assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    @Test
+    fun `The back link on the check EIC uploads page returns to the EIC issue date page`(page: Page) {
+        navigateToHasElectricalCertPage(page).submitHasEic()
+
+        assertPageIs(page, EicIssueDateFormPageUpdateElectricalSafety::class, urlArguments)
+            .submitDate(currentDate.minus(DatePeriod(years = 1)))
+        assertUploadPage(page, CertificateType.Eic).uploadCertificate("validFile.png")
+
+        assertCheckUploadsPage(page, CertificateType.Eic).backLink.clickAndWait()
+        assertPageIs(page, EicIssueDateFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `The back link on the check EIC uploads page returns to the EIC expiry date page when EIC issue date is disabled`(page: Page) {
+        featureFlagManager.disableFeature(EIC_ISSUE_DATE)
+
+        navigateToHasElectricalCertPage(page).submitHasEic()
+
+        assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+            .submitDate(currentDate.plus(DatePeriod(years = 1)))
+        assertUploadPage(page, CertificateType.Eic).uploadCertificate("validFile.png")
+
+        assertCheckUploadsPage(page, CertificateType.Eic).backLink.clickAndWait()
+        assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    private fun navigateToHasElectricalCertPage(page: Page): HasElectricalCertFormPageUpdateElectricalSafety {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
+        return assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
     }
 
     private fun submitHasCertificate(

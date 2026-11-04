@@ -13,8 +13,6 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private val state: ElectricalSafetyDetailState,
     private val uploadService: UploadService,
-    // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
-    private val isEicIssueDateEnabled: Boolean,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: ElectricalSafetyScenario = determineScenario(state)
@@ -45,7 +43,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         // TODO PDJB-1679: Always use the EIC issue date step for EICs when the EIC_ISSUE_DATE flag is removed
         val dateStep =
             when (state.hasElectricalCertStep.outcome) {
-                HasElectricalCertMode.HAS_EIC -> if (isEicIssueDateEnabled) state.eicIssueDateStep else state.eicExpiryDateStep
+                HasElectricalCertMode.HAS_EIC -> if (state.isEicIssueDateEnabled) state.eicIssueDateStep else state.eicExpiryDateStep
                 HasElectricalCertMode.HAS_EICR -> state.eicrExpiryDateStep
                 else -> throw IllegalStateException("Cert uploaded scenario requires a certificate type")
             }
@@ -67,7 +65,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 fieldHeading =
                     if (isEic) {
                         // TODO PDJB-1679: Remove this check and always use the issue date heading when the EIC_ISSUE_DATE flag is removed
-                        if (isEicIssueDateEnabled) {
+                        if (state.isEicIssueDateEnabled) {
                             "checkElectricalSafety.issueDate.fieldHeading"
                         } else {
                             "checkElectricalSafety.expiryDate.fieldHeading"
