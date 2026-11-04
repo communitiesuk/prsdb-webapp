@@ -52,6 +52,24 @@ class CertificateExpiryHelperTests {
         )
     }
 
+    @ParameterizedTest(name = "{1} when issued on {0}")
+    @MethodSource("provideEicIssueAndExpiryDates")
+    fun `getEicExpiryDate returns 5 years after the issue date`(
+        issueDate: LocalDate,
+        expectedExpiryDate: LocalDate,
+    ) {
+        assertEquals(expectedExpiryDate, CertificateExpiryHelper.getEicExpiryDate(issueDate))
+    }
+
+    @ParameterizedTest(name = "{1} when the current date {0}")
+    @MethodSource("provideCurrentDatesForEicIssueDate")
+    fun `isEicIssueDateExpired is`(
+        currentDate: LocalDate,
+        expectedIsExpired: Boolean,
+    ) {
+        assertEquals(expectedIsExpired, CertificateExpiryHelper.isEicIssueDateExpired(EIC_ISSUE_DATE, currentDate))
+    }
+
     @ParameterizedTest(name = "{1} when the current date {0}")
     @MethodSource("provideCurrentDatesForElectricalSafety")
     fun `isEicExpiryDateExpired is`(
@@ -82,6 +100,22 @@ class CertificateExpiryHelperTests {
     companion object {
         private val GAS_ISSUE_DATE = LocalDate.of(2024, 1, 15)
         private val EXPIRY_DATE = LocalDate.of(2025, 6, 1)
+        private val EIC_ISSUE_DATE = LocalDate.of(2020, 6, 1)
+
+        @JvmStatic
+        private fun provideEicIssueAndExpiryDates() =
+            listOf(
+                arguments(LocalDate.of(2020, 6, 1), LocalDate.of(2025, 6, 1)),
+                arguments(LocalDate.of(2020, 2, 29), LocalDate.of(2025, 2, 28)),
+            )
+
+        @JvmStatic
+        private fun provideCurrentDatesForEicIssueDate() =
+            listOf(
+                arguments(named("is the day before 5 years after the issue date", LocalDate.of(2025, 5, 31)), false),
+                arguments(named("is 5 years after the issue date", LocalDate.of(2025, 6, 1)), false),
+                arguments(named("is the day after 5 years after the issue date", LocalDate.of(2025, 6, 2)), true),
+            )
 
         @JvmStatic
         private fun provideGasIssueAndExpiryDates() =

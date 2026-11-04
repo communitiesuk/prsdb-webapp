@@ -198,8 +198,11 @@ electricalSafetyTask:
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
+    # TODO PDJB-1679: Remove eic when the EIC_ISSUE_DATE flag is removed
     eic:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
+  eicIssueDate:
+    fieldSetHeading: What’s the issue date on the Electrical Installation Certificate (EIC)?
   electricalCertificateExpired:
     eic:
       # TODO PDJB-1679: Remove heading, expiryDateParagraph and changeExpiryDate when the EIC_ISSUE_DATE flag is removed
