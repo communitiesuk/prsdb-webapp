@@ -309,6 +309,12 @@ freeholders:
     fieldSetHint: This can be the name of a person, company or organisation
     error:
       missing: Enter a name
+  email:
+    fieldSetHeading: What is {0}’s email address?
+    error:
+      missing: Enter an email address
+      invalidFormat: Enter an email address in the correct format, like name@example.com
+      duplicate: You’ve already used this email address for another freeholder - enter a different email address
   contactType:
     fieldSetHeading: Which contact information can you provide for {0}?
     fieldSetHint: You only need to provide one

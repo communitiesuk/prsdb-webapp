@@ -6,6 +6,7 @@ import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -243,6 +245,13 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationFreeholderContactType(freeholderName: String = "Test Freeholder") =
             beforePropertyRegistrationFreeholderName()
                 .withFreeholderName(freeholderName)
+
+        fun beforePropertyRegistrationFreeholderEmail(
+            freeholderName: String = "Test Freeholder",
+            existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        ) = beforePropertyRegistrationFreeholderContactType(freeholderName)
+            .withFreeholderContactType(FreeholderContactType.EMAIL)
+            .apply { existingFreeholders?.let { withFreeholders(it) } }
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

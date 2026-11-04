@@ -191,8 +191,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
-            // TODO PDJB-1966: update this usage when the real freeholder email page is added
-            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submitEmail("test@example.com")
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()

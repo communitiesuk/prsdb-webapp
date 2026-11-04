@@ -186,6 +186,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
@@ -278,6 +279,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEx
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
@@ -320,6 +322,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddres
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
@@ -1018,6 +1021,17 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationFreeholderEmailPage(
+        freeholderName: String = "Test Freeholder",
+        existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+    ): FreeholderEmailFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(freeholderName, existingFreeholders).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
+        return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
     }
 
     // TODO PDJB-1971: update this usage when the real has superior landlords page is added
