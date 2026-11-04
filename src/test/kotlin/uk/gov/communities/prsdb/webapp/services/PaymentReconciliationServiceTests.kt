@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -16,17 +18,23 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.ResourceAccessException
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import java.time.Duration
 import java.util.Optional
+import kotlin.test.assertContentEquals
 
 @ExtendWith(MockitoExtension::class)
 class PaymentReconciliationServiceTests {
@@ -46,6 +54,7 @@ class PaymentReconciliationServiceTests {
         paymentReconciliationService =
             PaymentReconciliationService(
                 MANUAL_INTERVENTION_EMAIL_ADDRESS,
+                Duration.ZERO,
                 mockPaymentRepository,
                 mockGovUkPayClient,
                 mockManualInterventionEmailSender,
@@ -191,6 +200,68 @@ class PaymentReconciliationServiceTests {
         }
     }
 
+    @Nested
+    inner class GetGovUkPayPaymentStatusWithRetry {
+        @Test
+        fun `returns the GOV UK Pay status without retrying when the first read succeeds`() {
+            // Arrange
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.SUCCESS))
+
+            // Act
+            val result = paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID)
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, result)
+            verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
+        }
+
+        @ParameterizedTest
+        @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentReconciliationServiceTests#transientFailures")
+        fun `retries once after a transient failure`(failure: GovUkPayException) {
+            // Arrange
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID))
+                .thenThrow(failure)
+                .thenReturn(createGovUkPayPayment(PAYMENT_ID, GovUkPayPaymentStatus.FAILED))
+
+            // Act
+            val result = paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID)
+
+            // Assert
+            assertEquals(PaymentStatus.FAILED, result)
+            verify(mockGovUkPayClient, times(2)).getPayment(PAYMENT_ID)
+        }
+
+        @Test
+        fun `does not retry after a client error`() {
+            // Arrange
+            val failure = GovUkPayException(HttpStatus.NOT_FOUND, "P0200", "Not found", RuntimeException())
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(failure)
+
+            // Act
+            val thrown = assertThrows<GovUkPayException> { paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID) }
+
+            // Assert
+            assertSame(failure, thrown)
+            verify(mockGovUkPayClient, times(1)).getPayment(PAYMENT_ID)
+        }
+
+        @Test
+        fun `throws the retry's failure with the first failure suppressed when both reads fail`() {
+            // Arrange
+            val firstFailure = GovUkPayException(HttpStatus.SERVICE_UNAVAILABLE, "P0999", "Unavailable", RuntimeException())
+            val retryFailure = GovUkPayException(HttpStatus.BAD_GATEWAY, null, null, RuntimeException())
+            whenever(mockGovUkPayClient.getPayment(PAYMENT_ID)).thenThrow(firstFailure).thenThrow(retryFailure)
+
+            // Act
+            val thrown = assertThrows<GovUkPayException> { paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID) }
+
+            // Assert
+            assertSame(retryFailure, thrown)
+            assertContentEquals(arrayOf<Throwable>(firstFailure), thrown.suppressed)
+        }
+    }
+
     private fun stubConditionalUpdate(
         expectedStatus: PaymentStatus,
         newStatus: PaymentStatus,
@@ -204,5 +275,12 @@ class PaymentReconciliationServiceTests {
         private const val PAYMENT_ID = "payment-id"
         private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
         private val REASON = PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED
+
+        @JvmStatic
+        fun transientFailures() =
+            listOf(
+                GovUkPayException(HttpStatus.SERVICE_UNAVAILABLE, "P0999", "Unavailable", RuntimeException()),
+                GovUkPayException("GOV.UK Pay request failed: I/O error", ResourceAccessException("I/O error")),
+            )
     }
 }

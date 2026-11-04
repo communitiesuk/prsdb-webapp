@@ -21,6 +21,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureNotTakenException
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
@@ -197,13 +199,7 @@ class PaymentService(
             }
 
             PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
-                paymentRepository.updateStatusIfCurrentStatusIs(
-                    paymentId,
-                    PaymentStatus.CREATED,
-                    govUkPayStatus,
-                    Instant.now(),
-                )
-                getStoredPaymentStatus(paymentId)
+                recordPaymentNotTaken(paymentId, govUkPayStatus)
             }
 
             PaymentStatus.SUCCEEDED -> {
@@ -236,6 +232,16 @@ class PaymentService(
             println("Marking payment $paymentId for cancellation: ${exception.message}")
             val status = paymentReconciliationService.markForCancellation(paymentId)
             if (status == PaymentStatus.SUCCEEDED) status else throw exception
+        } catch (exception: PaymentCaptureNotTakenException) {
+            println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
+            recordPaymentNotTaken(paymentId, exception.govUkPayStatus)
+        } catch (exception: PaymentCaptureOutcomeUnknownException) {
+            println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
+            paymentReconciliationService.recordManualIntervention(
+                paymentId,
+                PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                expectedStatus = PaymentStatus.CREATED,
+            )
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId: ${exception.stackTraceToString()}")
             when {
@@ -301,11 +307,49 @@ class PaymentService(
 
                 onCaptureAttempted()
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                govUkPayClient.capturePayment(paymentId)
+                captureAndConfirmPayment(paymentId)
                 onCaptured()
                 PaymentStatus.SUCCEEDED
             },
         )
+
+    private fun captureAndConfirmPayment(paymentId: String) {
+        try {
+            govUkPayClient.capturePayment(paymentId)
+        } catch (captureFailure: Exception) {
+            confirmPaymentTakenAfterCaptureFailure(paymentId, captureFailure)
+        }
+    }
+
+    private fun confirmPaymentTakenAfterCaptureFailure(
+        paymentId: String,
+        captureFailure: Exception,
+    ) {
+        val govUkPayStatus =
+            try {
+                paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(paymentId)
+            } catch (readFailure: Exception) {
+                throw PaymentCaptureOutcomeUnknownException(
+                    "Failed to get the status of payment $paymentId from GOV.UK Pay after its capture failed",
+                    captureFailure,
+                ).apply { addSuppressed(readFailure) }
+            }
+
+        val outcome = "GOV.UK Pay reports payment $paymentId as $govUkPayStatus after its capture failed"
+        when (govUkPayStatus) {
+            PaymentStatus.SUCCEEDED -> println("$outcome: ${captureFailure.stackTraceToString()}")
+            PaymentStatus.FAILED, PaymentStatus.CANCELLED -> throw PaymentCaptureNotTakenException(outcome, govUkPayStatus, captureFailure)
+            else -> throw PaymentCaptureOutcomeUnknownException(outcome, captureFailure)
+        }
+    }
+
+    private fun recordPaymentNotTaken(
+        paymentId: String,
+        govUkPayStatus: PaymentStatus,
+    ): PaymentStatus {
+        paymentRepository.updateStatusIfCurrentStatusIs(paymentId, PaymentStatus.CREATED, govUkPayStatus, Instant.now())
+        return getStoredPaymentStatus(paymentId)
+    }
 
     private fun checkQuoteDateMatchesRegistrationDate(
         payment: Payment,
