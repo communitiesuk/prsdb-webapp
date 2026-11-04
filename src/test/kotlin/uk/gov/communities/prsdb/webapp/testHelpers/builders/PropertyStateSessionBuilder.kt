@@ -240,6 +240,12 @@ class PropertyStateSessionBuilder(
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
+        fun beforePropertyRegistrationFreeholderContactType(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
+            .withFreeholderName(freeholderName)
+
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)
@@ -282,7 +288,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasElectricalCert(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasGasSupply(propertyIsOccupied).withGasSafetyTaskCompletedWithNoGasSupply()
 
-        fun beforePropertyRegistrationEicExpiryDate() =
+        fun beforePropertyRegistrationEicIssueDate() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
@@ -293,7 +299,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withEicExpiryDate()
+                .withEicIssueDate()
                 .withEicUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
@@ -313,7 +319,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersEicExpired() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withEicExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withEicIssueDate(issueDate = LocalDate(2015, 1, 1))
                 .withEicUploads()
                 .withEicExpiredAcknowledged()
 
@@ -566,7 +572,7 @@ class PropertyStateSessionBuilder(
                 .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
-                .withEicExpiryDate()
+                .withEicIssueDate()
                 .withEicUploads()
                 .withCheckElectricalSafetyAnswersComplete()
                 .withPropertyHasNoEpc()

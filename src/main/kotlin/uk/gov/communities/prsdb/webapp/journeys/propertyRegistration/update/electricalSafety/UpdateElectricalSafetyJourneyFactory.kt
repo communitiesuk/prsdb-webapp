@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
@@ -76,7 +77,14 @@ class UpdateElectricalSafetyJourneyFactory(
                 }
             }
             configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                backStep { journey.electricalSafetyDetailsTask.eicExpiryDateStep }
+                backStep {
+                    // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+                    if (journey.electricalSafetyDetailsTask.isEicIssueDateEnabled) {
+                        journey.electricalSafetyDetailsTask.eicIssueDateStep
+                    } else {
+                        journey.electricalSafetyDetailsTask.eicExpiryDateStep
+                    }
+                }
             }
             configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                 backStep { journey.electricalSafetyDetailsTask.eicrExpiryDateStep }
@@ -112,9 +120,17 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (state.checkingAnswersFor) {
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.eicIssueDateStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -148,7 +164,11 @@ class UpdateElectricalSafetyJourneyFactory(
         configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
         configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.electricalSafetyDetailsTask.eicIssueDateStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
