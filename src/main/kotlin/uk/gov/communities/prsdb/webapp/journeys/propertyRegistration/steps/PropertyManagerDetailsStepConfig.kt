@@ -5,18 +5,16 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 
-// TODO PDJB-1981: replace this placeholder with the real "Provide your property manager’s details" page
-//  (content, inputs, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class PropertyManagerDetailsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class PropertyManagerDetailsStepConfig :
+    AbstractRequestableStepConfig<Complete, PropertyManagerDetailsFormModel, JourneyState>() {
+    override val formModelClass = PropertyManagerDetailsFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1981): Provide your property manager’s details - content, inputs and validation to be added")
+    override fun getStepSpecificContent(state: JourneyState) = emptyMap<String, Any?>()
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/propertyManagerDetailsForm"
 
     override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -24,7 +22,7 @@ class PropertyManagerDetailsStepConfig : AbstractRequestableStepConfig<Complete,
 @JourneyFrameworkComponent
 final class PropertyManagerDetailsStep(
     stepConfig: PropertyManagerDetailsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, PropertyManagerDetailsFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "property-manager-details"
     }
