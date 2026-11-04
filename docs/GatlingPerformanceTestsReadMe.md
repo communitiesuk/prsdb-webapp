@@ -307,20 +307,36 @@ forecast. The final portfolio can be truncated to reach the exact property targe
 
 #### Workload assumptions and arithmetic
 
-The team's fee-model figures supplied on 23 October 2026 forecast 4.9 million eligible properties with 50% uptake in
-year one. The baseline represents the resulting year-one database volume while tests exercise new registrations
-and other journeys against it.
+The dump loader downloads a pinned S3 object version. The NFT `nft-rds-access` role therefore needs
+`s3:GetObjectVersion` on `arn:aws:s3:::prsdb-seed-data-nft/seed-data.dump`, as well as its existing object-read
+and KMS-decrypt permissions. **Infrastructure PR required:** codify this version-read permission in
+`communitiesuk/prsdb-infra`; a manual live-test permission change is not a substitute for Terraform configuration.
+
+The performance workflow resets the small fixture using migrations from its own commit, matching the deployed
+application. Other reset callers retain their environment-branch default. Startup checks outside the runner's WAF
+allow-list window use ECS rollout health; HTTP readiness checks remain inside the existing preparation window.
+
+The fee-model forecast is based on **properties, not landlords**: 4.9 million eligible properties, with uptake of
+50% in year one, 55% in year two, 65% in year three and 70% in year four. The reusable load-test baseline is the
+year-one database volume; the tests exercise new registrations and other journeys against it.
 
 ```text
-completed properties = eligible properties * year-one uptake
-                     = 4,900,000 * 0.50 = 2,450,000
+year 1 registrations = 4,900,000 * 0.50 = 2,450,000
+year 2 registrations = 4,900,000 * 0.55 = 2,695,000
+year 3 registrations = 4,900,000 * 0.65 = 3,185,000
+year 4 registrations = 4,900,000 * 0.70 = 3,430,000
+
+year-one completed properties = 2,450,000
 incomplete journeys  = ceil(completed properties * 0.10 / 0.90)
                      = 272,223
 total generated property registrations = 2,722,223
 
 registration journeys/minute = annual registrations / working days / active hours per day / 60
                              = 2,450,000 / 200 / 8 / 60 = 25.520833
-rounded annual estimate      = 2,500,000 / 200 / 8 / 60 = 26.041667
+agreed rounded load target   = 26 registrations/minute
+eight-hour registration capacity = 26 * 60 * 8 = 12,480
+basic-suite registrations    = 10 measured passes + 1 warm-up = 11
+minimum free-address reserve = 12,480 + 11 = 12,491
 ```
 
 The 200 working days and 8 active hours/day are planning assumptions, not observed traffic. The 90% completed /
@@ -328,10 +344,27 @@ The 200 working days and 8 active hours/day are planning assumptions, not observ
 All counts can be overridden independently. `NFT_SEED_PROPERTIES` now counts **completed** registrations, unlike
 its previous combined-total meaning; update any existing task/environment overrides accordingly.
 
-The registration rate is neither HTTP request rate nor concurrent users. Other journey traffic is additional and
-needs its own agreed mix; concurrent sessions depend on journey duration and thinking time. Future spike tests
-can reuse this database, but must check account/address capacity against their independently agreed surge profile.
-The team's later-year uptake percentages (55%, 65%, 70%) are not used to size this year-one baseline.
+The 26/minute figure is a **completed property-registration journey arrival rate**, not an HTTP request rate or
+concurrent-user count. The load suite is intended to exercise registrations and other service journeys; the
+registration rate is the quantified component of that workload, while the mix and rates for the other journeys are
+separate inputs. An eight-hour modeled day requires 12,480 addresses for new registrations. The basic simulation
+also creates 11 registrations (one functional warm-up and 10 measured passes), so the shared starting dump reserves
+12,491 eligible free addresses in total. The five `EG1 2AA` Gatling lookup addresses are additional reserved
+fixtures and are never part of this allocation. This is the agreed full-day registration capacity, not extra
+safety margin or a spike-test concurrency target. The seeder's final `unallocated addresses remain` count is the
+capacity check: it subtracts addresses allocated to both completed registrations and incomplete journeys.
+
+For the local dump rebuild from the existing preserved address pool, which had one unallocated address, use
+`NFT_SEED_GENERATED_ADDRESSES=12490` and `NFT_SEED_MINIMUM_FREE_ADDRESSES=12491`. The generated-address value is
+additional to that retained pool; recalculate it if the source address pool or baseline counts change.
+
+The basic suite updates phone and email on the fixed synthetic landlord subject
+`urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo`. Before creating a performance dump, apply
+`src/main/resources/data-nft-performance.sql`; it assigns this subject to an unlinked synthetic individual landlord
+and adds five high-ID `EG1 2AA` lookup addresses excluded from bulk allocation. New-registration journeys generate
+distinct subjects for each run and authenticate them through the existing One Login simulator; those identities are
+not pre-seeded. A later login spike can reuse the dump, but its simultaneous-login profile and account capacity must
+be agreed separately.
 
 Generated certificate metadata does not provide actual certificate files in S3. Record the tested image revision,
 random seed, reference date and actual generated counts when creating a dump. The existing ECS seeder task has its
@@ -340,13 +373,20 @@ with `0` and `2450000`, and explicitly supply `NFT_SEED_INCOMPLETE_PROPERTIES=27
 deliberately selected reference date rather than assuming the task definition inherits these new defaults.
 
 The large dump is intended to be created once and loaded before performance testing, with migrations applied to
-match the deployed NFT revision. Post-test cleanup must still reset NFT to its small fixture without changing the
-stored dump. The loader verifies at least the configured completed and incomplete registration counts before the
+match the deployed NFT revision. Basic, load and later spike suites should use the same restored starting database
+in one run; do not reset between suites. The existing performance workflow currently runs only the basic suite and
+has a 60-minute job timeout; this documentation does not add load/spike simulations, extend that timeout, or add a
+schedule. A full eight-hour capacity is the agreed dataset sizing model, not a claim that the current workflow can
+run for eight hours. Any future scheduling and suite orchestration must account for the selected test duration.
+
+After the run, including a failed run, the existing cleanup resets NFT to the small day-to-day fixture and starts
+the app. It does not modify or replace the large S3 dump. A subsequent run restores the large dump again before
+testing. The loader verifies at least the configured completed and incomplete registration counts before the
 performance workflow continues. Its defaults match the deployed seeder targets, and can be overridden with GitHub
 Environment variables `NFT_SEED_PROPERTIES` and `NFT_SEED_INCOMPLETE_PROPERTIES`. The minimum eligible free-address
 check is independently configurable with GitHub Environment variable `NFT_LOAD_MINIMUM_FREE_ADDRESSES` (default
-`1`) because the basic registration journey needs an eligible free address. These loader checks do not change the
-dataset or the seeder's own configuration.
+`1`); the reusable full-day dump is sized separately with its 12,491-address reserve. These loader checks do not
+change the dataset or the seeder's own configuration.
 
 ### NFT basic performance workflow (PDJB-430)
 

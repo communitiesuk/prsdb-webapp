@@ -26,7 +26,7 @@ permissions:
 jobs:
   changes:
     name: Check NFT changes
-    if: github.ref == 'refs/heads/nft'
+    if: github.ref == 'refs/heads/nft' || github.ref == 'refs/heads/feat/PDJB-1748-finish-nft-seeding'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -97,7 +97,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-rds-access
-          role-session-name: nft-seed-load-${{ github.run_id }}
+          role-session-name: GitHubActions-nft-seed-load-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
       - name: Read NFT database password
@@ -175,8 +175,11 @@ jobs:
           aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
           aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
           for _ in $(seq 1 60); do
-            if curl --fail --silent --show-error --max-time 10 \
-              https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck; then
+            if aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
+              jq -e '(.services | length == 1) and
+                (.services[0].desiredCount == 1) and (.services[0].runningCount == 1) and
+                (.services[0].pendingCount == 0) and (.services[0].deployments | length == 1) and
+                (.services[0].deployments[0].rolloutState == "COMPLETED")' >/dev/null; then
               exit 0
             fi
             sleep 5
@@ -235,6 +238,7 @@ jobs:
     with:
       environment: nft
       aws-account-id: 448120078528
+      checkout-ref: ${{ github.sha }}
     permissions:
       contents: read
       id-token: write
@@ -266,8 +270,11 @@ jobs:
           aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
           aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
           for _ in $(seq 1 60); do
-            if curl --fail --silent --show-error --max-time 10 \
-              https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck; then
+            if aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
+              jq -e '(.services | length == 1) and
+                (.services[0].desiredCount == 1) and (.services[0].runningCount == 1) and
+                (.services[0].pendingCount == 0) and (.services[0].deployments | length == 1) and
+                (.services[0].deployments[0].rolloutState == "COMPLETED")' >/dev/null; then
               exit 0
             fi
             sleep 5
