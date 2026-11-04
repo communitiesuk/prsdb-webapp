@@ -1014,7 +1014,7 @@ class Navigator(
         freeholderName: String = "Test Freeholder",
     ): FreeholderContactTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(freeholderName = freeholderName).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
