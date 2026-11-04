@@ -21,7 +21,7 @@
     </th:block>
 </th:block>
 <th:block id="form-content">
-    <div class="govuk-button-group">
+    <div class="govuk-button-group" th:if="${addAnotherUrl != null and addAnotherButtonText != null}">
         <div>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${addAnotherUrl}, #{${addAnotherButtonText}})}">
                 addAnother
@@ -31,5 +31,8 @@
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}">submit</button>
         </div>
     </div>
+    <th:block th:unless="${addAnotherUrl != null and addAnotherButtonText != null}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}">submit</button>
+    </th:block>
 </th:block>
 </html>

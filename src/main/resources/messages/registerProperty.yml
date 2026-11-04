@@ -221,6 +221,10 @@ propertyManager:
     access:
       heading: Give your property manager access
       paragraph: Entering your property manager’s details here does not give them access to this registration. You can do this from the property’s registration page.
+  check:
+    heading: You’ve added a property manager
+    insetText: After you submit and pay, we’ll contact this person to say they’re listed on your registration.
+    emailAddress: Email address
   todo:
     removePropertyManager:
       heading: 'TODO (PDJB-1983): Are you sure you want to remove your property manager?'
