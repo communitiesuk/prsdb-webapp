@@ -325,7 +325,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             propertyManagerPage.submitYes()
 
             val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-            propertyManagerDetailsPage.form.submit()
+            propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "manager@example.com")
             val checkPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
             checkPropertyManagerPage.form.submit()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)

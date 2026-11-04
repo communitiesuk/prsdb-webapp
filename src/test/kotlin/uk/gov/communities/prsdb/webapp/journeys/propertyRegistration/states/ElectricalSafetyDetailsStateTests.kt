@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
 
 class ElectricalSafetyDetailsStateTests {
@@ -59,6 +61,7 @@ class ElectricalSafetyDetailsStateTests {
         assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getEicExpiryDateIfReachable returns the EIC expiry date when the EIC expiry date step is reachable`() {
         val expiryDate = LocalDate.of(2030, 1, 1)
@@ -91,6 +94,7 @@ class ElectricalSafetyDetailsStateTests {
         assertNull(state.getElectricalCertificateExpiryDateIfReachable())
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getElectricalCertificateIsOutdated returns true if the EIC expiry date is in the past`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
@@ -103,6 +107,7 @@ class ElectricalSafetyDetailsStateTests {
         assertTrue(state.getElectricalCertificateIsOutdated()!!)
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getElectricalCertificateIsOutdated returns false if the EIC expiry date is in the future`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.plusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
@@ -115,18 +120,20 @@ class ElectricalSafetyDetailsStateTests {
         assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the EIC expires today`() {
+    fun `getElectricalCertificateIsOutdated returns false if the EIC expires today`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EIC)
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the EICR expires today`() {
+    fun `getElectricalCertificateIsOutdated returns false if the EICR expires today`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EICR)
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getEicIsOutdated returns true if the EIC expiry date is in the past`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
@@ -145,6 +152,7 @@ class ElectricalSafetyDetailsStateTests {
         assertTrue(state.getEicrIsOutdated()!!)
     }
 
+    // TODO PDJB-1679: Use an EIC issue date when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getEicrIsOutdated returns null if only an EIC expiry date has been provided`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate.minusDays(5), HasElectricalSafetyCertificate.HAS_EIC)
@@ -155,6 +163,49 @@ class ElectricalSafetyDetailsStateTests {
     fun `getElectricalCertificateIsOutdated returns null if the expiryDate is null`() {
         val state = buildTestElectricalSafetyDetailState()
         assertNull(state.getElectricalCertificateIsOutdated())
+    }
+
+    @Test
+    fun `getEicIssueDateIfReachable returns the EIC issue date when the EIC issue date step is reachable`() {
+        val issueDate = LocalDate.of(2024, 3, 20)
+        val state =
+            buildTestElectricalSafetyDetailState(
+                electricalCertMode = HasElectricalCertMode.HAS_EIC,
+                eicIssueDateFormModel = TodayOrPastDateFormModel().applyFromDate(issueDate),
+            )
+
+        assertEquals(issueDate.toKotlinLocalDate(), state.getEicIssueDateIfReachable())
+    }
+
+    @Test
+    fun `getEicIssueDateIfReachable returns null when the EIC issue date step is not reachable`() {
+        val state = buildTestElectricalSafetyDetailState(electricalCertMode = HasElectricalCertMode.HAS_EIC)
+
+        assertNull(state.getEicIssueDateIfReachable())
+    }
+
+    @Test
+    fun `getEicIsOutdated returns false if the EIC was issued today`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate)
+        assertFalse(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns false if the EIC was issued exactly 5 years ago`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(5))
+        assertFalse(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getEicIsOutdated returns true if the EIC was issued 5 years and 1 day ago`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(5).minusDays(1))
+        assertTrue(state.getEicIsOutdated()!!)
+    }
+
+    @Test
+    fun `getElectricalCertificateIsOutdated uses the EIC issue date when the EIC issue date step is reachable`() {
+        val state = buildTestElectricalSafetyDetailStateWithIssueDate(currentDate.minusYears(6))
+        assertTrue(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
@@ -258,6 +309,7 @@ class ElectricalSafetyDetailsStateTests {
     ): ElectricalSafetyDetailState {
         val expiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate)
         return buildTestElectricalSafetyDetailState(
+            // TODO PDJB-1679: Remove EIC support from this helper when the EIC_ISSUE_DATE flag is removed
             eicExpiryDateFormModel = if (certType == HasElectricalSafetyCertificate.HAS_EIC) expiryDateFormModel else null,
             eicrExpiryDateFormModel = if (certType == HasElectricalSafetyCertificate.HAS_EICR) expiryDateFormModel else null,
             hasElectricalCertFormModel = HasElectricalCertFormModel().apply { electricalCertType = certType },
@@ -266,10 +318,20 @@ class ElectricalSafetyDetailsStateTests {
         )
     }
 
+    private fun buildTestElectricalSafetyDetailStateWithIssueDate(issueDate: LocalDate): ElectricalSafetyDetailState =
+        buildTestElectricalSafetyDetailState(
+            eicIssueDateFormModel = TodayOrPastDateFormModel().applyFromDate(issueDate),
+            hasElectricalCertFormModel =
+                HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC },
+            electricalCertMode = HasElectricalCertMode.HAS_EIC,
+        )
+
     // A null expiry date form model means that expiry date step is not reachable
     private fun buildTestElectricalSafetyDetailState(
         electricalCertMode: HasElectricalCertMode? = null,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
         eicExpiryDateFormModel: AnyDateFormModel? = null,
+        eicIssueDateFormModel: TodayOrPastDateFormModel? = null,
         eicrExpiryDateFormModel: AnyDateFormModel? = null,
         eicUploadStepShouldBeReachable: Boolean = false,
         eicrUploadStepShouldBeReachable: Boolean = false,
@@ -279,6 +341,9 @@ class ElectricalSafetyDetailsStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyDetailState {
             override val isOccupied: Boolean = true
             override val propertyOwnershipId: Long? = null
+
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            override val isEicIssueDateEnabled: Boolean = true
             override var eicrUploadMap: Map<Int, CertificateUpload> = mapOf()
             override var highestAssignedEicrMemberId: Int? = null
             override var eicUploadMap: Map<Int, CertificateUpload> = mapOf()
@@ -305,9 +370,15 @@ class ElectricalSafetyDetailsStateTests {
                     }
                 }
 
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
             override val eicExpiryDateStep =
                 mock<EicExpiryDateStep>().apply {
                     whenever(this.formModelIfReachableOrNull).thenReturn(eicExpiryDateFormModel)
+                }
+
+            override val eicIssueDateStep =
+                mock<EicIssueDateStep>().apply {
+                    whenever(this.formModelIfReachableOrNull).thenReturn(eicIssueDateFormModel)
                 }
 
             override val eicrExpiryDateStep =
@@ -327,6 +398,13 @@ class ElectricalSafetyDetailsStateTests {
         }
 
     private fun AnyDateFormModel.applyFromDate(date: LocalDate): AnyDateFormModel =
+        apply {
+            day = date.dayOfMonth.toString()
+            month = date.monthValue.toString()
+            year = date.year.toString()
+        }
+
+    private fun TodayOrPastDateFormModel.applyFromDate(date: LocalDate): TodayOrPastDateFormModel =
         apply {
             day = date.dayOfMonth.toString()
             month = date.monthValue.toString()

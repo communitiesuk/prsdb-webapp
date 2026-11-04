@@ -242,14 +242,20 @@ class PropertyStateSessionBuilder(
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
-        fun beforePropertyRegistrationFreeholderContactType(freeholderName: String = "Test Freeholder") =
-            beforePropertyRegistrationFreeholderName()
-                .withFreeholderName(freeholderName)
+        fun beforePropertyRegistrationFreeholderContactType(
+            freeholderName: String = "Test Freeholder",
+            jointFreeholders: Boolean = true,
+        ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
+            .withFreeholderName(freeholderName)
 
         fun beforePropertyRegistrationFreeholderEmail(
             freeholderName: String = "Test Freeholder",
             existingFreeholders: Map<Int, FreeholderDataModel>? = null,
-        ) = beforePropertyRegistrationFreeholderContactType(freeholderName)
+            jointFreeholders: Boolean = true,
+        ) = beforePropertyRegistrationFreeholderContactType(
+            freeholderName = freeholderName,
+            jointFreeholders = jointFreeholders,
+        )
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { existingFreeholders?.let { withFreeholders(it) } }
 
@@ -295,7 +301,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasElectricalCert(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasGasSupply(propertyIsOccupied).withGasSafetyTaskCompletedWithNoGasSupply()
 
-        fun beforePropertyRegistrationEicExpiryDate() =
+        fun beforePropertyRegistrationEicIssueDate() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
@@ -306,7 +312,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withEicExpiryDate()
+                .withEicIssueDate()
                 .withEicUploads()
 
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
@@ -326,7 +332,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckElectricalSafetyAnswersEicExpired() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
-                .withEicExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withEicIssueDate(issueDate = LocalDate(2015, 1, 1))
                 .withEicUploads()
                 .withEicExpiredAcknowledged()
 
@@ -579,7 +585,7 @@ class PropertyStateSessionBuilder(
                 .withLicensingType(LicensingType.NO_LICENSING)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withEic()
-                .withEicExpiryDate()
+                .withEicIssueDate()
                 .withEicUploads()
                 .withCheckElectricalSafetyAnswersComplete()
                 .withPropertyHasNoEpc()

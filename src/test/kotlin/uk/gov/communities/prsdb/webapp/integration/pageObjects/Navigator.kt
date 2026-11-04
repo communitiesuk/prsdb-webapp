@@ -178,7 +178,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
@@ -273,7 +273,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -1015,9 +1015,13 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderContactTypePage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderContactTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
@@ -1026,14 +1030,18 @@ class Navigator(
     fun skipToPropertyRegistrationFreeholderEmailPage(
         freeholderName: String = "Test Freeholder",
         existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        jointFreeholders: Boolean = true,
     ): FreeholderEmailFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(freeholderName, existingFreeholders).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(
+                freeholderName = freeholderName,
+                existingFreeholders = existingFreeholders,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
     }
-
     // TODO PDJB-1971: update this usage when the real has superior landlords page is added
     fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(): AnyoneInOwnershipChainFormPagePropertyRegistration {
         setJourneyStateInSession(
@@ -1083,12 +1091,12 @@ class Navigator(
         return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationEicExpiryDatePage(): EicExpiryDateFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationEicIssueDatePage(): EicIssueDateFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationEicExpiryDate().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationEicIssueDate().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(EicExpiryDateStep.ROUTE_SEGMENT)
-        return createValidPage(page, EicExpiryDateFormPagePropertyRegistration::class)
+        navigateToPropertyRegistrationJourneyStep(EicIssueDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, EicIssueDateFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationEicrExpiryDatePage(): EicrExpiryDateFormPagePropertyRegistration {

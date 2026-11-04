@@ -75,7 +75,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
             assertThat(emailPage.heading).containsText("What is James Hassan’s email address?")
         }
-        
+
         @Test
         fun `submitting an empty email returns the missing email error`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")

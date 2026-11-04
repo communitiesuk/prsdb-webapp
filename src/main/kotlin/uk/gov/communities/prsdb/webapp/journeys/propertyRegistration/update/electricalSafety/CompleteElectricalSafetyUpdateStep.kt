@@ -25,10 +25,11 @@ class CompleteElectricalSafetyUpdateStepConfig(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
                 electricalCertType = state.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
-                electricalSafetyExpiryDate =
-                    state.electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()
-                        ?.toJavaLocalDate(),
+                eicrExpiryDate = state.electricalSafetyDetailsTask.getEicrExpiryDateIfReachable()?.toJavaLocalDate(),
                 electricalSafetyCertUploadIds = state.electricalSafetyDetailsTask.electricalUploadIds,
+                eicIssueDate = state.electricalSafetyDetailsTask.getEicIssueDateIfReachable()?.toJavaLocalDate(),
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                eicExpiryDate = state.electricalSafetyDetailsTask.getEicExpiryDateIfReachable()?.toJavaLocalDate(),
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

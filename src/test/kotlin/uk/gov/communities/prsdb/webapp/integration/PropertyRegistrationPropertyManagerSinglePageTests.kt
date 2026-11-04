@@ -67,10 +67,14 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
     }
 
     private fun addPropertyManager(page: Page): CheckPropertyManagerFormPagePropertyRegistration {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+        propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "manager@example.com")
+        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+    }
+
+    private fun navigateToPropertyManagerDetailsPage(page: Page): PropertyManagerDetailsFormPagePropertyRegistration {
         val propertyManagerPage = navigator.skipToPropertyRegistrationPropertyManagerPage()
         propertyManagerPage.submitYes()
-        val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-        propertyManagerDetailsPage.form.submit()
-        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+        return assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
     }
 }

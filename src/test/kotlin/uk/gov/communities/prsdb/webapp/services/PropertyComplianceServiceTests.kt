@@ -415,7 +415,8 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyCertIssueDate = gasCertIssueDate,
-                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = CertificateType.Eicr,
+                eicrExpiryDate = electricalSafetyExpiryDate,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
                 epcEnergyRating = epcEnergyRating,
@@ -435,6 +436,43 @@ class PropertyComplianceServiceTests {
             assertEquals(true, saved.tenancyStartedBeforeEpcExpiry)
             assertEquals(epcExemptionReason, saved.epcExemptionReason)
             assertEquals(meesExemptionReason, saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `saves an expiry date 5 years after the EIC issue date when an EIC issue date is provided`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                electricalCertType = CertificateType.Eic,
+                eicIssueDate = LocalDate.of(2024, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `saves the EIC expiry date when an EIC expiry date is provided`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                electricalCertType = CertificateType.Eic,
+                eicExpiryDate = LocalDate.of(2029, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
         }
 
         @Test
@@ -1362,7 +1400,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L, 20L),
             )
 
@@ -1372,6 +1410,99 @@ class PropertyComplianceServiceTests {
             assertEquals(expiryDate, saved.electricalSafetyExpiryDate)
             assertEquals(CertificateType.Eicr, saved.electricalCertType)
             assertEquals(listOf(eicrUpload1, eicrUpload2), saved.electricalSafetyFileUploads)
+        }
+
+        @Test
+        fun `saves an expiry date 5 years after the EIC issue date when an EIC issue date is provided`() {
+            setMockPrincipal()
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                eicIssueDate = LocalDate.of(2024, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+            assertEquals(CertificateType.Eic, captor.value.electricalCertType)
+        }
+
+        @Test
+        fun `sends valid electrical safety confirmation email when an in date EIC issue date is provided`() {
+            setMockPrincipal()
+            val compliance = createComplianceWithLastModifiedDate()
+            val issueDate = LocalDate.now().minusYears(1)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                eicIssueDate = issueDate,
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockLoggedInLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EIC)",
+                        expiryDate = issueDate.plusYears(5).format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired electrical safety confirmation email when an EIC issue date more than 5 years ago is provided`() {
+            setMockPrincipal()
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                eicIssueDate = LocalDate.now().minusYears(6),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockLoggedInLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EIC)",
+                    ),
+                ),
+            )
         }
 
         @Test
@@ -1390,7 +1521,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1412,7 +1543,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1436,7 +1567,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1493,7 +1624,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
@@ -1538,7 +1669,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1581,7 +1712,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1621,7 +1752,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1663,7 +1794,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -1707,7 +1838,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = emptyList(),
             )
 
@@ -1747,7 +1878,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate,
+                eicrExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = emptyList(),
             )
 
@@ -2323,7 +2454,7 @@ class PropertyComplianceServiceTests {
         private fun provideElectricalSafetyExpiryDates() =
             arrayOf(
                 arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
-                arguments(named("is today", LocalDate.now()), true),
+                arguments(named("is today", LocalDate.now()), false),
                 arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
             )
     }

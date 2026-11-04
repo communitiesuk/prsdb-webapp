@@ -5,8 +5,10 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithRadios
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElect
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiredFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicExpiryDateFormPageUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicIssueDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiredFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.EicrExpiryDateFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageUpdateElectricalSafety
@@ -68,7 +71,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         submitHasCertificate(hasElectricalCertPage, certificateType)
 
-        assertExpiryDatePage(page, certificateType).submitDate(currentDate.plus(DatePeriod(years = 1)))
+        assertCertDatePage(page, certificateType).submitDate(validCertDate(certificateType))
 
         assertUploadPage(page, certificateType).uploadCertificate("validFile.png")
 
@@ -103,7 +106,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         submitHasCertificate(hasElectricalCertPage, certificateType)
 
-        assertExpiryDatePage(page, certificateType).submitDate(currentDate.minus(DatePeriod(days = 5)))
+        assertCertDatePage(page, certificateType).submitDate(expiredCertDate(certificateType))
 
         assertExpiredPageForm(page, certificateType).submit()
 
@@ -117,7 +120,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
-    fun `The back link on the electrical cert expiry date and certificate pages returns to the check answers page when reached from there`(
+    fun `The back link on the electrical cert date and certificate pages returns to the check answers page when reached from there`(
         certificateType: CertificateType,
         page: Page,
     ) {
@@ -129,7 +132,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         submitHasCertificate(hasElectricalCertPage, certificateType)
 
-        assertExpiryDatePage(page, certificateType).submitDate(currentDate.plus(DatePeriod(years = 1)))
+        assertCertDatePage(page, certificateType).submitDate(validCertDate(certificateType))
 
         assertUploadPage(page, certificateType).uploadCertificate("validFile.png")
 
@@ -139,9 +142,8 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
         // Change the certificate date from the check answers page, then check the back link returns there
-        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
         checkAnswersPage.summaryList.certificateDateRow(certificateType).clickFirstActionLinkAndWait()
-        assertExpiryDatePage(page, certificateType).backLink.clickAndWait()
+        assertCertDatePage(page, certificateType).backLink.clickAndWait()
         checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
 
         // Change the certificate from the check answers page, then check the back link returns there
@@ -149,6 +151,40 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         checkUploadsPage = assertCheckUploadsPage(page, certificateType)
         checkUploadsPage.backLink.clickAndWait()
         assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    @Test
+    fun `The back link on the check EIC uploads page returns to the EIC issue date page`(page: Page) {
+        navigateToHasElectricalCertPage(page).submitHasEic()
+
+        assertPageIs(page, EicIssueDateFormPageUpdateElectricalSafety::class, urlArguments)
+            .submitDate(currentDate.minus(DatePeriod(years = 1)))
+        assertUploadPage(page, CertificateType.Eic).uploadCertificate("validFile.png")
+
+        assertCheckUploadsPage(page, CertificateType.Eic).backLink.clickAndWait()
+        assertPageIs(page, EicIssueDateFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `The back link on the check EIC uploads page returns to the EIC expiry date page when EIC issue date is disabled`(page: Page) {
+        featureFlagManager.disableFeature(EIC_ISSUE_DATE)
+
+        navigateToHasElectricalCertPage(page).submitHasEic()
+
+        assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+            .submitDate(currentDate.plus(DatePeriod(years = 1)))
+        assertUploadPage(page, CertificateType.Eic).uploadCertificate("validFile.png")
+
+        assertCheckUploadsPage(page, CertificateType.Eic).backLink.clickAndWait()
+        assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+    }
+
+    private fun navigateToHasElectricalCertPage(page: Page): HasElectricalCertFormPageUpdateElectricalSafety {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
+        return assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
     }
 
     private fun submitHasCertificate(
@@ -160,12 +196,24 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
     }
 
-    private fun assertExpiryDatePage(
+    private fun validCertDate(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> currentDate.minus(DatePeriod(years = 1))
+            else -> currentDate.plus(DatePeriod(years = 1))
+        }
+
+    private fun expiredCertDate(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> currentDate.minus(DatePeriod(years = 6))
+            else -> currentDate.minus(DatePeriod(days = 5))
+        }
+
+    private fun assertCertDatePage(
         page: Page,
         certificateType: CertificateType,
     ): DateFormPage =
         when (certificateType) {
-            CertificateType.Eic -> assertPageIs(page, EicExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+            CertificateType.Eic -> assertPageIs(page, EicIssueDateFormPageUpdateElectricalSafety::class, urlArguments)
             CertificateType.Eicr -> assertPageIs(page, EicrExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
