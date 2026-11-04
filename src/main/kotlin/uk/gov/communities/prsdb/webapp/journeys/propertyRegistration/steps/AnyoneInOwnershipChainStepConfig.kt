@@ -20,7 +20,10 @@ class AnyoneInOwnershipChainStepConfig : AbstractRequestableStepConfig<YesOrNo, 
                         value = true,
                         labelMsgKey = "registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.option.yes",
                     ),
-                    RadiosButtonViewModel(value = false, labelMsgKey = "forms.radios.option.no.label"),
+                    RadiosButtonViewModel(
+                        value = false,
+                        labelMsgKey = "registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.option.no",
+                    ),
                 ),
         )
 

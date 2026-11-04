@@ -353,6 +353,7 @@ superiorLandlords:
       heading: Is there anyone else in the ownership chain?
       option:
         'yes': Yes, add first person in the ownership chain
+        'no': No
       error:
         missing: Select if there is anyone else in the ownership chain
 # TODO PDJB-1959: replace with the real "Do you own the property?" content
