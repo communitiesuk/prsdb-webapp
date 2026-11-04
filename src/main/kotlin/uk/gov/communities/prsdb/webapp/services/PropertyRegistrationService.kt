@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
+import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
@@ -43,6 +44,7 @@ class PropertyRegistrationService(
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentRepository: PaymentRepository,
+    private val dateTimeHelper: DateTimeHelper = DateTimeHelper(),
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -228,7 +230,7 @@ class PropertyRegistrationService(
         landlord: Landlord,
     ) {
         val deadlineDate =
-            LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
+            dateTimeHelper.getCurrentDateInUK().toJavaLocalDate().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
                 DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
             )
         delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(

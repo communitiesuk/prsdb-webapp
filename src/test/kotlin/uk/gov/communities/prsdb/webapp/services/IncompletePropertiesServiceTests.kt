@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -28,8 +28,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesServiceTests {
@@ -42,8 +44,20 @@ class IncompletePropertiesServiceTests {
     @Mock
     private lateinit var mockSavedJourneyStateRepository: SavedJourneyStateRepository
 
-    @InjectMocks
     private lateinit var incompletePropertiesService: IncompletePropertiesService
+
+    @BeforeEach
+    fun setUp() {
+        incompletePropertiesService = createIncompletePropertiesService()
+    }
+
+    private fun createIncompletePropertiesService(dateTimeHelper: DateTimeHelper = DateTimeHelper()) =
+        IncompletePropertiesService(
+            mockLandlordIncompletePropertiesRepository,
+            mockReminderEmailSentRepository,
+            mockSavedJourneyStateRepository,
+            dateTimeHelper,
+        )
 
     @Nested
     inner class GetIncompletePropertiesDueReminderPageTests {
@@ -178,7 +192,7 @@ class IncompletePropertiesServiceTests {
 
         private val cutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(28),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(28),
             )
 
         private val pageRequest = PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
@@ -266,6 +280,29 @@ class IncompletePropertiesServiceTests {
             // Assert
             assertEquals(0, deletedCount)
             verify(mockSavedJourneyStateRepository, times(0)).deleteAll(any())
+        }
+
+        @Test
+        fun `deleteIncompletePropertiesOlderThan28Days uses the UK date when the UK has already reached the next day`() {
+            // Arrange
+            // 23:30 UTC on 15 June 2026 is 00:30 BST on 16 June 2026 in the UK
+            val incompletePropertiesServiceJustAfterUkMidnight =
+                createIncompletePropertiesService(
+                    DateTimeHelper(Clock.fixed(Instant.parse("2026-06-15T23:30:00Z"), ZoneOffset.UTC)),
+                )
+            // 28 days before 16 June 2026
+            val expectedCutoffDate = DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.of(2026, 5, 19))
+            whenever(
+                mockLandlordIncompletePropertiesRepository
+                    .findBySavedJourneyState_CreatedDateBefore(expectedCutoffDate, pageRequest),
+            ).thenReturn(emptyList())
+
+            // Act
+            incompletePropertiesServiceJustAfterUkMidnight.deleteIncompletePropertiesOlderThan28Days()
+
+            // Assert
+            verify(mockLandlordIncompletePropertiesRepository)
+                .findBySavedJourneyState_CreatedDateBefore(expectedCutoffDate, pageRequest)
         }
     }
 

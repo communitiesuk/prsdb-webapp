@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.NullSource
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verifyNoInteractions
@@ -53,8 +52,11 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.net.URI
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
+import java.time.ZoneOffset
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -104,11 +106,31 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockPaymentRepository: PaymentRepository
 
-    @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
+
+    private fun createPropertyRegistrationService(dateTimeHelper: DateTimeHelper = DateTimeHelper()) =
+        PropertyRegistrationService(
+            mockAddressService,
+            mockLicenseService,
+            mockPropertyOwnershipService,
+            mockUserToLandlordService,
+            mockAbsoluteUrlProvider,
+            mockConfirmationEmailSender,
+            mockPropertyOwnershipRepository,
+            mockPropertyRegistrationConfirmationService,
+            mockJointLandlordInvitationService,
+            mockPropertyComplianceService,
+            mockLettingAgentAccessService,
+            mockDelegateToLettingAgentEmailService,
+            mockFeatureFlagManager,
+            mockCurrentUserService,
+            mockPaymentRepository,
+            dateTimeHelper,
+        )
 
     @BeforeEach
     fun setUp() {
+        propertyRegistrationService = createPropertyRegistrationService()
         // TODO PDJB-1734: Remove the checkFeature(PAYMENTS) stub when the flag is removed, but keep the payment repository stub
         lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
         lenient()
@@ -1807,6 +1829,38 @@ class PropertyRegistrationServiceTests {
             argThat<PropertyRegistrationConfirmationEmail> { paymentDetails == null },
         )
         verifyNoInteractions(mockPaymentRepository)
+    }
+
+    @Test
+    fun `registerProperty uses the UK date for the letting agent deadline when the UK has already reached the next day`() {
+        // Arrange
+        // 23:30 UTC on 15 June 2026 is 00:30 BST on 16 June 2026 in the UK
+        val propertyRegistrationServiceJustAfterUkMidnight =
+            createPropertyRegistrationService(
+                DateTimeHelper(Clock.fixed(Instant.parse("2026-06-15T23:30:00Z"), ZoneOffset.UTC)),
+            )
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
+        val lettingAgentInvitation = createLettingAgentInvitation(propertyOwnership)
+        whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
+            .thenReturn(lettingAgentInvitation)
+
+        // Act
+        propertyRegistrationServiceJustAfterUkMidnight.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(lettingAgentEmail = LETTING_AGENT_EMAIL),
+        )
+
+        // Assert
+        // 28 days after 16 June 2026
+        verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
+            eq(propertyOwnership),
+            eq(landlord.name),
+            eq(LETTING_AGENT_EMAIL),
+            eq("14 July 2026"),
+            invitationToken = eq(lettingAgentInvitation.token),
+        )
     }
 
     private fun stubPropertyOwnershipCreation(

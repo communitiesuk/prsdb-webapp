@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.application
 
 import jakarta.transaction.Transactional
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.toKotlinLocalDate
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
-import java.time.LocalDate
 import kotlin.system.exitProcess
 
 @PrsdbScheduledTask("incomplete-property-reminder-scheduled-task")
@@ -49,13 +48,17 @@ class IncompletePropertiesReminderTaskLogic(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val incompletePropertiesService: IncompletePropertiesService,
     private val landlordUserEmailService: LandlordUserEmailService,
+    private val dateTimeHelper: DateTimeHelper = DateTimeHelper(),
 ) {
     @Transactional
     fun sendIncompletePropertyReminders(): Int {
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
         val cutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                dateTimeHelper
+                    .getCurrentDateInUK()
+                    .toJavaLocalDate()
+                    .minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
         val pagesOfProperties =
@@ -86,7 +89,7 @@ class IncompletePropertiesReminderTaskLogic(
                             singleLineAddress =
                                 property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
                             daysToComplete =
-                                LocalDate.now().toKotlinLocalDate().daysUntil(
+                                dateTimeHelper.getCurrentDateInUK().daysUntil(
                                     CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(
                                         property.savedJourneyState,
                                     ),

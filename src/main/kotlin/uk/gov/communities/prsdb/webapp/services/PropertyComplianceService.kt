@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
@@ -48,6 +50,7 @@ class PropertyComplianceService(
     private val eicDateService: EicDateService,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
+    private val dateTimeHelper: DateTimeHelper = DateTimeHelper(),
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -458,7 +461,11 @@ class PropertyComplianceService(
             }
         val formattedDeadlineDate =
             if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
-                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(DATE_FORMATTER)
+                dateTimeHelper
+                    .getCurrentDateInUK()
+                    .toJavaLocalDate()
+                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                    .format(DATE_FORMATTER)
             } else {
                 null
             }

@@ -56,8 +56,10 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.math.BigDecimal
 import java.net.URI
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.collections.listOf
@@ -118,23 +120,26 @@ class PropertyComplianceServiceTests {
         return compliance
     }
 
+    private fun createPropertyComplianceService(dateTimeHelper: DateTimeHelper = DateTimeHelper()) =
+        PropertyComplianceService(
+            mockPropertyComplianceRepository,
+            mockPropertyOwnershipRepository,
+            fileUploadRepository,
+            mockVirusScanCallbackService,
+            mockComplianceUpdateConfirmationSender,
+            mockLettingAgentComplianceUpdateSender,
+            mockAbsoluteUrlProvider,
+            mockUserToLandlordService,
+            mockPropertyOwnershipService,
+            mockCurrentUserService,
+            BeforePdjb1666EicDateService(),
+            mockFeatureFlagManager,
+            dateTimeHelper,
+        )
+
     @BeforeEach
     fun setup() {
-        propertyComplianceService =
-            PropertyComplianceService(
-                mockPropertyComplianceRepository,
-                mockPropertyOwnershipRepository,
-                fileUploadRepository,
-                mockVirusScanCallbackService,
-                mockComplianceUpdateConfirmationSender,
-                mockLettingAgentComplianceUpdateSender,
-                mockAbsoluteUrlProvider,
-                mockUserToLandlordService,
-                mockPropertyOwnershipService,
-                mockCurrentUserService,
-                BeforePdjb1666EicDateService(),
-                mockFeatureFlagManager,
-            )
+        propertyComplianceService = createPropertyComplianceService()
         // TODO: PDJB-1926: Remove this stub
         lenient()
             .`when`(mockFeatureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY))
@@ -1229,9 +1234,60 @@ class PropertyComplianceServiceTests {
                         certificateTypeLabel = "Gas safety certificate",
                         deadlineDate =
                             LocalDate
-                                .now()
+                                .now(DateTimeHelper.UK_ZONE)
                                 .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                 .format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `uses the UK date for the expired occupied gas safety deadline when the UK has already reached the next day`() {
+            // 23:30 UTC on 15 June 2026 is 00:30 BST on 16 June 2026 in the UK
+            val propertyComplianceServiceJustAfterUkMidnight =
+                createPropertyComplianceService(
+                    DateTimeHelper(Clock.fixed(Instant.parse("2026-06-15T23:30:00Z"), ZoneOffset.UTC)),
+                )
+            setMockPrincipal()
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            propertyComplianceServiceJustAfterUkMidnight.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = LocalDate.now().minusYears(2),
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            // 28 days after 16 June 2026
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockLoggedInLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        deadlineDate = "14 July 2026",
                     ),
                 ),
             )
@@ -1313,7 +1369,7 @@ class PropertyComplianceServiceTests {
                         certificateTypeLabel = "Gas safety certificate",
                         deadlineDate =
                             LocalDate
-                                .now()
+                                .now(DateTimeHelper.UK_ZONE)
                                 .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                 .format(dateFormatter),
                     ),
@@ -1684,7 +1740,7 @@ class PropertyComplianceServiceTests {
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
                         deadlineDate =
                             LocalDate
-                                .now()
+                                .now(DateTimeHelper.UK_ZONE)
                                 .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                 .format(dateFormatter),
                     ),
@@ -1768,7 +1824,7 @@ class PropertyComplianceServiceTests {
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
                         deadlineDate =
                             LocalDate
-                                .now()
+                                .now(DateTimeHelper.UK_ZONE)
                                 .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                 .format(dateFormatter),
                     ),

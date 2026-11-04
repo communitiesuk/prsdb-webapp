@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE
@@ -12,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepo
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Instant
-import java.time.LocalDate
 import kotlin.math.ceil
 
 @PrsdbTaskService
@@ -20,6 +20,7 @@ class IncompletePropertiesService(
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
+    private val dateTimeHelper: DateTimeHelper = DateTimeHelper(),
 ) {
     fun getIncompletePropertiesDueReminderPage(
         cutoffDate: Instant,
@@ -46,7 +47,7 @@ class IncompletePropertiesService(
     }
 
     fun deleteIncompletePropertiesOlderThan28Days(): Long {
-        val cutoffDate = DateTimeHelper.getJavaInstantFromLocalDate(LocalDate.now().minusDays(28))
+        val cutoffDate = DateTimeHelper.getJavaInstantFromLocalDate(dateTimeHelper.getCurrentDateInUK().toJavaLocalDate().minusDays(28))
 
         var totalDeleted = 0L
         do {

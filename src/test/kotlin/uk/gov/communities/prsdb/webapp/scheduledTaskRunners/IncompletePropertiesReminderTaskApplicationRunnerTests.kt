@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -33,7 +32,10 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyS
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.net.URI
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesReminderTaskApplicationRunnerTests {
@@ -49,7 +51,6 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     @Mock
     private lateinit var landlordUserEmailService: LandlordUserEmailService
 
-    @InjectMocks
     private lateinit var taskLogic: IncompletePropertiesReminderTaskLogic
 
     private val mockPrsdUrl = "www.prsd-url.com/landlord/dashboard"
@@ -63,8 +64,18 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
     @BeforeEach
     fun setUp() {
+        taskLogic = createTaskLogic()
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
     }
+
+    private fun createTaskLogic(dateTimeHelper: DateTimeHelper = DateTimeHelper()) =
+        IncompletePropertiesReminderTaskLogic(
+            emailSender,
+            absoluteUrlProvider,
+            incompletePropertiesService,
+            landlordUserEmailService,
+            dateTimeHelper,
+        )
 
     @Test
     fun `sendIncompletePropertyReminders sends an email to the landlord for each incomplete property older than 21 days`() {
@@ -216,7 +227,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         setupTwoEmailsToSend()
         val reminderCutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
         val userWithoutEmail = MockLandlordData.createPrsdbUser("user-without-email")
         val user2 = MockLandlordData.createPrsdbUser("user-2")
@@ -314,7 +325,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         setupTwoEmailsToSend()
         val reminderCutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
         val userWithoutEmail = MockLandlordData.createPrsdbUser("user-without-email")
         val user2 = MockLandlordData.createPrsdbUser("user-2")
@@ -343,13 +354,55 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         assertEquals(1, failureCount)
     }
 
+    @Test
+    fun `sendIncompletePropertyReminders uses the UK date when the UK has already reached the next day`() {
+        // Arrange
+        // 23:30 UTC on 15 June 2026 is 00:30 BST on 16 June 2026 in the UK
+        val taskLogicJustAfterUkMidnight =
+            createTaskLogic(
+                DateTimeHelper(Clock.fixed(Instant.parse("2026-06-15T23:30:00Z"), ZoneOffset.UTC)),
+            )
+        val expectedCutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.of(2026, 6, 16).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
+        val propertyAddress = "Address One"
+        // Started on 26 May 2026 (UK), so it must be completed by 23 June 2026: 7 days after 16 June
+        val savedJourneyState =
+            MockSavedJourneyStateData.createSavedJourneyState(
+                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(propertyAddress),
+                createdDate = Instant.parse("2026-05-26T10:00:00Z"),
+                entityId = 1L,
+            )
+        val user = MockLandlordData.createPrsdbUser("user-1")
+
+        whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(expectedCutoffDate)).thenReturn(1)
+        whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(expectedCutoffDate))
+            .thenReturn(listOf(LandlordIncompleteProperty(user = user, savedJourneyState = savedJourneyState)))
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(user.id)))
+            .thenReturn(mapOf(user.id to emailAddress1))
+
+        // Act
+        taskLogicJustAfterUkMidnight.sendIncompletePropertyReminders()
+
+        // Assert
+        verify(emailSender).sendEmail(
+            emailAddress1,
+            IncompletePropertyReminderEmail(
+                singleLineAddress = propertyAddress,
+                daysToComplete = 7,
+                prsdUrl = mockPrsdUrl,
+            ),
+        )
+    }
+
     private fun setupTwoEmailsToSend() {
         val propertyAddress1 = "Address One"
         val propertyAddress2 = "Address Two"
         val daysToComplete = 7
         val createdDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
         reminderEmail1 =
@@ -384,7 +437,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private fun setupTwoEntriesOnOneDatabasePage() {
         val reminderCutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
         whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(
@@ -415,7 +468,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private fun setupTwoEntriesOnTwoDatabasePages() {
         val reminderCutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
-                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+                LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
         whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(
