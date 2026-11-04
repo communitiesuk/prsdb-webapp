@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualIntervention
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import java.time.Instant
 
@@ -40,7 +41,7 @@ class PaymentReconciliationService(
                 )
             } catch (exception: GovUkPayException) {
                 println(
-                    "Could not cancel GOV.UK Pay payment $paymentId, so leaving it CANCELLING: " +
+                    "Failed to cancel GOV.UK Pay payment $paymentId, so leaving it CANCELLING: " +
                         exception.stackTraceToString(),
                 )
             }
@@ -49,7 +50,6 @@ class PaymentReconciliationService(
         return getStoredPaymentStatus(paymentId)
     }
 
-    // Recording waits for any finalisation of the payment that is in progress, so a payment about to be registered is not affected.
     fun recordManualIntervention(
         paymentId: String,
         reason: PaymentManualInterventionReason,
@@ -65,7 +65,9 @@ class PaymentReconciliationService(
 
         if (isRecorded) {
             println("Payment $paymentId requires manual intervention: ${reason.description}")
-            emailSupportAboutManualIntervention(paymentId, reason)
+            sendEmailAndLogFailures("the manual intervention email for payment $paymentId") {
+                emailSupportAboutManualIntervention(paymentId, reason)
+            }
         }
 
         return getStoredPaymentStatus(paymentId)
@@ -75,24 +77,17 @@ class PaymentReconciliationService(
         paymentId: String,
         reason: PaymentManualInterventionReason,
     ) {
-        try {
-            val payment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
-            manualInterventionEmailSender.sendEmail(
-                manualInterventionEmailAddress,
-                PaymentRequiresManualInterventionEmail(
-                    payment.paymentId,
-                    payment.reference,
-                    payment.amountInPence,
-                    payment.paymentCreatedAt,
-                    reason.description,
-                ),
-            )
-        } catch (exception: Exception) {
-            println(
-                "Failed to email support about payment $paymentId requiring manual intervention: " +
-                    exception.stackTraceToString(),
-            )
-        }
+        val payment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
+        manualInterventionEmailSender.sendEmail(
+            manualInterventionEmailAddress,
+            PaymentRequiresManualInterventionEmail(
+                payment.paymentId,
+                payment.reference,
+                payment.amountInPence,
+                payment.paymentCreatedAt,
+                reason.description,
+            ),
+        )
     }
 
     private fun getStoredPaymentStatus(paymentId: String): PaymentStatus =

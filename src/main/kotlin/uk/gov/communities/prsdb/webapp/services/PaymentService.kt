@@ -140,7 +140,7 @@ class PaymentService(
             govUkPayClient.cancelPayment(paymentId)
         } catch (exception: GovUkPayException) {
             println(
-                "Could not cancel GOV.UK Pay payment $paymentId, which was not saved because another payment was started for " +
+                "Failed to cancel GOV.UK Pay payment $paymentId, which was not saved because another payment was started for " +
                     "journey $journeyId at the same time: ${exception.stackTraceToString()}",
             )
         }
