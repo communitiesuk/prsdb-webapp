@@ -57,7 +57,6 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         // TODO PDJB-1963: check this still clears the real provide details page correctly
         state.freeholderProvideDetailsStep.clearFormData()
         state.freeholderNameStep.clearFormData()
-        // TODO PDJB-1965: check this still clears the real contact type page correctly
         state.freeholderContactTypeStep.clearFormData()
         // TODO PDJB-1966: check this still clears the real email page correctly
         state.freeholderEmailStep.clearFormData()

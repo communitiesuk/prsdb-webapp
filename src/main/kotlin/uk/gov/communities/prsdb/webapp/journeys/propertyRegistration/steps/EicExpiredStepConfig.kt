@@ -25,10 +25,9 @@ class EicExpiredStepConfig(
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState): Map<String, Any?> {
         val dateContent =
             if (isEicIssueDateEnabled) {
-                // TODO PDJB-1669: Use the EIC issue date and issue date step instead of expiry date once they exist
                 mapOf(
-                    "issueDate" to state.getEicExpiryDateIfReachable()?.toJavaLocalDate(),
-                    "changeIssueDateUrl" to Destination.VisitableStep(state.eicExpiryDateStep, state.journeyId).toUrlStringOrNull(),
+                    "issueDate" to state.getEicIssueDateIfReachable()?.toJavaLocalDate(),
+                    "changeIssueDateUrl" to Destination.VisitableStep(state.eicIssueDateStep, state.journeyId).toUrlStringOrNull(),
                 )
             } else {
                 mapOf(

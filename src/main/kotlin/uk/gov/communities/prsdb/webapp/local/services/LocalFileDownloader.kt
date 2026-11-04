@@ -31,7 +31,7 @@ class LocalFileDownloader : FileDownloader {
             )
         }
         val contentType =
-            when (fileUpload.extension) {
+            when (fileUpload.extension.lowercase()) {
                 "pdf" -> "application/pdf"
                 "jpg", "jpeg" -> "image/jpeg"
                 "png" -> "image/png"
