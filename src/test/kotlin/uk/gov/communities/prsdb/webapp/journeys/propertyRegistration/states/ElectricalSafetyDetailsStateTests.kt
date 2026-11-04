@@ -116,15 +116,15 @@ class ElectricalSafetyDetailsStateTests {
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the EIC expires today`() {
+    fun `getElectricalCertificateIsOutdated returns false if the EIC expires today`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EIC)
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test
-    fun `getElectricalCertificateIsOutdated returns true if the EICR expires today`() {
+    fun `getElectricalCertificateIsOutdated returns false if the EICR expires today`() {
         val state = buildTestElectricalSafetyDetailStateWithExpiryDate(currentDate, HasElectricalSafetyCertificate.HAS_EICR)
-        assertTrue(state.getElectricalCertificateIsOutdated()!!)
+        assertFalse(state.getElectricalCertificateIsOutdated()!!)
     }
 
     @Test

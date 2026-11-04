@@ -27,17 +27,17 @@ class CertificateExpiryHelper {
             currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
         ): Boolean = currentDate > getGasExpiryDate(issueDate, isGas14MonthExpiryEnabled)
 
-        // Expired on the expiry date
+        // Valid up to and including the expiry date
         fun isEicExpiryDateExpired(
             expiryDate: LocalDate,
             currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
-        ): Boolean = currentDate >= expiryDate
+        ): Boolean = currentDate > expiryDate
 
-        // Expired on the expiry date
+        // Valid up to and including the expiry date
         fun isEicrExpiryDateExpired(
             expiryDate: LocalDate,
             currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
-        ): Boolean = currentDate >= expiryDate
+        ): Boolean = currentDate > expiryDate
 
         // Valid up to and including the expiry date
         fun isEpcExpiryDateExpired(
