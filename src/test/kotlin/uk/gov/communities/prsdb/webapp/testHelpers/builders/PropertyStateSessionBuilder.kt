@@ -252,12 +252,9 @@ class PropertyStateSessionBuilder(
             jointFreeholders: Boolean = true,
             freeholderName: String = "Test Freeholder",
             existingFreeholders: Map<Int, FreeholderDataModel>? = null,
-        ) = beforePropertyRegistrationFreeholderContactType(
-            jointFreeholders = jointFreeholders,
-            freeholderName = freeholderName,
-        )
+        ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
             .withFreeholderContactType(FreeholderContactType.EMAIL)
-            .apply { existingFreeholders?.let { withFreeholders(it) } }
+            .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
