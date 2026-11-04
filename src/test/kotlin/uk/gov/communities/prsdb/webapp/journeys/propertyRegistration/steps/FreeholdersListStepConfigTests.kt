@@ -119,6 +119,16 @@ class FreeholdersListStepConfigTests {
     }
 
     @Test
+    fun `the only freeholder has Change and Remove actions when removing the last member is allowed`() {
+        val stepConfig = setupStepConfig(freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = false)))
+        whenever(mockState.allowRemovingLastMember).thenReturn(true)
+
+        val card = getCards(stepConfig).single()
+
+        assertEquals(listOf("forms.links.change", "forms.links.remove"), card.actions!!.map { it.text })
+    }
+
+    @Test
     fun `there are no cards and the heading parameter is zero when there are no freeholders in state`() {
         val stepConfig = setupStepConfig(freeholders = null, stubCardActionSteps = false)
 
