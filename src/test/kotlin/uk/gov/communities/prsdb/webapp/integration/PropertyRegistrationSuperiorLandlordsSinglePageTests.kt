@@ -4,9 +4,11 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnySuperiorLandlordsFormPagePropertyRegistration
 
 class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -32,6 +34,23 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage(afterFreeholders = true)
             anyoneInOwnershipChainPage.backLink.clickAndWait()
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordsListStep {
+        @Test
+        fun `Superior landlords list shows the number of people in the ownership chain`() {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            assertThat(superiorLandlordsListPage.heading).containsText("You’ve added 3 people in the ownership chain")
+        }
+
+        // TODO PDJB-1978: update the expected page when has any superior landlords becomes an internal step
+        @Test
+        fun `Back link returns to the has any superior landlords page`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.backLink.clickAndWait()
+            assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class)
         }
     }
 }

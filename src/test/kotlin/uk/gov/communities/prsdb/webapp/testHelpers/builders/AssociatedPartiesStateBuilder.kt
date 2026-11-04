@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
@@ -111,6 +114,18 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withFreeholderContactType(contactType: FreeholderContactType = FreeholderContactType.EMAIL): SelfType {
         val freeholderContactTypeFormModel = FreeholderContactTypeFormModel(contactType = contactType)
         withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
+        return self()
+    }
+
+    fun withAnyoneInOwnershipChain(anyoneInOwnershipChain: Boolean = true): SelfType {
+        val anyoneInOwnershipChainFormModel = AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = anyoneInOwnershipChain)
+        withSubmittedValue(AnyoneInOwnershipChainStep.ROUTE_SEGMENT, anyoneInOwnershipChainFormModel)
+        return self()
+    }
+
+    // TODO PDJB-1978: remove this when has any superior landlords becomes an internal step
+    fun withHasAnySuperiorLandlordsComplete(): SelfType {
+        withSubmittedValue(HasAnySuperiorLandlordsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }
