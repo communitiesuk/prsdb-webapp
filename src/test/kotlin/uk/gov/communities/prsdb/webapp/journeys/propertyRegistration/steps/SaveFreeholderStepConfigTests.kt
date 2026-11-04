@@ -59,7 +59,7 @@ class SaveFreeholderStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached replaces the freeholder being edited without changing the next id`() {
+    fun `afterStepIsReached replaces the freeholder being edited without changing the next id when editing`() {
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(YesOrNo.NO)
         val otherFreeholder = FreeholderDataModel(detailsKnown = true, name = "Other freeholder")
