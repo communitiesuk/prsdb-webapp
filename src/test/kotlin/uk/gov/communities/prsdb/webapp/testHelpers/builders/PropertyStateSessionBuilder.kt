@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddre
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -273,11 +274,28 @@ class PropertyStateSessionBuilder(
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
-        // TODO PDJB-1978: remove withHasAnySuperiorLandlordsComplete when has any superior landlords becomes an internal step
-        fun beforePropertyRegistrationSuperiorLandlordsList() =
-            beforePropertyRegistrationHasSuperiorLandlords()
-                .withAnyoneInOwnershipChain()
-                .withHasAnySuperiorLandlordsComplete()
+        val DEFAULT_SUPERIOR_LANDLORDS =
+            mapOf(
+                1 to
+                    SuperiorLandlordDataModel(
+                        detailsKnown = true,
+                        name = "Superior Landlord With Address",
+                        address = AddressDataModel.fromManualAddressData("1 Superior Street", "Superiortown", "SL1 1AA"),
+                    ),
+                2 to
+                    SuperiorLandlordDataModel(
+                        detailsKnown = true,
+                        name = "Superior Landlord With Email",
+                        email = "superior.landlord@example.com",
+                    ),
+                3 to SuperiorLandlordDataModel(detailsKnown = false),
+            )
+
+        fun beforePropertyRegistrationSuperiorLandlordsList(
+            superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,
+        ) = beforePropertyRegistrationHasSuperiorLandlords()
+            .withAnyoneInOwnershipChain()
+            .withSuperiorLandlords(superiorLandlords)
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
