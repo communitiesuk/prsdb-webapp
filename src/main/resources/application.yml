@@ -195,6 +195,9 @@ features:
     - name: "pdjb-973-asynchronous-email-sending"
       enabled: false
       expiry-date: "2027-01-01"
+    - name: "pdjb-1852-active-inactive"
+      enabled: false
+      expiry-date: "2027-01-01"
 
 ---
 
