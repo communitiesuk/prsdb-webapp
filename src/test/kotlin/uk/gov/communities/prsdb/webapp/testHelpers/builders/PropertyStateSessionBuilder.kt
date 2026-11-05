@@ -15,6 +15,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
@@ -49,7 +52,7 @@ class PropertyStateSessionBuilder(
 
     fun withCheckedAnswers(): PropertyStateSessionBuilder {
         val checkAnswersFormModel = CheckAnswersFormModel()
-        withSubmittedValue("check-answers", checkAnswersFormModel)
+        withSubmittedValue(PropertyRegistrationCyaStep.ROUTE_SEGMENT, checkAnswersFormModel)
         return this
     }
 
@@ -64,7 +67,7 @@ class PropertyStateSessionBuilder(
                     customPropertyType = customType
                 }
             }
-        withSubmittedValue("property-type", propertyTypeFormModel)
+        withSubmittedValue(PropertyTypeStep.ROUTE_SEGMENT, propertyTypeFormModel)
         return this
     }
 
@@ -73,7 +76,7 @@ class PropertyStateSessionBuilder(
             OwnershipTypeFormModel().apply {
                 this.ownershipType = ownershipType
             }
-        withSubmittedValue("ownership-type", ownershipTypeFormModel)
+        withSubmittedValue(OwnershipTypeStep.ROUTE_SEGMENT, ownershipTypeFormModel)
         return this
     }
 
@@ -252,6 +255,16 @@ class PropertyStateSessionBuilder(
         ) = beforePropertyRegistrationFreeholderContactType(freeholderName)
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { existingFreeholders?.let { withFreeholders(it) } }
+
+        fun beforePropertyRegistrationFreeholderLookupAddress(freeholderName: String = "Test Freeholder") =
+            beforePropertyRegistrationFreeholderContactType(freeholderName)
+                .withFreeholderContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationFreeholderSelectAddress(freeholderName: String = "Test Freeholder") =
+            beforePropertyRegistrationFreeholderLookupAddress(freeholderName).withFreeholderLookupAddress()
+
+        fun beforePropertyRegistrationFreeholderManualAddress(freeholderName: String = "Test Freeholder") =
+            beforePropertyRegistrationFreeholderLookupAddress(freeholderName).withFreeholderManualAddressSelected()
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

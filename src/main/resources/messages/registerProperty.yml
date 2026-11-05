@@ -327,6 +327,13 @@ freeholders:
           label: Postal address
       error:
         missing: Select which contact information you can provide
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'

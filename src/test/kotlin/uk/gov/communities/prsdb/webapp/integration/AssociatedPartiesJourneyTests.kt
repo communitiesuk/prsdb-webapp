@@ -14,11 +14,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersBackRoutingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
@@ -201,18 +203,44 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Choosing postal address as the freeholder contact type goes through the address page before leaving the task`(page: Page) {
-            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersPage()
-            freeholdersPage.submit()
-            // TODO PDJB-1969: remove this usage when has any freeholders becomes an internal step
-            assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1963: update this usage when the real provide details page is added
-            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-            // TODO PDJB-1967: update this usage when the real freeholder address pages are added
-            assertPageIs(page, FreeholderAddressFormPagePropertyRegistration::class).submit()
+        fun `Choosing postal address allows the freeholder address to be selected`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage()
+            assertThat(lookupAddressPage.heading).containsText("Test Freeholder")
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+
+            val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
+            assertThat(selectAddressPage.heading).containsText("Test Freeholder")
+            selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
+            // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
+            assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
+            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Freeholder address search with no results allows manual entry`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage()
+            val postcode = "NOT A POSTCODE"
+            val houseNameOrNumber = "NOT A HOUSE NUMBER"
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
+
+            val noAddressFoundPage = assertPageIs(page, FreeholderNoAddressFoundFormPagePropertyRegistration::class)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+            assertThat(noAddressFoundPage.heading).containsText(houseNameOrNumber)
+            noAddressFoundPage.form.submit()
+
+            val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyRegistration::class)
+            assertThat(manualAddressPage.heading).containsText("What is Test Freeholder’s address?")
+            manualAddressPage.submitAddress(
+                addressLineOne = "4 Freeholder Road",
+                addressLineTwo = "Suite 2",
+                townOrCity = "London",
+                postcode = "SW1A 1AA",
+            )
+
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()

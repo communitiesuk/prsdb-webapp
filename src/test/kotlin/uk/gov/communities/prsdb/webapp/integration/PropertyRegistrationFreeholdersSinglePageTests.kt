@@ -70,14 +70,14 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     @Nested
     inner class FreeholderEmailStep {
         @Test
-        fun `heading includes the freeholder name`() {
+        fun `Heading includes the freeholder name`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
 
             assertThat(emailPage.heading).containsText("What is James Hassan’s email address?")
         }
-        
+
         @Test
-        fun `submitting an empty email returns the missing email error`() {
+        fun `Submitting an empty email returns the missing email error`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
             emailPage.submitEmail("")
 
@@ -85,7 +85,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `submitting an invalid email returns the format error`() {
+        fun `Submitting an invalid email returns the format error`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
             emailPage.submitEmail("not-an-email")
 
@@ -94,7 +94,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `submitting an email already used by another freeholder returns the duplicate email error`() {
+        fun `Submitting an email already used by another freeholder returns the duplicate email error`() {
             val emailPage =
                 navigator.skipToPropertyRegistrationFreeholderEmailPage(
                     freeholderName = "James Hassan",
@@ -113,6 +113,40 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
             emailPage.backLink.clickAndWait()
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholderLookupAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage(freeholderName = "James Hassan")
+            assertThat(lookupAddressPage.heading).containsText("What is James Hassan’s address?")
+        }
+
+        @Test
+        fun `Back link returns to the freeholder contact type page`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage()
+            lookupAddressPage.backLink.clickAndWait()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholderSelectAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val selectAddressPage = navigator.skipToPropertyRegistrationFreeholderSelectAddressPage(freeholderName = "James Hassan")
+            assertThat(selectAddressPage.heading).containsText("Select James Hassan’s address")
+        }
+    }
+
+    @Nested
+    inner class FreeholderManualAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val manualAddressPage = navigator.skipToPropertyRegistrationFreeholderManualAddressPage(freeholderName = "James Hassan")
+            assertThat(manualAddressPage.heading).containsText("What is James Hassan’s address?")
         }
     }
 

@@ -121,11 +121,25 @@ class FreeholdersDetailsTask(
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
-            // TODO: PDJB-1967: Update this wiring to match OrgGovBodyMembersTask
-            task(journey.freeholderAddressTask) {
+            task(journey.freeholderAddressTask, FreeholderAddressTask.ROUTE_SEGMENT) {
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
+                configureStep(journey.freeholderAddressTask.lookupAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.selectAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.manualAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                }
             }
             step(journey.saveFreeholderStep) {
                 routeSegment(SaveFreeholderStep.ROUTE_SEGMENT)
