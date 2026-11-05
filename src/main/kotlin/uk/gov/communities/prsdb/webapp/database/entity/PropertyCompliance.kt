@@ -37,9 +37,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
-    // For EIC records, access dates through PropertyComplianceService/EicDateService;
-    // direct access bypasses the feature-flagged storage logic.
-    var electricalSafetyExpiryDate: LocalDate? = null
+    // Only used for EICRs (and records with no cert type). EICs store an issue date in eicIssueDate.
+    var eicrExpiryDate: LocalDate? = null
+
+    // Only used for EICs. Access EIC dates through PropertyComplianceService/EicDateService,
+    // which derive the EIC expiry date from this issue date.
+    var eicIssueDate: LocalDate? = null
 
     var electricalCertType: CertificateType? = null
 
@@ -121,7 +124,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         gasSafetyCertIssueDate: LocalDate? = null,
         hasGasSupply: Boolean? = null,
         gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
-        electricalSafetyExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
+        eicIssueDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
@@ -137,7 +141,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         this.hasGasSupply = hasGasSupply
         this.gasSafetyFileUploads = gasSafetyFileUploads
-        this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        this.eicrExpiryDate = eicrExpiryDate
+        this.eicIssueDate = eicIssueDate
         this.electricalCertType = electricalCertType
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate

@@ -132,7 +132,7 @@ class PropertyComplianceServiceTests {
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
                 mockCurrentUserService,
-                BeforePdjb1666EicDateService(),
+                AfterPdjb1666EicDateService(),
                 mockFeatureFlagManager,
             )
         // TODO: PDJB-1926: Remove this stub
@@ -429,7 +429,7 @@ class PropertyComplianceServiceTests {
             verify(mockPropertyComplianceRepository).save(captor.capture())
             val saved = captor.value
             assertEquals(gasCertIssueDate, saved.gasSafetyCertIssueDate)
-            assertEquals(electricalSafetyExpiryDate, saved.electricalSafetyExpiryDate)
+            assertEquals(electricalSafetyExpiryDate, saved.eicrExpiryDate)
             assertEquals(epcUrl, saved.epcUrl)
             assertEquals(epcExpiryDate, saved.epcExpiryDate)
             assertEquals(epcEnergyRating, saved.epcEnergyRating)
@@ -439,7 +439,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `saves an expiry date 5 years after the EIC issue date when an EIC issue date is provided`() {
+        fun `stores the EIC issue date with no EICR expiry date when an EIC issue date is provided`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
@@ -453,12 +453,14 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+            assertEquals(CertificateType.Eic, captor.value.electricalCertType)
+            assertEquals(LocalDate.of(2024, 3, 20), captor.value.eicIssueDate)
+            assertNull(captor.value.eicrExpiryDate)
         }
 
         // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
         @Test
-        fun `saves the EIC expiry date when an EIC expiry date is provided`() {
+        fun `stores an issue date 5 years before the EIC expiry date when an EIC expiry date is provided`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
@@ -472,7 +474,8 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+            assertEquals(LocalDate.of(2024, 3, 20), captor.value.eicIssueDate)
+            assertNull(captor.value.eicrExpiryDate)
         }
 
         @Test
@@ -1407,20 +1410,18 @@ class PropertyComplianceServiceTests {
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
             val saved = captor.value
-            assertEquals(expiryDate, saved.electricalSafetyExpiryDate)
+            assertEquals(expiryDate, saved.eicrExpiryDate)
             assertEquals(CertificateType.Eicr, saved.electricalCertType)
             assertEquals(listOf(eicrUpload1, eicrUpload2), saved.electricalSafetyFileUploads)
         }
 
         @Test
-        fun `saves an expiry date 5 years after the EIC issue date when an EIC issue date is provided`() {
+        fun `stores the EIC issue date and clears any EICR expiry date when an EIC issue date is provided`() {
             setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
-
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
-                .thenReturn(compliance)
-            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
-                .thenAnswer { it.arguments[0] }
+            compliance.eicrExpiryDate = LocalDate.of(2027, 1, 1)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
 
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
@@ -1431,8 +1432,52 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(LocalDate.of(2029, 3, 20), captor.value.electricalSafetyExpiryDate)
+            assertEquals(LocalDate.of(2024, 3, 20), captor.value.eicIssueDate)
+            assertNull(captor.value.eicrExpiryDate)
             assertEquals(CertificateType.Eic, captor.value.electricalCertType)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `stores an issue date 5 years before the EIC expiry date when an EIC expiry date is provided`() {
+            setMockPrincipal()
+            val compliance = createComplianceWithLastModifiedDate()
+            compliance.eicrExpiryDate = LocalDate.of(2027, 1, 1)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                eicExpiryDate = LocalDate.of(2030, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2025, 3, 20), captor.value.eicIssueDate)
+            assertNull(captor.value.eicrExpiryDate)
+        }
+
+        @Test
+        fun `stores an EICR as an expiry date and clears any EIC issue date`() {
+            setMockPrincipal()
+            val compliance = createComplianceWithLastModifiedDate()
+            compliance.eicIssueDate = LocalDate.of(2024, 1, 1)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                eicrExpiryDate = LocalDate.of(2030, 3, 20),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(LocalDate.of(2030, 3, 20), captor.value.eicrExpiryDate)
+            assertNull(captor.value.eicIssueDate)
         }
 
         @Test
@@ -1633,6 +1678,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `clears electrical safety fields when no cert type provided`() {
             val compliance = createComplianceWithLastModifiedDate()
+            compliance.eicIssueDate = LocalDate.of(2024, 1, 1)
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -1647,7 +1693,8 @@ class PropertyComplianceServiceTests {
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
             val saved = captor.value
-            assertNull(saved.electricalSafetyExpiryDate)
+            assertNull(saved.eicrExpiryDate)
+            assertNull(saved.eicIssueDate)
             assertNull(saved.electricalCertType)
             assertTrue(saved.electricalSafetyFileUploads.isEmpty())
         }
@@ -2255,8 +2302,7 @@ class PropertyComplianceServiceTests {
         listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
             val propertyCompliance =
                 PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate)
-                    .withElectricalCertType(certType)
+                    .withElectricalSafety(expiryDate, certType = certType)
                     .build()
             assertEquals(
                 expectedIsExpired,
@@ -2309,29 +2355,28 @@ class PropertyComplianceServiceTests {
 
         assertFalse(propertyComplianceService.isElectricalSafetyMissing(propertyCompliance))
         assertEquals(
-            propertyCompliance.electricalSafetyExpiryDate,
+            propertyCompliance.eicrExpiryDate,
             propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
         )
     }
 
     @Nested
     inner class EicDateTests {
+        private fun eicComplianceWithIssueDate(issueDate: LocalDate): PropertyCompliance =
+            PropertyComplianceBuilder().withElectricalCertType(CertificateType.Eic).build().apply {
+                eicIssueDate = issueDate
+            }
+
         @Test
-        fun `getEicIssueDate derives the issue date from the stored expiry date`() {
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
-                    .build()
+        fun `getEicIssueDate returns the stored issue date`() {
+            val propertyCompliance = eicComplianceWithIssueDate(LocalDate.of(2025, 6, 1))
 
             assertEquals(LocalDate.of(2025, 6, 1), propertyComplianceService.getEicIssueDate(propertyCompliance))
         }
 
         @Test
-        fun `getEicExpiryDate returns the stored expiry date`() {
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
-                    .build()
+        fun `getEicExpiryDate derives the expiry date from the stored issue date`() {
+            val propertyCompliance = eicComplianceWithIssueDate(LocalDate.of(2025, 6, 1))
 
             assertEquals(LocalDate.of(2030, 6, 1), propertyComplianceService.getEicExpiryDate(propertyCompliance))
         }
@@ -2355,22 +2400,22 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `setEicIssueDate stores the derived expiry date and saves`() {
+        fun `setEicIssueDate stores the issue date and saves`() {
             val propertyCompliance = eicComplianceWithLastModifiedDate()
 
             propertyComplianceService.setEicIssueDate(propertyOwnershipId, initialLastModifiedDate, LocalDate.of(2025, 6, 1))
 
-            assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
+            assertEquals(LocalDate.of(2025, 6, 1), propertyCompliance.eicIssueDate)
             verify(mockPropertyComplianceRepository).save(propertyCompliance)
         }
 
         @Test
-        fun `setEicExpiryDate stores the expiry date and saves`() {
+        fun `setEicExpiryDate stores the derived issue date and saves`() {
             val propertyCompliance = eicComplianceWithLastModifiedDate()
 
             propertyComplianceService.setEicExpiryDate(propertyOwnershipId, initialLastModifiedDate, LocalDate.of(2030, 6, 1))
 
-            assertEquals(LocalDate.of(2030, 6, 1), propertyCompliance.electricalSafetyExpiryDate)
+            assertEquals(LocalDate.of(2025, 6, 1), propertyCompliance.eicIssueDate)
             verify(mockPropertyComplianceRepository).save(propertyCompliance)
         }
 

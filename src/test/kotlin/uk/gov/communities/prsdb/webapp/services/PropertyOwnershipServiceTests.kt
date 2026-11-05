@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.Spy
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -40,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -114,6 +116,9 @@ class PropertyOwnershipServiceTests {
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
+    @Spy
+    private var eicDateService: EicDateService = AfterPdjb1666EicDateService()
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -1825,6 +1830,54 @@ class PropertyOwnershipServiceTests {
             )
         }
 
+        private fun addEicCompliance(
+            propertyOwnership: PropertyOwnership,
+            issueDate: LocalDate,
+        ) {
+            MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyOwnership).apply {
+                electricalCertType = CertificateType.Eic
+                eicrExpiryDate = null
+                eicIssueDate = issueDate
+            }
+        }
+
+        @Test
+        fun `does not show an in-date EIC as an outstanding action`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            addEicCompliance(propertyOwnership, LocalDate.now().minusYears(1))
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id))
+                .thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertTrue(outstandingActions.content.isEmpty())
+        }
+
+        @Test
+        fun `uses the EIC expiry date derived from the stored issue date`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val issueDate = LocalDate.now().minusYears(6)
+            addEicCompliance(propertyOwnership, issueDate)
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id))
+                .thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertEquals(
+                issueDate.plusYears(5),
+                outstandingActions.content
+                    .single()
+                    .complianceStatus!!
+                    .electricalSafetyExpiryDate,
+            )
+        }
+
         @Test
         fun `returns only the landlord's properties with outstanding actions`() {
             // Arrange
@@ -1845,8 +1898,16 @@ class PropertyOwnershipServiceTests {
             assertEquals(
                 listOf(
                     // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
-                    OutstandingActionsDataModel.fromPropertyOwnership(tenancyProvideLaterProperty, isGas14MonthExpiryEnabled = true),
-                    OutstandingActionsDataModel.fromPropertyOwnership(gasProvideLaterProperty, isGas14MonthExpiryEnabled = true),
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        tenancyProvideLaterProperty,
+                        electricalSafetyExpiryDate = null,
+                        isGas14MonthExpiryEnabled = true,
+                    ),
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        gasProvideLaterProperty,
+                        electricalSafetyExpiryDate = null,
+                        isGas14MonthExpiryEnabled = true,
+                    ),
                 ),
                 outstandingActions.content,
             )

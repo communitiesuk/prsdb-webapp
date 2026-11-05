@@ -828,19 +828,20 @@ class NftDataSeeder(
         propertyComplianceStmt.setLong(4, propertyOwnershipId)
         propertyComplianceStmt.setDateOrNull(5, complianceData.gasSafetyCertIssueDate)
         propertyComplianceStmt.setBooleanOrNull(6, complianceData.hasGasSupply)
-        propertyComplianceStmt.setDateOrNull(7, complianceData.electricalSafetyExpiryDate)
-        propertyComplianceStmt.setIntOrNull(8, complianceData.electricalCertType?.ordinal)
+        propertyComplianceStmt.setDateOrNull(7, complianceData.eicrExpiryDate)
+        propertyComplianceStmt.setDateOrNull(8, complianceData.eicIssueDate)
+        propertyComplianceStmt.setIntOrNull(9, complianceData.electricalCertType?.ordinal)
         propertyComplianceStmt.setStringOrNull(
-            9,
+            10,
             complianceData.epcNumber?.let {
                 "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
             },
         )
-        propertyComplianceStmt.setDateOrNull(10, complianceData.epcExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(11, complianceData.tenancyStartedBeforeEpcExpiry)
-        propertyComplianceStmt.setStringOrNull(12, complianceData.epcEnergyRating)
-        propertyComplianceStmt.setIntOrNull(13, complianceData.epcExemptionReason?.ordinal)
-        propertyComplianceStmt.setIntOrNull(14, complianceData.epcMeesExemptionReason?.ordinal)
+        propertyComplianceStmt.setDateOrNull(11, complianceData.epcExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(12, complianceData.tenancyStartedBeforeEpcExpiry)
+        propertyComplianceStmt.setStringOrNull(13, complianceData.epcEnergyRating)
+        propertyComplianceStmt.setIntOrNull(14, complianceData.epcExemptionReason?.ordinal)
+        propertyComplianceStmt.setIntOrNull(15, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount

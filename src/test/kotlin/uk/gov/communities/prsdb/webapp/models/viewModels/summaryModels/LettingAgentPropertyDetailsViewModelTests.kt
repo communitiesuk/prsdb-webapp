@@ -50,7 +50,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         createComplianceStatus(
             createPropertyCompliance(
                 propertyOwnership = propertyOwnership,
-                electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+                eicrExpiryDate = LocalDate.now().minusDays(1),
             ),
         )
 
