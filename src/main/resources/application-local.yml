@@ -30,6 +30,7 @@ spring:
       data-locations:
         - classpath:data-local.sql
         - classpath:data-metrics-local.sql
+        - classpath:data-placeholder-freeholders.sql
       continue-on-error: true
 
   data:
@@ -81,6 +82,9 @@ local:
 
 email-queue:
   name: prsdb-email-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2
@@ -157,7 +161,7 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
-      enabled: false
+      enabled: true
       expiry-date: "2027-01-01"
 
 ---

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -33,6 +34,24 @@ class FreeholderContactTypeStepConfig :
                 ),
             "submitButtonText" to "forms.buttons.continue",
         )
+
+    override fun resolvePageContent(
+        state: FreeholdersDetailsState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? FreeholderContactTypeFormModel
+        if (formModel?.contactType != null) return defaultContent
+
+        val editingFreeholder = state.editingFreeholder ?: return defaultContent
+        val prepopulatedFormModel = formModel ?: FreeholderContactTypeFormModel()
+        prepopulatedFormModel.contactType =
+            when {
+                editingFreeholder.email != null -> FreeholderContactType.EMAIL
+                editingFreeholder.address != null -> FreeholderContactType.POSTAL_ADDRESS
+                else -> null
+            }
+        return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
+    }
 
     override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/contactTypeForm"
 

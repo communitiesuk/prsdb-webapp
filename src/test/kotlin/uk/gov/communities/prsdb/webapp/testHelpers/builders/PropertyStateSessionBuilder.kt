@@ -6,9 +6,10 @@ import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -66,7 +68,7 @@ class PropertyStateSessionBuilder(
         return this
     }
 
-    fun withOwnershipType(ownershipType: OwnershipType = OwnershipType.FREEHOLD): PropertyStateSessionBuilder {
+    fun withOwnershipType(ownershipType: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD): PropertyStateSessionBuilder {
         val ownershipTypeFormModel =
             OwnershipTypeFormModel().apply {
                 this.ownershipType = ownershipType
@@ -207,8 +209,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
-            if (jointFreeholders) {
+        fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
@@ -219,32 +221,57 @@ class PropertyStateSessionBuilder(
                     .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
-        // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
-        fun beforePropertyRegistrationFreeholdersList(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        val DEFAULT_FREEHOLDERS =
+            mapOf(
+                1 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Freeholder With Address",
+                        address = AddressDataModel.fromManualAddressData("1 Freehold Street", "Freeholdtown", "FH1 1AA"),
+                    ),
+                2 to FreeholderDataModel(detailsKnown = true, name = "Freeholder With Email", email = "freeholder@example.com"),
+                3 to FreeholderDataModel(detailsKnown = false),
+            )
 
-        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        fun beforePropertyRegistrationFreeholdersList(
+            isJointFreeholder: Boolean = true,
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+            .withFreeholdersInfoComplete()
+            .withFreeholders(freeholders)
 
-        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
+        fun beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+                .withFreeholdersInfoComplete()
+
+        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
                 .withFreeholderProvideDetails()
 
-        fun beforePropertyRegistrationSuperiorLandlords() =
+        fun beforePropertyRegistrationHasSuperiorLandlords() =
             beforePropertyRegistrationOwnsProperty()
                 .withOwnsProperty()
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+
+        fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersList(isJointFreeholder = false, freeholders = freeholders)
+            .withFreeholdersListComplete()
 
         fun beforePropertyRegistrationFreeholderContactType(
             jointFreeholders: Boolean = true,
             freeholderName: String = "Test Freeholder",
         ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
             .withFreeholderName(freeholderName)
+
+        fun beforePropertyRegistrationFreeholderEmail(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+            existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
+            .withFreeholderContactType(FreeholderContactType.EMAIL)
+            .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
