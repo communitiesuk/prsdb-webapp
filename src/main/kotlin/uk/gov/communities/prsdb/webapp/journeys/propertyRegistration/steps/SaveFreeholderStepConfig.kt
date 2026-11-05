@@ -18,16 +18,22 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
     override fun afterStepIsReached(state: FreeholdersDetailsState) {
         val provideDetails =
             state.freeholderProvideDetailsStep.formModelOrNull?.provideDetails
-                ?: throw PrsdbWebException("Freeholder provide details step data is missing")
+                ?: throw PrsdbWebException(
+                    "Freeholder provide details step data is missing for journey ${state.journeyId}",
+                )
 
         val freeholder =
             if (provideDetails == YesOrNo.YES) {
                 val contactType =
                     state.freeholderContactTypeStep.formModelOrNull?.contactType
-                        ?: throw PrsdbWebException("Freeholder contact type step data is missing")
+                        ?: throw PrsdbWebException(
+                            "Freeholder contact type step data is missing for journey ${state.journeyId}",
+                        )
                 val name =
                     state.freeholderNameStep.formModelOrNull?.name
-                        ?: throw PrsdbWebException("Freeholder name step data is missing")
+                        ?: throw PrsdbWebException(
+                            "Freeholder name step data is missing for journey ${state.journeyId}",
+                        )
                 when (contactType) {
                     FreeholderContactType.EMAIL ->
                         FreeholderDataModel(
@@ -35,7 +41,9 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                             name = name,
                             email =
                                 state.freeholderEmailStep.formModelOrNull?.emailAddress
-                                    ?: throw PrsdbWebException("Freeholder email step data is missing"),
+                                    ?: throw PrsdbWebException(
+                                        "Freeholder email step data is missing for journey ${state.journeyId}",
+                                    ),
                         )
                     FreeholderContactType.POSTAL_ADDRESS -> buildFreeholderWithAddress(state, name)
                 }

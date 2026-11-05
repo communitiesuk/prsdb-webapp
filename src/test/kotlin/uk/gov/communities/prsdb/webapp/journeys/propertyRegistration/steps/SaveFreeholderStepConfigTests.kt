@@ -200,8 +200,10 @@ class SaveFreeholderStepConfigTests {
         val stepConfig = SaveFreeholderStepConfig()
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
         whenever(provideDetailsStep.formModelOrNull).thenReturn(null)
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        assertEquals("Freeholder provide details step data is missing for journey $JOURNEY_ID", exception.message)
     }
 
     @Test
@@ -211,8 +213,10 @@ class SaveFreeholderStepConfigTests {
         whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = YesOrNo.YES))
         whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(null)
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        assertEquals("Freeholder contact type step data is missing for journey $JOURNEY_ID", exception.message)
     }
 
     @Test
@@ -224,8 +228,27 @@ class SaveFreeholderStepConfigTests {
         whenever(contactTypeStep.formModelOrNull).thenReturn(FreeholderContactTypeFormModel(contactType = FreeholderContactType.EMAIL))
         whenever(mockState.freeholderNameStep).thenReturn(nameStep)
         whenever(nameStep.formModelOrNull).thenReturn(null)
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        assertEquals("Freeholder name step data is missing for journey $JOURNEY_ID", exception.message)
+    }
+
+    @Test
+    fun `afterStepIsReached throws when details are provided but the email answer is missing`() {
+        val stepConfig = SaveFreeholderStepConfig()
+        whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = YesOrNo.YES))
+        whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
+        whenever(contactTypeStep.formModelOrNull).thenReturn(FreeholderContactTypeFormModel(contactType = FreeholderContactType.EMAIL))
+        whenever(mockState.freeholderNameStep).thenReturn(nameStep)
+        whenever(nameStep.formModelOrNull).thenReturn(FreeholderNameFormModel().apply { name = ENTERED_NAME })
+        whenever(mockState.freeholderEmailStep).thenReturn(emailStep)
+        whenever(emailStep.formModelOrNull).thenReturn(null)
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
+
+        val exception = assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        assertEquals("Freeholder email step data is missing for journey $JOURNEY_ID", exception.message)
     }
 
     private fun setupStepsWithAnswers(
@@ -272,6 +295,7 @@ class SaveFreeholderStepConfigTests {
     companion object {
         private const val ENTERED_NAME = "Entered freeholder name"
         private const val ENTERED_EMAIL = "entered.freeholder@example.com"
+        private const val JOURNEY_ID = "test-journey-id"
         private const val LOOKUP_POSTCODE = "FA1 1AA"
         private const val LOOKUP_HOUSE_NAME_OR_NUMBER = "1"
         private val SELECTED_ADDRESS = AddressDataModel(singleLineAddress = "1 Fictional Road, FA1 1AA", postcode = "FA1 1AA")
