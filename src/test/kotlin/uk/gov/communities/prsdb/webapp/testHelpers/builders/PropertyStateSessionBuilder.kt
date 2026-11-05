@@ -273,6 +273,12 @@ class PropertyStateSessionBuilder(
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
+        // TODO PDJB-1978: remove withHasAnySuperiorLandlordsComplete when has any superior landlords becomes an internal step
+        fun beforePropertyRegistrationSuperiorLandlordsList() =
+            beforePropertyRegistrationHasSuperiorLandlords()
+                .withAnyoneInOwnershipChain()
+                .withHasAnySuperiorLandlordsComplete()
+
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true).withInvitedJointLandlords(alreadyInvitedEmails)

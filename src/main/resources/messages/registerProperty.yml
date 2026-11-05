@@ -369,6 +369,16 @@ superiorLandlords:
         postalAddress: Post
       error:
         missing: Select how we should contact the superior landlord
+  list:
+    heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
+    insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
+    emailAddress: Email address
+    postalAddress: Postal address
+    unknownSuperiorLandlord:
+      title: Unknown person
+      body: You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. Return and add these details when you can.
+    buttons:
+      addAnother: Add another person in the ownership chain
   anyoneInOwnershipChain:
     heading: Other people in the ownership chain
     paragraph:
