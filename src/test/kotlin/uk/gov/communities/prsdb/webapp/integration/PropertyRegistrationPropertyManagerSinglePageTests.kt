@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
@@ -38,6 +39,27 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
         checkPropertyManagerPage.form.submit()
 
         assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `remove property manager page shows the property manager's name and section header`(page: Page) {
+        addPropertyManager(page)
+        navigator.navigateToPropertyRegistrationRemovePropertyManagerPage()
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+
+        assertThat(removePropertyManagerPage.heading).containsText("Are you sure you want to remove Best Property Managers Ltd?")
+        assertThat(removePropertyManagerPage.form.sectionHeader).containsText("Ownership and landlords")
+    }
+
+    @Test
+    fun `cancelling removal returns to the summary page`(page: Page) {
+        addPropertyManager(page)
+        navigator.navigateToPropertyRegistrationRemovePropertyManagerPage()
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+
+        removePropertyManagerPage.cancelLink.clickAndWait()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
     }
 
     @Test

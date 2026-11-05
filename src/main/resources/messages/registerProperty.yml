@@ -221,12 +221,12 @@ propertyManager:
     access:
       heading: Give your property manager access
       paragraph: Entering your property manager’s details here does not give them access to this registration. You can do this from the property’s registration page.
-  todo:
-    removePropertyManager:
-      heading: 'TODO (PDJB-1983): Are you sure you want to remove your property manager?'
+  remove:
+    fieldSetHeading: 'Are you sure you want to remove {0}?'
+    fieldSetHint: They will be removed as your property manager
     radios:
       error:
-        missing: 'TODO (PDJB-1983): Select yes or no'
+        missing: Select if you want to remove this property manager
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
