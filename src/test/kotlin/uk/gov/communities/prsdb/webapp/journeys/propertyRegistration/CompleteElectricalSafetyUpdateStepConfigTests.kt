@@ -62,7 +62,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
+            whenever(mockElectricalSafetyDetailsTask.getEicrExpiryDateIfReachable()).thenReturn(expiryDate)
             whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(uploadIds)
 
             stepConfig.afterStepIsReached(mockState)
@@ -71,8 +71,51 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate.toJavaLocalDate(),
+                eicrExpiryDate = expiryDate.toJavaLocalDate(),
                 electricalSafetyCertUploadIds = uploadIds,
+            )
+        }
+
+        @Test
+        fun `calls updateElectricalSafety with the EIC issue date when one is reachable`() {
+            val issueDate = LocalDate(2024, 3, 20)
+
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eic)
+            whenever(mockElectricalSafetyDetailsTask.getEicIssueDateIfReachable()).thenReturn(issueDate)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(listOf(1L))
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockPropertyComplianceService).updateElectricalSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                electricalSafetyCertUploadIds = listOf(1L),
+                eicIssueDate = issueDate.toJavaLocalDate(),
+            )
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `calls updateElectricalSafety with the EIC expiry date when one is reachable`() {
+            val expiryDate = LocalDate(2029, 3, 20)
+
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eic)
+            whenever(mockElectricalSafetyDetailsTask.getEicExpiryDateIfReachable()).thenReturn(expiryDate)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(listOf(1L))
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockPropertyComplianceService).updateElectricalSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eic,
+                electricalSafetyCertUploadIds = listOf(1L),
+                eicExpiryDate = expiryDate.toJavaLocalDate(),
             )
         }
 
@@ -81,7 +124,6 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
             whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
@@ -90,7 +132,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = null,
-                electricalSafetyExpiryDate = null,
+                eicrExpiryDate = null,
                 electricalSafetyCertUploadIds = emptyList(),
             )
         }
@@ -104,7 +146,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
                 mockPropertyComplianceService.updateElectricalSafety(
                     propertyOwnershipId = propertyId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    electricalSafetyExpiryDate = null,
+                    eicrExpiryDate = null,
                     electricalSafetyCertUploadIds = emptyList(),
                 ),
             ).thenThrow(UpdateConflictException::class.java)
@@ -121,7 +163,6 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
 
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
             whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)

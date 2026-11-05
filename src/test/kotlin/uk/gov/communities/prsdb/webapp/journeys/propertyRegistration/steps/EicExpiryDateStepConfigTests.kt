@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
+// TODO PDJB-1679: Delete this file when the EIC_ISSUE_DATE flag is removed
 @ExtendWith(MockitoExtension::class)
 class EicExpiryDateStepConfigTests {
     @Mock

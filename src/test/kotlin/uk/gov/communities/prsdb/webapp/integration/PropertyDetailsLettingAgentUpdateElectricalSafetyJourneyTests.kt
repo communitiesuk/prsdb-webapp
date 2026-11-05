@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -16,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.U
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckEicUploadsFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckEicrUploadsFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.EicExpiryDateFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.EicIssueDateFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.EicrExpiryDateFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.HasElectricalCertFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.UploadEicFormPageLettingAgentUpdateElectricalSafety
@@ -48,10 +49,15 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
 
-        val expiryDate = DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 1))
-        val expiryDatePage = assertExpiryDatePage(page, certificateType)
-        assertThat(expiryDatePage.form.submitButton).hasText("Continue")
-        expiryDatePage.submitDate(expiryDate)
+        val today = DateTimeHelper().getCurrentDateInUK()
+        val certDate =
+            when (certificateType) {
+                CertificateType.Eic -> today.minus(DatePeriod(years = 1))
+                else -> today.plus(DatePeriod(years = 1))
+            }
+        val certDatePage = assertCertDatePage(page, certificateType)
+        assertThat(certDatePage.form.submitButton).hasText("Continue")
+        certDatePage.submitDate(certDate)
 
         assertUploadPage(page, certificateType).uploadCertificate("validFile.png")
 
@@ -65,12 +71,12 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
     }
 
-    private fun assertExpiryDatePage(
+    private fun assertCertDatePage(
         page: Page,
         certificateType: CertificateType,
     ): DateFormPage =
         when (certificateType) {
-            CertificateType.Eic -> assertPageIs(page, EicExpiryDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+            CertificateType.Eic -> assertPageIs(page, EicIssueDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
             CertificateType.Eicr -> assertPageIs(page, EicrExpiryDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }

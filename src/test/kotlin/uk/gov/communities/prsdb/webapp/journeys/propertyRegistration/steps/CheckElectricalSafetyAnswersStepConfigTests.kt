@@ -8,7 +8,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -20,10 +19,9 @@ class CheckElectricalSafetyAnswersStepConfigTests {
     lateinit var mockState: ElectricalSafetyState
 
     private val mockUploadService: UploadService = mock()
-    private val mockFeatureFlagManager: FeatureFlagManager = mock()
 
     private fun setupStepConfig(): CheckElectricalSafetyAnswersStepConfig {
-        val stepConfig = CheckElectricalSafetyAnswersStepConfig(mockUploadService, mockFeatureFlagManager)
+        val stepConfig = CheckElectricalSafetyAnswersStepConfig(mockUploadService)
         stepConfig.urlPath = CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

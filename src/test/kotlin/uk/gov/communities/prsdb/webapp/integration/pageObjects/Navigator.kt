@@ -178,7 +178,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
@@ -191,7 +191,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
@@ -276,7 +276,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -993,25 +993,28 @@ class Navigator(
     }
 
     // TODO PDJB-1962: update this usage when the real freeholders intro page is added
-    fun skipToPropertyRegistrationFreeholdersPage(): FreeholdersFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholdersInfoPage(): FreeholdersInfoFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholders().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersInfo().build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholdersInfoStep.ROUTE_SEGMENT)
-        return createValidPage(page, FreeholdersFormPagePropertyRegistration::class)
+        return createValidPage(page, FreeholdersInfoFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationFreeholdersListPage(jointFreeholders: Boolean = true): FreeholdersListFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholdersListPage(
+        isJointFreeholder: Boolean = true,
+        freeholders: Map<Int, FreeholderDataModel> = PropertyStateSessionBuilder.DEFAULT_FREEHOLDERS,
+    ): FreeholdersListFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersList(jointFreeholders).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersList(isJointFreeholder, freeholders).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholdersListStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholdersListFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationFreeholderNamePage(jointFreeholders: Boolean = true): FreeholderNameFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholderNamePage(isJointFreeholder: Boolean = true): FreeholderNameFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderName(jointFreeholders).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderName(isJointFreeholder).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderNameStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderNameFormPagePropertyRegistration::class)
@@ -1019,9 +1022,13 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderContactTypePage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderContactTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
@@ -1030,9 +1037,14 @@ class Navigator(
     fun skipToPropertyRegistrationFreeholderEmailPage(
         freeholderName: String = "Test Freeholder",
         existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        jointFreeholders: Boolean = true,
     ): FreeholderEmailFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(freeholderName, existingFreeholders).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(
+                freeholderName = freeholderName,
+                existingFreeholders = existingFreeholders,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
@@ -1040,9 +1052,13 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderLookupAddressPage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderLookupAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderLookupAddress(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderLookupAddress(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
@@ -1050,9 +1066,13 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderSelectAddressPage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderSelectAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderSelectAddress(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderSelectAddress(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
@@ -1060,19 +1080,28 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderManualAddressPage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderManualAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderManualAddress(freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderManualAddress(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderManualAddressFormPagePropertyRegistration::class)
     }
 
-    // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-    fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(): AnyoneInOwnershipChainFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlords().build(),
-        )
+    fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(
+        afterFreeholders: Boolean = false,
+    ): AnyoneInOwnershipChainFormPagePropertyRegistration {
+        val stateBuilder =
+            if (afterFreeholders) {
+                PropertyStateSessionBuilder.beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders()
+            } else {
+                PropertyStateSessionBuilder.beforePropertyRegistrationHasSuperiorLandlords()
+            }
+        setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
         return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
     }
@@ -1117,12 +1146,12 @@ class Navigator(
         return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationEicExpiryDatePage(): EicExpiryDateFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationEicIssueDatePage(): EicIssueDateFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationEicExpiryDate().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationEicIssueDate().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(EicExpiryDateStep.ROUTE_SEGMENT)
-        return createValidPage(page, EicExpiryDateFormPagePropertyRegistration::class)
+        navigateToPropertyRegistrationJourneyStep(EicIssueDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, EicIssueDateFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationEicrExpiryDatePage(): EicrExpiryDateFormPagePropertyRegistration {

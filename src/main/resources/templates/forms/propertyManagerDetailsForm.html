@@ -1,0 +1,16 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.propertyManager.details.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'propertyManagerDetails', #{registerProperty.propertyManager.details.heading}, null)}">
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{registerProperty.propertyManager.details.name.label}, 'name', null)}"></div>
+        <div th:replace="~{fragments/forms/emailInput :: emailInput(#{registerProperty.propertyManager.details.email.label}, 'emailAddress', null)}"></div>
+    </th:block>
+    <h2 class="govuk-heading-m" th:text="#{registerProperty.propertyManager.details.access.heading}">registerProperty.propertyManager.details.access.heading</h2>
+    <p class="govuk-body" th:text="#{registerProperty.propertyManager.details.access.paragraph}">registerProperty.propertyManager.details.access.paragraph</p>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+</th:block>
+</html>

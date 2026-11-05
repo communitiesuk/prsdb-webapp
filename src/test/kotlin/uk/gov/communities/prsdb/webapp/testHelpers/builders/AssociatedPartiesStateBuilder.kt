@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyFreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -70,6 +70,12 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
+    fun withFreeholders(freeholders: Map<Int, FreeholderDataModel>): SelfType {
+        additionalDataMap["freeholdersMap"] = Json.encodeToString(serializer(), freeholders)
+        additionalDataMap["nextFreeholderId"] = Json.encodeToString(serializer(), (freeholders.keys.maxOrNull() ?: 0) + 1)
+        return self()
+    }
+
     fun withOwnershipStructure(): SelfType {
         withOwnsProperty()
         withOwnershipKind()
@@ -98,9 +104,8 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1969: remove this when has any freeholders becomes an internal step
-    fun withHasAnyFreeholdersComplete(): SelfType {
-        withSubmittedValue(HasAnyFreeholdersStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withFreeholdersListComplete(): SelfType {
+        withSubmittedValue(FreeholdersListStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -115,7 +120,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
         return self()
     }
-
     fun withFreeholderLookupAddress(
         houseNameOrNumber: String = "1",
         postcode: String = "FA1 1AA",
@@ -144,8 +148,4 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withFreeholders(freeholders: Map<Int, FreeholderDataModel>): SelfType {
-        additionalDataMap["freeholdersMap"] = Json.encodeToString(serializer(), freeholders)
-        return self()
-    }
 }
