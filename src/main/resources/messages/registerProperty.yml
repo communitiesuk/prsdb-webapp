@@ -84,7 +84,7 @@ taskList:
   aboutYourProperty:
     heading: About your property
     propertyDetails: Property details
-    # TODO: PDJB-2016: Remove this
+    # TODO: PDJB-2016: Remove the ownershipAndLandlords header, it is replaced by peopleResponsible
     ownershipAndLandlords: Ownership and landlords
     peopleResponsible: People responsible for this property
     correspondence: Who the council should contact
