@@ -30,6 +30,7 @@ spring:
       data-locations:
         - classpath:data-local.sql
         - classpath:data-metrics-local.sql
+        - classpath:data-placeholder-freeholders.sql
       continue-on-error: true
 
   data:
