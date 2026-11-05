@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
@@ -211,6 +212,28 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
             assertThat(selectAddressPage.heading).containsText("Test Freeholder")
             selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
+            // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
+            assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
+            // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
+            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Choosing to enter a freeholder address manually from search results opens manual entry`(page: Page) {
+            val selectAddressPage = navigator.skipToPropertyRegistrationFreeholderSelectAddressPage()
+            selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+
+            val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyRegistration::class)
+            assertThat(manualAddressPage.heading).containsText("What is Test Freeholder’s address?")
+            manualAddressPage.submitAddress(
+                addressLineOne = "4 Freeholder Road",
+                addressLineTwo = "Suite 2",
+                townOrCity = "London",
+                postcode = "SW1A 1AA",
+            )
 
             // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
             assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
