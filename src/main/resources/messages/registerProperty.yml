@@ -267,6 +267,12 @@ paymentFailed:
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
   tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
+paymentNotCompleted:
+  heading: Your payment could not be completed
+  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
+  notRegistered: Your property has not been registered.
+  refund: If any money was taken from your account, it will be refunded.
+  payAgain: You need to pay again to register this property.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'

@@ -142,7 +142,7 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockState).paymentOutcome = PaymentOutcome.FAILURE
+        verify(mockState).paymentOutcome = PaymentOutcome.NOT_COMPLETED
     }
 
     @Test
@@ -307,7 +307,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "IN_PROGRESS", "QUOTE_EXPIRED"])
+    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "NOT_COMPLETED", "IN_PROGRESS", "QUOTE_EXPIRED"])
     fun `resolveNextDestination keeps the journey and returns the default destination when the payment has not succeeded`(
         paymentOutcome: PaymentOutcome,
     ) {
@@ -339,10 +339,13 @@ class PaymentStatusCheckStepConfigTests {
         assertEquals(defaultDestination, result)
     }
 
-    @Test
-    fun `resolveNextDestination redirects to the already registered step when the payment failed and the address is already registered`() {
+    @ParameterizedTest
+    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "NOT_COMPLETED"])
+    fun `resolveNextDestination redirects to the already registered step when the payment was unsuccessful and the address is registered`(
+        paymentOutcome: PaymentOutcome,
+    ) {
         // Arrange
-        whenever(mockState.paymentOutcome).thenReturn(PaymentOutcome.FAILURE)
+        whenever(mockState.paymentOutcome).thenReturn(paymentOutcome)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
@@ -445,9 +448,9 @@ class PaymentStatusCheckStepConfigTests {
             listOf(
                 Arguments.of(PaymentStatus.SUCCEEDED, PaymentOutcome.SUCCESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
-                Arguments.of(PaymentStatus.CANCELLING, PaymentOutcome.FAILURE),
-                Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.FAILURE),
-                Arguments.of(PaymentStatus.MANUAL_INTERVENTION, PaymentOutcome.FAILURE),
+                Arguments.of(PaymentStatus.CANCELLING, PaymentOutcome.NOT_COMPLETED),
+                Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.NOT_COMPLETED),
+                Arguments.of(PaymentStatus.MANUAL_INTERVENTION, PaymentOutcome.NOT_COMPLETED),
             )
     }
 }
