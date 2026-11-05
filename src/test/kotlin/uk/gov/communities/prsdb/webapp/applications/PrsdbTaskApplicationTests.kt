@@ -18,10 +18,12 @@ import uk.gov.communities.prsdb.webapp.application.DeleteExpiredOrganisationalLa
 import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
 import uk.gov.communities.prsdb.webapp.application.JointLandlordInvitationExpiryEmailTaskLogic
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.AuditingConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
+import uk.gov.communities.prsdb.webapp.config.GovUkPayConfig
 import uk.gov.communities.prsdb.webapp.config.LocalSqsConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
@@ -47,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.NotifyLetterNotificationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationDeletionService
+import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
@@ -115,6 +118,9 @@ class PrsdbTaskApplicationTests {
                 OrganisationalLandlordInvitationDeletionService::class.simpleBeanName,
                 DeleteExpiredOrganisationalLandlordInvitationsTaskLogic::class.simpleBeanName,
                 LandlordUserEmailService::class.simpleBeanName,
+                GovUkPayConfig::class.simpleBeanName,
+                GovUkPayClient::class.simpleBeanName,
+                PaymentReconciliationService::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
