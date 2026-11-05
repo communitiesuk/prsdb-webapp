@@ -217,7 +217,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     private val propertyDetailsSectionHeader = "Property details"
-    private val ownershipSectionHeader = "People responsible for this property"
+    private val peopleResponsibleSectionHeader = "People responsible for this property"
     private val occupiedSectionHeader = "Tell us if your property’s occupied"
     private val licenseSectionHeader = "Tell us if your property needs a license"
     private val gasSafetyHeader = "Gas safety certificate"
@@ -807,7 +807,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Has Joint Landlords - render page
             assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             hasJointLandlordsPage.submitHasJointLandlords()
@@ -815,12 +815,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Invite joint landlord - render page
             assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
-            assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             inviteJointLandlordPage.submitEmail("email@address.com")
             var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(checkJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(checkJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
             assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
             // Check joint landlords - render page
@@ -831,7 +831,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Invite another joint landlord - render page
             val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
-            assertThat(addAnotherPage.form.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(addAnotherPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
             addAnotherPage.submitEmail("email2@address.com")
 
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
@@ -1211,7 +1211,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Has Joint Landlords - render page
             assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
