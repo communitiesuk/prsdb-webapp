@@ -190,7 +190,7 @@ class PaymentStatusCheckStepConfigTests {
     @Test
     fun `afterStepIsReached marks the address as not already registered when the payment failed and the address is available`() {
         // Arrange
-        stubFinalisedPaymentStatus(PaymentStatus.CANCELLED)
+        stubFinalisedPaymentStatus(PaymentStatus.FAILED)
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
 
         // Act
@@ -203,7 +203,7 @@ class PaymentStatusCheckStepConfigTests {
     @Test
     fun `afterStepIsReached clears the already registered flag without checking registration when the address has no UPRN`() {
         // Arrange
-        stubFinalisedPaymentStatus(PaymentStatus.CANCELLED)
+        stubFinalisedPaymentStatus(PaymentStatus.FAILED)
         whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
 
         // Act
