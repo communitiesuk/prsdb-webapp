@@ -1,4 +1,4 @@
--- Seed data is loaded after the V1_61_0 freeholder backfill has already run, so properties that
+-- Seed data is loaded after the V1_62_0 freeholder backfill has already run, so properties that
 -- need a "no details known" placeholder freeholder get one here instead. Run after every seed
 -- script by IntegrationTestHelper, and listed after the seeds in data-locations, so individual
 -- seed files do not have to repeat it. Idempotent, so it is safe to run over already-seeded data.

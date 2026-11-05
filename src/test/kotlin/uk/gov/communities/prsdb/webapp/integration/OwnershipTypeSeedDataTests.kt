@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 
 // Verifies that the seed scripts populate ownership_type and ownership_type_before_pdjb955
-// consistently. This does NOT exercise the V1_61_0 backfill: seed data is loaded after Flyway has
+// consistently. This does NOT exercise the V1_62_0 backfill: seed data is loaded after Flyway has
 // run, and the backfill is not testable afterwards because ownership_type is NOT NULL by then.
 // TODO PDJB-2019: delete this class once the legacy column is dropped.
 class OwnershipTypeSeedDataTests : IntegrationTestWithImmutableData("data-local.sql") {

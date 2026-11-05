@@ -572,7 +572,7 @@ VALUES ('PRSD22', current_date, null,
        ('PRSD60', current_date, null, 'urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY') -- Aimie
     ON CONFLICT DO NOTHING;
 
--- The V1_61_0 backfill only covered properties that existed when it ran, so any added to this seed
+-- The V1_62_0 backfill only covered properties that existed when it ran, so any added to this seed
 -- afterwards get their placeholder freeholder here. A no-op for the rest.
 INSERT INTO freeholder (property_ownership_id)
 SELECT po.id
