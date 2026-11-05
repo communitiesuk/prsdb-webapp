@@ -121,7 +121,7 @@ class LettingAgentPropertyDetailsControllerTests(
         val mockFeatureFlagManager = MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled()
         return PropertyComplianceViewModelFactory(
             GasSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager),
-            ElectricalSafetyViewModelFactory(mock(), messageSource),
+            ElectricalSafetyViewModelFactory(mock(), messageSource, mock(), mock()),
             EpcViewModelFactory(messageSource),
         ).create(
             propertyCompliance = propertyCompliance,

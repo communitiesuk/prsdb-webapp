@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -10,12 +12,16 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
+import uk.gov.communities.prsdb.webapp.services.EicDateService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @PrsdbWebService
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
+    private val eicDateService: EicDateService,
+    // TODO PDJB-1679: Remove featureFlagManager when the EIC_ISSUE_DATE flag is removed.
+    private val featureFlagManager: FeatureFlagManager,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
     override val provideLaterNoDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedNoDeadline"
@@ -77,12 +83,26 @@ class ElectricalSafetyViewModelFactory(
                     )
                 }
 
-                // TODO PDJB-1669: Use an issue date label for EICs once they use an issue date rather than an expiry date
-                complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
-                    addRow(
-                        key = "propertyDetails.complianceInformation.expiryDate",
-                        value = expiryDate,
-                    )
+                when {
+                    // TODO PDJB-1679: Remove featureFlagManager.checkFeature(EIC_ISSUE_DATE).
+                    propertyCompliance.electricalCertType == CertificateType.Eic && featureFlagManager.checkFeature(EIC_ISSUE_DATE) -> {
+                        // TODO PDJB-1673: Tidy up EIC issue-date logic when issue dates are stored directly.
+                        eicDateService.issueDateFrom(propertyCompliance)?.let { issueDate ->
+                            addRow(
+                                key = "propertyDetails.complianceInformation.issueDate",
+                                value = issueDate,
+                            )
+                        }
+                    }
+
+                    else -> {
+                        complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
+                            addRow(
+                                key = "propertyDetails.complianceInformation.expiryDate",
+                                value = expiryDate,
+                            )
+                        }
+                    }
                 }
 
                 val (uploadsDeletedByVirusScan, visibleUploads) =

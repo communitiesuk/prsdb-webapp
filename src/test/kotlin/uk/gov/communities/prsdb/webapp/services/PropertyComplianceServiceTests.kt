@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Nested
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -47,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
@@ -2312,6 +2315,52 @@ class PropertyComplianceServiceTests {
             propertyCompliance.electricalSafetyExpiryDate,
             propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
         )
+    }
+
+    @Nested
+    inner class EicExpiryStatusTests {
+        private val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+
+        // TODO PDJB-1673: Use issue-date-backed fixtures when EIC issue dates are stored directly.
+        private fun eicWithIssueDate(issueDate: LocalDate): PropertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withElectricalSafety(
+                    expiryDate = CertificateExpiryHelper.getEicExpiryDate(issueDate),
+                    certType = CertificateType.Eic,
+                ).build()
+
+        @Test
+        fun `getComplianceStatus shows an EIC as added before five years after its issue date`() {
+            val propertyCompliance = eicWithIssueDate(today.minusYears(5).plusDays(1))
+
+            assertEquals(
+                ComplianceCertStatus.ADDED,
+                propertyComplianceService.getComplianceStatus(propertyCompliance).electricalSafetyStatus,
+            )
+        }
+
+        @Test
+        fun `getComplianceStatus shows an EIC as added on the date five years after its issue date`() {
+            val issueDate = today.minusYears(5)
+            assumeTrue(CertificateExpiryHelper.getEicExpiryDate(issueDate) == today)
+            val propertyCompliance = eicWithIssueDate(issueDate)
+
+            assertEquals(
+                ComplianceCertStatus.ADDED,
+                propertyComplianceService.getComplianceStatus(propertyCompliance).electricalSafetyStatus,
+            )
+        }
+
+        @Test
+        fun `getComplianceStatus shows an EIC as expired after five years and one day from its issue date`() {
+            val propertyCompliance = eicWithIssueDate(today.minusYears(5).minusDays(1))
+
+            assertEquals(
+                ComplianceCertStatus.EXPIRED,
+                propertyComplianceService.getComplianceStatus(propertyCompliance).electricalSafetyStatus,
+            )
+        }
     }
 
     @Nested
