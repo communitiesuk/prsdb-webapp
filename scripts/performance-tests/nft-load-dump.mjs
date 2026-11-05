@@ -1,6 +1,6 @@
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtemp, rm, stat, statfs} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, stat, statfs, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -11,7 +11,6 @@ const bucket = 'prsdb-seed-data-nft';
 const key = 'seed-data.dump';
 const postgresImage = 'postgres:16';
 const database = 'prsdb';
-const registrationLandlordSubject = 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo';
 
 function nonNegativeInteger(env, name, defaultValue) {
   const value = env[name] || String(defaultValue);
@@ -151,34 +150,23 @@ async function migrateDatabase(env = process.env) {
   });
 }
 
-async function verifyDatabase(environment, requirements) {
+export async function verifyDatabase(environment, requirements, executeCommand = run) {
+  const sql = await readFile(new URL('../../src/main/resources/data-nft-seed-verify.sql', import.meta.url), 'utf8');
   const counts = await runPsql(
-    environment,
-    `
-      SELECT
-        (SELECT count(*) FROM property_ownership),
-        (SELECT count(*) FROM landlord_incomplete_properties),
-        (SELECT count(*) FROM landlord WHERE individual_subject_identifier = '${registrationLandlordSubject}'),
-        (SELECT count(*) FROM address a
-          WHERE a.id BETWEEN 9100000001 AND 9100000005
-            AND upper(a.postcode) = 'EG1 2AA'
-            AND a.local_council_id IS NOT NULL
-            AND a.is_active
-            AND a.uprn IS NOT NULL
-            AND NOT EXISTS (
-              SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id
-            )),
-        (SELECT count(*) FROM address a
-          WHERE a.local_council_id IS NOT NULL
-            AND a.is_active
-            AND a.uprn IS NOT NULL
-            AND a.id NOT BETWEEN 9100000001 AND 9100000005
-            AND NOT EXISTS (
-              SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id
-            ))
-    `,
+    {...environment, PGOPTIONS: '-c default_transaction_read_only=on'},
+    sql,
+    executeCommand,
   );
-  const [completed, incomplete, fixtureLandlord, lookupAddresses, freeAddresses] = counts.split('|').map(Number);
+  const values = counts.split('|').map(Number);
+  requireCondition(
+    values.length === 11 && values.every(value => Number.isSafeInteger(value) && value >= 0),
+    'Restored dataset verification returned malformed counts',
+  );
+  const [completed, incomplete, fixtureLandlord, lookupAddresses, freeAddresses] = values;
+  requireCondition(
+    values.slice(5, 10).every(count => count === 0) && values[10] === 2,
+    'Restored dataset has overlapping, duplicate, invalid or ambiguous incomplete allocations, or an incomplete schema',
+  );
   requireCondition(
     completed >= requirements.minimumCompleted,
     'Restored dataset has fewer completed registrations than expected',
@@ -188,12 +176,12 @@ async function verifyDatabase(environment, requirements) {
     'Restored dataset has fewer incomplete registrations than expected',
   );
   requireCondition(fixtureLandlord > 0, 'Required Gatling landlord is missing from the restored dataset');
-  requireCondition(lookupAddresses >= 5, 'Required registration lookup addresses are missing from the restored dataset');
+  requireCondition(lookupAddresses >= 5, 'Required unambiguous performance lookup addresses are missing from the restored dataset');
   requireCondition(
     freeAddresses >= requirements.minimumFreeAddresses,
     'Restored dataset has too few eligible free addresses for registration journeys',
   );
-  await runPsql(environment, 'ANALYZE;');
+  await runPsql(environment, 'ANALYZE;', executeCommand);
   return {completed, incomplete, lookupAddresses, freeAddresses};
 }
 
@@ -269,20 +257,175 @@ export async function migrateAndVerifySeededDataset({
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   await timedStage('Apply Flyway migrations', () => migrate(env), log);
   const counts = await timedStage('Verify dataset and analyze', () => verify(environment, requirements), log);
-  log(`Restored dataset counts: ${JSON.stringify(counts)}; free address count excludes active ownership only, not incomplete allocations.`);
+  log(`Restored dataset counts: ${JSON.stringify(counts)}; free address count excludes completed and incomplete allocations.`);
   return counts;
+}
+
+export async function verifyQaFixtures({
+  aws = awsCommand, env = process.env, executeCommand = run, log = console.log,
+} = {}) {
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(new URL('../../src/main/resources/data-nft-qa-verify.sql', import.meta.url), 'utf8');
+  const result = await runPsql(environment, sql, executeCommand);
+  const counts = result.split('|').map(Number);
+  requireCondition(
+    counts.length === 6 && counts.every(Number.isSafeInteger) &&
+      counts.slice(0, 5).every((count, index) => count === [26, 0, 0, 2, 0][index]) && counts[5] > 0,
+    'QA fixture verification failed: expected 26 exact properties with address, registration and landlord links, ' +
+      'two organisation landlords, no incomplete registrations and successful migration history',
+  );
+  log('QA reset verified: all 26 expected properties and required links, both organisation landlords, no performance data.');
+}
+
+export async function exportSavedRegistrationFixtures(outputPath, {
+  aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
+} = {}) {
+  requireCondition(typeof outputPath === 'string' && outputPath.trim(), 'An output path is required for saved-registration fixtures');
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(new URL('../../src/main/resources/data-nft-saved-registration-fixtures.sql', import.meta.url), 'utf8');
+  const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
+    'Saved-registration fixtures need 11 to 101 distinct owners');
+  requireCondition(fixtures.every(row =>
+    ['subject', 'resumeJourneyId', 'deleteJourneyId', 'address'].every(field =>
+      typeof row?.[field] === 'string' && row[field].trim())),
+  'Saved-registration fixtures have missing fields');
+  const ids = fixtures.flatMap(row => [row.resumeJourneyId, row.deleteJourneyId]);
+  requireCondition(new Set(fixtures.map(row => row.subject)).size === fixtures.length &&
+    new Set(ids).size === ids.length && ids.every(id => /^[A-Za-z0-9-]+$/.test(id)),
+  'Saved-registration fixtures contain shared owners, reused states or unsafe IDs');
+  await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
+  log(`Exported ${fixtures.length} distinct saved-registration owners; database unchanged.`);
+  return fixtures;
+}
+
+export async function exportCompletedPropertyFixtures(outputPath, {
+  aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
+} = {}) {
+  requireCondition(typeof outputPath === 'string' && outputPath.trim(), 'An output path is required for completed-property fixtures');
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(new URL('../../src/main/resources/data-nft-completed-property-fixtures.sql', import.meta.url), 'utf8');
+  const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
+    'Completed-property fixtures need 11 to 101 distinct owners');
+  requireCondition(fixtures.every(row =>
+    typeof row?.subject === 'string' && row.subject.trim() &&
+    typeof row?.address === 'string' && row.address.trim() &&
+    Number.isSafeInteger(row?.propertyOwnershipId) && row.propertyOwnershipId > 0),
+  'Completed-property fixtures have missing fields or unsafe IDs');
+  requireCondition(new Set(fixtures.map(row => row.subject)).size === fixtures.length &&
+    new Set(fixtures.map(row => row.propertyOwnershipId)).size === fixtures.length,
+  'Completed-property fixtures contain shared owners or reused properties');
+  await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
+  log(`Exported ${fixtures.length} distinct completed-property owners; database unchanged.`);
+  return fixtures;
+}
+
+export async function exportJourneyFixtures(family, outputPath, {
+  aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
+} = {}) {
+  const schemas = {
+    council: {
+      strings: ['subject', 'actorName', 'councilName', 'targetName', 'targetEmail', 'targetSubject', 'address', 'uprn', 'landlordName'],
+      integers: ['councilId', 'targetId', 'propertyId', 'propertyRegistrationNumber', 'landlordId', 'landlordRegistrationNumber', 'propertyOwnershipId'],
+      unique: ['subject', 'councilId', 'targetId', 'propertyOwnershipId'],
+    },
+    operator: {
+      strings: ['subject', 'councilName', 'targetName', 'targetEmail', 'targetSubject'],
+      integers: ['councilId', 'targetId'],
+      unique: ['subject', 'targetId'],
+    },
+    'council-registration': {
+      strings: ['subject', 'email', 'councilName'],
+      integers: [],
+      unique: ['subject'],
+    },
+  };
+  const schema = Object.hasOwn(schemas, family) && schemas[family];
+  requireCondition(schema, 'Unsupported journey fixtures family');
+  requireCondition(typeof outputPath === 'string' && outputPath.trim(), 'An output path is required for journey fixtures');
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(new URL(`../../src/main/resources/data-nft-${family}-fixtures.sql`, import.meta.url), 'utf8');
+  const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
+    'Journey fixtures need 11 to 101 distinct actors');
+  requireCondition(fixtures.every(row =>
+    schema.strings.every(field => typeof row?.[field] === 'string' && row[field].trim()) &&
+    schema.integers.every(field => Number.isSafeInteger(row?.[field]) && row[field] > 0)),
+  'Journey fixtures have missing fields or unsafe IDs');
+  requireCondition(schema.unique.every(field => new Set(fixtures.map(row => row[field])).size === fixtures.length),
+    'Journey fixtures contain shared actors or records');
+  if (family === 'council-registration') {
+    const tokens = fixtures.flatMap(row => [row.validToken, row.expiredToken]);
+    requireCondition(tokens.every(token => typeof token === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) &&
+      new Set(tokens.map(token => token.toLowerCase())).size === tokens.length &&
+      fixtures.every(row => typeof row.invitedAsAdmin === 'boolean' &&
+        typeof row.validUntil === 'string' &&
+        /(?:Z|[+-]\d{2}:\d{2})$/i.test(row.validUntil) &&
+        Date.parse(row.validUntil) > Date.now() + 300000),
+    'Council registration fixtures have invalid, reused or near-expiry invitations');
+  } else {
+    const subjects = new Set(fixtures.map(row => row.subject));
+    requireCondition(fixtures.every(row => typeof row.targetManager === 'boolean' && !subjects.has(row.targetSubject)),
+      'Journey fixtures contain unsafe removal targets');
+    if (family === 'council') {
+      requireCondition(fixtures.every(row => row.propertyId === row.propertyOwnershipId &&
+        (row.licenseType === null || Number.isSafeInteger(row.licenseType)) &&
+        Array.isArray(row.files) && row.files.length <= 20 &&
+        row.files.every(file => /^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$/.test(file?.objectKey) &&
+          ['png', 'pdf'].includes(file?.extension))),
+      'Council fixtures have invalid property aliases or physical file references');
+    }
+  }
+  await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
+  log(`Exported ${fixtures.length} distinct ${family} actors; database unchanged.`);
+  return fixtures;
+}
+
+export async function exportOrganisationFixtures(outputPath, {
+  aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
+} = {}) {
+  requireCondition(typeof outputPath === 'string' && outputPath.trim(), 'An output path is required for organisation fixtures');
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(new URL('../../src/main/resources/data-nft-organisation-fixtures.sql', import.meta.url), 'utf8');
+  const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
+    'Organisation fixtures need 11 to 101 distinct administrators');
+  requireCondition(fixtures.every(row =>
+    typeof row?.subject === 'string' && row.subject.trim() &&
+    typeof row?.name === 'string' && row.name.trim() &&
+    Number.isSafeInteger(row?.organisationId) && row.organisationId > 0 &&
+    Number.isSafeInteger(row?.registrationNumber) && row.registrationNumber > 0),
+  'Organisation fixtures have missing fields or unsafe IDs');
+  requireCondition(['subject', 'organisationId', 'registrationNumber'].every(field =>
+    new Set(fixtures.map(row => row[field])).size === fixtures.length),
+  'Organisation fixtures contain shared administrators, organisations or registration numbers');
+  await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
+  log(`Exported ${fixtures.length} distinct organisation administrators; database unchanged.`);
+  return fixtures;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     if (process.argv[2] === '--verify-only') await migrateAndVerifySeededDataset();
+    else if (process.argv[2] === '--verify-qa') await verifyQaFixtures();
+    else if (process.argv[2] === '--export-saved-fixtures') await exportSavedRegistrationFixtures(process.argv[3]);
+    else if (process.argv[2] === '--export-property-fixtures') await exportCompletedPropertyFixtures(process.argv[3]);
+    else if (process.argv[2] === '--export-organisation-fixtures') await exportOrganisationFixtures(process.argv[3]);
+    else if (process.argv[2] === '--export-journey-fixtures') await exportJourneyFixtures(process.argv[3], process.argv[4]);
     else await loadSeededDataset({
       target: process.env.DEPLOYMENT_ENVIRONMENT,
       account: process.env.AWS_ACCOUNT_ID,
       bucket: process.env.NFT_SEED_DUMP_BUCKET,
       key: process.env.NFT_SEED_DUMP_KEY,
     });
-    console.log('NFT seed dump restored, migrated, and verified.');
+    console.log('NFT database operation completed and verified.');
   } catch (error) {
     console.log(`NFT seed dump load details: ${error.message}`);
     console.error('NFT seed dump load failed.');

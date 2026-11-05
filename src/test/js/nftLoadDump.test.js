@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 import {test} from 'node:test';
-import {loadSeededDataset, migrateAndVerifySeededDataset, restoreDatabase} from '../../../scripts/performance-tests/nft-load-dump.mjs';
+import * as loader from '../../../scripts/performance-tests/nft-load-dump.mjs';
+import {loadSeededDataset, migrateAndVerifySeededDataset, restoreDatabase, verifyDatabase, verifyQaFixtures} from '../../../scripts/performance-tests/nft-load-dump.mjs';
 
 const config = {
   target: 'nft',
@@ -9,6 +10,294 @@ const config = {
   bucket: 'prsdb-seed-data-nft',
   key: 'seed-data.dump',
 };
+
+const validSeedCounts = '2450026|272223|1|5|277777|0|0|0|0|0|2';
+const requirements = {minimumCompleted: 2450000, minimumIncomplete: 272223, minimumFreeAddresses: 12537};
+
+const savedFixtures = Array.from({length: 11}, (_, i) => ({
+  subject: `owner-${i}`, resumeJourneyId: `resume-${i}`, deleteJourneyId: `delete-${i}`, address: `${i} Fixture Road`,
+}));
+
+const propertyFixtures = Array.from({length: 11}, (_, i) => ({
+  subject: `owner-${i}`, propertyOwnershipId: i + 100, address: `${i} Fixture Road`,
+}));
+
+const organisationFixtures = Array.from({length: 11}, (_, i) => ({
+  subject: `admin-${i}`, organisationId: i + 100, registrationNumber: i + 200, name: `Fixture organisation ${i}`,
+}));
+
+const councilFixtures = Array.from({length: 11}, (_, i) => ({
+  subject: `council-${i}`, actorName: `Manager ${i}`, councilName: `Council ${i}`, councilId: i + 1,
+  targetName: `Member ${i}`, targetEmail: `member-${i}@example.test`, targetSubject: `member-${i}`,
+  targetId: i + 100, targetManager: false, propertyId: i + 200, propertyOwnershipId: i + 200,
+  propertyRegistrationNumber: i + 300, landlordId: i + 400, landlordRegistrationNumber: i + 500,
+  address: `${i} Fixture Road`, uprn: `${i + 600}`, landlordName: `Landlord ${i}`, licenseType: null,
+  files: [{objectKey: `certificateUpload.seed-${i}.gas.member-${i}`, extension: 'png'}],
+}));
+const councilRegistrationFixtures = Array.from({length: 11}, (_, i) => ({
+  subject: `registration-${i}`, email: `registration-${i}@example.test`, councilName: `Council ${i}`,
+  validToken: `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`,
+  expiredToken: `10000000-0000-0000-0000-${String(i).padStart(12, '0')}`,
+  validUntil: new Date(Date.now() + 3600000).toISOString(), invitedAsAdmin: false,
+}));
+
+for (const [mode, fixtures] of [
+  ['council', councilFixtures],
+  ['operator', councilFixtures.map(row => ({...row, councilId: 1}))],
+  ['council-registration', councilRegistrationFixtures],
+]) {
+  test(`exports ${mode} fixtures read-only through guarded NFT tunnel`, async () => {
+    assert.equal(typeof loader.exportJourneyFixtures, 'function');
+    const deps = dependencies();
+    const commands = [];
+    let written;
+    await loader.exportJourneyFixtures(mode, 'output.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async (...args) => {
+        commands.push(args);
+        return {stdout: JSON.stringify(fixtures)};
+      },
+      save: async (...args) => { written = args; },
+    });
+    assert.deepEqual(JSON.parse(written[1]), fixtures);
+    assert.equal(written[2].mode, 0o600);
+    assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
+    assert.match(commands[0][1].at(-1), /LIMIT 101/);
+    assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+  });
+}
+
+for (const [description, mode, fixtures] of [
+  ['insufficient capacity', 'council', councilFixtures.slice(0, 10)],
+  ['shared council', 'council', councilFixtures.map(row => ({...row, councilId: 1}))],
+  ['cross-actor target', 'operator', councilFixtures.map(row => ({...row, targetSubject: 'council-0'}))],
+  ['wrong property alias', 'council', councilFixtures.map(row => ({...row, propertyId: 1}))],
+  ['unsafe physical object key', 'council', councilFixtures.map(row => ({...row, files: [{objectKey: '../escape', extension: 'png'}]}))],
+  ['nonboolean manager', 'operator', councilFixtures.map(row => ({...row, targetManager: 'false'}))],
+  ['reused invitation token', 'council-registration', councilRegistrationFixtures.map(row => ({...row, expiredToken: row.validToken}))],
+  ['near-expiry invitation', 'council-registration', councilRegistrationFixtures.map(row => ({...row, validUntil: new Date(Date.now() + 60000).toISOString()}))],
+  ['unknown SQL mode', '../council', councilFixtures],
+]) {
+  test(`journey export rejects ${description} before writing`, async () => {
+    assert.equal(typeof loader.exportJourneyFixtures, 'function');
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportJourneyFixtures(mode, 'output.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /fixtures/);
+    assert.equal(written, false);
+  });
+}
+
+test('exports role-correct organisation fixtures read-only through guarded NFT tunnel', async () => {
+  assert.equal(typeof loader.exportOrganisationFixtures, 'function');
+  const deps = dependencies();
+  const commands = [];
+  let written;
+  await loader.exportOrganisationFixtures('organisations.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async (...args) => {
+      commands.push(args);
+      return {stdout: JSON.stringify(organisationFixtures)};
+    },
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1]), organisationFixtures);
+  assert.equal(written[2].mode, 0o600);
+  assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
+  assert.match(commands[0][1].at(-1), /u\.role = 0/);
+  assert.match(commands[0][1].at(-1), /LIMIT 101/);
+  assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+});
+
+for (const [description, fixtures] of [
+  ['insufficient organisation capacity', organisationFixtures.slice(0, 10)],
+  ['shared administrator', organisationFixtures.map(row => ({...row, subject: 'shared-admin'}))],
+  ['shared organisation', organisationFixtures.map(row => ({...row, organisationId: 1}))],
+  ['shared registration number', organisationFixtures.map(row => ({...row, registrationNumber: 1}))],
+  ['fractional organisation ID', organisationFixtures.map(row => ({...row, organisationId: 1.5}))],
+  ['blank organisation name', organisationFixtures.map(row => ({...row, name: ' '}))],
+]) {
+  test(`organisation export rejects ${description} before writing`, async () => {
+    assert.equal(typeof loader.exportOrganisationFixtures, 'function');
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportOrganisationFixtures('output.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /fixtures/);
+    assert.equal(written, false);
+  });
+}
+
+test('exports completed-property fixtures read-only through guarded NFT tunnel', async () => {
+  assert.equal(typeof loader.exportCompletedPropertyFixtures, 'function');
+  const deps = dependencies();
+  const commands = [];
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async (...args) => {
+      commands.push(args);
+      return {stdout: JSON.stringify(propertyFixtures)};
+    },
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1]), propertyFixtures);
+  assert.equal(written[2].mode, 0o600);
+  assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
+  assert.match(commands[0][1].at(-1), /LIMIT 101/);
+  assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+});
+
+for (const [description, fixtures] of [
+  ['insufficient property capacity', propertyFixtures.slice(0, 10)],
+  ['reused property owner', propertyFixtures.map(row => ({...row, subject: 'shared-owner'}))],
+  ['reused property', propertyFixtures.map(row => ({...row, propertyOwnershipId: 1}))],
+  ['unsafe property ID', propertyFixtures.map(row => ({...row, propertyOwnershipId: '../other'}))],
+  ['fractional property ID', propertyFixtures.map(row => ({...row, propertyOwnershipId: 1.5}))],
+]) {
+  test(`completed-property export rejects ${description} before writing`, async () => {
+    assert.equal(typeof loader.exportCompletedPropertyFixtures, 'function');
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportCompletedPropertyFixtures('output.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /fixtures/);
+    assert.equal(written, false);
+  });
+}
+
+test('exports bounded saved-registration fixtures read-only through guarded NFT tunnel', async () => {
+  assert.equal(typeof loader.exportSavedRegistrationFixtures, 'function');
+  const deps = dependencies();
+  const commands = [];
+  let written;
+  await loader.exportSavedRegistrationFixtures('output.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async (...args) => {
+      commands.push(args);
+      return {stdout: JSON.stringify(savedFixtures)};
+    },
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1]), savedFixtures);
+  assert.equal(written[2].mode, 0o600);
+  assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
+  assert.match(commands[0][1].at(-1), /LIMIT 101/);
+  assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+});
+
+for (const [description, fixtures] of [
+  ['insufficient capacity', savedFixtures.slice(0, 10)],
+  ['reused owner', savedFixtures.map(row => ({...row, subject: 'shared-owner'}))],
+  ['reused saved state', savedFixtures.map(row => ({...row, deleteJourneyId: 'shared-id'}))],
+  ['unsafe journey ID', savedFixtures.map(row => ({...row, resumeJourneyId: '../other'}))],
+]) {
+  test(`fixture export rejects ${description} before writing a file`, async () => {
+    assert.equal(typeof loader.exportSavedRegistrationFixtures, 'function');
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportSavedRegistrationFixtures('output.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /fixtures/);
+    assert.equal(written, false);
+  });
+}
+
+test('seed verification uses actual unallocated capacity and the shared read-only allocation audit', async () => {
+  const commands = [];
+  const counts = await verifyDatabase({}, requirements, async (...args) => {
+    commands.push(args);
+    return {stdout: validSeedCounts};
+  });
+  assert.equal(counts.freeAddresses, 277777);
+  const sql = commands[0][1].at(-1);
+  assert.match(sql, /cachedAddresses/);
+  assert.match(sql, /subject_identifier/);
+  assert.doesNotMatch(sql, /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+  assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
+  assert.equal(commands[1][1].at(-1), 'ANALYZE;');
+});
+
+for (const [description, index, value] of [
+  ['overlapping completed allocations', 5, '1'],
+  ['duplicate incomplete allocations', 6, '1'],
+  ['missing address metadata or wrong subject', 7, '1'],
+  ['ambiguous selected-address labels', 8, '1'],
+  ['invalid constraints or indexes', 9, '1'],
+  ['missing search indexes', 10, '1'],
+  ['insufficient actual reserve', 4, '0'],
+]) {
+  test(`seed verification rejects ${description} before analyze`, async () => {
+    const counts = validSeedCounts.split('|');
+    counts[index] = value;
+    let queries = 0;
+    await assert.rejects(verifyDatabase({}, requirements, async () => {
+      queries++;
+      return {stdout: counts.join('|')};
+    }), /Restored dataset/);
+    assert.equal(queries, 1);
+  });
+}
+
+test('post-reset verification checks fixtures read-only through the guarded NFT tunnel', async () => {
+  const deps = dependencies();
+  const commands = [];
+  await verifyQaFixtures({
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async (...args) => {
+      commands.push(args);
+      return {stdout: '26|0|0|2|0|60\n'};
+    },
+  });
+  assert.equal(commands.length, 1);
+  const [, args, options] = commands[0];
+  assert.ok(args.includes('ON_ERROR_STOP=1'));
+  const sql = args[args.indexOf('--command') + 1];
+  assert.match(sql, /ownership_link/);
+  assert.doesNotMatch(sql, /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP|ANALYZE)\b/i);
+  assert.equal(options.env.PGPASSWORD, deps.env.FLYWAY_PASSWORD);
+  assert.equal(options.env.PGOPTIONS, '-c default_transaction_read_only=on');
+  assert.equal(args.includes(deps.env.FLYWAY_PASSWORD), false);
+});
+
+for (const [description, result] of [
+  ['the observed nine-property partial reset', '9|0|17|0|0|60'],
+  ['a wrong address, registration or landlord link', '26|0|1|2|0|60'],
+  ['leftover performance data', '27|1|0|2|0|60'],
+  ['missing organisation fixtures', '26|0|0|1|0|60'],
+  ['failed migrations', '26|0|0|2|1|60'],
+  ['missing migration history', '26|0|0|2|0|0'],
+  ['malformed database output', ''],
+]) {
+  test(`post-reset verification rejects ${description}`, async () => {
+    const deps = dependencies();
+    await assert.rejects(verifyQaFixtures({
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: result}),
+    }), /QA fixture verification failed/);
+  });
+}
+
+test('post-reset verification refuses another account or a non-tunnel database before querying', async () => {
+  const deps = dependencies();
+  const executeCommand = async () => assert.fail('Must not query the database');
+  await assert.rejects(verifyQaFixtures({
+    env: {...deps.env, FLYWAY_URL: 'jdbc:postgresql://private-rds:5432/prsdb'},
+    aws: deps.aws, executeCommand,
+  }), /local SSM tunnel/);
+  await assert.rejects(verifyQaFixtures({
+    env: deps.env, aws: async () => ({Account: '000000000000'}), executeCommand,
+  }), /Wrong NFT AWS account/);
+});
 
 test('verification-only mode migrates and checks counts without downloading or restoring a dump', async () => {
   const deps = dependencies();

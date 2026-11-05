@@ -1,4 +1,20 @@
 -- =============================================================================
+-- Keep imported addresses unchanged; provide synthetic fallbacks for fixture IDs
+-- absent from a preserved address dataset. NULL UPRNs exclude these from lookup.
+INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, street_name, town_name, local_council_id)
+SELECT id, current_timestamp, null::bigint,
+       id || ' QA Fixture Road, Testville, QA1 1AA', 'QA1 1AA', id || '', 'QA Fixture Road', 'Testville', 2
+FROM (VALUES (1), (2), (3), (4), (5),
+             (7449161), (7449162), (7449163), (7449166), (7449167), (7449170),
+             (7449175), (7449181), (7449182), (7449164), (7449168), (7449171)) AS fixture(id)
+ON CONFLICT (id) DO NOTHING;
+
+-- Skip occupied fallback IDs without rewinding an imported sequence or moving it
+-- into the reserved high-ID address range.
+SELECT setval(pg_get_serial_sequence('address', 'id'),
+              GREATEST(pg_sequence_last_value(pg_get_serial_sequence('address', 'id')::regclass), 7449182));
+
+-- =============================================================================
 -- Addresses for the QA cohort below, at reserved ids far above the range the
 -- AddressBase/NGD loader allocates from. The cohort used to claim whichever existing
 -- addresses were not yet used by an active property, which meant an unbounded scan of
@@ -13,9 +29,9 @@
 --     carries on allocating from where it left off
 -- A NULL uprn also keeps them out of the address lookup, which requires uprn IS NOT NULL.
 -- =============================================================================
-INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
+INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, street_name, town_name, local_council_id)
 SELECT 9000000000 + i, current_timestamp, null::bigint,
-       i || ' Provide Later Road, Testville, QA1 1AA', 'QA1 1AA', i || '', 2
+       i || ' Provide Later Road, Testville, QA1 1AA', 'QA1 1AA', i || '', 'Provide Later Road', 'Testville', 2
 FROM generate_series(1, 9) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -344,9 +360,9 @@ SELECT id, registration_number_id, landlord_type, created_date,
        organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
        organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
        organisation_is_company, organisation_is_charity, organisation_is_trust,
-       organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
-       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
-       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+       organisation_company_number, organisation_charity_registered_with::smallint, organisation_charity_number,
+       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth::date, organisation_lead_trustee_email,
+       organisation_lead_trustee_phone, organisation_lead_trustee_address_id::bigint,
        organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone
 FROM (VALUES (100, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
         'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',

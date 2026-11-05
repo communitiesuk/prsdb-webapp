@@ -71,8 +71,7 @@ class NftDataSeeder(
 
     private val registrationNumberGenerator = RegistrationNumberGenerator()
     private val landlordAddressGenerator = AddressGenerator()
-    private val propertyOwnershipAddressGenerator = AddressGenerator(restrictToAvailable = true)
-    private val incompletePropertyAddressGenerator = AddressGenerator(restrictToAvailable = true)
+    private val propertyAddressGenerator = PropertyAddressGenerator()
 
     fun seedDatabase() {
         require(batchSize > 0) { "nft-seed.batch-size must be positive" }
@@ -99,6 +98,7 @@ class NftDataSeeder(
                     startingIds = nftDataSeederDao.findStartingIds()
                     nftDataSeederDao.updateIdSequences()
                     seedGeneratedAddressData()
+                    nftDataSeederDao.snapshotIncompleteAddressAllocations()
                     eligibleAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = false)
                     remainingAvailableAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = true)
                     check(totalProperties.toLong() + minimumFreeAddresses <= remainingAvailableAddressCount) {
@@ -151,7 +151,8 @@ class NftDataSeeder(
             var uprn = GENERATED_UPRN_BASE + nftDataSeederDao.countAddresses()
 
             while (addressesAdded < numOfGeneratedAddresses) {
-                val street = NftDataFaker.generateFakeStreet()
+                val generatedStreet = NftDataFaker.generateFakeStreet()
+                val street = generatedStreet.copy(streetName = "${generatedStreet.streetName} ${uprn - GENERATED_UPRN_BASE}")
                 val localCouncilId = NftDataFaker.pickOne(localCouncilIds)
                 val addressesOnStreet =
                     min(NftDataFaker.generateNumberOfAddressesOnStreet(), numOfGeneratedAddresses - addressesAdded)
@@ -389,24 +390,30 @@ class NftDataSeeder(
                             )
                         }
 
-                        if (propertyOwnershipsAdded % batchSize == 0 || propertyRegistrationsAdded() == totalProperties) {
+                        if (
+                            (scenario.isRegistrationComplete && propertyOwnershipsAdded % batchSize == 0) ||
+                            propertyRegistrationsAdded() == totalProperties
+                        ) {
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
                             ownershipPaymentStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
-                            propertyOwnershipAddressGenerator.forgetUsedValues()
+                            propertyAddressGenerator.forgetUsedValues()
                             fileUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
                             gasSafetyFileUploadsStmt.executeBatch()
                             electricalSafetyFileUploadsStmt.executeBatch()
                         }
-                        if (incompletePropertiesAdded % batchSize == 0 || propertyRegistrationsAdded() == totalProperties) {
+                        if (
+                            (!scenario.isRegistrationComplete && incompletePropertiesAdded % batchSize == 0) ||
+                            propertyRegistrationsAdded() == totalProperties
+                        ) {
                             reminderEmailSentStmt.executeBatch()
                             savedJourneyStateStmt.executeBatch()
                             incompletePropertyStmt.executeBatch()
-                            incompletePropertyAddressGenerator.forgetUsedValues()
+                            propertyAddressGenerator.forgetUsedValues()
                         }
 
                         if (propertyRegistrationsAdded() % batchSize == 0 || propertyRegistrationsAdded() == totalProperties) {
@@ -766,7 +773,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(7, registrationNumberId)
         propertyOwnershipStmt.setLongOrNull(8, licenceIdIfHasLicence)
         propertyOwnershipStmt.setInt(9, NftDataFaker.generatePropertyAndOtherType().first.ordinal)
-        val propertyAddress = propertyOwnershipAddressGenerator.next()
+        val propertyAddress = propertyAddressGenerator.next()
         propertyOwnershipStmt.setLong(10, propertyAddress.id)
         remainingAvailableAddressCount--
         propertyOwnershipStmt.setIntOrNull(11, numBedrooms)
@@ -820,7 +827,7 @@ class NftDataSeeder(
             reminderEmailSentStmt.addBatch()
         }
 
-        val address = incompletePropertyAddressGenerator.next()
+        val address = propertyAddressGenerator.next()
         remainingAvailableAddressCount--
 
         savedJourneyStateStmt.setLong(1, savedJourneyStateId)
@@ -999,15 +1006,26 @@ class NftDataSeeder(
         const val GENERATED_UPRN_BASE = 900_000_000_000L
     }
 
-    private inner class AddressGenerator(
-        private val restrictToAvailable: Boolean = false,
-    ) : Generator<Address>() {
+    // Both registration types share a keyset cursor, so flushing either batch cannot make an address reusable.
+    private inner class PropertyAddressGenerator : Generator<Address>() {
+        private var lastAddressId = 0L
+
+        override fun replenishValues() {
+            val addresses = nftDataSeederDao.findAvailablePropertyAddresses(batchSize * 5, lastAddressId)
+            if (addresses.isNotEmpty()) {
+                lastAddressId = addresses.maxOf { it.id }
+                values = values + NftDataFaker.shuffle(addresses)
+            }
+        }
+    }
+
+    private inner class AddressGenerator : Generator<Address>() {
         private val replenishmentSize = batchSize * 5
 
         override fun replenishValues() {
             val valueSet = values.toSet()
             val usedAddressIds = values.map { it.id }.toSet()
-            val availableAddressCount = if (restrictToAvailable) remainingAvailableAddressCount else eligibleAddressCount
+            val availableAddressCount = eligibleAddressCount
             val firstOffset =
                 NftDataFaker.generateNumberLessThan(
                     (availableAddressCount - replenishmentSize).coerceAtLeast(1),
@@ -1021,7 +1039,6 @@ class NftDataSeeder(
                         .findAddresses(
                             limit = replenishmentSize,
                             offset = offset,
-                            restrictToAvailable,
                         ).filterNot { it.id in usedAddressIds }
                 offset =
                     if (!triedFromStart) {

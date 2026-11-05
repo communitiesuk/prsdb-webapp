@@ -77,6 +77,17 @@ test('rejects scheduled writers before stopping the app', async () => {
   assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
 });
 
+test('rejects a retired restore worker before stopping the healthy app', async () => {
+  const deps = dependencies();
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) => operation === 'describe-task-definition' && input.taskDefinition === workerArn
+    ? {taskDefinition: {taskDefinitionArn: workerArn, status: 'INACTIVE'}}
+    : original(service, operation, input);
+  await assert.rejects(stopNftWriters(config, deps), /Restore task revision is unavailable/);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
+  assert.deepEqual(deps.state, {});
+});
+
 test('rejects a workflow SHA that is not deployed before app shutdown', async () => {
   const deps = dependencies();
   const original = deps.aws;

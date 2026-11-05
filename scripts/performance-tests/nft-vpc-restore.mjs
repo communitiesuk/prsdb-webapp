@@ -58,6 +58,9 @@ export async function stopNftWriters(config, overrides = {}) {
         container.name === 'prsdb-webapp' && container.image.endsWith(`-${config.expectedSha}`)),
       'Workflow SHA is not deployed; refusing to replace the database');
     }
+    const {taskDefinition: worker} = await aws('ecs', 'describe-task-definition', {taskDefinition: config.taskDefinition});
+    requireCondition(worker?.taskDefinitionArn === config.taskDefinition && worker.status === 'ACTIVE',
+      'Restore task revision is unavailable; refusing to stop the app');
     state.originalApp = {taskDefinition: app.taskDefinition, desiredCount: 1};
     state.network = app.networkConfiguration.awsvpcConfiguration;
     state.taskDefinition = config.taskDefinition;

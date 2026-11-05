@@ -13,6 +13,7 @@ BEGIN
         WHERE l.landlord_type = 0
           AND l.individual_is_active
           AND l.individual_has_accepted_privacy_notice
+          AND NOT l.individual_is_verified
           AND l.individual_subject_identifier IS NOT NULL
           AND NOT EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id)
         ORDER BY l.id
