@@ -209,8 +209,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
-        fun beforePropertyRegistrationFreeholders(jointFreeholders: Boolean = true) =
-            if (jointFreeholders) {
+        fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
+            if (isJointFreeholder) {
                 beforePropertyRegistrationOwnsProperty()
                     .withOwnsProperty()
                     .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
@@ -221,19 +221,31 @@ class PropertyStateSessionBuilder(
                     .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
             }
 
-        // TODO PDJB-1969: remove withHasAnyFreeholdersComplete when has any freeholders becomes an internal step
-        fun beforePropertyRegistrationFreeholdersList(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        val DEFAULT_FREEHOLDERS =
+            mapOf(
+                1 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Freeholder With Address",
+                        address = AddressDataModel.fromManualAddressData("1 Freehold Street", "Freeholdtown", "FH1 1AA"),
+                    ),
+                2 to FreeholderDataModel(detailsKnown = true, name = "Freeholder With Email", email = "freeholder@example.com"),
+                3 to FreeholderDataModel(detailsKnown = false),
+            )
 
-        fun beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholders(jointFreeholders)
-                .withFreeholdersInfoComplete()
-                .withHasAnyFreeholdersComplete()
+        fun beforePropertyRegistrationFreeholdersList(
+            isJointFreeholder: Boolean = true,
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+            .withFreeholdersInfoComplete()
+            .withFreeholders(freeholders)
 
-        fun beforePropertyRegistrationFreeholderName(jointFreeholders: Boolean = true) =
-            beforePropertyRegistrationFreeholderProvideDetails(jointFreeholders)
+        fun beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholdersInfo(isJointFreeholder)
+                .withFreeholdersInfoComplete()
+
+        fun beforePropertyRegistrationFreeholderName(isJointFreeholder: Boolean = true) =
+            beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
                 .withFreeholderProvideDetails()
 
         fun beforePropertyRegistrationHasSuperiorLandlords() =
@@ -241,6 +253,11 @@ class PropertyStateSessionBuilder(
                 .withOwnsProperty()
                 .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+
+        fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersList(isJointFreeholder = false, freeholders = freeholders)
+            .withFreeholdersListComplete()
 
         fun beforePropertyRegistrationFreeholderContactType(
             jointFreeholders: Boolean = true,

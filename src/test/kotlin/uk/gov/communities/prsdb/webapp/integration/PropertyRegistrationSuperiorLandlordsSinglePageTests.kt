@@ -5,9 +5,8 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersBackRoutingFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 
 class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -28,15 +27,11 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
         }
 
-        // TODO PDJB-1969: update the expected page to the freeholders list page when freeholders back routing becomes an internal step
         @Test
-        fun `Back link returns to the freeholders task when freeholders were asked about`(page: Page) {
-            // TODO: PDJB-1969: Use state builder methods added in the freeholders list area to set up this test without manual navigation
-            navigator.skipToPropertyRegistrationFreeholdersListPage(jointFreeholders = false).submit()
-            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
-            val anyoneInOwnershipChainPage = assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
+        fun `Back link returns to the freeholders list page when freeholders were asked about`(page: Page) {
+            val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage(afterFreeholders = true)
             anyoneInOwnershipChainPage.backLink.clickAndWait()
-            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class)
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
         }
     }
 }
