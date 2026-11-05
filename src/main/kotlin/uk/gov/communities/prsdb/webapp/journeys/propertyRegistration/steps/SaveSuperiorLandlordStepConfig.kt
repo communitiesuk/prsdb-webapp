@@ -24,10 +24,12 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                 val contactType =
                     state.superiorLandlordContactTypeStep.formModelOrNull?.contactType
                         ?: throw PrsdbWebException("Superior landlord contact type step data is missing")
+                val name =
+                    state.superiorLandlordNameStep.formModelOrNull?.name
+                        ?: throw PrsdbWebException("Superior landlord name step data is missing")
                 SuperiorLandlordDataModel(
                     detailsKnown = true,
-                    // TODO PDJB-1973: save the name the user entered on the superior landlord name step, throwing if it is missing
-                    name = PLACEHOLDER_NAME,
+                    name = name,
                     // TODO PDJB-1975: save the email address the user entered on the superior landlord email step, throwing if it is missing
                     email = if (contactType == SuperiorLandlordContactType.EMAIL) PLACEHOLDER_EMAIL else null,
                     // TODO PDJB-1976: save the address the user entered in the superior landlord address task, along with
@@ -53,7 +55,6 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
 
         // Clear the individual step form data so the next superior landlord starts fresh
         state.superiorLandlordProvideDetailsStep.clearFormData()
-        // TODO PDJB-1973: check this still clears the real name page correctly
         state.superiorLandlordNameStep.clearFormData()
         // TODO PDJB-1974: check this still clears the real contact type page correctly
         state.superiorLandlordContactTypeStep.clearFormData()
@@ -64,9 +65,6 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
     }
 
     companion object {
-        // TODO PDJB-1973: remove once the name the user entered is saved instead
-        const val PLACEHOLDER_NAME = "Placeholder Superior Landlord"
-
         // TODO PDJB-1975: remove once the email the user entered is saved instead
         const val PLACEHOLDER_EMAIL = "placeholder.superior.landlord@example.com"
 
