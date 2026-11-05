@@ -405,13 +405,17 @@ superiorLandlords:
     error:
       missing: Enter a name
   contactType:
-    fieldSetHeading: How should we contact the superior landlord? (TODO PDJB-1974)
+    fieldSetHeading: Which contact information can you provide for {0}?
+    fieldSetHint: You only need to provide one
     radios:
       option:
-        email: Email
-        postalAddress: Post
+        email:
+          label: Email address
+          hint: This will let us contact them quicker
+        postalAddress:
+          label: Postal address
       error:
-        missing: Select how we should contact the superior landlord
+        missing: Select which contact information you can provide
   list:
     heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
