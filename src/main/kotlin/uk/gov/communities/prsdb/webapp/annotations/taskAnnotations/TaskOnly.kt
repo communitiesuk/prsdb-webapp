@@ -8,5 +8,5 @@ class TaskOnly : Condition {
     override fun matches(
         context: ConditionContext,
         metadata: AnnotatedTypeMetadata,
-    ): Boolean = context.environment.activeProfiles.contains("web-server-deactivated")
+    ): Boolean = context.environment.activeProfiles.let { it.contains("web-server-deactivated") && !it.contains("email-worker") }
 }
