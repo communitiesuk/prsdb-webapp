@@ -18,7 +18,6 @@ class ReconcilePaymentsTaskApplicationRunner(
         exitProcess(reconcilePaymentsAndGetExitCode())
     }
 
-    // Separate from run so that tests can check the exit code without exitProcess stopping the test JVM
     internal fun reconcilePaymentsAndGetExitCode(): Int {
         println("Executing reconcile payments scheduled task")
 

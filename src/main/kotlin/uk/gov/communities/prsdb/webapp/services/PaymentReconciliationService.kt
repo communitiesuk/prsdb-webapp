@@ -67,7 +67,6 @@ class PaymentReconciliationService(
         return getStoredPaymentStatus(paymentId)
     }
 
-    // Returns the failure count. Never registers a property, so a payment taken after cancellation was requested goes to support.
     fun reconcilePayments(now: Instant): Int {
         var failureCount = 0
 
@@ -99,7 +98,6 @@ class PaymentReconciliationService(
         return failureCount
     }
 
-    // Returns whether the payment is left CANCELLING for the next run
     private fun resolveCancellingPayment(paymentId: String): Boolean =
         when (val govUkPayStatus = cancelOrReadGovUkPayStatus(paymentId)) {
             PaymentStatus.CANCELLED, PaymentStatus.FAILED -> {
@@ -121,7 +119,6 @@ class PaymentReconciliationService(
             }
         }
 
-    // Returns null if GOV.UK Pay did not cancel the payment and its status could not be read
     private fun cancelOrReadGovUkPayStatus(paymentId: String): PaymentStatus? =
         try {
             govUkPayClient.cancelPayment(paymentId)
