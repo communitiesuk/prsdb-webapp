@@ -113,7 +113,12 @@ class UpdateTenancyDetailsJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask)
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                    if (checkingAnswersFor == TenantsStep.ROUTE_SEGMENT) {
+                        configureStep(journey.householdsAndTenantsTask.tenants) {
+                            backDestination { journey.returnToCyaPageDestination }
+                        }
+                    }
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
