@@ -120,6 +120,7 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
         return self()
     }
+
     fun withFreeholderLookupAddress(
         houseNameOrNumber: String = "1",
         postcode: String = "FA1 1AA",
@@ -147,5 +148,4 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         )
         return self()
     }
-
 }
