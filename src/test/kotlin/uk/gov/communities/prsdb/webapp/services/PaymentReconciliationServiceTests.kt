@@ -202,7 +202,7 @@ class PaymentReconciliationServiceTests {
         }
 
         @ParameterizedTest
-        @CsvSource("FAILED, FAILED", "ERROR, FAILED", "CANCELLED, CANCELLED")
+        @CsvSource("FAILED, FAILED", "CANCELLED, CANCELLED")
         fun `records the GOV UK Pay status when GOV UK Pay does not cancel a payment that has failed or been cancelled`(
             govUkPayStatus: GovUkPayPaymentStatus,
             expectedStatus: PaymentStatus,

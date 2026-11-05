@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.application.DeleteExpiredOrganisationalLa
 import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
 import uk.gov.communities.prsdb.webapp.application.JointLandlordInvitationExpiryEmailTaskLogic
+import uk.gov.communities.prsdb.webapp.application.ReconcilePaymentsTaskLogic
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.AuditingConfig
@@ -121,6 +122,7 @@ class PrsdbTaskApplicationTests {
                 GovUkPayConfig::class.simpleBeanName,
                 GovUkPayClient::class.simpleBeanName,
                 PaymentReconciliationService::class.simpleBeanName,
+                ReconcilePaymentsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

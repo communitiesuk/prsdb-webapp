@@ -8,42 +8,38 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import org.springframework.context.ApplicationContext
-import uk.gov.communities.prsdb.webapp.application.ReconcilePaymentsTaskApplicationRunner
+import uk.gov.communities.prsdb.webapp.application.ReconcilePaymentsTaskLogic
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 
 @ExtendWith(MockitoExtension::class)
 class ReconcilePaymentsTaskApplicationRunnerTests {
     @Mock
-    private lateinit var mockContext: ApplicationContext
-
-    @Mock
-    private lateinit var mockPaymentReconciliationService: PaymentReconciliationService
+    private lateinit var paymentReconciliationService: PaymentReconciliationService
 
     @InjectMocks
-    private lateinit var runner: ReconcilePaymentsTaskApplicationRunner
+    private lateinit var taskLogic: ReconcilePaymentsTaskLogic
 
     @Test
-    fun `reconcilePaymentsAndGetExitCode returns 0 when no payments fail to reconcile`() {
+    fun `reconcilePayments returns zero when no payments fail to reconcile`() {
         // Arrange
-        whenever(mockPaymentReconciliationService.reconcilePayments(any())).thenReturn(0)
+        whenever(paymentReconciliationService.reconcilePayments(any())).thenReturn(0)
 
         // Act
-        val exitCode = runner.reconcilePaymentsAndGetExitCode()
+        val failureCount = taskLogic.reconcilePayments()
 
         // Assert
-        assertEquals(0, exitCode)
+        assertEquals(0, failureCount)
     }
 
     @Test
-    fun `reconcilePaymentsAndGetExitCode returns 1 when payments fail to reconcile`() {
+    fun `reconcilePayments returns the number of payments that failed to reconcile`() {
         // Arrange
-        whenever(mockPaymentReconciliationService.reconcilePayments(any())).thenReturn(2)
+        whenever(paymentReconciliationService.reconcilePayments(any())).thenReturn(2)
 
         // Act
-        val exitCode = runner.reconcilePaymentsAndGetExitCode()
+        val failureCount = taskLogic.reconcilePayments()
 
         // Assert
-        assertEquals(1, exitCode)
+        assertEquals(2, failureCount)
     }
 }
