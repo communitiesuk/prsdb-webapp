@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
@@ -64,6 +65,55 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
             val contactTypePage = navigator.skipToPropertyRegistrationFreeholderContactTypePage()
             contactTypePage.backLink.clickAndWait()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholderEmailStep {
+        @Test
+        fun `heading includes the freeholder name`() {
+            val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
+
+            assertThat(emailPage.heading).containsText("What is James Hassan’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email returns the missing email error`() {
+            val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
+            emailPage.submitEmail("")
+
+            assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address")
+        }
+
+        @Test
+        fun `submitting an invalid email returns the format error`() {
+            val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
+            emailPage.submitEmail("not-an-email")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `submitting an email already used by another freeholder returns the duplicate email error`() {
+            val emailPage =
+                navigator.skipToPropertyRegistrationFreeholderEmailPage(
+                    freeholderName = "James Hassan",
+                    existingFreeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, email = "james@example.com")),
+                )
+            emailPage.submitEmail("james@example.com")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText(
+                    "You’ve already used this email address for another freeholder - enter a different email address",
+                )
+        }
+
+        @Test
+        fun `Back link returns to the freeholder contact type page`(page: Page) {
+            val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
+            emailPage.backLink.clickAndWait()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
         }
     }
 

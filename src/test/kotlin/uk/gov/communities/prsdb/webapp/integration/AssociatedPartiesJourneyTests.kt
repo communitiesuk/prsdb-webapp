@@ -38,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import kotlin.test.assertEquals
 
@@ -167,8 +166,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
-            // TODO PDJB-1966: update this usage when the real freeholder email page is added
-            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submitEmail("test@example.com")
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
@@ -212,8 +210,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Email freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
-            // TODO PDJB-1966: update this usage when the real freeholder email page is added
-            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submitEmail("email.freeholder@example.com")
 
             freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
@@ -232,8 +229,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
             assertThat(freeholdersListPage.getSummaryCard(0).title).hasText("Unknown freeholder")
             assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Email freeholder")
-            // TODO PDJB-1966: assert the email the user entered once the real email page is added
-            assertThat(freeholdersListPage.getSummaryCard(1).summaryList).containsText(SaveFreeholderStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(freeholdersListPage.getSummaryCard(1).summaryList).containsText("email.freeholder@example.com")
             assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Address freeholder")
             // TODO PDJB-1967: assert the address the user entered once the real address pages are added
             assertThat(freeholdersListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
@@ -257,15 +253,15 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
             assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
             contactTypePage.form.submit()
-            // TODO PDJB-1966: update this usage when the real freeholder email page is added
-            assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submit()
+            val emailPage = assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("freeholder@example.com")
+            emailPage.submitEmail("changed.freeholder@example.com")
 
             val updatedListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(updatedListPage.heading).containsText("added 3 joint freeholders")
             assertThat(updatedListPage.getSummaryCard(0).title).hasText("Freeholder With Address")
             assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed freeholder")
-            // TODO PDJB-1966: assert the email the user entered once the real email page is added
-            assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText(SaveFreeholderStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText("changed.freeholder@example.com")
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
         }
 

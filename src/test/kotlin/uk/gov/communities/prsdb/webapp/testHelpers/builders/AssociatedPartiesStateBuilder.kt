@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -102,6 +105,12 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withFreeholderProvideDetails(provideDetails: YesOrNo = YesOrNo.YES): SelfType {
         val freeholderProvideDetailsFormModel = FreeholderProvideDetailsFormModel(provideDetails = provideDetails)
         withSubmittedValue(ProvideFreeholderDetailsStep.ROUTE_SEGMENT, freeholderProvideDetailsFormModel)
+        return self()
+    }
+
+    fun withFreeholderContactType(contactType: FreeholderContactType = FreeholderContactType.EMAIL): SelfType {
+        val freeholderContactTypeFormModel = FreeholderContactTypeFormModel(contactType = contactType)
+        withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
         return self()
     }
 }

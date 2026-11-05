@@ -30,8 +30,13 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                     name =
                         state.freeholderNameStep.formModelOrNull?.name
                             ?: throw PrsdbWebException("Freeholder name step data is missing"),
-                    // TODO PDJB-1966: save the email address the user entered on the freeholder email step
-                    email = if (contactType == FreeholderContactType.EMAIL) PLACEHOLDER_EMAIL else null,
+                    email =
+                        if (contactType == FreeholderContactType.EMAIL) {
+                            state.freeholderEmailStep.formModelOrNull?.emailAddress
+                                ?: throw PrsdbWebException("Freeholder email step data is missing")
+                        } else {
+                            null
+                        },
                     // TODO PDJB-1967: save the address the user entered in the freeholder address task, along with the
                     //  address lookup, select and manual entry answers needed to prefill those steps on change
                     address = if (contactType == FreeholderContactType.POSTAL_ADDRESS) PLACEHOLDER_ADDRESS else null,
@@ -58,16 +63,12 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state.freeholderProvideDetailsStep.clearFormData()
         state.freeholderNameStep.clearFormData()
         state.freeholderContactTypeStep.clearFormData()
-        // TODO PDJB-1966: check this still clears the real email page correctly
         state.freeholderEmailStep.clearFormData()
         // TODO PDJB-1967: check this still clears all the real address steps correctly
         state.freeholderAddressTask.clearFormData()
     }
 
     companion object {
-        // TODO PDJB-1966: remove once the email the user entered is saved instead
-        const val PLACEHOLDER_EMAIL = "placeholder.freeholder@example.com"
-
         // TODO PDJB-1967: remove once the address the user entered is saved instead
         val PLACEHOLDER_ADDRESS =
             AddressDataModel.fromManualAddressData(

@@ -6,6 +6,7 @@ import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -263,6 +264,14 @@ class PropertyStateSessionBuilder(
             freeholderName: String = "Test Freeholder",
         ) = beforePropertyRegistrationFreeholderName(jointFreeholders)
             .withFreeholderName(freeholderName)
+
+        fun beforePropertyRegistrationFreeholderEmail(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+            existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
+            .withFreeholderContactType(FreeholderContactType.EMAIL)
+            .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

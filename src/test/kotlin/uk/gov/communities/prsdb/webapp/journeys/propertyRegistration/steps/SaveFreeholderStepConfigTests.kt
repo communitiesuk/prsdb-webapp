@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 
@@ -77,7 +78,7 @@ class SaveFreeholderStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached saves the entered name and placeholder email when the contact type is email`() {
+    fun `afterStepIsReached saves the entered name and email when the contact type is email`() {
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.EMAIL)
         whenever(mockState.freeholdersMap).thenReturn(null)
@@ -90,7 +91,7 @@ class SaveFreeholderStepConfigTests {
             FreeholderDataModel(
                 detailsKnown = true,
                 name = ENTERED_NAME,
-                email = SaveFreeholderStepConfig.PLACEHOLDER_EMAIL,
+                email = ENTERED_EMAIL,
             )
         assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
         verify(mockState).nextFreeholderId = 2
@@ -178,6 +179,9 @@ class SaveFreeholderStepConfigTests {
             whenever(nameStep.formModelOrNull).thenReturn(FreeholderNameFormModel().apply { name = ENTERED_NAME })
         }
         whenever(mockState.freeholderEmailStep).thenReturn(emailStep)
+        if (contactType == FreeholderContactType.EMAIL) {
+            whenever(emailStep.formModelOrNull).thenReturn(FreeholderEmailFormModel().apply { emailAddress = ENTERED_EMAIL })
+        }
         whenever(mockState.freeholderAddressTask).thenReturn(addressTask)
     }
 
@@ -189,5 +193,6 @@ class SaveFreeholderStepConfigTests {
 
     companion object {
         private const val ENTERED_NAME = "Entered freeholder name"
+        private const val ENTERED_EMAIL = "entered.freeholder@example.com"
     }
 }

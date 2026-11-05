@@ -186,6 +186,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
@@ -278,6 +279,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEx
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
@@ -1016,12 +1018,32 @@ class Navigator(
 
     fun skipToPropertyRegistrationFreeholderContactTypePage(
         freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
     ): FreeholderContactTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(freeholderName = freeholderName).build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationFreeholderEmailPage(
+        freeholderName: String = "Test Freeholder",
+        existingFreeholders: Map<Int, FreeholderDataModel>? = null,
+        jointFreeholders: Boolean = true,
+    ): FreeholderEmailFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(
+                freeholderName = freeholderName,
+                existingFreeholders = existingFreeholders,
+                jointFreeholders = jointFreeholders,
+            ).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
+        return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationAnyoneInOwnershipChainPage(
