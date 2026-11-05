@@ -8,8 +8,9 @@ import {
 import {restoreEnvironment} from './nft-restore.mjs';
 
 function validate(config) {
+  const definition = config.taskDefinition ?? '';
   requireCondition(
-    new RegExp(`^${taskPrefix}prsdb-nft-vpc-restore-[a-zA-Z0-9-]+:\\d+$`).test(config.taskDefinition ?? ''),
+    definition.startsWith(taskPrefix) && /^prsdb-nft-vpc-restore-[a-zA-Z0-9-]+:\d+$/.test(definition.slice(taskPrefix.length)),
     'An exact NFT restore task definition revision is required',
   );
   requireCondition(/^\d+-\d+$/.test(config.runId ?? ''), 'Expected GitHub run ID and attempt');

@@ -58,7 +58,7 @@ export function buildCouncilConfiguration(existing, {simulatorUrl, appUrl}) {
 
 export function requireInteractiveAuthorization(status, body) {
   if (status !== 200 || !/<form\b/i.test(body) ||
-      !['sub', 'authCode', 'state'].every(name => new RegExp(`name=["']${name}["']`).test(body))) {
+      ![/name=["']sub["']/, /name=["']authCode["']/, /name=["']state["']/].every(pattern => pattern.test(body))) {
     throw new Error('Council simulator must expose interactive subject selection; start the container with -e INTERACTIVE_MODE=true');
   }
 }

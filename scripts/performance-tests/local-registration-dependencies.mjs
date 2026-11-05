@@ -219,37 +219,48 @@ async function selfTest(firstFailure) {
   const dependency = registrationDependencyServer({ fixtures: [fixture], appUrl: 'http://localhost:18080', port: 0, failFirst: true, firstFailure, pendingChecks: 2 });
   await dependency.listen();
   const base = `http://127.0.0.1:${dependency.server.address().port}`;
+  const localFetch = (value, options = {}) => {
+    const destination = new URL(value);
+    assert.ok(destination.origin === base && !destination.username && !destination.password,
+      'Requests must target the exact local test server without credentials');
+    return fetch(destination, { ...options, redirect: 'manual' });
+  };
   try {
-    const health = await fetch(`${base}/health`);
+    for (const destination of [`http://user@127.0.0.1:${dependency.server.address().port}/health`,
+      'https://example.com/health', 'http://127.0.0.1:1/health', 'http://localhost:18080/health']) {
+      assert.throws(() => localFetch(destination), /exact local test server/);
+    }
+    const health = await localFetch(`${base}/health`);
     assert.equal(health.status, 200);
-    const oauth = await fetch(`${base}/auth/oauth/token`, { method: 'POST', headers: { Authorization: 'Basic bG9jYWw6bG9jYWw=' },
+    const oauth = await localFetch(`${base}/auth/oauth/token`, { method: 'POST', headers: { Authorization: 'Basic bG9jYWw6bG9jYWw=' },
       body: new URLSearchParams({ grant_type: 'client_credentials' }) });
     assert.equal((await oauth.json()).access_token, token);
     for (const mode of ['1', '2', '3', '4', '5']) {
-      const response = await fetch(`${base}/api/prsdatabase/assessments/search?rrn=${rrn(true, 901, mode)}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await localFetch(`${base}/api/prsdatabase/assessments/search?rrn=${rrn(true, 901, mode)}`, { headers: { Authorization: `Bearer ${token}` } });
       assert.equal(response.status, mode === '4' ? 404 : 200);
       const json = await response.json();
       if (mode !== '4') assert.equal(json.data.address.addressLine1, 'NFT registration 901');
     }
     for (let attempt = 0; attempt < 2; attempt++) {
       const reference = `reference-${attempt}`;
-      const response = await fetch(`${base}/local/gov-uk-pay/v1/payments`, { method: 'POST', body: JSON.stringify({ amount: 6500,
+      const response = await localFetch(`${base}/local/gov-uk-pay/v1/payments`, { method: 'POST', body: JSON.stringify({ amount: 6500,
         reference, description: 'Register your rental property', delayed_capture: true,
         return_url: `http://localhost:18080${registrationPath}?journeyId=journey-a&paymentReference=${reference}` }) });
       assert.equal(response.status, 201);
       const payment = await response.json();
-      const card = await fetch(payment._links.next_url.href, { redirect: 'manual' });
+      const card = await localFetch(payment._links.next_url.href);
       assert.equal(card.status, 302);
+      assert.equal(new URL(card.headers.get('location')).origin, 'http://localhost:18080');
       if (attempt === 1) {
         for (let poll = 0; poll < 2; poll++) {
-          assert.equal((await (await fetch(payment._links.self.href)).json()).state.status, 'created');
+          assert.equal((await (await localFetch(payment._links.self.href)).json()).state.status, 'created');
         }
       }
-      const state = await (await fetch(payment._links.self.href)).json();
+      const state = await (await localFetch(payment._links.self.href)).json();
       assert.equal(state.state.status, attempt === 0 ? firstFailure : 'capturable');
-      if (attempt === 1) assert.equal((await fetch(payment._links.capture.href, { method: 'POST' })).status, 204);
+      if (attempt === 1) assert.equal((await localFetch(payment._links.capture.href, { method: 'POST' })).status, 204);
     }
-    const audit = await (await fetch(`${base}/audit`)).json();
+    const audit = await (await localFetch(`${base}/audit`)).json();
     assert.deepEqual(audit.map(payment => payment.status), [firstFailure, 'success']);
     assert.ok(audit.every(payment => payment.journeyId === 'journey-a' && payment.amount === 6500));
     assert.equal(new Set(audit.map(payment => payment.paymentId)).size, 2);

@@ -81,9 +81,7 @@ class ComplianceUpdateHttpContractTests {
             val PDF = "%PDF-1.4\n% synthetic contract certificate\n%%EOF\n".toByteArray(StandardCharsets.US_ASCII)
         }
 
-        // Wildcard bind serves both localhost addresses; Gatling only returns Secure cookies over https or to localhost,
-        // as with the real app on localhost:18080.
-        private val server = HttpServer.create(InetSocketAddress(0), 0)
+        private val server = HttpServer.create(InetSocketAddress("localhost", 0), 0)
         val baseUrl = "http://localhost:${server.address.port}"
         val posts = ConcurrentLinkedQueue<Map<String, String>>()
         val completed = mutableSetOf<String>()

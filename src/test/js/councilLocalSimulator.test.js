@@ -55,4 +55,11 @@ test('council bootstrap rejects automatic authorization instead of silently usin
   assert.throws(() => requireInteractiveAuthorization(200, '<h1>Unexpected page</h1>'), /interactive/i);
   assert.doesNotThrow(() => requireInteractiveAuthorization(200,
     '<form method="post"><input name="sub"><input name="authCode"><input name="state"></form>'));
+  assert.doesNotThrow(() => requireInteractiveAuthorization(200,
+    "<form method='post'><input name='sub'><input name='authCode'><input name='state'></form>"));
+  for (const name of ['sub', 'authCode', 'state']) {
+    assert.throws(() => requireInteractiveAuthorization(200,
+      '<form method="post"><input name="sub"><input name="authCode"><input name="state"></form>'
+        .replace(`name="${name}"`, `name="${name}-unexpected"`)), /interactive/i);
+  }
 });
