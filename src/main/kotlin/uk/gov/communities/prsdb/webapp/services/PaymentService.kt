@@ -140,7 +140,7 @@ class PaymentService(
             govUkPayClient.cancelPayment(paymentId)
         } catch (exception: GovUkPayException) {
             println(
-                "Failed to cancel GOV.UK Pay payment $paymentId, which was not saved because another payment was started for " +
+                "Could not cancel GOV.UK Pay payment $paymentId, which was not saved because another payment was started for " +
                     "journey $journeyId at the same time: ${exception.stackTraceToString()}",
             )
         }
@@ -223,30 +223,56 @@ class PaymentService(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
     ): PaymentStatus {
+        var isCaptureAttempted = false
         var isCaptured = false
         return try {
-            registerPropertyAndCapturePayment(paymentId, registrationData, onCaptured = { isCaptured = true })
+            registerPropertyAndCapturePayment(
+                paymentId,
+                registrationData,
+                onCaptureAttempted = { isCaptureAttempted = true },
+                onCaptured = { isCaptured = true },
+            )
         } catch (exception: PaymentQuoteExpiredException) {
             println("Marking payment $paymentId for cancellation: ${exception.message}")
             val status = paymentReconciliationService.markForCancellation(paymentId)
             if (status == PaymentStatus.SUCCEEDED) status else throw exception
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId: ${exception.stackTraceToString()}")
-            if (isCaptured) {
-                paymentReconciliationService.recordManualIntervention(
-                    paymentId,
-                    PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
-                    expectedStatus = PaymentStatus.CREATED,
-                )
-            } else {
-                paymentReconciliationService.markForCancellation(paymentId)
+            when {
+                isCaptured -> {
+                    paymentReconciliationService.recordManualIntervention(
+                        paymentId,
+                        PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
+                        expectedStatus = PaymentStatus.CREATED,
+                    )
+                }
+
+                isCaptureAttempted -> {
+                    cancelPaymentThatMayHaveBeenCaptured(paymentId)
+                }
+
+                else -> {
+                    paymentReconciliationService.markForCancellation(paymentId)
+                }
             }
         }
+    }
+
+    // GOV.UK Pay only cancels payments it hasn't taken, so a payment that can't be cancelled may have been taken
+    private fun cancelPaymentThatMayHaveBeenCaptured(paymentId: String): PaymentStatus {
+        val status = paymentReconciliationService.markForCancellation(paymentId)
+        if (status != PaymentStatus.CANCELLING) return status
+        return paymentReconciliationService.recordManualIntervention(
+            paymentId,
+            PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+            expectedStatus = PaymentStatus.CANCELLING,
+        )
     }
 
     private fun registerPropertyAndCapturePayment(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
+        onCaptureAttempted: () -> Unit,
         onCaptured: () -> Unit,
     ): PaymentStatus =
         checkNotNull(
@@ -281,6 +307,7 @@ class PaymentService(
                 checkQuoteDateMatchesRegistrationDate(storedPayment, property)
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
+                onCaptureAttempted()
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
                 govUkPayClient.capturePayment(paymentId)
                 onCaptured()

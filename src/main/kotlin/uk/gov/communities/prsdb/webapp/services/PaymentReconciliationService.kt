@@ -41,7 +41,7 @@ class PaymentReconciliationService(
                 )
             } catch (exception: GovUkPayException) {
                 println(
-                    "Failed to cancel GOV.UK Pay payment $paymentId, so leaving it CANCELLING: " +
+                    "Could not cancel GOV.UK Pay payment $paymentId, so leaving it CANCELLING: " +
                         exception.stackTraceToString(),
                 )
             }
