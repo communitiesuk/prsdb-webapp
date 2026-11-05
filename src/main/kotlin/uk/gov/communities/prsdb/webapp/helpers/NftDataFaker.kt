@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -55,7 +56,7 @@ object NftDataFaker {
     private var runReference: Instant = Instant.now()
 
     /**
-     * Resets all random sources so that a seeding run produces identical data every time.
+     * Resets all random sources so that a seeding run produces identical data for a given seed and reference date.
      * Must be called before seeding starts.
      */
     fun reset(
@@ -454,6 +455,9 @@ object NftDataFaker {
         val otherPropertyType = if (propertyType == PropertyType.OTHER) faker.options().option(*otherPropertyTypes) else null
         return Pair(propertyType, otherPropertyType)
     }
+
+    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
+    fun generateOwnershipTypeBeforePdjb955(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
 
     fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
 

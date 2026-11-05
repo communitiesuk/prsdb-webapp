@@ -16,6 +16,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -29,6 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
@@ -56,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
@@ -89,7 +92,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
@@ -101,14 +104,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersBackRoutingFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertMissingFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnyFreeholdersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
@@ -148,7 +149,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SaveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
@@ -165,6 +165,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -216,7 +217,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     private val propertyDetailsSectionHeader = "Property details"
-    private val ownershipSectionHeader = "Ownership and landlords"
+    private val peopleResponsibleSectionHeader = "People responsible for this property"
     private val occupiedSectionHeader = "Tell us if your property’s occupied"
     private val licenseSectionHeader = "Tell us if your property needs a license"
     private val gasSafetyHeader = "Gas safety certificate"
@@ -541,6 +542,36 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment failed page`(browser: Browser) {
+            withJavaScriptDisabled(browser) { page, navigator ->
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+                checkAnswersPage.confirm()
+                submitPaymentSummary(page)
+                val replacedPayment = getCreatedPayment()
+                val replacedPaymentReturnUrl = page.url()
+                // GOV.UK Pay refuses to cancel a payment while the user is part-way through 3D Secure, so it stays CANCELLING
+                doThrow(GovUkPayException("Cancel refused")).whenever(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+                val otherPage = page.context().newPage()
+                Navigator(otherPage, port).navigate(
+                    "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentSummaryStep.ROUTE_SEGMENT}" +
+                        "?${JourneyIdProvider.PARAMETER_NAME}=${getJourneyId(page)}",
+                )
+                createValidPage(otherPage, PaymentSummaryFormPagePropertyRegistration::class).form.submit()
+                createValidPage(otherPage, PaymentReturnFormPagePropertyRegistration::class)
+                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+                page.navigate(replacedPaymentReturnUrl)
+
+                val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+                assertThat(paymentFailedPage.tryAgainLink).isVisible()
+                assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
+                verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+                verify(govUkPayClient, never()).capturePayment(any())
+            }
+        }
+
+        @Test
         fun `submitting the payment summary creates a GOV UK Pay payment and returns to the payment return page`(page: Page) {
             // Stops the poller redirecting away from the payment return page
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
@@ -776,7 +807,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Has Joint Landlords - render page
             assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             hasJointLandlordsPage.submitHasJointLandlords()
@@ -784,12 +815,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Invite joint landlord - render page
             assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
-            assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             inviteJointLandlordPage.submitEmail("email@address.com")
             var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(checkJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(checkJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
             assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
             // Check joint landlords - render page
@@ -800,7 +831,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Invite another joint landlord - render page
             val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
-            assertThat(addAnotherPage.form.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(addAnotherPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
             addAnotherPage.submitEmail("email2@address.com")
 
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
@@ -932,15 +963,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            val electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            val eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(
-                electricalCertExpiryDatePage.heading,
-            ).containsText("What’s the expiry date on the Electrical Installation Certificate?")
-            electricalCertExpiryDatePage.submitDate(validExpiryDate)
+                eicIssueDatePage.heading,
+            ).containsText("What’s the issue date on the Electrical Installation Certificate (EIC)?")
+            eicIssueDatePage.submitDate(validEicIssueDate)
             var uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
 
             // Upload Electrical Cert - render page
@@ -1180,7 +1211,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Has Joint Landlords - render page
             assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(ownershipSectionHeader)
+            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
@@ -1195,20 +1226,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
             // TODO PDJB-1962: update this usage when the real freeholders intro page is added
-            assertPageIs(page, FreeholdersFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1969: remove this usage when has any freeholders becomes an internal step
-            assertPageIs(page, HasAnyFreeholdersFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
-            // TODO PDJB-1969: remove this usage when save freeholder becomes an internal step
-            assertPageIs(page, SaveFreeholderFormPagePropertyRegistration::class).submit()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
             freeholdersListPage.submit()
-            // TODO PDJB-1969: remove this usage when freeholders back routing becomes an internal step
-            assertPageIs(page, FreeholdersBackRoutingFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1971: update this usage when the real has superior landlords page is added
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitAnyoneInOwnershipChain(YesOrNo.NO)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
 
@@ -1682,12 +1706,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            var electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            var eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            eicIssueDatePage.submitDate(expiredEicIssueDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change issue date link
@@ -1697,14 +1721,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
             assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
             electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
+            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+            eicIssueDatePage.form.submit()
             electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
@@ -1811,12 +1835,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
             hasElectricalCertPage.submitHasEic()
-            var electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            var eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+            // EIC Issue Date - render page
+            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+            eicIssueDatePage.submitDate(expiredEicIssueDate)
             var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Electrical Cert Expired - render page then check change issue date link
@@ -1825,14 +1849,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(electricalCertExpiredPage.warning).isHidden()
             assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
             electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            electricalCertExpiryDatePage =
-                assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            eicIssueDatePage =
+                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
 
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
+            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+            eicIssueDatePage.form.submit()
             electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
 
             // Back on Electrical Cert Expired page - submit
@@ -2200,7 +2224,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(
                 listOf(
                     "Property details",
-                    "Ownership and landlords",
+                    "People responsible for this property",
                     "Who the council should contact",
                     "Tell us if your property’s occupied",
                 ),
@@ -2545,7 +2569,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
             assertTrue(propertyDetailsTask.hasLink)
 
-            val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
+            val ownershipTask = taskListPage.getAboutYourPropertyTask("People responsible for this property")
             assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
             assertFalse(ownershipTask.hasLink)
 
@@ -2577,7 +2601,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim(),
+                taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
@@ -2598,7 +2622,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
             assertEquals(
                 "Completed",
-                taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim(),
+                taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
             )
             assertEquals(
                 "Completed",
@@ -3220,6 +3244,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             DateTimeHelper()
                 .getCurrentDateInUK()
                 .minus(DatePeriod(days = 5))
+
+        val validEicIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = 1))
+
+        val expiredEicIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
     }

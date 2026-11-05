@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -23,7 +23,7 @@ class FreeholdersListStepConfig(
     override fun getStepSpecificContent(state: FreeholdersDetailsState) =
         mapOf(
             "addAnotherTitle" to "registerProperty.freeholders.list.heading.${if (state.isJointFreeholder) "joint" else "single"}",
-            "optionalAddAnotherTitleParam" to temporaryFreeholders.size,
+            "optionalAddAnotherTitleParam" to (state.freeholdersMap?.size ?: 0),
             "insetText" to "registerProperty.freeholders.list.insetText",
             "summaryCards" to getFreeholderCards(state),
             "submitButtonText" to "forms.buttons.saveAndContinue",
@@ -32,8 +32,7 @@ class FreeholdersListStepConfig(
         )
 
     private fun getFreeholderCards(state: FreeholdersDetailsState): List<SummaryCardViewModel> {
-        // TODO PDJB-1969: use state.freeholdersMap once freeholders are saved by the journey
-        val freeholdersMap = temporaryFreeholders
+        val freeholdersMap = state.freeholdersMap ?: emptyMap()
         val showRemove = freeholdersMap.size > 1 || state.allowRemovingLastMember
         return freeholdersMap
             .toSortedMap()
@@ -41,7 +40,7 @@ class FreeholdersListStepConfig(
                 val actions = getCardActions(state, freeholderId, showRemove)
                 if (freeholder.detailsKnown) {
                     SummaryCardViewModel(
-                        title = freeholder.name.orEmpty(),
+                        title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
                         summaryList = getContactRows(freeholder),
                         actions = actions,
                     )
@@ -82,30 +81,16 @@ class FreeholdersListStepConfig(
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        )
+        ).ifEmpty { throw PrsdbWebException("Freeholder has known details but no email or postal address") }
 
     override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/addAnotherCardsForm"
 
     override fun mode(state: FreeholdersDetailsState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    companion object {
-        // TODO PDJB-1969: remove these temporary freeholders once freeholders are saved by the journey
-        private val temporaryFreeholders: Map<Int, FreeholderDataModel> =
-            mapOf(
-                1 to
-                    FreeholderDataModel(
-                        detailsKnown = true,
-                        name = "James Hassan",
-                        address =
-                            AddressDataModel.fromManualAddressData(
-                                addressLineOne = "36 Sunnyside Lane",
-                                townOrCity = "Biggleswade",
-                                postcode = "SG18 9EJ",
-                            ),
-                    ),
-                2 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith", email = "email@example.com"),
-                3 to FreeholderDataModel(detailsKnown = false),
-            )
+    override fun afterStepIsReached(state: FreeholdersDetailsState) {
+        // Ensure that if you ever get to this page we reset any state that is used by one of the buttons.
+        // This means we can be certain all the buttons will always work even if you use the browser back buttons.
+        state.editingFreeholderId = null
     }
 }
 

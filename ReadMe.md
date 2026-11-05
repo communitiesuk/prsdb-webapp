@@ -226,8 +226,10 @@ Flyway runs the migrations.
 Database migrations <will be/ are> run at deployment time for all non-local deployments. This is done using
 the `flywayMigrate` Gradle task. When developing locally using the `local` profile the migrations will run at
 application start up. If you are using the `local` launch profile in IntelliJ, this will also run the `flywayClean` task
-before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
-populate the database with seed data.
+before running the migrations. After the migrations have run Spring Boot will then run the SQL scripts listed under
+`spring.sql.init.data-locations` in `application-local.yml` to populate the database with seed data. That list ends
+with the integration tests' `ALWAYS_APPENDED_SCRIPTS` (see `docs/IntegrationTestReadMe.md`), which must stay after the
+ordinary seeds since they fill in data for whatever those inserted.
 
 ### Updating Local Council Data
 

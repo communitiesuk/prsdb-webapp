@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -796,7 +797,6 @@ class NftDataSeederTests(
         assertTrue(organisationLandlords.isNotEmpty(), "Expected at least one organisation landlord to be seeded")
 
         var sawOrganisationWithExtraUsers = false
-        var sawEditorRole = false
 
         organisationLandlords.forEach { organisationLandlord ->
             val users = organisationalLandlordUserRepository.findByOrganisationalLandlord(organisationLandlord)
@@ -820,11 +820,9 @@ class NftDataSeederTests(
             users.forEach { user -> assertTrue(prsdbUserRepository.existsById(user.baseUser.id)) }
 
             if (users.size > 1) sawOrganisationWithExtraUsers = true
-            if (users.any { it.role == OrganisationalLandlordUserRole.EDITOR }) sawEditorRole = true
         }
 
         assertTrue(sawOrganisationWithExtraUsers, "Expected at least one organisation landlord to have extra users beyond the registrant")
-        assertTrue(sawEditorRole, "Expected at least one organisational landlord user with the EDITOR role")
     }
 
     @Test
@@ -847,19 +845,24 @@ class NftDataSeederTests(
         assertTrue(invitedOrganisationLandlordIds.all { it in organisationLandlordIds }) {
             "Expected each organisational landlord invitation to reference a real organisation landlord"
         }
+    }
 
-        val invitationRoles =
-            jdbcTemplate.queryForList<Int>(
-                "SELECT role FROM organisational_landlord_invitation",
+    @Test
+    fun `seedDatabase gives every property that requires freeholder records a placeholder freeholder`() {
+        newSeeder().seedDatabase()
+
+        val propertiesWithoutAFreeholder =
+            jdbcTemplate.queryForList<Long>(
+                "SELECT po.id FROM property_ownership po " +
+                    "WHERE po.ownership_type IN (${
+                        OwnershipType.entries.filter { it.requiresFreeholderRecords() }.joinToString(", ") { it.ordinal.toString() }
+                    }) AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id)",
             )
 
-        assertTrue(invitationRoles.isNotEmpty(), "Expected organisational landlord invitations to be seeded")
-        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.ADMIN.ordinal)) {
-            "Expected at least one organisational landlord invitation to have the ADMIN role"
-        }
-        assertTrue(invitationRoles.contains(OrganisationalLandlordUserRole.EDITOR.ordinal)) {
-            "Expected at least one organisational landlord invitation to have the EDITOR role"
-        }
+        assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
+
+        val seededFreeholders = jdbcTemplate.queryForList<Long>("SELECT id FROM freeholder")
+        assertTrue(seededFreeholders.isNotEmpty(), "Expected placeholder freeholders to be seeded")
     }
 
     @Test

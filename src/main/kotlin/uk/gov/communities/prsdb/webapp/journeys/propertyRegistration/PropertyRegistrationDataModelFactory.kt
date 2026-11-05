@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
@@ -57,10 +57,11 @@ class PropertyRegistrationDataModelFactory(
                 },
             licenseType = if (isDelegatedToLettingAgent) LicensingType.PROVIDE_LATER else state.licensingTask.getLicensingType(),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            // TODO PDJB-2015: derive the ownership type from the associated parties answers
+            // TODO PDJB-2015: derive the ownership type from the associated parties answers, via the
+            //  mapping on OwnershipTypeState
             ownershipType =
                 if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                    OwnershipType.FREEHOLD
+                    OwnershipTypeBeforePdjb955.FREEHOLD
                 } else {
                     state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
                         .notNullValue(OwnershipTypeFormModel::ownershipType)
@@ -144,9 +145,18 @@ class PropertyRegistrationDataModelFactory(
                 isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
-            electricalSafetyExpiryDate =
+            eicrExpiryDate =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
-                    .getElectricalCertificateExpiryDateIfReachable()
+                    .getEicrExpiryDateIfReachable()
+                    ?.toJavaLocalDate(),
+            eicIssueDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getEicIssueDateIfReachable()
+                    ?.toJavaLocalDate(),
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getEicExpiryDateIfReachable()
                     ?.toJavaLocalDate(),
             electricalCertType =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
@@ -188,6 +198,8 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
+            // TODO PDJB-1986: add the property manager's name and email address from
+            //  ownershipAndLandlordsTask.propertyManagerTask when the landlord is using a property manager
         )
     }
 }

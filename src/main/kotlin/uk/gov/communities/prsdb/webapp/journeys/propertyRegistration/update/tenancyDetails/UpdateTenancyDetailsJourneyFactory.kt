@@ -112,8 +112,15 @@ class UpdateTenancyDetailsJourneyFactory(
             unreachableStepUrl { returnUrl }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask)
+                HouseholdStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                }
+
+                TenantsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
@@ -130,8 +137,15 @@ class UpdateTenancyDetailsJourneyFactory(
                     checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
+                RentFrequencyStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 else -> {
