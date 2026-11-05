@@ -147,6 +147,7 @@ class FreeholdersListStepConfigTests {
             setupStepConfig(
                 freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, email = "email@example.com")),
                 stubRemoveStep = false,
+                stubAddAnotherStep = false,
             )
 
         // Act, Assert
@@ -160,6 +161,7 @@ class FreeholdersListStepConfigTests {
             setupStepConfig(
                 freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith")),
                 stubRemoveStep = false,
+                stubAddAnotherStep = false,
             )
 
         // Act, Assert
@@ -183,16 +185,19 @@ class FreeholdersListStepConfigTests {
         freeholders: Map<Int, FreeholderDataModel>? = DEFAULT_FREEHOLDERS,
         stubCardActionSteps: Boolean = true,
         stubRemoveStep: Boolean = stubCardActionSteps,
+        stubAddAnotherStep: Boolean = true,
     ): FreeholdersListStepConfig {
         val stepConfig = FreeholdersListStepConfig(urlParameterService)
         stepConfig.urlPath = FreeholdersListStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockState.freeholdersMap).thenReturn(freeholders)
-        whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
-        whenever(freeholderProvideDetailsStep.urlPath).thenReturn(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
-        whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
-        whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
+        if (stubAddAnotherStep) {
+            whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
+            whenever(freeholderProvideDetailsStep.urlPath).thenReturn(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+            whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
+            whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
+        }
         if (stubCardActionSteps) {
             whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
             whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
