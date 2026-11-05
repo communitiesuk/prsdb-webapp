@@ -59,6 +59,9 @@ const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/ho
 
 const val LANDLORD_RESPONSIBILITIES_URL = "https://www.gov.uk/renting-out-a-property"
 
+const val PROPERTY_FEE_GUIDANCE_URL =
+    "https://www.gov.uk/guidance/register-your-rental-property-service-guidance-for-landlords#fee-for-the-service"
+
 const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
 
 const val ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY =

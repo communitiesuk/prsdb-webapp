@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
@@ -14,6 +15,7 @@ class PaymentSummaryFormPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
     val form = FormWithSectionHeader(page)
     val summaryList = PaymentSummaryList(page)
+    val feeGuidanceLink = Link.byText(page, "the annual property fee (opens in new tab)")
 
     class PaymentSummaryList(
         page: Page,

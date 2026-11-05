@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_FEE_GUIDANCE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
@@ -39,6 +40,7 @@ class PaymentSummaryStepConfig(
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
             "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.quoteDate),
             "summaryListRows" to getSummaryListRows(state, quote),
+            "propertyFeeGuidanceUrl" to PROPERTY_FEE_GUIDANCE_URL,
             "quoteDate" to quote.quoteDate.toString(),
         )
     }
