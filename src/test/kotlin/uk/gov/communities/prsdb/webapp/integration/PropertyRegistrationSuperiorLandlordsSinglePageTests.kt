@@ -9,8 +9,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import kotlin.test.assertEquals
 
 class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -36,6 +40,79 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage(afterFreeholders = true)
             anyoneInOwnershipChainPage.backLink.clickAndWait()
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class ProvideSuperiorLandlordDetailsStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val provideDetailsPage = navigator.skipToPropertyRegistrationSuperiorLandlordProvideDetailsPage()
+            provideDetailsPage.form.submit()
+            assertThat(provideDetailsPage.form.getErrorMessage())
+                .containsText("Select if you can provide the details of this person in the ownership chain")
+        }
+
+        @Test
+        fun `Back link returns to the anyone in ownership chain page when adding the first superior landlord`(page: Page) {
+            val provideDetailsPage = navigator.skipToPropertyRegistrationSuperiorLandlordProvideDetailsPage()
+            provideDetailsPage.backLink.clickAndWait()
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Back link returns to the superior landlords list page when superior landlords have already been added`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding a new superior landlord does not prefill an answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            assertThat(page.locator("input[name='provideDetails']:checked")).hasCount(0)
+        }
+
+        @Test
+        fun `Returning to the page when adding a superior landlord prefills the answer just given`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).backLink.clickAndWait()
+
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            assertEquals("true", provideDetailsPage.form.radios.selectedValue)
+        }
+
+        @Test
+        fun `Changing a superior landlord prefills their existing answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(2)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            assertEquals("false", provideDetailsPage.form.radios.selectedValue)
+        }
+
+        @Test
+        fun `Returning to the page when changing a superior landlord prefills the answer just given`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(2)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).backLink.clickAndWait()
+
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            assertEquals("true", provideDetailsPage.form.radios.selectedValue)
         }
     }
 

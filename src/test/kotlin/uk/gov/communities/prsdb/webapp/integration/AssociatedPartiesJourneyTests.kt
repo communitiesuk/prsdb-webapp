@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -419,8 +420,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         fun `Choosing email as the superior landlord contact type goes through the email page before leaving the task`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             // TODO PDJB-1973: update this usage when the real superior landlord name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
@@ -446,8 +446,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             // TODO PDJB-1973: update this usage when the real superior landlord name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
@@ -465,8 +464,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitNo()
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
@@ -475,14 +473,13 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         fun `Adding several superior landlords shows each of them in the list`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitNo()
 
             var superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 1 person in the ownership chain")
             superiorLandlordsListPage.addAnotherButton.click()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            provideDetailsPage.submitYes()
             // TODO PDJB-1973: update this usage when the real superior landlord name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
@@ -494,8 +491,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 2 people in the ownership chain")
             superiorLandlordsListPage.addAnotherButton.click()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             // TODO PDJB-1973: update this usage when the real superior landlord name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: update this usage when the real contact type page is added
@@ -528,8 +524,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Change")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            provideDetailsPage.submitYes()
             // TODO PDJB-1973: check the name is prefilled once the real name page is added
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1974: check the contact type is prefilled once the real contact type page is added
