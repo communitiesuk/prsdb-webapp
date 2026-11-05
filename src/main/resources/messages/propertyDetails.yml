@@ -99,6 +99,7 @@ complianceInformation:
     eic:
       certificate: Electrical Installation Certificate (EIC)
       downloadCertificate: Download EIC
+      # TODO PDJB-1673: Review "expired EIC" download wording for certificates over five years old.
       downloadExpiredCertificate: Download expired EIC
   energyPerformance:
     heading: Energy performance certificate (EPC)
@@ -138,6 +139,7 @@ complianceInformation:
         linkText: View gas safety certificate
     electricalCert:
       expired:
+        # TODO PDJB-1673: Review EIC banner wording, which currently says the certificate has expired rather than being over five years old.
         mainText: This property’s electrical safety certificate has expired.
         linkText: View electrical safety certificate
     epc:
