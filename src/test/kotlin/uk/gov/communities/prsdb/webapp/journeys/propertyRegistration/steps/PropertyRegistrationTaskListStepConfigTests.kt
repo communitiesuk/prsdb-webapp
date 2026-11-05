@@ -148,6 +148,7 @@ class PropertyRegistrationTaskListStepConfigTests {
             stubState()
         }
 
+        // TODO: PDJB-2016: Remove this test
         @Test
         fun `getTaskListViewModel labels the ownership task 'Ownership and landlords' when ASSOCIATED_PARTIES is disabled`() {
             // Arrange
@@ -163,6 +164,7 @@ class PropertyRegistrationTaskListStepConfigTests {
             )
         }
 
+        // TODO: PDJB-2016: Remove ' when ASSOCIATED_PARTIES is enabled' from this test name
         @Test
         fun `getTaskListViewModel labels the ownership task 'People responsible for this property' when ASSOCIATED_PARTIES is enabled`() {
             // Arrange

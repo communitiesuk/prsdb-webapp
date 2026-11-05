@@ -433,6 +433,7 @@ class PropertyRegistrationJourneyFactory(
                     if (associatedPartiesEnabled) {
                         "registerProperty.taskList.aboutYourProperty.peopleResponsible"
                     } else {
+                        // TODO: PDJB-2016: Remove this branch
                         "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords"
                     },
                     shouldUseNumbering = false,
