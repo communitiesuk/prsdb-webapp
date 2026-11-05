@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -8,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
@@ -25,22 +25,20 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                 val contactType =
                     state.freeholderContactTypeStep.formModelOrNull?.contactType
                         ?: throw PrsdbWebException("Freeholder contact type step data is missing")
-                FreeholderDataModel(
-                    detailsKnown = true,
-                    name =
-                        state.freeholderNameStep.formModelOrNull?.name
-                            ?: throw PrsdbWebException("Freeholder name step data is missing"),
-                    email =
-                        if (contactType == FreeholderContactType.EMAIL) {
-                            state.freeholderEmailStep.formModelOrNull?.emailAddress
-                                ?: throw PrsdbWebException("Freeholder email step data is missing")
-                        } else {
-                            null
-                        },
-                    // TODO PDJB-1967: save the address the user entered in the freeholder address task, along with the
-                    //  address lookup, select and manual entry answers needed to prefill those steps on change
-                    address = if (contactType == FreeholderContactType.POSTAL_ADDRESS) PLACEHOLDER_ADDRESS else null,
-                )
+                val name =
+                    state.freeholderNameStep.formModelOrNull?.name
+                        ?: throw PrsdbWebException("Freeholder name step data is missing")
+                when (contactType) {
+                    FreeholderContactType.EMAIL ->
+                        FreeholderDataModel(
+                            detailsKnown = true,
+                            name = name,
+                            email =
+                                state.freeholderEmailStep.formModelOrNull?.emailAddress
+                                    ?: throw PrsdbWebException("Freeholder email step data is missing"),
+                        )
+                    FreeholderContactType.POSTAL_ADDRESS -> buildFreeholderWithAddress(state, name)
+                }
             } else {
                 FreeholderDataModel(detailsKnown = false)
             }
@@ -64,18 +62,33 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state.freeholderNameStep.clearFormData()
         state.freeholderContactTypeStep.clearFormData()
         state.freeholderEmailStep.clearFormData()
-        // TODO PDJB-1967: check this still clears all the real address steps correctly
         state.freeholderAddressTask.clearFormData()
     }
 
-    companion object {
-        // TODO PDJB-1967: remove once the address the user entered is saved instead
-        val PLACEHOLDER_ADDRESS =
-            AddressDataModel.fromManualAddressData(
-                addressLineOne = "1 Placeholder Street",
-                townOrCity = "Placeholder Town",
-                postcode = "AB1 2CD",
-            )
+    private fun buildFreeholderWithAddress(
+        state: FreeholdersDetailsState,
+        name: String,
+    ): FreeholderDataModel {
+        val addressTask = state.freeholderAddressTask
+        val lookupFormModel = addressTask.lookupAddressStep.formModelOrNull
+        val selectFormModel = addressTask.selectAddressStep.formModelOrNull
+        // The select step is skipped when the lookup finds no addresses, so the manual answers are used then too
+        val wentManual = selectFormModel?.address.let { it == null || it == MANUAL_ADDRESS_CHOSEN }
+        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
+
+        return FreeholderDataModel(
+            detailsKnown = true,
+            name = name,
+            address = addressTask.getAddress(),
+            addressSearchPostcode = lookupFormModel?.postcode,
+            addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
+            selectedAddress = selectFormModel?.address,
+            manualAddressLineOne = manualFormModel?.addressLineOne,
+            manualAddressLineTwo = manualFormModel?.addressLineTwo,
+            manualTownOrCity = manualFormModel?.townOrCity,
+            manualCounty = manualFormModel?.county,
+            manualPostcode = manualFormModel?.postcode,
+        )
     }
 }
 

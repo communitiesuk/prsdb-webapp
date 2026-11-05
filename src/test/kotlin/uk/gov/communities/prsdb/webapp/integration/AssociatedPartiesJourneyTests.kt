@@ -43,6 +43,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import kotlin.test.assertEquals
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -279,7 +281,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Email freeholder")
             assertThat(freeholdersListPage.getSummaryCard(1).summaryList).containsText("email.freeholder@example.com")
             assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Address freeholder")
-            assertThat(freeholdersListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
+            assertThat(freeholdersListPage.getSummaryCard(2).summaryList).containsText("1 Fictional Road")
         }
 
         @Test
@@ -310,6 +312,63 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed freeholder")
             assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText("changed.freeholder@example.com")
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
+        }
+
+        @Test
+        fun `Changing a freeholder with a postal address pre-fills their address answers`(page: Page) {
+            val freeholdersListPage =
+                navigator.skipToPropertyRegistrationFreeholdersListPage(
+                    freeholders =
+                        mapOf(
+                            1 to
+                                FreeholderDataModel(
+                                    detailsKnown = true,
+                                    name = "Freeholder With Address",
+                                    address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                                    addressSearchPostcode = "FA1 1AA",
+                                    addressSearchHouseNameOrNumber = "1",
+                                    selectedAddress = MANUAL_ADDRESS_CHOSEN,
+                                    manualAddressLineOne = "2 Manual Road",
+                                    manualAddressLineTwo = "Flat 3",
+                                    manualTownOrCity = "Manual Town",
+                                    manualCounty = "Manual County",
+                                    manualPostcode = "MA1 1AA",
+                                ),
+                            2 to FreeholderDataModel(detailsKnown = false),
+                        ),
+                )
+
+            freeholdersListPage
+                .getSummaryCard(0)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            // TODO PDJB-1963: update this usage when the real provide details page is added
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).form.submit()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).form.submit()
+
+            val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
+            assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
+            assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+            lookupAddressPage.form.submit()
+
+            val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
+            assertEquals(MANUAL_ADDRESS_CHOSEN, selectAddressPage.form.addressRadios.selectedValue)
+            selectAddressPage.form.submit()
+
+            val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyRegistration::class)
+            assertThat(manualAddressPage.form.addressLineOneInput).hasValue("2 Manual Road")
+            assertThat(manualAddressPage.form.addressLineTwoInput).hasValue("Flat 3")
+            assertThat(manualAddressPage.form.townOrCityInput).hasValue("Manual Town")
+            assertThat(manualAddressPage.form.countyInput).hasValue("Manual County")
+            assertThat(manualAddressPage.form.postcodeInput).hasValue("MA1 1AA")
+            manualAddressPage.form.addressLineOneInput.fill("3 Changed Road")
+            manualAddressPage.form.submit()
+
+            val updatedListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Freeholder With Address")
+            assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("3 Changed Road")
         }
 
         @Test
