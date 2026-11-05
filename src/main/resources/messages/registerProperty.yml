@@ -344,6 +344,8 @@ freeholders:
   address:
     lookup:
       fieldSetHeading: What is {0}’s address?
+      houseNameOrNumber:
+        label: House name or number
     select:
       fieldSetHeading: Select {0}’s address
     manual:
