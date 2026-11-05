@@ -10,6 +10,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 // TODO PDJB-1963: replace this placeholder with the real "can you provide details about the freeholder" page.
 // Implement the routing logic
+// TODO PDJB-1963: when changing a freeholder, prefill this page with whether details are known from
+//  state.editingFreeholder by overriding resolvePageContent, as in OrgGovBodyMemberNameStepConfig.
+//  Check when adding a second freeholder that the page starts empty, as SaveFreeholderStepConfig clears the form data after each save.
 @JourneyFrameworkComponent
 class ProvideFreeholderDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>() {
     override val formModelClass = FreeholderProvideDetailsFormModel::class

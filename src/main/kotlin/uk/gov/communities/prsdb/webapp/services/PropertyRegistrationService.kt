@@ -77,7 +77,7 @@ class PropertyRegistrationService(
                 gasSafetyFileUploadIds,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyFileUploadIds,
-                electricalSafetyExpiryDate,
+                eicrExpiryDate,
                 electricalCertType,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcCertificateUrl,
@@ -87,6 +87,9 @@ class PropertyRegistrationService(
                 epcExemptionReason,
                 epcMeesExemptionReason,
                 epcProvideLater = epcProvideLater,
+                eicIssueDate = eicIssueDate,
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                eicExpiryDate = eicExpiryDate,
             )
 
             runAfterTransactionCommits {
@@ -117,6 +120,7 @@ class PropertyRegistrationService(
                     null
                 }
 
+            // TODO PDJB-1986: save the property manager (if provided) and link it to the new property ownership
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,

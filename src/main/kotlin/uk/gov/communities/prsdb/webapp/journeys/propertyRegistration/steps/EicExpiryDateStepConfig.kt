@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 
+// TODO PDJB-1679: Delete this file when the EIC_ISSUE_DATE flag is removed
 @JourneyFrameworkComponent
 class EicExpiryDateStepConfig :
     AbstractRequestableStepConfig<ElectricalCertExpiryStatus, AnyDateFormModel, ElectricalSafetyDetailState>() {

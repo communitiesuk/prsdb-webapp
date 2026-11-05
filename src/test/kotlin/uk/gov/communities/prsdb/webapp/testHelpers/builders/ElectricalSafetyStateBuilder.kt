@@ -6,12 +6,13 @@ import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 
 interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<SelfType>> {
     val additionalDataMap: MutableMap<String, String>
@@ -86,8 +88,16 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
         return self()
     }
 
-    fun withEicExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
-        withElectricalCertExpiryDate(EicExpiryDateStep.ROUTE_SEGMENT, expiryDate)
+    fun withEicIssueDate(issueDate: LocalDate = DateTimeHelper().getCurrentDateInUK()): SelfType {
+        val formModel =
+            TodayOrPastDateFormModel().apply {
+                day = issueDate.dayOfMonth.toString()
+                month = issueDate.monthNumber.toString()
+                year = issueDate.year.toString()
+            }
+        withSubmittedValue(EicIssueDateStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
 
     fun withEicrExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
         withElectricalCertExpiryDate(EicrExpiryDateStep.ROUTE_SEGMENT, expiryDate)
