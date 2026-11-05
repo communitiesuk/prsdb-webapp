@@ -15,11 +15,15 @@ class RemovePropertyManagerStepConfig :
 
     override fun getStepSpecificContent(state: PropertyManagerState): Map<String, Any?> =
         mapOf(
-            "fieldSetHeadingParam" to state.propertyManagerDetailsStep.formModel.name,
+            "fieldSetHeading" to "registerProperty.propertyManager.remove.fieldSetHeading",
+            "fieldSetHint" to "registerProperty.propertyManager.remove.fieldSetHint",
+            "optionalFieldSetHeadingParam" to state.propertyManagerDetailsStep.formModel.name,
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+            "showSectionHeader" to true,
         )
 
-    override fun chooseTemplate(state: PropertyManagerState) = "forms/removePropertyManagerForm"
+    override fun chooseTemplate(state: PropertyManagerState) = "forms/areYouSureForm"
 
     override fun mode(state: PropertyManagerState): YesOrNo? = getFormModelFromStateOrNull(state)?.toYesOrNo()
 

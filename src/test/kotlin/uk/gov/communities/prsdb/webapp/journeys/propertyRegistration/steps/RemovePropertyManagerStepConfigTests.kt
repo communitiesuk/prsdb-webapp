@@ -43,7 +43,7 @@ class RemovePropertyManagerStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent includes the property manager's name and yes or no radios`() {
+    fun `getStepSpecificContent includes the property manager's name, hint, radios and section header`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.propertyManagerDetailsStep).thenReturn(mockPropertyManagerDetailsStep)
         whenever(mockPropertyManagerDetailsStep.formModel).thenReturn(
@@ -54,8 +54,12 @@ class RemovePropertyManagerStepConfigTests {
 
         assertEquals(
             mapOf(
-                "fieldSetHeadingParam" to "Jerry Mouse",
+                "fieldSetHeading" to "registerProperty.propertyManager.remove.fieldSetHeading",
+                "fieldSetHint" to "registerProperty.propertyManager.remove.fieldSetHint",
+                "optionalFieldSetHeadingParam" to "Jerry Mouse",
                 "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+                "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+                "showSectionHeader" to true,
             ),
             content,
         )
