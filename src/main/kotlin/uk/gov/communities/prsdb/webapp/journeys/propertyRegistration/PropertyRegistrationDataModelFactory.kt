@@ -145,9 +145,18 @@ class PropertyRegistrationDataModelFactory(
                 isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
-            electricalSafetyExpiryDate =
+            eicrExpiryDate =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
-                    .getElectricalCertificateExpiryDateIfReachable()
+                    .getEicrExpiryDateIfReachable()
+                    ?.toJavaLocalDate(),
+            eicIssueDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getEicIssueDateIfReachable()
+                    ?.toJavaLocalDate(),
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getEicExpiryDateIfReachable()
                     ?.toJavaLocalDate(),
             electricalCertType =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
@@ -189,6 +198,8 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
+            // TODO PDJB-1986: add the property manager's name and email address from
+            //  ownershipAndLandlordsTask.propertyManagerTask when the landlord is using a property manager
         )
     }
 }

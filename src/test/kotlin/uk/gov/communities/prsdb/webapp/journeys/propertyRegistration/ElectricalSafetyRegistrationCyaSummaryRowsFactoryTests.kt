@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -36,7 +38,10 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
     lateinit var mockState: ElectricalSafetyDetailState
 
     private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     private val mockEicExpiryDateStep: EicExpiryDateStep = mock()
+    private val mockEicIssueDateStep: EicIssueDateStep = mock()
     private val mockCheckEicUploadsStep: CheckEicUploadsStep = mock()
     private val mockEicrExpiryDateStep: EicrExpiryDateStep = mock()
     private val mockCheckEicrUploadsStep: CheckEicrUploadsStep = mock()
@@ -61,15 +66,22 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockHasElectricalCertStep.currentJourneyId).thenReturn("test-journey-id")
     }
 
-    private fun setupEicCertUploadedMocks() {
+    // TODO PDJB-1679: Remove isEicIssueDateEnabled and always stub the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+    private fun setupEicCertUploadedMocks(isEicIssueDateEnabled: Boolean) {
         setupCommonStateMocks()
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
         whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
         whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
-        whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
+        whenever(mockState.isEicIssueDateEnabled).thenReturn(isEicIssueDateEnabled)
+        if (isEicIssueDateEnabled) {
+            whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
+            whenever(mockEicIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
+        } else {
+            whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
+            whenever(mockEicExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
+        }
         whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
-        whenever(mockEicExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockCheckEicUploadsStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockState.eicUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
         stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
@@ -77,6 +89,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
     @Nested
     inner class CertUploaded {
+        // TODO PDJB-1679: Use the EIC issue date step instead of the EIC expiry date step when the EIC_ISSUE_DATE flag is removed
         @Test
         fun `factory uses the EIC branch steps and uploads, wires up EIC download messageKey and sorts uploads by map index`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -85,6 +98,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
 
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
+            whenever(mockState.isEicIssueDateEnabled).thenReturn(false)
 
             whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
             whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
@@ -99,7 +113,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
             val requestedSteps = mutableListOf<JourneyStep.RequestableStep<*, *, *>>()
             val factory =
-                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false) {
+                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService) {
                     requestedSteps.add(it)
                     Destination.Nowhere()
                 }
@@ -129,21 +143,47 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         }
 
         @Test
+        fun `factory links the EIC date row to the EIC issue date step with a blank value when the EIC issue date flag is enabled`() {
+            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
+            whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
+            whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            whenever(mockState.isEicIssueDateEnabled).thenReturn(true)
+            whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
+            whenever(mockState.checkEicUploadsStep).thenReturn(mockCheckEicUploadsStep)
+            whenever(mockState.eicUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
+
+            val requestedSteps = mutableListOf<JourneyStep.RequestableStep<*, *, *>>()
+            val factory =
+                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService) {
+                    requestedSteps.add(it)
+                    Destination.Nowhere()
+                }
+
+            val rows = factory.createRows()
+            assertEquals(listOf(mockHasElectricalCertStep, mockEicIssueDateStep, mockCheckEicUploadsStep), requestedSteps)
+            assertEquals("", rows[1].fieldValue)
+        }
+
+        @Test
         fun `factory uses the issue date heading for an EIC when EIC issue date is enabled`() {
-            setupEicCertUploadedMocks()
+            setupEicCertUploadedMocks(isEicIssueDateEnabled = true)
 
             val rows =
-                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = true).createRows()
+                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService).createRows()
 
             assertEquals("checkElectricalSafety.issueDate.fieldHeading", rows[1].fieldHeading)
         }
 
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
         @Test
         fun `factory uses the expiry date heading for an EIC when EIC issue date is disabled`() {
-            setupEicCertUploadedMocks()
+            setupEicCertUploadedMocks(isEicIssueDateEnabled = false)
 
             val rows =
-                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false).createRows()
+                ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService).createRows()
 
             assertEquals("checkElectricalSafety.expiryDate.fieldHeading", rows[1].fieldHeading)
         }
@@ -154,6 +194,9 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EICR)
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EICR)
+            // Lenient because the EICR branch shouldn't read the flag at all
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            lenient().`when`(mockState.isEicIssueDateEnabled).thenReturn(true)
 
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
 
@@ -166,7 +209,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             )
             stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = true)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(3, rows.size)
@@ -193,7 +236,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)
@@ -208,7 +251,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
             whenever(mockState.isOccupied).thenReturn(false)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)
@@ -226,7 +269,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)
@@ -241,7 +284,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
             whenever(mockState.isOccupied).thenReturn(false)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)
@@ -260,7 +303,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)
@@ -276,7 +319,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
             whenever(mockState.isOccupied).thenReturn(false)
 
-            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, isEicIssueDateEnabled = false)
+            val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val rows = factory.createRows()
             assertEquals(1, rows.size)

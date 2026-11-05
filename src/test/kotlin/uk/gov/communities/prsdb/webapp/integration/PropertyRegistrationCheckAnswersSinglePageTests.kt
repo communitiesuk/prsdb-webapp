@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
@@ -537,25 +537,27 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        // TODO PDJB-1671: Expect the EIC issue date page for EICs once it exists
-        @ParameterizedTest(name = "{0}")
-        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
-        fun `The back link on the electrical certificate expiry date page returns to the CYA page when reached from there`(
-            certificateType: CertificateType,
-            page: Page,
-        ) {
-            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(certificateType)
+        @Test
+        fun `The back link on the EICR expiry date page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eicr)
 
-            checkAnswersPage.complianceSummaryList.electricalCertDateRow(certificateType).actions
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eicr).actions
                 .getActionLink("Change")
                 .clickAndWait()
-            val expiryDatePage =
-                when (certificateType) {
-                    CertificateType.Eic -> assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
-                    CertificateType.Eicr -> assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
-                }
+            val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
             expiryDatePage.backLink.clickAndWait()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `The back link on the EIC issue date page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
+
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).actions
+                .getActionLink("Change")
+                .clickAndWait()
+            val issueDatePage = assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+            issueDatePage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 

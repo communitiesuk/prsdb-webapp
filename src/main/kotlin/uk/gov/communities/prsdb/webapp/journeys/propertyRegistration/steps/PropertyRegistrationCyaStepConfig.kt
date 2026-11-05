@@ -130,6 +130,7 @@ class PropertyRegistrationCyaStepConfig(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
             "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
             "ownershipAndLandlordsRows" to
+                // TODO PDJB-1986: add rows for whether a property manager is used and, if so, their name and email address
                 listOf(
                     getOwnershipTypeRow(state),
                     getJointLandLordsSummaryRow(state),

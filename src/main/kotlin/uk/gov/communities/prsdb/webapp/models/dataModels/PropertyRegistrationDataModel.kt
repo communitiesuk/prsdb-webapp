@@ -36,7 +36,10 @@ data class PropertyRegistrationDataModel(
     val gasSafetyFileUploadIds: List<Long>,
     val gasSafetyCertProvideLater: Boolean,
     val electricalSafetyFileUploadIds: List<Long>,
-    val electricalSafetyExpiryDate: LocalDate?,
+    val eicrExpiryDate: LocalDate?,
+    val eicIssueDate: LocalDate?,
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    val eicExpiryDate: LocalDate?,
     val electricalCertType: CertificateType?,
     val electricalSafetyCertProvideLater: Boolean,
     val epcCertificateUrl: String?,

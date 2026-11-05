@@ -1,0 +1,28 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{registerProperty.superiorLandlords.anyoneInOwnershipChain.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.superiorLandlords.anyoneInOwnershipChain.heading}">
+        registerProperty.superiorLandlords.anyoneInOwnershipChain.heading
+    </h1>
+    <p class="govuk-body" th:text="#{registerProperty.superiorLandlords.anyoneInOwnershipChain.paragraph.one}">
+        registerProperty.superiorLandlords.anyoneInOwnershipChain.paragraph.one
+    </p>
+    <div class="govuk-inset-text" th:text="#{registerProperty.superiorLandlords.anyoneInOwnershipChain.insetText}">
+        registerProperty.superiorLandlords.anyoneInOwnershipChain.insetText
+    </div>
+    <p class="govuk-body" th:text="#{registerProperty.superiorLandlords.anyoneInOwnershipChain.paragraph.two}">
+        registerProperty.superiorLandlords.anyoneInOwnershipChain.paragraph.two
+    </p>
+</th:block>
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'anyoneInOwnershipChain', #{registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.heading}, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'anyoneInOwnershipChain', null, ${radioOptions})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+</th:block>
+</html>
