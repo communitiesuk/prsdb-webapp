@@ -95,6 +95,9 @@ class SuperiorLandlordsListStepConfigTests {
         }
     }
 
+    // TODO PDJB-1978: add tests that getStepSpecificContent throws when a superior landlord with known details has no name,
+    //  and when one has no email or postal address (see FreeholdersListStepConfigTests)
+
     @Suppress("UNCHECKED_CAST")
     private fun getCards(stepConfig: SuperiorLandlordsListStepConfig) =
         stepConfig.getStepSpecificContent(mockState)["summaryCards"] as List<SummaryCardViewModel>

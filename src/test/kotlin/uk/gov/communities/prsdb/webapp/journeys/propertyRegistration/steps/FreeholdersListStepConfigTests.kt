@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -136,6 +138,32 @@ class FreeholdersListStepConfigTests {
 
         assertEquals(0, content["optionalAddAnotherTitleParam"])
         assertEquals(emptyList<SummaryCardViewModel>(), content["summaryCards"])
+    }
+
+    @Test
+    fun `getStepSpecificContent throws when a freeholder with known details has no name`() {
+        // Arrange
+        val stepConfig =
+            setupStepConfig(
+                freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, email = "email@example.com")),
+                stubRemoveStep = false,
+            )
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(mockState) }
+    }
+
+    @Test
+    fun `getStepSpecificContent throws when a freeholder with known details has no email or postal address`() {
+        // Arrange
+        val stepConfig =
+            setupStepConfig(
+                freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith")),
+                stubRemoveStep = false,
+            )
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(mockState) }
     }
 
     @Test

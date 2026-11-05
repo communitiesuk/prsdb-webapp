@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -40,7 +41,9 @@ class SuperiorLandlordsListStepConfig(
                 val actions = getCardActions(state, superiorLandlordId)
                 if (superiorLandlord.detailsKnown) {
                     SummaryCardViewModel(
-                        title = superiorLandlord.name.orEmpty(),
+                        title =
+                            superiorLandlord.name
+                                ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
                         summaryList = getContactRows(superiorLandlord),
                         actions = actions,
                     )
@@ -79,7 +82,7 @@ class SuperiorLandlordsListStepConfig(
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        )
+        ).ifEmpty { throw PrsdbWebException("Superior landlord has known details but no email or postal address") }
 
     override fun chooseTemplate(state: SuperiorLandlordsDetailsState) = "forms/addAnotherCardsForm"
 
