@@ -65,15 +65,18 @@ class PropertyRegistrationTaskListStepConfig(
                         ),
                     )
                     add(
-                        TaskListItemViewModel.fromTask(
-                            "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
-                            // TODO PDJB-2016: use ownershipAndLandlordsTask directly once ASSOCIATED_PARTIES is released
-                            if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                                state.ownershipAndLandlordsTask
-                            } else {
-                                state.ownershipAndLandlordsTaskBeforeAssociatedParties
-                            },
-                        ),
+                        // TODO PDJB-2016: use peopleResponsible and ownershipAndLandlordsTask directly once ASSOCIATED_PARTIES is released
+                        if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+                            TaskListItemViewModel.fromTask(
+                                "registerProperty.taskList.aboutYourProperty.peopleResponsible",
+                                state.ownershipAndLandlordsTask,
+                            )
+                        } else {
+                            TaskListItemViewModel.fromTask(
+                                "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                                state.ownershipAndLandlordsTaskBeforeAssociatedParties,
+                            )
+                        },
                     )
                     add(
                         TaskListItemViewModel.fromTask(
