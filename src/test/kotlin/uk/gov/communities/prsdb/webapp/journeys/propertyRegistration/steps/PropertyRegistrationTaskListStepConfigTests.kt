@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTaskBeforeAssociatedParties
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
@@ -140,6 +142,46 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Nested
+    inner class OwnershipTaskListItemTests {
+        @BeforeEach
+        fun setUp() {
+            stubState()
+        }
+
+        // TODO: PDJB-2016: Remove this test
+        @Test
+        fun `getTaskListViewModel labels the ownership task 'Ownership and landlords' when ASSOCIATED_PARTIES is disabled`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+
+            // Act
+            val aboutYourPropertySection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
+
+            // Assert
+            assertEquals(
+                "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                aboutYourPropertySection.tasks[1].nameKey,
+            )
+        }
+
+        // TODO: PDJB-2016: Remove ' when ASSOCIATED_PARTIES is enabled' from this test name
+        @Test
+        fun `getTaskListViewModel labels the ownership task 'People responsible for this property' when ASSOCIATED_PARTIES is enabled`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+
+            // Act
+            val aboutYourPropertySection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
+
+            // Assert
+            assertEquals(
+                "registerProperty.taskList.aboutYourProperty.peopleResponsible",
+                aboutYourPropertySection.tasks[1].nameKey,
+            )
+        }
+    }
+
+    @Nested
     inner class SubmitYourRegistrationTaskListItemTests {
         @BeforeEach
         fun setUp() {
@@ -181,6 +223,7 @@ class PropertyRegistrationTaskListStepConfigTests {
 
     private fun stubState() {
         val mockPropertyDetailsTask = mock<PropertyDetailsTask>()
+        val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
         val mockOwnershipAndLandlordsTaskBeforeAssociatedParties = mock<OwnershipAndLandlordsTaskBeforeAssociatedParties>()
         val mockCorrespondenceTask = mock<CorrespondenceTask>()
         val mockLicensingTask = mock<LicensingTask>()
@@ -191,6 +234,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         val mockEpcTask = mock<EpcTask>()
 
         whenever(mockPropertyDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
+        whenever(mockOwnershipAndLandlordsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockCorrespondenceTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockLicensingTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
@@ -203,6 +247,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         whenever(mockCyaStep.currentJourneyId).thenReturn("test-journey-id")
 
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
         whenever(
             mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
         ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
