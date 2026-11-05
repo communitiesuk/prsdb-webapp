@@ -52,6 +52,10 @@ The email worker then sends the emails on the queue and retries any that fail.
 Emails that still can't be sent are moved to a dead letter queue, which raises an alarm.
 Once the problem is fixed, you can resend them by redriving the dead letter queue in the AWS console.
 
+Outside production, emails to recipients who aren't on the Notify allowlist are re-sent to the address in the `EMAILNOTIFICATIONS_ALLOWLIST_FALLBACK_ADDRESS` environment variable.
+It's set from the `<environment>-prsdb-notify-allowlist-fallback-email-address` parameter in AWS Parameter Store.
+If it's not set, those emails are dropped.
+
 Locally, ElasticMQ (started by `docker-compose.local.yml`) is used in place of SQS, and the app processes the queue itself.
 
 ### Testing

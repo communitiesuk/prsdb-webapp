@@ -29,7 +29,7 @@ notify:
 email-queue:
   name: prsdb-email-queue
   listener:
-    # Started only in tests that import TestcontainersConfiguration, which provides ElasticMQ
+    # Started only in PrsdbEmailWorkerApplicationTests; stopping a listener when Spring pauses a cached test context waits for its poll to finish
     auto-startup: false
     max-concurrent-messages: 5
     initial-visibility-timeout-seconds: 1

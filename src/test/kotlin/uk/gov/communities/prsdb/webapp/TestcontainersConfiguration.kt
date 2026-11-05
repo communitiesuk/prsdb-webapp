@@ -24,6 +24,5 @@ class TestcontainersConfiguration {
             registry.add("local.sqs.endpoint") {
                 "http://${elasticMqContainer.host}:${elasticMqContainer.getMappedPort(SharedContainers.ELASTICMQ_PORT)}"
             }
-            registry.add("email-queue.listener.auto-startup") { "true" }
         }
 }

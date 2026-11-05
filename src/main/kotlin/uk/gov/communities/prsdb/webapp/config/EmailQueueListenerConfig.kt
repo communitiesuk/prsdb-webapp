@@ -31,12 +31,16 @@ class EmailQueueListenerConfig {
                     .maxMessagesPerPoll(maxConcurrentMessages)
                     .queueNotFoundStrategy(QueueNotFoundStrategy.FAIL)
             }.errorHandler(
-                ExponentialBackoffErrorHandler
-                    .builder<Any>()
-                    .initialVisibilityTimeoutSeconds(initialVisibilityTimeoutSeconds)
-                    .multiplier(visibilityTimeoutMultiplier)
-                    .maxVisibilityTimeoutSeconds(maxVisibilityTimeoutSeconds)
-                    .build(),
+                EmailQueueErrorHandler(
+                    persistentFailureVisibilityTimeoutSeconds = initialVisibilityTimeoutSeconds,
+                    transientFailureErrorHandler =
+                        ExponentialBackoffErrorHandler
+                            .builder<Any>()
+                            .initialVisibilityTimeoutSeconds(initialVisibilityTimeoutSeconds)
+                            .multiplier(visibilityTimeoutMultiplier)
+                            .maxVisibilityTimeoutSeconds(maxVisibilityTimeoutSeconds)
+                            .build(),
+                ),
             ).build()
 
     companion object {

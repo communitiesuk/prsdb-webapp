@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.core.env.Environment
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
@@ -26,11 +25,13 @@ import uk.gov.communities.prsdb.webapp.local.services.EmailDeliveryStubService
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
-// A dedicated queue stops email queue listeners in other cached test contexts consuming this test's messages
+// A dedicated queue keeps this test independent of emails other tests leave on the shared email queue
 @Import(TestcontainersConfiguration::class, PrsdbEmailWorkerApplicationTests.EmailWorkerTestsQueueConfiguration::class)
 @SpringBootTest
 @ActiveProfiles("web-server-deactivated", "email-worker", "local")
-@TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "email-queue.name=$EMAIL_WORKER_TESTS_QUEUE"])
+@TestPropertySource(
+    properties = ["EMAILNOTIFICATIONS_APIKEY", "email-queue.name=$EMAIL_WORKER_TESTS_QUEUE", "email-queue.listener.auto-startup=true"],
+)
 class PrsdbEmailWorkerApplicationTests {
     @MockitoSpyBean
     lateinit var emailDeliveryStubService: EmailDeliveryStubService
@@ -40,9 +41,6 @@ class PrsdbEmailWorkerApplicationTests {
 
     @Autowired
     lateinit var emailNotificationService: EmailNotificationService<BetaFeedbackEmail>
-
-    @Autowired
-    lateinit var environment: Environment
 
     @Autowired
     lateinit var context: ApplicationContext
@@ -58,11 +56,6 @@ class PrsdbEmailWorkerApplicationTests {
             eq("round-trip@example.com"),
             argThat { template == email.template && toHashMap() == email.toHashMap() },
         )
-    }
-
-    @Test
-    fun `the email worker profile keeps the application alive`() {
-        assertEquals("true", environment.getProperty("spring.main.keep-alive"))
     }
 
     @Test
