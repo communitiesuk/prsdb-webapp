@@ -110,6 +110,29 @@ class LettingAgentUpdateTenancyDetailsJourneyTests : IntegrationTestWithMutableD
         assertThat(checkAnswersPage.summaryList.numberOfPeopleRow).containsText(changedNumberOfPeople.toString())
     }
 
+    @Test
+    fun `the rent amount change link on the check answers page returns to the check answers page`(page: Page) {
+        navigateToCheckAnswersPage(page)
+
+        var checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.rentAmountRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .backLink
+            .clickAndWait()
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.rentAmountRow.clickFirstActionLinkAndWait()
+        val changedRentAmount = "800"
+        assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitRentAmount(changedRentAmount)
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        assertThat(checkAnswersPage.summaryList.rentAmountRow).containsText(changedRentAmount)
+    }
+
     private fun navigateToCheckAnswersPage(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(tenancyProvideLaterToken)
         detailsPage.summaryList.tenancyRow.clickFirstActionLinkAndWait()

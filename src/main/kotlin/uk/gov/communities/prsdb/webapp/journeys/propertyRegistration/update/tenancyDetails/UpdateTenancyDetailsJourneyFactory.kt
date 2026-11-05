@@ -135,8 +135,15 @@ class UpdateTenancyDetailsJourneyFactory(
                     checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
+                RentFrequencyStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 else -> {
