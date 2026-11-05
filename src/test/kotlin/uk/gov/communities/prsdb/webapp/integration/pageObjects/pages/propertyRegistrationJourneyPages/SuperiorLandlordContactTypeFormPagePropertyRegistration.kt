@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -16,6 +17,7 @@ class SuperiorLandlordContactTypeFormPagePropertyRegistration(
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${SuperiorLandlordContactTypeStep.ROUTE_SEGMENT}",
     ) {
     val form = SuperiorLandlordContactTypeForm(page)
+    val backLink = BackLink.default(page)
 
     fun submitContactType(contactType: SuperiorLandlordContactType) {
         form.radios.selectValue(contactType)

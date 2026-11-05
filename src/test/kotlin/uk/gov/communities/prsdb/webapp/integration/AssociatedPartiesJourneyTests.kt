@@ -421,8 +421,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
             // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
@@ -430,8 +429,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
             val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 1 person in the ownership chain")
-            // TODO PDJB-1973: assert the name the user entered once the real name page is added
-            assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_NAME)
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Test Superior Landlord")
             // TODO PDJB-1975: assert the email the user entered once the real email page is added
             assertThat(
                 superiorLandlordsListPage.getSummaryCard(0).summaryList,
@@ -447,8 +445,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
             // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
@@ -480,8 +477,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             superiorLandlordsListPage.addAnotherButton.click()
             val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
             provideDetailsPage.submitYes()
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Email superior landlord")
             // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
@@ -492,8 +488,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(superiorLandlordsListPage.heading).containsText("added 2 people in the ownership chain")
             superiorLandlordsListPage.addAnotherButton.click()
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
+            val secondNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            secondNamePage.submitName("Address superior landlord")
             // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
@@ -503,13 +499,12 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
             assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Unknown person")
-            // TODO PDJB-1973: assert the names the user entered once the real name page is added
-            assertThat(superiorLandlordsListPage.getSummaryCard(1).title).hasText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_NAME)
+            assertThat(superiorLandlordsListPage.getSummaryCard(1).title).hasText("Email superior landlord")
             // TODO PDJB-1975: assert the email the user entered once the real email page is added
             assertThat(
                 superiorLandlordsListPage.getSummaryCard(1).summaryList,
             ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
-            assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_NAME)
+            assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Address superior landlord")
             // TODO PDJB-1976: assert the address the user entered once the real address pages are added
             assertThat(superiorLandlordsListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
         }
@@ -526,8 +521,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .clickAndWait()
             val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
             provideDetailsPage.submitYes()
-            // TODO PDJB-1973: check the name is prefilled once the real name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
+            val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            namePage.submitName("Changed superior landlord")
             // TODO PDJB-1974: check the contact type is prefilled once the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
@@ -537,8 +532,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(updatedListPage.heading).containsText("added 3 people in the ownership chain")
             assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord With Address")
-            // TODO PDJB-1973: assert the name the user entered once the real name page is added
-            assertThat(updatedListPage.getSummaryCard(1).title).hasText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_NAME)
+            assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed superior landlord")
             // TODO PDJB-1975: assert the email the user entered once the real email page is added
             assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown person")

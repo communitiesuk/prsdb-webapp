@@ -228,6 +228,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
@@ -315,6 +316,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
@@ -1110,6 +1112,12 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT)
         return createValidPage(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordNamePage(): SuperiorLandlordNameFormPagePropertyRegistration {
+        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordName().build())
+        navigateToPropertyRegistrationJourneyStep(SuperiorLandlordNameStep.ROUTE_SEGMENT)
+        return createValidPage(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationSuperiorLandlordsListPage(
