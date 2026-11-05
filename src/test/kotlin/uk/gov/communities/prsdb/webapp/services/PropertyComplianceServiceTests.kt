@@ -2325,6 +2325,16 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
+    fun `isElectricalSafetyExpired throws when the electrical cert type is missing but an EIC issue date is stored`() {
+        val propertyCompliance = PropertyComplianceBuilder().build()
+        propertyCompliance.eicIssueDate = LocalDate.now().minusYears(1)
+
+        assertThrows<PrsdbWebException> {
+            propertyComplianceService.isElectricalSafetyExpired(propertyCompliance)
+        }
+    }
+
+    @Test
     fun `isElectricalSafetyExpired returns null when there is no electrical certificate`() {
         val propertyCompliance = PropertyComplianceBuilder().build()
 

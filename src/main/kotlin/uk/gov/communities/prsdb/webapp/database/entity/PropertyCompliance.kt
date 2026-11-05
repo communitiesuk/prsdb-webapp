@@ -37,11 +37,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
-    // Only used for EICRs (and records with no cert type). EICs store an issue date in eicIssueDate.
+    // Only used for EICRs (and legacy records with no cert type). Set through PropertyComplianceService,
+    // which keeps eicrExpiryDate/eicIssueDate mutually exclusive.
     var eicrExpiryDate: LocalDate? = null
 
-    // Only used for EICs. Access EIC dates through PropertyComplianceService/EicDateService,
-    // which derive the EIC expiry date from this issue date.
+    // Access through PropertyComplianceService/EicDateService rather than directly; EIC expiry dates
+    // are derived from this issue date. Only used for EICs.
     var eicIssueDate: LocalDate? = null
 
     var electricalCertType: CertificateType? = null

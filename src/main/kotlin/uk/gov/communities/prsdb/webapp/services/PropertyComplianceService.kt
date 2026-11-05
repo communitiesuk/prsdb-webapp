@@ -56,6 +56,8 @@ class PropertyComplianceService(
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
+    // TODO PDJB-1679: These EIC date methods centralise access for the EIC_ISSUE_DATE cutover. When the flag is removed,
+    //  remove setEicExpiryDate and simplify the rest to use the eicIssueDate column directly.
     fun getEicIssueDate(propertyCompliance: PropertyCompliance): LocalDate? =
         eicDateService.issueDateFrom(
             requireEic(propertyCompliance),
@@ -107,7 +109,7 @@ class PropertyComplianceService(
             // A record holding an electrical date without a usable cert type is inconsistent, so it is rejected
             // rather than reported as having no certificate.
             else ->
-                if (propertyCompliance.eicrExpiryDate == null) {
+                if (propertyCompliance.eicrExpiryDate == null && propertyCompliance.eicIssueDate == null) {
                     null
                 } else {
                     throw unexpectedElectricalCertType(propertyCompliance)
