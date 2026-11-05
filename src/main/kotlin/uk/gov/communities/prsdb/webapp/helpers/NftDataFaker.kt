@@ -19,9 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toInstant
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toLocalDate
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toTimestamp
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.sql.Date
@@ -29,6 +26,8 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Locale
 import java.util.Random
 import java.util.UUID
@@ -37,6 +36,9 @@ import java.util.concurrent.TimeUnit
 object NftDataFaker {
     private const val DEFAULT_SEED = 239L
     private const val MAX_ADDRESSES_PER_STREET = 30
+
+    // Dates and instants are converted in a fixed zone, so seeding produces the same data whatever the machine's time zone
+    private val SEEDING_ZONE: ZoneId = ZoneOffset.UTC
 
     private var seededRandom = Random(DEFAULT_SEED)
     private var faker = Faker(Locale.UK, seededRandom)
@@ -62,7 +64,11 @@ object NftDataFaker {
         runReference = reference
     }
 
-    private fun referenceDate(): LocalDate = runReference.toLocalDate()
+    private fun referenceDate(): LocalDate = runReference.toSeedingDate()
+
+    private fun Instant.toSeedingDate(): LocalDate = atZone(SEEDING_ZONE).toLocalDate()
+
+    private fun LocalDate.toSeedingInstant(): Instant = atStartOfDay(SEEDING_ZONE).toInstant()
 
     fun generateBoolean(probabilityTrue: Double = 0.5): Boolean = faker.random().nextDouble() < probabilityTrue
 
@@ -105,7 +111,8 @@ object NftDataFaker {
 
     fun generateNumberLessThan(max: Int): Int = faker.random().nextInt(max)
 
-    fun generateCreatedDate(after: Timestamp = referenceDate().minusYears(1).toTimestamp()): Timestamp = generateDateAfter(after)
+    fun generateCreatedDate(after: Timestamp = Timestamp.from(referenceDate().minusYears(1).toSeedingInstant())): Timestamp =
+        generateDateAfter(after)
 
     fun generateLastModifiedDate(createdDate: Timestamp): Timestamp? =
         if (generateBoolean(probabilityTrue = 0.6)) {
@@ -123,12 +130,11 @@ object NftDataFaker {
         reminderEmailSent: Boolean,
     ): Timestamp {
         val now = referenceDate()
-        val earliestCreatedDate = landlordCreatedDate.coerceAtLeast(now.minusDays(28).toTimestamp())
+        val earliestCreatedDate = landlordCreatedDate.coerceAtLeast(Timestamp.from(now.minusDays(28).toSeedingInstant()))
         return if (reminderEmailSent) {
             val latestCreatedDate =
-                now
-                    .minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong())
-                    .toTimestamp()
+                Timestamp
+                    .from(now.minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()).toSeedingInstant())
                     .coerceAtLeast(earliestCreatedDate)
             Timestamp.from(faker.timeAndDate().between(earliestCreatedDate.toInstant(), latestCreatedDate.toInstant()))
         } else {
@@ -503,7 +509,7 @@ object NftDataFaker {
     fun generateETag(): String = faker.regexify("[a-f0-9]{32}")
 
     fun generatePropertyComplianceData(createdDateTimestamp: Timestamp): PropertyComplianceData {
-        val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
+        val createdDate = Date.valueOf(createdDateTimestamp.toInstant().toSeedingDate())
 
         val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
 
@@ -521,10 +527,10 @@ object NftDataFaker {
             if (!eicrMissing) {
                 val expiryDate =
                     faker.timeAndDate().between(
-                        createdDate.toLocalDate().minusYears(5).toInstant(),
-                        createdDate.toLocalDate().plusYears(10).toInstant(),
+                        createdDate.toLocalDate().minusYears(5).toSeedingInstant(),
+                        createdDate.toLocalDate().plusYears(10).toSeedingInstant(),
                     )
-                Date.valueOf(expiryDate.toLocalDate())
+                Date.valueOf(expiryDate.toSeedingDate())
             } else {
                 null
             }
@@ -544,10 +550,10 @@ object NftDataFaker {
             if (epcNumber != null) {
                 val expiryDate =
                     faker.timeAndDate().between(
-                        createdDate.toLocalDate().minusYears(5).toInstant(),
-                        createdDate.toLocalDate().plusYears(10).toInstant(),
+                        createdDate.toLocalDate().minusYears(5).toSeedingInstant(),
+                        createdDate.toLocalDate().plusYears(10).toSeedingInstant(),
                     )
-                Date.valueOf(expiryDate.toLocalDate())
+                Date.valueOf(expiryDate.toSeedingDate())
             } else {
                 null
             }
@@ -616,7 +622,7 @@ object NftDataFaker {
         asOf: Timestamp,
     ): Boolean {
         if (expiryDate == null) return false
-        val asOfDate = asOf.toLocalDateTime().toLocalDate()
+        val asOfDate = asOf.toInstant().toSeedingDate()
         return when (certType) {
             CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
             CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
@@ -771,7 +777,7 @@ object NftDataFaker {
     private fun generateDateBefore(
         date: Date,
         maxDaysAgo: Long,
-    ): Date = Date.valueOf(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toLocalDate().toInstant()).toLocalDate())
+    ): Date = Date.valueOf(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toLocalDate().toSeedingInstant()).toSeedingDate())
 
     private fun generateTimestampBefore(
         date: Timestamp,
