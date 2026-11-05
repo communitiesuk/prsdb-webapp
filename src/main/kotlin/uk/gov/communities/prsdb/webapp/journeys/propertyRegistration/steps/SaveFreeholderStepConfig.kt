@@ -71,10 +71,9 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
     ): FreeholderDataModel {
         val addressTask = state.freeholderAddressTask
         val lookupFormModel = addressTask.lookupAddressStep.formModelOrNull
-        val selectFormModel = addressTask.selectAddressStep.formModelOrNull
-        // The select step is skipped when the lookup finds no addresses, so the manual answers are used then too
-        val wentManual = selectFormModel?.address.let { it == null || it == MANUAL_ADDRESS_CHOSEN }
-        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
+        // Set by both the select address and no address found steps, so it reflects the user's latest choice
+        val selectedAddress = addressTask.cachedSelectedAddress
+        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
 
         return FreeholderDataModel(
             detailsKnown = true,
@@ -82,7 +81,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
             address = addressTask.getAddress(),
             addressSearchPostcode = lookupFormModel?.postcode,
             addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
-            selectedAddress = selectFormModel?.address,
+            selectedAddress = selectedAddress,
             manualAddressLineOne = manualFormModel?.addressLineOne,
             manualAddressLineTwo = manualFormModel?.addressLineTwo,
             manualTownOrCity = manualFormModel?.townOrCity,

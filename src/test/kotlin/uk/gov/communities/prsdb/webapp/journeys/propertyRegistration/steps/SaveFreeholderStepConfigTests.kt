@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.NullSource
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -22,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
@@ -31,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Freeholde
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 
 @ExtendWith(MockitoExtension::class)
 class SaveFreeholderStepConfigTests {
@@ -55,9 +50,6 @@ class SaveFreeholderStepConfigTests {
 
     @Mock
     lateinit var lookupAddressStep: LookupAddressStep
-
-    @Mock
-    lateinit var selectAddressStep: SelectAddressStep
 
     @Mock
     lateinit var manualAddressStep: ManualAddressStep
@@ -122,7 +114,8 @@ class SaveFreeholderStepConfigTests {
         // Arrange
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
-        setupAddressAnswers(selectedAddress = SELECTED_ADDRESS.singleLineAddress, manualFormModel = null)
+        val staleManualFormModel = ManualAddressFormModel().apply { addressLineOne = "Previously entered road" }
+        setupAddressAnswers(selectedAddress = SELECTED_ADDRESS.singleLineAddress, manualFormModel = staleManualFormModel)
         whenever(addressTask.getAddress()).thenReturn(SELECTED_ADDRESS)
         whenever(mockState.freeholdersMap).thenReturn(emptyMap())
         whenever(mockState.editingFreeholderId).thenReturn(null)
@@ -144,10 +137,8 @@ class SaveFreeholderStepConfigTests {
         assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
     }
 
-    @ParameterizedTest(name = "when the selected address answer is {0}")
-    @NullSource
-    @ValueSource(strings = [MANUAL_ADDRESS_CHOSEN])
-    fun `afterStepIsReached saves the manual address answers when the address was entered manually`(selectedAddress: String?) {
+    @Test
+    fun `afterStepIsReached saves the manual address answers when the address was entered manually`() {
         // Arrange
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
@@ -159,7 +150,7 @@ class SaveFreeholderStepConfigTests {
                 county = "Manual County"
                 postcode = "MA1 1AA"
             }
-        setupAddressAnswers(selectedAddress = selectedAddress, manualFormModel = manualFormModel)
+        setupAddressAnswers(selectedAddress = MANUAL_ADDRESS_CHOSEN, manualFormModel = manualFormModel)
         val manualAddress = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA")
         whenever(addressTask.getAddress()).thenReturn(manualAddress)
         whenever(mockState.freeholdersMap).thenReturn(emptyMap())
@@ -177,7 +168,7 @@ class SaveFreeholderStepConfigTests {
                 address = manualAddress,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
-                selectedAddress = selectedAddress,
+                selectedAddress = MANUAL_ADDRESS_CHOSEN,
                 manualAddressLineOne = "2 Manual Road",
                 manualAddressLineTwo = "Flat 3",
                 manualTownOrCity = "Manual Town",
@@ -267,10 +258,7 @@ class SaveFreeholderStepConfigTests {
                 houseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER
             },
         )
-        whenever(addressTask.selectAddressStep).thenReturn(selectAddressStep)
-        whenever(selectAddressStep.formModelOrNull).thenReturn(
-            selectedAddress?.let { SelectAddressFormModel().apply { address = it } },
-        )
+        whenever(addressTask.cachedSelectedAddress).thenReturn(selectedAddress)
         whenever(addressTask.manualAddressStep).thenReturn(manualAddressStep)
         whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
     }

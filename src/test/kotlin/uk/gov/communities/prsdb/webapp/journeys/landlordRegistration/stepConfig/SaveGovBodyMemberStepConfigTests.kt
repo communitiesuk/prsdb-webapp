@@ -9,11 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -44,9 +43,6 @@ class SaveGovBodyMemberStepConfigTests {
 
     @Mock
     lateinit var lookupAddressStep: LookupAddressStep
-
-    @Mock
-    lateinit var selectAddressStep: SelectAddressStep
 
     @Mock
     lateinit var manualAddressStep: ManualAddressStep
@@ -84,7 +80,47 @@ class SaveGovBodyMemberStepConfigTests {
         verify(mockState).editingGovBodyMemberId = null
     }
 
-    private fun setupStepConfig(): SaveGovBodyMemberStepConfig {
+    @Test
+    fun `afterStepIsReached saves the manual address answers when the address was entered manually`() {
+        // Arrange
+        val stepConfig = setupStepConfig(selectedAddress = MANUAL_ADDRESS_CHOSEN)
+        whenever(mockState.editingGovBodyMemberId).thenReturn(null)
+        whenever(mockState.governingBodyMembersMap).thenReturn(emptyMap())
+        whenever(mockState.nextGoverningBodyMemberId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
+        verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
+        val savedMember = updatedMapCaptor.firstValue.getValue(1)
+        assertEquals(MANUAL_ADDRESS_CHOSEN, savedMember.selectedAddress)
+        assertEquals("1 Test Street", savedMember.manualAddressLineOne)
+        assertEquals("Test Town", savedMember.manualTownOrCity)
+        assertEquals("TT1 1TT", savedMember.manualPostcode)
+    }
+
+    @Test
+    fun `afterStepIsReached does not save manual address answers when an address was selected`() {
+        // Arrange
+        val stepConfig = setupStepConfig(selectedAddress = "1 Test Street, Test Town, TT1 1TT")
+        whenever(mockState.editingGovBodyMemberId).thenReturn(null)
+        whenever(mockState.governingBodyMembersMap).thenReturn(emptyMap())
+        whenever(mockState.nextGoverningBodyMemberId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
+        verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
+        val savedMember = updatedMapCaptor.firstValue.getValue(1)
+        assertEquals("1 Test Street, Test Town, TT1 1TT", savedMember.selectedAddress)
+        assertEquals(null, savedMember.manualAddressLineOne)
+    }
+
+    private fun setupStepConfig(selectedAddress: String = "1 Test Street, Test Town, TT1 1TT"): SaveGovBodyMemberStepConfig {
         val stepConfig = SaveGovBodyMemberStepConfig()
         stepConfig.urlPath = "save-governing-body-member"
         stepConfig.validator = AlwaysTrueValidator()
@@ -103,7 +139,6 @@ class SaveGovBodyMemberStepConfigTests {
                 postcode = "TT1 1TT"
                 houseNameOrNumber = "1"
             }
-        val selectFormModel = SelectAddressFormModel().apply { this.address = "1 Test Street, Test Town, TT1 1TT" }
         val manualFormModel =
             ManualAddressFormModel().apply {
                 addressLineOne = "1 Test Street"
@@ -121,8 +156,7 @@ class SaveGovBodyMemberStepConfigTests {
         whenever(govBodyMemberAddressTask.getAddress()).thenReturn(address)
         whenever(govBodyMemberAddressTask.lookupAddressStep).thenReturn(lookupAddressStep)
         whenever(lookupAddressStep.formModelOrNull).thenReturn(lookupFormModel)
-        whenever(govBodyMemberAddressTask.selectAddressStep).thenReturn(selectAddressStep)
-        whenever(selectAddressStep.formModelOrNull).thenReturn(selectFormModel)
+        whenever(govBodyMemberAddressTask.cachedSelectedAddress).thenReturn(selectedAddress)
         whenever(govBodyMemberAddressTask.manualAddressStep).thenReturn(manualAddressStep)
         whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
 
