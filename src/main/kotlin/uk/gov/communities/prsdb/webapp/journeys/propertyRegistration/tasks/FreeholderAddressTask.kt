@@ -25,7 +25,6 @@ class FreeholderAddressTask(
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "registerProperty.freeholders.address.lookup.fieldSetHeading",
-            "houseNameOrNumberLabel" to "registerProperty.freeholders.address.lookup.houseNameOrNumber.label",
         )
 
     override val selectAddressContentProperties: Map<String, Any?> =
