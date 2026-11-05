@@ -261,9 +261,22 @@ export async function loadSeededDataset(config, {
   }
 }
 
+export async function migrateAndVerifySeededDataset({
+  aws = awsCommand, env = process.env, migrate = migrateDatabase, verify = verifyDatabase, log = console.log,
+} = {}) {
+  const environment = postgresEnvironment(env);
+  const requirements = datasetRequirements(env);
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  await timedStage('Apply Flyway migrations', () => migrate(env), log);
+  const counts = await timedStage('Verify dataset and analyze', () => verify(environment, requirements), log);
+  log(`Restored dataset counts: ${JSON.stringify(counts)}; free address count excludes active ownership only, not incomplete allocations.`);
+  return counts;
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    await loadSeededDataset({
+    if (process.argv[2] === '--verify-only') await migrateAndVerifySeededDataset();
+    else await loadSeededDataset({
       target: process.env.DEPLOYMENT_ENVIRONMENT,
       account: process.env.AWS_ACCOUNT_ID,
       bucket: process.env.NFT_SEED_DUMP_BUCKET,

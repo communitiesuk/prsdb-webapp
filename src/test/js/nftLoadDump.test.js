@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 import {test} from 'node:test';
-import {loadSeededDataset, restoreDatabase} from '../../../scripts/performance-tests/nft-load-dump.mjs';
+import {loadSeededDataset, migrateAndVerifySeededDataset, restoreDatabase} from '../../../scripts/performance-tests/nft-load-dump.mjs';
 
 const config = {
   target: 'nft',
@@ -9,6 +9,28 @@ const config = {
   bucket: 'prsdb-seed-data-nft',
   key: 'seed-data.dump',
 };
+
+test('verification-only mode migrates and checks counts without downloading or restoring a dump', async () => {
+  const deps = dependencies();
+  await migrateAndVerifySeededDataset({
+    aws: deps.aws, env: deps.env, log: deps.log,
+    migrate: deps.migrateDatabase, verify: deps.verifyDatabase,
+  });
+  assert.deepEqual(deps.calls.map(([kind]) => kind), ['aws', 'migrate', 'verify']);
+});
+
+test('verification-only mode keeps the localhost tunnel and account guards', async () => {
+  const deps = dependencies();
+  await assert.rejects(migrateAndVerifySeededDataset({
+    env: {...deps.env, FLYWAY_URL: 'jdbc:postgresql://private-rds:5432/prsdb'}, aws: deps.aws,
+  }), /local SSM tunnel/);
+  assert.deepEqual(deps.calls, []);
+  await assert.rejects(migrateAndVerifySeededDataset({
+    env: deps.env, aws: async () => ({Account: '000000000000'}),
+    migrate: deps.migrateDatabase,
+  }), /Wrong NFT AWS account/);
+  assert.deepEqual(deps.calls, []);
+});
 
 function dependencies(overrides = {}) {
   const calls = [];
@@ -34,7 +56,7 @@ function dependencies(overrides = {}) {
     env: {
       FLYWAY_URL: 'jdbc:postgresql://localhost:5432/prsdb',
       FLYWAY_USER: 'test-user',
-      FLYWAY_PASSWORD: 'test-password',
+      FLYWAY_PASSWORD: 'test-password', // pragma: allowlist secret
     },
     log: () => {},
     ...overrides,
@@ -51,7 +73,7 @@ test('restores with four workers after clearing the schema and preserves fail-fa
     calls.push(args);
     return {stdout: ''};
   };
-  const environment = {PGPASSWORD: 'test-password', PGDATABASE: 'prsdb'};
+  const environment = {PGPASSWORD: 'test-password', PGDATABASE: 'prsdb'}; // pragma: allowlist secret
 
   await restoreDatabase('/tmp/seed-data.dump', environment, execute);
 
@@ -200,7 +222,7 @@ test('uses configured minimum dataset counts when verifying the restored dump', 
     env: {
       FLYWAY_URL: 'jdbc:postgresql://localhost:5432/prsdb',
       FLYWAY_USER: 'test-user',
-      FLYWAY_PASSWORD: 'test-password',
+      FLYWAY_PASSWORD: 'test-password', // pragma: allowlist secret
       NFT_SEED_PROPERTIES: '100',
       NFT_SEED_INCOMPLETE_PROPERTIES: '20',
       NFT_LOAD_MINIMUM_FREE_ADDRESSES: '7',
@@ -221,7 +243,7 @@ test('rejects invalid dataset count overrides before contacting AWS', async () =
     env: {
       FLYWAY_URL: 'jdbc:postgresql://localhost:5432/prsdb',
       FLYWAY_USER: 'test-user',
-      FLYWAY_PASSWORD: 'test-password',
+      FLYWAY_PASSWORD: 'test-password', // pragma: allowlist secret
       NFT_SEED_PROPERTIES: '-1',
     },
   });

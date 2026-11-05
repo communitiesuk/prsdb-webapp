@@ -14,6 +14,10 @@ on:
         description: Use an unseeded landlord subject to prove Gatling failure recovery
         type: boolean
         default: false
+      restore-task-definition:
+        description: Exact worker revision for the temporary in-VPC restore proof of concept
+        type: string
+        default: arn:aws:ecs:eu-west-2:448120078528:task-definition/prsdb-nft-vpc-restore-20261105:3
 
 concurrency:
   group: nft-app-service-operation
@@ -50,7 +54,10 @@ jobs:
     if: needs.changes.outputs.run == 'true'
     environment: nft
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition }}
+      EXPECTED_NFT_SHA: ${{ needs.changes.outputs.sha }}
     permissions:
       contents: read
       id-token: write
@@ -76,23 +83,9 @@ jobs:
           aws-region: eu-west-2
           role-duration-seconds: 3600
       - name: Stop NFT app while replacing the database
-        run: |
-          set -euo pipefail
-          app_service="$(aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json)"
-          jq -e --arg prefix "arn:aws:ecs:eu-west-2:448120078528:task-definition/prsdb-webapp-nft:" '
-            (.services | length == 1) and
-            (.services[0].status == "ACTIVE") and
-            (.services[0].desiredCount == 1) and
-            (.services[0].runningCount == 1) and
-            (.services[0].pendingCount == 0) and
-            (.services[0].taskDefinition | startswith($prefix)) and
-            (.services[0].deployments | length == 1) and
-            (.services[0].deployments[0].rolloutState == "COMPLETED")
-          ' <<< "$app_service" >/dev/null
-          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 0 >/dev/null
-          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
-          aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
-            jq -e '(.services[0].desiredCount == 0) and (.services[0].runningCount == 0) and (.services[0].pendingCount == 0)' >/dev/null
+        run: node scripts/performance-tests/nft-vpc-restore.mjs stop
+      - name: Restore pinned seed dump inside the NFT VPC
+        run: node scripts/performance-tests/nft-vpc-restore.mjs run
       - name: Configure NFT database credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -105,12 +98,8 @@ jobs:
         with:
           secret-ids: |
             FLYWAY_PASSWORD, tf-nft-prsdb-database-password
-      - name: Restore and verify the seeded NFT database
+      - name: Migrate and verify the restored NFT database through SSM
         env:
-          DEPLOYMENT_ENVIRONMENT: nft
-          AWS_ACCOUNT_ID: 448120078528
-          NFT_SEED_DUMP_BUCKET: prsdb-seed-data-nft
-          NFT_SEED_DUMP_KEY: seed-data.dump
           NFT_SEED_PROPERTIES: ${{ vars.NFT_SEED_PROPERTIES }}
           NFT_SEED_INCOMPLETE_PROPERTIES: ${{ vars.NFT_SEED_INCOMPLETE_PROPERTIES }}
           NFT_LOAD_MINIMUM_FREE_ADDRESSES: ${{ vars.NFT_LOAD_MINIMUM_FREE_ADDRESSES }}
@@ -161,7 +150,7 @@ jobs:
             echo "::error::NFT database port-forwarding session did not become ready."
             exit 1
           fi
-          node scripts/performance-tests/nft-load-dump.mjs
+          node scripts/performance-tests/nft-load-dump.mjs --verify-only
       - name: Configure NFT performance-test credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -170,22 +159,7 @@ jobs:
           aws-region: eu-west-2
           role-duration-seconds: 3600
       - name: Start NFT app after database restore
-        run: |
-          set -euo pipefail
-          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
-          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
-          for _ in $(seq 1 60); do
-            if aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
-              jq -e '(.services | length == 1) and
-                (.services[0].desiredCount == 1) and (.services[0].runningCount == 1) and
-                (.services[0].pendingCount == 0) and (.services[0].deployments | length == 1) and
-                (.services[0].deployments[0].rolloutState == "COMPLETED")' >/dev/null; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::error::NFT app did not become healthy after loading the seeded database."
-          exit 1
+        run: node scripts/performance-tests/nft-vpc-restore.mjs start
       - name: Read runner IPv4 address
         run: |
           runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
@@ -222,18 +196,56 @@ jobs:
           path: build/reports/gatling/**
           if-no-files-found: ignore
           retention-days: 30
-      - name: Restore environment
-        if: always() && steps.prepare.outcome != 'skipped'
-        env:
-          READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
-        run: node scripts/performance-tests/nft-restore.mjs
+      - name: Preserve recovery state
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-recovery-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/nft-restore-state.json
+            ${{ runner.temp }}/nft-state.json
+          if-no-files-found: error
+          retention-days: 7
 
-  reset-database:
-    name: Reset NFT database
+  stop-writers-for-reset:
+    name: Restore environment and stop actual writers before reset
     needs: [changes, performance-tests]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          name: nft-recovery-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-before-reset-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Stop owned worker, restore simulator configuration and wait for actual app shutdown
+        run: node scripts/performance-tests/nft-vpc-restore.mjs cleanup
+
+  reset-database:
+    name: Reset NFT database
+    needs: [changes, stop-writers-for-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.stop-writers-for-reset.result == 'success'
     uses: ./.github/workflows/reset-database.yml
     with:
       environment: nft
@@ -257,6 +269,14 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          name: nft-recovery-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -265,22 +285,9 @@ jobs:
           aws-region: eu-west-2
           role-duration-seconds: 3600
       - name: Start NFT app and verify the small-fixture reset
-        run: |
-          set -euo pipefail
-          aws ecs update-service --region eu-west-2 --cluster nft-app --service nft-app --desired-count 1 >/dev/null
-          aws ecs wait services-stable --region eu-west-2 --cluster nft-app --services nft-app
-          for _ in $(seq 1 60); do
-            if aws ecs describe-services --region eu-west-2 --cluster nft-app --services nft-app --output json |
-              jq -e '(.services | length == 1) and
-                (.services[0].desiredCount == 1) and (.services[0].runningCount == 1) and
-                (.services[0].pendingCount == 0) and (.services[0].deployments | length == 1) and
-                (.services[0].deployments[0].rolloutState == "COMPLETED")' >/dev/null; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::error::NFT app did not become healthy after the small-fixture reset."
-          exit 1
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs start-after-reset
 
   marker:
     name: Record successful NFT head
