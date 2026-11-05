@@ -112,12 +112,14 @@ class UpdateTenancyDetailsJourneyFactory(
             unreachableStepUrl { returnUrl }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                HouseholdStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
-                    if (checkingAnswersFor == TenantsStep.ROUTE_SEGMENT) {
-                        configureStep(journey.householdsAndTenantsTask.tenants) {
-                            backDestination { journey.returnToCyaPageDestination }
-                        }
+                }
+
+                TenantsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                        backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
