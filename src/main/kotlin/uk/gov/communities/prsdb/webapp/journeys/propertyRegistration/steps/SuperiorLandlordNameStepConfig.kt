@@ -1,35 +1,47 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
 
-// TODO PDJB-1973: replace this placeholder with the real superior landlord name page
-//  (content, input, validation and persistence). Rendered with the shared forms/todo placeholder page.
-// TODO PDJB-1973: when changing a superior landlord, prefill this page with the name from
-//  state.editingSuperiorLandlord by overriding resolvePageContent, as in FreeholderNameStepConfig.
-//  Check when adding a second superior landlord that the page starts empty, as SaveSuperiorLandlordStepConfig clears the
-//  form data after each save.
-//  Also update SaveSuperiorLandlordStepConfig to save the name the user entered.
 @JourneyFrameworkComponent
-class SuperiorLandlordNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class SuperiorLandlordNameStepConfig :
+    AbstractRequestableStepConfig<Complete, SuperiorLandlordNameFormModel, SuperiorLandlordsDetailsState>() {
+    override val formModelClass = SuperiorLandlordNameFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1973): Superior landlord name - content, input and validation to be added")
+    override fun getStepSpecificContent(state: SuperiorLandlordsDetailsState): Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "registerProperty.superiorLandlords.name.fieldSetHeading",
+            "fieldSetHint" to "registerProperty.superiorLandlords.name.fieldSetHint",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun resolvePageContent(
+        state: SuperiorLandlordsDetailsState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? SuperiorLandlordNameFormModel
+        if (!formModel?.name.isNullOrBlank()) return defaultContent
 
-    override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+        val editingSuperiorLandlord = state.editingSuperiorLandlord ?: return defaultContent
+        val prepopulatedFormModel = formModel ?: SuperiorLandlordNameFormModel()
+        prepopulatedFormModel.name = editingSuperiorLandlord.name
+        return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
+    }
+
+    override fun chooseTemplate(state: SuperiorLandlordsDetailsState) = "forms/nameForm"
+
+    override fun mode(state: SuperiorLandlordsDetailsState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class SuperiorLandlordNameStep(
     stepConfig: SuperiorLandlordNameStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, SuperiorLandlordNameFormModel, SuperiorLandlordsDetailsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "superior-landlord-name"
     }

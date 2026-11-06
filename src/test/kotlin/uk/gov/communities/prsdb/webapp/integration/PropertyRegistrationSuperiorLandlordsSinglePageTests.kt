@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
@@ -113,6 +114,83 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
 
             val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
             assertEquals("true", provideDetailsPage.form.radios.selectedValue)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordNameStep {
+        @Test
+        fun `The heading asks for the person's name`() {
+            val superiorLandlordNamePage = navigator.skipToPropertyRegistrationSuperiorLandlordNamePage()
+            assertThat(superiorLandlordNamePage.heading).containsText("What is this person’s name?")
+        }
+
+        @Test
+        fun `Submitting an empty name returns an error`() {
+            val superiorLandlordNamePage = navigator.skipToPropertyRegistrationSuperiorLandlordNamePage()
+            superiorLandlordNamePage.submitName("")
+            assertThat(superiorLandlordNamePage.form.getErrorMessage()).containsText("Enter a name")
+        }
+
+        @Test
+        fun `Back link returns to the provide details page`(page: Page) {
+            val superiorLandlordNamePage = navigator.skipToPropertyRegistrationSuperiorLandlordNamePage()
+            superiorLandlordNamePage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding a new superior landlord does not prefill a name`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+
+            val superiorLandlordNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordNamePage.form.nameInput).hasValue("")
+        }
+
+        // TODO PDJB-1974: check the back link still works when the real contact type page is added
+        @Test
+        fun `Returning to the page when adding a superior landlord prefills the name just given`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("New superior landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).backLink.clickAndWait()
+
+            val superiorLandlordNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordNamePage.form.nameInput).hasValue("New superior landlord")
+        }
+
+        @Test
+        fun `Changing a superior landlord prefills their existing name`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+
+            val superiorLandlordNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordNamePage.form.nameInput).hasValue("Superior Landlord With Email")
+        }
+
+        // TODO PDJB-1974: check the back link still works when the real contact type page is added
+        @Test
+        fun `Returning to the page when changing a superior landlord prefills the name just given`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Changed superior landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).backLink.clickAndWait()
+
+            val superiorLandlordNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordNamePage.form.nameInput).hasValue("Changed superior landlord")
         }
     }
 

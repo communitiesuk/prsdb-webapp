@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -35,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
 interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder<SelfType>> {
     val additionalDataMap: MutableMap<String, String>
@@ -153,6 +155,12 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withAnyoneInOwnershipChain(anyoneInOwnershipChain: Boolean = true): SelfType {
         val anyoneInOwnershipChainFormModel = AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = anyoneInOwnershipChain)
         withSubmittedValue(AnyoneInOwnershipChainStep.ROUTE_SEGMENT, anyoneInOwnershipChainFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlordProvideDetails(provideDetails: Boolean = true): SelfType {
+        val superiorLandlordProvideDetailsFormModel = SuperiorLandlordProvideDetailsFormModel(provideDetails = provideDetails)
+        withSubmittedValue(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT, superiorLandlordProvideDetailsFormModel)
         return self()
     }
 
