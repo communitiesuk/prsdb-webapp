@@ -41,6 +41,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     // which keeps eicrExpiryDate/eicIssueDate mutually exclusive.
     var eicrExpiryDate: LocalDate? = null
 
+    // TODO PDJB-1679: Update this comment when the EIC_ISSUE_DATE flag is removed - EIC dates will be read from this column directly.
     // Access through PropertyComplianceService/EicDateService rather than directly; EIC expiry dates
     // are derived from this issue date. Only used for EICs.
     var eicIssueDate: LocalDate? = null
