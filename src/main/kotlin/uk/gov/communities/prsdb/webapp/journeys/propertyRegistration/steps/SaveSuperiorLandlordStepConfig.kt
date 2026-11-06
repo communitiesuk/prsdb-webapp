@@ -65,7 +65,6 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         // Clear the individual step form data so the next superior landlord starts fresh
         state.superiorLandlordProvideDetailsStep.clearFormData()
         state.superiorLandlordNameStep.clearFormData()
-        // TODO PDJB-1974: check this still clears the real contact type page correctly
         state.superiorLandlordContactTypeStep.clearFormData()
         // TODO PDJB-1975: check this still clears the real email page correctly
         state.superiorLandlordEmailStep.clearFormData()

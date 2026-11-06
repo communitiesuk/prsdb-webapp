@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
-// TODO PDJB-1974: delete or replace this temporary form model when the real contact type page is built
 @IsValidPrioritised
 class SuperiorLandlordContactTypeFormModel(
     @ValidatedBy(

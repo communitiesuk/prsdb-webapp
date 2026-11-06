@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class SuperiorLandlordNameFormModel : FormModel {
+class SuperiorLandlordNameFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -15,5 +15,5 @@ class SuperiorLandlordNameFormModel : FormModel {
             ),
         ],
     )
-    var name: String? = null
-}
+    var name: String? = null,
+) : FormModel
