@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
@@ -15,7 +16,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
@@ -24,10 +29,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 
 interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder<SelfType>> {
     val additionalDataMap: MutableMap<String, String>
@@ -94,7 +101,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1962: update this when the real freeholders intro page is added
     fun withFreeholdersInfoComplete(): SelfType {
         withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
@@ -114,6 +120,33 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withFreeholderContactType(contactType: FreeholderContactType = FreeholderContactType.EMAIL): SelfType {
         val freeholderContactTypeFormModel = FreeholderContactTypeFormModel(contactType = contactType)
         withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
+        return self()
+    }
+
+    fun withFreeholderLookupAddress(
+        houseNameOrNumber: String = "1",
+        postcode: String = "FA1 1AA",
+    ): SelfType {
+        // The freeholder address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = FreeholderAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Fictional Road, $postcode", localCouncilId = 22, uprn = 44)
+        additionalDataMap["$routePrefix/cachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            },
+        )
+        return self()
+    }
+
+    fun withFreeholderManualAddressSelected(): SelfType {
+        withSubmittedValue(
+            "${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
+        )
         return self()
     }
 

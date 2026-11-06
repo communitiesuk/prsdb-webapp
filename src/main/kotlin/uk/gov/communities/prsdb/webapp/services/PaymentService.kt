@@ -12,6 +12,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
@@ -206,7 +207,11 @@ class PaymentService(
             }
 
             PaymentStatus.SUCCEEDED -> {
-                getStoredPaymentStatus(paymentId)
+                paymentReconciliationService.recordManualIntervention(
+                    paymentId,
+                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED,
+                    expectedStatus = PaymentStatus.CREATED,
+                )
             }
 
             PaymentStatus.CANCELLING, PaymentStatus.MANUAL_INTERVENTION -> {
@@ -217,21 +222,50 @@ class PaymentService(
     private fun finaliseCapturablePayment(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
-    ): PaymentStatus =
-        try {
-            registerPropertyAndCapturePayment(paymentId, registrationData)
+    ): PaymentStatus {
+        var isCaptureAttempted = false
+        var isCaptured = false
+        return try {
+            registerPropertyAndCapturePayment(
+                paymentId,
+                registrationData,
+                onCaptureAttempted = { isCaptureAttempted = true },
+                onCaptured = { isCaptured = true },
+            )
         } catch (exception: PaymentQuoteExpiredException) {
             println("Marking payment $paymentId for cancellation: ${exception.message}")
             val status = paymentReconciliationService.markForCancellation(paymentId)
             if (status == PaymentStatus.SUCCEEDED) status else throw exception
         } catch (exception: Exception) {
-            println("Failed to finalise payment $paymentId, so marking it for cancellation: ${exception.stackTraceToString()}")
-            paymentReconciliationService.markForCancellation(paymentId)
+            println("Failed to finalise payment $paymentId: ${exception.stackTraceToString()}")
+            when {
+                isCaptured -> {
+                    paymentReconciliationService.recordManualIntervention(
+                        paymentId,
+                        PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
+                        expectedStatus = PaymentStatus.CREATED,
+                    )
+                }
+
+                isCaptureAttempted -> {
+                    paymentReconciliationService.markForCancellation(
+                        paymentId,
+                        manualInterventionReasonIfNotCancelled = PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                    )
+                }
+
+                else -> {
+                    paymentReconciliationService.markForCancellation(paymentId)
+                }
+            }
         }
+    }
 
     private fun registerPropertyAndCapturePayment(
         paymentId: String,
         registrationData: PropertyRegistrationDataModel,
+        onCaptureAttempted: () -> Unit,
+        onCaptured: () -> Unit,
     ): PaymentStatus =
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
@@ -265,9 +299,10 @@ class PaymentService(
                 checkQuoteDateMatchesRegistrationDate(storedPayment, property)
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
+                onCaptureAttempted()
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                // TODO PDJB-1853: Reconcile the payment if the transaction fails to commit after capture.
                 govUkPayClient.capturePayment(paymentId)
+                onCaptured()
                 PaymentStatus.SUCCEEDED
             },
         )
