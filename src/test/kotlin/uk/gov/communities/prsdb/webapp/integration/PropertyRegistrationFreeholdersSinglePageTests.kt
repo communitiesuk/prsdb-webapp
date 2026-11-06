@@ -12,11 +12,81 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Nested
+    inner class ProvideFreeholderDetailsStep {
+        @Test
+        fun `Joint freeholders see the joint heading`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+
+            assertThat(provideDetailsPage.heading).containsText("Can you provide this joint freeholder’s details?")
+        }
+
+        @Test
+        fun `Non-joint freeholders see the non-joint heading`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
+            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+
+            assertThat(provideDetailsPage.heading).containsText("Can you provide this freeholder’s details?")
+        }
+
+        @Test
+        fun `Submitting without an answer for a joint freeholder returns the joint validation error`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+
+            provideDetailsPage.form.submit()
+
+            assertThat(provideDetailsPage.form.getErrorMessage())
+                .containsText("Select if you can provide this joint freeholder’s contact details")
+        }
+
+        @Test
+        fun `Submitting without an answer for a non-joint freeholder returns the non-joint validation error`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
+            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+
+            provideDetailsPage.form.submit()
+
+            assertThat(provideDetailsPage.form.getErrorMessage())
+                .containsText("Select if you can provide this freeholder’s contact details")
+        }
+
+        @Test
+        fun `Selecting yes continues to the freeholder name page`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+                .submitYes()
+
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Selecting no continues to the freeholders list`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+                .submitNo()
+
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Back link returns to the freeholders info page`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+
+            provideDetailsPage.backLink.clickAndWait()
+
+            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+        }
+    }
+
     @Nested
     inner class FreeholdersInfoStep {
         @Test
