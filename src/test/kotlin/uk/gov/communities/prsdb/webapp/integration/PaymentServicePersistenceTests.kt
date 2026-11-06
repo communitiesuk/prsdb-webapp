@@ -14,8 +14,10 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -27,9 +29,11 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertyId
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -45,7 +49,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import uk.gov.communities.prsdb.webapp.services.AddressService
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -107,6 +113,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
+
+    @MockitoBean
+    private lateinit var mockManualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
@@ -595,10 +604,10 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `finalisePayment leaves a payment it could neither finalise nor cancel marked for cancellation`() {
+    fun `finalisePayment leaves a payment it could neither register nor cancel marked for cancellation without emailing support`() {
         // Arrange
-        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
-        doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        whenever(mockPropertyRegistrationService.registerProperty(any()))
+            .thenThrow(EntityExistsException("Address already registered"))
         doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
 
         // Act
@@ -609,6 +618,50 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
         assertEquals(PaymentStatus.CANCELLING, payment.status)
         assertNull(payment.associatedProperty)
+        verify(mockManualInterventionEmailSender, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `finalisePayment records manual intervention and emails support when capture fails and the payment cannot be cancelled`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        doThrow(GovUkPayException("Cancel failed")).whenever(mockGovUkPayClient).cancelPayment(CREATED_PAYMENT_ID)
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, payment.status)
+        assertNull(payment.associatedProperty)
+        verify(mockManualInterventionEmailSender).sendEmail(
+            eq(MANUAL_INTERVENTION_EMAIL_ADDRESS),
+            argThat { reason == PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN.description },
+        )
+    }
+
+    @Test
+    fun `finalisePayment records manual intervention and emails support when the transaction fails to commit after capture`() {
+        // Arrange
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer { getProperty() }
+        doAnswer {
+            TransactionSynchronizationManager.registerSynchronization(
+                object : TransactionSynchronization {
+                    override fun beforeCommit(readOnly: Boolean): Unit = throw IllegalStateException("Commit failed")
+                },
+            )
+        }.whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, paymentRepository.findStatusByPaymentId(CREATED_PAYMENT_ID))
+        verify(mockManualInterventionEmailSender).sendEmail(eq(MANUAL_INTERVENTION_EMAIL_ADDRESS), any())
+        verify(mockGovUkPayClient, never()).cancelPayment(any())
     }
 
     @Test
@@ -726,6 +779,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         private const val JOURNEY_ID = "example-incomplete-journey-with-payments"
         private val INCOMPLETE_PROPERTY_ID = LandlordIncompletePropertyId(USER_ID, 6L)
         private const val TIMEOUT_SECONDS = 10L
+        private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
         private val NOW = Instant.parse("2026-01-01T12:00:00Z")
     }
 }
