@@ -140,7 +140,6 @@ class SuperiorLandlordsListStepConfigTests {
 
     private fun setupStepConfig(
         superiorLandlords: Map<Int, SuperiorLandlordDataModel>? = DEFAULT_SUPERIOR_LANDLORDS,
-        stubCardActionSteps: Boolean = true,
         stubAddAnotherStep: Boolean = true,
     ): SuperiorLandlordsListStepConfig {
         val stepConfig = SuperiorLandlordsListStepConfig(urlParameterService)
@@ -154,18 +153,16 @@ class SuperiorLandlordsListStepConfigTests {
             whenever(superiorLandlordProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
             whenever(superiorLandlordProvideDetailsStep.isStepReachable).thenReturn(true)
         }
-        if (stubCardActionSteps) {
-            whenever(mockState.setStateForSuperiorLandlordEditStep).thenReturn(setStateForSuperiorLandlordEditStep)
-            whenever(setStateForSuperiorLandlordEditStep.urlPath).thenReturn(SetStateForSuperiorLandlordEditStep.ROUTE_SEGMENT)
-            whenever(setStateForSuperiorLandlordEditStep.currentJourneyId).thenReturn("journey-123")
-            whenever(setStateForSuperiorLandlordEditStep.isStepReachable).thenReturn(true)
-            whenever(mockState.confirmRemoveSuperiorLandlordStep).thenReturn(confirmRemoveSuperiorLandlordStep)
-            whenever(confirmRemoveSuperiorLandlordStep.urlPath).thenReturn(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
-            whenever(confirmRemoveSuperiorLandlordStep.currentJourneyId).thenReturn("journey-123")
-            whenever(confirmRemoveSuperiorLandlordStep.isStepReachable).thenReturn(true)
-            whenever(urlParameterService.createParameterPair(any())).thenAnswer {
-                "superiorLandlordId" to it.getArgument<Int>(0).toString()
-            }
+        whenever(mockState.setStateForSuperiorLandlordEditStep).thenReturn(setStateForSuperiorLandlordEditStep)
+        whenever(setStateForSuperiorLandlordEditStep.urlPath).thenReturn(SetStateForSuperiorLandlordEditStep.ROUTE_SEGMENT)
+        whenever(setStateForSuperiorLandlordEditStep.currentJourneyId).thenReturn("journey-123")
+        whenever(setStateForSuperiorLandlordEditStep.isStepReachable).thenReturn(true)
+        whenever(mockState.confirmRemoveSuperiorLandlordStep).thenReturn(confirmRemoveSuperiorLandlordStep)
+        whenever(confirmRemoveSuperiorLandlordStep.urlPath).thenReturn(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
+        whenever(confirmRemoveSuperiorLandlordStep.currentJourneyId).thenReturn("journey-123")
+        whenever(confirmRemoveSuperiorLandlordStep.isStepReachable).thenReturn(true)
+        whenever(urlParameterService.createParameterPair(any())).thenAnswer {
+            "superiorLandlordId" to it.getArgument<Int>(0).toString()
         }
         return stepConfig
     }
