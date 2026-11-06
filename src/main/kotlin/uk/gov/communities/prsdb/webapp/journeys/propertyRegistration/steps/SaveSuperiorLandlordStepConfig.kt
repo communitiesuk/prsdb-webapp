@@ -39,8 +39,16 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                 SuperiorLandlordDataModel(
                     detailsKnown = true,
                     name = name,
-                    // TODO PDJB-1975: save the email address the user entered on the superior landlord email step, throwing if it is missing
-                    email = if (contactType == SuperiorLandlordContactType.EMAIL) PLACEHOLDER_EMAIL else null,
+                    email =
+                        if (contactType == SuperiorLandlordContactType.EMAIL) {
+                            state.superiorLandlordEmailStep.formModelOrNull?.emailAddress
+                                ?: throw UnrecoverableJourneyStateException(
+                                    state.journeyId,
+                                    "Superior landlord email step data is missing for journey ${state.journeyId}",
+                                )
+                        } else {
+                            null
+                        },
                     // TODO PDJB-1976: save the address the user entered in the superior landlord address task, along with
                     //  the address lookup, select and manual entry answers needed to prefill those steps on change, throwing if it is missing
                     address = if (contactType == SuperiorLandlordContactType.POSTAL_ADDRESS) PLACEHOLDER_ADDRESS else null,
@@ -66,16 +74,12 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         state.superiorLandlordProvideDetailsStep.clearFormData()
         state.superiorLandlordNameStep.clearFormData()
         state.superiorLandlordContactTypeStep.clearFormData()
-        // TODO PDJB-1975: check this still clears the real email page correctly
         state.superiorLandlordEmailStep.clearFormData()
         // TODO PDJB-1976: check this still clears all the real address steps correctly
         state.superiorLandlordAddressTask.clearFormData()
     }
 
     companion object {
-        // TODO PDJB-1975: remove once the email the user entered is saved instead
-        const val PLACEHOLDER_EMAIL = "placeholder.superior.landlord@example.com"
-
         // TODO PDJB-1976: remove once the address the user entered is saved instead
         val PLACEHOLDER_ADDRESS =
             AddressDataModel.fromManualAddressData(
