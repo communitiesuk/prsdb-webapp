@@ -6,7 +6,8 @@ data class LettingAgentComplianceUpdateNotificationEmail(
     val registrationNumber: String,
     val certificateType: String,
     val certificateTypeLabel: String,
-    val expiryDate: String,
+    val certificateDate: String,
+    val certificateDateHeading: String = ComplianceUpdateConfirmationEmail.EXPIRY_DATE_HEADING,
     val propertyRecordUrl: String,
 ) : EmailTemplateModel {
     override val template = EmailTemplate.LETTING_AGENT_COMPLIANCE_UPDATE_NOTIFICATION_EMAIL
@@ -18,7 +19,8 @@ data class LettingAgentComplianceUpdateNotificationEmail(
             "registration number" to registrationNumber,
             "certificate type" to certificateType,
             "certificate type label" to certificateTypeLabel,
-            "expiry date" to expiryDate,
+            "certificate date heading" to certificateDateHeading,
+            "certificate date" to certificateDate,
             "property record url" to propertyRecordUrl,
         )
 }

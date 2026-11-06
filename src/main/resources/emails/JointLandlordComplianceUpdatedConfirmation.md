@@ -14,9 +14,9 @@ A joint landlord added a new compliance certificate for a rental property.
 
 ((certificate type label))
 
-## Expiry date
+## ((certificate date heading))
 
-((expiry date))
+((certificate date))
 
 ^ We'll email you when this certificate expires. You need to keep the certificates on your rental property's registration up to date.
 
