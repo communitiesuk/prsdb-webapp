@@ -56,6 +56,8 @@ class PropertyComplianceService(
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
+    // TODO PDJB-1679: These EIC date methods centralise access for the EIC_ISSUE_DATE cutover. When the flag is removed,
+    //  remove setEicExpiryDate and simplify the rest to use the eicIssueDate column directly.
     fun getEicIssueDate(propertyCompliance: PropertyCompliance): LocalDate? =
         eicDateService.issueDateFrom(
             requireEic(propertyCompliance),
@@ -95,7 +97,7 @@ class PropertyComplianceService(
             CertificateType.Eic -> getEicExpiryDate(propertyCompliance)
             // Any other cert type, including none, keeps reading the stored column so that records predating
             // the cert type column behave exactly as they did before this date access moved onto the service.
-            else -> propertyCompliance.electricalSafetyExpiryDate
+            else -> propertyCompliance.eicrExpiryDate
         }
 
     fun isElectricalSafetyExpired(propertyCompliance: PropertyCompliance): Boolean? =
@@ -103,11 +105,11 @@ class PropertyComplianceService(
             CertificateType.Eic ->
                 eicDateService.expiryDateFrom(propertyCompliance)?.let { CertificateExpiryHelper.isEicExpiryDateExpired(it) }
             CertificateType.Eicr ->
-                propertyCompliance.electricalSafetyExpiryDate?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it) }
+                propertyCompliance.eicrExpiryDate?.let { CertificateExpiryHelper.isEicrExpiryDateExpired(it) }
             // A record holding an electrical date without a usable cert type is inconsistent, so it is rejected
             // rather than reported as having no certificate.
             else ->
-                if (propertyCompliance.electricalSafetyExpiryDate == null) {
+                if (propertyCompliance.eicrExpiryDate == null && propertyCompliance.eicIssueDate == null) {
                     null
                 } else {
                     throw unexpectedElectricalCertType(propertyCompliance)
@@ -239,7 +241,10 @@ class PropertyComplianceService(
             CertificateType.Eic ->
                 if (eicIssueDate != null) setEicIssueDate(record, eicIssueDate) else setEicExpiryDate(record, eicExpiryDate)
             CertificateType.Eicr -> setEicrExpiryDate(record, eicrExpiryDate)
-            null -> record.electricalSafetyExpiryDate = null
+            null -> {
+                record.eicrExpiryDate = null
+                record.eicIssueDate = null
+            }
             CertificateType.GasSafetyCert -> throw unexpectedElectricalCertType(record)
         }
         record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
@@ -249,19 +254,26 @@ class PropertyComplianceService(
         record: PropertyCompliance,
         expiryDate: LocalDate?,
     ) {
-        record.electricalSafetyExpiryDate = expiryDate
+        record.eicIssueDate = null
+        record.eicrExpiryDate = expiryDate
     }
 
     private fun setEicIssueDate(
         record: PropertyCompliance,
         issueDate: LocalDate,
-    ) = eicDateService.applyIssueDate(record, issueDate)
+    ) {
+        record.eicrExpiryDate = null
+        eicDateService.applyIssueDate(record, issueDate)
+    }
 
     // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
     private fun setEicExpiryDate(
         record: PropertyCompliance,
         expiryDate: LocalDate?,
-    ) = eicDateService.applyExpiryDate(record, expiryDate)
+    ) {
+        record.eicrExpiryDate = null
+        eicDateService.applyExpiryDate(record, expiryDate)
+    }
 
     private fun populateEpcFields(
         record: PropertyCompliance,
@@ -409,11 +421,13 @@ class PropertyComplianceService(
         // TODO PDJB-1679: Remove the eicExpiryDate check when the EIC_ISSUE_DATE flag is removed
         if (eicrExpiryDate != null || eicIssueDate != null || eicExpiryDate != null) {
             val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
+            // TODO PDJB-1678: Use the EIC issue date in the email for EICs
             sendCertificateUpdateEmail(
                 propertyCompliance,
                 isExpired = isElectricalSafetyExpired(propertyCompliance) == true,
                 certificateType = "electrical safety certificate",
                 certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
+                // TODO PDJB-1678: Review EIC update email content, which currently labels the calculated expiry date as an expiry date.
                 expiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
                 lettingAgentCertificateTypeLabel = "Electrical safety certificate",
             )

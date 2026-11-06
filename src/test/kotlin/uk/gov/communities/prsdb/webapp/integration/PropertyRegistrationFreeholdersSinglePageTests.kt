@@ -2,15 +2,18 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
@@ -81,6 +84,50 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
             provideDetailsPage.backLink.clickAndWait()
 
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholdersInfoStep {
+        @Test
+        fun `Non-joint freeholders see the intro and collapsed help details`() {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false)
+
+            assertThat(freeholdersPage.heading).containsText("Add freeholders")
+            assertThat(freeholdersPage.helpDetails).isVisible()
+        }
+
+        @Test
+        fun `Back link returns to the ownership kind page for non-joint freeholders`(page: Page) {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false)
+
+            freeholdersPage.backLink.clickAndWait()
+
+            assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Joint freeholders see the joint intro without help details`() {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = true)
+
+            assertThat(freeholdersPage.heading).containsText("Add joint freeholders")
+            assertEquals(0, freeholdersPage.helpDetails.count())
+        }
+
+        @Test
+        fun `Back link returns to the freehold type page for joint freeholders`(page: Page) {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = true)
+
+            freeholdersPage.backLink.clickAndWait()
+
+            assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding the first freeholder enters the details flow`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
         }
     }
 
@@ -289,7 +336,6 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         fun `Back link returns to the freeholders page`(page: Page) {
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             freeholdersListPage.backLink.clickAndWait()
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
         }
     }

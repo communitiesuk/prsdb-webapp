@@ -60,7 +60,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPay
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayNotCapturableException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayUnavailableException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
@@ -1050,33 +1052,79 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment rolls back, then marks the payment for cancellation in case it was taken when capture fails`() {
+        fun `finalisePayment commits the registration when capture fails but GOV UK Pay reports the payment as taken`() {
             // Arrange
-            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
-            stubTransaction()
-            whenever(mockPropertyRegistrationService.registerProperty(any()))
-                .thenReturn(MockLandlordData.createPropertyOwnership())
-            stubStoredPayment()
-            doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(
-                mockPaymentReconciliationService.markForCancellation(
-                    PAYMENT_ID,
-                    PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
-                ),
-            ).thenReturn(PaymentStatus.CANCELLED)
+            stubCaptureFailure()
+            stubGovUkPayStatusAfterCaptureFailure(GovUkPayPaymentStatus.SUCCESS)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
-            assertEquals(PaymentStatus.CANCELLED, status)
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            verify(mockTransactionManager).commit(any())
+            verify(mockPaymentReconciliationService, never()).recordManualIntervention(any(), any(), any())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
+        }
+
+        @ParameterizedTest
+        @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideCaptureFailuresAndNotTakenStatuses")
+        fun `finalisePayment rolls back, then records the GOV UK Pay status when capture fails and GOV UK Pay reports nothing was taken`(
+            captureFailure: GovUkPayException,
+            govUkPayStatus: GovUkPayPaymentStatus,
+            expectedStatus: PaymentStatus,
+        ) {
+            // Arrange
+            stubCaptureFailure(captureFailure)
+            stubGovUkPayStatusAfterCaptureFailure(govUkPayStatus)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(expectedStatus)
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(expectedStatus, status)
             verify(mockTransactionManager, never()).commit(any())
-            val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
+            val inOrder = inOrder(mockTransactionManager, mockPaymentRepository)
             inOrder.verify(mockTransactionManager).rollback(any())
-            inOrder.verify(mockPaymentReconciliationService).markForCancellation(
-                PAYMENT_ID,
-                PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+            inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIs(
+                eq(PAYMENT_ID),
+                eq(PaymentStatus.CREATED),
+                eq(expectedStatus),
+                any(),
             )
+            verify(mockPaymentReconciliationService, never()).recordManualIntervention(any(), any(), any())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
+        }
+
+        @Test
+        fun `finalisePayment rolls back, then records manual intervention when capture fails and GOV UK Pay reports it still capturable`() {
+            // Arrange
+            stubCaptureFailure()
+            stubGovUkPayStatusAfterCaptureFailure(GovUkPayPaymentStatus.CAPTURABLE)
+            stubCaptureOutcomeUnknownManualIntervention()
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verifyRolledBackBeforeCaptureOutcomeUnknownManualIntervention()
+        }
+
+        @Test
+        fun `finalisePayment rolls back, then records manual intervention when capture fails and GOV UK Pay's status can't be read`() {
+            // Arrange
+            stubCaptureFailure()
+            whenever(mockGovUkPayClient.getPaymentWithRetry(PAYMENT_ID)).thenThrow(GovUkPayException("Status read failed"))
+            stubCaptureOutcomeUnknownManualIntervention()
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+            // Assert
+            assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+            verifyRolledBackBeforeCaptureOutcomeUnknownManualIntervention()
         }
 
         @Test
@@ -1102,7 +1150,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
         }
 
         @Test
@@ -1363,6 +1411,40 @@ class PaymentServiceTests {
         whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment))
     }
 
+    private fun stubCaptureFailure(captureFailure: GovUkPayException = createGovUkPayUnavailableException()) {
+        stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+        stubTransaction()
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenReturn(MockLandlordData.createPropertyOwnership())
+        stubStoredPayment()
+        doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+    }
+
+    private fun stubGovUkPayStatusAfterCaptureFailure(govUkPayStatus: GovUkPayPaymentStatus) {
+        whenever(mockGovUkPayClient.getPaymentWithRetry(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
+    }
+
+    private fun stubCaptureOutcomeUnknownManualIntervention() {
+        whenever(
+            mockPaymentReconciliationService.recordManualIntervention(
+                PAYMENT_ID,
+                PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                PaymentStatus.CREATED,
+            ),
+        ).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
+    }
+
+    private fun verifyRolledBackBeforeCaptureOutcomeUnknownManualIntervention() {
+        verify(mockTransactionManager, never()).commit(any())
+        val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
+        inOrder.verify(mockTransactionManager).rollback(any())
+        inOrder.verify(mockPaymentReconciliationService).recordManualIntervention(
+            PAYMENT_ID,
+            PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+            PaymentStatus.CREATED,
+        )
+        verify(mockPaymentReconciliationService, never()).markForCancellation(any())
+    }
+
     private fun constraintViolation(constraintName: String) =
         DataIntegrityViolationException(
             "could not execute statement",
@@ -1402,6 +1484,13 @@ class PaymentServiceTests {
                 Arguments.of(GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
                 Arguments.of(GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
                 Arguments.of(GovUkPayPaymentStatus.ERROR, PaymentStatus.FAILED),
+            )
+
+        @JvmStatic
+        fun provideCaptureFailuresAndNotTakenStatuses() =
+            listOf(
+                Arguments.of(createGovUkPayUnavailableException(), GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(createGovUkPayNotCapturableException(), GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
             )
 
         @JvmStatic

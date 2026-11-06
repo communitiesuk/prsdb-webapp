@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddre
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -251,17 +252,6 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationFreeholderProvideDetails(isJointFreeholder)
                 .withFreeholderProvideDetails()
 
-        fun beforePropertyRegistrationHasSuperiorLandlords() =
-            beforePropertyRegistrationOwnsProperty()
-                .withOwnsProperty()
-                .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-                .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
-
-        fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
-            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
-        ) = beforePropertyRegistrationFreeholdersList(isJointFreeholder = false, freeholders = freeholders)
-            .withFreeholdersListComplete()
-
         fun beforePropertyRegistrationFreeholderContactType(
             jointFreeholders: Boolean = true,
             freeholderName: String = "Test Freeholder",
@@ -295,11 +285,51 @@ class PropertyStateSessionBuilder(
             .withFreeholderLookupAddress()
             .withFreeholderManualAddressSelected()
 
-        // TODO PDJB-1978: remove withHasAnySuperiorLandlordsComplete when has any superior landlords becomes an internal step
-        fun beforePropertyRegistrationSuperiorLandlordsList() =
+        fun beforePropertyRegistrationHasSuperiorLandlords() =
+            beforePropertyRegistrationOwnsProperty()
+                .withOwnsProperty()
+                .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+                .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+
+        fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
+            freeholders: Map<Int, FreeholderDataModel> = DEFAULT_FREEHOLDERS,
+        ) = beforePropertyRegistrationFreeholdersList(isJointFreeholder = false, freeholders = freeholders)
+            .withFreeholdersListComplete()
+
+        val DEFAULT_SUPERIOR_LANDLORDS =
+            mapOf(
+                1 to
+                    SuperiorLandlordDataModel(
+                        detailsKnown = true,
+                        name = "Superior Landlord With Address",
+                        address = AddressDataModel.fromManualAddressData("1 Superior Street", "Superiortown", "SL1 1AA"),
+                    ),
+                2 to
+                    SuperiorLandlordDataModel(
+                        detailsKnown = true,
+                        name = "Superior Landlord With Email",
+                        email = "superior.landlord@example.com",
+                    ),
+                3 to SuperiorLandlordDataModel(detailsKnown = false),
+            )
+
+        fun beforePropertyRegistrationSuperiorLandlordProvideDetails() =
             beforePropertyRegistrationHasSuperiorLandlords()
                 .withAnyoneInOwnershipChain()
-                .withHasAnySuperiorLandlordsComplete()
+
+        fun beforePropertyRegistrationSuperiorLandlordName() =
+            beforePropertyRegistrationSuperiorLandlordProvideDetails()
+                .withSuperiorLandlordProvideDetails()
+
+        fun beforePropertyRegistrationSuperiorLandlordContactType() =
+            beforePropertyRegistrationSuperiorLandlordName()
+                .withSuperiorLandlordNameComplete()
+
+        fun beforePropertyRegistrationSuperiorLandlordsList(
+            superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,
+        ) = beforePropertyRegistrationHasSuperiorLandlords()
+            .withAnyoneInOwnershipChain()
+            .withSuperiorLandlords(superiorLandlords)
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

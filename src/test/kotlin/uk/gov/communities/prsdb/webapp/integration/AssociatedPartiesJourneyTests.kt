@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveFreeholderFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
@@ -26,22 +28,20 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnySuperiorLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SaveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsBackRoutingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveSuperiorLandlordStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -84,7 +84,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
@@ -124,7 +123,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(false)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
@@ -147,7 +145,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
@@ -423,7 +420,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .clickAndWait()
             // TODO PDJB-1970: update this usage when the real remove freeholder confirmation page is added
             assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
         }
     }
@@ -441,26 +437,20 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         fun `Choosing email as the superior landlord contact type goes through the email page before leaving the task`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
-            assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1974: update this usage when the real contact type page is added
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
             // TODO PDJB-1975: update this usage when the real superior landlord email page is added
             assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
-            assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
             val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
-            // TODO PDJB-1978: verify that the information the user submitted is visible
-            assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
-            assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Unknown person")
+            assertThat(superiorLandlordsListPage.heading).containsText("added 1 person in the ownership chain")
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Test Superior Landlord")
+            // TODO PDJB-1975: assert the email the user entered once the real email page is added
+            assertThat(
+                superiorLandlordsListPage.getSummaryCard(0).summaryList,
+            ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
             superiorLandlordsListPage.submit()
-            // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
-            assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
 
@@ -470,22 +460,13 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
-            assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.YES)
-            // TODO PDJB-1973: update this usage when the real superior landlord name page is added
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1974: update this usage when the real contact type page is added
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
             // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
             assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
-            assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
-            assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
 
@@ -495,16 +476,115 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         ) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
             anyoneInOwnershipChainPage.submitYes()
-            // TODO PDJB-1978: remove this usage when has any superior landlords becomes an internal step
-            assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1972: update this usage when the real provide details page is added
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
-            // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
-            assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitNo()
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
-            assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding several superior landlords shows each of them in the list`(page: Page) {
+            val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
+            anyoneInOwnershipChainPage.submitYes()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitNo()
+
+            var superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordsListPage.heading).containsText("added 1 person in the ownership chain")
+            superiorLandlordsListPage.addAnotherButton.click()
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            provideDetailsPage.submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Email superior landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
+            // TODO PDJB-1975: update this usage when the real superior landlord email page is added
+            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
+
+            superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordsListPage.heading).containsText("added 2 people in the ownership chain")
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            val secondNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            secondNamePage.submitName("Address superior landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+            // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
+            assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
+
+            superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Unknown person")
+            assertThat(superiorLandlordsListPage.getSummaryCard(1).title).hasText("Email superior landlord")
+            // TODO PDJB-1975: assert the email the user entered once the real email page is added
+            assertThat(
+                superiorLandlordsListPage.getSummaryCard(1).summaryList,
+            ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Address superior landlord")
+            // TODO PDJB-1976: assert the address the user entered once the real address pages are added
+            assertThat(superiorLandlordsListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
+        }
+
+        @Test
+        fun `Changing a superior landlord updates their details in the list`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            assertThat(superiorLandlordsListPage.getSummaryCard(1).title).hasText("Superior Landlord With Email")
+
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+            provideDetailsPage.submitYes()
+            val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            namePage.submitName("Changed superior landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).form.submit()
+            // TODO PDJB-1975: update this usage when the real superior landlord email page is added
+            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
+
+            val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.heading).containsText("added 3 people in the ownership chain")
+            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord With Address")
+            assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed superior landlord")
+            // TODO PDJB-1975: assert the email the user entered once the real email page is added
+            assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown person")
+        }
+
+        @Test
+        fun `Removing superior landlords one by one updates the list then returns to the anyone in ownership chain page`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
+
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
+            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            val afterFirstRemoval = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(afterFirstRemoval.heading).containsText("added 2 people in the ownership chain")
+            assertThat(afterFirstRemoval.getSummaryCard(0).title).hasText("Superior Landlord With Address")
+            assertThat(afterFirstRemoval.getSummaryCard(1).title).hasText("Unknown person")
+
+            afterFirstRemoval
+                .getSummaryCard(0)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
+            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            val afterSecondRemoval = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(afterSecondRemoval.heading).containsText("added 1 person in the ownership chain")
+            assertThat(afterSecondRemoval.getSummaryCard(0).title).hasText("Unknown person")
+
+            afterSecondRemoval
+                .getSummaryCard(0)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
+            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
         }
     }
 

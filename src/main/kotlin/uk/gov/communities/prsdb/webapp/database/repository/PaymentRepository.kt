@@ -26,6 +26,13 @@ interface PaymentRepository : JpaRepository<Payment, String> {
         status: PaymentStatus,
     ): Payment?
 
+    fun findAllByStatus(status: PaymentStatus): List<Payment>
+
+    fun findAllByStatusAndPaymentCreatedAtBefore(
+        status: PaymentStatus,
+        paymentCreatedAt: Instant,
+    ): List<Payment>
+
     @Modifying
     @Transactional
     @Query(

@@ -470,8 +470,9 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzE
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
+-- TODO PDJB-1673: Add some EIC example data (electrical_cert_type = 1 with an eic_issue_date)
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true),

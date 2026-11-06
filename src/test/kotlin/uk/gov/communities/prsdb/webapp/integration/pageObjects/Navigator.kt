@@ -228,6 +228,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
@@ -308,11 +311,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
@@ -329,6 +335,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
@@ -1101,9 +1108,33 @@ class Navigator(
         return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationSuperiorLandlordsListPage(): SuperiorLandlordsListFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationSuperiorLandlordProvideDetailsPage(): SuperiorLandlordProvideDetailsFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordsList().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordProvideDetails().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT)
+        return createValidPage(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordNamePage(): SuperiorLandlordNameFormPagePropertyRegistration {
+        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordName().build())
+        navigateToPropertyRegistrationJourneyStep(SuperiorLandlordNameStep.ROUTE_SEGMENT)
+        return createValidPage(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordContactTypePage(): SuperiorLandlordContactTypeFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordContactType().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(SuperiorLandlordContactTypeStep.ROUTE_SEGMENT)
+        return createValidPage(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordsListPage(
+        superiorLandlords: Map<Int, SuperiorLandlordDataModel> = PropertyStateSessionBuilder.DEFAULT_SUPERIOR_LANDLORDS,
+    ): SuperiorLandlordsListFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordsList(superiorLandlords).build(),
         )
         navigateToPropertyRegistrationJourneyStep(SuperiorLandlordsListStep.ROUTE_SEGMENT)
         return createValidPage(page, SuperiorLandlordsListFormPagePropertyRegistration::class)

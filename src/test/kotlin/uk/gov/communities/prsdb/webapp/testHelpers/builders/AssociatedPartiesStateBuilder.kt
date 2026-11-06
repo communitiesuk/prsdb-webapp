@@ -11,17 +11,19 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
@@ -34,6 +36,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
 interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder<SelfType>> {
     val additionalDataMap: MutableMap<String, String>
@@ -100,7 +104,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1962: update this when the real freeholders intro page is added
     fun withFreeholdersInfoComplete(): SelfType {
         withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
@@ -156,9 +159,21 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1978: remove this when has any superior landlords becomes an internal step
-    fun withHasAnySuperiorLandlordsComplete(): SelfType {
-        withSubmittedValue(HasAnySuperiorLandlordsStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withSuperiorLandlordProvideDetails(provideDetails: Boolean = true): SelfType {
+        val superiorLandlordProvideDetailsFormModel = SuperiorLandlordProvideDetailsFormModel(provideDetails = provideDetails)
+        withSubmittedValue(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT, superiorLandlordProvideDetailsFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlordNameComplete(name: String = "Test Superior Landlord"): SelfType {
+        val superiorLandlordNameFormModel = SuperiorLandlordNameFormModel(name = name)
+        withSubmittedValue(SuperiorLandlordNameStep.ROUTE_SEGMENT, superiorLandlordNameFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlords(superiorLandlords: Map<Int, SuperiorLandlordDataModel>): SelfType {
+        additionalDataMap["superiorLandlordsMap"] = Json.encodeToString(serializer(), superiorLandlords)
+        additionalDataMap["nextSuperiorLandlordId"] = Json.encodeToString(serializer(), (superiorLandlords.keys.maxOrNull() ?: 0) + 1)
         return self()
     }
 }

@@ -1224,7 +1224,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
@@ -3044,7 +3043,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertNull(propertyCompliance.gasSafetyCertIssueDate)
             assertEquals(true, propertyCompliance.gasSafetyCertProvideLater)
             assertTrue(gasSafetyFileUploadIds.isEmpty())
-            assertNull(propertyCompliance.electricalSafetyExpiryDate)
+            assertNull(propertyCompliance.eicrExpiryDate)
+            assertNull(propertyCompliance.eicIssueDate)
             assertNull(propertyCompliance.electricalCertType)
             assertEquals(true, propertyCompliance.electricalSafetyCertProvideLater)
             assertTrue(electricalSafetyFileUploadIds.isEmpty())

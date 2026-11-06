@@ -114,7 +114,7 @@ VALUES (1, 1, '2025-01-15'),
 -- Gas: occupied=HAS_FAULTS (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
 -- EICR: all valid (expiry in future) so it doesn't interfere
 -- EPC: varies per test case
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
 VALUES
        -- 1: Provide later, occupied
        (1, 1, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true),

@@ -476,7 +476,8 @@ VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+-- TODO PDJB-1673: Add some EIC example data (electrical_cert_type = 1 with an eic_issue_date), here and in the integration test fixtures
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES
        (1, 8, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true),
        (2, 9, '01/01/25', '01/01/25', '1990-02-28', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2021-03-16', false, 'c', null, null, true, true, true),
@@ -536,7 +537,7 @@ SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(i
 --   45  PO 46: gas cert "provide later", electrical + EPC valid -> "add compliance certificates" (missing) banner.
 --   46  PO 40 (11 Complete Fields Road): all certs valid & in date, no provide-later -> no banner.
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
                                  gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)

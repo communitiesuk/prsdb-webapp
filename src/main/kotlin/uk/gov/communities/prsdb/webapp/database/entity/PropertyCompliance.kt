@@ -37,9 +37,14 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
-    // For EIC records, access dates through PropertyComplianceService/EicDateService;
-    // direct access bypasses the feature-flagged storage logic.
-    var electricalSafetyExpiryDate: LocalDate? = null
+    // Only used for EICRs (and legacy records with no cert type). Set through PropertyComplianceService,
+    // which keeps eicrExpiryDate/eicIssueDate mutually exclusive.
+    var eicrExpiryDate: LocalDate? = null
+
+    // TODO PDJB-1679: Update this comment when the EIC_ISSUE_DATE flag is removed - EIC dates will be read from this column directly.
+    // Access through PropertyComplianceService/EicDateService rather than directly; EIC expiry dates
+    // are derived from this issue date. Only used for EICs.
+    var eicIssueDate: LocalDate? = null
 
     var electricalCertType: CertificateType? = null
 
@@ -121,7 +126,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         gasSafetyCertIssueDate: LocalDate? = null,
         hasGasSupply: Boolean? = null,
         gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
-        electricalSafetyExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
+        eicIssueDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
@@ -137,7 +143,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         this.hasGasSupply = hasGasSupply
         this.gasSafetyFileUploads = gasSafetyFileUploads
-        this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        this.eicrExpiryDate = eicrExpiryDate
+        this.eicIssueDate = eicIssueDate
         this.electricalCertType = electricalCertType
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
