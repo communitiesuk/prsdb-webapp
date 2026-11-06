@@ -83,25 +83,21 @@ class ElectricalSafetyViewModelFactory(
                     )
                 }
 
-                when {
+                if (propertyCompliance.electricalCertType == CertificateType.Eic && featureFlagManager.checkFeature(EIC_ISSUE_DATE)) {
                     // TODO PDJB-1679: Remove featureFlagManager.checkFeature(EIC_ISSUE_DATE).
-                    propertyCompliance.electricalCertType == CertificateType.Eic && featureFlagManager.checkFeature(EIC_ISSUE_DATE) -> {
-                        // TODO PDJB-1673: Tidy up EIC issue-date logic when issue dates are stored directly.
-                        eicDateService.issueDateFrom(propertyCompliance)?.let { issueDate ->
-                            addRow(
-                                key = "propertyDetails.complianceInformation.issueDate",
-                                value = issueDate,
-                            )
-                        }
+                    // TODO PDJB-1673: Tidy up EIC issue-date logic when issue dates are stored directly.
+                    eicDateService.issueDateFrom(propertyCompliance)?.let { issueDate ->
+                        addRow(
+                            key = "propertyDetails.complianceInformation.issueDate",
+                            value = issueDate,
+                        )
                     }
-
-                    else -> {
-                        complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
-                            addRow(
-                                key = "propertyDetails.complianceInformation.expiryDate",
-                                value = expiryDate,
-                            )
-                        }
+                } else {
+                    complianceStatus.electricalSafetyExpiryDate?.let { expiryDate ->
+                        addRow(
+                            key = "propertyDetails.complianceInformation.expiryDate",
+                            value = expiryDate,
+                        )
                     }
                 }
 

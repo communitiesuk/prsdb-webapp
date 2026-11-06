@@ -414,7 +414,7 @@ class PropertyComplianceService(
                 isExpired = isElectricalSafetyExpired(propertyCompliance) == true,
                 certificateType = "electrical safety certificate",
                 certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
-                // TODO PDJB-1673: Review EIC update email content, which currently labels the calculated expiry date as an expiry date.
+                // TODO PDJB-1678: Review EIC update email content, which currently labels the calculated expiry date as an expiry date.
                 expiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
                 lettingAgentCertificateTypeLabel = "Electrical safety certificate",
             )
