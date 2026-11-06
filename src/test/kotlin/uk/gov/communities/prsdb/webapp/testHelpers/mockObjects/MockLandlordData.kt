@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -203,7 +204,8 @@ class MockLandlordData {
         }
 
         fun createPropertyOwnership(
-            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType: OwnershipType = OwnershipType.SOLE_FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             isOccupied: Boolean = currentNumTenants > 0,
@@ -233,6 +235,7 @@ class MockLandlordData {
             val propertyOwnership =
                 PropertyOwnership(
                     ownershipType = ownershipType,
+                    ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     isOccupied = isOccupied,
@@ -278,7 +281,7 @@ class MockLandlordData {
         }
 
         fun createOccupiedPropertyOwnership(
-            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             currentNumHouseholds: Int = 2,
             currentNumTenants: Int = 1,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
@@ -303,7 +306,7 @@ class MockLandlordData {
             val propertyOwnership =
                 createPropertyOwnership(
                     id = id,
-                    ownershipType = ownershipType,
+                    ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     isOccupied = true,

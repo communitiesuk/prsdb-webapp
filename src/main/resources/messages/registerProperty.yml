@@ -84,7 +84,9 @@ taskList:
   aboutYourProperty:
     heading: About your property
     propertyDetails: Property details
+    # TODO: PDJB-2016: Remove the ownershipAndLandlords header, it is replaced by peopleResponsible
     ownershipAndLandlords: Ownership and landlords
+    peopleResponsible: People responsible for this property
     correspondence: Who the council should contact
     occupied: Tell us if your property’s occupied
   rentedOut:
@@ -221,6 +223,10 @@ propertyManager:
     access:
       heading: Give your property manager access
       paragraph: Entering your property manager’s details here does not give them access to this registration. You can do this from the property’s registration page.
+  check:
+    heading: You’ve added a property manager
+    insetText: After you submit and pay, we’ll contact this person to say they’re listed on your registration.
+    emailAddress: Email address
   remove:
     fieldSetHeading: Are you sure you want to remove {0}?
     fieldSetHint: They will be removed as your property manager
@@ -341,6 +347,13 @@ freeholders:
           label: Postal address
       error:
         missing: Select which contact information you can provide
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
@@ -367,6 +380,16 @@ superiorLandlords:
         postalAddress: Post
       error:
         missing: Select how we should contact the superior landlord
+  list:
+    heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
+    insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
+    emailAddress: Email address
+    postalAddress: Postal address
+    unknownSuperiorLandlord:
+      title: Unknown person
+      body: You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. Return and add these details when you can.
+    buttons:
+      addAnother: Add another person in the ownership chain
   anyoneInOwnershipChain:
     heading: Other people in the ownership chain
     paragraph:

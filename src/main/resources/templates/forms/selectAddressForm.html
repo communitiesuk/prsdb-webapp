@@ -2,6 +2,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeadingParam" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addressCount" type="java.lang.Integer"*/-->
 <!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
 <!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
@@ -11,8 +12,8 @@
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title ?: fieldSetHeading}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title ?: fieldSetHeading}(${fieldSetHeadingParam})}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}(${fieldSetHeadingParam})}, null)}">
         <div th:id="'address-hint'" class="govuk-hint">
             <span th:remove="tag" th:text="#{addressForms.selectAddress.fieldSetHint.beforePostcode(${addressCount})}">addressForms.selectAddress.fieldSetHint.beforePostcode</span>
             <strong th:text="${postcode}"></strong>
