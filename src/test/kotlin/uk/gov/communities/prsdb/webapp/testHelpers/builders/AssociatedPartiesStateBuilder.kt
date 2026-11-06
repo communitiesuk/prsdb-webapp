@@ -101,7 +101,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1962: update this when the real freeholders intro page is added
     fun withFreeholdersInfoComplete(): SelfType {
         withSubmittedValue(FreeholdersInfoStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()

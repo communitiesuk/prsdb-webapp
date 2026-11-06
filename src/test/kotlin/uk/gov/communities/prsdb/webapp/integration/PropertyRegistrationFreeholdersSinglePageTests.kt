@@ -2,18 +2,65 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Nested
+    inner class FreeholdersInfoStep {
+        @Test
+        fun `Non-joint freeholders see the intro and collapsed help details`() {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false)
+
+            assertThat(freeholdersPage.heading).containsText("Add freeholders")
+            assertThat(freeholdersPage.helpDetails).isVisible()
+        }
+
+        @Test
+        fun `Back link returns to the ownership kind page for non-joint freeholders`(page: Page) {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false)
+
+            freeholdersPage.backLink.clickAndWait()
+
+            assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Joint freeholders see the joint intro without help details`() {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = true)
+
+            assertThat(freeholdersPage.heading).containsText("Add joint freeholders")
+            assertEquals(0, freeholdersPage.helpDetails.count())
+        }
+
+        @Test
+        fun `Back link returns to the freehold type page for joint freeholders`(page: Page) {
+            val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = true)
+
+            freeholdersPage.backLink.clickAndWait()
+
+            assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding the first freeholder enters the details flow`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
+        }
+    }
+
     @Nested
     inner class FreeholderNameStep {
         @Test
@@ -71,14 +118,14 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     @Nested
     inner class FreeholderEmailStep {
         @Test
-        fun `heading includes the freeholder name`() {
+        fun `Heading includes the freeholder name`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
 
             assertThat(emailPage.heading).containsText("What is James Hassan’s email address?")
         }
 
         @Test
-        fun `submitting an empty email returns the missing email error`() {
+        fun `Submitting an empty email returns the missing email error`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
             emailPage.submitEmail("")
 
@@ -86,7 +133,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `submitting an invalid email returns the format error`() {
+        fun `Submitting an invalid email returns the format error`() {
             val emailPage = navigator.skipToPropertyRegistrationFreeholderEmailPage(freeholderName = "James Hassan")
             emailPage.submitEmail("not-an-email")
 
@@ -95,7 +142,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `submitting an email already used by another freeholder returns the duplicate email error`() {
+        fun `Submitting an email already used by another freeholder returns the duplicate email error`() {
             val emailPage =
                 navigator.skipToPropertyRegistrationFreeholderEmailPage(
                     freeholderName = "James Hassan",
@@ -219,7 +266,6 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         fun `Back link returns to the freeholders page`(page: Page) {
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             freeholdersListPage.backLink.clickAndWait()
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
         }
     }

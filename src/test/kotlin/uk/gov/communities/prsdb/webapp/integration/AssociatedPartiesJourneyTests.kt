@@ -83,7 +83,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
@@ -124,7 +123,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(false)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
@@ -148,7 +146,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
 
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1963: update this usage when the real provide details page is added
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
@@ -406,7 +403,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .clickAndWait()
             // TODO PDJB-1970: update this usage when the real remove freeholder confirmation page is added
             assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
         }
     }

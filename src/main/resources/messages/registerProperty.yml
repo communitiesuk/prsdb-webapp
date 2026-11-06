@@ -317,6 +317,24 @@ occupancyChangeInterruption:
     four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
     five: You can go back to undo this change.
 freeholders:
+  intro:
+    heading:
+      joint: Add joint freeholders
+      nonJoint: Add freeholders
+    paragraph:
+      joint: Provide the details of the other freeholders one by one.
+      nonJoint: Freeholders own the property and its land for an indefinite time. They may be an individual person, multiple people or a company.
+    responsibility: You must add each freeholder’s details as they all have responsibility for the property’s condition.
+    help:
+      summary: How to find out who your freeholder is
+      paragraph:
+        one: The person on your lease may be the freeholder or know who it is.
+        two:
+          beforeLink: You can also find the freeholder on the property’s title register (sometimes known as the ‘title deeds’). Get the title register by
+          linkText: searching for land and property information (opens in new tab)
+          afterLink: .
+    buttons:
+      addFirstFreeholder: Add first freeholder
   provideDetails:
     fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
     radios:
