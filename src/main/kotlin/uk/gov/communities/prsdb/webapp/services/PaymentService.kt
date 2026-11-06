@@ -275,8 +275,6 @@ class PaymentService(
     ): PaymentStatus =
         checkNotNull(
             transactionTemplate.execute { transactionStatus ->
-                // The claim locks the payment's row until this transaction ends, so any other finalisation or
-                // cancellation of this payment waits for it, then sees the result.
                 val isClaimed =
                     paymentRepository.updateStatusIfCurrentStatusIs(
                         paymentId,
@@ -307,19 +305,15 @@ class PaymentService(
 
                 onCaptureAttempted()
                 // Capturing the payment can't be rolled back, so nothing else should run in this transaction after it.
-                captureAndConfirmPayment(paymentId)
+                try {
+                    govUkPayClient.capturePayment(paymentId)
+                } catch (captureFailure: Exception) {
+                    confirmPaymentTakenAfterCaptureFailure(paymentId, captureFailure)
+                }
                 onCaptured()
                 PaymentStatus.SUCCEEDED
             },
         )
-
-    private fun captureAndConfirmPayment(paymentId: String) {
-        try {
-            govUkPayClient.capturePayment(paymentId)
-        } catch (captureFailure: Exception) {
-            confirmPaymentTakenAfterCaptureFailure(paymentId, captureFailure)
-        }
-    }
 
     private fun confirmPaymentTakenAfterCaptureFailure(
         paymentId: String,
@@ -327,7 +321,7 @@ class PaymentService(
     ) {
         val govUkPayStatus =
             try {
-                paymentReconciliationService.getGovUkPayPaymentStatusWithRetry(paymentId)
+                PaymentStatus.fromGovUKPayStatus(govUkPayClient.getPaymentWithRetry(paymentId).state.status)
             } catch (readFailure: Exception) {
                 throw PaymentCaptureOutcomeUnknownException(
                     "Failed to get the status of payment $paymentId from GOV.UK Pay after its capture failed",

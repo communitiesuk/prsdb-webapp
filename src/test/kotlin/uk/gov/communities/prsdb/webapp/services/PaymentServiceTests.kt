@@ -1055,7 +1055,7 @@ class PaymentServiceTests {
         fun `finalisePayment commits the registration when capture fails but GOV UK Pay reports the payment as taken`() {
             // Arrange
             stubCaptureFailure()
-            whenever(mockPaymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+            stubGovUkPayStatusAfterCaptureFailure(GovUkPayPaymentStatus.SUCCESS)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
@@ -1071,25 +1071,26 @@ class PaymentServiceTests {
         @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideCaptureFailuresAndNotTakenStatuses")
         fun `finalisePayment rolls back, then records the GOV UK Pay status when capture fails and GOV UK Pay reports nothing was taken`(
             captureFailure: GovUkPayException,
-            govUkPayStatus: PaymentStatus,
+            govUkPayStatus: GovUkPayPaymentStatus,
+            expectedStatus: PaymentStatus,
         ) {
             // Arrange
             stubCaptureFailure(captureFailure)
-            whenever(mockPaymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID)).thenReturn(govUkPayStatus)
-            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(govUkPayStatus)
+            stubGovUkPayStatusAfterCaptureFailure(govUkPayStatus)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(expectedStatus)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
-            assertEquals(govUkPayStatus, status)
+            assertEquals(expectedStatus, status)
             verify(mockTransactionManager, never()).commit(any())
             val inOrder = inOrder(mockTransactionManager, mockPaymentRepository)
             inOrder.verify(mockTransactionManager).rollback(any())
             inOrder.verify(mockPaymentRepository).updateStatusIfCurrentStatusIs(
                 eq(PAYMENT_ID),
                 eq(PaymentStatus.CREATED),
-                eq(govUkPayStatus),
+                eq(expectedStatus),
                 any(),
             )
             verify(mockPaymentReconciliationService, never()).recordManualIntervention(any(), any(), any())
@@ -1100,7 +1101,7 @@ class PaymentServiceTests {
         fun `finalisePayment rolls back, then records manual intervention when capture fails and GOV UK Pay reports it still capturable`() {
             // Arrange
             stubCaptureFailure()
-            whenever(mockPaymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID)).thenReturn(PaymentStatus.CAPTURABLE)
+            stubGovUkPayStatusAfterCaptureFailure(GovUkPayPaymentStatus.CAPTURABLE)
             stubCaptureOutcomeUnknownManualIntervention()
 
             // Act
@@ -1115,8 +1116,7 @@ class PaymentServiceTests {
         fun `finalisePayment rolls back, then records manual intervention when capture fails and GOV UK Pay's status can't be read`() {
             // Arrange
             stubCaptureFailure()
-            whenever(mockPaymentReconciliationService.getGovUkPayPaymentStatusWithRetry(PAYMENT_ID))
-                .thenThrow(GovUkPayException("Status read failed"))
+            whenever(mockGovUkPayClient.getPaymentWithRetry(PAYMENT_ID)).thenThrow(GovUkPayException("Status read failed"))
             stubCaptureOutcomeUnknownManualIntervention()
 
             // Act
@@ -1419,6 +1419,10 @@ class PaymentServiceTests {
         doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
     }
 
+    private fun stubGovUkPayStatusAfterCaptureFailure(govUkPayStatus: GovUkPayPaymentStatus) {
+        whenever(mockGovUkPayClient.getPaymentWithRetry(PAYMENT_ID)).thenReturn(createGovUkPayPayment(PAYMENT_ID, govUkPayStatus))
+    }
+
     private fun stubCaptureOutcomeUnknownManualIntervention() {
         whenever(
             mockPaymentReconciliationService.recordManualIntervention(
@@ -1485,8 +1489,8 @@ class PaymentServiceTests {
         @JvmStatic
         fun provideCaptureFailuresAndNotTakenStatuses() =
             listOf(
-                Arguments.of(createGovUkPayUnavailableException(), PaymentStatus.FAILED),
-                Arguments.of(createGovUkPayNotCapturableException(), PaymentStatus.CANCELLED),
+                Arguments.of(createGovUkPayUnavailableException(), GovUkPayPaymentStatus.FAILED, PaymentStatus.FAILED),
+                Arguments.of(createGovUkPayNotCapturableException(), GovUkPayPaymentStatus.CANCELLED, PaymentStatus.CANCELLED),
             )
 
         @JvmStatic

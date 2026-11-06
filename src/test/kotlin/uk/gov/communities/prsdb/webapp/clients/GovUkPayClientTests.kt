@@ -17,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.ResponseCreator
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymen
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPaySettlementSummary
 import java.io.IOException
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
@@ -50,7 +52,7 @@ class GovUkPayClientTests {
         val builder = RestClient.builder().baseUrl(BASE_URL)
         mockServer = MockRestServiceServer.bindTo(builder).build()
         restClient = builder.build()
-        govUkPayClient = GovUkPayClient(restClient, RATE_LIMIT_RETRY_DELAYS_MS)
+        govUkPayClient = GovUkPayClient(restClient, RATE_LIMIT_RETRY_DELAYS_MS, Duration.ZERO)
     }
 
     @Test
@@ -445,7 +447,7 @@ class GovUkPayClientTests {
     @Test
     fun `getPayment does not retry a 429 response when no rate limit retry delays are configured`() {
         // Arrange
-        val clientWithoutRetries = GovUkPayClient(restClient, emptyList())
+        val clientWithoutRetries = GovUkPayClient(restClient, emptyList(), Duration.ZERO)
         mockServer
             .expect(ExpectedCount.once(), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
             .andRespond(errorResponse(HttpStatus.TOO_MANY_REQUESTS, "P0900", "Too many requests"))
@@ -455,6 +457,69 @@ class GovUkPayClientTests {
 
         // Assert
         assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), exception.httpStatus?.value())
+        mockServer.verify()
+    }
+
+    @Test
+    fun `getPaymentWithRetry returns the payment without retrying when the first attempt succeeds`() {
+        // Arrange
+        mockServer
+            .expect(ExpectedCount.once(), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPaymentWithRetry(PAYMENT_ID)
+
+        // Assert
+        assertEquals(GovUkPayPaymentStatus.SUCCESS, payment.state.status)
+        mockServer.verify()
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideTransientFailureResponses")
+    fun `getPaymentWithRetry retries once after a server or connection error`(transientFailureResponse: ResponseCreator) {
+        // Arrange
+        mockServer.expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID")).andRespond(transientFailureResponse)
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPaymentWithRetry(PAYMENT_ID)
+
+        // Assert
+        assertEquals(GovUkPayPaymentStatus.SUCCESS, payment.state.status)
+        mockServer.verify()
+    }
+
+    @Test
+    fun `getPaymentWithRetry does not retry after a client error`() {
+        // Arrange
+        mockServer
+            .expect(ExpectedCount.once(), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(errorResponse(HttpStatus.NOT_FOUND, "P0200", "Not found"))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.getPaymentWithRetry(PAYMENT_ID) }
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND.value(), exception.httpStatus?.value())
+        mockServer.verify()
+    }
+
+    @Test
+    fun `getPaymentWithRetry throws the retry's failure with the first failure suppressed when both attempts fail`() {
+        // Arrange
+        mockServer.expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID")).andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE))
+        mockServer.expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID")).andRespond(withStatus(HttpStatus.BAD_GATEWAY))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.getPaymentWithRetry(PAYMENT_ID) }
+
+        // Assert
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), exception.httpStatus?.value())
+        val firstFailure = assertInstanceOf(GovUkPayException::class.java, exception.suppressed.single())
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), firstFailure.httpStatus?.value())
         mockServer.verify()
     }
 
@@ -558,6 +623,13 @@ class GovUkPayClientTests {
                 Arguments.of(HttpStatus.BAD_REQUEST, "P0501"),
                 Arguments.of(HttpStatus.NOT_FOUND, "P0500"),
                 Arguments.of(HttpStatus.CONFLICT, "P0502"),
+            )
+
+        @JvmStatic
+        fun provideTransientFailureResponses() =
+            listOf(
+                Arguments.of(withStatus(HttpStatus.SERVICE_UNAVAILABLE)),
+                Arguments.of(ResponseCreator { throw IOException("Connection refused") }),
             )
 
         // Zero delays keep the tests fast; the number of delays is the number of times a 429 response is retried

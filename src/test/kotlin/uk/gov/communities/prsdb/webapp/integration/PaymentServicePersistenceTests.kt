@@ -302,6 +302,30 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
+    fun `finalisePayment rolls back the registration and records manual intervention when capture fails and GOV UK Pay's status can't be read`() {
+        // Arrange
+        doThrow(createGovUkPayUnavailableException()).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
+        whenever(mockGovUkPayClient.getPaymentWithRetry(CREATED_PAYMENT_ID)).thenThrow(createGovUkPayUnavailableException())
+        whenever(mockPropertyRegistrationService.registerProperty(any())).thenAnswer {
+            setLandlordAnniversary()
+            getProperty()
+        }
+
+        // Act
+        val status = paymentService.finalisePayment(CREATED_PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
+
+        // Assert
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
+        assertNull(landlordRepository.findById(LANDLORD_ID).get().anniversary)
+        val payment = paymentRepository.findById(CREATED_PAYMENT_ID).get()
+        assertEquals(PaymentStatus.MANUAL_INTERVENTION, payment.status)
+        assertNull(payment.associatedProperty)
+        assertNotNull(payment.associatedIncompleteProperty)
+        verify(mockManualInterventionEmailSender).sendEmail(eq(MANUAL_INTERVENTION_EMAIL_ADDRESS), any())
+        verify(mockGovUkPayClient, never()).cancelPayment(any())
+    }
+
+    @Test
     fun `finalisePayment rolls back the registration and cancels the payment when the property is registered after the quote date`() {
         // Arrange
         jdbcTemplate.update(
@@ -745,7 +769,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         govUkPayStatus: GovUkPayPaymentStatus,
     ) {
         doThrow(captureFailure).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
-        whenever(mockGovUkPayClient.getPayment(CREATED_PAYMENT_ID))
+        whenever(mockGovUkPayClient.getPaymentWithRetry(CREATED_PAYMENT_ID))
             .thenReturn(createGovUkPayPayment(paymentId = CREATED_PAYMENT_ID, status = govUkPayStatus))
     }
 

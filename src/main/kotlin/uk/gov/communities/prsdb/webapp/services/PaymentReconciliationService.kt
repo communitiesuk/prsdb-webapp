@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.web.client.ResourceAccessException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
@@ -11,13 +10,11 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
-import java.time.Duration
 import java.time.Instant
 
 @PrsdbWebService
 class PaymentReconciliationService(
     @Value("\${gov-uk-pay.manual-intervention-email-address}") private val manualInterventionEmailAddress: String,
-    @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
     private val paymentRepository: PaymentRepository,
     private val govUkPayClient: GovUkPayClient,
     private val manualInterventionEmailSender: EmailNotificationService<PaymentRequiresManualInterventionEmail>,
@@ -89,35 +86,6 @@ class PaymentReconciliationService(
         }
 
         return getStoredPaymentStatus(paymentId)
-    }
-
-    fun getGovUkPayPaymentStatusWithRetry(paymentId: String): PaymentStatus =
-        try {
-            getGovUkPayPaymentStatus(paymentId)
-        } catch (exception: GovUkPayException) {
-            if (!exception.isTransient()) throw exception
-            waitBeforeRetrying(exception)
-            try {
-                getGovUkPayPaymentStatus(paymentId)
-            } catch (retryException: GovUkPayException) {
-                retryException.addSuppressed(exception)
-                throw retryException
-            }
-        }
-
-    private fun getGovUkPayPaymentStatus(paymentId: String): PaymentStatus =
-        PaymentStatus.fromGovUKPayStatus(govUkPayClient.getPayment(paymentId).state.status)
-
-    private fun GovUkPayException.isTransient(): Boolean = httpStatus?.is5xxServerError() ?: (cause is ResourceAccessException)
-
-    private fun waitBeforeRetrying(exception: GovUkPayException) {
-        try {
-            Thread.sleep(paymentStatusRetryDelay)
-        } catch (interruption: InterruptedException) {
-            Thread.currentThread().interrupt()
-            exception.addSuppressed(interruption)
-            throw exception
-        }
     }
 
     private fun emailSupportAboutManualIntervention(
