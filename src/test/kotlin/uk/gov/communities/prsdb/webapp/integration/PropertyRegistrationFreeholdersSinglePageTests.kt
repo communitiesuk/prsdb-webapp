@@ -165,6 +165,40 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     }
 
     @Nested
+    inner class FreeholderLookupAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage(freeholderName = "James Hassan")
+            assertThat(lookupAddressPage.heading).containsText("What is James Hassan’s address?")
+        }
+
+        @Test
+        fun `Back link returns to the freeholder contact type page`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage()
+            lookupAddressPage.backLink.clickAndWait()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholderSelectAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val selectAddressPage = navigator.skipToPropertyRegistrationFreeholderSelectAddressPage(freeholderName = "James Hassan")
+            assertThat(selectAddressPage.heading).containsText("Select James Hassan’s address")
+        }
+    }
+
+    @Nested
+    inner class FreeholderManualAddressStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val manualAddressPage = navigator.skipToPropertyRegistrationFreeholderManualAddressPage(freeholderName = "James Hassan")
+            assertThat(manualAddressPage.heading).containsText("What is James Hassan’s address?")
+        }
+    }
+
+    @Nested
     inner class FreeholdersListStep {
         @Test
         fun `Joint freeholders see the joint freeholders heading`() {
