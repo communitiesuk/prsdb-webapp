@@ -1761,8 +1761,6 @@ class PropertyComplianceServiceTests {
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().plusYears(1)
 
-            // TODO PDJB-1679: Remove this stub when the EIC_ISSUE_DATE flag is removed
-            lenient().`when`(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
