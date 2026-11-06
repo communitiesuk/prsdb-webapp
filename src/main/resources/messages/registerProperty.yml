@@ -222,7 +222,7 @@ propertyManager:
       heading: Give your property manager access
       paragraph: Entering your property manager’s details here does not give them access to this registration. You can do this from the property’s registration page.
   remove:
-    fieldSetHeading: 'Are you sure you want to remove {0}?'
+    fieldSetHeading: Are you sure you want to remove {0}?
     fieldSetHint: They will be removed as your property manager
     radios:
       error:
