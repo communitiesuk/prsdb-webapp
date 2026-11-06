@@ -35,16 +35,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                             "Freeholder name step data is missing for journey ${state.journeyId}",
                         )
                 when (contactType) {
-                    FreeholderContactType.EMAIL ->
-                        FreeholderDataModel(
-                            detailsKnown = true,
-                            name = name,
-                            email =
-                                state.freeholderEmailStep.formModelOrNull?.emailAddress
-                                    ?: throw PrsdbWebException(
-                                        "Freeholder email step data is missing for journey ${state.journeyId}",
-                                    ),
-                        )
+                    FreeholderContactType.EMAIL -> buildFreeholderWithEmail(state, name)
                     FreeholderContactType.POSTAL_ADDRESS -> buildFreeholderWithAddress(state, name)
                 }
             } else {
@@ -72,6 +63,20 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state.freeholderEmailStep.clearFormData()
         state.freeholderAddressTask.clearFormData()
     }
+
+    private fun buildFreeholderWithEmail(
+        state: FreeholdersDetailsState,
+        name: String,
+    ): FreeholderDataModel =
+        FreeholderDataModel(
+            detailsKnown = true,
+            name = name,
+            email =
+                state.freeholderEmailStep.formModelOrNull?.emailAddress
+                    ?: throw PrsdbWebException(
+                        "Freeholder email step data is missing for journey ${state.journeyId}",
+                    ),
+        )
 
     private fun buildFreeholderWithAddress(
         state: FreeholdersDetailsState,
