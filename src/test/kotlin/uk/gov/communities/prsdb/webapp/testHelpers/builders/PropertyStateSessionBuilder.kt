@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
@@ -321,9 +322,22 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationSuperiorLandlordProvideDetails()
                 .withSuperiorLandlordProvideDetails()
 
-        fun beforePropertyRegistrationSuperiorLandlordContactType() =
+        fun beforePropertyRegistrationSuperiorLandlordContactType(superiorLandlordName: String = "Test Superior Landlord") =
             beforePropertyRegistrationSuperiorLandlordName()
-                .withSuperiorLandlordNameComplete()
+                .withSuperiorLandlordName(superiorLandlordName)
+
+        fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationSuperiorLandlordSelectAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+
+        fun beforePropertyRegistrationSuperiorLandlordManualAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordManualAddressSelected()
 
         fun beforePropertyRegistrationSuperiorLandlordsList(
             superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,
