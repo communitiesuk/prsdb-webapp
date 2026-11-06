@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.PaymentService
 enum class PaymentOutcome {
     SUCCESS,
     FAILURE,
+    NOT_COMPLETED,
     IN_PROGRESS,
     QUOTE_EXPIRED,
 }
@@ -46,8 +47,8 @@ class PaymentStatusCheckStepConfig(
         val paymentOutcome =
             when (paymentStatus) {
                 PaymentStatus.SUCCEEDED -> PaymentOutcome.SUCCESS
-                PaymentStatus.FAILED, PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, PaymentStatus.MANUAL_INTERVENTION ->
-                    PaymentOutcome.FAILURE
+                PaymentStatus.FAILED -> PaymentOutcome.FAILURE
+                PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, PaymentStatus.MANUAL_INTERVENTION -> PaymentOutcome.NOT_COMPLETED
                 PaymentStatus.CREATED -> PaymentOutcome.IN_PROGRESS
                 PaymentStatus.CAPTURABLE -> throw IllegalStateException(
                     "Payment ${storedPaymentStatus.paymentId} for journey ${state.journeyId} is stored as capturable",
@@ -55,7 +56,7 @@ class PaymentStatusCheckStepConfig(
             }
         state.paymentOutcome = paymentOutcome
 
-        if (paymentOutcome == PaymentOutcome.FAILURE) {
+        if (paymentOutcome.isUnsuccessful()) {
             val addressTask = state.propertyDetailsTask.addressTask
             addressTask.isAddressAlreadyRegistered = addressTask.getAddress().uprn?.let { addressAvailabilityService.isAddressOwned(it) }
         }
@@ -92,7 +93,7 @@ class PaymentStatusCheckStepConfig(
         if (state.paymentOutcome == PaymentOutcome.SUCCESS) {
             state.deleteJourney()
         }
-        if (state.paymentOutcome == PaymentOutcome.FAILURE) {
+        if (state.paymentOutcome?.isUnsuccessful() == true) {
             val addressTask = state.propertyDetailsTask.addressTask
             if (addressTask.isAddressAlreadyRegistered == true) {
                 return Destination(addressTask.alreadyRegisteredStep)
@@ -100,6 +101,8 @@ class PaymentStatusCheckStepConfig(
         }
         return defaultDestination
     }
+
+    private fun PaymentOutcome.isUnsuccessful() = this == PaymentOutcome.FAILURE || this == PaymentOutcome.NOT_COMPLETED
 }
 
 @JourneyFrameworkComponent
