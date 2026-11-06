@@ -329,6 +329,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
@@ -1101,9 +1102,11 @@ class Navigator(
         return createValidPage(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationSuperiorLandlordsListPage(): SuperiorLandlordsListFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationSuperiorLandlordsListPage(
+        superiorLandlords: Map<Int, SuperiorLandlordDataModel> = PropertyStateSessionBuilder.DEFAULT_SUPERIOR_LANDLORDS,
+    ): SuperiorLandlordsListFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordsList().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordsList(superiorLandlords).build(),
         )
         navigateToPropertyRegistrationJourneyStep(SuperiorLandlordsListStep.ROUTE_SEGMENT)
         return createValidPage(page, SuperiorLandlordsListFormPagePropertyRegistration::class)

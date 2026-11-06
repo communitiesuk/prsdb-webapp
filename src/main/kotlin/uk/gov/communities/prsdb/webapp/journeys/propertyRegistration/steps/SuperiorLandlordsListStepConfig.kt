@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -24,7 +23,7 @@ class SuperiorLandlordsListStepConfig(
     override fun getStepSpecificContent(state: SuperiorLandlordsDetailsState) =
         mapOf(
             "addAnotherTitle" to "registerProperty.superiorLandlords.list.heading",
-            "optionalAddAnotherTitleParam" to temporarySuperiorLandlords.size,
+            "optionalAddAnotherTitleParam" to (state.superiorLandlordsMap?.size ?: 0),
             "insetText" to "registerProperty.superiorLandlords.list.insetText",
             "summaryCards" to getSuperiorLandlordCards(state),
             "submitButtonText" to "forms.buttons.saveAndContinue",
@@ -33,8 +32,7 @@ class SuperiorLandlordsListStepConfig(
         )
 
     private fun getSuperiorLandlordCards(state: SuperiorLandlordsDetailsState): List<SummaryCardViewModel> {
-        // TODO PDJB-1978: use state.superiorLandlordsMap once superior landlords are saved by the journey
-        val superiorLandlordsMap = temporarySuperiorLandlords
+        val superiorLandlordsMap = state.superiorLandlordsMap ?: emptyMap()
         return superiorLandlordsMap
             .toSortedMap()
             .map { (superiorLandlordId, superiorLandlord) ->
@@ -88,24 +86,10 @@ class SuperiorLandlordsListStepConfig(
 
     override fun mode(state: SuperiorLandlordsDetailsState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    companion object {
-        // TODO PDJB-1978: remove these temporary superior landlords once superior landlords are saved by the journey
-        private val temporarySuperiorLandlords: Map<Int, SuperiorLandlordDataModel> =
-            mapOf(
-                1 to
-                    SuperiorLandlordDataModel(
-                        detailsKnown = true,
-                        name = "James Hassan",
-                        address =
-                            AddressDataModel.fromManualAddressData(
-                                addressLineOne = "36 Sunnyside Lane",
-                                townOrCity = "Biggleswade",
-                                postcode = "SG18 9EJ",
-                            ),
-                    ),
-                2 to SuperiorLandlordDataModel(detailsKnown = true, name = "Billie Smith", email = "email@example.com"),
-                3 to SuperiorLandlordDataModel(detailsKnown = false),
-            )
+    override fun afterStepIsReached(state: SuperiorLandlordsDetailsState) {
+        // Ensure that if you ever get to this page we reset any state that is used by one of the buttons.
+        // This means we can be certain all the buttons will always work even if you use the browser back buttons.
+        state.editingSuperiorLandlordId = null
     }
 }
 

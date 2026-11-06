@@ -10,6 +10,10 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 // TODO PDJB-1972: replace this placeholder with the real "can you provide details about the superior landlord" page.
 // Implement the routing logic
+// TODO PDJB-1972: when changing a superior landlord, prefill this page with whether details are known from
+//  state.editingSuperiorLandlord by overriding resolvePageContent, as in OrgGovBodyMemberNameStepConfig.
+//  Check when adding a second superior landlord that the page starts empty, as SaveSuperiorLandlordStepConfig clears the
+//  form data after each save.
 @JourneyFrameworkComponent
 class ProvideSuperiorLandlordDetailsStepConfig :
     AbstractRequestableStepConfig<YesOrNo, SuperiorLandlordProvideDetailsFormModel, JourneyState>() {

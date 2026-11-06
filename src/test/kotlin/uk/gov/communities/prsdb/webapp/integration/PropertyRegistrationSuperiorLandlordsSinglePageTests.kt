@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasAnySuperiorLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
 class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -45,12 +47,61 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             assertThat(superiorLandlordsListPage.heading).containsText("You’ve added 3 people in the ownership chain")
         }
 
-        // TODO PDJB-1978: update the expected page when has any superior landlords becomes an internal step
         @Test
-        fun `Back link returns to the has any superior landlords page`(page: Page) {
+        fun `The heading uses the singular form when one person in the ownership chain has been added`() {
+            val superiorLandlordsListPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordsListPage(
+                    superiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = false)),
+                )
+            assertThat(superiorLandlordsListPage.heading).containsText("You’ve added 1 person in the ownership chain")
+        }
+
+        @Test
+        fun `Each superior landlord in state is shown as a summary card with their details`() {
+            val superiorLandlordsListPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordsListPage(
+                    superiorLandlords =
+                        mapOf(
+                            1 to
+                                SuperiorLandlordDataModel(
+                                    detailsKnown = true,
+                                    name = "Alice Superior",
+                                    address = AddressDataModel.fromManualAddressData("2 Example Road", "Exampleton", "EG1 2AB"),
+                                ),
+                            2 to SuperiorLandlordDataModel(detailsKnown = true, name = "Bob Superior", email = "bob@example.com"),
+                            3 to SuperiorLandlordDataModel(detailsKnown = false),
+                        ),
+                )
+
+            val addressCard = superiorLandlordsListPage.getSummaryCard(0)
+            assertThat(addressCard.title).hasText("Alice Superior")
+            assertThat(addressCard.summaryList).containsText("Postal address")
+            assertThat(addressCard.summaryList).containsText("2 Example Road")
+            assertThat(addressCard.summaryList).containsText("EG1 2AB")
+
+            val emailCard = superiorLandlordsListPage.getSummaryCard(1)
+            assertThat(emailCard.title).hasText("Bob Superior")
+            assertThat(emailCard.summaryList).containsText("Email address")
+            assertThat(emailCard.summaryList).containsText("bob@example.com")
+
+            val unknownCard = superiorLandlordsListPage.getSummaryCard(2)
+            assertThat(unknownCard.title).hasText("Unknown person")
+            assertThat(unknownCard).containsText("you cannot currently provide their details")
+        }
+
+        @Test
+        fun `Each superior landlord card has change and remove actions`() {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            val card = superiorLandlordsListPage.getSummaryCard(0)
+            assertThat(card.getAction("Change")).isVisible()
+            assertThat(card.getAction("Remove")).isVisible()
+        }
+
+        @Test
+        fun `Back link returns to the anyone in ownership chain page`(page: Page) {
             val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
             superiorLandlordsListPage.backLink.clickAndWait()
-            assertPageIs(page, HasAnySuperiorLandlordsFormPagePropertyRegistration::class)
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
         }
     }
 }
