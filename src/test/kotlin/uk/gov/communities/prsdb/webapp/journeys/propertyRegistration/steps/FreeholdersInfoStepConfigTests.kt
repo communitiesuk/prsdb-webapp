@@ -14,22 +14,20 @@ class FreeholdersInfoStepConfigTests {
     lateinit var mockState: FreeholdersState
 
     @Test
-    fun `Joint freeholders use joint intro content`() {
+    fun `Joint freeholders use the joint freeholders template`() {
         whenever(mockState.isJointFreeholder).thenReturn(true)
 
-        val content = FreeholdersInfoStepConfig().getStepSpecificContent(mockState)
+        val template = FreeholdersInfoStepConfig().chooseTemplate(mockState)
 
-        assertEquals("registerProperty.freeholders.intro.heading.joint", content["heading"])
-        assertEquals(false, content["showHelpDetails"])
+        assertEquals("forms/jointFreeholdersInfoForm", template)
     }
 
     @Test
-    fun `Non-joint freeholders use non-joint intro content`() {
+    fun `Non-joint freeholders use the freeholders template`() {
         whenever(mockState.isJointFreeholder).thenReturn(false)
 
-        val content = FreeholdersInfoStepConfig().getStepSpecificContent(mockState)
+        val template = FreeholdersInfoStepConfig().chooseTemplate(mockState)
 
-        assertEquals("registerProperty.freeholders.intro.heading.nonJoint", content["heading"])
-        assertEquals(true, content["showHelpDetails"])
+        assertEquals("forms/freeholdersInfoForm", template)
     }
 }

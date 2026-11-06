@@ -12,25 +12,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class FreeholdersInfoStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, FreeholdersState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: FreeholdersState): Map<String, Any?> {
-        val variant = if (state.isJointFreeholder) "joint" else "nonJoint"
+    override fun getStepSpecificContent(state: FreeholdersState): Map<String, Any?> =
+        mapOf("landRegistrySearchUrl" to LAND_REGISTRY_SEARCH_URL)
 
-        return mapOf(
-            "heading" to "registerProperty.freeholders.intro.heading.$variant",
-            "introText" to "registerProperty.freeholders.intro.paragraph.$variant",
-            "responsibilityText" to "registerProperty.freeholders.intro.responsibility",
-            "showHelpDetails" to !state.isJointFreeholder,
-            "helpDetailsSummary" to "registerProperty.freeholders.intro.help.summary",
-            "helpDetailsParagraphOne" to "registerProperty.freeholders.intro.help.paragraph.one",
-            "helpDetailsParagraphTwoBeforeLink" to "registerProperty.freeholders.intro.help.paragraph.two.beforeLink",
-            "landRegistryLinkText" to "registerProperty.freeholders.intro.help.paragraph.two.linkText",
-            "helpDetailsParagraphTwoAfterLink" to "registerProperty.freeholders.intro.help.paragraph.two.afterLink",
-            "landRegistrySearchUrl" to LAND_REGISTRY_SEARCH_URL,
-            "submitButtonText" to "registerProperty.freeholders.intro.buttons.addFirstFreeholder",
-        )
-    }
-
-    override fun chooseTemplate(state: FreeholdersState) = "forms/freeholdersInfoForm"
+    override fun chooseTemplate(state: FreeholdersState) =
+        if (state.isJointFreeholder) "forms/jointFreeholdersInfoForm" else "forms/freeholdersInfoForm"
 
     override fun mode(state: FreeholdersState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
