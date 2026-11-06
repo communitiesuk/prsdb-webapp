@@ -33,11 +33,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordLookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
@@ -45,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveS
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import kotlin.test.assertEquals
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -438,17 +442,54 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Choosing postal address as the superior landlord contact type goes through the address page before leaving the task`(
-            page: Page,
-        ) {
-            val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
-            anyoneInOwnershipChainPage.submitYes()
-            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
-            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
-            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
-            // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
-            assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
+        fun `Choosing postal address allows the superior landlord address to be selected`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+
+            assertPageIs(page, SuperiorLandlordSelectAddressFormPagePropertyRegistration::class)
+                .selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).summaryList).containsText("1 Fictional Road")
+            superiorLandlordsListPage.submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Choosing to enter a superior landlord address manually from search results opens manual entry`(page: Page) {
+            val selectAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordSelectAddressPage()
+            selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+
+            assertPageIs(page, SuperiorLandlordManualAddressFormPagePropertyRegistration::class).submitAddress(
+                addressLineOne = "4 Superior Road",
+                addressLineTwo = "Suite 2",
+                townOrCity = "London",
+                postcode = "SW1A 1AA",
+            )
+
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Superior landlord address search with no results allows manual entry`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            val postcode = "NOT A POSTCODE"
+            val houseNameOrNumber = "NOT A HOUSE NUMBER"
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNameOrNumber)
+
+            val noAddressFoundPage = assertPageIs(page, SuperiorLandlordNoAddressFoundFormPagePropertyRegistration::class)
+            assertThat(noAddressFoundPage.heading).containsText(postcode)
+            assertThat(noAddressFoundPage.heading).containsText(houseNameOrNumber)
+            noAddressFoundPage.form.submit()
+
+            assertPageIs(page, SuperiorLandlordManualAddressFormPagePropertyRegistration::class).submitAddress(
+                addressLineOne = "4 Superior Road",
+                addressLineTwo = "Suite 2",
+                townOrCity = "London",
+                postcode = "SW1A 1AA",
+            )
+
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
@@ -489,8 +530,10 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             secondNamePage.submitName("Address superior landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
-            // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
-            assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordLookupAddressFormPagePropertyRegistration::class)
+                .submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            assertPageIs(page, SuperiorLandlordSelectAddressFormPagePropertyRegistration::class)
+                .selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
 
             superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
@@ -501,8 +544,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 superiorLandlordsListPage.getSummaryCard(1).summaryList,
             ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
             assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Address superior landlord")
-            // TODO PDJB-1976: assert the address the user entered once the real address pages are added
-            assertThat(superiorLandlordsListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
+            assertThat(superiorLandlordsListPage.getSummaryCard(2).summaryList).containsText("1 Fictional Road")
         }
 
         @Test
@@ -530,6 +572,66 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             // TODO PDJB-1975: assert the email the user entered once the real email page is added
             assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown person")
+        }
+
+        @Test
+        fun `Changing a superior landlord with a postal address pre-fills their address answers`(page: Page) {
+            val superiorLandlordsListPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordsListPage(
+                    superiorLandlords =
+                        mapOf(
+                            1 to
+                                SuperiorLandlordDataModel(
+                                    detailsKnown = true,
+                                    name = "Superior Landlord With Address",
+                                    address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                                    addressSearchPostcode = "FA1 1AA",
+                                    addressSearchHouseNameOrNumber = "1",
+                                    selectedAddress = MANUAL_ADDRESS_CHOSEN,
+                                    manualAddressLineOne = "2 Manual Road",
+                                    manualAddressLineTwo = "Flat 3",
+                                    manualTownOrCity = "Manual Town",
+                                    manualCounty = "Manual County",
+                                    manualPostcode = "MA1 1AA",
+                                ),
+                            2 to SuperiorLandlordDataModel(detailsKnown = false),
+                        ),
+                )
+
+            superiorLandlordsListPage
+                .getSummaryCard(0)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
+            assertThat(namePage.form.nameInput).hasValue("Superior Landlord With Address")
+            namePage.form.submit()
+            // TODO PDJB-1974: check the contact type is prefilled once the real contact type page is added
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+            val lookupAddressPage = assertPageIs(page, SuperiorLandlordLookupAddressFormPagePropertyRegistration::class)
+            assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
+            assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+            lookupAddressPage.form.submit()
+
+            val selectAddressPage = assertPageIs(page, SuperiorLandlordSelectAddressFormPagePropertyRegistration::class)
+            assertEquals(MANUAL_ADDRESS_CHOSEN, selectAddressPage.form.addressRadios.selectedValue)
+            selectAddressPage.form.submit()
+
+            val manualAddressPage = assertPageIs(page, SuperiorLandlordManualAddressFormPagePropertyRegistration::class)
+            assertThat(manualAddressPage.form.addressLineOneInput).hasValue("2 Manual Road")
+            assertThat(manualAddressPage.form.addressLineTwoInput).hasValue("Flat 3")
+            assertThat(manualAddressPage.form.townOrCityInput).hasValue("Manual Town")
+            assertThat(manualAddressPage.form.countyInput).hasValue("Manual County")
+            assertThat(manualAddressPage.form.postcodeInput).hasValue("MA1 1AA")
+            manualAddressPage.form.addressLineOneInput.fill("3 Changed Road")
+            manualAddressPage.form.submit()
+
+            val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord With Address")
+            assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("3 Changed Road")
         }
 
         @Test
