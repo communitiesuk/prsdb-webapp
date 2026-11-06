@@ -7,7 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -19,6 +21,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
@@ -27,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Freeholde
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 
 @ExtendWith(MockitoExtension::class)
 class SaveFreeholderStepConfigTests {
@@ -53,6 +58,9 @@ class SaveFreeholderStepConfigTests {
 
     @Mock
     lateinit var manualAddressStep: ManualAddressStep
+
+    @Mock
+    lateinit var selectAddressStep: SelectAddressStep
 
     @Test
     fun `afterStepIsReached adds a new freeholder with the next id when not editing`() {
@@ -173,6 +181,57 @@ class SaveFreeholderStepConfigTests {
                 manualAddressLineTwo = "Flat 3",
                 manualTownOrCity = "Manual Town",
                 manualCounty = "Manual County",
+                manualPostcode = "MA1 1AA",
+            )
+        assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
+    }
+
+    @Test
+    fun `afterStepIsReached saves manual address answers after a failed search despite an earlier selected address`() {
+        // Arrange
+        val stepConfig = SaveFreeholderStepConfig()
+        setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
+        val previousSelection = SELECTED_ADDRESS.singleLineAddress
+        val manualFormModel =
+            ManualAddressFormModel().apply {
+                addressLineOne = "2 Manual Road"
+                townOrCity = "Manual Town"
+                postcode = "MA1 1AA"
+            }
+        setupAddressAnswers(selectedAddress = previousSelection, manualFormModel = manualFormModel)
+        val selectFormModel = SelectAddressFormModel().apply { address = previousSelection }
+        whenever(addressTask.selectAddressStep).thenReturn(selectAddressStep)
+        whenever(selectAddressStep.formModelOrNull).thenReturn(selectFormModel)
+        whenever(addressTask.cachedAddresses).thenReturn(emptyList())
+        whenever(addressTask.getMatchingAddress(any())).thenCallRealMethod()
+        whenever(addressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(addressTask.getAddress()).thenCallRealMethod()
+
+        var cachedSelectedAddress: String? = previousSelection
+        whenever(addressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
+        doAnswer { cachedSelectedAddress = it.getArgument(0) }
+            .whenever(addressTask)
+            .cachedSelectedAddress = anyOrNull()
+
+        whenever(mockState.freeholdersMap).thenReturn(emptyMap())
+        whenever(mockState.editingFreeholderId).thenReturn(null)
+        whenever(mockState.nextFreeholderId).thenReturn(1)
+
+        // Act
+        NoAddressFoundStepConfig().afterStepDataIsAdded(addressTask)
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val expectedFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = ENTERED_NAME,
+                address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                addressSearchPostcode = LOOKUP_POSTCODE,
+                addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
+                selectedAddress = MANUAL_ADDRESS_CHOSEN,
+                manualAddressLineOne = "2 Manual Road",
+                manualTownOrCity = "Manual Town",
                 manualPostcode = "MA1 1AA",
             )
         assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
