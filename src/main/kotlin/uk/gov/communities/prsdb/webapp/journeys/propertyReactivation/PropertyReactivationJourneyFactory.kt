@@ -9,14 +9,15 @@ import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.Parentage
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationStepType.ELECTRICAL_SAFETY
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationStepType.EPC
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationStepType.GAS_SAFETY
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationStepType.LICENSING
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationStepType.TENANCY_DETAILS
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.EPC
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.GAS_SAFETY
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.LICENSING
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.TENANCY_DETAILS
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationElectricalSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationEpcStep
@@ -35,15 +36,6 @@ class PropertyReactivationJourneyFactory(
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
-        val requiredStepTypes = state.requiredStepTypes
-
-        // Only the steps required for this property are included, so each step's neighbours depend on that selection
-        val orderedSteps =
-            listOf(state.infoStep) + requiredStepTypes.map { state.getStep(it) } + listOf(state.checkAnswersStep)
-
-        fun stepBefore(step: JourneyStep<*, *, *>) = orderedSteps[orderedSteps.indexOf(step) - 1]
-
-        fun stepAfter(step: JourneyStep<*, *, *>) = orderedSteps[orderedSteps.indexOf(step) + 1]
 
         return journey(state) {
             unreachableStepStep { journey.infoStep }
@@ -52,46 +44,41 @@ class PropertyReactivationJourneyFactory(
                 initialStep()
                 // TODO PDJB-2034: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
-                nextStep { stepAfter(journey.infoStep) }
+                nextStep { journey.stepAfterInfo() }
             }
-            if (LICENSING in requiredStepTypes) {
-                step(journey.licensingStep) {
-                    routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
-                    parents { stepBefore(journey.licensingStep).isComplete() }
-                    nextStep { stepAfter(journey.licensingStep) }
-                }
+            // TODO PDJB-2037: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            step(journey.licensingStep) {
+                routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
+                parents { journey.parentsFor(LICENSING) }
+                nextStep { journey.requiredStepAfter(LICENSING) }
             }
-            if (GAS_SAFETY in requiredStepTypes) {
-                step(journey.gasSafetyStep) {
-                    routeSegment(ReactivationGasSafetyStep.ROUTE_SEGMENT)
-                    parents { stepBefore(journey.gasSafetyStep).isComplete() }
-                    nextStep { stepAfter(journey.gasSafetyStep) }
-                }
+            // TODO PDJB-2038: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            step(journey.gasSafetyStep) {
+                routeSegment(ReactivationGasSafetyStep.ROUTE_SEGMENT)
+                parents { journey.parentsFor(GAS_SAFETY) }
+                nextStep { journey.requiredStepAfter(GAS_SAFETY) }
             }
-            if (ELECTRICAL_SAFETY in requiredStepTypes) {
-                step(journey.electricalSafetyStep) {
-                    routeSegment(ReactivationElectricalSafetyStep.ROUTE_SEGMENT)
-                    parents { stepBefore(journey.electricalSafetyStep).isComplete() }
-                    nextStep { stepAfter(journey.electricalSafetyStep) }
-                }
+            // TODO PDJB-2039: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            step(journey.electricalSafetyStep) {
+                routeSegment(ReactivationElectricalSafetyStep.ROUTE_SEGMENT)
+                parents { journey.parentsFor(ELECTRICAL_SAFETY) }
+                nextStep { journey.requiredStepAfter(ELECTRICAL_SAFETY) }
             }
-            if (EPC in requiredStepTypes) {
-                step(journey.epcStep) {
-                    routeSegment(ReactivationEpcStep.ROUTE_SEGMENT)
-                    parents { stepBefore(journey.epcStep).isComplete() }
-                    nextStep { stepAfter(journey.epcStep) }
-                }
+            // TODO PDJB-2040: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            step(journey.epcStep) {
+                routeSegment(ReactivationEpcStep.ROUTE_SEGMENT)
+                parents { journey.parentsFor(EPC) }
+                nextStep { journey.requiredStepAfter(EPC) }
             }
-            if (TENANCY_DETAILS in requiredStepTypes) {
-                step(journey.tenancyDetailsStep) {
-                    routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
-                    parents { stepBefore(journey.tenancyDetailsStep).isComplete() }
-                    nextStep { stepAfter(journey.tenancyDetailsStep) }
-                }
+            // TODO PDJB-2041: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            step(journey.tenancyDetailsStep) {
+                routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
+                parents { journey.parentsFor(TENANCY_DETAILS) }
+                nextStep { journey.requiredStepAfter(TENANCY_DETAILS) }
             }
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
-                parents { stepBefore(journey.checkAnswersStep).isComplete() }
+                parents { journey.checkAnswersParents() }
                 nextUrl {
                     "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
                 }
@@ -103,21 +90,49 @@ class PropertyReactivationJourneyFactory(
         val state = stateFactory.getObject()
         if (!state.isStateInitialized) {
             val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
-            state.requiredStepTypes = ReactivationStepType.requiredFor(propertyOwnership)
+            state.requiredTaskTypes = ReactivationTaskType.requiredFor(propertyOwnership)
         }
         return state.initialiseFromPropertyOwnershipId(propertyOwnershipId)
     }
 
     fun initializeJourneyState(propertyOwnershipId: Long): String = stateFactory.getObject().initializeState(propertyOwnershipId)
 
-    private fun PropertyReactivationJourneyState.getStep(stepType: ReactivationStepType) =
-        when (stepType) {
+    private fun PropertyReactivationJourneyState.entryStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
+        when (taskType) {
             LICENSING -> licensingStep
             GAS_SAFETY -> gasSafetyStep
             ELECTRICAL_SAFETY -> electricalSafetyStep
             EPC -> epcStep
             TENANCY_DETAILS -> tenancyDetailsStep
         }
+
+    // The step whose outcome means the user has finished this part of the journey, e.g. a task's exit step
+    private fun PropertyReactivationJourneyState.completionStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
+        when (taskType) {
+            LICENSING -> licensingStep
+            GAS_SAFETY -> gasSafetyStep
+            ELECTRICAL_SAFETY -> electricalSafetyStep
+            EPC -> epcStep
+            TENANCY_DETAILS -> tenancyDetailsStep
+        }
+
+    // Task types are compared by enum order, which is the order the tasks appear in the journey
+    private fun PropertyReactivationJourneyState.requiredStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
+        requiredTaskTypes.filter { it > taskType }.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
+
+    private fun PropertyReactivationJourneyState.stepAfterInfo(): JourneyStep<*, *, *> =
+        requiredTaskTypes.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
+
+    // A step the property doesn't need is never reachable, so the user is sent back to the info step
+    private fun PropertyReactivationJourneyState.parentsFor(taskType: ReactivationTaskType): Parentage {
+        val previousStep = requiredTaskTypes.filter { it < taskType }.maxOrNull()?.let { completionStepFor(it) } ?: infoStep
+        return SingleParent(previousStep) { taskType in requiredTaskTypes && previousStep.outcome != null }
+    }
+
+    private fun PropertyReactivationJourneyState.checkAnswersParents(): Parentage {
+        val previousStep = requiredTaskTypes.maxOrNull()?.let { completionStepFor(it) } ?: infoStep
+        return SingleParent(previousStep) { previousStep.outcome != null }
+    }
 }
 
 @JourneyFrameworkComponent
@@ -134,7 +149,7 @@ class PropertyReactivationJourney(
     PropertyReactivationJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyOwnershipId: Long by delegateProvider.requiredImmutableDelegate("propertyOwnershipId")
-    override var requiredStepTypes: List<ReactivationStepType> by delegateProvider.requiredImmutableDelegate("requiredStepTypes")
+    override var requiredTaskTypes: List<ReactivationTaskType> by delegateProvider.requiredImmutableDelegate("requiredTaskTypes")
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
@@ -157,5 +172,5 @@ interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
     val epcStep: ReactivationEpcStep
     val tenancyDetailsStep: ReactivationTenancyDetailsStep
     val checkAnswersStep: ReactivationCheckAnswersStep
-    var requiredStepTypes: List<ReactivationStepType>
+    var requiredTaskTypes: List<ReactivationTaskType>
 }
