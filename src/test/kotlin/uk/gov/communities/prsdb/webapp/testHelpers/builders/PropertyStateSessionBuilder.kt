@@ -277,21 +277,22 @@ class PropertyStateSessionBuilder(
             .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
         fun beforePropertyRegistrationFreeholderLookupAddress(
-            freeholderName: String = "Test Freeholder",
             jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
         ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
             .withFreeholderContactType(FreeholderContactType.POSTAL_ADDRESS)
 
         fun beforePropertyRegistrationFreeholderSelectAddress(
-            freeholderName: String = "Test Freeholder",
             jointFreeholders: Boolean = true,
-        ) = beforePropertyRegistrationFreeholderLookupAddress(freeholderName, jointFreeholders)
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderLookupAddress(jointFreeholders, freeholderName)
             .withFreeholderLookupAddress()
 
         fun beforePropertyRegistrationFreeholderManualAddress(
-            freeholderName: String = "Test Freeholder",
             jointFreeholders: Boolean = true,
-        ) = beforePropertyRegistrationFreeholderLookupAddress(freeholderName, jointFreeholders)
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderLookupAddress(jointFreeholders, freeholderName)
+            .withFreeholderLookupAddress()
             .withFreeholderManualAddressSelected()
 
         // TODO PDJB-1978: remove withHasAnySuperiorLandlordsComplete when has any superior landlords becomes an internal step

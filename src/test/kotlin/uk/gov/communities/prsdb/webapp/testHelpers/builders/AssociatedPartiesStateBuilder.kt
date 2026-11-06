@@ -144,7 +144,6 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     }
 
     fun withFreeholderManualAddressSelected(): SelfType {
-        withFreeholderLookupAddress()
         withSubmittedValue(
             "${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
             SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
