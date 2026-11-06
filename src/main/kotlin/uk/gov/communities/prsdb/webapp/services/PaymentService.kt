@@ -248,7 +248,10 @@ class PaymentService(
                 }
 
                 isCaptureAttempted -> {
-                    cancelPaymentThatMayHaveBeenCaptured(paymentId)
+                    paymentReconciliationService.markForCancellation(
+                        paymentId,
+                        manualInterventionReasonIfNotCancelled = PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                    )
                 }
 
                 else -> {
@@ -256,17 +259,6 @@ class PaymentService(
                 }
             }
         }
-    }
-
-    // GOV.UK Pay only cancels payments it hasn't taken, so a payment that can't be cancelled may have been taken
-    private fun cancelPaymentThatMayHaveBeenCaptured(paymentId: String): PaymentStatus {
-        val status = paymentReconciliationService.markForCancellation(paymentId)
-        if (status != PaymentStatus.CANCELLING) return status
-        return paymentReconciliationService.recordManualIntervention(
-            paymentId,
-            PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
-            expectedStatus = PaymentStatus.CANCELLING,
-        )
     }
 
     private fun registerPropertyAndCapturePayment(

@@ -1050,7 +1050,7 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePayment rolls back, then marks the payment for cancellation and returns its status when capture fails`() {
+        fun `finalisePayment rolls back, then marks the payment for cancellation in case it was taken when capture fails`() {
             // Arrange
             stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1058,17 +1058,25 @@ class PaymentServiceTests {
                 .thenReturn(MockLandlordData.createPropertyOwnership())
             stubStoredPayment()
             doThrow(GovUkPayException("Capture failed")).whenever(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLING)
+            whenever(
+                mockPaymentReconciliationService.markForCancellation(
+                    PAYMENT_ID,
+                    PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                ),
+            ).thenReturn(PaymentStatus.CANCELLED)
 
             // Act
             val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
 
             // Assert
-            assertEquals(PaymentStatus.CANCELLING, status)
+            assertEquals(PaymentStatus.CANCELLED, status)
             verify(mockTransactionManager, never()).commit(any())
             val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
             inOrder.verify(mockTransactionManager).rollback(any())
-            inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
+            inOrder.verify(mockPaymentReconciliationService).markForCancellation(
+                PAYMENT_ID,
+                PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+            )
         }
 
         @Test
@@ -1094,7 +1102,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
         }
 
         @Test
