@@ -12,6 +12,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeNameFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteePhoneFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeFormPageUpdateOrganisationType
 
 @WithOrgLandlordProfile
@@ -195,6 +199,58 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
 
             cyaPage.leadTrusteeCard.summaryList.addressRow.clickFirstActionLinkAndWait()
             assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
+        }
+
+        @Test
+        fun `Clicking change link on lead trustee name row navigates to the lead trustee name page`(page: Page) {
+            val cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+
+            cyaPage.leadTrusteeCard.summaryList.nameRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, LeadTrusteeNameFormPageUpdateOrganisationType::class)
+        }
+
+        @Test
+        fun `Clicking change link on lead trustee date of birth row navigates to the lead trustee date of birth page`(page: Page) {
+            val cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+
+            cyaPage.leadTrusteeCard.summaryList.dateOfBirthRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, LeadTrusteeDobFormPageUpdateOrganisationType::class)
+        }
+
+        @Test
+        fun `Clicking change link on lead trustee email row navigates to the lead trustee email page`(page: Page) {
+            val cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+
+            cyaPage.leadTrusteeCard.summaryList.emailRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, LeadTrusteeEmailFormPageUpdateOrganisationType::class)
+        }
+
+        @Test
+        fun `Clicking change link on lead trustee phone row navigates to the lead trustee phone page`(page: Page) {
+            val cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+
+            cyaPage.leadTrusteeCard.summaryList.phoneRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, LeadTrusteePhoneFormPageUpdateOrganisationType::class)
         }
     }
 
