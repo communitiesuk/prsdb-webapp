@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
@@ -63,16 +65,78 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded removes the superior landlord with the given key`() {
+    fun `afterStepDataIsAdded removes the superior landlord with the given key when the user confirms removal`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
+        whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
+        whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val captor = argumentCaptor<Map<Int, SuperiorLandlordDataModel>>()
+        verify(mockState).superiorLandlordsMap = captor.capture()
+        assertEquals(mapOf(2 to secondSuperiorLandlord), captor.firstValue)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded keeps the superior landlord when the user does not confirm removal`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "false"))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockState, never()).superiorLandlordsMap = any()
+    }
+
+    @Test
+    fun `afterStepDataIsAdded clears the submitted answer`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
+        whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
+        whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockState).clearStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the superior landlord's name in the heading`() {
+        // Arrange
         val stepConfig = setupStepConfig()
         whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
         whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
 
-        stepConfig.afterStepDataIsAdded(mockState)
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
 
-        val captor = argumentCaptor<Map<Int, SuperiorLandlordDataModel>>()
-        verify(mockState).superiorLandlordsMap = captor.capture()
-        assertEquals(mapOf(2 to secondSuperiorLandlord), captor.firstValue)
+        // Assert
+        assertEquals("registerProperty.superiorLandlords.remove.fieldSetHeading", content["fieldSetHeading"])
+        assertEquals(firstSuperiorLandlord.name, content["optionalFieldSetHeadingParam"])
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the unknown person heading when the superior landlord has no name`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(2)
+        whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals("registerProperty.superiorLandlords.remove.fieldSetHeadingUnknown", content["fieldSetHeading"])
+        assertEquals(null, content["optionalFieldSetHeadingParam"])
     }
 
     @Test
