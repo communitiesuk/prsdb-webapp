@@ -65,6 +65,7 @@ gov-uk-pay:
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: payments-support@example.com
 
 cloudwatch-metrics:
   ecs:
@@ -130,5 +131,8 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
       enabled: false
       expiry-date: "2027-01-01"
