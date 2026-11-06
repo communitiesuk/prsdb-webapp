@@ -113,7 +113,7 @@ class SuperiorLandlordsListStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent throws when a freeholder with known details has no email or postal address`() {
+    fun `getStepSpecificContent throws when a superior landlord with known details has no email or postal address`() {
         // Arrange
         val stepConfig =
             setupStepConfig(
