@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveSuperiorLandlordStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -424,15 +423,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
-            // TODO PDJB-1975: update this usage when the real superior landlord email page is added
-            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submitEmail("superior.landlord@example.com")
             val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 1 person in the ownership chain")
             assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Test Superior Landlord")
-            // TODO PDJB-1975: assert the email the user entered once the real email page is added
-            assertThat(
-                superiorLandlordsListPage.getSummaryCard(0).summaryList,
-            ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).summaryList).containsText("superior.landlord@example.com")
             superiorLandlordsListPage.submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
         }
@@ -478,8 +473,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Email superior landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
-            // TODO PDJB-1975: update this usage when the real superior landlord email page is added
-            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submitEmail("second.person@example.com")
 
             superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(superiorLandlordsListPage.heading).containsText("added 2 people in the ownership chain")
@@ -496,10 +490,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
             assertThat(superiorLandlordsListPage.getSummaryCard(0).title).hasText("Unknown person")
             assertThat(superiorLandlordsListPage.getSummaryCard(1).title).hasText("Email superior landlord")
-            // TODO PDJB-1975: assert the email the user entered once the real email page is added
-            assertThat(
-                superiorLandlordsListPage.getSummaryCard(1).summaryList,
-            ).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(superiorLandlordsListPage.getSummaryCard(1).summaryList).containsText("second.person@example.com")
             assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Address superior landlord")
             // TODO PDJB-1976: assert the address the user entered once the real address pages are added
             assertThat(superiorLandlordsListPage.getSummaryCard(2).summaryList).containsText("1 Placeholder Street")
@@ -520,15 +511,16 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
             namePage.submitName("Changed superior landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).form.submit()
-            // TODO PDJB-1975: update this usage when the real superior landlord email page is added
-            assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
+            assertPageIs(
+                page,
+                SuperiorLandlordEmailFormPagePropertyRegistration::class,
+            ).submitEmail("changed.superior.landlord@example.com")
 
             val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(updatedListPage.heading).containsText("added 3 people in the ownership chain")
             assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord With Address")
             assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed superior landlord")
-            // TODO PDJB-1975: assert the email the user entered once the real email page is added
-            assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText(SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL)
+            assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText("changed.superior.landlord@example.com")
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown person")
         }
 

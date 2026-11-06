@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
@@ -323,7 +324,12 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationSuperiorLandlordContactType() =
             beforePropertyRegistrationSuperiorLandlordName()
-                .withSuperiorLandlordNameComplete()
+                .withSuperiorLandlordName()
+
+        fun beforePropertyRegistrationSuperiorLandlordEmail(existingSuperiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null) =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
+                .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
 
         fun beforePropertyRegistrationSuperiorLandlordsList(
             superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,

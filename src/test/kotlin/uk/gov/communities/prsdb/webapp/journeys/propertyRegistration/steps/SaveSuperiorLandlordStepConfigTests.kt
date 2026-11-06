@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Supe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
@@ -77,9 +78,9 @@ class SaveSuperiorLandlordStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached saves the entered name and placeholder email when the contact type is email`() {
+    fun `afterStepIsReached saves the name and email when the contact type is email`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(true, SuperiorLandlordContactType.EMAIL, ENTERED_NAME)
+        setupStepsWithAnswers(true, SuperiorLandlordContactType.EMAIL, ENTERED_NAME, email = "superior.landlord@example.com")
         whenever(mockState.superiorLandlordsMap).thenReturn(null)
         whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
         whenever(mockState.nextSuperiorLandlordId).thenReturn(null)
@@ -90,7 +91,7 @@ class SaveSuperiorLandlordStepConfigTests {
             SuperiorLandlordDataModel(
                 detailsKnown = true,
                 name = ENTERED_NAME,
-                email = SaveSuperiorLandlordStepConfig.PLACEHOLDER_EMAIL,
+                email = "superior.landlord@example.com",
             )
         assertEquals(mapOf(1 to expectedSuperiorLandlord), captureSavedMap())
         verify(mockState).nextSuperiorLandlordId = 2
@@ -159,6 +160,26 @@ class SaveSuperiorLandlordStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached throws when the contact type is email but the email answer is missing`() {
+        val stepConfig = SaveSuperiorLandlordStepConfig()
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
+        whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = true))
+        whenever(mockState.superiorLandlordContactTypeStep).thenReturn(contactTypeStep)
+        whenever(contactTypeStep.formModelOrNull).thenReturn(
+            SuperiorLandlordContactTypeFormModel(contactType = SuperiorLandlordContactType.EMAIL),
+        )
+        whenever(mockState.superiorLandlordNameStep).thenReturn(nameStep)
+        whenever(nameStep.formModelOrNull).thenReturn(SuperiorLandlordNameFormModel().apply { name = ENTERED_NAME })
+        whenever(mockState.superiorLandlordEmailStep).thenReturn(emailStep)
+        whenever(emailStep.formModelOrNull).thenReturn(null)
+
+        val exception = assertThrows<UnrecoverableJourneyStateException> { stepConfig.afterStepIsReached(mockState) }
+
+        assertTrue(exception.message!!.contains(JOURNEY_ID))
+    }
+
+    @Test
     fun `afterStepIsReached throws when details are provided but the name answer is missing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
         whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
@@ -176,13 +197,13 @@ class SaveSuperiorLandlordStepConfigTests {
         assertTrue(exception.message!!.contains(JOURNEY_ID))
     }
 
-    // TODO PDJB-1975: add a test that afterStepIsReached throws when the contact type is email but the email answer is missing
     // TODO PDJB-1976: add a test that afterStepIsReached throws when the contact type is postal address but the address answer is missing
 
     private fun setupStepsWithAnswers(
         provideDetails: Boolean,
         contactType: SuperiorLandlordContactType? = null,
         name: String? = null,
+        email: String? = null,
     ) {
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
         whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = provideDetails))
@@ -195,6 +216,9 @@ class SaveSuperiorLandlordStepConfigTests {
             whenever(nameStep.formModelOrNull).thenReturn(SuperiorLandlordNameFormModel().apply { this.name = name })
         }
         whenever(mockState.superiorLandlordEmailStep).thenReturn(emailStep)
+        if (email != null) {
+            whenever(emailStep.formModelOrNull).thenReturn(SuperiorLandlordEmailFormModel().apply { emailAddress = email })
+        }
         whenever(mockState.superiorLandlordAddressTask).thenReturn(addressTask)
     }
 

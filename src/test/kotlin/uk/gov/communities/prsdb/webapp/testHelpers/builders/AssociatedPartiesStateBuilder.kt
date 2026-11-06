@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -37,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
@@ -166,9 +169,17 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withSuperiorLandlordNameComplete(name: String = "Test Superior Landlord"): SelfType {
+    fun withSuperiorLandlordName(name: String = "Test Superior Landlord"): SelfType {
         val superiorLandlordNameFormModel = SuperiorLandlordNameFormModel(name = name)
         withSubmittedValue(SuperiorLandlordNameStep.ROUTE_SEGMENT, superiorLandlordNameFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlordContactType(contactType: SuperiorLandlordContactType = SuperiorLandlordContactType.EMAIL): SelfType {
+        withSubmittedValue(
+            SuperiorLandlordContactTypeStep.ROUTE_SEGMENT,
+            SuperiorLandlordContactTypeFormModel(contactType = contactType),
+        )
         return self()
     }
 
