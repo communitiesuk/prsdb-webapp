@@ -422,7 +422,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             anyoneInOwnershipChainPage.submitYes()
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
-            // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
             // TODO PDJB-1975: update this usage when the real superior landlord email page is added
@@ -446,7 +445,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             anyoneInOwnershipChainPage.submitYes()
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
-            // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
             // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
@@ -478,7 +476,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val provideDetailsPage = assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class)
             provideDetailsPage.submitYes()
             assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Email superior landlord")
-            // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.EMAIL)
             // TODO PDJB-1975: update this usage when the real superior landlord email page is added
@@ -490,7 +487,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
             val secondNamePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
             secondNamePage.submitName("Address superior landlord")
-            // TODO PDJB-1974: update this usage when the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
             // TODO PDJB-1976: update this usage when the real superior landlord address pages are added
@@ -523,9 +519,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             provideDetailsPage.submitYes()
             val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
             namePage.submitName("Changed superior landlord")
-            // TODO PDJB-1974: check the contact type is prefilled once the real contact type page is added
-            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
-                .submitContactType(SuperiorLandlordContactType.EMAIL)
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class).form.submit()
             // TODO PDJB-1975: update this usage when the real superior landlord email page is added
             assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
 
