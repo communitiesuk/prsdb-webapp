@@ -1,33 +1,34 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
-// TODO PDJB-1978: replace this placeholder with the real internal step routing back to the has superior landlords question when the last superior landlord is removed
+// Internal routing step that sits in the outer superior landlords task immediately after the superior landlords details
+// sub-journey. It reads the collected superior landlords (held by the outer task via its own state) and reports whether
+// any remain, so the outer task can route forward when superior landlords exist or back to the "anyone in the ownership
+// chain" question once the list has been emptied.
 @JourneyFrameworkComponent
-class SuperiorLandlordsBackRoutingStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class SuperiorLandlordsBackRoutingStepConfig : AbstractInternalStepConfig<AnyMembers, JourneyState>() {
+    private lateinit var superiorLandlordsList: () -> Map<Int, SuperiorLandlordDataModel>?
 
-    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf(
-            "todoComment" to
-                "TODO (PDJB-1978): internal step routing back to the has superior landlords page when the last one is removed",
-        )
-
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
-
-    override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
-}
-
-@JourneyFrameworkComponent
-final class SuperiorLandlordsBackRoutingStep(
-    stepConfig: SuperiorLandlordsBackRoutingStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
-    companion object {
-        const val ROUTE_SEGMENT = "superior-landlords-back-routing"
+    fun usingSuperiorLandlordsList(
+        superiorLandlordsList: () -> Map<Int, SuperiorLandlordDataModel>?,
+    ): SuperiorLandlordsBackRoutingStepConfig {
+        this.superiorLandlordsList = superiorLandlordsList
+        return this
     }
+
+    override fun isSubClassInitialised() = ::superiorLandlordsList.isInitialized
+
+    override fun mode(state: JourneyState): AnyMembers =
+        if (superiorLandlordsList().isNullOrEmpty()) AnyMembers.NO_MEMBERS else AnyMembers.SOME_MEMBERS
 }
+
+@JourneyFrameworkComponent
+class SuperiorLandlordsBackRoutingStep(
+    stepConfig: SuperiorLandlordsBackRoutingStepConfig,
+) : JourneyStep.InternalStep<AnyMembers, JourneyState>(stepConfig)

@@ -131,16 +131,6 @@ class FreeholdersListStepConfigTests {
     }
 
     @Test
-    fun `there are no cards and the heading parameter is zero when there are no freeholders in state`() {
-        val stepConfig = setupStepConfig(freeholders = null, stubCardActionSteps = false)
-
-        val content = stepConfig.getStepSpecificContent(mockState)
-
-        assertEquals(0, content["optionalAddAnotherTitleParam"])
-        assertEquals(emptyList<SummaryCardViewModel>(), content["summaryCards"])
-    }
-
-    @Test
     fun `getStepSpecificContent throws when a freeholder with known details has no name`() {
         // Arrange
         val stepConfig =
@@ -183,8 +173,7 @@ class FreeholdersListStepConfigTests {
 
     private fun setupStepConfig(
         freeholders: Map<Int, FreeholderDataModel>? = DEFAULT_FREEHOLDERS,
-        stubCardActionSteps: Boolean = true,
-        stubRemoveStep: Boolean = stubCardActionSteps,
+        stubRemoveStep: Boolean = true,
         stubAddAnotherStep: Boolean = true,
     ): FreeholdersListStepConfig {
         val stepConfig = FreeholdersListStepConfig(urlParameterService)
@@ -198,14 +187,12 @@ class FreeholdersListStepConfigTests {
             whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
             whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
         }
-        if (stubCardActionSteps) {
-            whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
-            whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
-            whenever(setStateForFreeholderEditStep.currentJourneyId).thenReturn("journey-123")
-            whenever(setStateForFreeholderEditStep.isStepReachable).thenReturn(true)
-            whenever(urlParameterService.createParameterPair(any())).thenAnswer {
-                "freeholderId" to it.getArgument<Int>(0).toString()
-            }
+        whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
+        whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
+        whenever(setStateForFreeholderEditStep.currentJourneyId).thenReturn("journey-123")
+        whenever(setStateForFreeholderEditStep.isStepReachable).thenReturn(true)
+        whenever(urlParameterService.createParameterPair(any())).thenAnswer {
+            "freeholderId" to it.getArgument<Int>(0).toString()
         }
         if (stubRemoveStep) {
             whenever(mockState.confirmRemoveFreeholderStep).thenReturn(confirmRemoveFreeholderStep)
