@@ -235,13 +235,6 @@ class PaymentService(
         } catch (exception: PaymentCaptureNotTakenException) {
             println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
             recordPaymentNotTaken(paymentId, exception.govUkPayStatus)
-        } catch (exception: PaymentCaptureOutcomeUnknownException) {
-            println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
-            paymentReconciliationService.recordManualIntervention(
-                paymentId,
-                PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
-                expectedStatus = PaymentStatus.CREATED,
-            )
         } catch (exception: Exception) {
             println("Failed to finalise payment $paymentId: ${exception.stackTraceToString()}")
             when {
@@ -254,9 +247,10 @@ class PaymentService(
                 }
 
                 isCaptureAttempted -> {
-                    paymentReconciliationService.markForCancellation(
+                    paymentReconciliationService.recordManualIntervention(
                         paymentId,
-                        manualInterventionReasonIfNotCancelled = PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                        PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
+                        expectedStatus = PaymentStatus.CREATED,
                     )
                 }
 

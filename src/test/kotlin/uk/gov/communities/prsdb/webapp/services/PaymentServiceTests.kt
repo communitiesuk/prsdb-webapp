@@ -1064,7 +1064,7 @@ class PaymentServiceTests {
             assertEquals(PaymentStatus.SUCCEEDED, status)
             verify(mockTransactionManager).commit(any())
             verify(mockPaymentReconciliationService, never()).recordManualIntervention(any(), any(), any())
-            verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
         }
 
         @ParameterizedTest
@@ -1094,7 +1094,7 @@ class PaymentServiceTests {
                 any(),
             )
             verify(mockPaymentReconciliationService, never()).recordManualIntervention(any(), any(), any())
-            verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
         }
 
         @Test
@@ -1150,7 +1150,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.MANUAL_INTERVENTION, status)
             verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
-            verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
+            verify(mockPaymentReconciliationService, never()).markForCancellation(any())
         }
 
         @Test
@@ -1442,7 +1442,7 @@ class PaymentServiceTests {
             PaymentManualInterventionReason.CAPTURE_OUTCOME_UNKNOWN,
             PaymentStatus.CREATED,
         )
-        verify(mockPaymentReconciliationService, never()).markForCancellation(any(), anyOrNull())
+        verify(mockPaymentReconciliationService, never()).markForCancellation(any())
     }
 
     private fun constraintViolation(constraintName: String) =

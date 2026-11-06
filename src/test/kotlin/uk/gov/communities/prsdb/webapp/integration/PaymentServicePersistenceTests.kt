@@ -302,7 +302,7 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Test
-    fun `finalisePayment rolls back the registration and records manual intervention when capture fails and GOV UK Pay's status can't be read`() {
+    fun `finalisePayment rolls back, then records manual intervention when capture fails and GOV UK Pay's status can't be read`() {
         // Arrange
         doThrow(createGovUkPayUnavailableException()).whenever(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         whenever(mockGovUkPayClient.getPaymentWithRetry(CREATED_PAYMENT_ID)).thenThrow(createGovUkPayUnavailableException())

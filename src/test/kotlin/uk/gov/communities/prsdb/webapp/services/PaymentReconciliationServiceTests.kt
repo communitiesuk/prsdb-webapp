@@ -94,35 +94,6 @@ class PaymentReconciliationServiceTests {
                 .updateStatusIfCurrentStatusIs(any(), eq(PaymentStatus.CANCELLING), any(), any())
         }
 
-        @Test
-        fun `records manual intervention with the given reason when GOV UK Pay does not cancel a payment that may have been taken`() {
-            // Arrange
-            val payment = createPayment(paymentId = PAYMENT_ID)
-            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.CANCELLING, rowsUpdated = 1)
-            doThrow(GovUkPayException(HttpStatus.BAD_REQUEST, "P0501", "Cancellation of payment failed", RuntimeException()))
-                .whenever(mockGovUkPayClient)
-                .cancelPayment(PAYMENT_ID)
-            stubConditionalUpdate(PaymentStatus.CANCELLING, PaymentStatus.MANUAL_INTERVENTION, rowsUpdated = 1)
-            whenever(mockPaymentRepository.findById(PAYMENT_ID)).thenReturn(Optional.of(payment))
-            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
-
-            // Act
-            val result = paymentReconciliationService.markForCancellation(PAYMENT_ID, REASON)
-
-            // Assert
-            assertEquals(PaymentStatus.MANUAL_INTERVENTION, result)
-            verify(mockManualInterventionEmailSender).sendEmail(
-                MANUAL_INTERVENTION_EMAIL_ADDRESS,
-                PaymentRequiresManualInterventionEmail(
-                    payment.paymentId,
-                    payment.reference,
-                    payment.amountInPence,
-                    payment.paymentCreatedAt,
-                    REASON.description,
-                ),
-            )
-        }
-
         @ParameterizedTest
         @EnumSource(PaymentStatus::class, names = ["CREATED"], mode = EnumSource.Mode.EXCLUDE)
         fun `returns the stored status without cancelling when the payment is no longer created`(storedStatus: PaymentStatus) {
