@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -112,7 +111,7 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withFreeholderProvideDetails(provideDetails: YesOrNo = YesOrNo.YES): SelfType {
+    fun withFreeholderProvideDetails(provideDetails: Boolean = true): SelfType {
         val freeholderProvideDetailsFormModel = FreeholderProvideDetailsFormModel(provideDetails = provideDetails)
         withSubmittedValue(ProvideFreeholderDetailsStep.ROUTE_SEGMENT, freeholderProvideDetailsFormModel)
         return self()

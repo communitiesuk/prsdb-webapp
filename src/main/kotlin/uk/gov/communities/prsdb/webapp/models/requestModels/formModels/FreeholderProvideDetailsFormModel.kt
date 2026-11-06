@@ -1,21 +1,31 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
-import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
-// TODO PDJB-1963: delete or replace this temporary form model when the real provide details page is built
 @IsValidPrioritised
 class FreeholderProvideDetailsFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerProperty.freeholders.provideDetails.radios.error.missing",
-                validatorType = NotNullConstraintValidator::class,
+                messageKey = "registerProperty.freeholders.provideDetails.radios.error.missing.joint",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isJointFreeholderAnswerProvided",
+            ),
+            ConstraintDescriptor(
+                messageKey = "registerProperty.freeholders.provideDetails.radios.error.missing.nonJoint",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isNonJointFreeholderAnswerProvided",
             ),
         ],
     )
-    var provideDetails: YesOrNo? = null,
-) : FormModel
+    var provideDetails: Boolean? = null,
+) : FormModel {
+    var isJointFreeholder: Boolean = false
+
+    fun isJointFreeholderAnswerProvided(): Boolean = !isJointFreeholder || provideDetails != null
+
+    fun isNonJointFreeholderAnswerProvided(): Boolean = isJointFreeholder || provideDetails != null
+}

@@ -166,7 +166,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -1227,8 +1226,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
             // TODO PDJB-1962: update this usage when the real freeholders intro page is added
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1963: update this usage when the real provide details page is added
-            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
             freeholdersListPage.submit()

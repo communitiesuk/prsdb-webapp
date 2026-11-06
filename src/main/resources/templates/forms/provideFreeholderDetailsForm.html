@@ -1,0 +1,14 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="form-content">
+        <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'provideDetails', #{${fieldSetHeading}}, null)}">
+            <th:block th:replace="~{fragments/forms/radios :: radios(null, 'provideDetails', null, ${radioOptions})}"></th:block>
+        </th:block>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    </th:block>
+</html>

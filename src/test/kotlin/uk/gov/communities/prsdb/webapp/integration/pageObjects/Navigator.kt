@@ -988,10 +988,9 @@ class Navigator(
         return createValidPage(page, OwnsPropertyFormPagePropertyRegistration::class)
     }
 
-    // TODO PDJB-1962: update this usage when the real freeholders intro page is added
-    fun skipToPropertyRegistrationFreeholdersInfoPage(): FreeholdersInfoFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder: Boolean = true): FreeholdersInfoFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersInfo().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholdersInfo(isJointFreeholder).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholdersInfoStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholdersInfoFormPagePropertyRegistration::class)
