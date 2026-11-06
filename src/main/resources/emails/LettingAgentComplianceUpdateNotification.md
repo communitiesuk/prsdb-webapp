@@ -12,9 +12,9 @@ Property Registration Number: ((registration number))
 
 ((certificate type label))
 
-## Expiry date
+## ((certificate date heading))
 
-((expiry date))
+((certificate date))
 
 ^ You remain responsible for this registration. Check that this certificate is correct.
 

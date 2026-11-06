@@ -16,7 +16,11 @@ forbidden:
     two: 'If you pasted the web address, check you copied the entire address.'
 serviceProblem:
   header: 'Sorry, there is a problem with the service'
-  body: Try again later.
+  body:
+    one: 'Try again later.'
+    two: 'We are working to fix this. You do not need to contact our help desk.'
+    three: 'If you were registering a property, we have saved your answers. You’ll be able to finish your registration later.'
+
 passcodeLimit:
   header: Maximum number of passcodes reached
   body:
