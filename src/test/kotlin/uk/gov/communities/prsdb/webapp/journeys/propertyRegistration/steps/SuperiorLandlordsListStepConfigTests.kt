@@ -100,7 +100,7 @@ class SuperiorLandlordsListStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent throws when a freeholder with known details has no name`() {
+    fun `getStepSpecificContent throws when a superior landlord with known details has no name`() {
         // Arrange
         val stepConfig =
             setupStepConfig(
