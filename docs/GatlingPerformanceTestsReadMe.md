@@ -14,7 +14,8 @@ src/gatling/kotlin/uk/gov/communities/prsdb/webapp/performance/
   BaseUrlConfig.kt                     # Resolves the target base URL
   RegisterAsLandlordGetSimulation.kt   # GET-only example
   FormSubmissionPostSimulation.kt      # GET -> extract CSRF -> POST example
-  BasicJourneysSimulation.kt           # Serial one-user populations: phone/email updates -> registration
+  BasicJourneysSimulation.kt           # Serial one-user populations: profile updates -> registration
+  SavedRegistrationSimulation.kt       # Disjoint owners: resume/save one registration, delete another
   *Journey.kt, OneLoginAuthentication.kt, Basic*.kt   # Reusable HTTP chains and run configuration
   *Tests.kt, BasicContractSimulation.kt, BasicHttpTestServer.kt   # Unit and Gatling assertion tests
 src/test/resources/one-login-simulator/  # Synthetic One Login identity-verification claims, shared with the
@@ -110,20 +111,20 @@ the simulation against the real app (below) does that.
 `BasicRunConfig` separates the target from the measurement mode. Both targets use the same HTTP journey logic;
 the existing toy simulations continue to use `BaseUrlConfig` unchanged.
 
-| Property | Purpose |
-|----------|---------|
-| `gatling.target` | Explicit `local` or `nft` target |
-| `gatling.baseUrl` | Application origin, including the local/worktree port |
-| `gatling.simulatorUrl` | Official One Login simulator origin |
-| `gatling.basic.landlordSubject` | Seeded synthetic landlord for the phone and email update slices |
-| `gatling.basic.registrationSubject` | Fresh run-specific prefix for generated synthetic registration subjects; must differ from `landlordSubject` |
-| `gatling.basic.iterations` | Number of measured journey passes; positive integer, default `10` |
-| `gatling.basic.maxIterations` | Safety ceiling for measured passes; positive integer, default `100`; raise explicitly to run more |
-| `gatling.basic.mode` | `baseline` records timings; `gated` applies explicit timing limits |
-| `gatling.local.basic.meanResponseTimeMs` | Local gated per-request mean limit, positive integer milliseconds |
-| `gatling.local.basic.maxResponseTimeMs` | Local gated per-request limit, positive integer milliseconds |
-| `gatling.nft.basic.meanResponseTimeMs` | Separately agreed NFT gated per-request mean limit |
-| `gatling.nft.basic.maxResponseTimeMs` | Separately agreed NFT gated per-request limit |
+| Property                                 | Purpose                                                                                                     |
+|------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `gatling.target`                         | Explicit `local` or `nft` target                                                                            |
+| `gatling.baseUrl`                        | Application origin, including the local/worktree port                                                       |
+| `gatling.simulatorUrl`                   | Official One Login simulator origin                                                                         |
+| `gatling.basic.landlordSubject`          | Seeded synthetic landlord for the profile update slices                                                      |
+| `gatling.basic.registrationSubject`      | Fresh run-specific prefix for generated synthetic registration subjects; must differ from `landlordSubject` |
+| `gatling.basic.iterations`               | Number of measured journey passes; positive integer, default `10`                                           |
+| `gatling.basic.maxIterations`            | Safety ceiling for measured passes; positive integer, default `100`; raise explicitly to run more           |
+| `gatling.basic.mode`                     | `baseline` records timings; `gated` applies explicit timing limits                                          |
+| `gatling.local.basic.meanResponseTimeMs` | Local gated per-request mean limit, positive integer milliseconds                                           |
+| `gatling.local.basic.maxResponseTimeMs`  | Local gated per-request limit, positive integer milliseconds                                                |
+| `gatling.nft.basic.meanResponseTimeMs`   | Separately agreed NFT gated per-request mean limit                                                          |
+| `gatling.nft.basic.maxResponseTimeMs`    | Separately agreed NFT gated per-request limit                                                               |
 
 URLs must be HTTP/HTTPS origins, without credentials, paths, query strings or fragments. Baseline mode rejects
 limits for its target rather than ignoring them. Gated mode requires both target-specific mean and maximum limits;
@@ -143,8 +144,243 @@ Local limits prove the gates work; they are not NFT acceptance limits. Future lo
 reuse journey chains while defining their own concurrent workload.
 
 Build and Test runs the unit and assertion tests (`performanceTest`) in their own job, but never the simulations.
-The webapp test shards run only the root `test` task. Automated performance execution belongs in the dedicated PDJB-430 performance-testing action; the
+The webapp test shards run only the root `test` task. Automated performance execution belongs in the dedicated PDJB-430 performance-testing
+action; the
 commands here remain available for explicit local development runs.
+
+### Owned saved-registration journeys
+
+`SavedRegistrationSimulation` is a separate, destructive correctness slice for the restored synthetic dataset.
+Each virtual user authenticates as a distinct existing owner, resumes a saved registration, retains its selected
+address, submits property type and two bedrooms, and checks the saved value. It then deletes a **different**
+saved registration and checks that the target disappeared while the resumed registration remains.
+HTTP contracts reject missing CSRF, a mismatched resume ID, unsaved progress, retained delete targets and loss of
+the unrelated record. No fixture is recycled within a run.
+
+Export fixtures immediately before running. For local work, first set the usual `PGHOST`, `PGPORT`, `PGDATABASE`,
+`PGUSER` and `PGPASSWORD` variables for the **disposable restored large database**, not the developer database:
+
+```bash
+PGOPTIONS='-c default_transaction_read_only=on' \
+  psql --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align \
+  --file src/main/resources/data-nft-saved-registration-fixtures.sql > /absolute/path/saved-fixtures.json
+./gradlew gatlingRun --non-interactive \
+  --simulation uk.gov.communities.prsdb.webapp.performance.SavedRegistrationSimulation \
+  -Dgatling.target=local -Dgatling.basic.mode=baseline \
+  -Dgatling.baseUrl=http://localhost:18080 \
+  -Dgatling.simulatorUrl=http://127.0.0.1:19090 \
+  -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+  -Dgatling.saved.fixturePath=/absolute/path/saved-fixtures.json
+```
+
+The shared SQL exports at most 101 owners, each with its two earliest owned saved registrations, covering
+warm-up plus at most 100 measured passes. Both the exported subjects and state IDs must be disjoint.
+The simulation fails before HTTP mutation if capacity, required fields or uniqueness are invalid. It uses
+each exported subject for authentication; `gatling.basic.landlordSubject` remains required by the shared config.
+The ordinary small local fixture does not provide this pool.
+
+In NFT, the `fixtures` mode of the bounded SSM database action invokes
+`node scripts/performance-tests/nft-load-dump.mjs --export-saved-fixtures <output-path>`.
+It verifies the AWS account and tunnel configuration, executes read-only SQL, checks capacity/uniqueness and
+writes a mode-0600 file in the runner's temporary directory. The performance workflow runs the basic suite and
+then this saved-registration suite against the same restored database, with no reset between them.
+These changes are locally verified, not yet proven by another GitHub/NFT execution.
+
+The combined large-local check passed 913/913 basic-suite requests followed by 209/209 saved-registration
+requests (26s and 10s respectively), each with warm-up plus ten measured passes. A separate database query
+confirmed all 11 resumed states retained their owned address and saved bedrooms, all 11 delete targets were
+removed, and allocation/schema checks remained valid. This is not a concurrency or NFT timing result.
+The pristine archive is unchanged; restore it again for a comparable starting point.
+
+### Owned completed-property and organisation updates
+
+Two further destructive correctness simulations use separate read-only fixture exports:
+
+| Simulation | Implemented variants | Verified large-local result |
+|---|---|---|
+| `CompletedPropertySimulation` | Ownership, bedrooms, furnishings, households/tenants, rent frequency/amount, water/custom/excluded bills, account/different correspondence email, selected/manual correspondence address, vacant/occupied and deferred tenancy completion; selective, mandatory HMO, additional HMO and removed licensing | 1,771/1,771 requests, 1m 54s |
+| `OrganisationProfileSimulation` | Organisation name, email, phone, selected/manual address and main contact, authenticated as existing organisation administrators | 440/440 requests, 11s |
+
+Both results include warm-up plus ten measured passes, with a different owner/organisation per pass.
+Independent database queries verified all 11 allocated property updates and all 11 organisation profile
+updates, retaining the expected ownership/admin membership and registration number. The property audit also
+confirmed the final manual contact address, occupied status, completed tenancy and cleared custom bills.
+These are sequential
+correctness timings, not concurrent-load results or NFT acceptance measurements.
+
+Export `data-nft-completed-property-fixtures.sql` or `data-nft-organisation-fixtures.sql` using the read-only
+`psql` command above against the disposable restored database. Both exports are bounded to 101 distinct
+actors. Property fixtures exclude shared ownership, delegation and owners with saved registrations.
+Organisation fixtures require actual admin memberships and never allocate the same organisation twice.
+The parsers reject underfilled, shared or invalid fixtures before authenticating.
+
+Use the common local simulation options above, replacing the simulation and fixture argument with:
+
+```text
+--simulation uk.gov.communities.prsdb.webapp.performance.CompletedPropertySimulation
+-Dgatling.property.fixturePath=/absolute/path/property-fixtures.json
+
+--simulation uk.gov.communities.prsdb.webapp.performance.OrganisationProfileSimulation
+-Dgatling.organisation.fixturePath=/absolute/path/organisation-fixtures.json
+```
+
+**Certificate storage is a separate fixture dependency.** The seed archive contains certificate metadata,
+not the referenced file bodies. Some property detail pages fail locally if those files are missing.
+The property export includes the actual referenced `files` (seed-owned object keys and extensions). Prepare
+their synthetic bodies before starting the isolated app:
+
+```bash
+mkdir -p /absolute/session/path/isolated-app
+node scripts/performance-tests/local-seed-files.mjs \
+  /absolute/path/property-fixtures.json /absolute/session/path/isolated-app
+```
+
+The storage root must already exist, outside the repository and its ancestors. Preparation is bounded to
+101 distinct owners and 20 file references per property, accepts only seed-owned PNG/PDF keys, rejects
+symlinked upload paths and different existing objects, and is repeatable without overwriting files.
+It creates real synthetic PNG/PDF bodies under `.local-uploads/safe/`; it does not change the database.
+Run the isolated app with this directory as its working directory and an absolute jar path. Its local
+One Login controller also needs a `src` link pointing to this checkout's `src` directory.
+The recorded check prepared 122 PNGs; an authenticated HTTP download returned the expected content type
+and 490 matching synthetic bytes. Developer uploads were not changed.
+This only materialises existing seeded certificates. New upload/compliance journeys separately use real
+synthetic PDFs and the unchanged production scanning task. NFT object storage provisioning/download
+validation remains outstanding; the archive alone is insufficient for end-to-end NFT execution.
+
+### Council and operator local dependencies
+
+Council and operator chains use their own internal-access OIDC provider and database memberships,
+not the landlord login or a broad role override. The official simulator needs a **separate interactive
+instance** for the RS256 internal-access client; do not overwrite the ES256 One Login configuration.
+Start it on a distinct loopback port using the same simulator image as the local landlord instance:
+
+```bash
+docker run -d --name <owned-council-simulator> -e INTERACTIVE_MODE=true \
+  -p 127.0.0.1:19091:3000 ghcr.io/govuk-one-login/simulator:<local-version>
+COUNCIL_SPRING_CONFIG_PATH=/absolute/session/path/council-spring.json \
+  node scripts/performance-tests/council-local-simulator.mjs
+```
+
+The bootstrap reads the existing One Login simulator configuration at `127.0.0.1:19090`, configures
+only the separate council simulator, checks its interactive form and issuer, and writes a new
+mode-0600 Spring override file. Set `ONE_LOGIN_SIMULATOR_URL`, `COUNCIL_SIMULATOR_URL` and
+`COUNCIL_APP_URL` explicitly when using other loopback ports. Merge the generated overrides into
+the isolated application's configuration and restart it. Pass
+`-Dgatling.council.simulatorUrl=http://127.0.0.1:19091`; `gatling.simulatorUrl` still identifies One Login.
+The simulations fail closed on unexpected external destinations.
+
+Fresh ten-pass actual-app runs subsequently passed 409/409 council requests in 22s and 300/300
+operator requests in 10s, each plus warm-up. Independent read-only audits confirmed all eleven target
+removals, invitation cleanup and preserved actor memberships. Missing-invitation pagination was
+reproduced and fixed with a contract regression; partial-run invitations and removals were recovered
+through scoped HTTP journeys before allocating fresh measured fixtures.
+Council registration passed 286/286 requests in 10s after genuine operator-created invitations,
+including expired-token rejection, real OIDC reauthentication and consumed-token checks. An independent
+audit verified eleven new memberships with the expected council, access level and accepted privacy notice.
+The shared seed audit reported zero allocation/schema violations after the initial pilots.
+These are sequential local timings, not concurrent-load results or GitHub/NFT validation.
+Passcodes require a separately labelled local run with Spring profile `require-passcode` and
+`gatling.operator.passcodes=true`; they are not silently enabled in the NFT-parity baseline.
+That explicit profile, including metrics backed by the existing local CloudWatch, Cost Explorer and
+Plausible implementations, passed 385/385 requests in 59s over eleven fresh operators. Independent
+SQL verified 22 new unclaimed passcodes, eleven removed target accounts and preserved operator access.
+
+### Further locally validated branches
+
+Every row below passed actual application requests and independent read-only persisted-state audits.
+Actor counts include one warm-up; these sequential local runs are not concurrent-load measurements.
+Earlier small pilots are superseded by the larger runs rather than counted as extra coverage.
+
+| Coverage | Actors | Successful requests |
+|---|---:|---:|
+| Selected-address, unverified individual registration | 11 | 451 |
+| Organisation invitation/cancellation | 11 | 187 |
+| Organisation acceptance, editor promotion, removal | 11 each | 253 / 99 / 121 |
+| Organisation initial registration: company, charitable trust, other | 11 each | 572 / 880 / 704 |
+| Organisation structure: trustee, governing body, company number/type, trust status | 11 per operation | 7 operations |
+| Full property registration: nine occupancy/address/certificate/EPC variants | 99 | 10,093 |
+| Existing-property gas, electrical and EPC compliance updates | 11 | 2,163 |
+| Joint invitation, resend and cancellation | 11 | 264 |
+| Joint invitation acceptance/rejection | 12 each | 156 / 108 |
+| Joint acceptance with new-user registration | 11 | 495 |
+| Owner-to-agent delegation/cancellation | 11 | 165 |
+| Agent first-time access/existing-password login | 12 each | 264 / 516 |
+| Agent gas certificate update | 12 | 891 |
+| Agent EIC/EICR updates | 2 each | 135 / 132 |
+| Leave joint property/switch to individual ownership | 11 each | 99 / 121 |
+| Property/landlord deregistration | 12 each | 156 / 180 |
+| Failed-payment retry/cancelled-payment retry/pending payment | 2 each | 146 / 146 / 144 |
+
+The registration and compliance audits include exact certificate dates/types, genuine scanned PDF
+associations and safe files, consumed scan callbacks, and succeeded payments with correct payer/property
+linkage. Payment retry audits also check the controlled dependency's failed/cancelled-then-success
+sequence; pending audits check intermediate pending states. The scanner must use the same Java runtime
+as the application jar. Neither scan status nor Secure cookies are bypassed.
+
+Landlord pages are checked for updated certificate cards; only the letting-agent template renders
+the update success banner. Both entry points share the compliance chain. New-user joint acceptance
+reuses the normal landlord registration chain through its embedded entry point.
+Team audits check exact membership changes, token consumption and preserved administrator access.
+Offboarding checks real property/account deletion and preserved remaining owners; account deletion
+requires legitimate One Login refresh after logout before checking confirmation and denied dashboard access.
+
+Separate local feature-profile pilots also passed, each with two unused allocations and independent
+property/compliance/payment audits:
+
+| Profile | Result | Verified scope |
+|---|---|---|
+| 13-month gas certificate, baseline validity | 178/178, 9s | Expired path, no uploaded gas certificate |
+| 13-month gas certificate, 14-month flag enabled | 241/241, 25s | Accepted certificate, genuine upload and scan |
+| EIC flag disabled/enabled | 194/194 each, 6s/8s | Implemented expired-certificate branches only |
+| Associated parties enabled | 146/146, 7s | Sole freehold, no property manager |
+
+Each enabled profile changes exactly its named flag from the NFT-parity baseline. EIC issue-date
+persistence and freeholder/superior-landlord/property-manager details remain unfinished production
+features; these pilots do not claim those outcomes or bypass the placeholder pages.
+
+The workflow now exports these pools through the guarded `property-fixtures` and `organisation-fixtures`
+SSM action modes and runs both simulations after saved registrations, without resetting the database.
+The guarded Node CLI options are `--export-property-fixtures` and `--export-organisation-fixtures`.
+Council, operator and council-registration exports also have guarded action modes
+`council-fixtures`, `operator-fixtures` and `council-registration-fixtures`. Their equivalent CLI is:
+
+```bash
+node scripts/performance-tests/nft-load-dump.mjs --export-journey-fixtures council /absolute/path/council.json
+```
+
+Replace `council` with `operator` or `council-registration` as appropriate. These exports use the
+same account/tunnel guards and read-only database setting, reject shared actors/removal targets and
+unsafe file references, and write owner-only files. Council registration requires genuinely prepared
+invitations before export; it does not create or alter invitations through SQL. Council detail pages
+also require the referenced certificate objects, not just database metadata.
+
+No new GitHub/NFT execution has yet validated this wiring. Local evidence above does not establish
+remote object storage/dependency readiness or a combined fresh-restore run.
+
+### Paused combined-run verification: future work
+
+The fresh corrected archive was restored locally and verified before running the baseline families
+without intermediate resets. Basic/individual registration, saved registration, completed-property
+updates, all organisation branches, the nine-variant property registration matrix, landlord compliance
+updates and all joint invitation decisions passed. The final new-user joint acceptance passed 495/495
+requests with eleven independently audited ownership outcomes. Owner-to-agent delegation/cancellation
+also passed 165/165 with an eleven-property audit.
+
+The combined run was deliberately paused. Remaining acceptance work is:
+
+- Rerun council operations using fresh removal targets. The original run had one landlord-name search
+  exceed the application's five-second database timeout; ten other actors completed. Preserve this
+  failure as evidence rather than reuse their deleted targets or weaken the assertion.
+- Run operator operations and genuine council invitation preparation/registration.
+- Prepare agent invitations, then run access, existing-password login and gas/EIC/EICR compliance.
+- Run destructive leave/switch/property/account offboarding last, then audit final seed invariants.
+- Complete reusable workflow/dependency/object-storage preparation before any separately approved AWS run.
+
+These remaining combined checks do not negate the earlier individual-family results, but the complete
+fresh-restore matrix is **not yet verified**. Full regression checks passed: 6,015 JUnit tests with
+zero failures/errors and four skipped, 145 performance contracts, 103 Node tests, and project ktlint.
+Whole-repository workflow lint also identified pre-existing ShellCheck findings in unchanged
+`build-and-deploy.yml` and `reset-database.yml`; the modified performance workflow passed.
 
 ### Real local basic journey
 
@@ -196,6 +432,12 @@ services, the landlord signs in through the **official simulator**, not `/local/
 when the bootstrap exits. It does not reset the database automatically. Stop it and the simulator with Ctrl-C
 when finished.
 
+The bootstrap adds `data-nft-performance.sql` after the normal local fixtures. Its five reserved addresses use
+distinct `PRSDB Performance Square` labels: older dumps can contain QA addresses with the original `PRSDB Square`
+labels, which would otherwise make selected-address submission ambiguous. The fixture upgrades only its own
+reserved rows with matching UPRNs, leaving imported and QA addresses unchanged. A separately restored large
+database with SQL initialisation disabled must have this fixture applied explicitly before running the suite.
+
 The default application port is 8080; `SERVER_PORT`, `POSTGRES_PORT` and `REDIS_PORT` follow `.env`.
 `ONE_LOGIN_SIMULATOR_PORT` overrides 13000; change the Docker port mapping to match.
 The simulator configuration API requires its IP origin (`127.0.0.1`), not `localhost`.
@@ -229,11 +471,15 @@ run-specific prefix: the simulation appends a warm-up or iteration suffix to gen
 each registration. Each run creates `gatling.basic.iterations + 1` registrations and leaves them in the target.
 Use a fresh prefix for every run, or restore/reseed the database before reusing one.
 
-The basic suite signs in as seeded landlord Alexander Smith for each profile-update pass. Phone and email values
-change on every warm-up and measured pass, so each profile submission updates the saved value rather than
-resubmitting an unchanged value. Phone values use the synthetic London range beginning `02079460123`; email
-addresses use `example.invalid`. Each pass checks the saved profile value. Run with the local profile and do not
-enable `use-notify`; local email notifications are handled by the stub service. In NFT the `one-login-simulator` profile (active only during performance runs) also selects the stub service, so
+The basic suite signs in as the seeded, unverified landlord for each profile-update pass. It updates name, date of birth, phone, email and address
+(selected lookup followed by manual entry). Phone, email and manual-address values change on every warm-up and
+measured pass; the address variants alternate so neither resubmits an unchanged address. Phone values use the
+synthetic London range beginning `02079460123`; email addresses use `example.invalid`. Each submission checks the
+saved profile value. Address HTTP contract tests also require the session, CSRF token, extra hidden fields and
+journey query string, and reject unchanged saved values even when response statuses are correct.
+Run with the local profile and do not
+enable `use-notify`; local email notifications are handled by the stub service. In NFT the `one-login-simulator` profile (active only during
+performance runs) also selects the stub service, so
 no emails are sent to Notify and Notify's allow-list cannot fail the journeys.
 
 NFT is behind CloudFront, whose cache policy has a 1 second minimum TTL that overrides `no-store`. A repeat GET
@@ -265,35 +511,232 @@ experiment, change the mode to `gated` and supply both `gatling.local.basic.mean
 front-channel requests are checked for correctness but excluded from application timing gates; the application
 callback includes its back-channel authentication work.
 
-The basic slice covers seeded phone and email updates and individual registration through the manual-address
-branch. It does not cover other registration branches, council or letting-agent journeys. See ADRs 0035-0040
+The current slice covers seeded name, date-of-birth, phone, email and selected/manual address updates, and
+individual registration through the manual-address branch. Identity updates require an unverified landlord.
+It also follows authenticated links through the landlord dashboard, property records, an owned property's
+details/compliance panels, compliance/outstanding actions and incomplete-property listing. Property headings
+must match the selected record, and unexpected redirects fail rather than following back to login.
+It does not cover other registration branches, council or letting-agent journeys. See ADRs 0035-0040
 for the basic/load distinction, API-level measurement, runner, scheduling, Gatling and fixture-restoration decisions.
+
+### Generating the large NFT dataset (PDJB-1748)
+
+`NftDataSeeder` adds records alongside the existing small fixture. Explicit IDs start above each table's existing
+maximum, and sequences are aligned without rewinding an already-ahead sequence. Generation requires exclusive
+database access and a freshly reset fixture; it is not an idempotent startup script. The seeding runner must
+enforce those preconditions rather than rerun the same random seed over a previously generated dataset.
+
+Bulk property addresses must be active, have a UPRN and belong to an English local council. The five reserved
+`EG1 2AA` lookup addresses remain outside bulk property allocation so the existing registration journey keeps
+working. `NFT_SEED_MINIMUM_FREE_ADDRESSES` (default `0`) reserves additional address capacity for subsequent
+registration journeys; choose it from the planned test volume rather than assuming the total address count
+represents usable capacity. Generation fails and rolls back if there are not enough addresses or if the
+configured landlords produce fewer property registrations than requested.
+
+The property settings are **additional** records, excluding the small fixture. Completed and incomplete registrations
+have separate exact targets:
+
+| Environment variable              | Deployed default | Meaning                                                                  |
+|-----------------------------------|-----------------:|--------------------------------------------------------------------------|
+| `NFT_SEED_SYSTEM_OPERATORS`       |              150 | Additional system operators                                              |
+| `NFT_SEED_LOCAL_COUNCIL_USERS`    |            3,000 | Additional local-council users                                           |
+| `NFT_SEED_PROPERTIES`             |        2,450,000 | Completed property registrations                                         |
+| `NFT_SEED_INCOMPLETE_PROPERTIES`  |          272,223 | Incomplete property-registration journeys                                |
+| `NFT_SEED_LANDLORDS`              |                0 | Derive landlord count from the existing synthetic portfolio distribution |
+| `NFT_SEED_BATCH_SIZE`             |           10,000 | Records processed per seeding batch                                      |
+| `NFT_SEED_RANDOM_SEED`            |              239 | Random seed for reproducible generated data                              |
+| `NFT_SEED_GENERATED_ADDRESSES`    |                0 | Generate no extra addresses; use the existing address dataset            |
+| `NFT_SEED_MINIMUM_FREE_ADDRESSES` |                0 | Extra eligible addresses to leave unallocated                            |
+
+A positive landlord count requests that many additional landlords instead; generation fails if their portfolios
+cannot supply both property targets. Automatic mode includes landlords with no properties according to the existing
+distribution and stops after the batch that meets both targets. It is a synthetic population, not a landlord demand
+forecast. The final portfolio can be truncated to reach the exact property targets. Local defaults remain small:
+30 landlords, 40 completed properties and 5 incomplete journeys.
+
+#### Workload assumptions and arithmetic
+
+The in-VPC worker downloads a pinned S3 object version. Its dedicated task role needs `s3:GetObjectVersion`
+on `arn:aws:s3:::prsdb-seed-data-nft/seed-data.dump`, restricted to the approved version, and KMS-decrypt
+permission. The Actions orchestrator needs scoped ECS launch/monitor/stop, PassRole and worker-log access.
+The current proof of concept uses isolated temporary AWS resources. Permanent worker provisioning and permissions
+in `communitiesuk/prsdb-infra` follow only after the GitHub-driven process is proven; they are not prerequisites
+for this experiment.
+
+The performance workflow resets the small fixture using migrations from its own commit, matching the deployed
+application. Other reset callers retain their environment-branch default. Startup checks outside the runner's WAF
+allow-list window verify completed ECS rollout and a healthy ALB target matching the running task; HTTP readiness
+checks remain inside the existing preparation window.
+
+The worker uses `pg_restore --jobs=4` against the custom-format dump directly from private ECS networking to RDS.
+SSM carries migration and verification traffic only, never the bulk dump. Parallel workers can load independent
+tables and build indexes concurrently but do not split a single table's `COPY` across workers. The database instance
+and storage configuration stay unchanged so timings can be compared.
+
+Logs include UTC start/completion/failure timestamps and elapsed seconds for download, archive inspection,
+restore, Flyway migrations and dataset verification (including `ANALYZE`). Each active phase emits an elapsed-time
+heartbeat every minute; this is not a percentage-complete estimate. Raw PostgreSQL output and credentials are
+not streamed to the Actions log.
+
+An interrupted restore can leave the preserved address/council tables without their post-data keys and indexes.
+The normal small-fixture reset preserves these tables, so cancellation alone does not establish recovery.
+Runner recovery must verify schema integrity before restarting the app; an unresolved failure blocks completion.
+
+The fee-model forecast is based on **properties, not landlords**: 4.9 million eligible properties, with uptake of
+50% in year one, 55% in year two, 65% in year three and 70% in year four. The reusable load-test baseline is the
+year-one database volume; the tests exercise new registrations and other journeys against it.
+
+```text
+year 1 registrations = 4,900,000 * 0.50 = 2,450,000
+year 2 registrations = 4,900,000 * 0.55 = 2,695,000
+year 3 registrations = 4,900,000 * 0.65 = 3,185,000
+year 4 registrations = 4,900,000 * 0.70 = 3,430,000
+
+year-one completed properties = 2,450,000
+incomplete journeys  = ceil(completed properties * 0.10 / 0.90)
+                     = 272,223
+total generated property registrations = 2,722,223
+
+registration journeys/minute = annual registrations / working days / active hours per day / 60
+                             = 2,450,000 / 200 / 8 / 60 = 25.520833
+agreed rounded load target   = 26 registrations/minute
+eight-hour registration capacity = 26 * 60 * 8 = 12,480
+basic-suite registrations    = 10 measured passes + 1 warm-up = 11
+minimum free-address reserve = 12,480 + 11 = 12,491
+```
+
+The 200 working days and 8 active hours/day are planning assumptions, not observed traffic. The 90% completed /
+10% incomplete mix retains the existing synthetic seed assumption; it is not part of the fee-model forecast.
+All counts can be overridden independently. `NFT_SEED_PROPERTIES` now counts **completed** registrations, unlike
+its previous combined-total meaning; update any existing task/environment overrides accordingly.
+
+The 26/minute figure is a **completed property-registration journey arrival rate**, not an HTTP request rate or
+concurrent-user count. The load suite is intended to exercise registrations and other service journeys; the
+registration rate is the quantified component of that workload, while the mix and rates for the other journeys are
+separate inputs. An eight-hour modeled day requires 12,480 addresses for new registrations. The basic simulation
+also creates 11 registrations (one functional warm-up and 10 measured passes), so the shared starting dump reserves
+12,491 eligible free addresses in total. The five `EG1 2AA` Gatling lookup addresses are additional reserved
+fixtures and are never part of this allocation. This is the agreed full-day registration capacity, not extra
+safety margin or a spike-test concurrency target. The seeder's final `unallocated addresses remain` count is the
+capacity check for newly generated data: it subtracts addresses allocated to both completed registrations and
+incomplete journeys. Both types now draw from one forward-only, bounded address buffer, so JDBC batch flushes
+cannot release incomplete addresses for reuse. Before appending data, a transaction-local snapshot excludes
+addresses already selected by saved registrations. Generated street labels include a synthetic sequence suffix
+to avoid ambiguous address selections when random street/postcode combinations repeat.
+The seeder DAO uses transaction-local `force_custom_plan` so cached collision-check plans cannot retain the
+tiny pre-seed table estimate as uncommitted batches grow. PostgreSQL restores the inherited planning mode on
+both commit and rollback; ordinary application sessions and database-wide settings are unchanged. A focused
+1.5M-row, 50,000-parameter benchmark reproduced a cached generic-plan timeout at five seconds versus approximately
+0.2 seconds with custom planning. This isolates that query bottleneck, not the total full-rebuild duration.
+
+**Existing dump limitation:** the earlier proof validated restore/recovery and the original basic journeys, not
+incomplete-address integrity. A subsequent local audit found repeated incomplete selections, overlap with active
+completed properties, and duplicate synthetic address labels. The corrected seeder does not repair an existing
+dump. Rebuild and independently validate the saved registrations before using that dump for resume/delete
+journeys or making a full-day capacity claim; row counts alone are insufficient.
+
+The corrected isolated local rebuild uses a fresh migrated QA fixture, `NFT_SEED_GENERATED_ADDRESSES=3000000`
+and `NFT_SEED_MINIMUM_FREE_ADDRESSES=12537`, with the full completed/incomplete targets above. It leaves
+277,777 independently verified free addresses. The original archive is retained unchanged; the replacement
+has been exported and restored into a separate local database, but has not been uploaded to S3.
+Do not reuse the earlier generated-address calculation based on the defective archive's allocations.
+The final local candidate, `prsdb-performance-seed-corrected-qa.dump`, also includes complete street/town
+components for the synthetic QA address fallbacks, so record headings retain the full address.
+Its SHA256 is `f55efa64e33b168969fdb887996a2ef38db3340ff5f2826f92d420d8a82b432e`.
+A fresh four-worker restore passed both allocation/schema and all-26-QA-record audits. The expanded local
+baseline passed 913/913 requests over ten measured passes plus warm-up, in 27 seconds. This is a sequential
+correctness check, not an NFT timing, concurrency, average-use or spike result; broader journey coverage remains unfinished.
+
+The current suite updates name, date of birth, phone, email and selected/manual address on the fixed synthetic landlord subject
+`urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo`. Dump preparation belongs to the seeding
+runner: its fixture contract requires `src/main/resources/data-nft-performance.sql` before bulk allocation for
+the five reserved high-ID `EG1 2AA` lookup addresses, and `src/main/resources/data-nft-performance-landlord.sql`
+after bulk seeding to assign this subject to an unlinked, unverified synthetic individual landlord if it is absent. The landlord script is
+dump preparation only, not startup data initialisation; the address fixture also supports databases with no
+landlords. The earlier restore proof of concept used the existing dump, without regenerating it.
+New-registration journeys generate
+distinct subjects for each run and authenticate them through the existing One Login simulator; those identities are
+not pre-seeded. A later login spike can reuse the dump, but its simultaneous-login profile and account capacity must
+be agreed separately.
+
+Generated certificate metadata does not provide actual certificate files in S3. Record the tested image revision,
+random seed, reference date and actual generated counts when creating a dump. The existing ECS seeder task has its
+own image and environment settings: override its old `NFT_SEED_LANDLORDS=2820000` and `NFT_SEED_PROPERTIES=4700000`
+with `0` and `2450000`, and explicitly supply `NFT_SEED_INCOMPLETE_PROPERTIES=272223`. Use the tested image and a
+deliberately selected reference date rather than assuming the task definition inherits these new defaults.
+
+The large dump is intended to be created once and loaded before performance testing, with migrations applied to
+match the deployed NFT revision. Basic, load and later spike suites should use the same restored starting database
+in one run; do not reset between suites. The performance workflow currently runs the basic and saved-registration suites, with separate
+bounded restore, compilation, test and recovery jobs. It does not yet include load/spike simulations.
+A full eight-hour capacity is the agreed dataset sizing model, not a claim that the current workflow can
+run for eight hours. Any future scheduling and suite orchestration must account for the selected test duration.
+
+After the run, including a failed run, the existing cleanup resets NFT to the small day-to-day fixture and starts
+the app. It does not modify or replace the large S3 dump. A subsequent run restores the large dump again before
+testing. The loader verifies at least the configured completed and incomplete registration counts before the
+performance workflow continues. The shared read-only `data-nft-seed-verify.sql` audit also rejects duplicate or
+ambiguous incomplete selections, overlap with completed ownership, missing cached address metadata, mismatched
+subjects, invalid schema objects and missing search indexes. Free capacity excludes both completed and incomplete
+allocations; the old defective dump now fails validation rather than being silently repaired during restore.
+The defaults match the deployed seeder targets, and can be overridden with GitHub
+Environment variables `NFT_SEED_PROPERTIES` and `NFT_SEED_INCOMPLETE_PROPERTIES`. The minimum eligible free-address
+check is independently configurable with GitHub Environment variable `NFT_LOAD_MINIMUM_FREE_ADDRESSES` (default
+`1`); the reusable full-day dump is sized separately with its 12,491-address reserve. These loader checks do not
+change the dataset or the seeder's own configuration.
 
 ### NFT basic performance workflow (PDJB-430)
 
 `.github/workflows/run-performance-tests.yml` is dispatched on the `nft` branch. It first checks whether the NFT
 head differs from the last successful run; if unchanged, it skips all AWS and database operations unless `force`
-is selected. The deployed app image must carry the workflow's NFT SHA. The performance job runs the existing
-`BasicJourneysSimulation` in baseline mode after the One Login simulator is prepared, uploads the report, and
-always attempts to restore the original app/simulator state and its own WAF/security-group changes.
+is selected. The `restore-task-definition` input identifies an exact worker revision, never `latest`; scheduled runs
+use the NFT Environment variable `NFT_RESTORE_TASK_DEFINITION`. Neither has a default worker.
+The original temporary proof-of-concept worker has been retired. Do not dispatch another run until an approved
+replacement worker and its scoped permissions are provisioned and its exact active ARN is configured.
+The deployed app image must carry the workflow's NFT SHA, checked before shutdown. Before testing, the
+workflow waits for actual app tasks to reach `STOPPED`: service `runningCount=0` is insufficient while ALB draining
+keeps containers and database connections alive. The dedicated worker validates the pinned dump version, size,
+checksum and archive, checks for database clients, then restores `s3://prsdb-seed-data-nft/seed-data.dump` directly
+to RDS. Actions migrates it to the deployed NFT revision and verifies required data through SSM. It starts the app and runs
+`BasicJourneysSimulation` followed by `SavedRegistrationSimulation` in baseline mode after the One Login simulator is prepared. Additional
+load/spike/performance suites should run against this same restored dataset before cleanup; do not reset between
+suites in a combined run. Gatling compilation runs in parallel with restore and transfers the compiled classes/resources
+to the test runner, which skips recompilation. Restore has a 45-minute budget, compilation 20 minutes, and
+simulator preparation plus Gatling 35 minutes. Preparation and HTTP tests deliberately share one runner because
+WAF and simulator access belong to that runner's IPv4 address. Each AWS job obtains fresh credentials.
+The restore job uploads its own recovery state and a pre-restore checkpoint; the performance job uploads
+Gatling reports and its separate preparation state. A separate recovery job
+restores the original app/simulator state and its own WAF/security-group changes.
 
-After the prepare/test/restore job completes, every selected execution invokes the shared database reset, even
-when preparation, Gatling or environment restoration failed. The reset cleans and migrates the NFT schema and
-restarts the application. The NFT Spring profile loads the existing `data-test.sql` fixture, restoring the
-synthetic landlord and other predefined test records. This does not restore the full-scale `pg_dump` described
-in ADR-0040. The manual `Reset Database - NFT` workflow uses the same reset sequence and shares the
-`nft-app-service-operation` concurrency lock with performance runs and webapp NFT deployments.
+After the performance job completes, recovery stops the owned restore task, restores simulator configuration/access
+and waits for the actual app tasks to stop. Reset is blocked if this cannot be verified or the latest active app
+revision differs from the recorded baseline. Otherwise the shared database reset runs even when loading,
+preparation or Gatling failed. This is the final cleanup: it cleans and migrates the NFT schema, then returns
+NFT to the small `data-test.sql` fixture for day-to-day use. It does
+not reload the large dump. The `Reset Database - NFT` workflow has the same small-fixture semantics and
+shares the `nft-app-service-operation` concurrency lock with performance runs and webapp NFT deployments. After
+the reset succeeds, the workflow ensures the one-task app is running and healthy, then checks the QA fixtures
+read-only through SSM before recording success.
 
-After this profile change is deployed, run the manual `Reset Database - NFT` workflow once before the first
-performance run. This clean reset seeds the fixture on the existing NFT database; thereafter the performance
-workflow performs the post-run reset automatically. Verify the configured landlord is available before Gatling
-starts because SQL initialization continues on error and app health alone does not prove the fixture loaded.
+Health does not prove complete QA fixture initialization. The standard reset preserves address/council tables.
+`data-test.sql` now supplies missing address dependencies as synthetic, NULL-UPRN fallbacks without replacing
+preserved addresses. Its normal address sequence advances past fallback IDs without rewinding an imported
+sequence or jumping into the reserved high-ID range. The runner checks all 26 exact property IDs and their
+expected addresses, registration numbers and landlord links, both organisation landlords, successful migration
+history, and absence of leftover performance properties/incomplete registrations. A partial reset (including
+the previously observed nine-property reset) fails the workflow and cannot advance the success marker.
+These changes are locally verified; another approved GitHub/NFT run must establish deployed end-to-end evidence.
 
-The manual `fail-smoke` input injects a failure after simulator setup but before Gatling. The separate
+The large baseline is created separately, normally once, by the existing NFT ECS seed-and-dump task. It may be
+deliberately regenerated in the future, but normal performance runs only read it; neither loading nor the final
+small-fixture reset writes or deletes the S3 object. A run that needs a replacement baseline must use the
+separately approved seed-and-dump operation.
+
+The `fail-smoke` input injects a failure after simulator setup but before Gatling. The separate
 `fail-gatling` input uses an unseeded synthetic landlord so the journey fails after Gatling starts. Both inputs
 force the workflow past the unchanged-head check. Gatling reports are uploaded even when the simulation fails.
-The successful NFT head marker advances only when both the performance job and post-run database reset succeed;
-failed test or reset attempts do not advance it.
+The successful NFT head marker advances only when dump restore, preparation, all configured performance suites,
+post-run small-fixture reset and app recovery succeed. Failed test or reset attempts do not advance it.
 
 The scripts record the original app task ARN, simulator task/count, temporary ARN and owned WAF/SG
 entries in logs (and in the handoff state file). They require a stable one-task app using `default,nft`
@@ -314,96 +757,14 @@ Restoration (run unconditionally, even after a prior-step failure):
 5. Restores the original app task and verifies its health **before** scaling simulator back to zero.
    It removes only its owned access, then deregisters the temporary app revision.
 
-Manual dispatch examples:
+Execution and recovery belong to the GitHub runners. Their logs and artifacts retain the original app revision,
+owned worker ARN, simulator state, access changes, restore stages, Gatling report and reset outcome.
+The `fail-smoke` case never starts mutating journeys; `fail-gatling` exercises failure after Gatling starts.
 
-```bash
-gh workflow run run-performance-tests.yml --ref nft -f force=true
-# Fail before Gatling to prove environment restoration:
-gh workflow run run-performance-tests.yml --ref nft -f force=true -f fail-smoke=true
-# Fail a Gatling journey to prove report retention, environment restoration and database reset:
-gh workflow run run-performance-tests.yml --ref nft -f fail-gatling=true
-```
-
-Inspect the exact resulting run and compare the Gatling artifact, original/restored app task ARN/profile/health,
-simulator desired/running count zero, owned access removal, temporary revision retirement and database-reset
-outcome. The `fail-smoke` case never starts mutating journeys.
-
-**Interrupted-run recovery:** ordinary errors and signals trigger bounded best-effort cleanup, but
-hard cancellation/runner loss can prevent it. Do not start another NFT deployment or readiness run
-until an operator has restored/verified the environment. This slice deliberately adds no SSM journal
-or automatic recovery service. Use the run's logs to obtain `ORIGINAL_APP_TASK`, `TEMPORARY_APP_TASK`,
-runner CIDR, WAF names/IDs and SG marker (`PDJB-430:<run-id>-<attempt>`).
-
-First inspect live service state:
-
-```bash
-aws ecs describe-services --profile prsdb-nft --region eu-west-2 --cluster nft-app \
-  --services nft-app nft-one-login-simulator \
-  --query 'services[].{Name:serviceName,Task:taskDefinition,Desired:desiredCount,Running:runningCount}'
-```
-
-```powershell
-aws ecs describe-services --profile prsdb-nft --region eu-west-2 --cluster nft-app `
-  --services nft-app nft-one-login-simulator `
-  --query 'services[].{Name:serviceName,Task:taskDefinition,Desired:desiredCount,Running:runningCount}'
-```
-
-If the app still uses **this run's temporary ARN**, restore the original ARN recorded in its logs.
-If it already uses the original ARN, do not unnecessarily redeploy. If it uses any other task ARN,
-coordinate with that deployment's owner rather than overwriting it. With `ORIGINAL_APP_TASK` set
-to the recorded original ARN:
-
-```bash
-aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app \
-  --service nft-app --task-definition "$ORIGINAL_APP_TASK"
-aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app --services nft-app
-curl --fail --max-time 15 https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck
-# Only once the original app is stable and healthy:
-aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app \
-  --service nft-one-login-simulator --desired-count 0
-aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app \
-  --services nft-one-login-simulator
-```
-
-```powershell
-aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app `
-  --service nft-app --task-definition "$ORIGINAL_APP_TASK"
-aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app --services nft-app
-curl.exe --fail --max-time 15 https://nft.register-home-to-rent.test.communities.gov.uk/healthcheck
-# Only once the original app is stable and healthy:
-aws ecs update-service --profile prsdb-nft --region eu-west-2 --cluster nft-app `
-  --service nft-one-login-simulator --desired-count 0
-aws ecs wait services-stable --profile prsdb-nft --region eu-west-2 --cluster nft-app `
-  --services nft-one-login-simulator
-```
-
-In PowerShell, set the variable first with `$ORIGINAL_APP_TASK = "<recorded ARN>"`, and use `curl.exe`
-because `curl` is an alias for `Invoke-WebRequest`.
-
-After verifying no service/deployment references `TEMPORARY_APP_TASK`, deregister that exact ARN:
-
-```bash
-aws ecs deregister-task-definition --profile prsdb-nft --region eu-west-2 \
-  --task-definition "$TEMPORARY_APP_TASK"
-```
-
-```powershell
-aws ecs deregister-task-definition --profile prsdb-nft --region eu-west-2 `
-  --task-definition "$TEMPORARY_APP_TASK"
-```
-
-For network recovery, use `wafv2 get-ip-set` then `update-ip-set` with the **fresh** lock token and
-current address list minus only the logged run-owned CIDR. CloudFront WAF uses `us-east-1`/`CLOUDFRONT`;
-regional WAF uses `eu-west-2`/`REGIONAL`. Do not restore an old complete address-list snapshot. Use
-`ec2 describe-security-group-rules` to find the exact logged CIDR and run description, then revoke
-only those rule IDs with `ec2 revoke-security-group-ingress`. Leave all pre-existing entries alone.
-
-If registration succeeded but its response was lost, the script might not know the new ARN. Inspect
-the webapp task family/latest revision and compare its original image/settings and simulator profile
-to this run before retiring it. **An active temporary revision can become family-latest and be picked
-by existing deployment tooling**; resolve retirement before another NFT deployment. Do not rotate
-credentials or deploy a newer image as a recovery shortcut.
-
+**Interrupted-run limitation:** ordinary failures trigger bounded cleanup, but force-cancellation or runner
+loss can prevent recovery jobs or artifact upload. Missing state, unknown tasks and unverified restoration
+block automatic reset. Fully automatic recovery from those conditions is not yet proven by this experiment;
+removing manual commands does not remove that limitation.
 
 ### Prerequisites for a local run
 
@@ -417,8 +778,8 @@ credentials or deploy a newer image as a recovery shortcut.
 the `pdjb-238-gatling-post-endpoint` feature flag. That flag is enabled only in the NFT environment, so to run
 this simulation locally you must enable it first, by either:
 
-- setting `enabled: true` for that flag in `src/main/resources/application-local.yml`, then restarting the app
-  (remember to revert the change before committing); or
+- setting `enabled: true` for that flag in `src/main/resources/application-local.yml`, then restarting the app (remember to revert the
+  change before committing); or
 - toggling it at runtime via the feature flag overrides page at `/system-operator/feature-flags`.
 
 If the flag is off, the endpoint returns 404 and the simulation reports both a failed status check and a
@@ -436,8 +797,8 @@ Gatling writes an HTML report per run to:
 build/reports/gatling/<simulation>-<timestamp>/index.html
 ```
 
-The console output prints the exact path at the end of each run. These reports are build output and are
-**not** committed — the repository's `.gitignore` excludes `build/`. In CI, publish the report directory as a
+The console output prints the exact path at the end of each run. These reports are build output and are **not** committed — the repository's
+`.gitignore` excludes `build/`. In CI, publish the report directory as a
 workflow artifact so each run's results can be downloaded and analysed.
 
 ## Code patterns
@@ -459,7 +820,7 @@ extract the hidden input, then reference it in the POST. Gatling automatically c
 issued by the GET into the subsequent POST for the same virtual user, so the token stays valid:
 
 ```kotlin
-.exec(
+val journey = exec(
     http("Get form-submission page")
         .get("/performance-test/form-submission")
         .check(status().`is`(200))

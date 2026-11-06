@@ -8,6 +8,11 @@ on:
       aws-account-id:
         required: true
         type: string
+      checkout-ref:
+        description: Optional repository revision to use for the database reset
+        required: false
+        type: string
+        default: ''
 
 permissions:
   id-token: write
@@ -37,7 +42,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.environment == 'integration' && 'main' || inputs.environment }}
+          ref: ${{ inputs.checkout-ref || (inputs.environment == 'integration' && 'main' || inputs.environment) }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
