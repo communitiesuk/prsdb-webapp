@@ -70,7 +70,7 @@ class PaymentReconciliationService(
     fun reconcilePayments(now: Instant): Int {
         var failureCount = 0
 
-        val abandonedPaymentCutoff = now.minus(ABANDONED_PAYMENT_AGE_IN_HOURS, ChronoUnit.HOURS)
+        val abandonedPaymentCutoff = now.minus(ABANDONED_PAYMENT_AGE_IN_HOURS.toLong(), ChronoUnit.HOURS)
         paymentRepository.findAllByStatusAndPaymentCreatedAtBefore(PaymentStatus.CREATED, abandonedPaymentCutoff).forEach { payment ->
             try {
                 markForCancellation(payment.paymentId)
@@ -80,7 +80,7 @@ class PaymentReconciliationService(
             }
         }
 
-        val unresolvedPaymentCutoff = now.minus(UNRESOLVED_CANCELLING_PAYMENT_AGE_IN_HOURS, ChronoUnit.HOURS)
+        val unresolvedPaymentCutoff = now.minus(UNRESOLVED_CANCELLING_PAYMENT_AGE_IN_HOURS.toLong(), ChronoUnit.HOURS)
         paymentRepository.findAllByStatus(PaymentStatus.CANCELLING).forEach { payment ->
             try {
                 val isStillCancelling = resolveCancellingPayment(payment.paymentId)
