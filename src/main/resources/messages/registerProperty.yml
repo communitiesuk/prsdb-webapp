@@ -227,12 +227,12 @@ propertyManager:
     heading: You’ve added a property manager
     insetText: After you submit and pay, we’ll contact this person to say they’re listed on your registration.
     emailAddress: Email address
-  todo:
-    removePropertyManager:
-      heading: 'TODO (PDJB-1983): Are you sure you want to remove your property manager?'
+  remove:
+    fieldSetHeading: Are you sure you want to remove {0}?
+    fieldSetHint: They will be removed as your property manager
     radios:
       error:
-        missing: 'TODO (PDJB-1983): Select yes or no'
+        missing: Select if you want to remove this property manager
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
