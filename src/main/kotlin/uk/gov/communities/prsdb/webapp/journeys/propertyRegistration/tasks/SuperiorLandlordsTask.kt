@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Supe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsBackRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsBackRoutingStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
@@ -51,17 +53,21 @@ class SuperiorLandlordsTask(
                 }
                 savable()
             }
-            step(journey.superiorLandlordsBackRoutingStep) {
-                routeSegment(SuperiorLandlordsBackRoutingStep.ROUTE_SEGMENT)
+            step<AnyMembers, SuperiorLandlordsBackRoutingStepConfig>(journey.superiorLandlordsBackRoutingStep) {
+                stepSpecificInitialisation { usingSuperiorLandlordsList { journey.superiorLandlordsMap } }
                 parents { journey.superiorLandlordsDetailsTask.isComplete() }
-                nextStep { exitStep }
-                savable()
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.anyoneInOwnershipChainStep
+                        AnyMembers.SOME_MEMBERS -> exitStep
+                    }
+                }
             }
             exitStep {
                 parents {
                     OrParents(
                         journey.anyoneInOwnershipChainStep.hasOutcome(YesOrNo.NO),
-                        journey.superiorLandlordsBackRoutingStep.isComplete(),
+                        journey.superiorLandlordsBackRoutingStep.hasOutcome(AnyMembers.SOME_MEMBERS),
                     )
                 }
             }

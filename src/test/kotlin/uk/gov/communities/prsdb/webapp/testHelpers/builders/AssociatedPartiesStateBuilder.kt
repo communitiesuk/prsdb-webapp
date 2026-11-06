@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnySuperiorLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -23,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
@@ -156,9 +156,9 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    // TODO PDJB-1978: remove this when has any superior landlords becomes an internal step
-    fun withHasAnySuperiorLandlordsComplete(): SelfType {
-        withSubmittedValue(HasAnySuperiorLandlordsStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withSuperiorLandlords(superiorLandlords: Map<Int, SuperiorLandlordDataModel>): SelfType {
+        additionalDataMap["superiorLandlordsMap"] = Json.encodeToString(serializer(), superiorLandlords)
+        additionalDataMap["nextSuperiorLandlordId"] = Json.encodeToString(serializer(), (superiorLandlords.keys.maxOrNull() ?: 0) + 1)
         return self()
     }
 }

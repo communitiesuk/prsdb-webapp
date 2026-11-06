@@ -10,6 +10,10 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 // TODO PDJB-1974: replace this placeholder with the real superior landlord contact type page.
 // Implement the routing logic
+// TODO PDJB-1974: when changing a superior landlord, prefill this page with the contact type from
+//  state.editingSuperiorLandlord by overriding resolvePageContent, as in FreeholderContactTypeStepConfig.
+//  Check when adding a second superior landlord that the page starts empty, as SaveSuperiorLandlordStepConfig clears the
+//  form data after each save.
 @JourneyFrameworkComponent
 class SuperiorLandlordContactTypeStepConfig :
     AbstractRequestableStepConfig<SuperiorLandlordContactType, SuperiorLandlordContactTypeFormModel, JourneyState>() {
