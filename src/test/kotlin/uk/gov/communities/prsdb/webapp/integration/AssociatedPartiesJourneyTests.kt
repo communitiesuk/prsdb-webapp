@@ -327,8 +327,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
             assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1977: update this usage when the real superior landlords list page is added
-            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            // TODO PDJB-1978: verify that the information the user submitted is visible
+            assertThat(superiorLandlordsListPage.heading).containsText("added 3 people in the ownership chain")
+            assertThat(superiorLandlordsListPage.getSummaryCard(2).title).hasText("Unknown person")
+            superiorLandlordsListPage.submit()
             // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
             assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -353,7 +356,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordAddressFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
             assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1977: update this usage when the real superior landlords list page is added
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
             assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()
@@ -372,7 +374,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitProvideDetails(YesOrNo.NO)
             // TODO PDJB-1978: remove this usage when save superior landlord becomes an internal step
             assertPageIs(page, SaveSuperiorLandlordFormPagePropertyRegistration::class).submit()
-            // TODO PDJB-1977: update this usage when the real superior landlords list page is added
             assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class).submit()
             // TODO PDJB-1978: remove this usage when superior landlords back routing becomes an internal step
             assertPageIs(page, SuperiorLandlordsBackRoutingFormPagePropertyRegistration::class).submit()

@@ -429,7 +429,15 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
+                withHeadingMessageKey(
+                    if (associatedPartiesEnabled) {
+                        "registerProperty.taskList.aboutYourProperty.peopleResponsible"
+                    } else {
+                        // TODO: PDJB-2016: Remove this branch
+                        "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords"
+                    },
+                    shouldUseNumbering = false,
+                )
                 if (associatedPartiesEnabled) {
                     task(journey.ownershipAndLandlordsTask) {
                         withDependencies { journey }

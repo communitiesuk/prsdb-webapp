@@ -32,6 +32,8 @@ const val EIC_ISSUE_DATE = "pdjb-1666-eic-issue-date"
 
 const val ASYNCHRONOUS_EMAIL_SENDING = "pdjb-973-asynchronous-email-sending"
 
+const val ACTIVE_INACTIVE = "pdjb-844-active-inactive"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -46,4 +48,5 @@ val featureFlagNames =
         PROPERTY_REGISTRATION_PHASE_THREE,
         EIC_ISSUE_DATE,
         ASYNCHRONOUS_EMAIL_SENDING,
+        ACTIVE_INACTIVE,
     )

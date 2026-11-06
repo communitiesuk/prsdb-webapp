@@ -37,6 +37,9 @@ features:
     - name: "pdjb-973-asynchronous-email-sending"
       enabled: false
       expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
+      enabled: true
+      expiry-date: "2027-01-01"
 
 argon2:
   iterations: 2
