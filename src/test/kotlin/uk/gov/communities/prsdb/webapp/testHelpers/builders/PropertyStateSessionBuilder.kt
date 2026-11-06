@@ -9,12 +9,15 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
@@ -49,7 +52,7 @@ class PropertyStateSessionBuilder(
 
     fun withCheckedAnswers(): PropertyStateSessionBuilder {
         val checkAnswersFormModel = CheckAnswersFormModel()
-        withSubmittedValue("check-answers", checkAnswersFormModel)
+        withSubmittedValue(PropertyRegistrationCyaStep.ROUTE_SEGMENT, checkAnswersFormModel)
         return this
     }
 
@@ -64,16 +67,16 @@ class PropertyStateSessionBuilder(
                     customPropertyType = customType
                 }
             }
-        withSubmittedValue("property-type", propertyTypeFormModel)
+        withSubmittedValue(PropertyTypeStep.ROUTE_SEGMENT, propertyTypeFormModel)
         return this
     }
 
-    fun withOwnershipType(ownershipType: OwnershipType = OwnershipType.FREEHOLD): PropertyStateSessionBuilder {
+    fun withOwnershipType(ownershipType: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD): PropertyStateSessionBuilder {
         val ownershipTypeFormModel =
             OwnershipTypeFormModel().apply {
                 this.ownershipType = ownershipType
             }
-        withSubmittedValue("ownership-type", ownershipTypeFormModel)
+        withSubmittedValue(OwnershipTypeStep.ROUTE_SEGMENT, ownershipTypeFormModel)
         return this
     }
 
@@ -272,6 +275,31 @@ class PropertyStateSessionBuilder(
         ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
+
+        fun beforePropertyRegistrationFreeholderLookupAddress(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
+            .withFreeholderContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationFreeholderSelectAddress(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderLookupAddress(jointFreeholders, freeholderName)
+            .withFreeholderLookupAddress()
+
+        fun beforePropertyRegistrationFreeholderManualAddress(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderLookupAddress(jointFreeholders, freeholderName)
+            .withFreeholderLookupAddress()
+            .withFreeholderManualAddressSelected()
+
+        // TODO PDJB-1978: remove withHasAnySuperiorLandlordsComplete when has any superior landlords becomes an internal step
+        fun beforePropertyRegistrationSuperiorLandlordsList() =
+            beforePropertyRegistrationHasSuperiorLandlords()
+                .withAnyoneInOwnershipChain()
+                .withHasAnySuperiorLandlordsComplete()
 
         fun beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails: MutableList<String>? = null) =
             if (alreadyInvitedEmails != null) {

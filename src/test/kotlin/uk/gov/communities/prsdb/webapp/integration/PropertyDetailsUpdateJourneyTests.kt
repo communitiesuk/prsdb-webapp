@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
@@ -71,7 +71,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update Ownership Type page
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.LEASEHOLD)
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
@@ -97,7 +97,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage =
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.LEASEHOLD)
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Re-enter the abandoned bedrooms update via the change link and submit it
@@ -116,8 +116,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
             // The ownership type update below must change the data, otherwise the last-modified date is not bumped
             assertNotEquals(
-                OwnershipType.FREEHOLD,
-                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.ownershipType,
+                OwnershipTypeBeforePdjb955.FREEHOLD,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.ownershipTypeBeforePdjb955,
             )
 
             // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
@@ -135,7 +135,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage =
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.FREEHOLD)
             assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the

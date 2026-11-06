@@ -11,7 +11,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.Instant
 
 interface PaymentRepository : JpaRepository<Payment, String> {
-    fun findAllByAssociatedIncompleteProperty(associatedIncompleteProperty: LandlordIncompleteProperty): List<Payment>
+    fun findByAssociatedIncompletePropertyAndStatus(
+        associatedIncompleteProperty: LandlordIncompleteProperty,
+        status: PaymentStatus,
+    ): Payment?
 
     fun findByReferenceAndAssociatedIncompleteProperty(
         reference: String,
@@ -27,11 +30,11 @@ interface PaymentRepository : JpaRepository<Payment, String> {
     @Transactional
     @Query(
         "UPDATE Payment p SET p.status = :newStatus, p.lastModifiedDate = :now " +
-            "WHERE p.paymentId = :paymentId AND p.status IN :expectedStatuses",
+            "WHERE p.paymentId = :paymentId AND p.status = :expectedStatus",
     )
-    fun updateStatusIfCurrentStatusIn(
+    fun updateStatusIfCurrentStatusIs(
         paymentId: String,
-        expectedStatuses: Collection<PaymentStatus>,
+        expectedStatus: PaymentStatus,
         newStatus: PaymentStatus,
         now: Instant,
     ): Int

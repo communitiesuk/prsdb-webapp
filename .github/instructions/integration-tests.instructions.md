@@ -51,6 +51,13 @@ new tests, and check for an existing overlay before writing a new one.
 Note that the signed-in mock user's One Login subject is fixed (`urn:fdc:gov.uk:2022:UVWXY`), so changing what that
 user is requires a seed data change rather than a different login.
 
+### Always-appended scripts
+
+`IntegrationTestHelper` appends the scripts in `ALWAYS_APPENDED_SCRIPTS` after the scripts a test names, so a new seed
+script does not need to repeat them. They must be idempotent. `data-test.sql` and `data-integration.sql` are loaded
+via `spring.sql.init.platform` instead, so they are not covered and keep their own copies. See
+`docs/IntegrationTestReadMe.md` before adding another.
+
 ## Page Objects
 
 ### Structure
