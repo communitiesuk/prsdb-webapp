@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="landRegistrySearchUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.freeholders.intro.heading.nonJoint}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <h1 class="govuk-heading-xl" th:text="#{registerProperty.freeholders.intro.heading.nonJoint}">heading</h1>
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.freeholders.intro.heading.nonJoint}">heading</h1>
     <p class="govuk-body" th:text="#{registerProperty.freeholders.intro.paragraph.nonJoint}">introText</p>
     <p class="govuk-body" th:text="#{registerProperty.freeholders.intro.responsibility}">responsibilityText</p>
     <details id="details-content" th:replace="~{fragments/details :: details(#{registerProperty.freeholders.intro.help.summary}, ~{::#details-content/content()})}">
