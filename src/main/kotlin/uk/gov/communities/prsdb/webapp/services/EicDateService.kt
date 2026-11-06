@@ -28,31 +28,32 @@ interface EicDateService {
     )
 }
 
+// The database migration runs whatever the flag state, so both flag states share issue-date-backed storage.
+// The flag only controls journey and UI behaviour.
 @Primary
 @Conditional(WebServerOnly::class)
 @Service("eic-date-service-flag-off")
-class BeforePdjb1666EicDateService : EicDateService {
-    override fun issueDateFrom(propertyCompliance: PropertyCompliance): LocalDate? =
-        propertyCompliance.electricalSafetyExpiryDate?.minusYears(EIC_VALIDITY_YEARS.toLong())
+class BeforePdjb1666EicDateService : EicDateService by AfterPdjb1666EicDateService()
 
-    override fun expiryDateFrom(propertyCompliance: PropertyCompliance): LocalDate? = propertyCompliance.electricalSafetyExpiryDate
+@Conditional(WebServerOnly::class)
+@Service("eic-date-service-flag-on")
+class AfterPdjb1666EicDateService : EicDateService {
+    override fun issueDateFrom(propertyCompliance: PropertyCompliance): LocalDate? = propertyCompliance.eicIssueDate
+
+    override fun expiryDateFrom(propertyCompliance: PropertyCompliance): LocalDate? =
+        propertyCompliance.eicIssueDate?.plusYears(EIC_VALIDITY_YEARS.toLong())
 
     override fun applyIssueDate(
         propertyCompliance: PropertyCompliance,
         issueDate: LocalDate?,
     ) {
-        propertyCompliance.electricalSafetyExpiryDate = issueDate?.plusYears(EIC_VALIDITY_YEARS.toLong())
+        propertyCompliance.eicIssueDate = issueDate
     }
 
     override fun applyExpiryDate(
         propertyCompliance: PropertyCompliance,
         expiryDate: LocalDate?,
     ) {
-        propertyCompliance.electricalSafetyExpiryDate = expiryDate
+        propertyCompliance.eicIssueDate = expiryDate?.minusYears(EIC_VALIDITY_YEARS.toLong())
     }
 }
-
-// TODO PDJB-1669: Replace delegation with issue-date-backed storage.
-@Conditional(WebServerOnly::class)
-@Service("eic-date-service-flag-on")
-class AfterPdjb1666EicDateService : EicDateService by BeforePdjb1666EicDateService()

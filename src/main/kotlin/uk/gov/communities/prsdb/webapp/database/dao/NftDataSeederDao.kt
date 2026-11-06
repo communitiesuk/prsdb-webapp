@@ -229,10 +229,10 @@ class NftDataSeederDao(
             """
             INSERT INTO property_compliance 
             (id, created_date, last_modified_date, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply,
-            electrical_safety_expiry_date,electrical_cert_type,
+            eicr_expiry_date, eic_issue_date, electrical_cert_type,
             epc_url, epc_expiry_date,
             tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }

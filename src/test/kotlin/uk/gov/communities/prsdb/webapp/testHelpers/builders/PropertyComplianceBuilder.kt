@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.services.AfterPdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -111,8 +112,7 @@ class PropertyComplianceBuilder {
         certType: CertificateType? = CertificateType.Eicr,
     ): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyFileUploads = mutableListOf(fileUpload)
-        propertyCompliance.electricalSafetyExpiryDate = expiryDate
-        propertyCompliance.electricalCertType = certType
+        setElectricalSafetyExpiryDate(expiryDate, certType)
         return this
     }
 
@@ -136,15 +136,27 @@ class PropertyComplianceBuilder {
         expiryDate: LocalDate = LocalDate.now().plusYears(5),
         certType: CertificateType? = CertificateType.Eicr,
     ): PropertyComplianceBuilder {
-        propertyCompliance.electricalSafetyExpiryDate = expiryDate
-        propertyCompliance.electricalCertType = certType
+        setElectricalSafetyExpiryDate(expiryDate, certType)
         return this
     }
 
     fun withExpiredElectricalSafety(certType: CertificateType? = CertificateType.Eicr): PropertyComplianceBuilder {
-        propertyCompliance.electricalSafetyExpiryDate = LocalDate.now().minusDays(1)
-        propertyCompliance.electricalCertType = certType
+        setElectricalSafetyExpiryDate(LocalDate.now().minusDays(1), certType)
         return this
+    }
+
+    private fun setElectricalSafetyExpiryDate(
+        expiryDate: LocalDate?,
+        certType: CertificateType?,
+    ) {
+        propertyCompliance.electricalCertType = certType
+        if (certType == CertificateType.Eic) {
+            propertyCompliance.eicrExpiryDate = null
+            AfterPdjb1666EicDateService().applyExpiryDate(propertyCompliance, expiryDate)
+        } else {
+            propertyCompliance.eicIssueDate = null
+            propertyCompliance.eicrExpiryDate = expiryDate
+        }
     }
 
     fun withElectricalSafetyCertProvideLater(provideLater: Boolean = true): PropertyComplianceBuilder {
@@ -152,6 +164,8 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    // Only sets the cert type, so any date already set stays in the column for the previous type.
+    // To build an EIC with a date, pass certType to withElectricalSafety or withElectricalSafetyExpiryDate instead.
     fun withElectricalCertType(certType: CertificateType = CertificateType.Eicr): PropertyComplianceBuilder {
         propertyCompliance.electricalCertType = certType
         return this

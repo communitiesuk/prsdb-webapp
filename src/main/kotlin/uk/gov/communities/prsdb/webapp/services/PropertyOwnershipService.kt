@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -57,6 +59,7 @@ class PropertyOwnershipService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
+    private val eicDateService: EicDateService,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -533,13 +536,26 @@ class PropertyOwnershipService(
         val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
         val allOutstandingActions =
             retrieveAllActivePropertiesForLandlord(landlord)
-                .map { OutstandingActionsDataModel.fromPropertyOwnership(it, isGas14MonthExpiryEnabled) }
-                .filter { it.shouldShowOnOutstandingActionsPage }
+                .map {
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        it,
+                        it.propertyCompliance?.let(::electricalSafetyExpiryDateOf),
+                        isGas14MonthExpiryEnabled,
+                    )
+                }.filter { it.shouldShowOnOutstandingActionsPage }
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
         val fromIndex = pageRequest.offset.toInt().coerceAtMost(allOutstandingActions.size)
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allOutstandingActions.size)
         return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
     }
+
+    // TODO PDJB-1676: Use PropertyComplianceService.getComplianceStatus instead of repeating the EIC/EICR choice
+    // (PropertyComplianceService can't be injected here as it already depends on this service)
+    private fun electricalSafetyExpiryDateOf(propertyCompliance: PropertyCompliance): LocalDate? =
+        when (propertyCompliance.electricalCertType) {
+            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
+            else -> propertyCompliance.eicrExpiryDate
+        }
 
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)

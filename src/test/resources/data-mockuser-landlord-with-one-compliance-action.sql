@@ -32,7 +32,7 @@ VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),
        (1, 3, '2025-01-15');
 
-INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_exemption_reason)
+INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, eicr_expiry_date, electrical_cert_type, epc_exemption_reason)
 VALUES
        (1, 2, current_date, true, null, null, 0),
        (2, 3, current_date, true, current_date + 365, 0, 0),
