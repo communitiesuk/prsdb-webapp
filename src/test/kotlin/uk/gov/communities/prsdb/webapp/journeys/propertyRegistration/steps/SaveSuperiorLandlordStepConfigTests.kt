@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactTy
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
@@ -43,7 +42,7 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached adds a new superior landlord with the next id when not editing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         val existingSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "Existing superior landlord")
         whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to existingSuperiorLandlord))
         whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
@@ -60,7 +59,7 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached replaces the superior landlord being edited without changing the next id when editing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         val otherSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "Other superior landlord")
         whenever(mockState.superiorLandlordsMap).thenReturn(
             mapOf(1 to otherSuperiorLandlord, 2 to SuperiorLandlordDataModel(detailsKnown = true, name = "Edited superior landlord")),
@@ -78,7 +77,7 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached saves the placeholder name and email when the contact type is email`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, SuperiorLandlordContactType.EMAIL)
+        setupStepsWithAnswers(true, SuperiorLandlordContactType.EMAIL)
         whenever(mockState.superiorLandlordsMap).thenReturn(null)
         whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
         whenever(mockState.nextSuperiorLandlordId).thenReturn(null)
@@ -98,7 +97,7 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached saves the placeholder name and address when the contact type is postal address`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, SuperiorLandlordContactType.POSTAL_ADDRESS)
+        setupStepsWithAnswers(true, SuperiorLandlordContactType.POSTAL_ADDRESS)
         whenever(mockState.superiorLandlordsMap).thenReturn(emptyMap())
         whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
         whenever(mockState.nextSuperiorLandlordId).thenReturn(1)
@@ -117,7 +116,7 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached clears the superior landlord form data so the next superior landlord starts empty`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         whenever(mockState.superiorLandlordsMap).thenReturn(emptyMap())
         whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
         whenever(mockState.nextSuperiorLandlordId).thenReturn(1)
@@ -144,7 +143,7 @@ class SaveSuperiorLandlordStepConfigTests {
     fun `afterStepIsReached throws when details are provided but the contact type answer is missing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
-        whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = YesOrNo.YES))
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.superiorLandlordContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(null)
 
@@ -156,7 +155,7 @@ class SaveSuperiorLandlordStepConfigTests {
     // TODO PDJB-1976: add a test that afterStepIsReached throws when the contact type is postal address but the address answer is missing
 
     private fun setupStepsWithAnswers(
-        provideDetails: YesOrNo,
+        provideDetails: Boolean,
         contactType: SuperiorLandlordContactType? = null,
     ) {
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)

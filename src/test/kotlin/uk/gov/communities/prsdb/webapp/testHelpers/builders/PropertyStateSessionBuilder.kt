@@ -313,6 +313,10 @@ class PropertyStateSessionBuilder(
                 3 to SuperiorLandlordDataModel(detailsKnown = false),
             )
 
+        fun beforePropertyRegistrationSuperiorLandlordProvideDetails() =
+            beforePropertyRegistrationHasSuperiorLandlords()
+                .withAnyoneInOwnershipChain()
+
         fun beforePropertyRegistrationSuperiorLandlordsList(
             superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,
         ) = beforePropertyRegistrationHasSuperiorLandlords()

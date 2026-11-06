@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
@@ -21,7 +20,7 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                 ?: throw PrsdbWebException("Superior landlord provide details step data is missing")
 
         val superiorLandlord =
-            if (provideDetails == YesOrNo.YES) {
+            if (provideDetails) {
                 val contactType =
                     state.superiorLandlordContactTypeStep.formModelOrNull?.contactType
                         ?: throw PrsdbWebException("Superior landlord contact type step data is missing")
@@ -53,7 +52,6 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         state.editingSuperiorLandlordId = null
 
         // Clear the individual step form data so the next superior landlord starts fresh
-        // TODO PDJB-1972: check this still clears the real provide details page correctly
         state.superiorLandlordProvideDetailsStep.clearFormData()
         // TODO PDJB-1973: check this still clears the real name page correctly
         state.superiorLandlordNameStep.clearFormData()

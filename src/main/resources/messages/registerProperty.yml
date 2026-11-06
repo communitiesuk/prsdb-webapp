@@ -390,10 +390,15 @@ freeholders:
       addAnother: Add another freeholder
 superiorLandlords:
   provideDetails:
-    fieldSetHeading: Can you provide details about the superior landlord? (TODO PDJB-1972)
+    fieldSetHeading: Can you provide the details of this person in the ownership chain?
     radios:
+      option:
+        'yes':
+          hint: Provide a name and either an email or postal address
+        'no':
+          hint: You can continue, but return and add these details when you can
       error:
-        missing: Select whether you can provide details about the superior landlord
+        missing: Select if you can provide the details of this person in the ownership chain
   contactType:
     fieldSetHeading: How should we contact the superior landlord? (TODO PDJB-1974)
     radios:
