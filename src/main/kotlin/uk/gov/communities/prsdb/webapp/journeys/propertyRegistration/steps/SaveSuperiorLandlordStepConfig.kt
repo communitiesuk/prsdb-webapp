@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -17,16 +17,25 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
     override fun afterStepIsReached(state: SuperiorLandlordsDetailsState) {
         val provideDetails =
             state.superiorLandlordProvideDetailsStep.formModelOrNull?.provideDetails
-                ?: throw PrsdbWebException("Superior landlord provide details step data is missing")
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Superior landlord provide details step data is missing for journey ${state.journeyId}",
+                )
 
         val superiorLandlord =
             if (provideDetails) {
                 val contactType =
                     state.superiorLandlordContactTypeStep.formModelOrNull?.contactType
-                        ?: throw PrsdbWebException("Superior landlord contact type step data is missing")
+                        ?: throw UnrecoverableJourneyStateException(
+                            state.journeyId,
+                            "Superior landlord contact type step data is missing for journey ${state.journeyId}",
+                        )
                 val name =
                     state.superiorLandlordNameStep.formModelOrNull?.name
-                        ?: throw PrsdbWebException("Superior landlord name step data is missing")
+                        ?: throw UnrecoverableJourneyStateException(
+                            state.journeyId,
+                            "Superior landlord name step data is missing for journey ${state.journeyId}",
+                        )
                 SuperiorLandlordDataModel(
                     detailsKnown = true,
                     name = name,

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -12,7 +13,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
@@ -134,26 +135,33 @@ class SaveSuperiorLandlordStepConfigTests {
     @Test
     fun `afterStepIsReached throws when the provide details answer is missing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
         whenever(provideDetailsStep.formModelOrNull).thenReturn(null)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<UnrecoverableJourneyStateException> { stepConfig.afterStepIsReached(mockState) }
+
+        assertTrue(exception.message!!.contains(JOURNEY_ID))
     }
 
     @Test
     fun `afterStepIsReached throws when details are provided but the contact type answer is missing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
         whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.superiorLandlordContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(null)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<UnrecoverableJourneyStateException> { stepConfig.afterStepIsReached(mockState) }
+
+        assertTrue(exception.message!!.contains(JOURNEY_ID))
     }
 
     @Test
     fun `afterStepIsReached throws when details are provided but the name answer is missing`() {
         val stepConfig = SaveSuperiorLandlordStepConfig()
+        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
         whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(provideDetailsStep)
         whenever(provideDetailsStep.formModelOrNull).thenReturn(SuperiorLandlordProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.superiorLandlordContactTypeStep).thenReturn(contactTypeStep)
@@ -163,7 +171,9 @@ class SaveSuperiorLandlordStepConfigTests {
         whenever(mockState.superiorLandlordNameStep).thenReturn(nameStep)
         whenever(nameStep.formModelOrNull).thenReturn(null)
 
-        assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
+        val exception = assertThrows<UnrecoverableJourneyStateException> { stepConfig.afterStepIsReached(mockState) }
+
+        assertTrue(exception.message!!.contains(JOURNEY_ID))
     }
 
     // TODO PDJB-1975: add a test that afterStepIsReached throws when the contact type is email but the email answer is missing
@@ -196,5 +206,6 @@ class SaveSuperiorLandlordStepConfigTests {
 
     companion object {
         private const val ENTERED_NAME = "Entered superior landlord"
+        private const val JOURNEY_ID = "test-journey-id"
     }
 }
