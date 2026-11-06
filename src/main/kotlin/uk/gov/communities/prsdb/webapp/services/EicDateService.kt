@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import java.time.LocalDate
 
-// TODO PDJB-1666: Remove the feature-flag toggle and flag-off implementation once EIC issue-date storage is released.
+// TODO PDJB-1679: Remove the feature-flag toggle and flag-off implementation when the flag is removed.
 @PrsdbFlip(name = EIC_ISSUE_DATE, alterBean = "eic-date-service-flag-on")
 interface EicDateService {
     fun issueDateFrom(propertyCompliance: PropertyCompliance): LocalDate?
