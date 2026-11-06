@@ -40,7 +40,7 @@ class PropertyComplianceViewModelFactoryTests {
             mockMessageSource,
             MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
         )
-    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mock(), mock())
     private val factory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,

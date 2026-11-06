@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_FEE_GUIDANCE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -38,6 +40,7 @@ class PaymentSummaryStepConfig(
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
             "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.quoteDate),
             "summaryListRows" to getSummaryListRows(state, quote),
+            "propertyFeeGuidanceUrl" to PROPERTY_FEE_GUIDANCE_URL,
             "quoteDate" to quote.quoteDate.toString(),
         )
     }
@@ -99,13 +102,16 @@ class PaymentSummaryStepConfig(
             return Destination(state.paymentSummaryStep)
         }
 
-        val nextUrl =
+        val creationResult =
             paymentService.createPropertyRegistrationPayment(
                 state.journeyId,
                 state.loggedInLandlordEmailAtStartOfJourney,
                 quote,
             )
-        return Destination.ExternalUrl(nextUrl)
+        return when (creationResult) {
+            is PropertyRegistrationPaymentCreationResult.NewPayment -> Destination.ExternalUrl(creationResult.nextUrl)
+            PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted -> Destination(state.paymentSummaryStep)
+        }
     }
 
     companion object {

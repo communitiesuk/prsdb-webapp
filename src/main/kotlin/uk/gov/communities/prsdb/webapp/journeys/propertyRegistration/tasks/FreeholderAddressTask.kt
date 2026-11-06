@@ -2,28 +2,42 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholderAddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
-// TODO PDJB-1967: replace the placeholder step with the real address search, select and manual entry steps
 @JourneyFrameworkComponent
 class FreeholderAddressTask(
     journeyStateService: JourneyStateService,
-    override val freeholderAddressStep: FreeholderAddressStep,
-) : TaskWithoutDependencies<FreeholderAddressState>(journeyStateService),
-    FreeholderAddressState {
-    override val taskState get() = this
+    lookupAddressStep: LookupAddressStep,
+    selectAddressStep: SelectAddressStep,
+    noAddressFoundStep: NoAddressFoundStep,
+    manualAddressStep: ManualAddressStep,
+) : AddressTask(
+        journeyStateService,
+        lookupAddressStep,
+        selectAddressStep,
+        noAddressFoundStep,
+        manualAddressStep,
+    ) {
+    override val lookupAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "registerProperty.freeholders.address.lookup.fieldSetHeading",
+        )
 
-    override fun makeSubJourney(state: FreeholderAddressState) =
-        subJourney(state) {
-            step(journey.freeholderAddressStep) {
-                routeSegment(FreeholderAddressStep.ROUTE_SEGMENT)
-                nextStep { exitStep }
-            }
-            exitStep {
-                parents { journey.freeholderAddressStep.isComplete() }
-            }
-        }
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf("fieldSetHeading" to "registerProperty.freeholders.address.select.fieldSetHeading")
+
+    override val manualAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "registerProperty.freeholders.address.manual.fieldSetHeading",
+            "fieldSetHint" to null,
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
+
+    companion object {
+        const val ROUTE_SEGMENT = "freeholder-address"
+    }
 }

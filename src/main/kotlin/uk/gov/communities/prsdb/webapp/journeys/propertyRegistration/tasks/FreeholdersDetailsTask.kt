@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -18,7 +19,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
@@ -61,35 +66,46 @@ class FreeholdersDetailsTask(
     override fun makeSubJourney(state: FreeholdersDetailsState) =
         subJourney(state) {
             step(journey.hasAnyFreeholdersStep) {
-                routeSegment(HasAnyFreeholdersStep.ROUTE_SEGMENT)
-                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
-                nextStep { journey.freeholderProvideDetailsStep }
-                savable()
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.freeholderProvideDetailsStep
+                        AnyMembers.SOME_MEMBERS -> journey.freeholdersListStep
+                    }
+                }
             }
             step(journey.setStateForFreeholderEditStep) {
                 routeSegment(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyFreeholdersStep.isComplete() }
+                parents { journey.hasAnyFreeholdersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 nextStep { journey.freeholderProvideDetailsStep }
-                savable()
             }
-            // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
             step(journey.confirmRemoveFreeholderStep) {
                 routeSegment(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyFreeholdersStep.isComplete() }
+                parents { journey.hasAnyFreeholdersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 backStep { journey.freeholdersListStep }
-                nextStep { journey.freeholdersListStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.freeholdersListStep
+                        AnyMembers.NO_MEMBERS -> exitStep
+                    }
+                }
                 savable()
             }
             step(journey.freeholdersListStep) {
                 routeSegment(FreeholdersListStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyFreeholdersStep.isComplete() }
+                parents { journey.hasAnyFreeholdersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 nextStep { exitStep }
                 savable()
             }
             step(journey.freeholderProvideDetailsStep) {
                 routeSegment(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
-                // TODO: PDJB-1969: Update this wiring to match OrgGovBodyMembersTask
-                parents { journey.hasAnyFreeholdersStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasAnyFreeholdersStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                        SingleParent(journey.freeholdersListStep) {
+                            !journey.freeholdersMap.isNullOrEmpty()
+                        },
+                    )
+                }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.freeholderNameStep
@@ -121,14 +137,57 @@ class FreeholdersDetailsTask(
                 nextStep { journey.saveFreeholderStep }
                 savable()
             }
-            // TODO: PDJB-1967: Update this wiring to match OrgGovBodyMembersTask
-            task(journey.freeholderAddressTask) {
+            task(journey.freeholderAddressTask, FreeholderAddressTask.ROUTE_SEGMENT) {
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
+                configureStep(journey.freeholderAddressTask.lookupAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingFreeholder = journey.editingFreeholder
+                        if (editingFreeholder != null) {
+                            mapOf(
+                                LookupAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.addressSearchPostcode,
+                                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to editingFreeholder.addressSearchHouseNameOrNumber,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.selectAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        mapOf(
+                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to journey.editingFreeholder?.selectedAddress,
+                        )
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.manualAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingFreeholder = journey.editingFreeholder
+                        if (editingFreeholder?.manualAddressLineOne != null) {
+                            mapOf(
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingFreeholder.manualAddressLineOne,
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingFreeholder.manualAddressLineTwo,
+                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingFreeholder.manualTownOrCity,
+                                ManualAddressStepConfig.PREFILL_COUNTY to editingFreeholder.manualCounty,
+                                ManualAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.manualPostcode,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
             }
             step(journey.saveFreeholderStep) {
-                routeSegment(SaveFreeholderStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.freeholderProvideDetailsStep.hasOutcome(YesOrNo.NO),
@@ -140,7 +199,12 @@ class FreeholdersDetailsTask(
                 savable()
             }
             exitStep {
-                parents { journey.freeholdersListStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.freeholdersListStep.isComplete(),
+                        journey.confirmRemoveFreeholderStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                    )
+                }
             }
         }
 }

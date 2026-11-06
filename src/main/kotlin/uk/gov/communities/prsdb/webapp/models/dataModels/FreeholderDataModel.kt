@@ -2,11 +2,18 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.serialization.Serializable
 
-// TODO PDJB-1969: populate from the freeholder details collected by the real freeholder pages
 @Serializable
 data class FreeholderDataModel(
     val detailsKnown: Boolean,
     val name: String? = null,
     val email: String? = null,
     val address: AddressDataModel? = null,
+    val addressSearchPostcode: String? = null,
+    val addressSearchHouseNameOrNumber: String? = null,
+    val selectedAddress: String? = null,
+    val manualAddressLineOne: String? = null,
+    val manualAddressLineTwo: String? = null,
+    val manualTownOrCity: String? = null,
+    val manualCounty: String? = null,
+    val manualPostcode: String? = null,
 )

@@ -4,11 +4,14 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
@@ -47,14 +50,18 @@ class FreeholdersTask(
                 }
                 savable()
             }
-            step(journey.freeholdersBackRoutingStep) {
-                routeSegment(FreeholdersBackRoutingStep.ROUTE_SEGMENT)
+            step<AnyMembers, FreeholdersBackRoutingStepConfig>(journey.freeholdersBackRoutingStep) {
+                stepSpecificInitialisation { usingFreeholdersList { journey.freeholdersMap } }
                 parents { journey.freeholdersDetailsTask.isComplete() }
-                nextStep { exitStep }
-                savable()
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.freeholdersInfoStep
+                        AnyMembers.SOME_MEMBERS -> exitStep
+                    }
+                }
             }
             exitStep {
-                parents { journey.freeholdersBackRoutingStep.isComplete() }
+                parents { journey.freeholdersBackRoutingStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
             }
         }
 }

@@ -21,7 +21,12 @@ class OutstandingActionsDataModelTests {
         val propertyOwnership =
             MockLandlordData.createOccupiedPropertyOwnership(licenseProvideLater = true, tenancyProvideLater = true)
 
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         assertTrue(dataModel.shouldShowLicensingAction)
         assertTrue(dataModel.shouldShowTenancyAction)
@@ -33,7 +38,12 @@ class OutstandingActionsDataModelTests {
     fun `fromPropertyOwnership does not show a licensing action for an unoccupied property with licensing provided later`() {
         val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(licenseProvideLater = true)
 
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         assertFalse(dataModel.shouldShowLicensingAction)
         assertFalse(dataModel.shouldShowTenancyAction)
@@ -53,7 +63,12 @@ class OutstandingActionsDataModelTests {
         ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
 
         // Act
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         // Assert
         assertTrue(dataModel.complianceStatus!!.shouldShowOnComplianceActionsPage)
@@ -64,7 +79,12 @@ class OutstandingActionsDataModelTests {
     fun `fromPropertyOwnership has no compliance status when the property has no compliance record`() {
         val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(tenancyProvideLater = true)
 
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         assertNull(dataModel.complianceStatus)
         assertTrue(dataModel.shouldShowOnOutstandingActionsPage)
@@ -83,7 +103,12 @@ class OutstandingActionsDataModelTests {
         ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
 
         // Act
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         // Assert
         assertNotNull(dataModel.complianceStatus)
@@ -96,7 +121,12 @@ class OutstandingActionsDataModelTests {
         val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
         MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyOwnership)
 
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = propertyOwnership.propertyCompliance!!.eicrExpiryDate,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         assertFalse(dataModel.shouldShowOnOutstandingActionsPage)
     }
@@ -111,7 +141,12 @@ class OutstandingActionsDataModelTests {
                 licenseProvideLater = true,
             )
 
-        val dataModel = OutstandingActionsDataModel.fromPropertyOwnership(propertyOwnership, isGas14MonthExpiryEnabled = true)
+        val dataModel =
+            OutstandingActionsDataModel.fromPropertyOwnership(
+                propertyOwnership,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
 
         assertEquals(registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()), dataModel.provideLaterDeadline)
     }

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -59,7 +61,8 @@ class UploadServiceTests {
         assertEquals(FileUploadStatus.QUARANTINED, result.status)
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = ["testDocument.pdf", "testDocument.PDF"])
     fun `uploadFile stores the fileName when one is provided`() {
         // Arrange
         val proposedObjectKey = "testObjectKey"

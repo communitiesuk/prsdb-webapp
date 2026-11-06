@@ -158,7 +158,7 @@ electricalSafetyTask:
     bullet:
       one: order you to fix any electrical problems
       two: do remedial work on your property and charge you for it
-      three: fine you up to £30,000
+      three: fine you
     readMore:
       beforeLink: Read more about
       link: electrical safety standards in rental properties (opens in new tab)
@@ -241,7 +241,7 @@ electricalSafetyTask:
         bullet:
           one: order you to fix any electrical problems
           two: do remedial work on your property and charge you for it
-          three: fine you up to £30,000
+          three: fine you
         readMore:
           beforeLink: Read more about
           link: electrical safety standards in rental properties (opens in new tab)
@@ -276,7 +276,7 @@ electricalSafetyTask:
         bullet:
           one: order you to fix any electrical problems
           two: do remedial work on your property and charge you for it
-          three: fine you up to £30,000
+          three: fine you
         readMore:
           beforeLink: Read more about
           link: electrical safety standards in rental properties (opens in new tab)

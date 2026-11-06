@@ -20,6 +20,8 @@ const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
 
 const val FIND_LOCAL_COUNCIL_URL = "https://www.gov.uk/find-local-council"
 
+const val LAND_REGISTRY_SEARCH_URL = "https://www.gov.uk/search-property-information-land-registry"
+
 const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
 
 const val GET_NEW_EPC_URL = "https://www.gov.uk/get-new-energy-certificate"
@@ -58,6 +60,9 @@ const val GOVERNMENT_APPROVED_DEPOSIT_PROTECTION_SCHEME_URL = "https://www.gov.u
 const val HOW_TO_RENT_GUIDE_URL = "https://www.gov.uk/government/publications/how-to-rent"
 
 const val LANDLORD_RESPONSIBILITIES_URL = "https://www.gov.uk/renting-out-a-property"
+
+const val PROPERTY_FEE_GUIDANCE_URL =
+    "https://www.gov.uk/guidance/register-your-rental-property-service-guidance-for-landlords#fee-for-the-service"
 
 const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
 

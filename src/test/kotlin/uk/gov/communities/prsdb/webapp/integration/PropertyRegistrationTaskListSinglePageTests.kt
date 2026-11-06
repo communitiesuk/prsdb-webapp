@@ -13,7 +13,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             navigator.skipToPropertyRegistrationOwnsPropertyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
-            assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
+            assert(taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.contains("In progress"))
             assert(
                 taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot start yet"),
             )
@@ -43,7 +43,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             navigator.skipToPropertyRegistrationHasGasCertPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
-            assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("Complete"))
+            assert(taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Complete"))

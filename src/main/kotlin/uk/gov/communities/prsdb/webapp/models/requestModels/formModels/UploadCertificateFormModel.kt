@@ -51,9 +51,17 @@ open class UploadCertificateFormModel : FormModel {
 
     fun isNameNotBlank() = name.isNotBlank()
 
-    fun isFileTypeValid() = !isNameNotBlank() || FilenameUtils.getExtension(name) in validExtensions && contentType in validMimeTypes
+    fun isFileTypeValid(): Boolean {
+        if (name.isBlank()) return true
 
-    fun isContentLengthValid() = !isNameNotBlank() || !isFileTypeValid() || contentLength <= maxContentLength
+        val extension = FilenameUtils.getExtension(name).lowercase()
+        val hasValidExtension = extension in validExtensions
+        val hasValidMimeType = contentType in validMimeTypes
+
+        return hasValidExtension && hasValidMimeType
+    }
+
+    fun isContentLengthValid() = name.isBlank() || !isFileTypeValid() || contentLength <= maxContentLength
 
     fun isUploadSuccessfulOrInvalid() = !hasUploadFailed
 
