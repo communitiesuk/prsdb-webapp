@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
+import org.springframework.http.HttpStatus
+import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLink
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -53,5 +55,11 @@ class MockGovUkPayData {
                 ),
             nextUrl = nextUrl,
         )
+
+        fun createGovUkPayUnavailableException() =
+            GovUkPayException(HttpStatus.SERVICE_UNAVAILABLE, "P0999", "GOV.UK Pay is unavailable", RuntimeException())
+
+        fun createGovUkPayNotCapturableException() =
+            GovUkPayException(HttpStatus.CONFLICT, "P1003", "GOV.UK Pay could not capture this payment", RuntimeException())
     }
 }

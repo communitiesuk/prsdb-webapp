@@ -66,6 +66,7 @@ gov-uk-pay:
   connect-timeout: 5s
   read-timeout: 10s
   manual-intervention-email-address: payments-support@example.com
+  payment-status-retry-delay: 0s
 
 cloudwatch-metrics:
   ecs:

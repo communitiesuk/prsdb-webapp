@@ -21,11 +21,7 @@ class PaymentReconciliationService(
 ) {
     // Marking the payment waits for any finalisation of it that is in progress, because that holds the row lock from its
     // CREATED -> SUCCEEDED claim. A CANCELLING payment can never be captured.
-    // Give a reason if the payment may have been taken, so support is emailed when GOV.UK Pay won't cancel it.
-    fun markForCancellation(
-        paymentId: String,
-        manualInterventionReasonIfNotCancelled: PaymentManualInterventionReason? = null,
-    ): PaymentStatus {
+    fun markForCancellation(paymentId: String): PaymentStatus {
         val isMarked =
             paymentRepository.updateStatusIfCurrentStatusIs(
                 paymentId,
@@ -44,17 +40,6 @@ class PaymentReconciliationService(
                     Instant.now(),
                 )
             } catch (exception: GovUkPayException) {
-                if (manualInterventionReasonIfNotCancelled != null) {
-                    println(
-                        "Could not cancel GOV.UK Pay payment $paymentId, which may have been taken: " +
-                            exception.stackTraceToString(),
-                    )
-                    return recordManualIntervention(
-                        paymentId,
-                        manualInterventionReasonIfNotCancelled,
-                        expectedStatus = PaymentStatus.CANCELLING,
-                    )
-                }
                 println(
                     "Could not cancel GOV.UK Pay payment $paymentId, so leaving it CANCELLING: " +
                         exception.stackTraceToString(),
