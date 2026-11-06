@@ -19,7 +19,7 @@ class FreeholdersInfoStepConfigTests {
 
         val template = FreeholdersInfoStepConfig().chooseTemplate(mockState)
 
-        assertEquals("forms/jointFreeholdersInfoForm", template)
+        assertEquals("forms/freeholdersInfoFormJoint", template)
     }
 
     @Test

@@ -16,7 +16,7 @@ class FreeholdersInfoStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
         mapOf("landRegistrySearchUrl" to LAND_REGISTRY_SEARCH_URL)
 
     override fun chooseTemplate(state: FreeholdersState) =
-        if (state.isJointFreeholder) "forms/jointFreeholdersInfoForm" else "forms/freeholdersInfoForm"
+        if (state.isJointFreeholder) "forms/freeholdersInfoFormJoint" else "forms/freeholdersInfoForm"
 
     override fun mode(state: FreeholdersState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
