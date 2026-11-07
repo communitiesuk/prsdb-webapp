@@ -31,7 +31,7 @@ class PropertyComplianceTests {
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         val expectedGasExpiryDate = arbitraryIssueDate.plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
         assertEquals(expectedGasExpiryDate, propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled = true))
-        assertEquals(arbitraryElectricalSafetyExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
+        assertEquals(arbitraryElectricalSafetyExpiryDate, propertyCompliance.eicrExpiryDate)
     }
 
     @Test
@@ -40,7 +40,7 @@ class PropertyComplianceTests {
 
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         assertNull(propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled = true))
-        assertNull(propertyCompliance.electricalSafetyExpiryDate)
+        assertNull(propertyCompliance.eicrExpiryDate)
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")

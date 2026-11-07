@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
@@ -57,35 +59,46 @@ class SuperiorLandlordsDetailsTask(
     override fun makeSubJourney(state: SuperiorLandlordsDetailsState) =
         subJourney(state) {
             step(journey.hasAnySuperiorLandlordsStep) {
-                routeSegment(HasAnySuperiorLandlordsStep.ROUTE_SEGMENT)
-                // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
-                nextStep { journey.superiorLandlordProvideDetailsStep }
-                savable()
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.superiorLandlordProvideDetailsStep
+                        AnyMembers.SOME_MEMBERS -> journey.superiorLandlordsListStep
+                    }
+                }
             }
             step(journey.setStateForSuperiorLandlordEditStep) {
                 routeSegment(SetStateForSuperiorLandlordEditStep.ROUTE_SEGMENT)
-                parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
+                parents { journey.hasAnySuperiorLandlordsStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 nextStep { journey.superiorLandlordProvideDetailsStep }
-                savable()
             }
-            // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
             step(journey.confirmRemoveSuperiorLandlordStep) {
                 routeSegment(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
-                parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
+                parents { journey.hasAnySuperiorLandlordsStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 backStep { journey.superiorLandlordsListStep }
-                nextStep { journey.superiorLandlordsListStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.superiorLandlordsListStep
+                        AnyMembers.NO_MEMBERS -> exitStep
+                    }
+                }
                 savable()
             }
             step(journey.superiorLandlordsListStep) {
                 routeSegment(SuperiorLandlordsListStep.ROUTE_SEGMENT)
-                parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
+                parents { journey.hasAnySuperiorLandlordsStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
                 nextStep { exitStep }
                 savable()
             }
             step(journey.superiorLandlordProvideDetailsStep) {
                 routeSegment(ProvideSuperiorLandlordDetailsStep.ROUTE_SEGMENT)
-                // TODO: PDJB-1978: Update this wiring to match OrgGovBodyMembersTask
-                parents { journey.hasAnySuperiorLandlordsStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasAnySuperiorLandlordsStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                        SingleParent(journey.superiorLandlordsListStep) {
+                            !journey.superiorLandlordsMap.isNullOrEmpty()
+                        },
+                    )
+                }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.superiorLandlordNameStep
@@ -124,7 +137,6 @@ class SuperiorLandlordsDetailsTask(
                 savable()
             }
             step(journey.saveSuperiorLandlordStep) {
-                routeSegment(SaveSuperiorLandlordStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.superiorLandlordProvideDetailsStep.hasOutcome(YesOrNo.NO),
@@ -136,7 +148,12 @@ class SuperiorLandlordsDetailsTask(
                 savable()
             }
             exitStep {
-                parents { journey.superiorLandlordsListStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.superiorLandlordsListStep.isComplete(),
+                        journey.confirmRemoveSuperiorLandlordStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                    )
+                }
             }
         }
 }

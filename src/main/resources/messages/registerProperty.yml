@@ -84,7 +84,9 @@ taskList:
   aboutYourProperty:
     heading: About your property
     propertyDetails: Property details
+    # TODO: PDJB-2016: Remove the ownershipAndLandlords header, it is replaced by peopleResponsible
     ownershipAndLandlords: Ownership and landlords
+    peopleResponsible: People responsible for this property
     correspondence: Who the council should contact
     occupied: Tell us if your property’s occupied
   rentedOut:
@@ -221,12 +223,16 @@ propertyManager:
     access:
       heading: Give your property manager access
       paragraph: Entering your property manager’s details here does not give them access to this registration. You can do this from the property’s registration page.
-  todo:
-    removePropertyManager:
-      heading: 'TODO (PDJB-1983): Are you sure you want to remove your property manager?'
+  check:
+    heading: You’ve added a property manager
+    insetText: After you submit and pay, we’ll contact this person to say they’re listed on your registration.
+    emailAddress: Email address
+  remove:
+    fieldSetHeading: Are you sure you want to remove {0}?
+    fieldSetHint: They will be removed as your property manager
     radios:
       error:
-        missing: 'TODO (PDJB-1983): Select yes or no'
+        missing: Select if you want to remove this property manager
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
@@ -234,6 +240,10 @@ paymentSummary:
   preGratisPeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
   postGratisPeriod: You are paying for {0} to your renewal date.
   renewalDateExplanation: Your renewal date is 1 year from when you registered your first property.
+  guidance:
+    prefix: Find out more about
+    link: the annual property fee (opens in new tab)
+    afterLink: .
   summary:
     heading: Payment summary
     address: Property address
@@ -257,6 +267,12 @@ paymentFailed:
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
   tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
+paymentNotCompleted:
+  heading: Your payment could not be completed
+  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
+  notRegistered: Your property has not been registered.
+  refund: If any money was taken from your account, it will be refunded.
+  payAgain: You need to pay again to register this property.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
@@ -311,6 +327,24 @@ occupancyChangeInterruption:
     four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
     five: You can go back to undo this change.
 freeholders:
+  intro:
+    heading:
+      joint: Add joint freeholders
+      nonJoint: Add freeholders
+    paragraph:
+      joint: Provide the details of the other freeholders one by one.
+      nonJoint: Freeholders own the property and its land for an indefinite time. They may be an individual person, multiple people or a company.
+    responsibility: You must add each freeholder’s details as they all have responsibility for the property’s condition.
+    help:
+      summary: How to find out who your freeholder is
+      paragraph:
+        one: The person on your lease may be the freeholder or know who it is.
+        two:
+          beforeLink: You can also find the freeholder on the property’s title register (sometimes known as the ‘title deeds’). Get the title register by
+          linkText: searching for land and property information (opens in new tab)
+          afterLink: .
+    buttons:
+      addFirstFreeholder: Add first freeholder
   provideDetails:
     fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
     radios:
@@ -341,6 +375,13 @@ freeholders:
           label: Postal address
       error:
         missing: Select which contact information you can provide
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
@@ -355,18 +396,42 @@ freeholders:
       addAnother: Add another freeholder
 superiorLandlords:
   provideDetails:
-    fieldSetHeading: Can you provide details about the superior landlord? (TODO PDJB-1972)
-    radios:
-      error:
-        missing: Select whether you can provide details about the superior landlord
-  contactType:
-    fieldSetHeading: How should we contact the superior landlord? (TODO PDJB-1974)
+    fieldSetHeading: Can you provide the details of this person in the ownership chain?
     radios:
       option:
-        email: Email
-        postalAddress: Post
+        'yes':
+          hint: Provide a name and either an email or postal address
+        'no':
+          hint: You can continue, but return and add these details when you can
       error:
-        missing: Select how we should contact the superior landlord
+        missing: Select if you can provide the details of this person in the ownership chain
+  name:
+    fieldSetHeading: What is this person’s name?
+    fieldSetHint: This can be the name of a person, company or organisation
+    error:
+      missing: Enter a name
+  contactType:
+    fieldSetHeading: Which contact information can you provide for {0}?
+    fieldSetHint: You only need to provide one
+    radios:
+      option:
+        email:
+          label: Email address
+          hint: This will let us contact them quicker
+        postalAddress:
+          label: Postal address
+      error:
+        missing: Select which contact information you can provide
+  list:
+    heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
+    insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
+    emailAddress: Email address
+    postalAddress: Postal address
+    unknownSuperiorLandlord:
+      title: Unknown person
+      body: You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. Return and add these details when you can.
+    buttons:
+      addAnother: Add another person in the ownership chain
   anyoneInOwnershipChain:
     heading: Other people in the ownership chain
     paragraph:

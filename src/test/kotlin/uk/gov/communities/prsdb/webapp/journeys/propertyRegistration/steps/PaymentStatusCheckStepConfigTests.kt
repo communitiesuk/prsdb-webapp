@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
+import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import kotlin.test.assertIs
@@ -40,6 +41,9 @@ import kotlin.test.assertIs
 class PaymentStatusCheckStepConfigTests {
     @Mock
     private lateinit var mockPaymentService: PaymentService
+
+    @Mock
+    private lateinit var mockPaymentReconciliationService: PaymentReconciliationService
 
     @Mock
     private lateinit var mockPropertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory
@@ -70,6 +74,7 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig =
             PaymentStatusCheckStepConfig(
                 mockPaymentService,
+                mockPaymentReconciliationService,
                 mockPropertyRegistrationDataModelFactory,
                 mockAddressAvailabilityService,
             )
@@ -92,6 +97,25 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
+    @MethodSource("provideNonCreatedPaymentStatusesAndOutcomes")
+    fun `afterStepIsReached stores the outcome for a payment no longer stored as created without asking GOV UK Pay`(
+        storedPaymentStatus: PaymentStatus,
+        expectedOutcome: PaymentOutcome,
+    ) {
+        // Arrange
+        stubStoredPaymentStatus(storedPaymentStatus)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).paymentOutcome = expectedOutcome
+        verify(mockPaymentService, never()).getGovUkPayPaymentStatus(any())
+        verify(mockPaymentService, never()).finalisePayment(any(), any(), any())
+        verifyNoInteractions(mockPaymentReconciliationService)
+    }
+
+    @ParameterizedTest
     @EnumSource(value = PaymentStatus::class, names = ["CAPTURABLE", "SUCCEEDED", "FAILED", "CANCELLED"])
     fun `afterStepIsReached finalises the payment with the GOV UK Pay status and the journey's registration data`(
         govUkPayStatus: PaymentStatus,
@@ -100,7 +124,7 @@ class PaymentStatusCheckStepConfigTests {
         stubGovUkPayStatus(govUkPayStatus)
         whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
         whenever(mockPaymentService.finalisePayment(paymentId, govUkPayStatus, registrationData))
-            .thenReturn(govUkPayStatus)
+            .thenReturn(PaymentStatus.SUCCEEDED)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -109,23 +133,16 @@ class PaymentStatusCheckStepConfigTests {
         verify(mockPaymentService).finalisePayment(paymentId, govUkPayStatus, registrationData)
     }
 
-    @ParameterizedTest
-    @MethodSource("provideFinalisedPaymentStatusesAndOutcomes")
-    fun `afterStepIsReached stores the outcome for the finalised payment status`(
-        finalisedPaymentStatus: PaymentStatus,
-        expectedOutcome: PaymentOutcome,
-    ) {
+    @Test
+    fun `afterStepIsReached stores the outcome for the finalised payment status rather than the GOV UK Pay status`() {
         // Arrange
-        stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
-        whenever(mockPropertyRegistrationDataModelFactory.fromJourneyState(mockState)).thenReturn(registrationData)
-        whenever(mockPaymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData))
-            .thenReturn(finalisedPaymentStatus)
+        stubFinalisedPaymentStatus(PaymentStatus.CANCELLING)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockState).paymentOutcome = expectedOutcome
+        verify(mockState).paymentOutcome = PaymentOutcome.NOT_COMPLETED
     }
 
     @Test
@@ -145,9 +162,18 @@ class PaymentStatusCheckStepConfigTests {
         verifyNoInteractions(mockAddressAvailabilityService)
     }
 
+    @Test
+    fun `afterStepIsReached throws when the finalised payment is still stored as capturable`() {
+        // Arrange
+        stubFinalisedPaymentStatus(PaymentStatus.CAPTURABLE)
+
+        // Act & Assert
+        assertThrows<IllegalStateException> { stepConfig.afterStepIsReached(mockState) }
+    }
+
     @ParameterizedTest
-    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLED"])
-    fun `afterStepIsReached marks the address as already registered when the payment failed and the address has been registered`(
+    @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLING", "CANCELLED", "MANUAL_INTERVENTION"])
+    fun `afterStepIsReached marks the address as already registered when the payment did not succeed and the address has been registered`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
         // Arrange
@@ -164,7 +190,7 @@ class PaymentStatusCheckStepConfigTests {
     @Test
     fun `afterStepIsReached marks the address as not already registered when the payment failed and the address is available`() {
         // Arrange
-        stubFinalisedPaymentStatus(PaymentStatus.CANCELLED)
+        stubFinalisedPaymentStatus(PaymentStatus.FAILED)
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
 
         // Act
@@ -177,7 +203,7 @@ class PaymentStatusCheckStepConfigTests {
     @Test
     fun `afterStepIsReached clears the already registered flag without checking registration when the address has no UPRN`() {
         // Arrange
-        stubFinalisedPaymentStatus(PaymentStatus.CANCELLED)
+        stubFinalisedPaymentStatus(PaymentStatus.FAILED)
         whenever(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Example Road, EG1 2AB", uprn = null))
 
         // Act
@@ -189,7 +215,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentStatus::class, names = ["SUCCEEDED", "CAPTURABLE"])
+    @EnumSource(value = PaymentStatus::class, names = ["SUCCEEDED", "CREATED"])
     fun `afterStepIsReached does not check whether the address is registered when the payment has not failed`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
@@ -226,7 +252,8 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentService).getPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+        verify(mockPaymentService).getStoredPropertyRegistrationPaymentStatus(journeyId, paymentReference)
+        verify(mockPaymentService).getGovUkPayPaymentStatus(paymentId)
     }
 
     @Test
@@ -280,7 +307,7 @@ class PaymentStatusCheckStepConfigTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "IN_PROGRESS", "QUOTE_EXPIRED"])
+    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "NOT_COMPLETED", "IN_PROGRESS", "QUOTE_EXPIRED"])
     fun `resolveNextDestination keeps the journey and returns the default destination when the payment has not succeeded`(
         paymentOutcome: PaymentOutcome,
     ) {
@@ -312,10 +339,13 @@ class PaymentStatusCheckStepConfigTests {
         assertEquals(defaultDestination, result)
     }
 
-    @Test
-    fun `resolveNextDestination redirects to the already registered step when the payment failed and the address is already registered`() {
+    @ParameterizedTest
+    @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "NOT_COMPLETED"])
+    fun `resolveNextDestination redirects to the already registered step when the payment was unsuccessful and the address is registered`(
+        paymentOutcome: PaymentOutcome,
+    ) {
         // Arrange
-        whenever(mockState.paymentOutcome).thenReturn(PaymentOutcome.FAILURE)
+        whenever(mockState.paymentOutcome).thenReturn(paymentOutcome)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
@@ -343,25 +373,28 @@ class PaymentStatusCheckStepConfigTests {
         assertEquals(defaultDestination, result)
     }
 
-    @Test
-    fun `afterStepIsReached cancels a capturable payment and throws when answers changed since they were confirmed`() {
+    @ParameterizedTest
+    @EnumSource(value = PaymentStatus::class, names = ["CANCELLING", "CANCELLED"])
+    fun `afterStepIsReached marks a capturable payment for cancellation and throws when answers changed since they were confirmed`(
+        storedStatus: PaymentStatus,
+    ) {
         // Arrange
         stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
         stubAnswersChangedSinceConfirmation()
-        whenever(mockPaymentService.cancelUnfinalisedPayment(paymentId)).thenReturn(PaymentStatus.CANCELLED)
+        whenever(mockPaymentReconciliationService.markForCancellation(paymentId)).thenReturn(storedStatus)
 
         // Act & Assert
         assertThrows<CyaDataHasChangedException> { stepConfig.afterStepIsReached(mockState) }
-        verify(mockPaymentService).cancelUnfinalisedPayment(paymentId)
+        verify(mockPaymentReconciliationService).markForCancellation(paymentId)
         verify(mockPaymentService, never()).finalisePayment(any(), any(), any())
     }
 
     @Test
-    fun `afterStepIsReached reports success when the payment was already finalised despite answers having changed`() {
+    fun `afterStepIsReached reports success when the payment succeeded before it could be marked for cancellation`() {
         // Arrange
         stubGovUkPayStatus(PaymentStatus.CAPTURABLE)
         stubAnswersChangedSinceConfirmation()
-        whenever(mockPaymentService.cancelUnfinalisedPayment(paymentId)).thenReturn(PaymentStatus.SUCCEEDED)
+        whenever(mockPaymentReconciliationService.markForCancellation(paymentId)).thenReturn(PaymentStatus.SUCCEEDED)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -381,7 +414,7 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentService, never()).cancelUnfinalisedPayment(any(), anyOrNull())
+        verifyNoInteractions(mockPaymentReconciliationService)
         verify(mockPaymentService).finalisePayment(paymentId, PaymentStatus.CAPTURABLE, registrationData)
     }
 
@@ -389,11 +422,17 @@ class PaymentStatusCheckStepConfigTests {
         whenever(mockState.answersChangedSinceConfirmation).thenReturn(true)
     }
 
-    private fun stubGovUkPayStatus(status: PaymentStatus) {
+    private fun stubStoredPaymentStatus(status: PaymentStatus) {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.paymentReference).thenReturn(paymentReference)
-        whenever(mockPaymentService.getPropertyRegistrationPaymentStatus(journeyId, paymentReference))
-            .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status, isCancellable = false))
+        whenever(mockPaymentService.getStoredPropertyRegistrationPaymentStatus(journeyId, paymentReference))
+            .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status))
+    }
+
+    private fun stubGovUkPayStatus(status: PaymentStatus) {
+        stubStoredPaymentStatus(PaymentStatus.CREATED)
+        whenever(mockPaymentService.getGovUkPayPaymentStatus(paymentId))
+            .thenReturn(PaymentStatusCheckDataModel(paymentId = paymentId, status = status))
     }
 
     private fun stubFinalisedPaymentStatus(finalisedPaymentStatus: PaymentStatus) {
@@ -405,12 +444,13 @@ class PaymentStatusCheckStepConfigTests {
 
     companion object {
         @JvmStatic
-        fun provideFinalisedPaymentStatusesAndOutcomes() =
+        fun provideNonCreatedPaymentStatusesAndOutcomes() =
             listOf(
                 Arguments.of(PaymentStatus.SUCCEEDED, PaymentOutcome.SUCCESS),
-                Arguments.of(PaymentStatus.CAPTURABLE, PaymentOutcome.IN_PROGRESS),
                 Arguments.of(PaymentStatus.FAILED, PaymentOutcome.FAILURE),
-                Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.FAILURE),
+                Arguments.of(PaymentStatus.CANCELLING, PaymentOutcome.NOT_COMPLETED),
+                Arguments.of(PaymentStatus.CANCELLED, PaymentOutcome.NOT_COMPLETED),
+                Arguments.of(PaymentStatus.MANUAL_INTERVENTION, PaymentOutcome.NOT_COMPLETED),
             )
     }
 }

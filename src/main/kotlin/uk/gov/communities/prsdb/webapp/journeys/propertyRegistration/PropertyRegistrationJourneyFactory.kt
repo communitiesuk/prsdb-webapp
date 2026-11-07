@@ -429,7 +429,15 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
+                withHeadingMessageKey(
+                    if (associatedPartiesEnabled) {
+                        "registerProperty.taskList.aboutYourProperty.peopleResponsible"
+                    } else {
+                        // TODO: PDJB-2016: Remove this branch
+                        "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords"
+                    },
+                    shouldUseNumbering = false,
+                )
                 if (associatedPartiesEnabled) {
                     task(journey.ownershipAndLandlordsTask) {
                         withDependencies { journey }
@@ -668,7 +676,7 @@ class PropertyRegistrationJourneyFactory(
                                     Destination.ExternalUrl("$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
                                 }
 
-                                PaymentOutcome.FAILURE -> {
+                                PaymentOutcome.FAILURE, PaymentOutcome.NOT_COMPLETED -> {
                                     Destination(journey.paymentFailedStep)
                                 }
 
@@ -684,7 +692,12 @@ class PropertyRegistrationJourneyFactory(
                     }
                     step(journey.paymentFailedStep) {
                         routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
-                        parents { journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE) }
+                        parents {
+                            OrParents(
+                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE),
+                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.NOT_COMPLETED),
+                            )
+                        }
                         noNextDestination()
                         backUrl { null }
                     }

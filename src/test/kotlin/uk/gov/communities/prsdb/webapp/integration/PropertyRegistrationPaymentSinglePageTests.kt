@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_FEE_GUIDANCE_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -38,6 +39,8 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         val paymentSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
         assertThat(paymentSummaryPage.heading).containsText("Property fee")
         assertThat(paymentSummaryPage.form.submitButton).containsText("Go to payment")
+
+        assertThat(paymentSummaryPage.feeGuidanceLink).hasAttribute("href", PROPERTY_FEE_GUIDANCE_URL)
     }
 
     @Test

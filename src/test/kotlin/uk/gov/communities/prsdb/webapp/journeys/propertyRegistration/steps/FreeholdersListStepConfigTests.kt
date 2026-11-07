@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -129,13 +131,31 @@ class FreeholdersListStepConfigTests {
     }
 
     @Test
-    fun `there are no cards and the heading parameter is zero when there are no freeholders in state`() {
-        val stepConfig = setupStepConfig(freeholders = null, stubCardActionSteps = false)
+    fun `getStepSpecificContent throws when a freeholder with known details has no name`() {
+        // Arrange
+        val stepConfig =
+            setupStepConfig(
+                freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, email = "email@example.com")),
+                stubRemoveStep = false,
+                stubAddAnotherStep = false,
+            )
 
-        val content = stepConfig.getStepSpecificContent(mockState)
+        // Act, Assert
+        assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(mockState) }
+    }
 
-        assertEquals(0, content["optionalAddAnotherTitleParam"])
-        assertEquals(emptyList<SummaryCardViewModel>(), content["summaryCards"])
+    @Test
+    fun `getStepSpecificContent throws when a freeholder with known details has no email or postal address`() {
+        // Arrange
+        val stepConfig =
+            setupStepConfig(
+                freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith")),
+                stubRemoveStep = false,
+                stubAddAnotherStep = false,
+            )
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(mockState) }
     }
 
     @Test
@@ -153,26 +173,26 @@ class FreeholdersListStepConfigTests {
 
     private fun setupStepConfig(
         freeholders: Map<Int, FreeholderDataModel>? = DEFAULT_FREEHOLDERS,
-        stubCardActionSteps: Boolean = true,
-        stubRemoveStep: Boolean = stubCardActionSteps,
+        stubRemoveStep: Boolean = true,
+        stubAddAnotherStep: Boolean = true,
     ): FreeholdersListStepConfig {
         val stepConfig = FreeholdersListStepConfig(urlParameterService)
         stepConfig.urlPath = FreeholdersListStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockState.freeholdersMap).thenReturn(freeholders)
-        whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
-        whenever(freeholderProvideDetailsStep.urlPath).thenReturn(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
-        whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
-        whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
-        if (stubCardActionSteps) {
-            whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
-            whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
-            whenever(setStateForFreeholderEditStep.currentJourneyId).thenReturn("journey-123")
-            whenever(setStateForFreeholderEditStep.isStepReachable).thenReturn(true)
-            whenever(urlParameterService.createParameterPair(any())).thenAnswer {
-                "freeholderId" to it.getArgument<Int>(0).toString()
-            }
+        if (stubAddAnotherStep) {
+            whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
+            whenever(freeholderProvideDetailsStep.urlPath).thenReturn(ProvideFreeholderDetailsStep.ROUTE_SEGMENT)
+            whenever(freeholderProvideDetailsStep.currentJourneyId).thenReturn("journey-123")
+            whenever(freeholderProvideDetailsStep.isStepReachable).thenReturn(true)
+        }
+        whenever(mockState.setStateForFreeholderEditStep).thenReturn(setStateForFreeholderEditStep)
+        whenever(setStateForFreeholderEditStep.urlPath).thenReturn(SetStateForFreeholderEditStep.ROUTE_SEGMENT)
+        whenever(setStateForFreeholderEditStep.currentJourneyId).thenReturn("journey-123")
+        whenever(setStateForFreeholderEditStep.isStepReachable).thenReturn(true)
+        whenever(urlParameterService.createParameterPair(any())).thenAnswer {
+            "freeholderId" to it.getArgument<Int>(0).toString()
         }
         if (stubRemoveStep) {
             whenever(mockState.confirmRemoveFreeholderStep).thenReturn(confirmRemoveFreeholderStep)

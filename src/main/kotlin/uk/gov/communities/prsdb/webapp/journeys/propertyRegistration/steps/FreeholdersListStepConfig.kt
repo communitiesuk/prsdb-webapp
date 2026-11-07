@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -39,7 +40,7 @@ class FreeholdersListStepConfig(
                 val actions = getCardActions(state, freeholderId, showRemove)
                 if (freeholder.detailsKnown) {
                     SummaryCardViewModel(
-                        title = freeholder.name.orEmpty(),
+                        title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
                         summaryList = getContactRows(freeholder),
                         actions = actions,
                     )
@@ -80,7 +81,7 @@ class FreeholdersListStepConfig(
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        )
+        ).ifEmpty { throw PrsdbWebException("Freeholder has known details but no email or postal address") }
 
     override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/addAnotherCardsForm"
 

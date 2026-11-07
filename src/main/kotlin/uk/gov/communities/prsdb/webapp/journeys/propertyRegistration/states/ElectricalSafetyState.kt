@@ -84,7 +84,7 @@ interface ElectricalSafetyDetailState : JourneyState {
             else -> null
         }
 
-    // TODO PDJB-1669: Remove this once EICs use an issue date rather than an expiry date
+    // TODO PDJB-1673: Remove this once the journey shows the EIC issue date rather than an expiry date
     fun getElectricalCertificateExpiryDateIfReachable() =
         getEicOrEicrValue({ getEicExpiryDateIfReachable() }, { getEicrExpiryDateIfReachable() })
 
