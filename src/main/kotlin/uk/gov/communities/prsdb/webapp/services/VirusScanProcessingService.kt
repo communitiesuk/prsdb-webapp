@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
     private val virusCallbackHandler: VirusNotificationEmailHandler,

@@ -58,6 +58,15 @@ email-queue:
     visibility-timeout-multiplier: 2.0
     max-visibility-timeout-seconds: 900
 
+scan-result-queue:
+  name: ${SCAN_RESULT_QUEUE_NAME:}
+  listener:
+    auto-startup: true
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 30
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 900
+
 os:
   api-key: ${OS_API_KEY}
   downloads.base-url: https://api.os.uk/downloads/v1
