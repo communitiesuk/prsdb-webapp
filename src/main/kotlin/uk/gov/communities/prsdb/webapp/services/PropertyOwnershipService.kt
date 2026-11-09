@@ -199,6 +199,20 @@ class PropertyOwnershipService(
         return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }
     }
 
+    fun getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId: Long): PropertyOwnership {
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        val propertyOwnership = propertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnershipId)
+
+        if (landlord == null || propertyOwnership == null || propertyOwnership.landlords.none { it.id == landlord.id }) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No inactive property ownership $propertyOwnershipId found for the current landlord",
+            )
+        }
+
+        return propertyOwnership
+    }
+
     fun getRegisteredPropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,

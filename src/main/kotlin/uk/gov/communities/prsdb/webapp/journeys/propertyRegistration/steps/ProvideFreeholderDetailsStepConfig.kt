@@ -1,42 +1,69 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderProvideDetailsFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
-// TODO PDJB-1963: replace this placeholder with the real "can you provide details about the freeholder" page.
-// Implement the routing logic
-// TODO PDJB-1963: when changing a freeholder, prefill this page with whether details are known from
-//  state.editingFreeholder by overriding resolvePageContent, as in OrgGovBodyMemberNameStepConfig.
-//  Check when adding a second freeholder that the page starts empty, as SaveFreeholderStepConfig clears the form data after each save.
 @JourneyFrameworkComponent
-class ProvideFreeholderDetailsStepConfig : AbstractRequestableStepConfig<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>() {
+class ProvideFreeholderDetailsStepConfig :
+    AbstractRequestableStepConfig<YesOrNo, FreeholderProvideDetailsFormModel, FreeholdersDetailsState>() {
     override val formModelClass = FreeholderProvideDetailsFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> =
         mapOf(
             "fieldName" to "provideDetails",
-            "fieldSetHeading" to "registerProperty.freeholders.provideDetails.fieldSetHeading",
+            "fieldSetHeading" to
+                if (state.isJointFreeholder) {
+                    "registerProperty.freeholders.provideDetails.fieldSetHeading.joint"
+                } else {
+                    "registerProperty.freeholders.provideDetails.fieldSetHeading.nonJoint"
+                },
             "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(value = YesOrNo.YES, labelMsgKey = "forms.radios.option.yes.label"),
-                    RadiosButtonViewModel(value = YesOrNo.NO, labelMsgKey = "forms.radios.option.no.label"),
+                RadiosViewModel.yesOrNoRadios(
+                    yesHint = "registerProperty.freeholders.provideDetails.radios.option.yes.hint",
+                    noHint = "registerProperty.freeholders.provideDetails.radios.option.no.hint",
                 ),
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun enrichSubmittedDataBeforeValidation(
+        state: FreeholdersDetailsState,
+        formData: FormData,
+    ): FormData =
+        super.enrichSubmittedDataBeforeValidation(state, formData) +
+            (FreeholderProvideDetailsFormModel::isJointFreeholder.name to state.isJointFreeholder)
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.provideDetails
+    override fun resolvePageContent(
+        state: FreeholdersDetailsState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? FreeholderProvideDetailsFormModel
+        if (formModel?.provideDetails != null) return defaultContent
+
+        val editingFreeholder = state.editingFreeholder ?: return defaultContent
+        val prepopulatedFormModel = formModel ?: FreeholderProvideDetailsFormModel()
+        prepopulatedFormModel.provideDetails = editingFreeholder.detailsKnown
+        return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
+    }
+
+    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/provideDetailsForm"
+
+    override fun mode(state: FreeholdersDetailsState) =
+        getFormModelFromStateOrNull(state)?.provideDetails?.let {
+            if (it) YesOrNo.YES else YesOrNo.NO
+        }
 }
 
 @JourneyFrameworkComponent
 final class ProvideFreeholderDetailsStep(
     stepConfig: ProvideFreeholderDetailsStepConfig,
-) : RequestableStep<YesOrNo, FreeholderProvideDetailsFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<YesOrNo, FreeholderProvideDetailsFormModel, FreeholdersDetailsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "freeholder-provide-details"
     }

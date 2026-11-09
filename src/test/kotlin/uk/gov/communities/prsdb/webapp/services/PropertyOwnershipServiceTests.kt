@@ -922,6 +922,89 @@ class PropertyOwnershipServiceTests {
         }
     }
 
+    @Nested
+    inner class GetInactivePropertyOwnershipForCurrentLandlord {
+        @Test
+        fun `returns the property when it is inactive and the current user is its landlord`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, landlords = mutableSetOf(landlord))
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnership.id)
+
+            assertEquals(propertyOwnership, result)
+        }
+
+        @Test
+        fun `returns the property when the current user is a joint landlord`() {
+            val jointLandlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
+                )
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false)
+            propertyOwnership.addLandlord(jointLandlord)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(jointLandlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnership.id)
+
+            assertEquals(propertyOwnership, result)
+        }
+
+        @Test
+        fun `throws not found error if there is no inactive property ownership with the given id`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveFalse(1)).thenReturn(null)
+
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(1)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        }
+
+        @Test
+        fun `throws not found error if the current user is not a landlord of the property`() {
+            val otherLandlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    isActive = false,
+                    landlords =
+                        mutableSetOf(
+                            MockLandlordData.createIndividualLandlord(
+                                baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
+                            ),
+                        ),
+                )
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(otherLandlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnership.id)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        }
+
+        @Test
+        fun `throws not found error if the current user has no landlord record`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val errorThrown =
+                assertThrows<ResponseStatusException> {
+                    propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnership.id)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
+        }
+    }
+
     @Test
     fun `searchForProperties returns a single matching property when the search term is a PRN`() {
         val searchPRN = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123)
