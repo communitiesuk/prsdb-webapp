@@ -5,8 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// Converts between the ownership questions the landlord answers and the OwnershipType we persist.
-// Both directions live here so that they cannot drift apart.
 // TODO PDJB-1984, PDJB-1985, PDJB-1986, PDJB-2014: use this for the ownership answer rows on the
 //  property registration check your answers page.
 // TODO PDJB-960, PDJB-1996, PDJB-1997, PDJB-1998: use this for the ownership answer rows on the

@@ -15,9 +15,6 @@ interface OwnershipTypeState : JourneyState {
     val ownershipKindStep: OwnershipKindStep
     val freeholdTypeStep: FreeholdTypeStep
 
-    // The journey's answers expressed as the OwnershipType we persist.
-    // TODO PDJB-2015: add service layer methods to convert a stored OwnershipType back into the
-    //  three question answers. Nothing repopulates the questions from a stored value yet.
     val ownershipType: OwnershipType?
         get() =
             OwnershipTypeAnswersConverter.convert(
