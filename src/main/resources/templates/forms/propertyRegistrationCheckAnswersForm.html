@@ -4,8 +4,11 @@
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="aboutPropertyHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="ownershipAndLandlordsHeadingKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="ownershipAndLandlordsRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="peopleResponsibleForThisPropertyHeadingKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="peopleResponsibleForThisPropertyRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="superiorLandlordsRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="superiorLandlordsChangeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="superiorLandlordsCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
 <!--/*@thymesVar id="correspondenceRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="occupancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="rentedOutHeadingKey" type="java.lang.String"*/-->
@@ -49,9 +52,31 @@
         <h2 class="govuk-heading-l" th:text="#{${aboutPropertyHeadingKey}}"></h2>
         <h3 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-        <th:block th:if="${!#lists.isEmpty(ownershipAndLandlordsRows)}">
-            <h3 class="govuk-heading-m" th:text="#{${ownershipAndLandlordsHeadingKey}}"></h3>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${ownershipAndLandlordsRows})}"></dl>
+        <!--/* TODO: PDJB-2146: This header & section no longer need to be optional */-->
+        <th:block th:if="${!#lists.isEmpty(peopleResponsibleForThisPropertyRows)}">
+            <h3 class="govuk-heading-m"
+                th:text="#{${peopleResponsibleForThisPropertyHeadingKey}}">peopleResponsibleForThisPropertyHeadingKey</h3>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
+            <!--/* TODO: PDJB-2146: Add Joint Landlords header & row */-->
+            <!--/* TODO: PDJB-2014: Add Ownership type header & rows */-->
+            <!--/* TODO: PDJB-1984: Add Freeholders header & rows */-->
+            <th:block th:if="${superiorLandlordsRows != null or superiorLandlordsCards != null}">
+                <h4 class="govuk-heading-s"
+                    th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h4>
+                <th:block th:if="${superiorLandlordsRows != null}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
+                </th:block>
+                <th:block th:if="${superiorLandlordsCards != null}">
+                    <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
+                        <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
+                           th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
+                    </p>
+                    <th:block th:each="card : ${superiorLandlordsCards}">
+                        <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
+                    </th:block>
+                </th:block>
+            </th:block>
+            <!--/* TODO: PDJB-1986: Add Property Manager header & rows */-->
         </th:block>
         <th:block th:if="${!#lists.isEmpty(correspondenceRows)}">
             <h3 class="govuk-heading-m"

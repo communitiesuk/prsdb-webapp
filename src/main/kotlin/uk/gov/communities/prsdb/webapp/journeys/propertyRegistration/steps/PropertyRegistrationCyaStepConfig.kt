@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
@@ -30,6 +31,7 @@ class PropertyRegistrationCyaStepConfig(
     private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
+    private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -128,8 +130,13 @@ class PropertyRegistrationCyaStepConfig(
     ): Map<String, Any?> =
         mapOf(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
-            "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
-            "ownershipAndLandlordsRows" to
+            "peopleResponsibleForThisPropertyHeadingKey" to
+                if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+                    "forms.checkPropertyAnswers.peopleResponsibleForThisProperty.heading"
+                } else {
+                    "forms.checkPropertyAnswers.ownershipAndLandlords.heading"
+                },
+            "peopleResponsibleForThisPropertyRows" to
                 // TODO PDJB-1986: add rows for whether a property manager is used and, if so, their name and email address
                 listOf(
                     getOwnershipTypeRow(state),
@@ -146,7 +153,36 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
-        )
+        ) + getSuperiorLandlordsContent(state)
+
+    private fun getSuperiorLandlordsContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val superiorLandlordsTask = state.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+        val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
+        val anyoneInOwnershipChain =
+            anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain ?: return emptyMap()
+
+        return if (anyoneInOwnershipChain) {
+            val listStep = superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep
+            mapOf(
+                "superiorLandlordsChangeUrl" to Destination.VisitableStep(listStep, state.getCyaJourneyId(listStep)).toUrlStringOrNull(),
+                "superiorLandlordsCards" to
+                    superiorLandlordSummaryCardHelper.getSummaryCards(superiorLandlordsTask.superiorLandlordsMap ?: emptyMap()),
+            )
+        } else {
+            mapOf(
+                "superiorLandlordsRows" to
+                    listOf(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.heading",
+                            "commonText.no",
+                            Destination.VisitableStep(anyoneInOwnershipChainStep, state.getCyaJourneyId(anyoneInOwnershipChainStep)),
+                        ),
+                    ),
+            )
+        }
+    }
 
     private fun getCorrespondenceRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
         val emailStep = state.correspondenceTask.correspondenceEmailStep
