@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -24,7 +25,16 @@ class CompleteOwnershipTypeUpdateStepConfig(
         try {
             propertyOwnershipService.updateOwnershipType(
                 state.propertyId,
-                state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                // TODO PDJB-1992: handle the ASSOCIATED_PARTIES flag here, either by making this step
+                //  flag-aware or by replacing this journey with a flag-on version. Until then it
+                //  prefills from the legacy column via OwnershipTypeFormModel.fromPropertyOwnership and
+                //  converts the answer back, so an ownership type with no legacy equivalent, such as
+                //  TENANTS_IN_COMMON, is rewritten even when the user saves without changing their
+                //  answer. Leave TODO PDJB-2016 markers on whatever flag-off code remains, so that it is
+                //  deleted with the flag.
+                OwnershipTypeConverter.convert(
+                    state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                ),
                 Instant.parse(state.lastModifiedDate).toJavaInstant(),
             )
         } catch (ex: UpdateConflictException) {

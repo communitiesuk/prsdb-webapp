@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARC
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -63,15 +63,10 @@ class PropertyOwnershipService(
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-1957: add a flag-on variant of this method taking the new OwnershipType directly,
-    //  so that the flag-off variant can be deleted wholesale with the flag in PDJB-2016. It must
-    //  still populate ownershipTypeBeforePdjb955, since the column is NOT NULL and
-    //  PropertyDetailsViewModelBase renders it until PDJB-1996.
-    // TODO PDJB-2016 then PDJB-2019, in that order: PDJB-2016 deletes the flag-off variant, leaving
-    //  a single method for PDJB-2019 to stop populating ownershipTypeBeforePdjb955 in.
+    // TODO PDJB-2019: stop populating ownershipTypeBeforePdjb955 and delete the legacy column.
     @Transactional
     fun createPropertyOwnership(
-        ownershipType: OwnershipTypeBeforePdjb955,
+        ownershipType: OwnershipType,
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
@@ -102,8 +97,11 @@ class PropertyOwnershipService(
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
-                ownershipType = OwnershipTypeConverter.convert(ownershipType),
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
+                // TODO PDJB-2019: delete this line with the legacy column. Derived rather than passed
+                //  in, because the column is NOT NULL and PropertyDetailsViewModelBase renders it
+                //  until PDJB-1996.
+                ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
@@ -314,20 +312,20 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1957: mirror the flag-on/flag-off split in createPropertyOwnership.
     // TODO PDJB-1957: changing to a type that no longer requires freeholder records leaves any
     //  placeholder freeholder behind. Decide what should happen to existing freeholders here
     //  once the freeholders journey exists.
     @Transactional
     fun updateOwnershipType(
         id: Long,
-        ownershipType: OwnershipTypeBeforePdjb955,
+        ownershipType: OwnershipType,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.ownershipTypeBeforePdjb955 = ownershipType
-        propertyOwnership.ownershipType = OwnershipTypeConverter.convert(ownershipType)
+        propertyOwnership.ownershipType = ownershipType
+        // TODO PDJB-2019: delete this line with the legacy column.
+        propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

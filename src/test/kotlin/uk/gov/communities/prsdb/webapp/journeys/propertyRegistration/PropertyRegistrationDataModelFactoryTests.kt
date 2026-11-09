@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -155,6 +156,19 @@ class PropertyRegistrationDataModelFactoryTests {
         if (choice == CorrespondenceEmailOption.DIFFERENT_EMAIL) {
             verify(mockState, never()).loggedInLandlordEmailAtStartOfJourney
         }
+    }
+
+    @Test
+    fun `fromJourneyState converts the beforePdjb955 ownership type answer when the associated parties flag is off`() {
+        // Arrange
+        setupStateForPropertyRegistration(ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD)
+        setupStateForComplianceDataWithNullValues()
+
+        // Act
+        val result = factory.fromJourneyState(mockState)
+
+        // Assert
+        assertEquals(OwnershipType.JOINT_TENANTS, result.ownershipType)
     }
 
     @Test
@@ -468,7 +482,9 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(true, result.tenancyProvideLater)
     }
 
-    private fun setupStateForPropertyRegistration() {
+    private fun setupStateForPropertyRegistration(
+        ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+    ) {
         val mockOccupiedStep = mock<OccupiedStep>()
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
@@ -503,7 +519,7 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
-        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD }
+        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = ownershipTypeBeforePdjb955 }
         whenever(
             mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
         ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)

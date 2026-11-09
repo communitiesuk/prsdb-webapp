@@ -46,8 +46,8 @@ class OwnershipTypeConverterTests {
     }
 
     @ParameterizedTest
-    @MethodSource("provideCurrentToLegacyMappings")
-    fun `convertToBeforePdjb955 maps each ownership type to its legacy equivalent`(
+    @MethodSource("provideCurrentToBeforePdjb955Mappings")
+    fun `convertToBeforePdjb955 maps each ownership type to its beforePdjb955 equivalent`(
         ownershipType: OwnershipType,
         expected: OwnershipTypeBeforePdjb955,
     ) {
@@ -60,13 +60,13 @@ class OwnershipTypeConverterTests {
 
     @ParameterizedTest
     @EnumSource(OwnershipTypeBeforePdjb955::class)
-    fun `every legacy ownership type round-trips through the current enum unchanged`(legacy: OwnershipTypeBeforePdjb955) {
+    fun `every beforePdjb955 ownership type round-trips through the current enum unchanged`(beforePdjb955: OwnershipTypeBeforePdjb955) {
         // Act
-        val result = OwnershipTypeConverter.convertToBeforePdjb955(OwnershipTypeConverter.convert(legacy))
+        val result = OwnershipTypeConverter.convertToBeforePdjb955(OwnershipTypeConverter.convert(beforePdjb955))
 
         // Assert - this is what keeps the flag-off path's behaviour unchanged, despite the
         // conversion being lossy in the other direction
-        assertEquals(legacy, result)
+        assertEquals(beforePdjb955, result)
     }
 
     companion object {
@@ -80,7 +80,7 @@ class OwnershipTypeConverterTests {
             )
 
         @JvmStatic
-        fun provideCurrentToLegacyMappings() =
+        fun provideCurrentToBeforePdjb955Mappings() =
             listOf(
                 Arguments.of(OwnershipType.NONE, OwnershipTypeBeforePdjb955.LEASEHOLD),
                 Arguments.of(OwnershipType.LEASEHOLD_ONLY, OwnershipTypeBeforePdjb955.LEASEHOLD),
