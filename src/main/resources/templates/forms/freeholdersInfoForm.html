@@ -1,0 +1,20 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="landRegistrySearchUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.freeholders.intro.heading.nonJoint}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.freeholders.intro.heading.nonJoint}">heading</h1>
+    <p class="govuk-body" th:text="#{registerProperty.freeholders.intro.paragraph.nonJoint}">introText</p>
+    <p class="govuk-body" th:text="#{registerProperty.freeholders.intro.responsibility}">responsibilityText</p>
+    <details id="details-content" th:replace="~{fragments/details :: details(#{registerProperty.freeholders.intro.help.summary}, ~{::#details-content/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{registerProperty.freeholders.intro.help.paragraph.one}">helpDetailsParagraphOne</p>
+            <p class="govuk-body">
+                <span th:text="#{registerProperty.freeholders.intro.help.paragraph.two.beforeLink}">helpDetailsParagraphTwoBeforeLink</span>
+                <a class="govuk-link" th:href="${landRegistrySearchUrl}" target="_blank" rel="noopener noreferrer" th:text="#{registerProperty.freeholders.intro.help.paragraph.two.linkText}">landRegistryLinkText</a><span th:text="#{registerProperty.freeholders.intro.help.paragraph.two.afterLink}">helpDetailsParagraphTwoAfterLink</span>
+            </p>
+        </div>
+    </details>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.freeholders.intro.buttons.addFirstFreeholder})}"></button>
+</html>

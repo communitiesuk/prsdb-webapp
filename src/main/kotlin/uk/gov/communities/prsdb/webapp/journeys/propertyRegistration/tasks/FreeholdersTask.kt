@@ -1,29 +1,71 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
+import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
 class FreeholdersTask(
     journeyStateService: JourneyStateService,
-    override val freeholdersStep: FreeholdersStep,
-) : TaskWithoutDependencies<FreeholdersState>(journeyStateService),
+    override val freeholdersInfoStep: FreeholdersInfoStep,
+    override val freeholdersDetailsTask: FreeholdersDetailsTask,
+    override val freeholdersBackRoutingStep: FreeholdersBackRoutingStep,
+) : Task<FreeholdersState, FreeholdersDependencies>(journeyStateService),
     FreeholdersState {
     override val taskState get() = this
 
+    override val isJointFreeholder: Boolean
+        get() = dependencies.isJointFreeholder
+
+    override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
+    override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
+    override var editingFreeholderId: Int? by delegateProvider.nullableDelegate("editingFreeholderId")
+
     override fun makeSubJourney(state: FreeholdersState) =
         subJourney(state) {
-            step(journey.freeholdersStep) {
-                routeSegment(FreeholdersStep.ROUTE_SEGMENT)
-                nextStep { exitStep }
+            step(journey.freeholdersInfoStep) {
+                routeSegment(FreeholdersInfoStep.ROUTE_SEGMENT)
+                nextStep { journey.freeholdersDetailsTask.firstStep }
                 savable()
             }
+            task(journey.freeholdersDetailsTask) {
+                parents { journey.freeholdersInfoStep.isComplete() }
+                backDestination { Destination(journey.freeholdersInfoStep) }
+                nextStep { journey.freeholdersBackRoutingStep }
+                withDependencies {
+                    FreeholdersDetailsDependencies(
+                        listState = journey,
+                        isJointFreeholder = { journey.isJointFreeholder },
+                    )
+                }
+                savable()
+            }
+            step<AnyMembers, FreeholdersBackRoutingStepConfig>(journey.freeholdersBackRoutingStep) {
+                stepSpecificInitialisation { usingFreeholdersList { journey.freeholdersMap } }
+                parents { journey.freeholdersDetailsTask.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.freeholdersInfoStep
+                        AnyMembers.SOME_MEMBERS -> exitStep
+                    }
+                }
+            }
             exitStep {
-                parents { journey.freeholdersStep.isComplete() }
+                parents { journey.freeholdersBackRoutingStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
             }
         }
+}
+
+interface FreeholdersDependencies {
+    val isJointFreeholder: Boolean
 }

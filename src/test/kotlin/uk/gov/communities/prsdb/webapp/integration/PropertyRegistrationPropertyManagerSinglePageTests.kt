@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemovePropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
@@ -41,9 +43,52 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
     }
 
     @Test
+    fun `changing the details returns to the summary page with the updated card`(page: Page) {
+        val checkPropertyManagerPage = addPropertyManager(page)
+
+        checkPropertyManagerPage.clickChangeAndWait()
+        val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+        propertyManagerDetailsPage.submitDetails(name = "Other Managers Ltd", email = "other@example.com")
+
+        val updatedCheckPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+        assertThat(updatedCheckPropertyManagerPage.propertyManagerCard.title).hasText("Other Managers Ltd")
+        assertThat(updatedCheckPropertyManagerPage.propertyManagerCard.summaryList.emailAddressRow.value)
+            .containsText("other@example.com")
+    }
+
+    @Test
+    fun `remove property manager page shows the property manager's name, section header and Save and continue button`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+
+        assertThat(removePropertyManagerPage.heading).containsText("Are you sure you want to remove Best Property Managers Ltd?")
+        assertThat(removePropertyManagerPage.form.sectionHeader).containsText("People responsible for this property")
+        assertThat(removePropertyManagerPage.form.submitButton).hasText("Save and continue")
+    }
+
+    @Test
+    fun `submitting the remove property manager page with no option selected returns an error`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+
+        removePropertyManagerPage.form.submit()
+
+        assertThat(removePropertyManagerPage.form.getErrorMessage()).containsText("Select if you want to remove this property manager")
+    }
+
+    @Test
+    fun `cancelling removal returns to the summary page`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+
+        removePropertyManagerPage.cancelLink.clickAndWait()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+    }
+
+    @Test
     fun `not confirming removal returns to the summary page`(page: Page) {
-        addPropertyManager(page)
-        navigator.navigateToPropertyRegistrationRemovePropertyManagerPage()
+        addPropertyManager(page).clickRemoveAndWait()
         val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
 
         removePropertyManagerPage.submitNo()
@@ -53,8 +98,7 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
 
     @Test
     fun `confirming removal clears the details and returns to the question with yes still selected`(page: Page) {
-        addPropertyManager(page)
-        navigator.navigateToPropertyRegistrationRemovePropertyManagerPage()
+        addPropertyManager(page).clickRemoveAndWait()
         val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
 
         removePropertyManagerPage.submitYes()
@@ -66,11 +110,53 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
         assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
+    @Test
+    fun `the remove page has no option selected after previously not confirming removal`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitNo()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
+    }
+
+    @Test
+    fun `the remove page has no option selected after not confirming removal and then cancelling`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitNo()
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).cancelLink.clickAndWait()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
+    }
+
+    @Test
+    fun `the remove page has no option selected after confirming removal and adding a new property manager`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitYes()
+        assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitYes()
+        assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+            .submitDetails(name = "Other Managers Ltd", email = "other@example.com")
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
+    }
+
     private fun addPropertyManager(page: Page): CheckPropertyManagerFormPagePropertyRegistration {
+        val propertyManagerDetailsPage = navigateToPropertyManagerDetailsPage(page)
+        propertyManagerDetailsPage.submitDetails(name = "Best Property Managers Ltd", email = "manager@example.com")
+        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+    }
+
+    private fun navigateToPropertyManagerDetailsPage(page: Page): PropertyManagerDetailsFormPagePropertyRegistration {
         val propertyManagerPage = navigator.skipToPropertyRegistrationPropertyManagerPage()
         propertyManagerPage.submitYes()
-        val propertyManagerDetailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-        propertyManagerDetailsPage.form.submit()
-        return assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+        return assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
     }
 }

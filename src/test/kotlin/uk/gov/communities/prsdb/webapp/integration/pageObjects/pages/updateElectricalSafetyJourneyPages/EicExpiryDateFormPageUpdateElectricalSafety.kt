@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 
+// TODO PDJB-1679: Remove this page when the EIC_ISSUE_DATE flag is removed
 class EicExpiryDateFormPageUpdateElectricalSafety(
     page: Page,
     urlArguments: Map<String, String>,

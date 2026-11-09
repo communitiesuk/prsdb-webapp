@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.Spy
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -40,10 +41,12 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -115,6 +118,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
+    @Spy
+    private var eicDateService: EicDateService = AfterPdjb1666EicDateService()
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -122,7 +128,7 @@ class PropertyOwnershipServiceTests {
     @EnumSource(LandlordType::class)
     fun `createPropertyOwnership creates a property ownership with supplied correspondence details`(landlordType: LandlordType) {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -151,7 +157,8 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -219,7 +226,7 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `createPropertyOwnership can create a property ownership with no license`() {
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -242,7 +249,8 @@ class PropertyOwnershipServiceTests {
 
         val expectedPropertyOwnership =
             PropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -322,7 +330,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
@@ -364,7 +372,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -403,7 +411,7 @@ class PropertyOwnershipServiceTests {
         // Act
         val property =
             propertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -445,7 +453,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipType.FREEHOLD,
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -1183,13 +1191,63 @@ class PropertyOwnershipServiceTests {
         )
     }
 
+    // The flag-off path, where createPropertyOwnership takes the legacy enum and derives the new one.
+    // TODO PDJB-2016: delete this test along with the flag-off variant of createPropertyOwnership.
+    //  Do not extend it to cover the flag-on path, which takes the new enum directly.
+    @Test
+    fun `createPropertyOwnership stores both the legacy ownership type and its replacement`() {
+        // Arrange
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createIndividualLandlord()
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        // Act
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            numBedrooms = 1,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+        )
+
+        // Assert
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(
+            OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            propertyOwnershipCaptor.value.ownershipTypeBeforePdjb955,
+        )
+        assertEquals(OwnershipType.JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
+    }
+
     @Test
     fun `updateOwnershipType updates the property's ownership type`() {
         // Arrange
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -1199,12 +1257,13 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateOwnershipType(
             propertyOwnership.id,
-            OwnershipType.LEASEHOLD,
+            OwnershipTypeBeforePdjb955.LEASEHOLD,
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
         // Assert
-        assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.ownershipType)
+        assertEquals(OwnershipTypeBeforePdjb955.LEASEHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
+        assertEquals(OwnershipType.LEASEHOLD_ONLY, propertyOwnership.ownershipType)
     }
 
     @Test
@@ -1213,7 +1272,7 @@ class PropertyOwnershipServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             )
 
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -1225,7 +1284,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateOwnershipType(
                     propertyOwnership.id,
-                    OwnershipType.LEASEHOLD,
+                    OwnershipTypeBeforePdjb955.LEASEHOLD,
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
@@ -1825,6 +1884,54 @@ class PropertyOwnershipServiceTests {
             )
         }
 
+        private fun addEicCompliance(
+            propertyOwnership: PropertyOwnership,
+            issueDate: LocalDate,
+        ) {
+            MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyOwnership).apply {
+                electricalCertType = CertificateType.Eic
+                eicrExpiryDate = null
+                eicIssueDate = issueDate
+            }
+        }
+
+        @Test
+        fun `does not show an in-date EIC as an outstanding action`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            addEicCompliance(propertyOwnership, LocalDate.now().minusYears(1))
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id))
+                .thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertTrue(outstandingActions.content.isEmpty())
+        }
+
+        @Test
+        fun `uses the EIC expiry date derived from the stored issue date`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            val issueDate = LocalDate.now().minusYears(6)
+            addEicCompliance(propertyOwnership, issueDate)
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id))
+                .thenReturn(listOf(propertyOwnership))
+
+            // Act
+            val outstandingActions = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0)
+
+            // Assert
+            assertEquals(
+                issueDate.plusYears(5),
+                outstandingActions.content
+                    .single()
+                    .complianceStatus!!
+                    .electricalSafetyExpiryDate,
+            )
+        }
+
         @Test
         fun `returns only the landlord's properties with outstanding actions`() {
             // Arrange
@@ -1845,8 +1952,16 @@ class PropertyOwnershipServiceTests {
             assertEquals(
                 listOf(
                     // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
-                    OutstandingActionsDataModel.fromPropertyOwnership(tenancyProvideLaterProperty, isGas14MonthExpiryEnabled = true),
-                    OutstandingActionsDataModel.fromPropertyOwnership(gasProvideLaterProperty, isGas14MonthExpiryEnabled = true),
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        tenancyProvideLaterProperty,
+                        electricalSafetyExpiryDate = null,
+                        isGas14MonthExpiryEnabled = true,
+                    ),
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        gasProvideLaterProperty,
+                        electricalSafetyExpiryDate = null,
+                        isGas14MonthExpiryEnabled = true,
+                    ),
                 ),
                 outstandingActions.content,
             )

@@ -19,17 +19,21 @@ of [testcontainers](https://testcontainers.com/).
 ### Running multiple worktrees in parallel
 
 The local build can be run from multiple git worktrees simultaneously. Each worktree
-needs unique ports to avoid conflicts. Three environment variables in `.env` control this:
+needs unique ports to avoid conflicts. Four environment variables in `.env` control this:
 
-| Variable        | Default | Purpose                   |
-|-----------------|---------|---------------------------|
-| `SERVER_PORT`   | `8080`  | Spring Boot server port   |
-| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port |
-| `REDIS_PORT`    | `6379`  | Host-side Redis port      |
+| Variable         | Default | Purpose                        |
+|------------------|---------|--------------------------------|
+| `SERVER_PORT`    | `8080`  | Spring Boot server port        |
+| `POSTGRES_PORT`  | `5433`  | Host-side PostgreSQL port      |
+| `REDIS_PORT`     | `6379`  | Host-side Redis port           |
+| `ELASTICMQ_PORT` | `9324`  | Host-side ElasticMQ (SQS) port |
 
 When creating a worktree with the `scripts/git-worktrees/new-worktree` script, unique
 ports are assigned automatically. To adjust ports manually, edit `.env` in the worktree
 root.
+
+Worktrees created before `ELASTICMQ_PORT` was introduced need it adding to their `.env` by hand, using the same
+offset as their other ports (e.g. `SERVER_PORT="8085"` → `ELASTICMQ_PORT="9329"`).
 
 #### Playwright CLI for browser testing
 
@@ -222,8 +226,10 @@ Flyway runs the migrations.
 Database migrations <will be/ are> run at deployment time for all non-local deployments. This is done using
 the `flywayMigrate` Gradle task. When developing locally using the `local` profile the migrations will run at
 application start up. If you are using the `local` launch profile in IntelliJ, this will also run the `flywayClean` task
-before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
-populate the database with seed data.
+before running the migrations. After the migrations have run Spring Boot will then run the SQL scripts listed under
+`spring.sql.init.data-locations` in `application-local.yml` to populate the database with seed data. That list ends
+with the integration tests' `ALWAYS_APPENDED_SCRIPTS` (see `docs/IntegrationTestReadMe.md`), which must stay after the
+ordinary seeds since they fill in data for whatever those inserted.
 
 ### Updating Local Council Data
 

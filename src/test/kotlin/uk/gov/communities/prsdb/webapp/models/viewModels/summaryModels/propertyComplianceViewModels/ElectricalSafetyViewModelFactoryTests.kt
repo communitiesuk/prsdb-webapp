@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named.named
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -10,15 +11,19 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
+import uk.gov.communities.prsdb.webapp.services.BeforePdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -38,7 +43,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource)
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource, mock(), mock())
             .fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
     }
 
@@ -57,11 +62,193 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         assertEquals(expectedKey, insetTextKey)
     }
 
+    @Test
+    fun `fromEntity shows the EIC issue date when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(1)
+        val propertyCompliance = eicWithIssueDate(issueDate)
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            rowsWithUploads(
+                certKeyPrefix = "propertyDetails.complianceInformation.electricalSafety.eic",
+                uploadedFiles =
+                    listOf(
+                        UploadedFileUrl(
+                            messageKey = "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate",
+                            displayName = "electrical_safety_certificate.pdf",
+                        ),
+                    ),
+                certificateDate = issueDate,
+                dateHeading = "propertyDetails.complianceInformation.issueDate",
+            ),
+            rows,
+        )
+    }
+
+    @Test
+    fun `fromEntity shows an EIC as expired more than five years after its issue date when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(5).minusDays(1)
+        val propertyCompliance = eicWithIssueDate(issueDate)
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            rowsWithUploads(
+                certKeyPrefix = "propertyDetails.complianceInformation.electricalSafety.eic",
+                uploadedFiles =
+                    listOf(
+                        UploadedFileUrl(
+                            messageKey = "propertyDetails.complianceInformation.electricalSafety.eic.downloadExpiredCertificate",
+                            displayName = "electrical_safety_certificate.pdf",
+                        ),
+                    ),
+                certificateDate = issueDate,
+                isValidCertificate = false,
+                dateHeading = "propertyDetails.complianceInformation.issueDate",
+            ),
+            rows,
+        )
+    }
+
+    @Test
+    fun `fromEntity continues to show an EIC expiry date when EIC_ISSUE_DATE is disabled`() {
+        // Arrange
+        val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(1)
+        val propertyCompliance = eicWithIssueDate(issueDate)
+        val factory = createFactory(eicIssueDateEnabled = false)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            SummaryListRowViewModel("propertyDetails.complianceInformation.expiryDate", issueDate.plusYears(5)),
+            rows[2],
+        )
+    }
+
+    @Test
+    fun `fromEntity continues to show an EICR expiry date when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).plusYears(1)
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eicr)
+                .build()
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            SummaryListRowViewModel(
+                "propertyDetails.complianceInformation.expiryDate",
+                expiryDate,
+            ),
+            rows[2],
+        )
+    }
+
+    @Test
+    fun `fromEntity does not add a date row for a missing EIC when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withElectricalCertType(CertificateType.Eic)
+                .build()
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(1, rows.size)
+        assertEquals("propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes", rows[0].fieldHeading)
+    }
+
+    @Test
+    fun `fromEntity retains an expired EICR expiry date when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withElectricalSafetyExpiryDate(expiryDate, CertificateType.Eicr)
+                .build()
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            rowsWithoutUploads("propertyDetails.complianceInformation.electricalSafety.eicr", expiryDate),
+            rows,
+        )
+    }
+
+    @Test
+    fun `fromEntity does not add a date row for a provide later EIC when EIC_ISSUE_DATE is enabled`() {
+        // Arrange
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withElectricalCertType(CertificateType.Eic)
+                .withElectricalSafetyCertProvideLater()
+                .build()
+        val factory = createFactory(eicIssueDateEnabled = true)
+
+        // Act
+        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+
+        // Assert
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes",
+                    "checkElectricalSafety.provideThisLater.occupiedNoDeadline",
+                ),
+            ),
+            rows,
+        )
+    }
+
+    // TODO PDJB-1673: Use issue-date-backed fixtures when EIC issue dates are stored directly.
+    private fun eicWithIssueDate(issueDate: LocalDate): PropertyCompliance =
+        PropertyComplianceBuilder()
+            .withPropertyOwnership()
+            .withElectricalSafety(expiryDate = CertificateExpiryHelper.getEicExpiryDate(issueDate), certType = CertificateType.Eic)
+            .build()
+            .also { BeforePdjb1666EicDateService().applyIssueDate(it, issueDate) }
+
+    private fun createFactory(eicIssueDateEnabled: Boolean): ElectricalSafetyViewModelFactory {
+        val featureFlagManager = mock<FeatureFlagManager>()
+        whenever(featureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(eicIssueDateEnabled)
+        return ElectricalSafetyViewModelFactory(
+            mockUploadService,
+            mockMessageSource,
+            BeforePdjb1666EicDateService(),
+            featureFlagManager,
+        )
+    }
+
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
         private val electricalSafetyViewModelFactory =
-            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource, mock(), mock())
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 
@@ -79,14 +266,15 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 .withElectricalCertType()
                 .withEpc()
                 .build()
+        private val compliantEicIssueDate = LocalDate.now().minusYears(1)
         private val compliantWithEic =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(false)
                 .withGasSafetyCert()
-                .withElectricalSafety()
-                .withElectricalCertType(CertificateType.Eic)
+                .withElectricalSafety(certType = CertificateType.Eic)
                 .withEpc()
                 .build()
+                .apply { eicIssueDate = compliantEicIssueDate }
         private val compliantWithFileName =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(false)
@@ -190,7 +378,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
-                        expiryDate = compliant.electricalSafetyExpiryDate,
+                        certificateDate = compliant.eicrExpiryDate,
                     ),
                 ),
                 arguments(
@@ -208,7 +396,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
-                        expiryDate = compliantViaPluralUploads.electricalSafetyExpiryDate,
+                        certificateDate = compliantViaPluralUploads.eicrExpiryDate,
                     ),
                 ),
                 arguments(
@@ -226,7 +414,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
-                        expiryDate = compliantWithEic.electricalSafetyExpiryDate,
+                        certificateDate = compliantEicIssueDate.plusYears(5),
                     ),
                 ),
                 arguments(
@@ -244,7 +432,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
-                        expiryDate = compliantWithFileName.electricalSafetyExpiryDate,
+                        certificateDate = compliantWithFileName.eicrExpiryDate,
                     ),
                 ),
                 arguments(
@@ -261,7 +449,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     displayName = "pending_report.pdf",
                                 ),
                             ),
-                        expiryDate = quarantinedUpload.electricalSafetyExpiryDate,
+                        certificateDate = quarantinedUpload.eicrExpiryDate,
                     ),
                 ),
                 arguments(
@@ -280,7 +468,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.expiryDate",
-                            virusScanFailedUpload.electricalSafetyExpiryDate,
+                            virusScanFailedUpload.eicrExpiryDate,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.yourCertificate",
@@ -304,7 +492,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
-                        expiryDate = expiredAfterUpload.electricalSafetyExpiryDate,
+                        certificateDate = expiredAfterUpload.eicrExpiryDate,
                         isValidCertificate = false,
                     ),
                 ),
@@ -315,7 +503,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                     ),
                     rowsWithoutUploads(
                         certKeyPrefix = "propertyDetails.complianceInformation.electricalSafety.eicr",
-                        expiryDate = expiredBeforeUpload.electricalSafetyExpiryDate,
+                        expiryDate = expiredBeforeUpload.eicrExpiryDate,
                     ),
                 ),
                 arguments(
@@ -387,8 +575,9 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         private fun rowsWithUploads(
             certKeyPrefix: String,
             uploadedFiles: List<UploadedFileUrl>,
-            expiryDate: Any?,
+            certificateDate: Any?,
             isValidCertificate: Boolean = true,
+            dateHeading: String = "propertyDetails.complianceInformation.expiryDate",
         ): List<SummaryListRowViewModel> =
             listOfNotNull(
                 SummaryListRowViewModel(
@@ -399,9 +588,9 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                     "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                     "$certKeyPrefix.certificate",
                 ),
-                expiryDate?.let {
+                certificateDate?.let {
                     SummaryListRowViewModel(
-                        "propertyDetails.complianceInformation.expiryDate",
+                        dateHeading,
                         it,
                     )
                 },

@@ -2,14 +2,14 @@ package uk.gov.communities.prsdb.webapp.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.JdkClientHttpRequestFactory
 import org.springframework.web.client.RestClient
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import java.net.http.HttpClient
 import java.time.Duration
 
-@PrsdbWebConfiguration
+@Configuration
 class GovUkPayConfig {
     @Value("\${gov-uk-pay.base-url}")
     lateinit var baseUrl: String

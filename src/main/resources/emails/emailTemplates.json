@@ -106,15 +106,15 @@
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
   },
   {
-    "test_id": "a596ebce-7bc1-44c7-a3fb-32d09991f635",
-    "prod_id": "7f1d1ab1-4d9a-45ac-b209-0aa83eff2320",
+    "test_id": "1c8d8038-8758-402f-96ac-cd1454614ea5",
+    "prod_id": "40221944-1cbd-4761-895e-cc696d98ecec",
     "enumName": "COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "You added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/ComplianceUpdatedConfirmation.md"
   },
   {
-    "test_id": "0aa102dd-55e1-4cd2-847e-617105efe7b6",
-    "prod_id": "915f6aff-91de-40fa-98ac-01dbe7a74747",
+    "test_id": "56299048-6d7e-421b-b906-440d78e03485",
+    "prod_id": "ec322c01-370e-4464-a6b0-ef2682df219f",
     "enumName": "JOINT_LANDLORD_COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "A joint landlord added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/JointLandlordComplianceUpdatedConfirmation.md"
@@ -366,8 +366,8 @@
     "bodyLocation": "/emails/LettingAgentPropertyUpdateNotification.md"
   },
   {
-    "test_id": "489f94c7-3b9b-4aa4-827b-1ea7107ae555",
-    "prod_id": "588efdce-6e44-4496-b6fe-2af09bbec9a6",
+    "test_id": "326a1f07-d521-4dd0-b11a-d435a2e7668c",
+    "prod_id": "56963d61-9ba6-41ca-86f4-f0046faa45fe",
     "enumName": "LETTING_AGENT_COMPLIANCE_UPDATE_NOTIFICATION_EMAIL",
     "subject": "A letting agent or property manager added a new ((certificate type)) to a property record",
     "bodyLocation": "/emails/LettingAgentComplianceUpdateNotification.md"
@@ -406,5 +406,12 @@
     "enumName": "REMOVE_ORG_TEAM_MEMBER_NOTIFICATION",
     "subject": "Access removed for ((organisation name))",
     "bodyLocation": "/emails/RemoveOrgTeamMemberNotification.md"
+  },
+  {
+    "test_id": "00d8a549-b18d-4b93-a604-95c72e1ffdea",
+    "prod_id": "abefdbc5-3311-430d-9158-33c55af33c9f",
+    "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
+    "subject": "A property registration payment needs checking",
+    "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
   }
 ]
