@@ -8,8 +8,8 @@ class Radios(
 ) : BaseComponent(parentLocator.locator(".govuk-radios")) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val selectedValue: String
-        get() = locator.locator("input:checked").getAttribute("value")
+    val selectedValue: String?
+        get() = locator.locator("input:checked").takeIf { it.count() > 0 }?.getAttribute("value")
 
     val isAnyOptionSelected: Boolean
         get() = locator.locator("input:checked").count() > 0
