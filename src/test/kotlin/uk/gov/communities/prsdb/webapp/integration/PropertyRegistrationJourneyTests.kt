@@ -848,7 +848,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
 
-            // TODO PDJB-1959: update this usage when the real owns property page is added
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
             // TODO PDJB-1960: update this usage when the real ownership kind page is added
@@ -1219,7 +1218,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
-            // TODO PDJB-1959: update this usage when the real owns property page is added
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
             // TODO PDJB-1960: update this usage when the real ownership kind page is added
@@ -2317,7 +2315,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
-            // TODO PDJB-1959: update this usage when the real owns property page is added
             assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
             // TODO PDJB-1960: update this usage when the real ownership kind page is added
             assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
