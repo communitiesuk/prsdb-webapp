@@ -451,12 +451,32 @@ ownsProperty:
   radios:
     error:
       missing: Select if you own this property
-# TODO PDJB-1960: replace with the real "What kind of ownership do you have?" content
 ownershipKind:
-  fieldSetHeading: TODO PDJB-1960 What kind of ownership do you have?
-  radios:
-    error:
-      missing: Select the kind of ownership you have
+  fieldSetHeading: What kind of ownership do you have?
+  fieldSetHint: Select all that apply
+  details:
+    summary: If you have a ‘share of freehold’
+    paragraph:
+      one: A ‘share of freehold’ can be an arrangement for owning a flat.
+      two: 'It means you own:'
+    bullet:
+      one: the leasehold for your flat
+      two: part of the entire building’s freehold
+    selectBoth:
+      beforeFreehold: If this is how you own your property, select both
+      freehold: freehold
+      and: and
+      leasehold: leasehold
+      afterLeasehold: .
+  checkbox:
+    freehold:
+      label: Freehold
+      hint: Own the property and land indefinitely
+    leasehold:
+      label: Leasehold
+      hint: Have a lease with a freeholder (includes most flats)
+  error:
+    missing: Select how you own this property
 # TODO PDJB-1961: replace with the real "What kind of freehold do you have?" content
 freeholdType:
   fieldSetHeading: TODO PDJB-1961 What kind of freehold do you have?
