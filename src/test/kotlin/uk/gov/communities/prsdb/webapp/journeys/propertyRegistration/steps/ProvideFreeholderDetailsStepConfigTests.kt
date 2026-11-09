@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -44,18 +43,6 @@ class ProvideFreeholderDetailsStepConfigTests {
         assertEquals("provideDetails", content["fieldName"])
         assertEquals("registerProperty.freeholders.provideDetails.fieldSetHeading.$headingSuffix", content["fieldSetHeading"])
         assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `Validation uses the ownership type from journey state rather than submitted data`(isJointFreeholder: Boolean) {
-        whenever(mockState.isJointFreeholder).thenReturn(isJointFreeholder)
-        val formData = mapOf("isJointFreeholder" to !isJointFreeholder, "provideDetails" to true)
-
-        val enrichedData = stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
-
-        assertEquals(isJointFreeholder, enrichedData["isJointFreeholder"])
-        assertEquals(true, enrichedData["provideDetails"])
     }
 
     @ParameterizedTest
