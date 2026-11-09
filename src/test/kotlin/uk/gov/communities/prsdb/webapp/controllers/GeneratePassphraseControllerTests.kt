@@ -53,6 +53,7 @@ class GeneratePassphraseControllerTests(
                 view { name("generatePassphrase") }
                 model {
                     attribute("passphrase", "time anything responsibility costume")
+                    attribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
                 }
             }
     }

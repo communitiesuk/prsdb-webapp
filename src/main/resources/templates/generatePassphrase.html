@@ -8,11 +8,14 @@
             <strong th:text="${passphrase}"></strong>
         </div>
         <section>
-            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.howToUse}">generatePassphrase.howToUse</h2>
+            <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
             <p class="govuk-body" th:text="#{generatePassphrase.paragraph.one}">generatePassphrase.paragraph.one</p>
             <p class="govuk-body" th:text="#{generatePassphrase.paragraph.two}">generatePassphrase.paragraph.two</p>
             <p class="govuk-body" th:text="#{generatePassphrase.paragraph.three}">generatePassphrase.paragraph.three</p>
         </section>
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
+            generatePassphrase.generateAnother
+        </a>
     </div>
 </main>
 </html>

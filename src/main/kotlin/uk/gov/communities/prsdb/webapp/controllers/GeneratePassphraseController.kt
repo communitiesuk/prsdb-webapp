@@ -18,6 +18,7 @@ class GeneratePassphraseController(
     @GetMapping
     fun generatePassphrase(model: Model): String {
         model.addAttribute("passphrase", passphraseService.generatePassphrase())
+        model.addAttribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
         return "generatePassphrase"
     }
 

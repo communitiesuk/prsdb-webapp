@@ -1,11 +1,13 @@
-title: Generate a passphrase
 banner:
   heading: New passphrase
   body: The passphrase is
-howToUse: How to use a passphrase
 paragraph:
-  one: This page displays a new passphrase every time it is reloaded. A passphrase is a random sequence of words.
+  one: This passphrase helps you to authenticate a landlord over the phone.
   two: >
-    To authenticate a user, send a passphrase to their stored contact details (by email or SMS), ask them to repeat it to you (over the
-    phone), and check it matches the passphrase you generated.
-  three: Always generate a new passphrase for every authentication attempt.
+    Prefer authenticating by email where possible, or SMS as a second choice. Use post only as a last resort. To authenticate a landlord
+    by email or SMS, send this passphrase to their stored contact details, ask them to repeat it to you (over the phone), and check it
+    matches. Always generate a new passphrase for every authentication attempt.
+  three: >
+    For postal-only landlords, send this passphrase by post and record it against their customer record. When they later call the
+    contact centre and you need them to authenticate, ask them to repeat their passphrase to you and check it matches their customer record.
+generateAnother: Generate another passphrase
