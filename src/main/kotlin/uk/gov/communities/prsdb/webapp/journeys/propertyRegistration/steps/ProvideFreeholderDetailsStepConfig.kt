@@ -17,6 +17,7 @@ class ProvideFreeholderDetailsStepConfig :
 
     override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> =
         mapOf(
+            "fieldName" to "provideDetails",
             "fieldSetHeading" to
                 if (state.isJointFreeholder) {
                     "registerProperty.freeholders.provideDetails.fieldSetHeading.joint"
@@ -28,6 +29,7 @@ class ProvideFreeholderDetailsStepConfig :
                     yesHint = "registerProperty.freeholders.provideDetails.radios.option.yes.hint",
                     noHint = "registerProperty.freeholders.provideDetails.radios.option.no.hint",
                 ),
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun enrichSubmittedDataBeforeValidation(
@@ -50,7 +52,7 @@ class ProvideFreeholderDetailsStepConfig :
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 
-    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/provideFreeholderDetailsForm"
+    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/provideDetailsForm"
 
     override fun mode(state: FreeholdersDetailsState) =
         getFormModelFromStateOrNull(state)?.provideDetails?.let {

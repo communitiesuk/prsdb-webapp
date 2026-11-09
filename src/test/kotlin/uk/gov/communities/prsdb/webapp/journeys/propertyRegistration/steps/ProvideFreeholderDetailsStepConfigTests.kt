@@ -31,7 +31,7 @@ class ProvideFreeholderDetailsStepConfigTests {
 
     @ParameterizedTest
     @CsvSource("true, joint", "false, nonJoint")
-    fun `Freeholders use the shared template with their ownership-specific heading`(
+    fun `Freeholders use the shared details template with their ownership-specific content`(
         isJointFreeholder: Boolean,
         headingSuffix: String,
     ) {
@@ -40,8 +40,10 @@ class ProvideFreeholderDetailsStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockState)
         val template = stepConfig.chooseTemplate(mockState)
 
-        assertEquals("forms/provideFreeholderDetailsForm", template)
+        assertEquals("forms/provideDetailsForm", template)
+        assertEquals("provideDetails", content["fieldName"])
         assertEquals("registerProperty.freeholders.provideDetails.fieldSetHeading.$headingSuffix", content["fieldSetHeading"])
+        assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
     }
 
     @ParameterizedTest
