@@ -39,7 +39,7 @@ class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, Letter
         address: Address,
     ): LetterAddressDataModel {
         val addressLines = listOfNotNull(name) + address.toMultiLineAddress().lines()
-        
+
         // Notify accepts at most seven lines; condense the middle while keeping the final postcode line separate.
         if (addressLines.size <= LetterAddressDataModel.MAX_ADDRESS_LINES) {
             return LetterAddressDataModel(addressLines)
