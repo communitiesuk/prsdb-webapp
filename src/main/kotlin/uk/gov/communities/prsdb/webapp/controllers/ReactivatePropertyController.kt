@@ -31,6 +31,7 @@ class ReactivatePropertyController(
     private val propertyReactivationJourneyFactory: PropertyReactivationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
+    // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
@@ -41,6 +42,7 @@ class ReactivatePropertyController(
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
+    // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
@@ -65,6 +67,7 @@ class ReactivatePropertyController(
             startNewJourneyOn = { it is PropertyOwnershipMismatchException },
         )
 
+    // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(

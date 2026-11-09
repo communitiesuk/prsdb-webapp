@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
-// TODO PDJB-844: Delete this class when the ACTIVE_INACTIVE flag is removed
+// TODO PDJB-2149: Delete this class when the ACTIVE_INACTIVE flag is removed
 class ReactivatePropertyControllerFeatureFlagTests : FeatureFlagTestCallingEndpoints() {
     @MockitoBean
     private lateinit var journeyFactory: PropertyReactivationJourneyFactory
