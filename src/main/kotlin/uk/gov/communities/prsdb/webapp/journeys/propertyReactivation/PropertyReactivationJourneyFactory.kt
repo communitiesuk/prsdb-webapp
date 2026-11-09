@@ -46,31 +46,36 @@ class PropertyReactivationJourneyFactory(
                 backUrl { LANDLORD_DASHBOARD_URL }
                 nextStep { journey.stepAfterInfo() }
             }
-            // TODO PDJB-2037: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
+            // and updating entryStepFor and completionStepFor
             step(journey.licensingStep) {
                 routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(LICENSING) }
                 nextStep { journey.requiredStepAfter(LICENSING) }
             }
-            // TODO PDJB-2038: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            // TODO PDJB-2038: replace this placeholder step with a task, registering it with task(...)
+            // and updating entryStepFor and completionStepFor
             step(journey.gasSafetyStep) {
                 routeSegment(ReactivationGasSafetyStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(GAS_SAFETY) }
                 nextStep { journey.requiredStepAfter(GAS_SAFETY) }
             }
-            // TODO PDJB-2039: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            // TODO PDJB-2039: replace this placeholder step with a task, registering it with task(...)
+            // and updating entryStepFor and completionStepFor
             step(journey.electricalSafetyStep) {
                 routeSegment(ReactivationElectricalSafetyStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(ELECTRICAL_SAFETY) }
                 nextStep { journey.requiredStepAfter(ELECTRICAL_SAFETY) }
             }
-            // TODO PDJB-2040: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            // TODO PDJB-2040: replace this placeholder step with a task, registering it with task(...)
+            // and updating entryStepFor and completionStepFor
             step(journey.epcStep) {
                 routeSegment(ReactivationEpcStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(EPC) }
                 nextStep { journey.requiredStepAfter(EPC) }
             }
-            // TODO PDJB-2041: if this becomes a task, register it with task(...) and update entryStepFor and completionStepFor
+            // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
+            // and updating entryStepFor and completionStepFor
             step(journey.tenancyDetailsStep) {
                 routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(TENANCY_DETAILS) }
