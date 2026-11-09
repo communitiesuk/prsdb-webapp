@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -2604,6 +2605,56 @@ class PropertyComplianceServiceTests {
             val propertyCompliance = PropertyComplianceBuilder().build()
 
             assertNull(propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance))
+        }
+
+        // TODO PDJB-1679: Remove the flag stub when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `getComplianceStatus uses EIC dates from the EIC date service`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
+            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
+                    .build()
+
+            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+            assertEquals(expiryDate.minusYears(5), complianceStatus.eicIssueDate)
+            assertEquals(expiryDate, complianceStatus.electricalSafetyExpiryDate)
+            assertEquals(ComplianceCertStatus.EXPIRED, complianceStatus.electricalSafetyStatus)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `getComplianceStatus omits the EIC issue date when the EIC issue date flag is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
+                    .build()
+
+            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+            assertNull(complianceStatus.eicIssueDate)
+            assertEquals(expiryDate, complianceStatus.electricalSafetyExpiryDate)
+            assertEquals(ComplianceCertStatus.EXPIRED, complianceStatus.electricalSafetyStatus)
+        }
+
+        @Test
+        fun `getComplianceStatus preserves EICR expiry`() {
+            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).plusDays(1)
+            val eicrCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eicr)
+                    .build()
+            val eicrStatus = propertyComplianceService.getComplianceStatus(eicrCompliance)
+
+            assertEquals(null, eicrStatus.eicIssueDate)
+            assertEquals(expiryDate, eicrStatus.electricalSafetyExpiryDate)
         }
     }
 

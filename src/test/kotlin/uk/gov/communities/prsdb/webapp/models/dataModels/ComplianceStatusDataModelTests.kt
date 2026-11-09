@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -19,6 +22,70 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ComplianceStatusDataModelTests {
+    @Test
+    fun `EIC uses the provided EIC dates instead of a stored EICR expiry date`() {
+        val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+        val issueDate = today.minusYears(1)
+        val expiryDate = today.plusYears(4)
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
+                .build()
+        propertyCompliance.eicrExpiryDate = today.minusDays(1)
+
+        val dataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(
+                propertyCompliance = propertyCompliance,
+                eicIssueDate = issueDate,
+                electricalSafetyExpiryDate = expiryDate,
+                isGas14MonthExpiryEnabled = true,
+            )
+
+        assertEquals(issueDate, dataModel.eicIssueDate)
+        assertEquals(expiryDate, dataModel.electricalSafetyExpiryDate)
+        assertEquals(ComplianceCertStatus.ADDED, dataModel.electricalSafetyStatus)
+    }
+
+    @Test
+    fun `EIC without dates has faults`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withElectricalSafety(certType = CertificateType.Eic)
+                .build()
+
+        val dataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(
+                propertyCompliance = propertyCompliance,
+                eicIssueDate = null,
+                electricalSafetyExpiryDate = null,
+                isGas14MonthExpiryEnabled = true,
+            )
+
+        assertNull(dataModel.eicIssueDate)
+        assertNull(dataModel.electricalSafetyExpiryDate)
+        assertEquals(ComplianceCertStatus.HAS_FAULTS, dataModel.electricalSafetyStatus)
+    }
+
+    @Test
+    fun `a stored expiry date without a cert type is rejected`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withElectricalSafety(certType = null)
+                .build()
+
+        assertThrows<PrsdbWebException> {
+            ComplianceStatusDataModel.fromPropertyCompliance(
+                propertyCompliance = propertyCompliance,
+                eicIssueDate = null,
+                electricalSafetyExpiryDate = propertyCompliance.eicrExpiryDate,
+                isGas14MonthExpiryEnabled = true,
+            )
+        }
+    }
+
     @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
     @MethodSource("provideShouldShowCertCases")
     fun `shouldShowCert returns expected value based on occupancy and cert status`(

@@ -19,6 +19,21 @@ import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
+    inner class ExpiredEicPropertyRecord :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-landlord-with-properties.sql", "data-overlay-expired-eic-property-record.sql"),
+        ) {
+        @Test
+        fun `property record shows banner for an expired EIC`() {
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(2)
+
+            assertThat(
+                propertyDetailsPage.notificationBanner,
+            ).containsText("This property’s electrical safety certificate has expired.")
+        }
+    }
+
+    @Nested
     inner class PropertyDetailsLandlordView {
         @Test
         fun `the property details page loads with the property details tab selected by default`(page: Page) {

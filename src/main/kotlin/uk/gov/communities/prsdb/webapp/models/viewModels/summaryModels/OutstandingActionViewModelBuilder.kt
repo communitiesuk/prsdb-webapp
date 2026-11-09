@@ -74,6 +74,7 @@ class OutstandingActionViewModelBuilder {
                     "electricalSafety",
                     complianceStatus.provideLaterDeadline,
                     complianceStatus.electricalSafetyExpiryDate,
+                    eicIssueDate = complianceStatus.eicIssueDate,
                 )
             }
             if (complianceStatus.shouldShowEpcAction()) {
@@ -93,12 +94,24 @@ class OutstandingActionViewModelBuilder {
             certTypeKey: String,
             provideLaterDeadline: LocalDate?,
             expiryDate: LocalDate?,
+            eicIssueDate: LocalDate? = null,
         ) {
+            val showEicIssueDate = status == ComplianceCertStatus.EXPIRED && eicIssueDate != null
             add(
                 SummaryListRowViewModel(
                     fieldHeading = label,
-                    fieldValue = getCertStatusValue(status, certTypeKey, provideLaterDeadline),
-                    optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, expiryDate),
+                    fieldValue =
+                        if (showEicIssueDate) {
+                            "outstandingActions.status.expiredEic"
+                        } else {
+                            getCertStatusValue(status, certTypeKey, provideLaterDeadline)
+                        },
+                    optionalFieldValueParam =
+                        if (showEicIssueDate) {
+                            eicIssueDate.format(DATE_FORMATTER)
+                        } else {
+                            getCertStatusValueParam(status, provideLaterDeadline, expiryDate)
+                        },
                 ),
             )
         }

@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
@@ -534,13 +535,17 @@ class PropertyOwnershipService(
     ): Page<OutstandingActionsDataModel> {
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
         val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+        // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
+        val isEicIssueDateEnabled = featureFlagManager.checkFeature(EIC_ISSUE_DATE)
         val allOutstandingActions =
             retrieveAllActivePropertiesForLandlord(landlord)
-                .map {
+                .map { propertyOwnership ->
+                    val propertyCompliance = propertyOwnership.propertyCompliance
                     OutstandingActionsDataModel.fromPropertyOwnership(
-                        it,
-                        it.propertyCompliance?.let(::electricalSafetyExpiryDateOf),
-                        isGas14MonthExpiryEnabled,
+                        propertyOwnership,
+                        eicIssueDate = propertyCompliance?.takeIf { isEicIssueDateEnabled }?.let(eicDateService::issueDateFrom),
+                        electricalSafetyExpiryDate = propertyCompliance?.let(::electricalSafetyExpiryDateOf),
+                        isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                     )
                 }.filter { it.shouldShowOnOutstandingActionsPage }
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
@@ -549,8 +554,6 @@ class PropertyOwnershipService(
         return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
     }
 
-    // TODO PDJB-1676: Use PropertyComplianceService.getComplianceStatus instead of repeating the EIC/EICR choice
-    // (PropertyComplianceService can't be injected here as it already depends on this service)
     private fun electricalSafetyExpiryDateOf(propertyCompliance: PropertyCompliance): LocalDate? =
         when (propertyCompliance.electricalCertType) {
             CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
