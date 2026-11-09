@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
@@ -56,7 +57,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -192,7 +195,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 listOf(
                     "About your property",
                     "Property details",
-                    "Ownership and landlords",
+                    "People responsible for this property",
                     "Who the council should contact",
                     "Tell us if your property’s occupied",
                     "How your property’s rented out",
@@ -541,7 +544,9 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `The back link on the EICR expiry date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eicr)
 
-            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eicr).actions
+            checkAnswersPage.complianceSummaryList
+                .electricalCertDateRow(CertificateType.Eicr)
+                .actions
                 .getActionLink("Change")
                 .clickAndWait()
             val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
@@ -553,7 +558,9 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `The back link on the EIC issue date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
 
-            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).actions
+            checkAnswersPage.complianceSummaryList
+                .electricalCertDateRow(CertificateType.Eic)
+                .actions
                 .getActionLink("Change")
                 .clickAndWait()
             val issueDatePage = assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
@@ -674,7 +681,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 listOf(
                     "About your property",
                     "Property details",
-                    "Ownership and landlords",
+                    "People responsible for this property",
                     "Who the council should contact",
                     "Tell us if your property’s occupied",
                 ),
@@ -738,6 +745,69 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms()
                         .withCompletedCorrespondence(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordsCheckAnswers {
+        @Test
+        fun `when nobody else is in the ownership chain, a summary row links to the ownership chain question`(page: Page) {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+                        .withAnyoneInOwnershipChain(false),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            var checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.anyoneInOwnershipChainRow.value).hasText("No")
+            BaseComponent.assertThat(checkAnswersPage.superiorLandlordsChangeLink).hasCount(0)
+
+            checkAnswersPage.summaryList.anyoneInOwnershipChainRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `when there are people in the ownership chain, they are shown as cards`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithSuperiorLandlords(page)
+
+            BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.summaryList.anyoneInOwnershipChainRow).hasCount(0)
+            listOf("Superior Landlord With Address", "Superior Landlord With Email", "Unknown person").forEach { title ->
+                val card = checkAnswersPage.getSummaryCard(title, "h5")
+                BaseComponent.assertThat(card.title).hasText(title)
+            }
+        }
+
+        @Test
+        fun `the add, change or remove link starts a CYA sub-journey at the superior landlords list`(page: Page) {
+            var checkAnswersPage = goToCheckAnswersWithSuperiorLandlords(page)
+
+            checkAnswersPage.superiorLandlordsChangeLink.clickAndWait()
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            superiorLandlordsListPage.submit()
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
+        }
+
+        private fun goToCheckAnswersWithSuperiorLandlords(page: Page): CheckAnswersPagePropertyRegistration {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+                        .withAnyoneInOwnershipChain()
+                        .withSuperiorLandlords(PropertyStateSessionBuilder.DEFAULT_SUPERIOR_LANDLORDS)
+                        .withSuperiorLandlordsListComplete(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
