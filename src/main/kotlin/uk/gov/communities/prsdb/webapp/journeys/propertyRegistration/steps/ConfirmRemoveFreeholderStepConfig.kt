@@ -47,7 +47,7 @@ class ConfirmRemoveFreeholderStepConfig(
 
     override fun afterStepDataIsAdded(state: FreeholdersDetailsState) {
         val wantsToProceed = getFormModelFromStateOrNull(state)?.wantsToProceed
-        state.clearStepData(stepDataKey)
+        state.confirmRemoveFreeholderStep.clearFormData()
         if (wantsToProceed != true) return
 
         val keyToRemove = collectionKeyParameterService.getParameterOrNull() ?: return

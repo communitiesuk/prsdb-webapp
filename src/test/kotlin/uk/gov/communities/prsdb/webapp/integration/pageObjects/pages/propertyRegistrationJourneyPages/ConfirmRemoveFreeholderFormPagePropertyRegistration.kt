@@ -12,7 +12,6 @@ class ConfirmRemoveFreeholderFormPagePropertyRegistration(
     page: Page,
 ) : PageWithYesNoRadios(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ConfirmRemoveFreeholderStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val hint = page.locator(".govuk-hint")
     val backLink = BackLink.default(page)
     val cancelLink = Link.byText(page, "Cancel")
 }

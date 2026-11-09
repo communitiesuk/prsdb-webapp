@@ -27,6 +27,9 @@ class ConfirmRemoveFreeholderStepConfigTests {
     @Mock
     lateinit var collectionKeyParameterService: CollectionKeyParameterService
 
+    @Mock
+    lateinit var mockConfirmRemoveFreeholderStep: ConfirmRemoveFreeholderStep
+
     private val firstFreeholder = FreeholderDataModel(detailsKnown = true, name = "First freeholder")
     private val secondFreeholder = FreeholderDataModel(detailsKnown = false)
 
@@ -106,18 +109,20 @@ class ConfirmRemoveFreeholderStepConfigTests {
     @Test
     fun `afterStepDataIsAdded keeps the freeholder when removal is not confirmed`() {
         val stepConfig = setupStepConfig()
+        whenever(mockState.confirmRemoveFreeholderStep).thenReturn(mockConfirmRemoveFreeholderStep)
         whenever(mockState.getStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT))
             .thenReturn(mapOf("wantsToProceed" to "false"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(mockState, never()).freeholdersMap = any()
-        verify(mockState).clearStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
+        verify(mockConfirmRemoveFreeholderStep).clearFormData()
     }
 
     @Test
     fun `afterStepDataIsAdded removes the freeholder with the given key when removal is confirmed`() {
         val stepConfig = setupStepConfig()
+        whenever(mockState.confirmRemoveFreeholderStep).thenReturn(mockConfirmRemoveFreeholderStep)
         whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
         whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to firstFreeholder, 2 to secondFreeholder))
         whenever(mockState.getStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT))
@@ -128,7 +133,7 @@ class ConfirmRemoveFreeholderStepConfigTests {
         val captor = argumentCaptor<Map<Int, FreeholderDataModel>>()
         verify(mockState).freeholdersMap = captor.capture()
         assertEquals(mapOf(2 to secondFreeholder), captor.firstValue)
-        verify(mockState).clearStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
+        verify(mockConfirmRemoveFreeholderStep).clearFormData()
     }
 
     @Test
