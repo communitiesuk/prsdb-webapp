@@ -25,7 +25,7 @@ class FreeholderProvideDetailsFormModel(
 ) : FormModel {
     var isJointFreeholder: Boolean = false
 
-    fun isJointFreeholderAnswerProvided(): Boolean = !isJointFreeholder || provideDetails != null
+    fun isJointFreeholderAnswerProvided(): Boolean = if (isJointFreeholder) provideDetails != null else true
 
-    fun isNonJointFreeholderAnswerProvided(): Boolean = isJointFreeholder || provideDetails != null
+    fun isNonJointFreeholderAnswerProvided(): Boolean = if (!isJointFreeholder) provideDetails != null else true
 }
