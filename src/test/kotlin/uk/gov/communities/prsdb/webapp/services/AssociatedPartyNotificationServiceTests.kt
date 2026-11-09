@@ -6,8 +6,10 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -98,6 +100,72 @@ class AssociatedPartyNotificationServiceTests {
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(listOf("Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            letter,
+        )
+    }
+
+    @Test
+    fun `sendNotification condenses a long address while keeping the postcode last`() {
+        val fullAddress =
+            Address(
+                AddressDataModel(
+                    singleLineAddress =
+                        "Example Organisation, Flat 2, 12, Rose Court, High Street, Example Locality, London, SW1A 1AA",
+                    organisation = "Example Organisation",
+                    subBuilding = "Flat 2",
+                    buildingNumber = "12",
+                    buildingName = "Rose Court",
+                    streetName = "High Street",
+                    locality = "Example Locality",
+                    townName = "London",
+                    postcode = "SW1A 1AA",
+                ),
+            )
+        val freeholder = Freeholder(createPropertyOwnership(), name = "Daniel Roberts", address = fullAddress)
+
+        associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(
+                listOf(
+                    "Daniel Roberts",
+                    "Example Organisation",
+                    "Flat 2",
+                    "12",
+                    "Rose Court",
+                    "High Street, Example Locality, London",
+                    "SW1A 1AA",
+                ),
+            ),
+            letter,
+        )
+    }
+
+    @Test
+    fun `sendNotification condenses a long manually entered address while keeping the postcode last`() {
+        val manualAddress =
+            Address(
+                AddressDataModel(
+                    singleLineAddress =
+                        "Example Organisation, Flat 2, 12, Rose Court, High Street, Example Locality, London, SW1A 1AA",
+                ),
+            )
+        val freeholder = Freeholder(createPropertyOwnership(), name = "Daniel Roberts", address = manualAddress)
+
+        associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(
+                listOf(
+                    "Daniel Roberts",
+                    "Example Organisation",
+                    "Flat 2",
+                    "12",
+                    "Rose Court",
+                    "High Street, Example Locality, London",
+                    "SW1A 1AA",
+                ),
+            ),
             letter,
         )
     }

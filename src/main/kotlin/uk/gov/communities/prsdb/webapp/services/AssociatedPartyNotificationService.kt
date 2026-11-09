@@ -37,5 +37,19 @@ class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, Letter
     private fun letterAddress(
         name: String?,
         address: Address,
-    ) = LetterAddressDataModel(listOfNotNull(name) + address.toMultiLineAddress().lines())
+    ): LetterAddressDataModel {
+        val addressLines = listOfNotNull(name) + address.toMultiLineAddress().lines()
+        
+        // Notify accepts at most seven lines; condense the middle while keeping the final postcode line separate.
+        if (addressLines.size <= LetterAddressDataModel.MAX_ADDRESS_LINES) {
+            return LetterAddressDataModel(addressLines)
+        }
+
+        val linesToCondense = addressLines.drop(LetterAddressDataModel.MAX_ADDRESS_LINES - 2)
+        val condensedAddressLines =
+            addressLines.take(LetterAddressDataModel.MAX_ADDRESS_LINES - 2) +
+                linesToCondense.dropLast(1).joinToString(", ") +
+                linesToCondense.last()
+        return LetterAddressDataModel(condensedAddressLines)
+    }
 }
