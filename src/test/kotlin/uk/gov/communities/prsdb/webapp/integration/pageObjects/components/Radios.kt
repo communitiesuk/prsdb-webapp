@@ -11,6 +11,9 @@ class Radios(
     val selectedValue: String
         get() = locator.locator("input:checked").getAttribute("value")
 
+    val isAnyOptionSelected: Boolean
+        get() = locator.locator("input:checked").count() > 0
+
     fun <E : Enum<E>> selectValue(value: E) {
         val radio = getRadio(value.name)
         radio.check()

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
@@ -17,6 +16,4 @@ class RemovePropertyManagerFormModel : FormModel {
         ],
     )
     var wantsToProceed: Boolean? = null
-
-    fun toYesOrNo(): YesOrNo? = wantsToProceed?.let { if (it) YesOrNo.YES else YesOrNo.NO }
 }
