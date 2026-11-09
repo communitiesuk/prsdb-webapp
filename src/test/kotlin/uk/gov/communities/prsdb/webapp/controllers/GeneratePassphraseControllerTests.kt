@@ -44,7 +44,7 @@ class GeneratePassphraseControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `generatePassphrase returns the generated passphrase for a system operator`() {
-        whenever(passphraseService.generatePassphrase()).thenReturn("time anything responsibility costume")
+        whenever(passphraseService.generatePassphrase()).thenReturn("time anything costume")
 
         mvc
             .get(GENERATE_PASSPHRASE_URL)
@@ -52,7 +52,7 @@ class GeneratePassphraseControllerTests(
                 status { isOk() }
                 view { name("generatePassphrase") }
                 model {
-                    attribute("passphrase", "time anything responsibility costume")
+                    attribute("passphrase", "time anything costume")
                     attribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
                 }
             }
@@ -61,7 +61,7 @@ class GeneratePassphraseControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `generatePassphrase renders the generated passphrase`() {
-        whenever(passphraseService.generatePassphrase()).thenReturn("time anything responsibility costume")
+        whenever(passphraseService.generatePassphrase()).thenReturn("time anything costume")
 
         mvc
             .get(GENERATE_PASSPHRASE_URL)
@@ -70,7 +70,7 @@ class GeneratePassphraseControllerTests(
                 content {
                     string(containsString("New passphrase"))
                     string(containsString("The passphrase is"))
-                    string(containsString("time anything responsibility costume"))
+                    string(containsString("time anything costume"))
                 }
             }
     }
