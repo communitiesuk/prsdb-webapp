@@ -7,12 +7,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -74,16 +77,58 @@ class ConfirmRemoveFreeholderStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded removes the freeholder with the given key`() {
+    fun `getStepSpecificContent includes confirmation content for a named freeholder`() {
+        val stepConfig = setupStepConfig()
+        whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
+        whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to firstFreeholder))
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals("registerProperty.freeholders.remove.fieldSetHeading", content["fieldSetHeading"])
+        assertEquals("First freeholder", content["optionalFieldSetHeadingParam"])
+        assertEquals("registerProperty.freeholders.remove.fieldSetHint", content["fieldSetHint"])
+        assertEquals(RadiosViewModel.yesOrNoRadios(), content["radioOptions"])
+        assertEquals("forms.buttons.saveAndContinue", content["submitButtonTextKey"])
+        assertEquals(true, content["showSectionHeader"])
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the unknown freeholder heading when details are not known`() {
+        val stepConfig = setupStepConfig()
+        whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(2)
+        whenever(mockState.freeholdersMap).thenReturn(mapOf(2 to secondFreeholder))
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals("registerProperty.freeholders.remove.unknownFreeholder.fieldSetHeading", content["fieldSetHeading"])
+    }
+
+    @Test
+    fun `afterStepDataIsAdded keeps the freeholder when removal is not confirmed`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("wantsToProceed" to "false"))
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockState, never()).freeholdersMap = any()
+        verify(mockState).clearStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded removes the freeholder with the given key when removal is confirmed`() {
         val stepConfig = setupStepConfig()
         whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
         whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to firstFreeholder, 2 to secondFreeholder))
+        whenever(mockState.getStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("wantsToProceed" to "true"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         val captor = argumentCaptor<Map<Int, FreeholderDataModel>>()
         verify(mockState).freeholdersMap = captor.capture()
         assertEquals(mapOf(2 to secondFreeholder), captor.firstValue)
+        verify(mockState).clearStepData(ConfirmRemoveFreeholderStep.ROUTE_SEGMENT)
     }
 
     @Test
