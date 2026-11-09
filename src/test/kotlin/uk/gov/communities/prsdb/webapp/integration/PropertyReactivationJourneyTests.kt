@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.TenancyDetailsFormPagePropertyReactivation
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import kotlin.test.assertEquals
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -89,11 +88,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `a landlord is sent to the info page if they visit a step the property does not need`(page: Page) {
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
-        val licensingPath =
-            ReactivatePropertyController.getPropertyReactivationBasePath(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER) +
-                "/${ReactivationLicensingStep.ROUTE_SEGMENT}"
-
-        navigator.navigate(licensingPath)
+        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
 
         assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
     }

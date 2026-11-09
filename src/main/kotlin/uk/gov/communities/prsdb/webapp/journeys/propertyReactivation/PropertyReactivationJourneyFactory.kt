@@ -51,35 +51,35 @@ class PropertyReactivationJourneyFactory(
             step(journey.licensingStep) {
                 routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(LICENSING) }
-                nextStep { journey.requiredStepAfter(LICENSING) }
+                nextStep { journey.nextStepAfter(LICENSING) }
             }
             // TODO PDJB-2038: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.gasSafetyStep) {
                 routeSegment(ReactivationGasSafetyStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(GAS_SAFETY) }
-                nextStep { journey.requiredStepAfter(GAS_SAFETY) }
+                nextStep { journey.nextStepAfter(GAS_SAFETY) }
             }
             // TODO PDJB-2039: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.electricalSafetyStep) {
                 routeSegment(ReactivationElectricalSafetyStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(ELECTRICAL_SAFETY) }
-                nextStep { journey.requiredStepAfter(ELECTRICAL_SAFETY) }
+                nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
             }
             // TODO PDJB-2040: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.epcStep) {
                 routeSegment(ReactivationEpcStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(EPC) }
-                nextStep { journey.requiredStepAfter(EPC) }
+                nextStep { journey.nextStepAfter(EPC) }
             }
             // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.tenancyDetailsStep) {
                 routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
                 parents { journey.parentsFor(TENANCY_DETAILS) }
-                nextStep { journey.requiredStepAfter(TENANCY_DETAILS) }
+                nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
             }
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
@@ -111,7 +111,6 @@ class PropertyReactivationJourneyFactory(
             TENANCY_DETAILS -> tenancyDetailsStep
         }
 
-    // The step whose outcome means the user has finished this part of the journey, e.g. a task's exit step
     private fun PropertyReactivationJourneyState.completionStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         when (taskType) {
             LICENSING -> licensingStep
@@ -121,14 +120,12 @@ class PropertyReactivationJourneyFactory(
             TENANCY_DETAILS -> tenancyDetailsStep
         }
 
-    // Task types are compared by enum order, which is the order the tasks appear in the journey
-    private fun PropertyReactivationJourneyState.requiredStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
+    private fun PropertyReactivationJourneyState.nextStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         requiredTaskTypes.filter { it > taskType }.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
 
     private fun PropertyReactivationJourneyState.stepAfterInfo(): JourneyStep<*, *, *> =
         requiredTaskTypes.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
 
-    // A step the property doesn't need is never reachable, so the user is sent back to the info step
     private fun PropertyReactivationJourneyState.parentsFor(taskType: ReactivationTaskType): Parentage {
         val previousStep = requiredTaskTypes.filter { it < taskType }.maxOrNull()?.let { completionStepFor(it) } ?: infoStep
         return SingleParent(previousStep) { taskType in requiredTaskTypes && previousStep.outcome != null }
