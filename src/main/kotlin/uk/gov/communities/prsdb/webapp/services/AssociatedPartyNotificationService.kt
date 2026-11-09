@@ -1,0 +1,41 @@
+package uk.gov.communities.prsdb.webapp.services
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
+import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.AssociatedParty
+import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
+
+@PrsdbWebService
+class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, LetterModel : LetterTemplateModel>(
+    private val emailNotificationService: EmailNotificationService<EmailModel>,
+    private val letterNotificationService: LetterNotificationService<LetterModel>,
+) {
+    fun sendNotification(
+        associatedParty: AssociatedParty,
+        email: EmailModel,
+        letter: LetterModel,
+    ): AssociatedPartyNotificationOutcome {
+        if (associatedParty.isFullyRedacted()) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        }
+
+        val emailAddress = associatedParty.email
+        if (!emailAddress.isNullOrBlank()) {
+            emailNotificationService.sendEmail(emailAddress, email)
+            return AssociatedPartyNotificationOutcome.EMAIL_SENT
+        }
+
+        val postalAddress =
+            checkNotNull(associatedParty.address) { "An associated party that is not fully redacted and has no email must have an address" }
+        letterNotificationService.sendLetter(letterAddress(associatedParty.name, postalAddress), letter)
+        return AssociatedPartyNotificationOutcome.LETTER_SENT
+    }
+
+    private fun letterAddress(
+        name: String?,
+        address: Address,
+    ) = LetterAddressDataModel(listOfNotNull(name) + address.toMultiLineAddress().lines())
+}
