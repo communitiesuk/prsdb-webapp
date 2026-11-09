@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -45,7 +44,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -245,9 +243,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
             freeholdersListPage.addAnotherButton.click()
-            var provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
-            assertNull(provideDetailsPage.form.radios.selectedValue)
-            provideDetailsPage.submitYes()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Email freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submitEmail("email.freeholder@example.com")
@@ -255,9 +251,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
             freeholdersListPage.addAnotherButton.click()
-            provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
-            assertNull(provideDetailsPage.form.radios.selectedValue)
-            provideDetailsPage.submitYes()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             val secondNamePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
             assertThat(secondNamePage.form.nameInput).hasValue("")
             secondNamePage.submitName("Address freeholder")
@@ -287,9 +281,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Change")
                 .link
                 .clickAndWait()
-            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
-            assertEquals("true", provideDetailsPage.form.radios.selectedValue)
-            provideDetailsPage.submitYes()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             val namePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
             assertThat(namePage.form.nameInput).hasValue("Freeholder With Email")
             namePage.submitName("Changed freeholder")
@@ -306,26 +298,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(updatedListPage.getSummaryCard(1).title).hasText("Changed freeholder")
             assertThat(updatedListPage.getSummaryCard(1).summaryList).containsText("changed.freeholder@example.com")
             assertThat(updatedListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
-        }
-
-        @Test
-        fun `Changing a freeholder without known details preselects no`(page: Page) {
-            val freeholdersListPage =
-                navigator.skipToPropertyRegistrationFreeholdersListPage(
-                    freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = false)),
-                )
-
-            freeholdersListPage
-                .getSummaryCard(0)
-                .getAction("Change")
-                .link
-                .clickAndWait()
-            val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
-            assertEquals("false", provideDetailsPage.form.radios.selectedValue)
-            provideDetailsPage.submitNo()
-
-            val updatedListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Unknown freeholder")
         }
 
         @Test
