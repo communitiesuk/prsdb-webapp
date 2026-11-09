@@ -23,8 +23,6 @@ enum class OwnershipType {
 
     // Whether the property must have at least one freeholder record, because the ownership type does
     // not already identify all the freeholders. Repeated as ordinals in V1_62_0 and the seed scripts.
-    // TODO PDJB-2015: make OwnershipStructureRoutingStepConfig.asksFreeholders delegate to this.
-    //  The enabling step is the journey answers -> OwnershipType mapping on OwnershipTypeState.
     fun requiresFreeholderRecords() =
         this in
             setOf(
@@ -34,5 +32,16 @@ enum class OwnershipType {
                 TENANTS_IN_COMMON,
                 SHARE_OF_JOINT_TENANTS,
                 SHARE_OF_TENANTS_IN_COMMON,
+            )
+
+    fun requiresSuperiorLandlordInfo() =
+        this in
+            setOf(
+                NONE,
+                LEASEHOLD_ONLY,
+                SHARE_OF_SOLE_FREEHOLD,
+                SHARE_OF_JOINT_TENANTS,
+                SHARE_OF_TENANTS_IN_COMMON,
+                SHARE_OF_COMMONHOLD,
             )
 }
