@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as assertThatLocator
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -431,7 +432,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .link
                 .clickAndWait()
             removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
-            assertThat(removeFreeholderPage.page.locator(".govuk-radios input:checked")).hasCount(0)
+            assertThatLocator(removeFreeholderPage.page.locator(".govuk-radios input:checked")).hasCount(0)
             removeFreeholderPage.submitYes()
             freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
