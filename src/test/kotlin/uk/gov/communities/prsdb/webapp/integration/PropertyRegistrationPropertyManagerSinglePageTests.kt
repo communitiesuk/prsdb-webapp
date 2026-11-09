@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemovePropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
@@ -107,6 +108,31 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
 
         navigator.navigateToPropertyRegistrationCheckPropertyManagerPage()
         assertPageIs(page, TaskListPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `the remove page has no option selected after previously not confirming removal`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitNo()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
+    }
+
+    @Test
+    fun `the remove page has no option selected after confirming removal and adding a new property manager`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitYes()
+        assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitYes()
+        assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+            .submitDetails(name = "Other Managers Ltd", email = "other@example.com")
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
     }
 
     private fun addPropertyManager(page: Page): CheckPropertyManagerFormPagePropertyRegistration {
