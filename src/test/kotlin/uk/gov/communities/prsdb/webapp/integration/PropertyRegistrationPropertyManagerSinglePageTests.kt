@@ -122,6 +122,19 @@ class PropertyRegistrationPropertyManagerSinglePageTests : IntegrationTestWithIm
     }
 
     @Test
+    fun `the remove page has no option selected after not confirming removal and then cancelling`(page: Page) {
+        addPropertyManager(page).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitNo()
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+        assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).cancelLink.clickAndWait()
+
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).clickRemoveAndWait()
+
+        val removePropertyManagerPage = assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class)
+        assertFalse(removePropertyManagerPage.form.radios.isAnyOptionSelected)
+    }
+
+    @Test
     fun `the remove page has no option selected after confirming removal and adding a new property manager`(page: Page) {
         addPropertyManager(page).clickRemoveAndWait()
         assertPageIs(page, RemovePropertyManagerFormPagePropertyRegistration::class).submitYes()
