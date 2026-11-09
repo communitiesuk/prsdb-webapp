@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -27,7 +27,7 @@ class MockPropertyRegistrationData {
             propertyType: PropertyType = PropertyType.DETACHED_HOUSE,
             licenseType: LicensingType = LicensingType.NO_LICENSING,
             licenceNumber: String = "",
-            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            ownershipType: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             isOccupied: Boolean = false,
             numberOfHouseholds: Int = 0,
             numberOfPeople: Int = 0,
@@ -47,7 +47,10 @@ class MockPropertyRegistrationData {
             gasSafetyFileUploadIds: List<Long> = emptyList(),
             gasSafetyCertProvideLater: Boolean = false,
             electricalSafetyFileUploadIds: List<Long> = emptyList(),
-            electricalSafetyExpiryDate: LocalDate? = null,
+            eicrExpiryDate: LocalDate? = null,
+            eicIssueDate: LocalDate? = null,
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate: LocalDate? = null,
             electricalCertType: CertificateType? = null,
             electricalSafetyCertProvideLater: Boolean = false,
             epcCertificateUrl: String? = null,
@@ -87,7 +90,10 @@ class MockPropertyRegistrationData {
             gasSafetyFileUploadIds = gasSafetyFileUploadIds,
             gasSafetyCertProvideLater = gasSafetyCertProvideLater,
             electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
+            // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+            eicExpiryDate = eicExpiryDate,
             electricalCertType = electricalCertType,
             electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
             epcCertificateUrl = epcCertificateUrl,

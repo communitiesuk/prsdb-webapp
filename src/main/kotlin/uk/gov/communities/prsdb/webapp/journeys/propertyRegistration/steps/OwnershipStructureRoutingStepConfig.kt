@@ -28,10 +28,13 @@ class OwnershipStructureRoutingStepConfig : AbstractInternalStepConfig<Ownership
         }
     }
 
+    // TODO PDJB-2015: this is the same rule as OwnershipType.requiresFreeholderRecords(), expressed
+    //  over the journey's answers. The enabling step is the answers -> OwnershipType mapping on
+    //  OwnershipTypeState; once that exists, delegate to it so the rule is only stated once.
     private fun asksFreeholders(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||
             ownershipType.ownershipKindStep.outcome == OwnershipKind.LEASEHOLD_ONLY ||
-            ownershipType.freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
+            ownershipType.isJointFreeholder
 
     private fun asksSuperiorLandlords(ownershipType: OwnershipTypeState): Boolean =
         ownershipType.ownsPropertyStep.outcome == YesOrNo.NO ||

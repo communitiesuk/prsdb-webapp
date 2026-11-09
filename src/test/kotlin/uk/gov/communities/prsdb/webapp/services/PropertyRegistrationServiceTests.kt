@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -53,7 +53,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import java.net.URI
-import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import java.util.UUID
@@ -146,7 +145,7 @@ class PropertyRegistrationServiceTests {
                         propertyType = PropertyType.DETACHED_HOUSE,
                         licenseType = LicensingType.NO_LICENSING,
                         licenceNumber = "license number",
-                        ownershipType = OwnershipType.FREEHOLD,
+                        ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                         isOccupied = true,
                         numberOfHouseholds = 1,
                         numberOfPeople = 1,
@@ -199,7 +198,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -232,7 +231,7 @@ class PropertyRegistrationServiceTests {
                     propertyType = PropertyType.DETACHED_HOUSE,
                     licenseType = LicensingType.NO_LICENSING,
                     licenceNumber = "",
-                    ownershipType = OwnershipType.FREEHOLD,
+                    ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                     isOccupied = true,
                     numberOfHouseholds = 1,
                     numberOfPeople = 1,
@@ -255,7 +254,7 @@ class PropertyRegistrationServiceTests {
         // Arrange
         val correspondenceEmail = "chosen.contact@example.com"
         val correspondenceAddressModel = AddressDataModel.fromManualAddressData("12 Contact Road", "Leeds", "LS1 1AA")
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val isOccupied = true
         val numberOfHouseholds = 1
         val numberOfPeople = 2
@@ -278,7 +277,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
@@ -395,7 +394,7 @@ class PropertyRegistrationServiceTests {
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15)
-        val electricalSafetyExpiryDate = LocalDate.of(2029, 3, 20)
+        val eicIssueDate = LocalDate.of(2024, 3, 20)
         val epcUrl = "https://epc.example.com/cert/1234"
         val epcExpiryDate = LocalDate.of(2030, 1, 1)
         val epcEnergyRating = "B"
@@ -448,7 +447,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -464,8 +463,9 @@ class PropertyRegistrationServiceTests {
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                 gasSafetyFileUploadIds = listOf(10L, 20L),
                 electricalSafetyFileUploadIds = listOf(30L),
-                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
-                electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+                eicrExpiryDate = null,
+                eicIssueDate = eicIssueDate,
+                electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eic,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
                 epcEnergyRating = epcEnergyRating,
@@ -483,8 +483,8 @@ class PropertyRegistrationServiceTests {
             gasSafetyFileUploadIds = listOf(10L, 20L),
             gasSafetyCertProvideLater = false,
             electricalSafetyFileUploadIds = listOf(30L),
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
-            electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eicr,
+            eicrExpiryDate = null,
+            electricalCertType = uk.gov.communities.prsdb.webapp.constants.enums.CertificateType.Eic,
             electricalSafetyCertProvideLater = false,
             epcCertificateUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
@@ -493,6 +493,7 @@ class PropertyRegistrationServiceTests {
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = meesExemptionReason,
             epcProvideLater = false,
+            eicIssueDate = eicIssueDate,
         )
     }
 
@@ -552,7 +553,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.SELECTIVE_LICENCE,
                 licenceNumber = "Licence",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 2,
                 numberOfPeople = 1,
@@ -584,7 +585,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty registers the property if there is no license`() {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -604,7 +605,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -702,7 +703,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not create a license and sets licenseProvideLater when the user provides licensing later`() {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -721,7 +722,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -823,7 +824,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty sends joint landlord invitation emails when joint landlord emails are provided`() {
         // Arrange
         val jointLandlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -837,7 +838,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -922,7 +923,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not send joint landlord invitation emails when no joint landlord emails provided`() {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -934,7 +935,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1006,7 +1007,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty persists a letting agent invitation when a letting agent email is provided`() {
         // Arrange
         val lettingAgentEmail = "agent@example.com"
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1018,7 +1019,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1105,7 +1106,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not persist a letting agent invitation when no letting agent email is provided`() {
         // Arrange
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1117,7 +1118,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1188,7 +1189,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty does not send joint landlord invitation emails when empty list provided`() {
         // Arrange
         val jointLandlordEmails = emptyList<String>()
-        val ownershipType = OwnershipType.FREEHOLD
+        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1200,7 +1201,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipType = ownershipType,
+                ownershipTypeBeforePdjb955 = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1322,7 +1323,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -1421,7 +1422,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -1516,7 +1517,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -1589,7 +1590,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipType.FREEHOLD,
+                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -1736,11 +1737,10 @@ class PropertyRegistrationServiceTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         stubConfirmationEmailDependencies()
-        // 23:30 UTC on 4 October is 00:30 BST on 5 October
         val payment =
             MockPaymentData.createPayment(
                 amountInPence = 2550,
-                paymentCreatedAt = Instant.parse("2026-10-04T23:30:00Z"),
+                quoteDate = LocalDate.of(2026, 10, 5),
                 status = PaymentStatus.SUCCEEDED,
             )
         whenever(

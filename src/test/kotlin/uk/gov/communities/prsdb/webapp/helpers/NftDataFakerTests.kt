@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import java.sql.Date
@@ -103,6 +104,29 @@ class NftDataFakerTests {
     }
 
     @Test
+    fun `generatePropertyComplianceData stores EIC issue dates and EICR expiry dates`() {
+        NftDataFaker.reset(seed = TEST_SEED, reference = FIXED_REFERENCE)
+        val sample = List(FAKER_SAMPLE_SIZE) { NftDataFaker.generatePropertyComplianceData(Timestamp.from(FIXED_REFERENCE)) }
+
+        sample.forEach {
+            when (it.electricalCertType) {
+                CertificateType.Eic -> {
+                    assertTrue(it.eicIssueDate != null && it.eicrExpiryDate == null)
+                    assertEquals(
+                        it.eicIssueDate!!.toLocalDate().plusYears(EIC_VALIDITY_YEARS.toLong()),
+                        it.electricalSafetyExpiryDate!!.toLocalDate(),
+                    )
+                }
+
+                CertificateType.Eicr -> assertTrue(it.eicIssueDate == null && it.eicrExpiryDate != null)
+                else -> assertTrue(it.eicIssueDate == null && it.eicrExpiryDate == null)
+            }
+        }
+        assertTrue(sample.any { it.electricalCertType == CertificateType.Eic })
+        assertTrue(sample.any { it.electricalCertType == CertificateType.Eicr })
+    }
+
+    @Test
     fun `generateRenewalDate returns next year's anniversary when this year's has passed`() {
         // Arrange
         NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
@@ -141,9 +165,9 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `isElectricalSafetyCertificateCurrent returns false on the expiry date`() {
+    fun `isElectricalSafetyCertificateCurrent returns true on the expiry date`() {
         listOf(CertificateType.Eic, CertificateType.Eicr).forEach { certType ->
-            assertFalse(
+            assertTrue(
                 NftDataFaker.isElectricalSafetyCertificateCurrent(
                     Date.valueOf(LocalDate.of(2025, 6, 15)),
                     certType,

@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -301,9 +302,17 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
                     configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -420,7 +429,15 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
+                withHeadingMessageKey(
+                    if (associatedPartiesEnabled) {
+                        "registerProperty.taskList.aboutYourProperty.peopleResponsible"
+                    } else {
+                        // TODO: PDJB-2016: Remove this branch
+                        "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords"
+                    },
+                    shouldUseNumbering = false,
+                )
                 if (associatedPartiesEnabled) {
                     task(journey.ownershipAndLandlordsTask) {
                         withDependencies { journey }
@@ -525,7 +542,15 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
                 configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep }
+                    backStep {
+                        val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
+                        // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+                        if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
+                            electricalSafetyDetailsTask.eicIssueDateStep
+                        } else {
+                            electricalSafetyDetailsTask.eicExpiryDateStep
+                        }
+                    }
                 }
                 configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                     backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
@@ -651,19 +676,28 @@ class PropertyRegistrationJourneyFactory(
                                     Destination.ExternalUrl("$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
                                 }
 
-                                PaymentOutcome.FAILURE -> {
+                                PaymentOutcome.FAILURE, PaymentOutcome.NOT_COMPLETED -> {
                                     Destination(journey.paymentFailedStep)
                                 }
 
                                 PaymentOutcome.IN_PROGRESS -> {
                                     Destination(journey.paymentReturnStep)
                                 }
+
+                                PaymentOutcome.QUOTE_EXPIRED -> {
+                                    Destination(journey.paymentSummaryStep)
+                                }
                             }
                         }
                     }
                     step(journey.paymentFailedStep) {
                         routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
-                        parents { journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE) }
+                        parents {
+                            OrParents(
+                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE),
+                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.NOT_COMPLETED),
+                            )
+                        }
                         noNextDestination()
                         backUrl { null }
                     }
@@ -844,7 +878,7 @@ interface PropertyRegistrationJourneyState :
     override val cyaStep: PropertyRegistrationCyaStep
 
     val answersChangedSinceConfirmation: Boolean
-        get() = cyaStep.formModelOrNull?.submittedFilteredJourneyData.orEmpty() != answersLastChanged?.toString().orEmpty()
+        get() = cyaStep.formModelOrNull?.answersLastChangedAt.orEmpty() != answersLastChanged?.toString().orEmpty()
 
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep

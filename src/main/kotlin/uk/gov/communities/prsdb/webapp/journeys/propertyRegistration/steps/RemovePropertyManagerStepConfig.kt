@@ -5,38 +5,41 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyManagerState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryPropertyManagerYesOrNoFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemovePropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
-// TODO PDJB-1983: replace this placeholder with the real "Are you sure you want to remove (property manager)?" page
-//  (content, form model, validation and cancel link). Rendered with the shared forms/todoWithRadios placeholder page.
 @JourneyFrameworkComponent
 class RemovePropertyManagerStepConfig :
-    AbstractRequestableStepConfig<YesOrNo, TemporaryPropertyManagerYesOrNoFormModel, PropertyManagerState>() {
-    override val formModelClass = TemporaryPropertyManagerYesOrNoFormModel::class
+    AbstractRequestableStepConfig<YesOrNo, RemovePropertyManagerFormModel, PropertyManagerState>() {
+    override val formModelClass = RemovePropertyManagerFormModel::class
 
     override fun getStepSpecificContent(state: PropertyManagerState): Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "registerProperty.propertyManager.todo.removePropertyManager.heading",
-            "fieldName" to "answer",
+            "fieldSetHeading" to "registerProperty.propertyManager.remove.fieldSetHeading",
+            "fieldSetHint" to "registerProperty.propertyManager.remove.fieldSetHint",
+            "optionalFieldSetHeadingParam" to state.propertyManagerDetailsStep.formModel.name,
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+            "showSectionHeader" to true,
         )
 
-    override fun chooseTemplate(state: PropertyManagerState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: PropertyManagerState) = "forms/areYouSureForm"
 
-    override fun mode(state: PropertyManagerState): YesOrNo? = getFormModelFromStateOrNull(state)?.toYesOrNo()
+    override fun mode(state: PropertyManagerState): YesOrNo =
+        if (state.propertyManagerDetailsStep.formModelOrNull == null) YesOrNo.YES else YesOrNo.NO
 
     override fun afterStepDataIsAdded(state: PropertyManagerState) {
-        if (mode(state) == YesOrNo.YES) {
+        if (getFormModelFromState(state).wantsToProceed == true) {
             state.propertyManagerDetailsStep.clearFormData()
         }
+        state.removePropertyManagerStep.clearFormData()
     }
 }
 
 @JourneyFrameworkComponent
 final class RemovePropertyManagerStep(
     stepConfig: RemovePropertyManagerStepConfig,
-) : RequestableStep<YesOrNo, TemporaryPropertyManagerYesOrNoFormModel, PropertyManagerState>(stepConfig) {
+) : RequestableStep<YesOrNo, RemovePropertyManagerFormModel, PropertyManagerState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-property-manager"
     }

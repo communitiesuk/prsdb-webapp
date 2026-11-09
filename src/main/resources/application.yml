@@ -32,6 +32,11 @@ spring:
     multipart:
       enabled: false
 
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: fail
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
@@ -42,6 +47,16 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
+  allowlist-fallback-address: ${EMAILNOTIFICATIONS_ALLOWLIST_FALLBACK_ADDRESS:}
+
+email-queue:
+  name: ${EMAIL_QUEUE_NAME:}
+  listener:
+    auto-startup: true
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 30
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 900
 
 os:
   api-key: ${OS_API_KEY}
@@ -116,6 +131,8 @@ gov-uk-pay:
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2026-11-01}
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: ${GOV_UK_PAY_MANUAL_INTERVENTION_EMAIL_ADDRESS:Team-PRSDB+payment-manual-intervention@softwire.com}
+  payment-status-retry-delay: 2s
 
 cloudwatch-metrics:
   ecs:
@@ -178,6 +195,9 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
       enabled: false
       expiry-date: "2027-01-01"
 

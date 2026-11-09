@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import net.datafaker.Faker
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -49,7 +51,7 @@ object NftDataFaker {
     private var runReference: Instant = Instant.now()
 
     /**
-     * Resets all random sources so that a seeding run produces identical data every time.
+     * Resets all random sources so that a seeding run produces identical data for a given seed and reference date.
      * Must be called before seeding starts.
      */
     fun reset(
@@ -448,6 +450,9 @@ object NftDataFaker {
         return Pair(propertyType, otherPropertyType)
     }
 
+    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
+    fun generateOwnershipTypeBeforePdjb955(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
+
     fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
 
     fun generateNumHouseholdsAndTenants(): Pair<Int, Int> {
@@ -587,10 +592,20 @@ object NftDataFaker {
                 null
             }
 
+        // EICs store an issue date rather than an expiry date
+        val eicIssueDate =
+            if (electricalCertType == CertificateType.Eic) {
+                electricalSafetyExpiryDate?.let { Date.valueOf(it.toLocalDate().minusYears(EIC_VALIDITY_YEARS.toLong())) }
+            } else {
+                null
+            }
+        val eicrExpiryDate = if (electricalCertType == CertificateType.Eic) null else electricalSafetyExpiryDate
+
         return PropertyComplianceData(
             hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
             electricalCertType = electricalCertType,
             epcNumber = epcNumber,
             epcExpiryDate = epcExpiryDate,
@@ -870,7 +885,8 @@ object NftDataFaker {
     data class PropertyComplianceData(
         val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
-        val electricalSafetyExpiryDate: Date?,
+        val eicrExpiryDate: Date?,
+        val eicIssueDate: Date?,
         val electricalCertType: CertificateType?,
         val epcNumber: String?,
         val epcExpiryDate: Date?,
@@ -878,5 +894,8 @@ object NftDataFaker {
         val epcEnergyRating: String?,
         val epcExemptionReason: EpcExemptionReason?,
         val epcMeesExemptionReason: MeesExemptionReason?,
-    )
+    ) {
+        val electricalSafetyExpiryDate: Date?
+            get() = eicIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EIC_VALIDITY_YEARS.toLong())) } ?: eicrExpiryDate
+    }
 }

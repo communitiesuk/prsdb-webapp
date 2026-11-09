@@ -30,6 +30,7 @@ spring:
       data-locations:
         - classpath:data-local.sql
         - classpath:data-metrics-local.sql
+        - classpath:data-placeholder-freeholders.sql
       continue-on-error: true
 
   data:
@@ -76,6 +77,14 @@ local:
     transientExceptionPostcode: TE99 9TF
     persistentExceptionPostcode: PE99 9PF
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
+  sqs:
+    endpoint: http://localhost:${ELASTICMQ_PORT:9324}
+
+email-queue:
+  name: prsdb-email-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2
@@ -111,6 +120,8 @@ gov-uk-pay:
   # How long a payment stays in progress after the mock card page, so the payment processing page can be seen. Set it
   # longer than paymentStatusPoller.js keeps checking to see the manual check instead.
   mock-card-entry-delay-seconds: ${MOCK_GOV_UK_PAY_CARD_ENTRY_DELAY_SECONDS:2}
+  mock-failing-calls-from-capture: ${MOCK_GOV_UK_PAY_FAILING_CALLS_FROM_CAPTURE:0}
+  mock-failing-capture-takes-payment: ${MOCK_GOV_UK_PAY_FAILING_CAPTURE_TAKES_PAYMENT:true}
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
@@ -152,7 +163,10 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
-      enabled: false
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
+      enabled: true
       expiry-date: "2027-01-01"
 
 ---

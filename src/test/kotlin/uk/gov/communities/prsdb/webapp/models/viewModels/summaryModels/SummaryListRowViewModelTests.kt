@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 
 class SummaryListRowViewModelTests {
@@ -12,7 +12,7 @@ class SummaryListRowViewModelTests {
         val convertableValues =
             listOf(true, false) +
                 PropertyType.entries +
-                OwnershipType.entries +
+                OwnershipTypeBeforePdjb955.entries +
                 LicensingType.entries
     }
 

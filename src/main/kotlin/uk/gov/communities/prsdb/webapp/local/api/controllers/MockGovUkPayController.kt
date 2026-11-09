@@ -44,6 +44,10 @@ import kotlin.random.Random
  *
  * After the mock card page, a payment stays in progress for `gov-uk-pay.mock-card-entry-delay-seconds`, as a real
  * payment can while GOV.UK Pay finishes processing it, so that our payment processing page can be seen locally.
+ *
+ * Set `gov-uk-pay.mock-failing-calls-from-capture` to make that many of a payment's calls fail with `503`, starting
+ * with its first capture, and `gov-uk-pay.mock-failing-capture-takes-payment` to choose whether that failing capture
+ * still takes the payment.
  */
 @Profile("local")
 @PrsdbRestController
@@ -51,6 +55,8 @@ import kotlin.random.Random
 class MockGovUkPayController(
     @Value("\${server.port}") private val serverPort: String,
     @Value("\${gov-uk-pay.mock-card-entry-delay-seconds}") private val cardEntryDelaySeconds: Long,
+    @Value("\${gov-uk-pay.mock-failing-calls-from-capture}") private val failingCallsFromCapture: Int,
+    @Value("\${gov-uk-pay.mock-failing-capture-takes-payment}") private val failingCaptureTakesPayment: Boolean,
     private val objectMapper: ObjectMapper,
     private val paymentRepository: PaymentRepository,
 ) {
@@ -115,6 +121,7 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
+        if (payment.consumeFailingCall()) return unavailable()
         return jsonResponse(HttpStatus.OK, payment.toResponseJson())
     }
 
@@ -123,13 +130,18 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
-        if (payment.status != GovUkPayPaymentStatus.CAPTURABLE) {
-            return jsonResponse(
-                HttpStatus.BAD_REQUEST,
-                errorJson("P0104", "Payment cannot be captured because it is not in a capturable state"),
-            )
+        payment.startFailingCalls(failingCallsFromCapture)
+        if (payment.consumeFailingCall()) {
+            if (failingCaptureTakesPayment && payment.status == GovUkPayPaymentStatus.CAPTURABLE) {
+                payment.markCaptured()
+            }
+            return unavailable()
         }
-        payment.markCaptured()
+        when (payment.status) {
+            GovUkPayPaymentStatus.CAPTURABLE -> payment.markCaptured()
+            GovUkPayPaymentStatus.SUCCESS -> {}
+            else -> return jsonResponse(HttpStatus.CONFLICT, errorJson("P1003", "GOV.UK Pay could not capture this payment"))
+        }
         return ResponseEntity.noContent().build()
     }
 
@@ -138,6 +150,7 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = findPayment(paymentId) ?: return notFound()
+        if (payment.consumeFailingCall()) return unavailable()
         if (payment.finished) {
             return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P0501", "Cancellation of payment failed"))
         }
@@ -179,7 +192,8 @@ class MockGovUkPayController(
             PaymentStatus.CAPTURABLE -> storedPayment.markCapturable()
             PaymentStatus.SUCCEEDED -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
             PaymentStatus.FAILED -> storedPayment.markFailed()
-            PaymentStatus.CANCELLED -> storedPayment.markCancelled()
+            PaymentStatus.CANCELLED, PaymentStatus.CANCELLING -> storedPayment.markCancelled()
+            PaymentStatus.MANUAL_INTERVENTION -> storedPayment.markCaptured(lastModifiedDate ?: paymentCreatedAt)
         }
         return storedPayment
     }
@@ -306,6 +320,9 @@ class MockGovUkPayController(
 
     private fun notFound(): ResponseEntity<String> = jsonResponse(HttpStatus.NOT_FOUND, errorJson("P0200", "Not found"))
 
+    private fun unavailable(): ResponseEntity<String> =
+        jsonResponse(HttpStatus.SERVICE_UNAVAILABLE, errorJson("P0999", "GOV.UK Pay is unavailable"))
+
     private fun jsonResponse(
         status: HttpStatus,
         body: String,
@@ -351,6 +368,23 @@ class MockGovUkPayController(
             get() = status in GovUkPayPaymentStatus.FINISHED_STATUSES
 
         private var cardEntryCompletesAt: Instant? = null
+
+        private var haveFailingCallsStarted = false
+        private var failingCallsRemaining = 0
+
+        @Synchronized
+        fun startFailingCalls(calls: Int) {
+            if (haveFailingCallsStarted) return
+            haveFailingCallsStarted = true
+            failingCallsRemaining = calls
+        }
+
+        @Synchronized
+        fun consumeFailingCall(): Boolean {
+            if (failingCallsRemaining <= 0) return false
+            failingCallsRemaining--
+            return true
+        }
 
         @Synchronized
         fun enterCardDetails(completesAt: Instant) {

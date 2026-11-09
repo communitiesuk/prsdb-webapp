@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.services.BeforePdjb1666EicDateService
+import uk.gov.communities.prsdb.webapp.services.AfterPdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import java.time.Instant
 import java.time.LocalDate
@@ -28,7 +28,8 @@ class MockPropertyComplianceData {
                 listOf(FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId")),
             gasSafetyCertIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             hasGasSupply: Boolean = true,
-            electricalSafetyExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
+            eicrExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
+            eicIssueDate: LocalDate? = null,
             electricalCertType: CertificateType? = CertificateType.Eicr,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
@@ -41,7 +42,8 @@ class MockPropertyComplianceData {
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             hasGasSupply = hasGasSupply,
             gasSafetyFileUploads = gasSafetyFileUploads.toMutableList(),
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
             electricalCertType = electricalCertType,
             epcUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
@@ -79,7 +81,7 @@ class MockPropertyComplianceData {
                 mock(),
                 mock(),
                 mock(),
-                BeforePdjb1666EicDateService(),
+                AfterPdjb1666EicDateService(),
                 MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
             )
         }

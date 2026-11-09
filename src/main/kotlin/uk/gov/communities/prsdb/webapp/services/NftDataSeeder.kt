@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.Instant
@@ -242,6 +243,7 @@ class NftDataSeeder(
 
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
+        val freeholderStmt = nftDataSeederDao.prepareFreeholderStatement()
         val ownershipPaymentStmt = nftDataSeederDao.prepareOwnedPropertyPaymentStatement()
         val landlordMembershipStmt = nftDataSeederDao.prepareLandlordshipMembersStatement()
         val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
@@ -314,6 +316,7 @@ class NftDataSeeder(
                             addPropertyOwnershipToBatch(
                                 registrationNumberStmt,
                                 propertyOwnershipStmt,
+                                freeholderStmt,
                                 ownershipPaymentStmt,
                                 landlordMembershipStmt,
                                 licenceStmt,
@@ -355,6 +358,7 @@ class NftDataSeeder(
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
+                            freeholderStmt.executeBatch()
                             ownershipPaymentStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
@@ -383,6 +387,7 @@ class NftDataSeeder(
             registrationNumberStmt.executeBatch()
             licenceStmt.executeBatch()
             propertyOwnershipStmt.executeBatch()
+            freeholderStmt.executeBatch()
             ownershipPaymentStmt.executeBatch()
             landlordMembershipStmt.executeBatch()
             fileUploadStmt.executeBatch()
@@ -405,6 +410,7 @@ class NftDataSeeder(
 
             licenceStmt.close()
             propertyOwnershipStmt.close()
+            freeholderStmt.close()
             ownershipPaymentStmt.close()
             landlordMembershipStmt.close()
             fileUploadStmt.close()
@@ -653,6 +659,7 @@ class NftDataSeeder(
     private fun addPropertyOwnershipToBatch(
         registrationNumberStmt: PreparedStatement,
         propertyOwnershipStmt: PreparedStatement,
+        freeholderStmt: PreparedStatement,
         paymentStmt: PreparedStatement,
         membershipStmt: PreparedStatement,
         licenceStmt: PreparedStatement,
@@ -696,7 +703,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
         propertyOwnershipStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        propertyOwnershipStmt.setInt(4, NftDataFaker.generateOwnershipType().ordinal)
+        val ownershipType = NftDataFaker.generateOwnershipType()
+        propertyOwnershipStmt.setInt(4, ownershipType.ordinal)
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
         propertyOwnershipStmt.setLong(7, registrationNumberId)
@@ -718,17 +726,32 @@ class NftDataSeeder(
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
         propertyOwnershipStmt.setDate(23, renewalDate)
+        propertyOwnershipStmt.setInt(24, NftDataFaker.generateOwnershipTypeBeforePdjb955().ordinal)
         propertyOwnershipStmt.addBatch()
 
+        // A "no details known" placeholder.
+        // TODO PDJB-1957: seed realistic associated parties once the journey defines their shape -
+        //  named freeholders, superior landlords and property managers - so that NFT exercises
+        //  those joins at a representative volume.
+        //  Their addresses should come from landlordAddressGenerator, which is unrestricted: unlike
+        //  property addresses they can be duplicated and must not consume the available pool.
+        if (ownershipType.requiresFreeholderRecords()) {
+            freeholderStmt.setTimestamp(1, createdDate)
+            freeholderStmt.setLong(2, propertyOwnershipId)
+            freeholderStmt.addBatch()
+        }
+
+        val paymentCreatedAt = NftDataFaker.generatePaymentCreated(createdDate)
         paymentStmt.setString(1, NftDataFaker.generatePaymentId())
         paymentStmt.setTimestamp(2, createdDate)
         paymentStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
         paymentStmt.setInt(4, NftDataFaker.generatePaymentAmount())
         paymentStmt.setString(5, NftDataFaker.generatePaymentReference())
-        paymentStmt.setTimestamp(6, NftDataFaker.generatePaymentCreated(createdDate))
-        paymentStmt.setDate(7, renewalDate)
-        paymentStmt.setString(8, landlordDetails.subjectId)
-        paymentStmt.setLong(9, propertyOwnershipId)
+        paymentStmt.setTimestamp(6, paymentCreatedAt)
+        paymentStmt.setDate(7, Date.valueOf(paymentCreatedAt.toInstant().atZone(DateTimeHelper.UK_ZONE).toLocalDate()))
+        paymentStmt.setDate(8, renewalDate)
+        paymentStmt.setString(9, landlordDetails.subjectId)
+        paymentStmt.setLong(10, propertyOwnershipId)
         paymentStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
@@ -825,19 +848,20 @@ class NftDataSeeder(
         propertyComplianceStmt.setLong(4, propertyOwnershipId)
         propertyComplianceStmt.setDateOrNull(5, complianceData.gasSafetyCertIssueDate)
         propertyComplianceStmt.setBooleanOrNull(6, complianceData.hasGasSupply)
-        propertyComplianceStmt.setDateOrNull(7, complianceData.electricalSafetyExpiryDate)
-        propertyComplianceStmt.setIntOrNull(8, complianceData.electricalCertType?.ordinal)
+        propertyComplianceStmt.setDateOrNull(7, complianceData.eicrExpiryDate)
+        propertyComplianceStmt.setDateOrNull(8, complianceData.eicIssueDate)
+        propertyComplianceStmt.setIntOrNull(9, complianceData.electricalCertType?.ordinal)
         propertyComplianceStmt.setStringOrNull(
-            9,
+            10,
             complianceData.epcNumber?.let {
                 "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
             },
         )
-        propertyComplianceStmt.setDateOrNull(10, complianceData.epcExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(11, complianceData.tenancyStartedBeforeEpcExpiry)
-        propertyComplianceStmt.setStringOrNull(12, complianceData.epcEnergyRating)
-        propertyComplianceStmt.setIntOrNull(13, complianceData.epcExemptionReason?.ordinal)
-        propertyComplianceStmt.setIntOrNull(14, complianceData.epcMeesExemptionReason?.ordinal)
+        propertyComplianceStmt.setDateOrNull(11, complianceData.epcExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(12, complianceData.tenancyStartedBeforeEpcExpiry)
+        propertyComplianceStmt.setStringOrNull(13, complianceData.epcEnergyRating)
+        propertyComplianceStmt.setIntOrNull(14, complianceData.epcExemptionReason?.ordinal)
+        propertyComplianceStmt.setIntOrNull(15, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount

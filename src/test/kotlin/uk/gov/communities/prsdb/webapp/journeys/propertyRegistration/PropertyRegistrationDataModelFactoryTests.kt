@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
@@ -164,7 +164,7 @@ class PropertyRegistrationDataModelFactoryTests {
         val gasCertIssueDate = LocalDate(2024, 6, 15)
 
         val electricalUploadIds = listOf(30L)
-        val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
+        val eicrExpiryDate = LocalDate(2029, 3, 20)
 
         val certificateNumber = "1234-5678-9012-3456-7890"
         val epcUrl = "https://epc.example.com/$certificateNumber"
@@ -183,7 +183,7 @@ class PropertyRegistrationDataModelFactoryTests {
             gasUploadIds = gasUploadIds,
             gasCertIssueDate = gasCertIssueDate,
             electricalUploadIds = electricalUploadIds,
-            electricalCertExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
             electricalCertType = CertificateType.Eicr,
             acceptedEpc = acceptedEpc,
             epcUrl = epcUrl,
@@ -201,7 +201,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(gasUploadIds, result.gasSafetyFileUploadIds)
         assertEquals(false, result.gasSafetyCertProvideLater)
         assertEquals(electricalUploadIds, result.electricalSafetyFileUploadIds)
-        assertEquals(electricalSafetyExpiryDate.toJavaLocalDate(), result.electricalSafetyExpiryDate)
+        assertEquals(eicrExpiryDate.toJavaLocalDate(), result.eicrExpiryDate)
         assertEquals(CertificateType.Eicr, result.electricalCertType)
         assertEquals(false, result.electricalSafetyCertProvideLater)
         assertEquals(epcUrl, result.epcCertificateUrl)
@@ -212,6 +212,34 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(meesExemptionReason, result.epcMeesExemptionReason)
         assertEquals(false, result.epcProvideLater)
         assertEquals(false, result.licenseProvideLater)
+    }
+
+    @Test
+    fun `fromJourneyState returns the EIC issue date from state`() {
+        val eicIssueDate = LocalDate(2024, 3, 20)
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = CertificateType.Eic, eicIssueDate = eicIssueDate)
+
+        val result = factory.fromJourneyState(mockState)
+
+        assertEquals(eicIssueDate.toJavaLocalDate(), result.eicIssueDate)
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        assertNull(result.eicExpiryDate)
+        assertNull(result.eicrExpiryDate)
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `fromJourneyState returns the EIC expiry date from state`() {
+        val eicExpiryDate = LocalDate(2029, 3, 20)
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = CertificateType.Eic, eicExpiryDate = eicExpiryDate)
+
+        val result = factory.fromJourneyState(mockState)
+
+        assertEquals(eicExpiryDate.toJavaLocalDate(), result.eicExpiryDate)
+        assertNull(result.eicIssueDate)
+        assertNull(result.eicrExpiryDate)
     }
 
     @Test
@@ -331,7 +359,7 @@ class PropertyRegistrationDataModelFactoryTests {
         ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
         whenever(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(
-            OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD },
+            OwnershipTypeFormModel().apply { ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD },
         )
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
         whenever(mockState.getJointLandlordsTask(any())).thenReturn(mockJointLandlordsTask)
@@ -367,7 +395,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -394,7 +422,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -429,7 +457,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -475,7 +503,7 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
-        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
+        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD }
         whenever(
             mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
         ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
@@ -512,7 +540,10 @@ class PropertyRegistrationDataModelFactoryTests {
         gasUploadIds: List<Long> = emptyList(),
         gasCertIssueDate: LocalDate? = null,
         electricalUploadIds: List<Long> = emptyList(),
-        electricalCertExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
+        eicIssueDate: LocalDate? = null,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         acceptedEpc: EpcDataModel? = null,
         epcUrl: String? = null,
@@ -543,7 +574,10 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
         whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+        whenever(electricalSafetyDetailsTask.getEicrExpiryDateIfReachable()).thenReturn(eicrExpiryDate)
+        whenever(electricalSafetyDetailsTask.getEicIssueDateIfReachable()).thenReturn(eicIssueDate)
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        whenever(electricalSafetyDetailsTask.getEicExpiryDateIfReachable()).thenReturn(eicExpiryDate)
 
         if (acceptedEpc != null) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
@@ -609,7 +643,7 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
         whenever(gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+        whenever(electricalSafetyDetailsTask.getEicrExpiryDateIfReachable()).thenReturn(null)
         whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockGasTask: GasSafetyTask = mock()

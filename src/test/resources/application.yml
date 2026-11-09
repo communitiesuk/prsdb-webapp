@@ -5,6 +5,8 @@ spring:
     aws:
       region:
         static: eu-west-2
+      sqs:
+        queue-not-found-strategy: fail
   mvc:
     format:
       date: "d MMMM yyyy"
@@ -22,6 +24,17 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
   use-production-notify: false
+  allowlist-fallback-address: ""
+
+email-queue:
+  name: prsdb-email-queue
+  listener:
+    # Started only in PrsdbEmailWorkerApplicationTests; stopping a listener when Spring pauses a cached test context waits for its poll to finish
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2
@@ -52,6 +65,8 @@ gov-uk-pay:
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: payments-support@example.com
+  payment-status-retry-delay: 0s
 
 cloudwatch-metrics:
   ecs:
@@ -117,5 +132,8 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
       enabled: false
       expiry-date: "2027-01-01"
