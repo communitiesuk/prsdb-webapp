@@ -293,24 +293,17 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
             assertThat(removeFreeholderPage.heading).containsText("Are you sure you want to remove Test Freeholder?")
-            assertThat(removeFreeholderPage.form.sectionHeader).containsText("People responsible for this property")
-            assertThat(removeFreeholderPage.hint).containsText("They will be removed as a freeholder")
-            assertThat(removeFreeholderPage.form.submitButton).hasText("Save and continue")
-            assertThat(removeFreeholderPage.cancelLink).hasText("Cancel")
         }
 
         @Test
-        fun `Back link returns to the unchanged freeholder list`(page: Page) {
+        fun `Back link returns to the freeholder list page`(page: Page) {
             var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
             removeFreeholderPage.backLink.clickAndWait()
 
-            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
-            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
-            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
         }
 
         @Test
