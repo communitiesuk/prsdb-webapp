@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
@@ -65,7 +64,7 @@ class SaveFreeholderStepConfigTests {
     @Test
     fun `afterStepIsReached adds a new freeholder with the next id when not editing`() {
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         val existingFreeholder = FreeholderDataModel(detailsKnown = true, name = "Existing freeholder")
         whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to existingFreeholder))
         whenever(mockState.editingFreeholderId).thenReturn(null)
@@ -82,7 +81,7 @@ class SaveFreeholderStepConfigTests {
     @Test
     fun `afterStepIsReached replaces the freeholder being edited without changing the next id when editing`() {
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         val otherFreeholder = FreeholderDataModel(detailsKnown = true, name = "Other freeholder")
         whenever(mockState.freeholdersMap).thenReturn(
             mapOf(1 to otherFreeholder, 2 to FreeholderDataModel(detailsKnown = true, name = "Edited freeholder")),
@@ -100,7 +99,7 @@ class SaveFreeholderStepConfigTests {
     @Test
     fun `afterStepIsReached saves the entered name and email when the contact type is email`() {
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.EMAIL)
+        setupStepsWithAnswers(true, FreeholderContactType.EMAIL)
         whenever(mockState.freeholdersMap).thenReturn(null)
         whenever(mockState.editingFreeholderId).thenReturn(null)
         whenever(mockState.nextFreeholderId).thenReturn(null)
@@ -121,7 +120,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached saves the selected address and lookup answers when the contact type is postal address`() {
         // Arrange
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
+        setupStepsWithAnswers(true, FreeholderContactType.POSTAL_ADDRESS)
         val staleManualFormModel = ManualAddressFormModel().apply { addressLineOne = "Previously entered road" }
         setupAddressAnswers(selectedAddress = SELECTED_ADDRESS.singleLineAddress, manualFormModel = staleManualFormModel)
         whenever(addressTask.getAddress()).thenReturn(SELECTED_ADDRESS)
@@ -149,7 +148,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached saves the manual address answers when the address was entered manually`() {
         // Arrange
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
+        setupStepsWithAnswers(true, FreeholderContactType.POSTAL_ADDRESS)
         val manualFormModel =
             ManualAddressFormModel().apply {
                 addressLineOne = "2 Manual Road"
@@ -190,7 +189,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached saves manual address answers after a failed search despite an earlier selected address`() {
         // Arrange
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.YES, FreeholderContactType.POSTAL_ADDRESS)
+        setupStepsWithAnswers(true, FreeholderContactType.POSTAL_ADDRESS)
         val previousSelection = SELECTED_ADDRESS.singleLineAddress
         val manualFormModel =
             ManualAddressFormModel().apply {
@@ -240,7 +239,7 @@ class SaveFreeholderStepConfigTests {
     @Test
     fun `afterStepIsReached clears the freeholder form data so the next freeholder starts empty`() {
         val stepConfig = SaveFreeholderStepConfig()
-        setupStepsWithAnswers(YesOrNo.NO)
+        setupStepsWithAnswers(false)
         whenever(mockState.freeholdersMap).thenReturn(emptyMap())
         whenever(mockState.editingFreeholderId).thenReturn(null)
         whenever(mockState.nextFreeholderId).thenReturn(1)
@@ -269,7 +268,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached throws when details are provided but the contact type answer is missing`() {
         val stepConfig = SaveFreeholderStepConfig()
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
-        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = YesOrNo.YES))
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(null)
         whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
@@ -282,7 +281,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached throws when details are provided but the name answer is missing`() {
         val stepConfig = SaveFreeholderStepConfig()
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
-        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = YesOrNo.YES))
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(FreeholderContactTypeFormModel(contactType = FreeholderContactType.EMAIL))
         whenever(mockState.freeholderNameStep).thenReturn(nameStep)
@@ -297,7 +296,7 @@ class SaveFreeholderStepConfigTests {
     fun `afterStepIsReached throws when details are provided but the email answer is missing`() {
         val stepConfig = SaveFreeholderStepConfig()
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
-        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = YesOrNo.YES))
+        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = true))
         whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
         whenever(contactTypeStep.formModelOrNull).thenReturn(FreeholderContactTypeFormModel(contactType = FreeholderContactType.EMAIL))
         whenever(mockState.freeholderNameStep).thenReturn(nameStep)
@@ -311,7 +310,7 @@ class SaveFreeholderStepConfigTests {
     }
 
     private fun setupStepsWithAnswers(
-        provideDetails: YesOrNo,
+        provideDetails: Boolean,
         contactType: FreeholderContactType? = null,
     ) {
         whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
