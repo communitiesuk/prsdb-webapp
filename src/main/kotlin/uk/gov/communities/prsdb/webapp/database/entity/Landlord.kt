@@ -14,6 +14,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import java.time.LocalDate
 import java.time.MonthDay
 
 @Entity
@@ -52,6 +53,18 @@ abstract class Landlord : ModifiableAuditableEntity() {
     open var anniversaryMonth: Int? = null
         protected set
 
+    @Column(name = "is_active", nullable = false)
+    open var isActive: Boolean = false
+        protected set
+
+    @Column(name = "has_registered_property", nullable = false)
+    open var hasRegisteredProperty: Boolean = false
+        protected set
+
+    @Column(name = "deactivation_date")
+    open var deactivationDate: LocalDate? = null
+        protected set
+
     val anniversary: MonthDay?
         get() {
             val day = anniversaryDay
@@ -70,5 +83,9 @@ abstract class Landlord : ModifiableAuditableEntity() {
             anniversaryDay = monthDay.dayOfMonth
             anniversaryMonth = monthDay.monthValue
         }
+    }
+
+    fun markAsHavingRegisteredProperty() {
+        hasRegisteredProperty = true
     }
 }

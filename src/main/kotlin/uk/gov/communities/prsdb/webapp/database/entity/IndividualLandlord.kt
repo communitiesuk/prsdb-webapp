@@ -47,10 +47,6 @@ class IndividualLandlord() : Landlord() {
     @Column(name = "individual_date_of_birth")
     var dateOfBirth: LocalDate? = null
 
-    @Column(name = "individual_is_active")
-    var isActive: Boolean = false
-        private set
-
     @Column(name = "individual_is_verified")
     var isVerified: Boolean = false
         private set

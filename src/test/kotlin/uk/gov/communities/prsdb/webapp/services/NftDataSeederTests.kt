@@ -207,6 +207,27 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase marks exactly the landlords with registered properties as having registered a property`() {
+        newSeeder().seedDatabase()
+
+        val mismatchedCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM landlord l
+                WHERE l.has_registered_property <> EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id)
+                """.trimIndent(),
+                Long::class.java,
+            )
+        val registeredCount =
+            jdbcTemplate.queryForObject("SELECT count(*) FROM landlord WHERE has_registered_property", Long::class.java)!!
+
+        assertEquals(0L, mismatchedCount)
+        assertTrue(registeredCount > 0, "Expected some landlords to have registered a property")
+        assertTrue(registeredCount < numOfLandlords, "Expected some landlords not to have registered a property")
+    }
+
+    @Test
     fun `seedDatabase gives every organisation landlord a registrant admin user and any extra users have their own prsdb user`() {
         newSeeder().seedDatabase()
 
