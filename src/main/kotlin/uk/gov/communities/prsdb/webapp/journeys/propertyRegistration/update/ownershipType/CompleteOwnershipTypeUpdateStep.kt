@@ -25,13 +25,14 @@ class CompleteOwnershipTypeUpdateStepConfig(
         try {
             propertyOwnershipService.updateOwnershipType(
                 state.propertyId,
-                // TODO PDJB-1992: handle the ASSOCIATED_PARTIES flag here, either by making this step
-                //  flag-aware or by replacing this journey with a flag-on version. Until then it
-                //  prefills from the legacy column via OwnershipTypeFormModel.fromPropertyOwnership and
-                //  converts the answer back, so an ownership type with no legacy equivalent, such as
-                //  TENANTS_IN_COMMON, is rewritten even when the user saves without changing their
-                //  answer. Leave TODO PDJB-2016 markers on whatever flag-off code remains, so that it is
-                //  deleted with the flag.
+                // TODO PDJB-1992: handle the ASSOCIATED_PARTIES flag here. Decide whether to make this
+                //  step flag-aware or to replace this journey with a flag-on version, and make sure each
+                //  version passes the right ownership type to updateOwnershipType: take it from the task
+                //  when the flag is on, and keep converting the legacy answer with
+                //  OwnershipTypeConverter.convert when it is off. Until that is done the legacy prefill
+                //  means an ownership type with no legacy equivalent, such as TENANTS_IN_COMMON, is
+                //  rewritten even when the user saves without changing their answer. Mark whatever
+                //  flag-off code remains with TODO PDJB-2016, so it is deleted with the flag.
                 OwnershipTypeConverter.convert(
                     state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
                 ),

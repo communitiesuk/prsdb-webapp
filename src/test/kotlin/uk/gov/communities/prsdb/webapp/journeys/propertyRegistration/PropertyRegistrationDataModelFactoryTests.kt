@@ -483,6 +483,8 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     private fun setupStateForPropertyRegistration(
+        // TODO PDJB-2019: remove this parameter once the legacy ownership type column is gone. It
+        //  exists only so that one test can exercise the legacy conversion.
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
     ) {
         val mockOccupiedStep = mock<OccupiedStep>()
