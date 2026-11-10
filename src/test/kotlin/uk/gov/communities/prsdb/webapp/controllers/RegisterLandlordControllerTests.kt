@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
+import java.time.LocalDate
 
 @WebMvcTest(RegisterLandlordController::class)
 class RegisterLandlordControllerTests(
@@ -272,7 +273,7 @@ class RegisterLandlordControllerTests(
             .andExpect {
                 status { isOk() }
                 model {
-                    attribute("deactivationDate", "30 November 2026")
+                    attribute("deactivationDate", LocalDate.of(2026, 11, 30))
                 }
             }
     }

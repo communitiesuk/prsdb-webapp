@@ -31,8 +31,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @PrsdbController
 @RequestMapping(LANDLORD_REGISTRATION_ROUTE)
@@ -87,10 +85,7 @@ class RegisterLandlordController(
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check and always add the deactivation date
         if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             val deactivationDate = LandlordDeactivationDateHelper.getDeactivationDateFromCreatedDate(landlord.createdDate)
-            model.addAttribute(
-                "deactivationDate",
-                deactivationDate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
-            )
+            model.addAttribute("deactivationDate", deactivationDate.toJavaLocalDate())
         }
 
         val surveyUrl =
