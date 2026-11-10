@@ -168,6 +168,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (85, '08/25/26', 1502423347, 1),
        (86, '01/15/25', 1502423348, 0),
        (87, '01/15/25', 1502423351, 0),
+       (88, '01/15/25', 1502423352, 0),
        (900, '07/23/26', 1502423349, 1), -- Test org landlord (Team-PRSDB+orglandlord)
        (901, '07/23/26', 1502423350, 1); -- Test editor org landlord (Team-PRSDB+orglandlordeditor)
 
@@ -234,13 +235,14 @@ VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB
        (56, '07/23/26', '07/23/26', 5010, 'Joint Org House, PRSDB Road, JO1 1AA', 1, 'JO1 1AA', 'Joint Org House', 'PRSDB Road'),
        (57, '08/19/26', '08/19/26', 5011, 'Letting Agent House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Letting Agent House', 'PRSDB Road'),
        (58, '08/19/26', '08/19/26', 5012, 'Delegated At Registration House, PRSDB Road, EG1 2AZ', 1, 'EG1 2AZ', 'Delegated At Registration House', 'PRSDB Road'),
-       (59, '01/15/25', '01/15/25', 5013, 'Succeeded Payment House, PRSDB Road, SP1 1AA', 1, 'SP1 1AA', 'Succeeded Payment House', 'PRSDB Road');
+       (59, '01/15/25', '01/15/25', 5013, 'Succeeded Payment House, PRSDB Road, SP1 1AA', 1, 'SP1 1AA', 'Succeeded Payment House', 'PRSDB Road'),
+       (60, '01/15/25', '01/15/25', 5015, 'Inactive House, PRSDB Road, IN1 1AA', 1, 'IN1 1AA', 'Inactive House', 'PRSDB Road');
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', true, true),
        (2, '09/13/24', '09/13/24', 2, 2, '08/13/2001', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
@@ -403,7 +405,9 @@ VALUES (39, true, 1, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_
        (48, true, 1, 1, 0, 0, 83, 56, '07/23/26', '07/23/26', null, 1, null, null, null, null, null, null, null, null, true, false, null, false, false, 'email@example.com', 1, current_date + 365),
        (49, true, 1, 1, 1, 2, 84, 57, '08/19/26', '08/19/26', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365),
        (50, true, 1, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
-       (51, true, 1, 1, 1, 2, 87, 59, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365);
+       (51, true, 1, 1, 1, 2, 87, 59, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365),
+       -- PDJB-844: inactive, occupied property with every detail marked "provide later", for the reactivation journey
+       (52, false, 1, 1, 1, 2, 88, 60, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -467,8 +471,13 @@ VALUES (1, 1, '2025-01-15'),
        (36, 48, '2025-07-23'),
        (1, 49, '2026-08-19'),
        (1, 50, '2025-01-15'),
-       (1, 51, '2025-01-15')
+       (1, 51, '2025-01-15'),
+       (1, 52, '2025-01-15')
 ON CONFLICT DO NOTHING;
+
+UPDATE landlord l
+SET has_registered_property = true
+WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
@@ -536,6 +545,7 @@ SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(i
 --   44  PO 45: gas cert + EPC expired, electrical valid      -> "multiple certificates expired" banner.
 --   45  PO 46: gas cert "provide later", electrical + EPC valid -> "add compliance certificates" (missing) banner.
 --   46  PO 40 (11 Complete Fields Road): all certs valid & in date, no provide-later -> no banner.
+--   51  PO 52 (Inactive House): all three certs "provide later", for the PDJB-844 reactivation journey.
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
@@ -559,7 +569,9 @@ VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
         null, null, null, null, true, true, true, false, false, false),
        (50, 51, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, 0,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
+        null, 'c', null, null, true, true, true, false, false, false),
+       (51, 52, '01/15/25', '01/15/25', null, true, null, null, null, null,
+        null, null, null, null, true, true, true, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 

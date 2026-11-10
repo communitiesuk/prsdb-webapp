@@ -304,6 +304,7 @@ class LandlordServiceTests {
             assertEquals("registrant@test.com", saved.registrantEmail)
             assertEquals("072", saved.registrantPhoneNumber)
             assertEquals(registrationNumber, saved.registrationNumber)
+            assertTrue(saved.isActive)
             assertEquals(result, saved)
         }
 

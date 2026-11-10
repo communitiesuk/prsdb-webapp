@@ -2,35 +2,42 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordAddressState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
-// TODO PDJB-1976: replace the placeholder step with the real address search, select and manual entry steps
-//  Make sure that address autofill and clearing works for the change/remove steps -
-//  see how OrgGovBodyMembersTask prefills/clears the address steps
 @JourneyFrameworkComponent
 class SuperiorLandlordAddressTask(
     journeyStateService: JourneyStateService,
-    override val superiorLandlordAddressStep: SuperiorLandlordAddressStep,
-) : TaskWithoutDependencies<SuperiorLandlordAddressState>(journeyStateService),
-    SuperiorLandlordAddressState {
-    override val taskState get() = this
+    lookupAddressStep: LookupAddressStep,
+    selectAddressStep: SelectAddressStep,
+    noAddressFoundStep: NoAddressFoundStep,
+    manualAddressStep: ManualAddressStep,
+) : AddressTask(
+        journeyStateService,
+        lookupAddressStep,
+        selectAddressStep,
+        noAddressFoundStep,
+        manualAddressStep,
+    ) {
+    override val lookupAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "registerProperty.superiorLandlords.address.lookup.fieldSetHeading",
+        )
 
-    // TODO PDJB-1976: Ensure that the address task can clear form data & remove this if it is redundant
-    fun clearFormData() {
-        superiorLandlordAddressStep.clearFormData()
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf("fieldSetHeading" to "registerProperty.superiorLandlords.address.select.fieldSetHeading")
+
+    override val manualAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "registerProperty.superiorLandlords.address.manual.fieldSetHeading",
+            "fieldSetHint" to null,
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
+
+    companion object {
+        const val ROUTE_SEGMENT = "superior-landlord-address"
     }
-
-    override fun makeSubJourney(state: SuperiorLandlordAddressState) =
-        subJourney(state) {
-            step(journey.superiorLandlordAddressStep) {
-                routeSegment(SuperiorLandlordAddressStep.ROUTE_SEGMENT)
-                nextStep { exitStep }
-            }
-            exitStep {
-                parents { journey.superiorLandlordAddressStep.isComplete() }
-            }
-        }
 }
