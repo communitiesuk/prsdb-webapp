@@ -120,7 +120,7 @@ class PropertyRegistrationService(
                     null
                 }
 
-            // TODO PDJB-1986: save the property manager (if provided) and link it to the new property ownership
+            // TODO PDJB-2015: save the property manager (if provided) and link it to the new property ownership
             // TODO PDJB-2015: create the freeholders from the registration journey's answers.
             // TODO PDJB-2015: create the superior landlords from the registration journey's answers.
             //  Both hold a foreign key to the property ownership, so unlike the licence and the property

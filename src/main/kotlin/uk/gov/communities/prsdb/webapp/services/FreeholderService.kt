@@ -17,16 +17,22 @@ class FreeholderService(
         propertyOwnership: PropertyOwnership,
         freeholders: List<FreeholderDataModel>,
     ) {
-        freeholders.forEach { freeholder ->
-            freeholderRepository.save(
-                Freeholder(
-                    propertyOwnership = propertyOwnership,
-                    name = freeholder.name,
-                    email = freeholder.email,
-                    address = freeholder.address?.let { addressService.findOrCreateAddress(it) },
-                ),
-            )
-        }
+        freeholders.forEach { createFreeholder(propertyOwnership, it) }
+    }
+
+    @Transactional
+    fun createFreeholder(
+        propertyOwnership: PropertyOwnership,
+        freeholder: FreeholderDataModel,
+    ) {
+        freeholderRepository.save(
+            Freeholder(
+                propertyOwnership = propertyOwnership,
+                name = freeholder.name,
+                email = freeholder.email,
+                address = freeholder.address?.let { addressService.findOrCreateAddress(it) },
+            ),
+        )
     }
 
     @Transactional
@@ -34,6 +40,9 @@ class FreeholderService(
         freeholderRepository.deleteByPropertyOwnership(propertyOwnership)
     }
 
+    // TODO PDJB-2015/PDJB-1992: remove this once property registration and the ownership type update
+    //  journey both collect real freeholders. It only exists to keep the invariant that an ownership
+    //  type requiring freeholder records always has at least one freeholder row.
     @Transactional
     fun createPlaceholderFreeholder(propertyOwnership: PropertyOwnership) {
         freeholderRepository.save(Freeholder(propertyOwnership = propertyOwnership))

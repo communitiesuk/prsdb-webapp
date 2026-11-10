@@ -17,16 +17,22 @@ class SuperiorLandlordService(
         propertyOwnership: PropertyOwnership,
         superiorLandlords: List<SuperiorLandlordDataModel>,
     ) {
-        superiorLandlords.forEach { superiorLandlord ->
-            superiorLandlordRepository.save(
-                SuperiorLandlord(
-                    propertyOwnership = propertyOwnership,
-                    name = superiorLandlord.name,
-                    email = superiorLandlord.email,
-                    address = superiorLandlord.address?.let { addressService.findOrCreateAddress(it) },
-                ),
-            )
-        }
+        superiorLandlords.forEach { createSuperiorLandlord(propertyOwnership, it) }
+    }
+
+    @Transactional
+    fun createSuperiorLandlord(
+        propertyOwnership: PropertyOwnership,
+        superiorLandlord: SuperiorLandlordDataModel,
+    ) {
+        superiorLandlordRepository.save(
+            SuperiorLandlord(
+                propertyOwnership = propertyOwnership,
+                name = superiorLandlord.name,
+                email = superiorLandlord.email,
+                address = superiorLandlord.address?.let { addressService.findOrCreateAddress(it) },
+            ),
+        )
     }
 
     @Transactional

@@ -325,7 +325,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1984: once real freeholder details can be entered, warn before discarding them.
+    // TODO PDJB-1992: this should take the landlord's freeholder and superior landlord answers (including
+    //  the yes/no superior landlord question) so that changing the ownership type leaves the property in a
+    //  valid state, rather than falling back on a placeholder freeholder.
     @Transactional
     fun updateOwnershipType(
         id: Long,
