@@ -30,6 +30,7 @@ import java.time.LocalDate
 import java.time.MonthDay
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.Random
 import java.util.UUID
@@ -123,7 +124,12 @@ object NftDataFaker {
             null
         }
 
-    fun generateDateOfBirth(): Date = Date.valueOf(faker.timeAndDate().birthday(18, 120))
+    fun generateDateOfBirth(): Date {
+        val referenceDate = referenceDate()
+        val earliestDateOfBirth = referenceDate.minusYears(120).toEpochDay()
+        val latestDateOfBirth = referenceDate.minusYears(18).toEpochDay()
+        return Date.valueOf(LocalDate.ofEpochDay(faker.random().nextLong(earliestDateOfBirth, latestDateOfBirth)))
+    }
 
     fun generateRenewalDate(anniversary: MonthDay): Date = Date.valueOf(RenewalDateHelper.getRenewalDate(anniversary, referenceDate()))
 
@@ -145,7 +151,7 @@ object NftDataFaker {
     }
 
     fun generateLastEmailReminderSentDate(createdDate: Timestamp): Timestamp =
-        Timestamp.valueOf(createdDate.toLocalDateTime().plusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()))
+        Timestamp.from(createdDate.toInstant().plus(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong(), ChronoUnit.DAYS))
 
     fun generateInvitationToken(): UUID = UUID.fromString(faker.internet().uuid())
 
