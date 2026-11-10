@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.EPC
@@ -26,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -87,32 +87,7 @@ class PropertyReactivationJourneyFactory(
                     "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
                 }
             }
-            replaceGasSafetyButtons()
-        }
-    }
-
-    private fun JourneyBuilder<PropertyReactivationJourney>.replaceGasSafetyButtons() {
-        val gasSafetyDetailsTask = journey.gasSafetyTask.gasSafetyDetailsTask
-        configureStep(gasSafetyDetailsTask.hasGasSupplyStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(gasSafetyDetailsTask.hasGasCertStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(gasSafetyDetailsTask.gasCertIssueDateStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(gasSafetyDetailsTask.checkGasCertUploadsStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(gasSafetyDetailsTask.gasCertExpiredStep) {
-            withAdditionalContentProperty {
-                "submitButtonText" to
-                    if (journey.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
-            }
-        }
-        configureStep(journey.gasSafetyTask.checkGasSafetyAnswersStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            useContinueButtons(journey.gasSafetyTask)
         }
     }
 
