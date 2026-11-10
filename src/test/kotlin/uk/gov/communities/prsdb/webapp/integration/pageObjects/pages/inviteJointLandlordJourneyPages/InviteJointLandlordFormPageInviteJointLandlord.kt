@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJoin
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EmailFormPage
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 
@@ -13,6 +12,4 @@ class InviteJointLandlordFormPageInviteJointLandlord(
         page,
         InviteJointLandlordController.getInviteJointLandlordRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT}",
-    ) {
-    val heading = Heading(page.locator("h1"))
-}
+    )

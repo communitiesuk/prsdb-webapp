@@ -326,6 +326,11 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationSuperiorLandlordName()
                 .withSuperiorLandlordName(superiorLandlordName)
 
+        fun beforePropertyRegistrationSuperiorLandlordEmail(existingSuperiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null) =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
+                .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
+
         fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
             beforePropertyRegistrationSuperiorLandlordContactType()
                 .withSuperiorLandlordContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)

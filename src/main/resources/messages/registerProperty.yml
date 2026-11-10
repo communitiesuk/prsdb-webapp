@@ -439,6 +439,12 @@ superiorLandlords:
           label: Postal address
       error:
         missing: Select which contact information you can provide
+  email:
+    fieldSetHeading: What is {0}’s email address?
+    error:
+      missing: Enter an email address
+      invalidFormat: Enter an email address in the correct format, like name@example.com
+      duplicate: You’ve already used this email address for another person in the ownership chain - enter a different email address
   address:
     lookup:
       fieldSetHeading: What is {0}’s address?
