@@ -26,6 +26,9 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
     @Mock
     lateinit var collectionKeyParameterService: CollectionKeyParameterService
 
+    @Mock
+    lateinit var mockConfirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep
+
     private val firstSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "First superior landlord")
     private val secondSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = false)
 
@@ -68,6 +71,7 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
     fun `afterStepDataIsAdded removes the superior landlord with the given key when the user confirms removal`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockState.confirmRemoveSuperiorLandlordStep).thenReturn(mockConfirmRemoveSuperiorLandlordStep)
         whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
         whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
         whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
@@ -85,6 +89,7 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
     fun `afterStepDataIsAdded keeps the superior landlord when the user does not confirm removal`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockState.confirmRemoveSuperiorLandlordStep).thenReturn(mockConfirmRemoveSuperiorLandlordStep)
         whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "false"))
 
         // Act
@@ -98,6 +103,7 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
     fun `afterStepDataIsAdded clears the submitted answer`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockState.confirmRemoveSuperiorLandlordStep).thenReturn(mockConfirmRemoveSuperiorLandlordStep)
         whenever(mockState.getStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
         whenever(collectionKeyParameterService.getParameterOrNull()).thenReturn(1)
         whenever(mockState.superiorLandlordsMap).thenReturn(mapOf(1 to firstSuperiorLandlord, 2 to secondSuperiorLandlord))
@@ -106,7 +112,7 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockState).clearStepData(ConfirmRemoveSuperiorLandlordStep.ROUTE_SEGMENT)
+        verify(mockConfirmRemoveSuperiorLandlordStep).clearFormData()
     }
 
     @Test
