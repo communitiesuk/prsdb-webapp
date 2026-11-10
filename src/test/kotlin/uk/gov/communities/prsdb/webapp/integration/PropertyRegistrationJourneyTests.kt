@@ -809,7 +809,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
-            assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+            assertThat(hasJointLandlordsPage.header).containsText("Joint landlords")
             assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
@@ -1213,7 +1213,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
             // Has Joint Landlords - render page
-            assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+            assertThat(hasJointLandlordsPage.header).containsText("Joint landlords")
             assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
             // fill in and submit
