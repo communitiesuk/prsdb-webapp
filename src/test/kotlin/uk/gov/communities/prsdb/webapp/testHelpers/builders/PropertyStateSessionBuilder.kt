@@ -324,7 +324,7 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationSuperiorLandlordContactType(superiorLandlordName: String = "Test Superior Landlord") =
             beforePropertyRegistrationSuperiorLandlordName()
-                .withSuperiorLandlordName()
+                .withSuperiorLandlordName(superiorLandlordName)
 
         fun beforePropertyRegistrationSuperiorLandlordEmail(existingSuperiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null) =
             beforePropertyRegistrationSuperiorLandlordContactType()

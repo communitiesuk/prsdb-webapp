@@ -363,7 +363,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         @Test
         fun `Cancelling removal returns to the unchanged freeholder list`(page: Page) {
             var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
-            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+            freeholdersListPage
+                .getSummaryCard(1)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
             removeFreeholderPage.cancelLink.clickAndWait()
@@ -377,7 +381,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         @Test
         fun `Answering no returns to the unchanged freeholder list`(page: Page) {
             var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
-            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+            freeholdersListPage
+                .getSummaryCard(1)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
             removeFreeholderPage.submitNo()
@@ -403,7 +411,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                                 ),
                         ),
                 )
-            freeholdersListPage.getSummaryCard(0).getAction("Remove").link.clickAndWait()
+            freeholdersListPage
+                .getSummaryCard(0)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
             removeFreeholderPage.submitYes()
@@ -645,7 +657,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val namePage = assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class)
             assertThat(namePage.form.nameInput).hasValue("Superior Landlord With Address")
             namePage.form.submit()
-            // TODO PDJB-1974: check the contact type is prefilled once the real contact type page is added
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
 
