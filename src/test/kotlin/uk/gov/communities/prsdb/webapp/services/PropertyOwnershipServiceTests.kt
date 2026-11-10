@@ -419,7 +419,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
