@@ -1,9 +1,14 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
+import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.springframework.http.MediaType
 import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
@@ -11,17 +16,23 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.PROPERTY_REACTIVATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @AllowIfLandlord
@@ -30,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class ReactivatePropertyController(
     private val propertyReactivationJourneyFactory: PropertyReactivationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val certificateUploadHelper: CertificateUploadHelper,
 ) {
     // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
@@ -51,6 +63,32 @@ class ReactivatePropertyController(
         @RequestParam formData: FormData,
     ): ModelAndView {
         throwIfPropertyCannotBeReactivated(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
+    }
+
+    // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
+    @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
+    @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun postFileUploadJourneyData(
+        @PathVariable stepPath: String,
+        @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
+        @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
+        @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
+        @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
+        @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
+        request: HttpServletRequest,
+    ): ModelAndView {
+        throwIfPropertyCannotBeReactivated(propertyOwnershipId)
+
+        val stepName = stepPath.trimStart('/')
+        val formData =
+            certificateUploadHelper.uploadFileAndReturnFormModel(
+                CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
+                fileInputIterator,
+                token,
+                request,
+            )
+
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 

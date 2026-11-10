@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.REACTIVATE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
@@ -42,6 +43,9 @@ class ReactivatePropertyControllerTests(
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
+
+    @MockitoBean
+    private lateinit var certificateUploadHelper: CertificateUploadHelper
 
     private val propertyOwnershipId = 1L
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
