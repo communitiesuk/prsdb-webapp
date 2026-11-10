@@ -277,6 +277,84 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
     }
 
     @Nested
+    inner class SuperiorLandlordEmailStep {
+        @Test
+        fun `heading asks for the superior landlord's email address`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+
+            assertThat(emailPage.heading).containsText("What is Test Superior Landlord’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email returns the missing email error`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.submitEmail("")
+
+            assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address")
+        }
+
+        @Test
+        fun `submitting an invalid email returns the format error`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.submitEmail("not-an-email")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `submitting an email already used by another superior landlord returns the duplicate email error`() {
+            val emailPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage(
+                    existingSuperiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = true, email = "james@example.com")),
+                )
+            emailPage.submitEmail("james@example.com")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText(
+                    "You’ve already used this email address for another person in the ownership chain - enter a different email address",
+                )
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding a new superior landlord does not prefill an answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
+
+            val emailPage = assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("")
+        }
+
+        @Test
+        fun `Changing a superior landlord prefills their existing answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Superior Landlord With Email")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
+
+            val emailPage = assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("superior.landlord@example.com")
+        }
+    }
+
+    @Nested
     inner class SuperiorLandlordsListStep {
         @Test
         fun `Superior landlords list shows the number of people in the ownership chain`() {

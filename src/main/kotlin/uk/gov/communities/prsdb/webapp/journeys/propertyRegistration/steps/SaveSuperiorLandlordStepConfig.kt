@@ -37,7 +37,7 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                             "Superior landlord name step data is missing for journey ${state.journeyId}",
                         )
                 when (contactType) {
-                    SuperiorLandlordContactType.EMAIL -> buildSuperiorLandlordWithEmail(name)
+                    SuperiorLandlordContactType.EMAIL -> buildSuperiorLandlordWithEmail(state, name)
                     SuperiorLandlordContactType.POSTAL_ADDRESS -> buildSuperiorLandlordWithAddress(state, name)
                 }
             } else {
@@ -61,17 +61,23 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         state.superiorLandlordProvideDetailsStep.clearFormData()
         state.superiorLandlordNameStep.clearFormData()
         state.superiorLandlordContactTypeStep.clearFormData()
-        // TODO PDJB-1975: check this still clears the real email page correctly
         state.superiorLandlordEmailStep.clearFormData()
         state.superiorLandlordAddressTask.clearFormData()
     }
 
-    private fun buildSuperiorLandlordWithEmail(name: String): SuperiorLandlordDataModel =
+    private fun buildSuperiorLandlordWithEmail(
+        state: SuperiorLandlordsDetailsState,
+        name: String,
+    ): SuperiorLandlordDataModel =
         SuperiorLandlordDataModel(
             detailsKnown = true,
             name = name,
-            // TODO PDJB-1975: save the email address the user entered on the superior landlord email step, throwing if it is missing
-            email = PLACEHOLDER_EMAIL,
+            email =
+                state.superiorLandlordEmailStep.formModelOrNull?.emailAddress
+                    ?: throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "Superior landlord email step data is missing for journey ${state.journeyId}",
+                    ),
         )
 
     private fun buildSuperiorLandlordWithAddress(
@@ -98,11 +104,6 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
             manualCounty = manualFormModel?.county,
             manualPostcode = manualFormModel?.postcode,
         )
-    }
-
-    companion object {
-        // TODO PDJB-1975: remove once the email the user entered is saved instead
-        const val PLACEHOLDER_EMAIL = "placeholder.superior.landlord@example.com"
     }
 }
 
