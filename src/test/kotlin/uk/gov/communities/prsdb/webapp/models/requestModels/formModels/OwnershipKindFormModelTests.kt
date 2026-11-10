@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindOption
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindCheckboxOption
 
 class OwnershipKindFormModelTests {
     @Test
@@ -23,7 +23,7 @@ class OwnershipKindFormModelTests {
     fun `isSelectionValid returns false when a selected value is not a valid option`() {
         val formModel =
             OwnershipKindFormModel().apply {
-                ownershipKinds = mutableListOf(OwnershipKindOption.FREEHOLD.name, "COMMONHOLD")
+                ownershipKinds = mutableListOf(OwnershipKindCheckboxOption.FREEHOLD.name, "COMMONHOLD")
             }
 
         assertFalse(formModel.isSelectionValid())
@@ -49,6 +49,16 @@ class OwnershipKindFormModelTests {
     }
 
     @Test
+    fun `toOwnershipKindCheckboxOptions returns the selected options ignoring unticked and blank checkboxes`() {
+        val formModel =
+            OwnershipKindFormModel().apply {
+                ownershipKinds = mutableListOf(null, "", OwnershipKindCheckboxOption.LEASEHOLD.name)
+            }
+
+        assertEquals(setOf(OwnershipKindCheckboxOption.LEASEHOLD), formModel.toOwnershipKindCheckboxOptions())
+    }
+
+    @Test
     fun `toOwnershipKind returns null when nothing is selected`() {
         assertNull(OwnershipKindFormModel().toOwnershipKind())
     }
@@ -57,10 +67,10 @@ class OwnershipKindFormModelTests {
         @JvmStatic
         fun validSelections() =
             listOf(
-                Arguments.of(listOf(OwnershipKindOption.FREEHOLD.name, null), OwnershipKind.FREEHOLD_ONLY),
-                Arguments.of(listOf(null, OwnershipKindOption.LEASEHOLD.name), OwnershipKind.LEASEHOLD_ONLY),
+                Arguments.of(listOf(OwnershipKindCheckboxOption.FREEHOLD.name, null), OwnershipKind.FREEHOLD_ONLY),
+                Arguments.of(listOf(null, OwnershipKindCheckboxOption.LEASEHOLD.name), OwnershipKind.LEASEHOLD_ONLY),
                 Arguments.of(
-                    listOf(OwnershipKindOption.FREEHOLD.name, OwnershipKindOption.LEASEHOLD.name),
+                    listOf(OwnershipKindCheckboxOption.FREEHOLD.name, OwnershipKindCheckboxOption.LEASEHOLD.name),
                     OwnershipKind.FREEHOLD_AND_LEASEHOLD,
                 ),
             )

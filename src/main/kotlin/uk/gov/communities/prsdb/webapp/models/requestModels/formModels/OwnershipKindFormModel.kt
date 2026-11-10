@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindOption
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindCheckboxOption
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -20,12 +20,19 @@ class OwnershipKindFormModel : FormModel {
     )
     var ownershipKinds: MutableList<String?> = mutableListOf()
 
-    fun isSelectionValid(): Boolean = toOwnershipKind() != null
+    fun isSelectionValid(): Boolean {
+        val selectedValues = nonBlankOwnershipKinds()
+        return selectedValues.isNotEmpty() &&
+            selectedValues.all { value -> OwnershipKindCheckboxOption.entries.any { it.name == value } }
+    }
+
+    fun toOwnershipKindCheckboxOptions(): Set<OwnershipKindCheckboxOption> =
+        nonBlankOwnershipKinds().map { OwnershipKindCheckboxOption.valueOf(it) }.toSet()
 
     fun toOwnershipKind(): OwnershipKind? {
-        val selected = ownershipKinds.filterNotNull().filter { it.isNotBlank() }.toSet()
-        val options = OwnershipKindOption.entries.filter { it.name in selected }.toSet()
-        if (options.size != selected.size) return null
-        return OwnershipKind.entries.find { it.options == options }
+        val selectedOptions = toOwnershipKindCheckboxOptions()
+        return OwnershipKind.entries.find { it.options == selectedOptions }
     }
+
+    private fun nonBlankOwnershipKinds(): List<String> = ownershipKinds.filterNotNull().filter { it.isNotBlank() }
 }

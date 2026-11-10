@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -13,7 +13,7 @@ class OwnershipKindFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${OwnershipKindStep.ROUTE_SEGMENT}") {
     val form = OwnershipKindForm(page)
-    val shareOfFreeholdDetails: Locator = page.locator("details.govuk-details")
+    val backLink = BackLink.default(page)
 
     fun submitOwnershipKind(ownershipKind: OwnershipKind) {
         ownershipKind.options.forEach { form.checkboxes.checkCheckbox(it.name) }

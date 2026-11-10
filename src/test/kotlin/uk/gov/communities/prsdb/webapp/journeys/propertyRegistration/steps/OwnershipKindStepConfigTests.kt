@@ -24,12 +24,12 @@ class OwnershipKindStepConfigTests {
                 "checkboxOptions" to
                     listOf(
                         CheckboxButtonViewModel(
-                            value = OwnershipKindOption.FREEHOLD,
+                            value = OwnershipKindCheckboxOption.FREEHOLD,
                             labelMsgKey = "registerProperty.ownershipKind.checkbox.freehold.label",
                             hintMsgKey = "registerProperty.ownershipKind.checkbox.freehold.hint",
                         ),
                         CheckboxButtonViewModel(
-                            value = OwnershipKindOption.LEASEHOLD,
+                            value = OwnershipKindCheckboxOption.LEASEHOLD,
                             labelMsgKey = "registerProperty.ownershipKind.checkbox.leasehold.label",
                             hintMsgKey = "registerProperty.ownershipKind.checkbox.leasehold.hint",
                         ),

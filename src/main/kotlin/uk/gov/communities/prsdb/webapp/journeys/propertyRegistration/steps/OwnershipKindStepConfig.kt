@@ -18,12 +18,12 @@ class OwnershipKindStepConfig : AbstractRequestableStepConfig<OwnershipKind, Own
             "checkboxOptions" to
                 listOf(
                     CheckboxButtonViewModel(
-                        value = OwnershipKindOption.FREEHOLD,
+                        value = OwnershipKindCheckboxOption.FREEHOLD,
                         labelMsgKey = "registerProperty.ownershipKind.checkbox.freehold.label",
                         hintMsgKey = "registerProperty.ownershipKind.checkbox.freehold.hint",
                     ),
                     CheckboxButtonViewModel(
-                        value = OwnershipKindOption.LEASEHOLD,
+                        value = OwnershipKindCheckboxOption.LEASEHOLD,
                         labelMsgKey = "registerProperty.ownershipKind.checkbox.leasehold.label",
                         hintMsgKey = "registerProperty.ownershipKind.checkbox.leasehold.hint",
                     ),
@@ -44,15 +44,15 @@ final class OwnershipKindStep(
     }
 }
 
-enum class OwnershipKindOption {
+enum class OwnershipKindCheckboxOption {
     FREEHOLD,
     LEASEHOLD,
 }
 
 enum class OwnershipKind(
-    val options: Set<OwnershipKindOption>,
+    val options: Set<OwnershipKindCheckboxOption>,
 ) {
-    FREEHOLD_ONLY(setOf(OwnershipKindOption.FREEHOLD)),
-    LEASEHOLD_ONLY(setOf(OwnershipKindOption.LEASEHOLD)),
-    FREEHOLD_AND_LEASEHOLD(setOf(OwnershipKindOption.FREEHOLD, OwnershipKindOption.LEASEHOLD)),
+    FREEHOLD_ONLY(setOf(OwnershipKindCheckboxOption.FREEHOLD)),
+    LEASEHOLD_ONLY(setOf(OwnershipKindCheckboxOption.LEASEHOLD)),
+    FREEHOLD_AND_LEASEHOLD(setOf(OwnershipKindCheckboxOption.FREEHOLD, OwnershipKindCheckboxOption.LEASEHOLD)),
 }
