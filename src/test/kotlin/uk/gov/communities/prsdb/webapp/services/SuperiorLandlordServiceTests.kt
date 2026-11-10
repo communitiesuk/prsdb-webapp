@@ -11,6 +11,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -98,6 +99,37 @@ class SuperiorLandlordServiceTests {
         verify(superiorLandlordRepository).save(captor.capture())
         assertEquals("Bob Superior", captor.firstValue.name)
         assertNull(captor.firstValue.address)
+        verifyNoInteractions(addressService)
+    }
+
+    @Test
+    fun `createSuperiorLandlords saves every superior landlord in the list`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+        // Act
+        superiorLandlordService.createSuperiorLandlords(
+            propertyOwnership,
+            listOf(
+                SuperiorLandlordDataModel(detailsKnown = true, name = "Alice Superior", email = "alice@example.com"),
+                SuperiorLandlordDataModel(detailsKnown = true, name = "Bob Superior", email = "bob@example.com"),
+                SuperiorLandlordDataModel(detailsKnown = false),
+            ),
+        )
+
+        // Assert
+        val captor = argumentCaptor<SuperiorLandlord>()
+        verify(superiorLandlordRepository, times(3)).save(captor.capture())
+        assertEquals(listOf("Alice Superior", "Bob Superior", null), captor.allValues.map { it.name })
+    }
+
+    @Test
+    fun `createSuperiorLandlords saves nothing when given an empty list`() {
+        // Act
+        superiorLandlordService.createSuperiorLandlords(MockLandlordData.createPropertyOwnership(), emptyList())
+
+        // Assert
+        verifyNoInteractions(superiorLandlordRepository)
         verifyNoInteractions(addressService)
     }
 

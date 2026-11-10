@@ -11,6 +11,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -95,6 +96,37 @@ class FreeholderServiceTests {
         verify(freeholderRepository).save(captor.capture())
         assertEquals("Bob Freeholder", captor.firstValue.name)
         assertNull(captor.firstValue.address)
+        verifyNoInteractions(addressService)
+    }
+
+    @Test
+    fun `createFreeholders saves every freeholder in the list`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+        // Act
+        freeholderService.createFreeholders(
+            propertyOwnership,
+            listOf(
+                FreeholderDataModel(detailsKnown = true, name = "Alice Freeholder", email = "alice@example.com"),
+                FreeholderDataModel(detailsKnown = true, name = "Bob Freeholder", email = "bob@example.com"),
+                FreeholderDataModel(detailsKnown = false),
+            ),
+        )
+
+        // Assert
+        val captor = argumentCaptor<Freeholder>()
+        verify(freeholderRepository, times(3)).save(captor.capture())
+        assertEquals(listOf("Alice Freeholder", "Bob Freeholder", null), captor.allValues.map { it.name })
+    }
+
+    @Test
+    fun `createFreeholders saves nothing when given an empty list`() {
+        // Act
+        freeholderService.createFreeholders(MockLandlordData.createPropertyOwnership(), emptyList())
+
+        // Assert
+        verifyNoInteractions(freeholderRepository)
         verifyNoInteractions(addressService)
     }
 

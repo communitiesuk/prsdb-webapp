@@ -95,4 +95,18 @@ class PropertyManagerServiceTests {
             propertyManagerService.updatePropertyManager(null, "Agent Ltd", null)
         }
     }
+
+    @Test
+    fun `updatePropertyManager leaves an existing one untouched when a name is given without an email`() {
+        // Arrange
+        val existing = PropertyManager("Old Agent", "old@example.com")
+
+        // Act & Assert
+        assertThrows<NullPointerException> {
+            propertyManagerService.updatePropertyManager(existing, "New Agent", null)
+        }
+        assertEquals("Old Agent", existing.name)
+        assertEquals("old@example.com", existing.email)
+        verifyNoInteractions(propertyManagerRepository)
+    }
 }

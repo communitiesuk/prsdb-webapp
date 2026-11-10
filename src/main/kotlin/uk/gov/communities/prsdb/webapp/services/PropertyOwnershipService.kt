@@ -100,40 +100,48 @@ class PropertyOwnershipService(
 
         registeringLandlord.markAsHavingRegisteredProperty()
 
-        return propertyOwnershipRepository.save(
-            PropertyOwnership(
-                ownershipType = ownershipType,
-                // TODO PDJB-2019: delete this line with the legacy column. Derived rather than passed
-                //  in, because the column is NOT NULL and PropertyDetailsViewModelBase renders it
-                //  until PDJB-1996.
-                ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
-                currentNumHouseholds = numberOfHouseholds,
-                currentNumTenants = numberOfPeople,
-                isOccupied = isOccupied,
-                registrationNumber = registrationNumber,
-                landlords = mutableSetOf(registeringLandlord),
-                propertyBuildType = propertyBuildType,
-                customPropertyType = customPropertyType,
-                address = address,
-                license = license,
-                correspondenceEmail = correspondenceEmail,
-                correspondenceAddress = correspondenceAddress,
-                renewalDate = renewalDate,
-                isActive = isActive,
-                numBedrooms = numBedrooms,
-                billsIncludedList = billsIncludedList,
-                customBillsIncluded = customBillsIncluded,
-                furnishedStatus = furnishedStatus,
-                rentFrequency = rentFrequency,
-                customRentFrequency = customRentFrequency,
-                rentAmount = rentAmount,
-                markedJointLandlord = markedJointLandlord,
-                licenseProvideLater = licenseProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            ).apply {
-                if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
-            },
-        )
+        val propertyOwnership =
+            propertyOwnershipRepository.save(
+                PropertyOwnership(
+                    ownershipType = ownershipType,
+                    // TODO PDJB-2019: delete this line with the legacy column. Derived rather than passed
+                    //  in, because the column is NOT NULL and PropertyDetailsViewModelBase renders it
+                    //  until PDJB-1996.
+                    ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
+                    currentNumHouseholds = numberOfHouseholds,
+                    currentNumTenants = numberOfPeople,
+                    isOccupied = isOccupied,
+                    registrationNumber = registrationNumber,
+                    landlords = mutableSetOf(registeringLandlord),
+                    propertyBuildType = propertyBuildType,
+                    customPropertyType = customPropertyType,
+                    address = address,
+                    license = license,
+                    correspondenceEmail = correspondenceEmail,
+                    correspondenceAddress = correspondenceAddress,
+                    renewalDate = renewalDate,
+                    isActive = isActive,
+                    numBedrooms = numBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                    markedJointLandlord = markedJointLandlord,
+                    licenseProvideLater = licenseProvideLater,
+                    tenancyProvideLater = tenancyProvideLater,
+                ).apply {
+                    if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
+                },
+            )
+
+        // TODO PDJB-2015: create the freeholders the landlord gave instead of a placeholder.
+        if (ownershipType.requiresFreeholderRecords()) {
+            freeholderService.createPlaceholderFreeholder(propertyOwnership)
+        }
+
+        return propertyOwnership
     }
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {

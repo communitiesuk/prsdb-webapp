@@ -26,8 +26,8 @@ class PropertyManagerService(
         } else if (propertyManager == null) {
             createPropertyManager(name, email!!)
         } else {
-            propertyManager.name = name
             propertyManager.email = email!!
+            propertyManager.name = name
             propertyManagerRepository.save(propertyManager)
             propertyManager
         }
