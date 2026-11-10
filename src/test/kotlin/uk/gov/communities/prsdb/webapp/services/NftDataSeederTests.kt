@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
 import java.util.TimeZone
+import kotlin.test.assertNotNull
 
 // This test seeds a small but non-trivial volume of data, so it exercises the same batching, address-generation and
 // organisation-landlord branching logic as a real NFT run, just at a scale that completes quickly on a test database.
@@ -287,7 +288,7 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase gives every property that requires freeholder records a placeholder freeholder`() {
+    fun `seedDatabase gives every property that requires freeholder records at least one freeholder`() {
         newSeeder().seedDatabase()
 
         val propertiesWithoutAFreeholder =
@@ -301,7 +302,99 @@ class NftDataSeederTests(
         assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
 
         val seededFreeholders = jdbcTemplate.queryForList<Long>("SELECT id FROM freeholder")
-        assertTrue(seededFreeholders.isNotEmpty(), "Expected placeholder freeholders to be seeded")
+        assertTrue(seededFreeholders.isNotEmpty(), "Expected freeholders to be seeded")
+    }
+
+    @Test
+    fun `seedDatabase seeds both named and placeholder freeholders`() {
+        newSeeder().seedDatabase()
+
+        val namedFreeholders = jdbcTemplate.queryForList<Long>("SELECT id FROM freeholder WHERE name IS NOT NULL")
+        assertTrue(namedFreeholders.isNotEmpty(), "Expected named freeholders to be seeded")
+
+        val placeholderFreeholders = jdbcTemplate.queryForList<Long>("SELECT id FROM freeholder WHERE name IS NULL")
+        assertTrue(placeholderFreeholders.isNotEmpty(), "Expected placeholder freeholders to be seeded")
+    }
+
+    @Test
+    fun `seedDatabase gives every named associated party exactly one contact method and placeholders none`() {
+        newSeeder().seedDatabase()
+
+        listOf("freeholder", "superior_landlord").forEach { table ->
+            assertTrue(
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE email IS NOT NULL").isNotEmpty(),
+                "Expected some $table rows to be contactable by email",
+            )
+            assertTrue(
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE address_id IS NOT NULL").isNotEmpty(),
+                "Expected some $table rows to be contactable by post",
+            )
+
+            val rowsBreakingTheContactInvariant =
+                jdbcTemplate.queryForList<Long>(
+                    "SELECT id FROM $table WHERE " +
+                        "(name IS NOT NULL AND NOT ((email IS NOT NULL) != (address_id IS NOT NULL))) " +
+                        "OR (name IS NULL AND (email IS NOT NULL OR address_id IS NOT NULL))",
+                )
+
+            assertEquals(emptyList<Long>(), rowsBreakingTheContactInvariant, "Found $table rows breaking the contact invariant")
+        }
+    }
+
+    @Test
+    fun `seedDatabase only gives superior landlords to properties whose ownership type requires them`() {
+        newSeeder().seedDatabase()
+
+        val seededSuperiorLandlords = jdbcTemplate.queryForList<Long>("SELECT id FROM superior_landlord")
+        assertTrue(seededSuperiorLandlords.isNotEmpty(), "Expected superior landlords to be seeded")
+
+        val superiorLandlordsOnTheWrongProperties =
+            jdbcTemplate.queryForList<Long>(
+                "SELECT sl.id FROM superior_landlord sl " +
+                    "JOIN property_ownership po ON po.id = sl.property_ownership_id " +
+                    "WHERE po.ownership_type NOT IN (${
+                        OwnershipType.entries.filter { it.requiresSuperiorLandlordInfo() }.joinToString(", ") { it.ordinal.toString() }
+                    })",
+            )
+
+        assertEquals(emptyList<Long>(), superiorLandlordsOnTheWrongProperties)
+    }
+
+    @Test
+    fun `seedDatabase gives some but not all properties a property manager`() {
+        newSeeder().seedDatabase()
+
+        val managedProperties = jdbcTemplate.queryForList<Long>("SELECT id FROM property_ownership WHERE property_manager_id IS NOT NULL")
+        assertTrue(managedProperties.isNotEmpty(), "Expected some properties to have a property manager")
+
+        val unmanagedProperties = jdbcTemplate.queryForList<Long>("SELECT id FROM property_ownership WHERE property_manager_id IS NULL")
+        assertTrue(unmanagedProperties.isNotEmpty(), "Expected some properties to have no property manager")
+
+        val seededPropertyManagers = jdbcTemplate.queryForList<Long>("SELECT id FROM property_manager")
+        assertEquals(managedProperties.size, seededPropertyManagers.size)
+    }
+
+    // Guards against property_manager being dropped from updateIdSequences(). Its ids are inserted explicitly, which
+    // does not advance the identity sequence, so without that the first manager created through the app would collide.
+    @Test
+    fun `seedDatabase advances the property manager id sequence past the seeded ids`() {
+        newSeeder().seedDatabase()
+
+        val maxSeededId =
+            assertNotNull(
+                jdbcTemplate.queryForList<Long>("SELECT MAX(id) FROM property_manager").single(),
+                "Expected property managers to be seeded",
+            )
+        val nextSequenceValue =
+            assertNotNull(
+                jdbcTemplate.queryForList<Long>("SELECT nextval(pg_get_serial_sequence('property_manager', 'id'))").single(),
+                "Expected the property manager id sequence to exist",
+            )
+
+        assertTrue(
+            nextSequenceValue > maxSeededId,
+            "Expected the property manager id sequence to be past $maxSeededId, but the next value was $nextSequenceValue",
+        )
     }
 
     @Test

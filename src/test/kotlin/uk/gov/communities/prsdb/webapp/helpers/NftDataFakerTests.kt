@@ -276,6 +276,29 @@ class NftDataFakerTests {
         )
     }
 
+    @Test
+    fun `generated associated parties are either named with one contact method or have no details at all`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+
+        val parties = List(SAMPLE_SIZE / 100) { NftDataFaker.generateFreeholders() + NftDataFaker.generateSuperiorLandlords() }.flatten()
+
+        parties.forEach { party ->
+            if (party.name == null) {
+                assertFalse(party.email != null || party.hasAddress, "Expected a party with no name to have no email or address")
+            } else {
+                assertNotEquals(
+                    party.email != null,
+                    party.hasAddress,
+                    "Expected a named party to have exactly one of an email and an address",
+                )
+            }
+        }
+
+        assertTrue(parties.any { it.name == null }, "Expected at least one party with no details")
+        assertTrue(parties.any { it.email != null }, "Expected at least one party contactable by email")
+        assertTrue(parties.any { it.hasAddress }, "Expected at least one party contactable by post")
+    }
+
     private fun generateFakerSample(): List<String> =
         List(FAKER_SAMPLE_SIZE) {
             listOf(
