@@ -322,7 +322,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationSuperiorLandlordProvideDetails()
                 .withSuperiorLandlordProvideDetails()
 
-        fun beforePropertyRegistrationSuperiorLandlordContactType() =
+        fun beforePropertyRegistrationSuperiorLandlordContactType(superiorLandlordName: String = "Test Superior Landlord") =
             beforePropertyRegistrationSuperiorLandlordName()
                 .withSuperiorLandlordName()
 
@@ -330,6 +330,19 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationSuperiorLandlordContactType()
                 .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
                 .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
+
+        fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationSuperiorLandlordSelectAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+
+        fun beforePropertyRegistrationSuperiorLandlordManualAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordManualAddressSelected()
 
         fun beforePropertyRegistrationSuperiorLandlordsList(
             superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,

@@ -403,6 +403,14 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  remove:
+    fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
+    unknownFreeholder:
+      fieldSetHeading: Are you sure you want to remove this unknown freeholder?
+    fieldSetHint: They will be removed as a freeholder
+    radios:
+      error:
+        missing: Select if you want to remove this freeholder
 superiorLandlords:
   provideDetails:
     fieldSetHeading: Can you provide the details of this person in the ownership chain?
@@ -437,6 +445,13 @@ superiorLandlords:
       missing: Enter an email address
       invalidFormat: Enter an email address in the correct format, like name@example.com
       duplicate: You’ve already used this email address for another person in the ownership chain - enter a different email address
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.

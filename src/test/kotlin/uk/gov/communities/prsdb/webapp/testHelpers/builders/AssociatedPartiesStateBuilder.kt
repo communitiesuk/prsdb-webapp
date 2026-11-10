@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -178,6 +179,33 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         withSubmittedValue(
             SuperiorLandlordContactTypeStep.ROUTE_SEGMENT,
             SuperiorLandlordContactTypeFormModel(contactType = contactType),
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordLookupAddress(
+        houseNameOrNumber: String = "1",
+        postcode: String = "FA1 1AA",
+    ): SelfType {
+        // The superior landlord address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = SuperiorLandlordAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Fictional Road, $postcode", localCouncilId = 22, uprn = 44)
+        additionalDataMap["$routePrefix/cachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            },
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordManualAddressSelected(): SelfType {
+        withSubmittedValue(
+            "${SuperiorLandlordAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
         )
         return self()
     }
