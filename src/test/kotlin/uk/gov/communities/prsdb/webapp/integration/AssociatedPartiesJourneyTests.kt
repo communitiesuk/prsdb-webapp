@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import kotlin.test.assertEquals
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as assertThatLocator
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -357,8 +358,60 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
+        fun `Cancelling removal returns to the unchanged freeholder list`(page: Page) {
+            var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.cancelLink.clickAndWait()
+
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
+            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
+        }
+
+        @Test
+        fun `Answering no returns to the unchanged freeholder list`(page: Page) {
+            var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.submitNo()
+
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
+            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Unknown freeholder")
+        }
+
+        @Test
+        fun `Confirming removal of the last non-joint freeholder returns to the freeholders page variant`(page: Page) {
+            val freeholdersListPage =
+                navigator.skipToPropertyRegistrationFreeholdersListPage(
+                    isJointFreeholder = false,
+                    freeholders =
+                        mapOf(
+                            1 to
+                                FreeholderDataModel(
+                                    detailsKnown = true,
+                                    name = "Test Freeholder",
+                                    email = "test@example.com",
+                                ),
+                        ),
+                )
+            freeholdersListPage.getSummaryCard(0).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.submitYes()
+
+            val freeholdersInfoPage = assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+            assertThat(freeholdersInfoPage.heading).containsText("Add freeholders")
+        }
+
+        @Test
         fun `Removing freeholders one by one updates the list then returns to the freeholders page`(page: Page) {
-            val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
 
             freeholdersListPage
@@ -366,32 +419,37 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1970: update this usage when the real remove freeholder confirmation page is added
-            assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class).submit()
-            val afterFirstRemoval = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(afterFirstRemoval.heading).containsText("added 2 joint freeholders")
-            assertThat(afterFirstRemoval.getSummaryCard(0).title).hasText("Freeholder With Address")
-            assertThat(afterFirstRemoval.getSummaryCard(1).title).hasText("Unknown freeholder")
+            var removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.submitYes()
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText("Freeholder With Address")
+            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Unknown freeholder")
 
-            afterFirstRemoval
+            freeholdersListPage
                 .getSummaryCard(0)
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1970: update this usage when the real remove freeholder confirmation page is added
-            assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class).submit()
-            val afterSecondRemoval = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(afterSecondRemoval.heading).containsText("added 1 joint freeholder")
-            assertThat(afterSecondRemoval.getSummaryCard(0).title).hasText("Unknown freeholder")
+            removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            assertThatLocator(removeFreeholderPage.page.locator(".govuk-radios input:checked")).hasCount(0)
+            removeFreeholderPage.submitYes()
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText("Unknown freeholder")
 
-            afterSecondRemoval
+            freeholdersListPage
                 .getSummaryCard(0)
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1970: update this usage when the real remove freeholder confirmation page is added
-            assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class).submit()
-            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+            removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            assertThat(removeFreeholderPage.heading)
+                .containsText("Are you sure you want to remove this unknown freeholder?")
+            removeFreeholderPage.submitYes()
+
+            val freeholdersInfoPage = assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+            assertThat(freeholdersInfoPage.heading).containsText("Add joint freeholders")
         }
     }
 

@@ -403,6 +403,14 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  remove:
+    fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
+    unknownFreeholder:
+      fieldSetHeading: Are you sure you want to remove this unknown freeholder?
+    fieldSetHint: They will be removed as a freeholder
+    radios:
+      error:
+        missing: Select if you want to remove this freeholder
 superiorLandlords:
   provideDetails:
     fieldSetHeading: Can you provide the details of this person in the ownership chain?
