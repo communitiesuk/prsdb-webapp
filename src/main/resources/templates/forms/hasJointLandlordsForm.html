@@ -9,20 +9,18 @@
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}"></h1>
     <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.one}"></p>
+    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.two}"></p>
     <details  id="details" th:replace="~{fragments/details :: details(#{jointLandlords.hasJointLandlords.link.one}, ~{::#details/content()})}" >
-        <div class="govuk-details__text" th:text="#{jointLandlords.hasJointLandlords.paragraph.two}"></div>
         <div class="govuk-details__text" th:text="#{jointLandlords.hasJointLandlords.paragraph.three}"></div>
+        <div class="govuk-details__text" th:text="#{jointLandlords.hasJointLandlords.paragraph.four}"></div>
         <div class="govuk-details__text">
-            <span th:text="#{jointLandlords.hasJointLandlords.paragraph.four}"></span>
+            <span th:text="#{jointLandlords.hasJointLandlords.paragraph.five}"></span>
             <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{jointLandlords.hasJointLandlords.link.two}" rel="noreferrer noopener" target="_blank">
             </a><span th:remove="tag" th:text="#{jointLandlords.hasJointLandlords.afterLink}"></span>
         </div>
     </details>
     <h2 class="govuk-heading-m" th:text="#{jointLandlords.hasJointLandlords.subHeading.one}"></h2>
-    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.five}"></p>
     <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.six}"></p>
-    <p class="govuk-inset-text" th:text="#{jointLandlords.hasJointLandlords.paragraph.seven}"></p>
-    <p class="govuk-body" th:text="#{jointLandlords.hasJointLandlords.paragraph.eight}"></p>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
