@@ -132,7 +132,7 @@ class PropertyOwnershipServiceTests {
     @EnumSource(LandlordType::class)
     fun `createPropertyOwnership creates a property ownership with supplied correspondence details`(landlordType: LandlordType) {
         // Arrange
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -162,7 +162,7 @@ class PropertyOwnershipServiceTests {
         val expectedPropertyOwnership =
             PropertyOwnership(
                 ownershipType = OwnershipType.SOLE_FREEHOLD,
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -230,7 +230,7 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `createPropertyOwnership can create a property ownership with no license`() {
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
@@ -254,7 +254,7 @@ class PropertyOwnershipServiceTests {
         val expectedPropertyOwnership =
             PropertyOwnership(
                 ownershipType = OwnershipType.SOLE_FREEHOLD,
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
                 isOccupied = isOccupied,
@@ -334,7 +334,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
             isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
@@ -376,7 +376,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -419,7 +419,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -456,7 +456,7 @@ class PropertyOwnershipServiceTests {
         // Act
         val property =
             propertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -498,7 +498,7 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -1319,11 +1319,9 @@ class PropertyOwnershipServiceTests {
         )
     }
 
-    // The flag-off path, where createPropertyOwnership takes the legacy enum and derives the new one.
-    // TODO PDJB-2016: delete this test along with the flag-off variant of createPropertyOwnership.
-    //  Do not extend it to cover the flag-on path, which takes the new enum directly.
+    // TODO PDJB-2019: drop the beforePdjb955 half of this test along with the legacy column.
     @Test
-    fun `createPropertyOwnership stores both the legacy ownership type and its replacement`() {
+    fun `createPropertyOwnership stores the given ownership type and derives the beforePdjb955 one`() {
         // Arrange
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1339,7 +1337,7 @@ class PropertyOwnershipServiceTests {
 
         // Act
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            ownershipType = OwnershipType.TENANTS_IN_COMMON,
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
@@ -1366,11 +1364,11 @@ class PropertyOwnershipServiceTests {
             OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
             propertyOwnershipCaptor.value.ownershipTypeBeforePdjb955,
         )
-        assertEquals(OwnershipType.JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
+        assertEquals(OwnershipType.TENANTS_IN_COMMON, propertyOwnershipCaptor.value.ownershipType)
     }
 
     @Test
-    fun `updateOwnershipType updates the property's ownership type`() {
+    fun `updateOwnershipType stores the given ownership type and derives the beforePdjb955 one`() {
         // Arrange
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
@@ -1385,13 +1383,13 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateOwnershipType(
             propertyOwnership.id,
-            OwnershipTypeBeforePdjb955.LEASEHOLD,
+            OwnershipType.SHARE_OF_COMMONHOLD,
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
         // Assert
-        assertEquals(OwnershipTypeBeforePdjb955.LEASEHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
-        assertEquals(OwnershipType.LEASEHOLD_ONLY, propertyOwnership.ownershipType)
+        assertEquals(OwnershipTypeBeforePdjb955.COMMONHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
+        assertEquals(OwnershipType.SHARE_OF_COMMONHOLD, propertyOwnership.ownershipType)
     }
 
     @Test
@@ -1412,7 +1410,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateOwnershipType(
                     propertyOwnership.id,
-                    OwnershipTypeBeforePdjb955.LEASEHOLD,
+                    OwnershipType.LEASEHOLD_ONLY,
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
