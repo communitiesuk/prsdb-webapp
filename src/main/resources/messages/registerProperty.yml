@@ -439,6 +439,13 @@ superiorLandlords:
           label: Postal address
       error:
         missing: Select which contact information you can provide
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.

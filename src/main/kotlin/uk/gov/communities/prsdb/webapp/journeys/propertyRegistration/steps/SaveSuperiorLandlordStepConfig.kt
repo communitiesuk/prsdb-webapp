@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
 @JourneyFrameworkComponent
@@ -36,15 +36,10 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                             state.journeyId,
                             "Superior landlord name step data is missing for journey ${state.journeyId}",
                         )
-                SuperiorLandlordDataModel(
-                    detailsKnown = true,
-                    name = name,
-                    // TODO PDJB-1975: save the email address the user entered on the superior landlord email step, throwing if it is missing
-                    email = if (contactType == SuperiorLandlordContactType.EMAIL) PLACEHOLDER_EMAIL else null,
-                    // TODO PDJB-1976: save the address the user entered in the superior landlord address task, along with
-                    //  the address lookup, select and manual entry answers needed to prefill those steps on change, throwing if it is missing
-                    address = if (contactType == SuperiorLandlordContactType.POSTAL_ADDRESS) PLACEHOLDER_ADDRESS else null,
-                )
+                when (contactType) {
+                    SuperiorLandlordContactType.EMAIL -> buildSuperiorLandlordWithEmail(name)
+                    SuperiorLandlordContactType.POSTAL_ADDRESS -> buildSuperiorLandlordWithAddress(state, name)
+                }
             } else {
                 SuperiorLandlordDataModel(detailsKnown = false)
             }
@@ -68,21 +63,46 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         state.superiorLandlordContactTypeStep.clearFormData()
         // TODO PDJB-1975: check this still clears the real email page correctly
         state.superiorLandlordEmailStep.clearFormData()
-        // TODO PDJB-1976: check this still clears all the real address steps correctly
         state.superiorLandlordAddressTask.clearFormData()
+    }
+
+    private fun buildSuperiorLandlordWithEmail(name: String): SuperiorLandlordDataModel =
+        SuperiorLandlordDataModel(
+            detailsKnown = true,
+            name = name,
+            // TODO PDJB-1975: save the email address the user entered on the superior landlord email step, throwing if it is missing
+            email = PLACEHOLDER_EMAIL,
+        )
+
+    private fun buildSuperiorLandlordWithAddress(
+        state: SuperiorLandlordsDetailsState,
+        name: String,
+    ): SuperiorLandlordDataModel {
+        val addressTask = state.superiorLandlordAddressTask
+        val address = addressTask.getAddress()
+        val lookupFormModel = addressTask.lookupAddressStep.formModelOrNull
+        // Set by both the select address and no address found steps, so it reflects the user's latest choice
+        val selectedAddress = addressTask.cachedSelectedAddress
+        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
+
+        return SuperiorLandlordDataModel(
+            detailsKnown = true,
+            name = name,
+            address = address,
+            addressSearchPostcode = lookupFormModel?.postcode,
+            addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
+            selectedAddress = selectedAddress,
+            manualAddressLineOne = manualFormModel?.addressLineOne,
+            manualAddressLineTwo = manualFormModel?.addressLineTwo,
+            manualTownOrCity = manualFormModel?.townOrCity,
+            manualCounty = manualFormModel?.county,
+            manualPostcode = manualFormModel?.postcode,
+        )
     }
 
     companion object {
         // TODO PDJB-1975: remove once the email the user entered is saved instead
         const val PLACEHOLDER_EMAIL = "placeholder.superior.landlord@example.com"
-
-        // TODO PDJB-1976: remove once the address the user entered is saved instead
-        val PLACEHOLDER_ADDRESS =
-            AddressDataModel.fromManualAddressData(
-                addressLineOne = "1 Placeholder Street",
-                townOrCity = "Placeholder Town",
-                postcode = "AB1 2CD",
-            )
     }
 }
 
