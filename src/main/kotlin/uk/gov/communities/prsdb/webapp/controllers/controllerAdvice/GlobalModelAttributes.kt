@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -79,7 +78,6 @@ class GlobalModelAttributes(
             "privacyUrl",
             "/$PRIVACY_NOTICE_PATH_SEGMENT".overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
         )
-        model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("accessibilityStatementUrl", ACCESSIBILITY_STATEMENT_URL)
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
