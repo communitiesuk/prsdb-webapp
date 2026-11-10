@@ -94,6 +94,9 @@ confirmation:
     bullet:
       one: repeatedly break the rules
       two: 'commit a serious offence, like providing false information on this service'
+    deactivation:
+      individual: If you do not submit a property registration by {0,,deactivationDate} your landlord account will be deactivated.
+      organisation: If your organisation does not submit a property registration by {0,,deactivationDate} your landlord account will be deactivated.
   feedback:
     body: 'Answer a few short questions about <strong>landlord registration</strong>.'
 privacyNotice:
