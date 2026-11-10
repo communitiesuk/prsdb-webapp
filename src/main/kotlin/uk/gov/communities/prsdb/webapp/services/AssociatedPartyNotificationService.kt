@@ -28,9 +28,13 @@ class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, Letter
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
+        val name =
+            checkNotNull(associatedParty.name?.takeIf { it.isNotBlank() }) {
+                "An associated party must have a name to receive a letter"
+            }
         val postalAddress =
             checkNotNull(associatedParty.address) { "An associated party that is not fully redacted and has no email must have an address" }
-        letterNotificationService.sendLetter(letterAddress(associatedParty.name, postalAddress), letter)
+        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
         return AssociatedPartyNotificationOutcome.LETTER_SENT
     }
 

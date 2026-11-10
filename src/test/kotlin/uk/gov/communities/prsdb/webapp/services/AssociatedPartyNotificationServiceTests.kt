@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.mock
@@ -62,6 +63,17 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `sendNotification emails an associated party with an email address when their name and address are unknown`() {
+        val freeholder = Freeholder(createPropertyOwnership(), email = "sarah.thompson@example.com")
+
+        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    @Test
     fun `sendNotification posts a letter addressed by name to an associated party without an email address`() {
         val superiorLandlord =
             SuperiorLandlord(createPropertyOwnership(), name = "Daniel Roberts", address = postalAddress)
@@ -92,16 +104,25 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification posts a letter to just the postal address when the associated party's name is unknown`() {
+    fun `sendNotification rejects a postal letter when the associated party's name is missing`() {
         val freeholder = Freeholder(createPropertyOwnership(), address = postalAddress)
 
-        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        assertThrows(IllegalStateException::class.java) {
+            associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        }
 
-        assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
-        verify(letterNotificationService).sendLetter(
-            LetterAddressDataModel(listOf("Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
-            letter,
-        )
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    @Test
+    fun `sendNotification rejects a postal letter when the associated party's name is blank`() {
+        val freeholder = Freeholder(createPropertyOwnership(), name = " ", address = postalAddress)
+
+        assertThrows(IllegalStateException::class.java) {
+            associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        }
+
+        verifyNoInteractions(letterNotificationService)
     }
 
     @Test
