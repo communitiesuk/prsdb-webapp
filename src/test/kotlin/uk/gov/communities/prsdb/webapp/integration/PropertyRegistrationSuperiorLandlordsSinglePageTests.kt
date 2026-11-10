@@ -341,4 +341,38 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
         }
     }
+
+    @Nested
+    inner class SuperiorLandlordLookupAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            assertThat(lookupAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            lookupAddressPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordSelectAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val selectAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordSelectAddressPage()
+            assertThat(selectAddressPage.heading).containsText("Select Test Superior Landlord’s address")
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordManualAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val manualAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordManualAddressPage()
+            assertThat(manualAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+    }
 }
