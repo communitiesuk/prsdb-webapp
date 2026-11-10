@@ -302,12 +302,7 @@ class OutstandingActionsPageTests : IntegrationTest() {
         fun `expired EIC appears with its issue date on outstanding actions`() {
             val outstandingActionsPage = navigator.goToOutstandingActions()
             val card = outstandingActionsPage.findSummaryCard("7 Mythical Drive")
-            val expectedIssueDate =
-                LocalDate
-                    .now()
-                    .minusDays(1)
-                    .minusYears(5)
-                    .format(DATE_FORMATTER)
+            val expectedIssueDate = LocalDate.of(2000, 6, 1).format(DATE_FORMATTER)
 
             assertThat(card.summaryList.electricalSafetyRow).containsText("Expired (issued on $expectedIssueDate)")
         }

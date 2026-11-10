@@ -55,7 +55,7 @@ data class ComplianceStatusDataModel(
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
-            eicIssueDate: LocalDate?,
+            eicIssueDate: LocalDate? = null,
             electricalSafetyExpiryDate: LocalDate?,
             isGas14MonthExpiryEnabled: Boolean,
         ): ComplianceStatusDataModel =

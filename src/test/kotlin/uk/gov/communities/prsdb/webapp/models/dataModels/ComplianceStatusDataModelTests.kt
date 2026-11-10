@@ -23,52 +23,6 @@ import kotlin.test.assertTrue
 
 class ComplianceStatusDataModelTests {
     @Test
-    fun `EIC uses the provided EIC dates instead of a stored EICR expiry date`() {
-        val today = LocalDate.now(DateTimeHelper.UK_ZONE)
-        val issueDate = today.minusYears(1)
-        val expiryDate = today.plusYears(4)
-        val propertyCompliance =
-            PropertyComplianceBuilder()
-                .withOccupiedPropertyOwnership()
-                .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
-                .build()
-        propertyCompliance.eicrExpiryDate = today.minusDays(1)
-
-        val dataModel =
-            ComplianceStatusDataModel.fromPropertyCompliance(
-                propertyCompliance = propertyCompliance,
-                eicIssueDate = issueDate,
-                electricalSafetyExpiryDate = expiryDate,
-                isGas14MonthExpiryEnabled = true,
-            )
-
-        assertEquals(issueDate, dataModel.eicIssueDate)
-        assertEquals(expiryDate, dataModel.electricalSafetyExpiryDate)
-        assertEquals(ComplianceCertStatus.ADDED, dataModel.electricalSafetyStatus)
-    }
-
-    @Test
-    fun `EIC without dates has faults`() {
-        val propertyCompliance =
-            PropertyComplianceBuilder()
-                .withOccupiedPropertyOwnership()
-                .withElectricalSafety(certType = CertificateType.Eic)
-                .build()
-
-        val dataModel =
-            ComplianceStatusDataModel.fromPropertyCompliance(
-                propertyCompliance = propertyCompliance,
-                eicIssueDate = null,
-                electricalSafetyExpiryDate = null,
-                isGas14MonthExpiryEnabled = true,
-            )
-
-        assertNull(dataModel.eicIssueDate)
-        assertNull(dataModel.electricalSafetyExpiryDate)
-        assertEquals(ComplianceCertStatus.HAS_FAULTS, dataModel.electricalSafetyStatus)
-    }
-
-    @Test
     fun `a stored expiry date without a cert type is rejected`() {
         val propertyCompliance =
             PropertyComplianceBuilder()

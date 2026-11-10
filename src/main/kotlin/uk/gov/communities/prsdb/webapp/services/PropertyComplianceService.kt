@@ -132,9 +132,6 @@ class PropertyComplianceService(
     fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
         ComplianceStatusDataModel.fromPropertyCompliance(
             propertyCompliance = propertyCompliance,
-            // TODO PDJB-1679: Remove the flag check when the EIC_ISSUE_DATE flag is removed
-            eicIssueDate =
-                if (featureFlagManager.checkFeature(EIC_ISSUE_DATE)) eicDateService.issueDateFrom(propertyCompliance) else null,
             electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
             isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
         )

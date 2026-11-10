@@ -67,7 +67,6 @@ class OutstandingActionViewModelBuilder {
                 )
             }
             if (complianceStatus.shouldShowElectricalSafetyAction()) {
-                // TODO PDJB-1673: Review EIC action content, which currently uses "Expired on" with the calculated expiry date.
                 addCertRow(
                     "outstandingActions.summaryRow.electricalSafety",
                     complianceStatus.electricalSafetyStatus,

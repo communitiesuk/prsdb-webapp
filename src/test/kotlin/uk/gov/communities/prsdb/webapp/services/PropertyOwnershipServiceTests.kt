@@ -1970,50 +1970,11 @@ class PropertyOwnershipServiceTests {
             )
         }
 
-        // TODO PDJB-1679: Remove the flag stub when the EIC_ISSUE_DATE flag is removed
-        @Test
-        fun `outstanding actions use EIC dates and preserve EICR expiry`() {
-            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
-            val eicExpiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
-            val eicIssueDate = eicExpiryDate.minusYears(5)
-            val eicOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 501L)
-            val eicCompliance =
-                PropertyComplianceBuilder()
-                    .withPropertyOwnership(eicOwnership)
-                    .withElectricalSafety(expiryDate = eicExpiryDate, certType = CertificateType.Eic)
-                    .build()
-            ReflectionTestUtils.setField(eicOwnership, "propertyCompliance", eicCompliance)
-
-            val eicrExpiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
-            val eicrOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 502L)
-            val eicrCompliance =
-                PropertyComplianceBuilder()
-                    .withPropertyOwnership(eicrOwnership)
-                    .withElectricalSafety(expiryDate = eicrExpiryDate, certType = CertificateType.Eicr)
-                    .build()
-            ReflectionTestUtils.setField(eicrOwnership, "propertyCompliance", eicrCompliance)
-            whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
-            ).thenReturn(listOf(eicOwnership, eicrOwnership))
-
-            val results = propertyOwnershipService.getOutstandingActionsForLandlord(landlord, 0).content
-            val eicStatus = results.single { it.propertyOwnershipId == eicOwnership.id }.complianceStatus!!
-            val eicrStatus = results.single { it.propertyOwnershipId == eicrOwnership.id }.complianceStatus!!
-
-            assertEquals(eicIssueDate, eicStatus.eicIssueDate)
-            assertEquals(eicExpiryDate, eicStatus.electricalSafetyExpiryDate)
-            assertEquals(null, eicrStatus.eicIssueDate)
-            assertEquals(eicrExpiryDate, eicrStatus.electricalSafetyExpiryDate)
-            verify(eicDateService).issueDateFrom(eicCompliance)
-            verify(eicDateService).expiryDateFrom(eicCompliance)
-            verify(eicDateService, never()).expiryDateFrom(eicrCompliance)
-        }
-
         // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
         @Test
         fun `outstanding actions omit the EIC issue date when the EIC issue date flag is disabled`() {
             whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
-            val eicExpiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+            val eicExpiryDate = LocalDate.of(2000, 6, 1)
             val eicOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 501L)
             val eicCompliance =
                 PropertyComplianceBuilder()

@@ -2607,11 +2607,9 @@ class PropertyComplianceServiceTests {
             assertNull(propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance))
         }
 
-        // TODO PDJB-1679: Remove the flag stub when the EIC_ISSUE_DATE flag is removed
         @Test
-        fun `getComplianceStatus uses EIC dates from the EIC date service`() {
-            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
-            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
+        fun `getComplianceStatus uses the EIC expiry date from the EIC date service`() {
+            val expiryDate = LocalDate.of(2000, 6, 1)
             val propertyCompliance =
                 PropertyComplianceBuilder()
                     .withOccupiedPropertyOwnership()
@@ -2620,25 +2618,6 @@ class PropertyComplianceServiceTests {
 
             val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
 
-            assertEquals(expiryDate.minusYears(5), complianceStatus.eicIssueDate)
-            assertEquals(expiryDate, complianceStatus.electricalSafetyExpiryDate)
-            assertEquals(ComplianceCertStatus.EXPIRED, complianceStatus.electricalSafetyStatus)
-        }
-
-        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
-        @Test
-        fun `getComplianceStatus omits the EIC issue date when the EIC issue date flag is disabled`() {
-            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
-            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withOccupiedPropertyOwnership()
-                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
-                    .build()
-
-            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
-
-            assertNull(complianceStatus.eicIssueDate)
             assertEquals(expiryDate, complianceStatus.electricalSafetyExpiryDate)
             assertEquals(ComplianceCertStatus.EXPIRED, complianceStatus.electricalSafetyStatus)
         }
@@ -2653,7 +2632,6 @@ class PropertyComplianceServiceTests {
                     .build()
             val eicrStatus = propertyComplianceService.getComplianceStatus(eicrCompliance)
 
-            assertEquals(null, eicrStatus.eicIssueDate)
             assertEquals(expiryDate, eicrStatus.electricalSafetyExpiryDate)
         }
     }

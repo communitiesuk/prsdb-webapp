@@ -42,10 +42,10 @@ data class OutstandingActionsDataModel(
                 complianceStatus =
                     propertyOwnership.propertyCompliance?.let {
                         ComplianceStatusDataModel.fromPropertyCompliance(
-                            it,
-                            eicIssueDate,
-                            electricalSafetyExpiryDate,
-                            isGas14MonthExpiryEnabled,
+                            propertyCompliance = it,
+                            eicIssueDate = eicIssueDate,
+                            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                            isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                         )
                     },
             )
