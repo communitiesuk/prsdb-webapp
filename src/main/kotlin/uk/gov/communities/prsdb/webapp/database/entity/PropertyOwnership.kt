@@ -142,6 +142,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var renewalDate: LocalDate
         private set
 
+    @Column(name = "deactivation_date")
+    var deactivationDate: LocalDate? = null
+        private set
+
     constructor(
         ownershipType: OwnershipType,
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955,

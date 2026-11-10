@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactTy
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
@@ -451,6 +452,76 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
         fun `The heading includes the superior landlord name`() {
             val manualAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordManualAddressPage()
             assertThat(manualAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+    }
+
+    @Nested
+    inner class ConfirmRemoveSuperiorLandlordStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val confirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            confirmRemovePage.form.submit()
+            assertThat(confirmRemovePage.form.getErrorMessage())
+                .containsText("Select if you want to remove this person from the ownership chain")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlords list page`(page: Page) {
+            val confirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            confirmRemovePage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No option is selected when removing another person after removing someone`(page: Page) {
+            val firstConfirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            assertThat(firstConfirmRemovePage.heading).containsText("Superior Landlord With Address")
+            firstConfirmRemovePage.submitWantsToProceed()
+
+            val listPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(listPage.getSummaryCard(0).title).hasText("Superior Landlord With Email")
+
+            val secondConfirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(secondConfirmRemovePage.heading).containsText("Superior Landlord With Email")
+            assertThat(secondConfirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        @Test
+        fun `No option is selected when returning to the page after choosing not to remove someone`(page: Page) {
+            navigateToConfirmRemovePage(page, cardIndex = 0).submitDoesNotWantToProceed()
+
+            val confirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(confirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        @Test
+        fun `No option is selected when returning to the page after selecting an option and cancelling`(page: Page) {
+            val initialConfirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            initialConfirmRemovePage.form.areYouSureRadios.selectValue("true")
+            initialConfirmRemovePage.cancelLink.clickAndWait()
+
+            val confirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(confirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        private fun navigateToConfirmRemovePage(
+            page: Page,
+            cardIndex: Int,
+        ): ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration {
+            navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            return clickRemoveOnListPage(page, cardIndex)
+        }
+
+        private fun clickRemoveOnListPage(
+            page: Page,
+            cardIndex: Int,
+        ): ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration {
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+                .getSummaryCard(cardIndex)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            return assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class)
         }
     }
 }
