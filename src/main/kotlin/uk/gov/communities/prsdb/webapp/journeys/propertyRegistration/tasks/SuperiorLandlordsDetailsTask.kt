@@ -21,6 +21,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
 @JourneyFrameworkComponent
@@ -130,11 +133,56 @@ class SuperiorLandlordsDetailsTask(
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
             }
-            // TODO: PDJB-1976: Update this wiring to match OrgGovBodyMembersTask
-            task(journey.superiorLandlordAddressTask) {
+            task(journey.superiorLandlordAddressTask, SuperiorLandlordAddressTask.ROUTE_SEGMENT) {
                 parents { journey.superiorLandlordContactTypeStep.hasOutcome(SuperiorLandlordContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
+                configureStep(journey.superiorLandlordAddressTask.lookupAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingSuperiorLandlord = journey.editingSuperiorLandlord
+                        if (editingSuperiorLandlord != null) {
+                            mapOf(
+                                LookupAddressStepConfig.PREFILL_POSTCODE to editingSuperiorLandlord.addressSearchPostcode,
+                                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to
+                                    editingSuperiorLandlord.addressSearchHouseNameOrNumber,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
+                configureStep(journey.superiorLandlordAddressTask.selectAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        mapOf(
+                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to journey.editingSuperiorLandlord?.selectedAddress,
+                        )
+                    }
+                }
+                configureStep(journey.superiorLandlordAddressTask.manualAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingSuperiorLandlord = journey.editingSuperiorLandlord
+                        if (editingSuperiorLandlord?.manualAddressLineOne != null) {
+                            mapOf(
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingSuperiorLandlord.manualAddressLineOne,
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingSuperiorLandlord.manualAddressLineTwo,
+                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingSuperiorLandlord.manualTownOrCity,
+                                ManualAddressStepConfig.PREFILL_COUNTY to editingSuperiorLandlord.manualCounty,
+                                ManualAddressStepConfig.PREFILL_POSTCODE to editingSuperiorLandlord.manualPostcode,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
             }
             step(journey.saveSuperiorLandlordStep) {
                 parents {

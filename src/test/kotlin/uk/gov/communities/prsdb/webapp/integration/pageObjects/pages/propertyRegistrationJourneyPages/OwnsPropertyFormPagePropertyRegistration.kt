@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 
-// TODO PDJB-1959: replace this placeholder with the real "Do you own the property?" question
 class OwnsPropertyFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${OwnsPropertyStep.ROUTE_SEGMENT}") {

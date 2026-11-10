@@ -5,11 +5,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactTy
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 
-// TODO PDJB-1974: replace this placeholder with the real superior landlord contact type page
 class SuperiorLandlordContactTypeFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
@@ -17,6 +17,7 @@ class SuperiorLandlordContactTypeFormPagePropertyRegistration(
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${SuperiorLandlordContactTypeStep.ROUTE_SEGMENT}",
     ) {
     val form = SuperiorLandlordContactTypeForm(page)
+    val heading = Heading(page.locator("h1"))
     val backLink = BackLink.default(page)
 
     fun submitContactType(contactType: SuperiorLandlordContactType) {

@@ -267,6 +267,12 @@ paymentFailed:
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
   tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
+paymentNotCompleted:
+  heading: Your payment could not be completed
+  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
+  notRegistered: Your property has not been registered.
+  refund: If any money was taken from your account, it will be refunded.
+  payAgain: You need to pay again to register this property.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
@@ -340,10 +346,19 @@ freeholders:
     buttons:
       addFirstFreeholder: Add first freeholder
   provideDetails:
-    fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
+    fieldSetHeading:
+      joint: Can you provide this joint freeholder’s details?
+      nonJoint: Can you provide this freeholder’s details?
     radios:
+      option:
+        'yes':
+          hint: Provide a name and either an email or postal address
+        'no':
+          hint: You can continue, but return and add these details when you can
       error:
-        missing: Select whether you can provide details about the freeholder
+        missing:
+          joint: Select if you can provide this joint freeholder’s contact details
+          nonJoint: Select if you can provide this freeholder’s contact details
   name:
     fieldSetHeading:
       joint: What is this joint freeholder’s name?
@@ -388,6 +403,14 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  remove:
+    fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
+    unknownFreeholder:
+      fieldSetHeading: Are you sure you want to remove this unknown freeholder?
+    fieldSetHint: They will be removed as a freeholder
+    radios:
+      error:
+        missing: Select if you want to remove this freeholder
 superiorLandlords:
   provideDetails:
     fieldSetHeading: Can you provide the details of this person in the ownership chain?
@@ -405,13 +428,24 @@ superiorLandlords:
     error:
       missing: Enter a name
   contactType:
-    fieldSetHeading: How should we contact the superior landlord? (TODO PDJB-1974)
+    fieldSetHeading: Which contact information can you provide for {0}?
+    fieldSetHint: You only need to provide one
     radios:
       option:
-        email: Email
-        postalAddress: Post
+        email:
+          label: Email address
+          hint: This will let us contact them quicker
+        postalAddress:
+          label: Postal address
       error:
-        missing: Select how we should contact the superior landlord
+        missing: Select which contact information you can provide
+  address:
+    lookup:
+      fieldSetHeading: What is {0}’s address?
+    select:
+      fieldSetHeading: Select {0}’s address
+    manual:
+      fieldSetHeading: What is {0}’s address?
   list:
     heading: '{0,choice,1#You’ve added 1 person in the ownership chain|1<You’ve added {0} people in the ownership chain}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
@@ -443,10 +477,15 @@ superiorLandlords:
         'no': 'No'
       error:
         missing: Select if there is anyone else in the ownership chain
-# TODO PDJB-1959: replace with the real "Do you own the property?" content
 ownsProperty:
-  fieldSetHeading: TODO PDJB-1959 Do you own this property?
+  fieldSetHeading: Do you own this property?
+  fieldSetHint: This helps us understand if there’s anyone else who’s responsible for the property’s condition
   radios:
+    option:
+      'yes':
+        hint: Includes freehold and leasehold
+      'no':
+        hint: Includes ‘rent-to-rent’ and ‘guaranteed rent’ arrangements
     error:
       missing: Select if you own this property
 # TODO PDJB-1960: replace with the real "What kind of ownership do you have?" content
