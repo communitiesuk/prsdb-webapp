@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -60,6 +61,7 @@ class PropertyOwnershipService(
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
+    private val landlordRepository: LandlordRepository,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -99,6 +101,8 @@ class PropertyOwnershipService(
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
         val correspondenceAddress = addressService.findOrCreateAddress(correspondenceAddressModel)
+
+        registeringLandlord.markAsHavingRegisteredProperty()
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -497,6 +501,8 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
+        landlord.markAsHavingRegisteredProperty()
+        landlordRepository.save(landlord)
     }
 
     @Transactional
