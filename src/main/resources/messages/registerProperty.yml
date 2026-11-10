@@ -267,6 +267,12 @@ paymentFailed:
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
   tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
+paymentNotCompleted:
+  heading: Your payment could not be completed
+  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
+  notRegistered: Your property has not been registered.
+  refund: If any money was taken from your account, it will be refunded.
+  payAgain: You need to pay again to register this property.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
@@ -340,10 +346,19 @@ freeholders:
     buttons:
       addFirstFreeholder: Add first freeholder
   provideDetails:
-    fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
+    fieldSetHeading:
+      joint: Can you provide this joint freeholder’s details?
+      nonJoint: Can you provide this freeholder’s details?
     radios:
+      option:
+        'yes':
+          hint: Provide a name and either an email or postal address
+        'no':
+          hint: You can continue, but return and add these details when you can
       error:
-        missing: Select whether you can provide details about the freeholder
+        missing:
+          joint: Select if you can provide this joint freeholder’s contact details
+          nonJoint: Select if you can provide this freeholder’s contact details
   name:
     fieldSetHeading:
       joint: What is this joint freeholder’s name?
