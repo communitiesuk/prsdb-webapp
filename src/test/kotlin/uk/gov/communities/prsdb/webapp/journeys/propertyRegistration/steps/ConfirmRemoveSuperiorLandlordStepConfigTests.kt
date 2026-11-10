@@ -135,7 +135,7 @@ class ConfirmRemoveSuperiorLandlordStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals("registerProperty.superiorLandlords.remove.fieldSetHeadingUnknown", content["fieldSetHeading"])
+        assertEquals("registerProperty.superiorLandlords.remove.unknownSuperiorLandlord.fieldSetHeading", content["fieldSetHeading"])
         assertEquals(null, content["optionalFieldSetHeadingParam"])
     }
 

@@ -423,8 +423,9 @@ superiorLandlords:
     buttons:
       addAnother: Add another person in the ownership chain
   remove:
-    fieldSetHeading: 'Are you sure you want to remove {0,,name}?'
-    fieldSetHeadingUnknown: Are you sure you want to remove this unknown person?
+    fieldSetHeading: 'Are you sure you want to remove {0,,superiorLandlordName}?'
+    unknownSuperiorLandlord:
+      fieldSetHeading: Are you sure you want to remove this unknown person?
     fieldSetHint: They will be removed from the property’s ownership chain
     radios:
       error:

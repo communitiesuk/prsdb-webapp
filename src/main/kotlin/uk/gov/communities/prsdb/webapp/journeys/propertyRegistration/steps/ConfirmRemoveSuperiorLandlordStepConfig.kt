@@ -17,11 +17,11 @@ class ConfirmRemoveSuperiorLandlordStepConfig(
     override val formModelClass = ConfirmRemoveSuperiorLandlordFormModel::class
 
     override fun getStepSpecificContent(state: SuperiorLandlordsDetailsState): Map<String, Any?> {
-        val superiorLandlordName = getSuperiorLandlordToRemove(state)?.name
+        val superiorLandlordName = getSuperiorLandlordToRemove(state)?.takeIf { it.detailsKnown }?.name
         return mapOf(
             "fieldSetHeading" to
                 if (superiorLandlordName == null) {
-                    "registerProperty.superiorLandlords.remove.fieldSetHeadingUnknown"
+                    "registerProperty.superiorLandlords.remove.unknownSuperiorLandlord.fieldSetHeading"
                 } else {
                     "registerProperty.superiorLandlords.remove.fieldSetHeading"
                 },
@@ -43,10 +43,8 @@ class ConfirmRemoveSuperiorLandlordStepConfig(
     override fun afterStepDataIsAdded(state: SuperiorLandlordsDetailsState) {
         val wantsToProceed = getFormModelFromStateOrNull(state)?.wantsToProceed
         // Clear to stop it being pre-selected on later visits
-        state.clearStepData(stepDataKey)
-        if (wantsToProceed != true) {
-            return
-        }
+        state.confirmRemoveSuperiorLandlordStep.clearFormData()
+        if (wantsToProceed != true) return
         val keyToRemove = collectionKeyParameterService.getParameterOrNull() ?: return
         val currentMap = state.superiorLandlordsMap?.toMutableMap() ?: return
         currentMap.remove(keyToRemove)
