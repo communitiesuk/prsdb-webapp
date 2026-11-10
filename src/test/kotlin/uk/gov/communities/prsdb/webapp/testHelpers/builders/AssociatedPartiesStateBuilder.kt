@@ -65,7 +65,7 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withOwnershipKind(ownershipKind: OwnershipKind = OwnershipKind.FREEHOLD_ONLY): SelfType {
         val ownershipKindFormModel =
             OwnershipKindFormModel().apply {
-                this.ownershipKind = ownershipKind
+                ownershipKinds = ownershipKind.options.map { it.name }.toMutableList()
             }
         withSubmittedValue(OwnershipKindStep.ROUTE_SEGMENT, ownershipKindFormModel)
         return self()

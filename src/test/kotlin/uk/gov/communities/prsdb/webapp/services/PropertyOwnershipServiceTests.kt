@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -113,6 +114,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockAddressService: AddressService
+
+    @Mock
+    private lateinit var mockLandlordRepository: LandlordRepository
 
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
@@ -395,6 +399,47 @@ class PropertyOwnershipServiceTests {
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertEquals(null, propertyOwnershipCaptor.value.lastOccupiedDate)
+    }
+
+    @ParameterizedTest
+    @EnumSource(LandlordType::class)
+    fun `createPropertyOwnership marks the registering landlord as having registered a property`(landlordType: LandlordType) {
+        val landlord =
+            when (landlordType) {
+                LandlordType.INDIVIDUAL -> MockLandlordData.createIndividualLandlord()
+                LandlordType.ORGANISATION -> MockLandlordData.createOrgLandlord()
+            }
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+        )
+
+        assertTrue(landlord.hasRegisteredProperty)
     }
 
     @Test
@@ -2148,6 +2193,20 @@ class PropertyOwnershipServiceTests {
             // Assert
             assertTrue(propertyOwnership.landlords.contains(newLandlord))
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `addLandlordToPropertyOwnership marks the landlord as having registered a property`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            assertTrue(newLandlord.hasRegisteredProperty)
+            verify(mockLandlordRepository).save(newLandlord)
         }
     }
 

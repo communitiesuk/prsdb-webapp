@@ -28,7 +28,7 @@ class VirusScanProcessingService(
         if (callbackDetails.isNotEmpty()) {
             processCertificateScanResult(callbackDetails, scanResultStatus)
         } else {
-            removeOrphanedFileUpload(locator)
+            processScanWithoutCallbacks(locator)
         }
     }
 
@@ -72,20 +72,32 @@ class VirusScanProcessingService(
         callbackDetails.forEach { virusScanCallbackRepository.delete(it) }
     }
 
-    private fun removeOrphanedFileUpload(locator: UploadedFileLocator) {
-        val fileUpload =
-            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
+    private fun processScanWithoutCallbacks(locator: UploadedFileLocator) {
+        val fileUpload = fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
-        fileUpload?.let {
-            if (dequarantiner.deleteQuarantinedFile(it)) {
-                throw PrsdbWebException("Deleted orphaned file: ${it.objectKey}")
-            } else {
-                throw PrsdbWebException("Failed to delete orphaned file: ${it.objectKey}")
+        when {
+            fileUpload == null -> {
+                println(
+                    "No file upload found for object key: ${locator.objectKey} and version ID: ${locator.versionId}. " +
+                        "Its scan result has already been processed, or it has no file upload record.",
+                )
+            }
+
+            fileUpload.status != FileUploadStatus.QUARANTINED -> {
+                println(
+                    "File upload ${fileUpload.objectKey} is already ${fileUpload.status}, " +
+                        "so its scan result has already been processed.",
+                )
+            }
+
+            dequarantiner.deleteQuarantinedFile(fileUpload) -> {
+                println("Deleted orphaned file: ${fileUpload.objectKey}")
+            }
+
+            else -> {
+                throw PrsdbWebException("Failed to delete orphaned file: ${fileUpload.objectKey}")
             }
         }
-        throw PrsdbWebException(
-            "No file upload found for object key: ${locator.objectKey} and version ID: ${locator.versionId}",
-        )
     }
 
     private fun getCallbackDetails(certificateFileLocator: UploadedFileLocator): List<VirusScanCallback> {

@@ -214,6 +214,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
+        fun beforePropertyRegistrationOwnershipKind() = beforePropertyRegistrationOwnsProperty().withOwnsProperty()
+
         fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
             if (isJointFreeholder) {
                 beforePropertyRegistrationOwnsProperty()
@@ -325,6 +327,11 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationSuperiorLandlordContactType(superiorLandlordName: String = "Test Superior Landlord") =
             beforePropertyRegistrationSuperiorLandlordName()
                 .withSuperiorLandlordName(superiorLandlordName)
+
+        fun beforePropertyRegistrationSuperiorLandlordEmail(existingSuperiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null) =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
+                .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
 
         fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
             beforePropertyRegistrationSuperiorLandlordContactType()
