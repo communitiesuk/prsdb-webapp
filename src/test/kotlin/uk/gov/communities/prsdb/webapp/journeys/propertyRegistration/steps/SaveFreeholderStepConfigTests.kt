@@ -73,7 +73,10 @@ class SaveFreeholderStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(mapOf(1 to existingFreeholder, 4 to FreeholderDataModel(detailsKnown = false)), savedMap)
+        assertEquals(
+            mapOf(1 to existingFreeholder, 4 to FreeholderDataModel(editedInJourney = true, detailsKnown = false)),
+            savedMap,
+        )
         verify(mockState).nextFreeholderId = 5
         verify(mockState).editingFreeholderId = null
     }
@@ -91,7 +94,11 @@ class SaveFreeholderStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(mapOf(1 to otherFreeholder, 2 to FreeholderDataModel(detailsKnown = false)), savedMap)
+        // The freeholder the user did not edit keeps editedInJourney = false
+        assertEquals(
+            mapOf(1 to otherFreeholder, 2 to FreeholderDataModel(editedInJourney = true, detailsKnown = false)),
+            savedMap,
+        )
         verify(mockState, never()).nextFreeholderId = any()
         verify(mockState).editingFreeholderId = null
     }
@@ -108,6 +115,7 @@ class SaveFreeholderStepConfigTests {
 
         val expectedFreeholder =
             FreeholderDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 email = ENTERED_EMAIL,
@@ -134,6 +142,7 @@ class SaveFreeholderStepConfigTests {
         // Assert
         val expectedFreeholder =
             FreeholderDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = SELECTED_ADDRESS,
@@ -170,6 +179,7 @@ class SaveFreeholderStepConfigTests {
         // Assert
         val expectedFreeholder =
             FreeholderDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = manualAddress,
@@ -223,6 +233,7 @@ class SaveFreeholderStepConfigTests {
         // Assert
         val expectedFreeholder =
             FreeholderDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),

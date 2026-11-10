@@ -50,7 +50,11 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                 nextKey
             }
 
-        currentMap[targetKey] = freeholder
+        // Keep the database id of the freeholder being edited, and record that the user went through
+        // their details, so that saving the journey can tell an amended freeholder from a new one and
+        // leave freeholders the user never opened alone.
+        currentMap[targetKey] =
+            freeholder.copy(databaseId = currentMap[targetKey]?.databaseId, editedInJourney = true)
         state.freeholdersMap = currentMap
         state.editingFreeholderId = null
 

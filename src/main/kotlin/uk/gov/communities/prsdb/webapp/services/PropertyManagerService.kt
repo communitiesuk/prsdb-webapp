@@ -12,4 +12,19 @@ class PropertyManagerService(
         name: String,
         email: String,
     ): PropertyManager = propertyManagerRepository.save(PropertyManager(name, email))
+
+    fun updatePropertyManager(
+        propertyManager: PropertyManager,
+        name: String,
+        email: String,
+    ) {
+        propertyManager.name = name
+        propertyManager.email = email
+        propertyManagerRepository.save(propertyManager)
+    }
+
+    // The caller is responsible for clearing propertyOwnership.propertyManager.
+    fun removePropertyManager(propertyManager: PropertyManager) {
+        propertyManagerRepository.delete(propertyManager)
+    }
 }

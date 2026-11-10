@@ -75,7 +75,13 @@ class SaveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(mapOf(1 to existingSuperiorLandlord, 4 to SuperiorLandlordDataModel(detailsKnown = false)), savedMap)
+        assertEquals(
+            mapOf(
+                1 to existingSuperiorLandlord,
+                4 to SuperiorLandlordDataModel(editedInJourney = true, detailsKnown = false),
+            ),
+            savedMap,
+        )
         verify(mockState).nextSuperiorLandlordId = 5
         verify(mockState).editingSuperiorLandlordId = null
     }
@@ -93,7 +99,14 @@ class SaveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(mapOf(1 to otherSuperiorLandlord, 2 to SuperiorLandlordDataModel(detailsKnown = false)), savedMap)
+        // The superior landlord the user did not edit keeps editedInJourney = false
+        assertEquals(
+            mapOf(
+                1 to otherSuperiorLandlord,
+                2 to SuperiorLandlordDataModel(editedInJourney = true, detailsKnown = false),
+            ),
+            savedMap,
+        )
         verify(mockState, never()).nextSuperiorLandlordId = any()
         verify(mockState).editingSuperiorLandlordId = null
     }
@@ -110,6 +123,7 @@ class SaveSuperiorLandlordStepConfigTests {
 
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 email = "superior.landlord@example.com",
@@ -136,6 +150,7 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = SELECTED_ADDRESS,
@@ -172,6 +187,7 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = manualAddress,
@@ -225,6 +241,7 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
+                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
