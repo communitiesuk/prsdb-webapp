@@ -69,11 +69,7 @@ const val ONE_LOGIN_INFO_URL = "https://www.gov.uk/using-your-gov-uk-one-login"
 const val ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY =
     "https://www.gov.uk/using-your-gov-uk-one-login/proving-your-identity"
 
-const val RENTERS_RIGHTS_BILL_URL = "https://bills.parliament.uk/bills/3764"
-
-const val RENTERS_RIGHTS_BILL_GUIDE_URL =
-    "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
-        "/guide-to-the-renters-rights-bill"
+const val ACCESSIBILITY_STATEMENT_URL = "https://www.gov.uk/help/accessibility-statement"
 
 const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"
 
