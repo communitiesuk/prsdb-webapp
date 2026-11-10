@@ -1,18 +1,23 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
+import jakarta.servlet.http.Cookie
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.util.ResourceUtils
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
@@ -27,6 +32,8 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
@@ -162,6 +169,30 @@ class ReactivatePropertyControllerTests(
             }.andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData returns 404 without uploading when the property cannot be reactivated by the current user`() {
+        mockPropertyCannotBeReactivated()
+        val httpEntity =
+            MultipartEntityBuilder
+                .create()
+                .addTextBody("_csrf", "any-csrf-token")
+                .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
+                .build()
+
+        mvc
+            .post("${getPropertyReactivationBasePath(propertyOwnershipId)}/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=any-id") {
+                contentType = MediaType.parseMediaType(httpEntity.contentType)
+                content = httpEntity.content.readAllBytes()
+                with(csrf().asHeader())
+                cookie(Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token"))
+            }.andExpect {
+                status { isNotFound() }
+            }
+
+        verifyNoInteractions(certificateUploadHelper)
     }
 
     @Test

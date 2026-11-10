@@ -145,8 +145,9 @@ class VirusNotificationEmailHandler(
         }
 
     private fun getPropertyOwnership(id: Long): PropertyOwnership =
-        propertyOwnershipRepository.findByIdAndIsActiveTrue(id)
-            ?: throw IllegalStateException("No active property ownership found for id: $id")
+        propertyOwnershipRepository.findById(id).orElseThrow {
+            IllegalStateException("No property ownership found for id: $id")
+        }
 
     private fun sendEmailAfterCommit(
         recipientAddress: String,

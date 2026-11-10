@@ -2,7 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -13,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmationPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ElectricalSafetyFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EpcFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.GasCertExpiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.GasCertIssueDateFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
@@ -88,8 +92,17 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(hasGasCertPage.form.submitButton).hasText("Continue")
         hasGasCertPage.submitHasCertificate()
 
-        val issueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
+        var issueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
         assertThat(issueDatePage.form.submitButton).hasText("Continue")
+        issueDatePage.submitDate(
+            DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(months = GAS_SAFETY_CERT_VALIDITY_MONTHS, days = 5)),
+        )
+
+        val expiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyReactivation::class, urlArguments)
+        assertThat(expiredPage.form.submitButton).hasText("Continue without a valid gas safety certificate")
+        expiredPage.changeIssueDateLink.clickAndWait()
+
+        issueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
         issueDatePage.submitDate(DateTimeHelper().getCurrentDateInUK())
 
         val uploadPage = assertPageIs(page, UploadGasCertFormPagePropertyReactivation::class, urlArguments)
