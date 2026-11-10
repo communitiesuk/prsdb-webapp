@@ -1,0 +1,16 @@
+info:
+  heading: Reactivate your property
+  youAreReactivating: 'You are reactivating:'
+  whatHappensNext:
+    heading: What happens next
+    paragraph:
+      one: You’ll need to provide any missing information before this property can be reactivated.
+      two: 'This could include:'
+      three: You must complete this information yourself. You cannot ask a letting agent or property manager to do it for you.
+    bullet:
+      one: licensing information
+      two: gas safety certificate
+      three: electrical safety certificate
+      four: energy performance certificate (EPC)
+      five: tenancy details
+  insetText: You must complete all the information and submit in one go. Your answers will not be saved until you submit.

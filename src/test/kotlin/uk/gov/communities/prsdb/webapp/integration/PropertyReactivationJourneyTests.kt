@@ -28,7 +28,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        assertThat(infoPage.heading).containsText("PDJB-2105")
+        assertThat(infoPage.heading).containsText("Reactivate your property")
         infoPage.submit()
 
         val licensingPage = assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments)
