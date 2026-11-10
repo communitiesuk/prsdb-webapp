@@ -12,6 +12,18 @@
     <h1 class="govuk-heading-l" th:text="#{${heading}}">
         heading
     </h1>
+    <th:block th:if="${showRentCalculationSection}">
+        <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.five}">forms.rentAmount.paragraph.five</p>
+        <details id="details" th:replace="~{fragments/details :: details(#{forms.rentAmount.details.summary}, ~{::#details/content()})}">
+            <div class="govuk-details__text">
+                <h2 class="govuk-heading-s" th:text="#{forms.rentAmount.details.subheading.one}">forms.rentAmount.details.subheading.one</h2>
+                <p class="govuk-body" th:text="#{forms.rentAmount.details.paragraph.one}">forms.rentAmount.details.paragraph.one</p>
+                <h2 class="govuk-heading-s" th:text="#{forms.rentAmount.details.subheading.two}">forms.rentAmount.details.subheading.two</h2>
+                <p class="govuk-body" th:text="#{forms.rentAmount.details.paragraph.two}">forms.rentAmount.details.paragraph.two</p>
+            </div>
+        </details>
+        <h2 class="govuk-heading-m" th:text="#{forms.rentAmount.subheading.other.one}">forms.rentAmount.subheading.other.one</h2>
+    </th:block>
     <p class="govuk-body" data-testid="bills-explanation-for-frequency" th:text="#{${billsExplanationForRentFrequency}}">
         forms.rentAmount.paragraph.one
     </p>
@@ -34,16 +46,7 @@
 <th:block id="form-content" th:with="rentAmountHint=${fieldSetHint}">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='rentAmount', fieldSetHeading=#{${subheading}}, fieldSetHint=null, fieldSetHeadingLabelTo='rentAmount', fieldSetHeadingLabelSize='m')}">
-        <th:block th:if="${showRentCalculationSection}">
-            <p class="govuk-body" th:text="#{forms.rentAmount.conditionalSection.paragraph.one}">
-                forms.rentAmount.conditionalSection.paragraph.one
-            </p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li th:text="#{forms.rentAmount.conditionalSection.bullet.one}">forms.rentAmount.conditionalSection.bullet.one</li>
-                <li th:text="#{forms.rentAmount.conditionalSection.bullet.two}">forms.rentAmount.conditionalSection.bullet.two</li>
-            </ul>
-        </th:block>
-        <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.four}">forms.rentAmount.paragraph.four</p>
+        <p class="govuk-body" th:unless="${showRentCalculationSection}" th:text="#{forms.rentAmount.paragraph.four}">forms.rentAmount.paragraph.four</p>
         <th:block th:replace="~{fragments/forms/currencyInput :: currencyInput(null, 'rentAmount', #{${rentAmountHint}})}"></th:block>
     </th:block>
     <button
