@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,14 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1976: replace this placeholder (and SuperiorLandlordAddressTask) with the real superior landlord address
-//  search, select and manual entry pages. Rendered with the shared forms/todo placeholder page.
+// TODO PDJB-2039: replace this placeholder with the real reactivation electrical safety task.
+//  Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class SuperiorLandlordAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class ReactivationElectricalSafetyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1976): Superior landlord postal address - address search, select and manual entry to be added")
+        mapOf("todoComment" to "TODO (PDJB-2039): Reactivation electrical safety task - pages to be added")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -22,10 +22,10 @@ class SuperiorLandlordAddressStepConfig : AbstractRequestableStepConfig<Complete
 }
 
 @JourneyFrameworkComponent
-final class SuperiorLandlordAddressStep(
-    stepConfig: SuperiorLandlordAddressStepConfig,
+final class ReactivationElectricalSafetyStep(
+    stepConfig: ReactivationElectricalSafetyStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "superior-landlord-address"
+        const val ROUTE_SEGMENT = "electrical-safety"
     }
 }

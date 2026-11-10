@@ -158,7 +158,10 @@ class PropertyRegistrationCyaStepConfig(
     private fun getSuperiorLandlordsContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
 
-        val superiorLandlordsTask = state.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+        val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
+        if (ownershipStructureTask.ownershipTypeTask.ownershipType?.requiresSuperiorLandlordInfo() != true) return emptyMap()
+
+        val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
         val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
         val anyoneInOwnershipChain =
             anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain ?: return emptyMap()

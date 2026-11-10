@@ -2,26 +2,27 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 
-// TODO PDJB-1960: replace this placeholder with the real "What kind of ownership do you have?" question
 class OwnershipKindFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${OwnershipKindStep.ROUTE_SEGMENT}") {
     val form = OwnershipKindForm(page)
+    val backLink = BackLink.default(page)
 
     fun submitOwnershipKind(ownershipKind: OwnershipKind) {
-        form.radios.selectValue(ownershipKind)
+        ownershipKind.options.forEach { form.checkboxes.checkCheckbox(it.name) }
         form.submit()
     }
 
     class OwnershipKindForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
-        val radios = Radios(locator)
+        val checkboxes = Checkboxes(locator)
     }
 }
