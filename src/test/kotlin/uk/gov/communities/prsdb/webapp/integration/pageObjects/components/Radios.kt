@@ -9,7 +9,7 @@ class Radios(
     constructor(page: Page) : this(page.locator("html"))
 
     val selectedValue: String
-        get() = locator.locator("input:checked").getAttribute("value")
+        get() = selectedRadios.getAttribute("value")
 
     val selectedRadios: Locator
         get() = locator.locator("input:checked")
