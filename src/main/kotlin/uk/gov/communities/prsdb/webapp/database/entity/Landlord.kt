@@ -54,7 +54,7 @@ abstract class Landlord : ModifiableAuditableEntity() {
         protected set
 
     @Column(name = "is_active", nullable = false)
-    open var isActive: Boolean = false
+    open var isActive: Boolean = true
         protected set
 
     @Column(name = "has_registered_property", nullable = false)

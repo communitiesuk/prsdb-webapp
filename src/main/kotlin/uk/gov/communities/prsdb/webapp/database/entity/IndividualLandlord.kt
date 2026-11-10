@@ -79,7 +79,6 @@ class IndividualLandlord() : Landlord() {
         this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
         this.nonEnglandOrWalesAddress = nonEnglandOrWalesAddress
         this.dateOfBirth = dateOfBirth
-        this.isActive = true
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES

@@ -174,7 +174,6 @@ class OrganisationalLandlord() : Landlord() {
         this.mainContactName = mainContactName
         this.mainContactEmail = mainContactEmail
         this.mainContactPhone = mainContactPhone
-        this.isActive = true
     }
 
     @get:Transient
