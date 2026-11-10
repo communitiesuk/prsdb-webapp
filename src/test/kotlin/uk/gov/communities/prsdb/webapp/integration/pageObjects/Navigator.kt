@@ -996,7 +996,6 @@ class Navigator(
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
-    // TODO PDJB-1959: update this usage when the real owns property page is added
     fun skipToPropertyRegistrationOwnsPropertyPage(): OwnsPropertyFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOwnsProperty().build(),
