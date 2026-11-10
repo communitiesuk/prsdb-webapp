@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipStructureState
 
 enum class OwnershipStructureRouteMode {
@@ -18,7 +18,8 @@ class OwnershipStructureRoutingStepConfig : AbstractInternalStepConfig<Ownership
     override fun mode(state: OwnershipStructureState): OwnershipStructureRouteMode {
         val ownershipType =
             state.ownershipTypeTask.ownershipType
-                ?: throw PrsdbWebException(
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
                     "Ownership structure routing was reached before the ownership type task was complete",
                 )
 

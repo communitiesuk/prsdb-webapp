@@ -51,4 +51,15 @@ enum class OwnershipType {
                 SHARE_OF_TENANTS_IN_COMMON,
                 SHARE_OF_COMMONHOLD,
             )
+
+    // Whether the landlord is themselves one of several freeholders, and so should be added to the
+    // freeholders list.
+    fun isJointFreeholder() =
+        this in
+            setOf(
+                JOINT_TENANTS,
+                TENANTS_IN_COMMON,
+                SHARE_OF_JOINT_TENANTS,
+                SHARE_OF_TENANTS_IN_COMMON,
+            )
 }

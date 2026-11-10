@@ -26,6 +26,16 @@ class OwnershipTypeTests {
         assertEquals(expectedResult, ownershipType.requiresSuperiorLandlordInfo())
     }
 
+    @ParameterizedTest(name = "{1} for {0}")
+    @MethodSource("provideJointFreeholderScenarios")
+    fun `isJointFreeholder returns`(
+        ownershipType: OwnershipType,
+        expectedResult: Boolean,
+    ) {
+        // Act & Assert
+        assertEquals(expectedResult, ownershipType.isJointFreeholder())
+    }
+
     companion object {
         @JvmStatic
         private fun provideFreeholderScenarios() =
@@ -55,6 +65,21 @@ class OwnershipTypeTests {
                 arguments(OwnershipType.SHARE_OF_JOINT_TENANTS, true),
                 arguments(OwnershipType.SHARE_OF_TENANTS_IN_COMMON, true),
                 arguments(OwnershipType.SHARE_OF_COMMONHOLD, true),
+            )
+
+        @JvmStatic
+        private fun provideJointFreeholderScenarios() =
+            arrayOf(
+                arguments(OwnershipType.NONE, false),
+                arguments(OwnershipType.LEASEHOLD_ONLY, false),
+                arguments(OwnershipType.SOLE_FREEHOLD, false),
+                arguments(OwnershipType.JOINT_TENANTS, true),
+                arguments(OwnershipType.TENANTS_IN_COMMON, true),
+                arguments(OwnershipType.COMMONHOLD, false),
+                arguments(OwnershipType.SHARE_OF_SOLE_FREEHOLD, false),
+                arguments(OwnershipType.SHARE_OF_JOINT_TENANTS, true),
+                arguments(OwnershipType.SHARE_OF_TENANTS_IN_COMMON, true),
+                arguments(OwnershipType.SHARE_OF_COMMONHOLD, false),
             )
     }
 }

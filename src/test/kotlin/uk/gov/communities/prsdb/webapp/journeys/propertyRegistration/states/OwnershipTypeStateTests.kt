@@ -15,23 +15,25 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsP
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 class OwnershipTypeStateTests {
-    @ParameterizedTest(name = "{1} when freeholdType is {0}")
+    @ParameterizedTest(name = "{3} when ownsProperty is {0}, ownershipKind is {1} and freeholdType is {2}")
     @MethodSource("provideFreeholdTypeScenarios")
     fun `isJointFreeholder returns`(
+        ownsProperty: YesOrNo?,
+        ownershipKind: OwnershipKind?,
         freeholdType: FreeholdType?,
         expectedResult: Boolean,
     ) {
         // Arrange
-        val state = buildTestOwnershipTypeState(freeholdType)
+        val state = buildTestOwnershipTypeState(ownsProperty, ownershipKind, freeholdType)
 
         // Act & Assert
         assertEquals(expectedResult, state.isJointFreeholder)
     }
 
     private fun buildTestOwnershipTypeState(
+        ownsProperty: YesOrNo?,
+        ownershipKind: OwnershipKind?,
         freeholdType: FreeholdType?,
-        ownsProperty: YesOrNo? = null,
-        ownershipKind: OwnershipKind? = null,
     ): OwnershipTypeState =
         object : AbstractJourneyState(journeyStateService = mock()), OwnershipTypeState {
             override val ownsPropertyStep = mock<OwnsPropertyStep> { on { outcome } doReturn ownsProperty }
@@ -43,11 +45,19 @@ class OwnershipTypeStateTests {
         @JvmStatic
         private fun provideFreeholdTypeScenarios() =
             arrayOf(
-                arguments(FreeholdType.JOINT_TENANTS, true),
-                arguments(FreeholdType.TENANTS_IN_COMMON, true),
-                arguments(FreeholdType.SOLE_OWNERSHIP, false),
-                arguments(FreeholdType.COMMONHOLD, false),
-                arguments(null, false),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_ONLY, FreeholdType.JOINT_TENANTS, true),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_ONLY, FreeholdType.TENANTS_IN_COMMON, true),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_ONLY, FreeholdType.SOLE_OWNERSHIP, false),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_ONLY, FreeholdType.COMMONHOLD, false),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_AND_LEASEHOLD, FreeholdType.JOINT_TENANTS, true),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_AND_LEASEHOLD, FreeholdType.TENANTS_IN_COMMON, true),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_AND_LEASEHOLD, FreeholdType.SOLE_OWNERSHIP, false),
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_AND_LEASEHOLD, FreeholdType.COMMONHOLD, false),
+                arguments(YesOrNo.YES, OwnershipKind.LEASEHOLD_ONLY, null, false),
+                arguments(YesOrNo.NO, null, null, false),
+                // The ownership type task is not yet complete, so there is no ownership type to judge
+                arguments(YesOrNo.YES, OwnershipKind.FREEHOLD_ONLY, null, false),
+                arguments(null, null, null, false),
             )
     }
 }

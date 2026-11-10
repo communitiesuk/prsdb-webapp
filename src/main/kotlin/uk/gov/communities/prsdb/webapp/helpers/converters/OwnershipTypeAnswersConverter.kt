@@ -5,14 +5,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// TODO PDJB-1984, PDJB-1985, PDJB-1986, PDJB-2014: use this for the ownership answer rows on the
-//  property registration check your answers page.
-// TODO PDJB-960, PDJB-1996, PDJB-1997, PDJB-1998: use this for the ownership answer rows on the
-//  property record, so that it and the check your answers page stay consistent.
+// TODO PDJB-1996: use this to show the ownership answer rows on the property record, which has
+//  only the stored OwnershipType to work from.
+// TODO PDJB-2014: optionally use this for the same rows on the property registration check your
+//  answers page to keep cya consistent with the property record.
 object OwnershipTypeAnswersConverter {
     // Null until enough of the ownership type task has been answered to determine the type, which
     // is exactly when the task is complete (see OwnershipTypeTask.exitStep).
-    fun convert(
+    fun convertOrNull(
         ownsProperty: YesOrNo?,
         ownershipKind: OwnershipKind?,
         freeholdType: FreeholdType?,

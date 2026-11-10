@@ -32,12 +32,9 @@ class OwnershipTypeAnswersConverterTests {
         OwnershipTypeAnswersConverter.convert(ownershipType)
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideOwnershipTypeAnswers")
-    fun `convert only leaves a later answer unanswered when that question is not asked`(
-        ownershipType: OwnershipType,
-        expected: OwnershipTypeAnswers,
-    ) {
+    @ParameterizedTest
+    @EnumSource(OwnershipType::class)
+    fun `convert only leaves a later answer unanswered when that question is not asked`(ownershipType: OwnershipType) {
         // Act
         val result = OwnershipTypeAnswersConverter.convert(ownershipType)
 
@@ -45,19 +42,18 @@ class OwnershipTypeAnswersConverterTests {
         // freeholdType only when there is no freehold to describe
         assertEquals(result.ownsProperty == YesOrNo.YES, result.ownershipKind != null)
         assertEquals(result.ownershipKind != null && result.ownershipKind != OwnershipKind.LEASEHOLD_ONLY, result.freeholdType != null)
-        assertEquals(expected, result)
     }
 
     @ParameterizedTest(name = "{3} when ownsProperty is {0}, ownershipKind is {1} and freeholdType is {2}")
     @MethodSource("provideAnswerScenarios")
-    fun `convert maps the journey answers to an ownership type`(
+    fun `convertOrNull maps the journey answers to an ownership type`(
         ownsProperty: YesOrNo?,
         ownershipKind: OwnershipKind?,
         freeholdType: FreeholdType?,
         expected: OwnershipType?,
     ) {
         // Act
-        val result = OwnershipTypeAnswersConverter.convert(ownsProperty, ownershipKind, freeholdType)
+        val result = OwnershipTypeAnswersConverter.convertOrNull(ownsProperty, ownershipKind, freeholdType)
 
         // Assert
         assertEquals(expected, result)
@@ -65,12 +61,12 @@ class OwnershipTypeAnswersConverterTests {
 
     @ParameterizedTest
     @EnumSource(OwnershipType::class)
-    fun `convert round-trips every ownership type through its answers`(ownershipType: OwnershipType) {
+    fun `converting an ownership type to answers and back gives the same ownership type`(ownershipType: OwnershipType) {
         // Arrange
         val answers = OwnershipTypeAnswersConverter.convert(ownershipType)
 
         // Act
-        val result = OwnershipTypeAnswersConverter.convert(answers.ownsProperty, answers.ownershipKind, answers.freeholdType)
+        val result = OwnershipTypeAnswersConverter.convertOrNull(answers.ownsProperty, answers.ownershipKind, answers.freeholdType)
 
         // Assert
         assertEquals(ownershipType, result)

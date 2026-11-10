@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeAnswersConverter
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -17,14 +16,13 @@ interface OwnershipTypeState : JourneyState {
 
     val ownershipType: OwnershipType?
         get() =
-            OwnershipTypeAnswersConverter.convert(
+            OwnershipTypeAnswersConverter.convertOrNull(
                 ownsPropertyStep.outcome,
                 ownershipKindStep.outcome,
                 freeholdTypeStep.outcome,
             )
 
-    // Whether the landlord is themselves one of several freeholders, and so should be added to the
-    // freeholders list.
+    // False until the ownership type task is complete, which is always before the freeholders are asked for.
     val isJointFreeholder: Boolean
-        get() = freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
+        get() = ownershipType?.isJointFreeholder() ?: false
 }
