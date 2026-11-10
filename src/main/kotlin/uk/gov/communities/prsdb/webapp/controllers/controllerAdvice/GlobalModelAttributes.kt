@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter.Companion.CSP_NONCE_ATTRIBUTE
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfig.Companion.LETTING_AGENT_ROUTES_PREFIX
+import uk.gov.communities.prsdb.webapp.constants.ACCESSIBILITY_STATEMENT_URL
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
@@ -79,6 +80,7 @@ class GlobalModelAttributes(
             "/$PRIVACY_NOTICE_PATH_SEGMENT".overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
         )
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
+        model.addAttribute("accessibilityStatementUrl", ACCESSIBILITY_STATEMENT_URL)
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
