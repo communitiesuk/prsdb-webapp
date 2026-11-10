@@ -1,5 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -9,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForList
 import org.springframework.test.context.ActiveProfiles
@@ -16,6 +21,7 @@ import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -25,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordR
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
+import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
 
 // This test seeds a small but non-trivial volume of data, so it exercises the same batching, address-generation and
@@ -64,6 +71,9 @@ class NftDataSeederTests(
         properties: Int = numOfProperties,
         batchSize: Int = 25,
         generatedAddresses: Int = 2000,
+        randomSeed: Long = 239L,
+        minimumFreeAddresses: Int = 0,
+        incompleteProperties: Int = properties / 10,
     ) = NftDataSeeder(
         sessionFactory = sessionFactory,
         localCouncilRepository = localCouncilRepository,
@@ -71,15 +81,17 @@ class NftDataSeederTests(
         numOfSystemOperators = 2,
         numOfLcUsers = 2,
         numOfLandlords = landlords,
-        numOfProperties = properties,
+        numOfProperties = properties - incompleteProperties,
         batchSize = batchSize,
-        randomSeed = 239L,
+        randomSeed = randomSeed,
         // A blank referenceDate resolves to Instant.now(), which makes seeding non-reproducible: the
         // random-call sequence for date generation depends on the exact instant, so any two runs (even with
         // the same random seed) can diverge. Use a fixed date so "seedDatabase is deterministic" actually
         // tests what it claims to test.
         referenceDate = "2024-01-01",
         numOfGeneratedAddresses = generatedAddresses,
+        minimumFreeAddresses = minimumFreeAddresses,
+        numOfIncompleteProperties = incompleteProperties,
     )
 
     @BeforeEach
@@ -88,11 +100,518 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase seeds the configured number of landlords and properties without error`() {
+    fun `seeder collision checks use custom planning without leaking after commit or rollback`() {
+        sessionFactory.openStatelessSession().use { session ->
+            session.doWork { connection ->
+                connection.createStatement().use { it.execute("SET plan_cache_mode = force_generic_plan") }
+            }
+            try {
+                for (commit in listOf(true, false)) {
+                    val transaction = session.beginTransaction()
+                    session.doWork { connection ->
+                        NftDataSeederDao(session, connection)
+                        connection.createStatement().use { statement ->
+                            statement.executeQuery("SHOW plan_cache_mode").use { result ->
+                                result.next()
+                                assertEquals("force_custom_plan", result.getString(1))
+                            }
+                        }
+                    }
+                    if (commit) transaction.commit() else transaction.rollback()
+                    session.doWork { connection ->
+                        connection.createStatement().use { statement ->
+                            statement.executeQuery("SHOW plan_cache_mode").use { result ->
+                                result.next()
+                                assertEquals("force_generic_plan", result.getString(1))
+                            }
+                        }
+                    }
+                }
+            } finally {
+                session.doWork { connection ->
+                    connection.createStatement().use { it.execute("RESET plan_cache_mode") }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `shared seed audit rejects duplicate overlapping and incomplete cached allocations`() {
         newSeeder().seedDatabase()
+        val sql = ClassPathResource("data-nft-seed-verify.sql").getContentAsString(Charsets.UTF_8)
+
+        fun audit() = jdbcTemplate.query(sql) { result, _ -> (1..11).map { result.getLong(it) } }.single()
+
+        assertEquals(1700L, audit()[4])
+        assertEquals(listOf(0L, 0L, 0L, 0L, 0L, 2L), audit().drop(5))
+        val states =
+            jdbcTemplate.queryForList(
+                "SELECT s.id, s.serialized_state FROM saved_journey_state s " +
+                    "JOIN landlord_incomplete_properties lip ON lip.saved_journey_state_id = s.id ORDER BY s.id",
+            )
+        val first = states.first()
+        val second = states[1]
+        jdbcTemplate.update(
+            "UPDATE saved_journey_state SET serialized_state = ? WHERE id = ?",
+            first["serialized_state"],
+            second["id"],
+        )
+        assertTrue(audit()[6] > 0)
+        jdbcTemplate.update(
+            "UPDATE saved_journey_state SET serialized_state = ? WHERE id = ?",
+            second["serialized_state"],
+            second["id"],
+        )
+        jdbcTemplate.execute(
+            """
+            UPDATE saved_journey_state
+            SET serialized_state = (serialized_state::jsonb - 'cachedAddresses')::text
+            WHERE id = ${first["id"]}
+            """.trimIndent(),
+        )
+        assertTrue(audit()[7] > 0)
+        jdbcTemplate.update(
+            "UPDATE saved_journey_state SET serialized_state = ? WHERE id = ?",
+            first["serialized_state"],
+            first["id"],
+        )
+        jdbcTemplate.execute(
+            """
+            UPDATE property_ownership SET address_id = (
+                SELECT a.id FROM saved_journey_state s
+                JOIN address a ON a.single_line_address = s.serialized_state::jsonb #>> '{journeyData,select-address,address}'
+                WHERE s.id = ${first["id"]}
+            ) WHERE id = (SELECT min(id) FROM property_ownership)
+            """.trimIndent(),
+        )
+        assertEquals(1L, audit()[5])
+    }
+
+    @Test
+    fun `saved registration fixtures allocate two earliest owned states per distinct active landlord`() {
+        newSeeder().seedDatabase()
+        val sql = ClassPathResource("data-nft-saved-registration-fixtures.sql").getContentAsString(Charsets.UTF_8)
+        val fixtures = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
+        assertTrue(fixtures.isNotEmpty())
+        val subjects = fixtures.map { it.jsonObject.getValue("subject").jsonPrimitive.content }
+        assertEquals(subjects.size, subjects.toSet().size)
+        val allIds =
+            fixtures.flatMap { element ->
+                val fixture = element.jsonObject
+                val subject = fixture.getValue("subject").jsonPrimitive.content
+                val selected = listOf("resumeJourneyId", "deleteJourneyId").map { fixture.getValue(it).jsonPrimitive.content }
+                val owned =
+                    jdbcTemplate.queryForList(
+                        """
+                        SELECT s.journey_id FROM saved_journey_state s
+                        JOIN landlord_incomplete_properties lip ON lip.saved_journey_state_id = s.id
+                        WHERE lip.user_id = ? AND s.subject_identifier = ?
+                        ORDER BY s.created_date, s.id LIMIT 2
+                        """.trimIndent(),
+                        String::class.java,
+                        subject,
+                        subject,
+                    )
+                assertEquals(owned, selected)
+                selected
+            }
+        assertEquals(allIds.size, allIds.toSet().size)
+        jdbcTemplate.update("UPDATE landlord SET individual_is_active = false WHERE individual_subject_identifier = ?", subjects.first())
+        val remaining = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
+        assertTrue(remaining.none { it.jsonObject.getValue("subject").jsonPrimitive.content == subjects.first() })
+    }
+
+    @Test
+    fun `completed property fixtures select distinct active sole owners without saved states or delegation`() {
+        newSeeder().seedDatabase()
+        val sql = ClassPathResource("data-nft-completed-property-fixtures.sql").getContentAsString(Charsets.UTF_8)
+
+        fun fixtures() = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
+        val initial = fixtures()
+        assertTrue(initial.size >= 5)
+        val subjects = initial.map { it.jsonObject.getValue("subject").jsonPrimitive.content }
+        val ids = initial.map { it.jsonObject.getValue("propertyOwnershipId").jsonPrimitive.content.toLong() }
+        assertEquals(subjects.size, subjects.toSet().size)
+        assertEquals(ids.size, ids.toSet().size)
+        for (element in initial) {
+            val fixture = element.jsonObject
+            val files = fixture.getValue("files").jsonArray
+            val expectedFiles =
+                jdbcTemplate.queryForList(
+                    """
+                    SELECT DISTINCT f.object_key, f.extension
+                    FROM property_compliance pc
+                    LEFT JOIN gas_safety_uploads g ON g.property_compliance_id = pc.id
+                    LEFT JOIN electrical_safety_uploads e ON e.property_compliance_id = pc.id
+                    JOIN file_upload f ON f.id IN (g.gas_safety_file_uploads_id, e.electrical_safety_file_uploads_id)
+                    WHERE pc.property_ownership_id = ?
+                    """.trimIndent(),
+                    fixture.getValue("propertyOwnershipId").jsonPrimitive.content.toLong(),
+                )
+            assertEquals(
+                expectedFiles.map { "${it["object_key"]}.${it["extension"]}" }.toSet(),
+                files.map {
+                    val objectKey = it.jsonObject.getValue("objectKey").jsonPrimitive.content
+                    val extension = it.jsonObject.getValue("extension").jsonPrimitive.content
+                    "$objectKey.$extension"
+                }.toSet(),
+            )
+            assertEquals(
+                1L,
+                jdbcTemplate.queryForObject(
+                    """
+                    SELECT count(*) FROM ownership_link ol JOIN landlord l ON l.id = ol.landlord_id
+                    JOIN property_ownership p ON p.id = ol.landlordship_id JOIN address a ON a.id = p.address_id
+                    WHERE p.id = ? AND l.individual_subject_identifier = ? AND p.is_active AND p.is_occupied
+                      AND a.single_line_address = ?
+                    """.trimIndent(),
+                    Long::class.java,
+                    fixture.getValue("propertyOwnershipId").jsonPrimitive.content.toLong(),
+                    fixture.getValue("subject").jsonPrimitive.content,
+                    fixture.getValue("address").jsonPrimitive.content,
+                ),
+            )
+        }
+        jdbcTemplate.update("UPDATE landlord SET individual_is_active = false WHERE individual_subject_identifier = ?", subjects[0])
+        jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = true WHERE id = ?", ids[1])
+        jdbcTemplate.update(
+            "INSERT INTO letting_agent_access (token, invited_email, property_ownership_id) VALUES (gen_random_uuid(), ?, ?)",
+            "agent@example.com",
+            ids[2],
+        )
+        jdbcTemplate.update(
+            """
+            INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+            SELECT landlord_id, ?, current_timestamp FROM ownership_link WHERE landlordship_id = ? LIMIT 1
+            """.trimIndent(),
+            ids[3],
+            ids[4],
+        )
+        val remaining = fixtures()
+        assertTrue(remaining.none { it.jsonObject.getValue("subject").jsonPrimitive.content == subjects[0] })
+        assertTrue(remaining.none { it.jsonObject.getValue("propertyOwnershipId").jsonPrimitive.content.toLong() in ids.take(4) })
+    }
+
+    @Test
+    fun `organisation fixtures select administrators once per organisation and exclude editors`() {
+        newSeeder().seedDatabase()
+        val sql = ClassPathResource("data-nft-organisation-fixtures.sql").getContentAsString(Charsets.UTF_8)
+
+        fun fixtures() = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
+        val initial = fixtures()
+        assertTrue(initial.size >= 3)
+        val ids = initial.map { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() }
+        val subjects = initial.map { it.jsonObject.getValue("subject").jsonPrimitive.content }
+        assertEquals(ids.size, ids.toSet().size)
+        assertEquals(subjects.size, subjects.toSet().size)
+        for (element in initial) {
+            val fixture = element.jsonObject
+            assertEquals(
+                1L,
+                jdbcTemplate.queryForObject(
+                    """
+                    SELECT count(*) FROM organisational_landlord_user u
+                    JOIN landlord l ON l.id = u.organisation_landlord_id
+                    JOIN registration_number r ON r.id = l.registration_number_id
+                    WHERE l.id = ? AND u.subject_identifier = ? AND u.role = 0 AND l.landlord_type = 1
+                      AND r.number = ? AND l.organisation_landlord_name = ?
+                    """.trimIndent(),
+                    Long::class.java,
+                    fixture.getValue("organisationId").jsonPrimitive.content.toLong(),
+                    fixture.getValue("subject").jsonPrimitive.content,
+                    fixture.getValue("registrationNumber").jsonPrimitive.content.toLong(),
+                    fixture.getValue("name").jsonPrimitive.content,
+                ),
+            )
+        }
+        jdbcTemplate.update("UPDATE organisational_landlord_user SET role = 1 WHERE organisation_landlord_id = ?", ids[0])
+        assertTrue(fixtures().none { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() == ids[0] })
+        jdbcTemplate.update(
+            "UPDATE organisational_landlord_user SET role = 0, organisation_landlord_id = ? WHERE subject_identifier = ?",
+            ids[1],
+            subjects[0],
+        )
+        val remaining = fixtures()
+        assertEquals(1, remaining.count { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() == ids[1] })
+        assertTrue(remaining.none { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() == ids[0] })
+    }
+
+    @Test
+    fun `QA fixture loads every property without depending on imported address IDs`() {
+        IntegrationTestHelper.resetAndSeedDatabase(listOf("data-test.sql"), jdbcTemplate)
+
+        assertEquals(26, jdbcTemplate.queryForObject("SELECT count(*) FROM property_ownership", Int::class.java))
+        assertEquals(
+            26,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(DISTINCT po.id)
+                FROM property_ownership po
+                JOIN address a ON a.id = po.address_id
+                JOIN ownership_link ol ON ol.landlordship_id = po.id
+                JOIN landlord l ON l.id = ol.landlord_id
+                JOIN registration_number rn ON rn.id = po.registration_number_id
+                WHERE po.id BETWEEN 1 AND 26
+                """.trimIndent(),
+                Int::class.java,
+            ),
+        )
+        val verificationSql = ClassPathResource("data-nft-qa-verify.sql").inputStream.bufferedReader().use { it.readText() }
+        val result = jdbcTemplate.queryForList(verificationSql).single().values.toList()
+        assertEquals(listOf(26L, 0L, 0L, 2L, 0L), result.take(5))
+        assertTrue((result.last() as Long) > 0)
+        assertEquals(
+            "1 QA Fixture Road\nTestville\nQA1 1AA",
+            propertyOwnershipRepository.findById(1).get().address.toMultiLineAddress(),
+        )
+        assertEquals(
+            "1 Provide Later Road\nTestville\nQA1 1AA",
+            propertyOwnershipRepository.findById(18).get().address.toMultiLineAddress(),
+        )
+        jdbcTemplate.execute("UPDATE address SET street_name = null WHERE id = 2")
+        val missingComponentsResult = jdbcTemplate.queryForList(verificationSql).single().values.toList()
+        assertEquals(1L, missingComponentsResult[2])
+        jdbcTemplate.execute("UPDATE address SET street_name = 'QA Fixture Road' WHERE id = 2")
+
+        jdbcTemplate.execute("DELETE FROM ownership_link WHERE landlordship_id = 1 AND landlord_id = 1")
+        val missingLinkResult = jdbcTemplate.queryForList(verificationSql).single().values.toList()
+        assertEquals(1L, missingLinkResult[2])
+        assertEquals(7449183L, jdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('address', 'id'))", Long::class.java))
+    }
+
+    @Test
+    fun `QA fixture preserves imported addresses and remains idempotent`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO address (id, created_date, single_line_address, postcode, local_council_id)
+            VALUES (1, current_timestamp, 'Preserved address', 'QA9 9AA', 2)
+            """.trimIndent(),
+        )
+        jdbcTemplate.execute("SELECT setval(pg_get_serial_sequence('address', 'id'), 8000000)")
+        repeat(2) {
+            jdbcTemplate.execute(ClassPathResource("data-test.sql").getContentAsString(Charsets.UTF_8))
+        }
+
+        assertEquals(26, jdbcTemplate.queryForObject("SELECT count(*) FROM property_ownership", Int::class.java))
+        assertEquals(
+            "Preserved address",
+            jdbcTemplate.queryForObject("SELECT single_line_address FROM address WHERE id = 1", String::class.java),
+        )
+        assertEquals(8000001L, jdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('address', 'id'))", Long::class.java))
+    }
+
+    @Test
+    fun `performance lookup fixture has unambiguous labels alongside legacy QA addresses`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
+            VALUES (13, current_timestamp, 1013, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1),
+                   (9100000001, current_timestamp, 9100000001, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1)
+            """.trimIndent(),
+        )
+        repeat(2) {
+            jdbcTemplate.execute(ClassPathResource("data-nft-performance.sql").getContentAsString(Charsets.UTF_8))
+        }
+
+        assertEquals(
+            5,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*) FROM address performance
+                WHERE performance.id BETWEEN 9100000001 AND 9100000005
+                  AND NOT EXISTS (
+                    SELECT 1 FROM address other
+                    WHERE other.id <> performance.id AND other.is_active
+                      AND other.single_line_address = performance.single_line_address
+                  )
+                """.trimIndent(),
+                Int::class.java,
+            ),
+        )
+        assertEquals(
+            "1 PRSDB Square, EG1 2AA",
+            jdbcTemplate.queryForObject("SELECT single_line_address FROM address WHERE id = 13", String::class.java),
+        )
+    }
+
+    @Test
+    fun `seedDatabase seeds the configured number of landlords and properties without error`() {
+        newSeeder(minimumFreeAddresses = 100).seedDatabase()
 
         assertEquals(numOfLandlords.toLong(), landlordRepository.count())
         assertEquals(numOfProperties.toLong(), propertyOwnershipRepository.count() + incompletePropertiesRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase produces exact completed and incomplete property counts`() {
+        newSeeder(properties = 300, incompleteProperties = 30).seedDatabase()
+
+        assertEquals(270L, propertyOwnershipRepository.count())
+        assertEquals(30L, incompletePropertiesRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase derives the landlord population from portfolios when no landlord count is supplied`() {
+        newSeeder(landlords = 0, properties = 120, incompleteProperties = 20).seedDatabase()
+
+        assertEquals(100L, propertyOwnershipRepository.count())
+        assertEquals(20L, incompletePropertiesRepository.count())
+        assertTrue(landlordRepository.count() > 0)
+        assertTrue(
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*) FROM landlord l
+                WHERE NOT EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id)
+                AND NOT EXISTS (
+                    SELECT 1 FROM saved_journey_state sjs
+                    WHERE sjs.subject_identifier = l.individual_subject_identifier
+                )
+                AND l.landlord_type = 0
+                """.trimIndent(),
+                Long::class.java,
+            )!! > 0,
+        )
+    }
+
+    @Test
+    fun `seedDatabase can generate only completed properties`() {
+        newSeeder(properties = 100, incompleteProperties = 0).seedDatabase()
+
+        assertEquals(100L, propertyOwnershipRepository.count())
+        assertEquals(0L, incompletePropertiesRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase can generate only incomplete properties`() {
+        newSeeder(properties = 100, incompleteProperties = 100).seedDatabase()
+
+        assertEquals(0L, propertyOwnershipRepository.count())
+        assertEquals(100L, incompletePropertiesRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase preserves the NFT fixture and adds the configured volume`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, local_council_id)
+            VALUES (1, current_timestamp, 1, '1 Test Street', 'TE1 1ST', 1)
+            """.trimIndent(),
+        )
+        jdbcTemplate.execute(
+            """
+            INSERT INTO prsdb_user (id, created_date) VALUES ('fixture-landlord', current_timestamp);
+            INSERT INTO registration_number (id, created_date, number, type)
+            VALUES (2147484000, current_timestamp, 210000000001, 1);
+            INSERT INTO landlord
+                (id, registration_number_id, individual_address_id, created_date, individual_email,
+                 individual_is_active, individual_name, individual_phone_number, individual_subject_identifier,
+                 individual_date_of_birth, individual_country_of_residence, individual_is_verified,
+                 individual_has_accepted_privacy_notice)
+            VALUES (2147484000, 2147484000, 1, current_timestamp, 'fixture@example.com',
+                    true, 'Fixture Landlord', '07777777777', 'fixture-landlord',
+                    '1980-01-01', 'England or Wales', true, true);
+            INSERT INTO system_operator (id, created_date, subject_identifier)
+            VALUES (1, current_timestamp, 'fixture-landlord');
+            SELECT setval(pg_get_serial_sequence('address', 'id'), 1);
+            """.trimIndent(),
+        )
+        jdbcTemplate.execute(
+            ClassPathResource("data-nft-performance.sql").inputStream.bufferedReader().use { it.readText() },
+        )
+        val before = captureSeedSnapshot()
+        val landlordCount = landlordRepository.count()
+        val propertyCount = propertyOwnershipRepository.count() + incompletePropertiesRepository.count()
+
+        newSeeder().seedDatabase()
+
+        assertEquals(landlordCount + numOfLandlords, landlordRepository.count())
+        assertEquals(
+            propertyCount + numOfProperties,
+            propertyOwnershipRepository.count() + incompletePropertiesRepository.count(),
+        )
+        val after = captureSeedSnapshot()
+        assertTrue(after.landlords.containsAll(before.landlords))
+        assertTrue(after.properties.containsAll(before.properties))
+        assertEquals(
+            0L,
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM property_ownership WHERE address_id BETWEEN 9100000001 AND 9100000005",
+                Long::class.java,
+            ),
+        )
+    }
+
+    @Test
+    fun `seedDatabase appends records with existing compliance and saved journeys without changing them`() {
+        newSeeder().seedDatabase()
+        val before = captureSeedSnapshot()
+        val propertyCount = propertyOwnershipRepository.count() + incompletePropertiesRepository.count()
+
+        newSeeder(randomSeed = 240L).seedDatabase()
+
+        assertEquals(2L * numOfLandlords, landlordRepository.count())
+        assertEquals(
+            propertyCount + numOfProperties,
+            propertyOwnershipRepository.count() + incompletePropertiesRepository.count(),
+        )
+        val after = captureSeedSnapshot()
+        assertTrue(after.properties.containsAll(before.properties))
+        assertTrue(after.incompleteProperties.containsAll(before.incompleteProperties))
+        assertTrue(after.compliance.containsAll(before.compliance))
+        assertTrue(after.uploads.containsAll(before.uploads))
+    }
+
+    @Test
+    fun `seedDatabase fails rather than consuming reserved lookup addresses`() {
+        jdbcTemplate.execute(
+            ClassPathResource("data-nft-performance.sql").inputStream.bufferedReader().use { it.readText() },
+        )
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                newSeeder(generatedAddresses = 0).seedDatabase()
+            }
+
+        assertTrue(exception.message!!.contains("not enough addresses"))
+        assertEquals(5L, countRows("address"))
+        assertEquals(0L, landlordRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase rejects insufficient free address headroom and rolls back generated addresses`() {
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                newSeeder(generatedAddresses = numOfProperties + 10, minimumFreeAddresses = 20).seedDatabase()
+            }
+
+        assertTrue(exception.message!!.contains("20 free addresses"))
+        assertEquals(0L, countRows("address"))
+        assertEquals(0L, landlordRepository.count())
+    }
+
+    @Test
+    fun `seedDatabase fails instead of accepting fewer properties than requested`() {
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                newSeeder(landlords = 1, properties = 1000).seedDatabase()
+            }
+
+        assertTrue(exception.message!!.contains("only generated"))
+        assertEquals(0L, countRows("address"))
+        assertEquals(0L, countRows("system_operator"))
+    }
+
+    @Test
+    fun `seedDatabase does not rewind sequences already ahead of the data`() {
+        newSeeder().seedDatabase()
+        jdbcTemplate.execute("SELECT setval(pg_get_serial_sequence('landlord', 'id'), 70000)")
+
+        newSeeder(randomSeed = 240L).seedDatabase()
+
+        assertEquals(
+            70001L,
+            jdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('landlord', 'id'))", Long::class.java),
+        )
     }
 
     @Test
@@ -130,6 +649,84 @@ class NftDataSeederTests(
         assertTrue(countRows("file_upload") > 0, "Expected certificate file upload metadata")
         assertTrue(countRows("gas_safety_uploads") > 0, "Expected gas safety certificate relationships")
         assertTrue(countRows("electrical_safety_uploads") > 0, "Expected electrical certificate relationships")
+    }
+
+    @Test
+    fun `seedDatabase allocates distinct addresses across completed and incomplete batches and appended runs`() {
+        repeat(2) { run ->
+            newSeeder(
+                landlords = 0,
+                properties = 120,
+                incompleteProperties = 60,
+                batchSize = 5,
+                generatedAddresses = if (run == 0) 260 else 0,
+                randomSeed = 239L + run,
+                minimumFreeAddresses = 20,
+            ).seedDatabase()
+
+            val allocations =
+                jdbcTemplate.queryForList(
+                    """
+                    SELECT a.single_line_address AS address
+                    FROM property_ownership p JOIN address a ON a.id = p.address_id
+                    UNION ALL
+                    SELECT s.serialized_state::jsonb #>> '{journeyData,select-address,address}' AS address
+                    FROM saved_journey_state s
+                    JOIN landlord_incomplete_properties i ON i.saved_journey_state_id = s.id
+                    """.trimIndent(),
+                    String::class.java,
+                )
+            assertEquals((run + 1) * 120, allocations.size)
+            assertEquals(allocations.size, allocations.toSet().size, "Every completed and incomplete allocation must be distinct")
+        }
+    }
+
+    @Test
+    fun `seedDatabase keeps generated address selections unambiguous alongside an earlier synthetic street`() {
+        NftDataFaker.reset(seed = 239L)
+        val street = NftDataFaker.generateFakeStreet()
+        jdbcTemplate.update(
+            """
+            INSERT INTO address (created_date, uprn, single_line_address, postcode, building_number, street_name, local_council_id)
+            VALUES (current_timestamp, 1, ?, ?, '1', ?, 1)
+            """.trimIndent(),
+            NftDataFaker.buildSingleLineAddress(1, street),
+            street.postcode,
+            street.streetName,
+        )
+        newSeeder(landlords = 0, properties = 70, incompleteProperties = 35, generatedAddresses = 80, batchSize = 5)
+            .seedDatabase()
+
+        assertEquals(
+            0,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*) FROM (
+                    SELECT single_line_address FROM address
+                    GROUP BY single_line_address HAVING count(*) > 1
+                ) ambiguous_addresses
+                """.trimIndent(),
+                Int::class.java,
+            ),
+        )
+    }
+
+    @Test
+    fun `seedDatabase counts existing incomplete allocations when checking free address headroom`() {
+        newSeeder(landlords = 0, properties = 20, incompleteProperties = 20, generatedAddresses = 30, batchSize = 5).seedDatabase()
+
+        assertThrows(IllegalStateException::class.java) {
+            newSeeder(
+                landlords = 0,
+                properties = 10,
+                incompleteProperties = 0,
+                generatedAddresses = 0,
+                minimumFreeAddresses = 1,
+                batchSize = 5,
+            ).seedDatabase()
+        }
+        assertEquals(20L, incompletePropertiesRepository.count())
+        assertEquals(0L, propertyOwnershipRepository.count())
     }
 
     @Test
@@ -244,7 +841,7 @@ class NftDataSeederTests(
 
     @Test
     fun `seedDatabase creates valid organisational landlord invitations for seeded organisations`() {
-        newSeeder().seedDatabase()
+        newSeeder(batchSize = numOfLandlords).seedDatabase()
 
         val organisationLandlordIds =
             organisationLandlordRepository

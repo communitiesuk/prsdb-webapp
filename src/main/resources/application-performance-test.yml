@@ -1,0 +1,12 @@
+spring:
+  config:
+    activate:
+      on-profile: performance-test
+
+gov-uk-pay:
+  base-url: http://localhost:${server.port}/local/gov-uk-pay
+  api-key: performance-test
+  mock-base-url: ${GOV_UK_PAY_MOCK_BASE_URL}
+  mock-card-entry-delay-seconds: 0
+  mock-failing-calls-from-capture: 0
+  mock-failing-capture-takes-payment: false

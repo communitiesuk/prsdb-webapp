@@ -49,7 +49,7 @@ import kotlin.random.Random
  * with its first capture, and `gov-uk-pay.mock-failing-capture-takes-payment` to choose whether that failing capture
  * still takes the payment.
  */
-@Profile("local")
+@Profile("local | performance-test")
 @PrsdbRestController
 @RequestMapping("/local/gov-uk-pay")
 class MockGovUkPayController(
@@ -59,10 +59,11 @@ class MockGovUkPayController(
     @Value("\${gov-uk-pay.mock-failing-capture-takes-payment}") private val failingCaptureTakesPayment: Boolean,
     private val objectMapper: ObjectMapper,
     private val paymentRepository: PaymentRepository,
+    @Value("\${gov-uk-pay.mock-base-url:}") private val mockBaseUrl: String,
 ) {
     private val payments = ConcurrentHashMap<String, StoredPayment>()
 
-    private val baseUrl get() = "http://localhost:$serverPort/local/gov-uk-pay"
+    private val baseUrl get() = mockBaseUrl.ifBlank { "http://localhost:$serverPort/local/gov-uk-pay" }
 
     @PostMapping("/v1/payments")
     fun createPayment(

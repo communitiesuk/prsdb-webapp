@@ -37,6 +37,7 @@ class MockGovUkPayControllerTests {
         cardEntryDelaySeconds: Long = 0,
         failingCallsFromCapture: Int = 0,
         failingCaptureTakesPayment: Boolean = true,
+        mockBaseUrl: String = "",
     ) = MockMvcBuilders
         .standaloneSetup(
             MockGovUkPayController(
@@ -46,6 +47,7 @@ class MockGovUkPayControllerTests {
                 failingCaptureTakesPayment,
                 objectMapper,
                 mockPaymentRepository,
+                mockBaseUrl,
             ),
         ).build()
 
@@ -92,6 +94,16 @@ class MockGovUkPayControllerTests {
             .andExpect(
                 jsonPath("$._links.next_url.href", startsWith("http://localhost:8080/local/gov-uk-pay/mock-card-page/")),
             )
+    }
+
+    @Test
+    fun `uses the explicitly configured payment mock origin for hosted card links`() {
+        mvc = createMvc(mockBaseUrl = "https://nft.example/local/gov-uk-pay")
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$._links.next_url.href", startsWith("https://nft.example/local/gov-uk-pay/mock-card-page/")))
     }
 
     @Test

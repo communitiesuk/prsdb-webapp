@@ -31,6 +31,7 @@ data class BasicRunConfig(
     val limits: ResponseTimeLimits?,
     val iterations: Int,
     val maxIterations: Int,
+    val certificateDownloadOrigin: String? = null,
 ) {
     companion object {
         fun from(properties: Map<String, String>): BasicRunConfig {
@@ -67,6 +68,20 @@ data class BasicRunConfig(
                     }
                 }
 
+            val certificateDownloadOrigin =
+                properties["gatling.certificate.downloadOrigin"]?.let {
+                    val origin = originUrl(properties, "gatling.certificate.downloadOrigin")
+                    val uri = URI.create(origin)
+                    require(
+                        when (target) {
+                            PerformanceTarget.NFT ->
+                                uri.scheme == "https" && uri.port == -1 && uri.host.endsWith(".s3.eu-west-2.amazonaws.com")
+                            PerformanceTarget.LOCAL -> uri.host in setOf("localhost", "127.0.0.1", "[::1]")
+                        } && uri.host != URI.create(originUrl(properties, "gatling.baseUrl")).host,
+                    ) { "Certificate downloads require a separate NFT S3 bucket host or local loopback host" }
+                    origin
+                }
+
             return BasicRunConfig(
                 target = target,
                 mode = mode,
@@ -76,6 +91,7 @@ data class BasicRunConfig(
                 limits = limits,
                 iterations = iterations,
                 maxIterations = maxIterations,
+                certificateDownloadOrigin = certificateDownloadOrigin,
             )
         }
 

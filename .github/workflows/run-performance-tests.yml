@@ -14,6 +14,12 @@ on:
         description: Use an unseeded landlord subject to prove Gatling failure recovery
         type: boolean
         default: false
+      restore-task-definition:
+        description: Exact active restore worker revision (otherwise use NFT_RESTORE_TASK_DEFINITION environment variable)
+        type: string
+      expected-app-sha:
+        description: Deployed app SHA for test-only revisions (otherwise require the workflow SHA)
+        type: string
 
 concurrency:
   group: nft-app-service-operation
@@ -44,13 +50,45 @@ jobs:
           FORCE_READINESS: ${{ inputs.force == true || inputs.fail-smoke == true || inputs.fail-gatling == true }}
         run: node scripts/performance-tests/nft-change-check.mjs
 
-  performance-tests:
-    name: Prepare, test, and restore NFT
+  compile-gatling:
+    name: Compile Gatling while the database restores
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: 25
+          cache: gradle
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Compile the exact workflow revision
+        run: ./gradlew gatlingClasses --no-daemon --console=plain
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gatling-classes-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/classes/
+            build/resources/
+          if-no-files-found: error
+          retention-days: 7
+
+  restore-dataset:
+    name: Restore and verify the large NFT dataset
     needs: changes
     if: needs.changes.outputs.run == 'true'
     environment: nft
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
     permissions:
       contents: read
       id-token: write
@@ -65,9 +103,6 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - name: Install frontend dependencies
-        run: npm ci --ignore-scripts
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -75,18 +110,96 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Stop NFT app while replacing the database
+        run: node scripts/performance-tests/nft-vpc-restore.mjs stop
+      - name: Preserve pre-restore recovery checkpoint
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-restore-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nft-restore-state.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Restore pinned seed dump inside the NFT VPC
+        run: node scripts/performance-tests/nft-vpc-restore.mjs run
+      - name: Migrate and verify the restored NFT database through SSM
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: seed
+        env:
+          NFT_SEED_PROPERTIES: ${{ vars.NFT_SEED_PROPERTIES }}
+          NFT_SEED_INCOMPLETE_PROPERTIES: ${{ vars.NFT_SEED_INCOMPLETE_PROPERTIES }}
+          NFT_LOAD_MINIMUM_FREE_ADDRESSES: ${{ vars.NFT_LOAD_MINIMUM_FREE_ADDRESSES }}
+      - name: Preserve restore state, including partial failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nft-restore-state.json
+          if-no-files-found: error
+          retention-days: 7
+
+  performance-tests:
+    name: Prepare simulator and run Gatling on one allowlisted runner
+    needs: [changes, compile-gatling, restore-dataset]
+    if: needs.changes.outputs.run == 'true'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: corretto
+          java-version: 25
+          cache: gradle
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          name: gatling-classes-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build
+      - name: Check compiled simulation was transferred
+        run: |
+          test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BasicJourneysSimulation.class
+          test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/RampedLoadSimulation.class
+      - uses: actions/download-artifact@v8
+        with:
+          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}
+      - name: Configure NFT performance-test credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-readiness-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Start NFT app after database restore
+        run: node scripts/performance-tests/nft-vpc-restore.mjs start
       - name: Read runner IPv4 address
         run: |
           runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
           echo "::add-mask::$runner_ip"
           echo "RUNNER_IP=$runner_ip" >> "$GITHUB_ENV"
       - name: Prepare environment
+        id: prepare
         env:
-          EXPECTED_NFT_SHA: ${{ needs.changes.outputs.sha }}
+          EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
           FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
           READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
         run: node scripts/performance-tests/nft-prepare.mjs
+      - name: Export distinct owners and saved registrations through read-only SSM tunnel
+        id: exportOwners
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: fixtures
       - name: Run basic Gatling journeys
+        id: basicJourneys
+        continue-on-error: true
         env:
           FAIL_GATLING: ${{ inputs.fail-gatling == true }}
         run: |
@@ -95,6 +208,7 @@ jobs:
             landlord_subject=urn:fdc:gov.uk:2026:PERF-UNKNOWN
           fi
           ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.BasicJourneysSimulation \
             -Dgatling.target=nft \
             -Dgatling.basic.mode=baseline \
@@ -102,6 +216,224 @@ jobs:
             -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
             -Dgatling.basic.landlordSubject="$landlord_subject" \
             -Dgatling.basic.registrationSubject="urn:fdc:gov.uk:2026:PERF-${GITHUB_RUN_ID}"
+      - name: Run owned saved-registration resume and selective deletion journeys
+        id: savedRegistrationJourneys
+        continue-on-error: true
+        run: |
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.SavedRegistrationSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.saved.fixturePath="$RUNNER_TEMP/nft-saved-registration-fixtures.json"
+      - name: Export sole-owner completed property fixtures through read-only SSM tunnel
+        id: exportPropertyFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: property-fixtures
+      - name: Run owned completed-property updates
+        id: completedPropertyUpdates
+        continue-on-error: true
+        run: |
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.CompletedPropertySimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.property.fixturePath="$RUNNER_TEMP/nft-completed-property-fixtures.json"
+      - name: Export organisation administrator fixtures through read-only SSM tunnel
+        id: exportOrganisationFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: organisation-fixtures
+      - name: Run organisation profile updates
+        id: organisationProfileUpdates
+        continue-on-error: true
+        run: |
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationProfileSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.organisation.fixturePath="$RUNNER_TEMP/nft-organisation-fixtures.json"
+      - name: Run owned completed-property certificate uploads
+        id: certificateUploads
+        continue-on-error: true
+        run: |
+          node scripts/performance-tests/local-registration-certificate.mjs "$RUNNER_TEMP/performance-certificate.pdf"
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.CompletedPropertyComplianceSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.property.fixturePath="$RUNNER_TEMP/nft-completed-property-fixtures.json" \
+            -Dgatling.property.fixtureOffset=11 \
+            -Dgatling.certificate.downloadOrigin=https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com \
+            -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf"
+      - name: Export operator and exclusive administrator targets through read-only SSM tunnel
+        id: exportOperatorFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: operator-fixtures
+      - name: Run operator access changes and stubbed invitations
+        id: operatorJourneys
+        continue-on-error: true
+        run: |
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.OperatorOperationsSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.operator.fixturePath="$RUNNER_TEMP/nft-operator-fixtures.json" \
+            -Dgatling.council.emailDeliveryStub=true
+      - name: Export property-registration owners and free addresses for the mixed ramp
+        id: exportRegistrationFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: registration-fixtures
+      - name: Export exclusive council actors and mutation targets for the mixed ramp
+        id: exportCouncilFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: council-fixtures
+      - name: Export exclusive letting-agent properties for the mixed ramp
+        id: exportAgentFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: agent-fixtures
+      - name: Export exclusive joint-landlord properties for the mixed ramp
+        id: exportJointFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: joint-fixtures
+      - name: Export exclusive property deregistration fixtures for the mixed ramp
+        id: exportOffboardingFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: offboarding-fixtures
+      - name: Run provisional all-family concurrent calibration ramp
+        id: rampedJourneys
+        continue-on-error: true
+        if: >-
+          vars.NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY == 'true' &&
+          steps.prepare.outcome == 'success' &&
+          steps.exportOwners.outcome == 'success' &&
+          steps.exportPropertyFixtures.outcome == 'success' &&
+          steps.exportOrganisationFixtures.outcome == 'success' &&
+          steps.exportOperatorFixtures.outcome == 'success' &&
+          steps.exportRegistrationFixtures.outcome == 'success' &&
+          steps.exportCouncilFixtures.outcome == 'success' &&
+          steps.exportAgentFixtures.outcome == 'success' &&
+          steps.exportJointFixtures.outcome == 'success' &&
+          steps.exportOffboardingFixtures.outcome == 'success'
+        run: |
+          ./gradlew gatlingRun --no-daemon --non-interactive \
+            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
+            --simulation uk.gov.communities.prsdb.webapp.performance.RampedLoadSimulation \
+            -Dgatling.target=nft \
+            -Dgatling.basic.mode=baseline \
+            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
+            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
+            -Dgatling.basic.registrationSubject="urn:fdc:gov.uk:2026:PERF-RAMP-${GITHUB_RUN_ID}" \
+            -Dgatling.registration.fixturePath="$RUNNER_TEMP/nft-registration-fixtures.json" \
+            -Dgatling.registration.paymentBaseUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/gov-uk-pay \
+            -Dgatling.saved.fixturePath="$RUNNER_TEMP/nft-saved-registration-fixtures.json" \
+            -Dgatling.property.fixturePath="$RUNNER_TEMP/nft-completed-property-fixtures.json" \
+            -Dgatling.organisation.fixturePath="$RUNNER_TEMP/nft-organisation-fixtures.json" \
+            -Dgatling.operator.fixturePath="$RUNNER_TEMP/nft-operator-fixtures.json" \
+            -Dgatling.council.fixturePath="$RUNNER_TEMP/nft-council-fixtures.json" \
+            -Dgatling.agent.fixturePath="$RUNNER_TEMP/nft-agent-fixtures.json" \
+            -Dgatling.joint.fixturePath="$RUNNER_TEMP/nft-joint-fixtures.json" \
+            -Dgatling.offboarding.fixturePath="$RUNNER_TEMP/nft-offboarding-fixtures.json" \
+            -Dgatling.council.emailDeliveryStub=true \
+            -Dgatling.certificate.downloadOrigin=https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com \
+            -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf" \
+            -Dgatling.ramp.rampMinutes=5 \
+            -Dgatling.ramp.holdMinutes=15 \
+            -Dgatling.ramp.fixtureOffset=22 \
+            -Dgatling.ramp.operatorFixtureOffset=11
+      - name: Summarise journey outcomes
+        if: always() && steps.prepare.outcome == 'success'
+        env:
+          EXPORT_OWNERS: ${{ steps.exportOwners.outcome }}
+          BASIC_JOURNEYS: ${{ steps.basicJourneys.outcome }}
+          SAVED_REGISTRATION: ${{ steps.savedRegistrationJourneys.outcome }}
+          EXPORT_PROPERTY: ${{ steps.exportPropertyFixtures.outcome }}
+          COMPLETED_PROPERTY: ${{ steps.completedPropertyUpdates.outcome }}
+          EXPORT_ORGANISATION: ${{ steps.exportOrganisationFixtures.outcome }}
+          ORGANISATION_PROFILE: ${{ steps.organisationProfileUpdates.outcome }}
+          CERTIFICATE_UPLOADS: ${{ steps.certificateUploads.outcome }}
+          EXPORT_OPERATOR: ${{ steps.exportOperatorFixtures.outcome }}
+          OPERATOR_JOURNEYS: ${{ steps.operatorJourneys.outcome }}
+          EXPORT_REGISTRATION: ${{ steps.exportRegistrationFixtures.outcome }}
+          EXPORT_COUNCIL: ${{ steps.exportCouncilFixtures.outcome }}
+          EXPORT_AGENT: ${{ steps.exportAgentFixtures.outcome }}
+          EXPORT_JOINT: ${{ steps.exportJointFixtures.outcome }}
+          EXPORT_OFFBOARDING: ${{ steps.exportOffboardingFixtures.outcome }}
+          PAYMENT_MOCK_READY: ${{ vars.NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY == 'true' && 'success' || 'failure' }}
+          RAMPED_JOURNEYS: ${{ steps.rampedJourneys.outcome }}
+        run: |
+          failed=false
+          for stage in \
+            "Export owners:$EXPORT_OWNERS" \
+            "Basic journeys:$BASIC_JOURNEYS" \
+            "Saved-registration journeys:$SAVED_REGISTRATION" \
+            "Export property fixtures:$EXPORT_PROPERTY" \
+            "Completed-property updates:$COMPLETED_PROPERTY" \
+            "Export organisation fixtures:$EXPORT_ORGANISATION" \
+            "Organisation profile updates:$ORGANISATION_PROFILE" \
+            "Certificate uploads:$CERTIFICATE_UPLOADS" \
+            "Export operator fixtures:$EXPORT_OPERATOR" \
+            "Operator journeys:$OPERATOR_JOURNEYS" \
+            "Export property-registration fixtures:$EXPORT_REGISTRATION" \
+            "Export council fixtures:$EXPORT_COUNCIL" \
+            "Export letting-agent fixtures:$EXPORT_AGENT" \
+            "Export joint-landlord fixtures:$EXPORT_JOINT" \
+            "Export offboarding fixtures:$EXPORT_OFFBOARDING" \
+            "NFT performance payment mock ready:$PAYMENT_MOCK_READY" \
+            "Ramped journeys:$RAMPED_JOURNEYS"; do
+            name="${stage%%:*}"
+            outcome="${stage#*:}"
+            printf '%s: %s\n' "$name" "$outcome"
+            if [[ "$outcome" != "success" ]]; then
+              failed=true
+            fi
+          done
+          {
+            echo '### PDJB-553 provisional normal-load calibration'
+            echo 'Covered representatives: individual landlord, paid property registration, saved property, completed property, certificates/compliance, organisation, joint landlord, letting agent, local council, system operator and property offboarding.'
+            echo 'Offered arrival profile: actual property registration 26/minute; each of the other ten families 1/minute provisionally; 5-minute linear ramp and 15-minute hold. Two-second provisional pauses follow authentication and at the completed-property transition.'
+            echo 'Gates: zero failed requests and expected successful completion counts for each representative family. Gatling mean/max timings are reported for calibration only; no NFT mean/max acceptance thresholds are asserted.'
+            echo 'Third-party simulator and payment front-channel time is not an application performance budget. Repeat the same profile in separately approved runs before agreeing timing limits with the workload/SLO owner.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$failed" == "true" ]]; then
+            echo "::error::One or more journey stages failed; see the per-stage outcomes above."
+            exit 1
+          fi
       - name: Upload Gatling report
         if: always()
         uses: actions/upload-artifact@v7
@@ -110,33 +442,118 @@ jobs:
           path: build/reports/gatling/**
           if-no-files-found: ignore
           retention-days: 30
-      - name: Restore environment
+      - name: Preserve recovery state
         if: always()
-        env:
-          READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
-        run: node scripts/performance-tests/nft-restore.mjs
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-readiness-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nft-state.json
+          if-no-files-found: error
+          retention-days: 7
 
-  reset-database:
-    name: Reset NFT database
-    needs: [changes, performance-tests]
+  stop-writers-for-reset:
+    name: Restore environment and stop actual writers before reset
+    needs: [changes, restore-dataset, performance-tests]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      READINESS_STATE_REQUIRED: ${{ needs.performance-tests.result != 'skipped' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: nft-*-state-${{ github.run_id }}-${{ github.run_attempt }}
+          merge-multiple: true
+          path: ${{ runner.temp }}
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-before-reset-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Stop owned worker, restore simulator configuration and wait for actual app shutdown
+        run: |
+          if [[ "$READINESS_STATE_REQUIRED" == "true" ]] && [[ ! -s "$RUNNER_TEMP/nft-state.json" ]]; then
+            echo "::error::Preparation ran but its recovery state is missing; refusing automatic reset."
+            exit 1
+          fi
+          node scripts/performance-tests/nft-vpc-restore.mjs cleanup
+
+  reset-database:
+    name: Reset NFT database
+    needs: [changes, stop-writers-for-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.stop-writers-for-reset.result == 'success'
     uses: ./.github/workflows/reset-database.yml
     with:
       environment: nft
       aws-account-id: 448120078528
+      checkout-ref: ${{ github.sha }}
     permissions:
       contents: read
       id-token: write
 
-  marker:
-    name: Record successful NFT head
-    needs: [changes, performance-tests, reset-database]
+  restore-app-after-database-reset:
+    name: Start NFT app and verify all QA fixtures after reset
+    needs: [changes, reset-database]
     if: >-
       always() && needs.changes.result == 'success' &&
-      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success') ||
+      needs.changes.outputs.run == 'true' &&
+      needs.reset-database.result == 'success'
+    environment: nft
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}
+      - name: Configure NFT runner credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-reset-recovery-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Start NFT app and verify rollout and ALB health
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs start-after-reset
+      - name: Verify the exact QA properties and required links
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: qa
+
+  marker:
+    name: Record successful NFT head
+    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      (inputs.expected-app-sha == '' || inputs.expected-app-sha == needs.changes.outputs.sha) &&
+      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success') ||
       (needs.performance-tests.result == 'skipped' && needs.reset-database.result == 'skipped' &&
+      needs.restore-app-after-database-reset.result == 'skipped' &&
       needs.changes.outputs.run == 'false'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
