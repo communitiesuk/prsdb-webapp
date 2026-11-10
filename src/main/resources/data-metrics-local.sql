@@ -70,7 +70,7 @@ FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1000 + i, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
@@ -140,7 +140,7 @@ FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
@@ -223,7 +223,7 @@ VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', 900002000001, 1),
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', NULL, 2001, 2001, DATE '1980-01-01', true, '07300002001', 'metrics-joint-user-1', 'Joint Metrics Landlord 1', 'metrics.joint.1@example.com', 'England or Wales', true, true),
        (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', NULL, 2002, 2002, DATE '1980-01-02', true, '07300002002', 'metrics-joint-user-2', 'Joint Metrics Landlord 2', 'metrics.joint.2@example.com', 'England or Wales', true, true),
@@ -246,6 +246,10 @@ VALUES (2001, 2201, TIMESTAMPTZ '2029-12-03 09:00:00+00'),
        (2004, 2202, TIMESTAMPTZ '2031-02-06 09:00:00+00'),
        (2005, 2202, TIMESTAMPTZ '2031-02-07 09:00:00+00')
 ON CONFLICT DO NOTHING;
+
+UPDATE landlord l
+SET has_registered_property = true
+WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 -- Reset the sequences past the metrics cohorts so records created manually in the app
 -- (e.g. while testing) get ids above the seeded ones rather than colliding with them.
