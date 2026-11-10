@@ -222,7 +222,7 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRSDB+landlord@softwire.com', null::varchar, true, '2025-02-25 16:17:18.075473+00'::timestamptz, 'PRSD Landlord',
@@ -302,7 +302,7 @@ SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRS
        (39, 55, 1, '2026-09-09 00:00:00+00', 'Victoria.Greenwell@communities.gov.uk', null, true, null, 'Victoria Greenwell',
         '07777777777', 'urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E', '1990-01-01', 'England or Wales', true,
         true)) AS v (
-                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
                                    last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                                    individual_has_accepted_privacy_notice)
 -- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
@@ -432,6 +432,10 @@ SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
 -- the whole statement with a foreign key violation.
 WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
 ON CONFLICT DO NOTHING;
+
+UPDATE landlord l
+SET has_registered_property = true
+WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 -- TODO PDJB-1673: Add some EIC example data (electrical_cert_type = 1 with an eic_issue_date)
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,

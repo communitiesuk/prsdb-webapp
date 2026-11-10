@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
@@ -398,6 +399,53 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             freeholdersListPage.backLink.clickAndWait()
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class ConfirmRemoveFreeholderStep {
+        @Test
+        fun `The heading and details identify the freeholder being removed`(page: Page) {
+            val freeholdersListPage =
+                navigator.skipToPropertyRegistrationFreeholdersListPage(
+                    isJointFreeholder = false,
+                    freeholders =
+                        mapOf(
+                            1 to
+                                FreeholderDataModel(
+                                    detailsKnown = true,
+                                    name = "Test Freeholder",
+                                    email = "test@example.com",
+                                ),
+                        ),
+                )
+            freeholdersListPage.getSummaryCard(0).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            assertThat(removeFreeholderPage.heading).containsText("Are you sure you want to remove Test Freeholder?")
+        }
+
+        @Test
+        fun `Back link returns to the freeholder list page`(page: Page) {
+            var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.backLink.clickAndWait()
+
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Submitting without choosing whether to remove a freeholder shows an error`(page: Page) {
+            val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
+
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            removeFreeholderPage.form.submit()
+
+            assertThat(removeFreeholderPage.form.getErrorMessage())
+                .containsText("Select if you want to remove this freeholder")
         }
     }
 }

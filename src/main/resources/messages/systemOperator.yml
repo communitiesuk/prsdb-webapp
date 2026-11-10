@@ -5,6 +5,8 @@ dashboard:
     heading: Manage the service
   generatePasscode:
     button: Generate a passcode
+  generatePassphrase:
+    button: Generate a passphrase
   inviteLocalCouncilAdmin:
     button: Invite a local council admin
   metrics:
