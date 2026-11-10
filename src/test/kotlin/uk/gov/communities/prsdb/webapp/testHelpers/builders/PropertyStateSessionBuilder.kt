@@ -214,6 +214,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
+        fun beforePropertyRegistrationOwnershipKind() = beforePropertyRegistrationOwnsProperty().withOwnsProperty()
+
         fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
             if (isJointFreeholder) {
                 beforePropertyRegistrationOwnsProperty()

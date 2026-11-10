@@ -58,7 +58,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
 
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
-            // TODO PDJB-1960: update this usage when the real ownership kind page is added
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
             // TODO PDJB-1961: update this usage when the real freehold type page is added
@@ -76,7 +75,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
 
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
-            // TODO PDJB-1960: update this usage when the real ownership kind page is added
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
             // TODO PDJB-1961: update this usage when the real freehold type page is added
@@ -100,7 +98,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
 
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
-            // TODO PDJB-1960: update this usage when the real ownership kind page is added
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
             // TODO PDJB-1961: update this usage when the real freehold type page is added
@@ -137,7 +134,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
 
             val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
             ownsPropertyPage.submitOwnsProperty(true)
-            // TODO PDJB-1960: update this usage when the real ownership kind page is added
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
 
