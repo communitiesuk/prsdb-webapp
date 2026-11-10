@@ -10,6 +10,17 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 
 class PropertyRegistrationOwnershipTypeSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
+    inner class OwnsPropertyStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val ownsPropertyPage = navigator.skipToPropertyRegistrationOwnsPropertyPage()
+            ownsPropertyPage.form.submit()
+            assertThat(ownsPropertyPage.form.getErrorMessage())
+                .containsText("Select if you own this property")
+        }
+    }
+
+    @Nested
     inner class OwnershipKindStep {
         @Test
         fun `The freehold and leasehold checkboxes show their hint text`() {

@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @JourneyFrameworkComponent
@@ -23,7 +22,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                 )
 
         val freeholder =
-            if (provideDetails == YesOrNo.YES) {
+            if (provideDetails) {
                 val contactType =
                     state.freeholderContactTypeStep.formModelOrNull?.contactType
                         ?: throw PrsdbWebException(
@@ -56,7 +55,6 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state.editingFreeholderId = null
 
         // Clear the individual step form data so the next freeholder starts fresh
-        // TODO PDJB-1963: check this still clears the real provide details page correctly
         state.freeholderProvideDetailsStep.clearFormData()
         state.freeholderNameStep.clearFormData()
         state.freeholderContactTypeStep.clearFormData()

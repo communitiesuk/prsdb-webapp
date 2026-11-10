@@ -25,12 +25,14 @@ class RemovePropertyManagerStepConfig :
 
     override fun chooseTemplate(state: PropertyManagerState) = "forms/areYouSureForm"
 
-    override fun mode(state: PropertyManagerState): YesOrNo? = getFormModelFromStateOrNull(state)?.toYesOrNo()
+    override fun mode(state: PropertyManagerState): YesOrNo =
+        if (state.propertyManagerDetailsStep.formModelOrNull == null) YesOrNo.YES else YesOrNo.NO
 
     override fun afterStepDataIsAdded(state: PropertyManagerState) {
-        if (mode(state) == YesOrNo.YES) {
+        if (getFormModelFromState(state).wantsToProceed == true) {
             state.propertyManagerDetailsStep.clearFormData()
         }
+        state.removePropertyManagerStep.clearFormData()
     }
 }
 
