@@ -25,7 +25,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -1547,6 +1546,7 @@ class PropertyRegistrationServiceTests {
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 landlords = mutableSetOf(landlord),
+                isOccupied = true,
                 registrationNumber = registrationNumber,
             )
 
@@ -1582,8 +1582,6 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
-
         propertyRegistrationService.registerProperty(
             MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
@@ -1614,8 +1612,7 @@ class PropertyRegistrationServiceTests {
         verify(mockConfirmationEmailSender).sendEmail(
             eq(currentUserEmail),
             argThat<PropertyRegistrationConfirmationEmail> {
-                isPdjb939PhaseTwoEnabled &&
-                    licenseProvideLater &&
+                licenseProvideLater &&
                     gasSafetyCertProvideLater &&
                     electricalSafetyCertProvideLater &&
                     epcProvideLater &&
@@ -1850,7 +1847,6 @@ class PropertyRegistrationServiceTests {
     private fun stubConfirmationEmailDependencies() {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(CURRENT_USER_EMAIL)
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(false)
     }
 
     private fun createLettingAgentInvitation(propertyOwnership: PropertyOwnership) =

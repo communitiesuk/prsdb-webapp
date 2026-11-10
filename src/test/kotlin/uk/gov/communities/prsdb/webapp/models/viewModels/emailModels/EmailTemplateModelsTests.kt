@@ -578,6 +578,23 @@ class EmailTemplateModelsTests {
         }
     }
 
+    @Test
+    fun `property registration email includes missing details for occupied property not delegated to letting agent`() {
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = true,
+                licenseProvideLater = true,
+            )
+
+        val hashMap = email.toHashMap()
+
+        Assertions.assertEquals("yes", hashMap["hasMissingDetails"])
+        Assertions.assertTrue(hashMap["missingDetailsList"].orEmpty().contains("licensing details"))
+    }
+
     @ParameterizedTest
     @CsvSource("true,yes", "false,no")
     fun `organisation registration email includes the feature flag as yes or no personalisation`(
