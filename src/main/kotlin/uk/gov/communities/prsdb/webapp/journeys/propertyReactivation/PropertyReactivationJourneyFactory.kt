@@ -44,6 +44,8 @@ class PropertyReactivationJourneyFactory(
                 initialStep()
                 // TODO PDJB-2034: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
+                // TODO PDJB-2046: route to the "property already registered" page when there is another
+                //  active registration for this address
                 nextStep { journey.stepAfterInfo() }
             }
             // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
