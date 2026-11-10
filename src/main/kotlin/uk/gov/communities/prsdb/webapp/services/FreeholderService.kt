@@ -33,4 +33,9 @@ class FreeholderService(
     fun clearFreeholders(propertyOwnership: PropertyOwnership) {
         freeholderRepository.deleteByPropertyOwnership(propertyOwnership)
     }
+
+    @Transactional
+    fun createPlaceholderFreeholder(propertyOwnership: PropertyOwnership) {
+        freeholderRepository.save(Freeholder(propertyOwnership = propertyOwnership))
+    }
 }

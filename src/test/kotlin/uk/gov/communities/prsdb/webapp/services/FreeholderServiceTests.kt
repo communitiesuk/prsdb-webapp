@@ -109,4 +109,20 @@ class FreeholderServiceTests {
         // Assert
         verify(freeholderRepository).deleteByPropertyOwnership(propertyOwnership)
     }
+
+    @Test
+    fun `createPlaceholderFreeholder saves an empty row for the property`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+        // Act
+        freeholderService.createPlaceholderFreeholder(propertyOwnership)
+
+        // Assert
+        val captor = argumentCaptor<Freeholder>()
+        verify(freeholderRepository).save(captor.capture())
+        assertEquals(propertyOwnership, captor.firstValue.propertyOwnership)
+        assertFalse(captor.firstValue.detailsKnown())
+        verifyNoInteractions(addressService)
+    }
 }

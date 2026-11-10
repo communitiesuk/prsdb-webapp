@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -96,6 +97,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLicenseService: LicenseService
+
+    @Mock
+    private lateinit var mockFreeholderService: FreeholderService
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
@@ -1390,6 +1394,80 @@ class PropertyOwnershipServiceTests {
         // Assert
         assertEquals(OwnershipTypeBeforePdjb955.COMMONHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
         assertEquals(OwnershipType.SHARE_OF_COMMONHOLD, propertyOwnership.ownershipType)
+    }
+
+    @Test
+    fun `updateOwnershipType creates a placeholder freeholder when the new type requires one`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.LEASEHOLD_ONLY,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
+    }
+
+    @Test
+    fun `updateOwnershipType leaves the existing freeholders alone when the new type still requires them`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            )
+        propertyOwnership.freeholders.add(Freeholder(propertyOwnership))
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.LEASEHOLD_ONLY,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        verifyNoInteractions(mockFreeholderService)
+    }
+
+    @Test
+    fun `updateOwnershipType clears the freeholders when the new type does not require any`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            )
+        propertyOwnership.freeholders.add(Freeholder(propertyOwnership))
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.SOLE_FREEHOLD,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        verify(mockFreeholderService).clearFreeholders(propertyOwnership)
     }
 
     @Test

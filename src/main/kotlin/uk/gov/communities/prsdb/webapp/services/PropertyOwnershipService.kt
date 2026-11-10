@@ -54,6 +54,7 @@ class PropertyOwnershipService(
     private val registrationNumberService: RegistrationNumberService,
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
+    private val freeholderService: FreeholderService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
@@ -316,9 +317,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1957: changing to a type that no longer requires freeholder records leaves any
-    //  placeholder freeholder behind. Decide what should happen to existing freeholders here
-    //  once the freeholders journey exists.
+    // TODO PDJB-1984: once real freeholder details can be entered, warn before discarding them.
     @Transactional
     fun updateOwnershipType(
         id: Long,
@@ -331,6 +330,14 @@ class PropertyOwnershipService(
         // TODO PDJB-2019: delete this line with the legacy column.
         propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
         propertyOwnershipRepository.save(propertyOwnership)
+
+        if (ownershipType.requiresFreeholderRecords()) {
+            if (propertyOwnership.freeholders.isEmpty()) {
+                freeholderService.createPlaceholderFreeholder(propertyOwnership)
+            }
+        } else if (propertyOwnership.freeholders.isNotEmpty()) {
+            freeholderService.clearFreeholders(propertyOwnership)
+        }
     }
 
     @Transactional

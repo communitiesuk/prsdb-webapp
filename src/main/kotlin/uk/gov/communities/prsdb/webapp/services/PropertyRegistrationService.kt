@@ -121,6 +121,10 @@ class PropertyRegistrationService(
                 }
 
             // TODO PDJB-1986: save the property manager (if provided) and link it to the new property ownership
+            // TODO PDJB-1984: create the freeholders from the registration journey's answers.
+            // TODO PDJB-1985: create the superior landlords from the registration journey's answers.
+            //  Both hold a foreign key to the property ownership, so unlike the licence and the property
+            //  manager they have to be created from the saved result rather than passed in.
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
