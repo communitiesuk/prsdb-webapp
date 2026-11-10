@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
@@ -204,8 +205,11 @@ class MockLandlordData {
         }
 
         fun createPropertyOwnership(
-            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             ownershipType: OwnershipType = OwnershipType.SOLE_FREEHOLD,
+            // Derived so that the two columns stay consistent by default, while still letting a test
+            // set them independently to represent pre-existing legacy data.
+            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 =
+                OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             isOccupied: Boolean = currentNumTenants > 0,
