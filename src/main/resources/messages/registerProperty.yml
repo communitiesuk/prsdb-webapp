@@ -346,10 +346,19 @@ freeholders:
     buttons:
       addFirstFreeholder: Add first freeholder
   provideDetails:
-    fieldSetHeading: Can you provide details about the freeholder? (TODO PDJB-1963)
+    fieldSetHeading:
+      joint: Can you provide this joint freeholder’s details?
+      nonJoint: Can you provide this freeholder’s details?
     radios:
+      option:
+        'yes':
+          hint: Provide a name and either an email or postal address
+        'no':
+          hint: You can continue, but return and add these details when you can
       error:
-        missing: Select whether you can provide details about the freeholder
+        missing:
+          joint: Select if you can provide this joint freeholder’s contact details
+          nonJoint: Select if you can provide this freeholder’s contact details
   name:
     fieldSetHeading:
       joint: What is this joint freeholder’s name?

@@ -49,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.M
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
@@ -168,6 +169,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
@@ -269,6 +271,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -345,6 +348,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyReactivationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
@@ -1600,6 +1604,23 @@ class Navigator(
             page,
             DeregisterPropertyInfoPage::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyReactivationInfoPage(propertyOwnershipId: Long): InfoFormPagePropertyReactivation {
+        navigate(ReactivatePropertyController.getPropertyReactivationPath(propertyOwnershipId))
+        return createValidPage(
+            page,
+            InfoFormPagePropertyReactivation::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun navigateToPropertyReactivationLicensingPageAfterInfo(propertyOwnershipId: Long) {
+        setJourneyStateInSession(PropertyReactivationStateSessionBuilder().withInfoCompleted().build())
+        navigate(
+            ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
+                "/${ReactivationLicensingStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
         )
     }
 
