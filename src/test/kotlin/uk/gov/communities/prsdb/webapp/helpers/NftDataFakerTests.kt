@@ -10,6 +10,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
+import java.util.TimeZone
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
@@ -101,6 +102,33 @@ class NftDataFakerTests {
         val second = List(FAKER_SAMPLE_SIZE) { NftDataFaker.generateCreatedDate().toString() }
 
         assertEquals(first, second)
+    }
+
+    @Test
+    fun `generateDateOfBirth returns dates between 18 and 120 years before the reference date`() {
+        val datesOfBirth = generateDatesOfBirth()
+
+        val referenceDate = LocalDate.of(2025, 1, 1)
+        assertTrue(datesOfBirth.all { it >= referenceDate.minusYears(120) && it < referenceDate.minusYears(18) })
+    }
+
+    @Test
+    fun `generateDateOfBirth returns the same dates whatever the default time zone`() {
+        val datesOfBirthInUtcPlus14 = withDefaultTimeZone("Pacific/Kiritimati") { generateDatesOfBirth() }
+        val datesOfBirthInUtcMinus12 = withDefaultTimeZone("Etc/GMT+12") { generateDatesOfBirth() }
+
+        assertEquals(datesOfBirthInUtcPlus14, datesOfBirthInUtcMinus12)
+    }
+
+    @Test
+    fun `generateLastEmailReminderSentDate returns the same instant whatever the default time zone`() {
+        val createdDateBeforeClocksGoBack = Timestamp.from(Instant.parse("2025-10-20T12:00:00Z"))
+
+        val ukReminderDate =
+            withDefaultTimeZone("Europe/London") { NftDataFaker.generateLastEmailReminderSentDate(createdDateBeforeClocksGoBack) }
+        val utcReminderDate = withDefaultTimeZone("UTC") { NftDataFaker.generateLastEmailReminderSentDate(createdDateBeforeClocksGoBack) }
+
+        assertEquals(utcReminderDate, ukReminderDate)
     }
 
     @Test
@@ -260,6 +288,24 @@ class NftDataFakerTests {
                 NftDataFaker.generateStandardAndCustomBillsIncluded(),
             ).joinToString("|")
         }
+
+    private fun generateDatesOfBirth(): List<LocalDate> {
+        NftDataFaker.reset(seed = TEST_SEED, reference = FIXED_REFERENCE)
+        return List(FAKER_SAMPLE_SIZE) { NftDataFaker.generateDateOfBirth().toLocalDate() }
+    }
+
+    private fun <T> withDefaultTimeZone(
+        timeZoneId: String,
+        block: () -> T,
+    ): T {
+        val originalTimeZone = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone(timeZoneId))
+            return block()
+        } finally {
+            TimeZone.setDefault(originalTimeZone)
+        }
+    }
 
     companion object {
         private const val TEST_SEED = 239L
