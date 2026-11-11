@@ -108,6 +108,28 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `sendNotification emails a freeholder with an email address but no name`() {
+        val freeholder = createFreeholder(email = "sarah.thompson@example.com")
+
+        val outcome = sendNotificationToFreeholder(freeholder)
+
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    @Test
+    fun `sendNotification emails a superior landlord with an email address but a blank name`() {
+        val superiorLandlord = createSuperiorLandlord(name = " ", email = "daniel.roberts@example.com")
+
+        val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
+
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("daniel.roberts@example.com", email)
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    @Test
     fun `sendNotificationToSuperiorLandlord prefers email when a postal address is also available`() {
         val superiorLandlord =
             createSuperiorLandlord(

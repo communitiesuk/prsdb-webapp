@@ -31,47 +31,41 @@ class AssociatedPartyNotificationService(
         freeholder: Freeholder,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome {
-        val name = freeholder.name?.takeIf { it.isNotBlank() } ?: return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
-        return sendNotification(name, freeholder.email, freeholder.address, email, letter)
-    }
+    ): AssociatedPartyNotificationOutcome =
+        sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
 
     internal fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlord,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome {
-        val name = superiorLandlord.name?.takeIf { it.isNotBlank() } ?: return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
-        return sendNotification(name, superiorLandlord.email, superiorLandlord.address, email, letter)
-    }
+    ): AssociatedPartyNotificationOutcome =
+        sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
 
     private fun sendNotification(
-        name: String,
+        name: String?,
         emailAddress: String?,
         postalAddress: Address?,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome {
-        if (emailAddress.isNullOrBlank() && postalAddress == null) {
-            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
-        }
-
         if (!emailAddress.isNullOrBlank()) {
             emailNotificationService.sendEmail(emailAddress, email)
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
-        val recipientAddress =
-            checkNotNull(postalAddress) { "An associated party that is not fully redacted and has no email must have an address" }
-        letterNotificationService.sendLetter(letterAddress(name, recipientAddress), letter)
+        if (name.isNullOrBlank() || postalAddress == null) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        }
+
+        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
         return AssociatedPartyNotificationOutcome.LETTER_SENT
     }
 
     private fun letterAddress(
-        name: String?,
+        name: String,
         address: Address,
     ): LetterAddressDataModel {
-        val addressLines = listOfNotNull(name) + address.toMultiLineAddress().lines()
+        val addressLines = listOf(name) + address.toMultiLineAddress().lines()
 
         // Notify accepts at most seven lines; condense the middle while keeping the final postcode line separate.
         if (addressLines.size <= LetterAddressDataModel.MAX_ADDRESS_LINES) {
