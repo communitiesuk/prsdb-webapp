@@ -19,11 +19,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.Reactivatio
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.LICENSING
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.TENANCY_DETAILS
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationElectricalSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
@@ -61,12 +61,24 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.parentsFor(GAS_SAFETY) }
                 nextStep { journey.nextStepAfter(GAS_SAFETY) }
             }
-            // TODO PDJB-2039: replace this placeholder step with a task, registering it with task(...)
-            // and updating entryStepFor and completionStepFor
-            step(journey.electricalSafetyStep) {
-                routeSegment(ReactivationElectricalSafetyStep.ROUTE_SEGMENT)
+            task(journey.electricalSafetyTask) {
+                withDependencies { ReactivationElectricalSafetyDependencies(journey) }
                 parents { journey.parentsFor(ELECTRICAL_SAFETY) }
                 nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
+            }
+            configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                backStep {
+                    val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
+                    // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+                    if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
+                        electricalSafetyDetailsTask.eicIssueDateStep
+                    } else {
+                        electricalSafetyDetailsTask.eicExpiryDateStep
+                    }
+                }
+            }
+            configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
+                backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
             }
             // TODO PDJB-2040: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
@@ -90,6 +102,7 @@ class PropertyReactivationJourneyFactory(
                 }
             }
             useContinueButtons(journey.gasSafetyTask)
+            useContinueButtons(journey.electricalSafetyTask)
         }
     }
 
@@ -109,7 +122,7 @@ class PropertyReactivationJourneyFactory(
         when (taskType) {
             LICENSING -> licensingStep
             GAS_SAFETY -> gasSafetyTask.firstStep
-            ELECTRICAL_SAFETY -> electricalSafetyStep
+            ELECTRICAL_SAFETY -> electricalSafetyTask.firstStep
             EPC -> epcStep
             TENANCY_DETAILS -> tenancyDetailsStep
         }
@@ -118,7 +131,7 @@ class PropertyReactivationJourneyFactory(
         when (taskType) {
             LICENSING -> licensingStep
             GAS_SAFETY -> gasSafetyTask.exitStep
-            ELECTRICAL_SAFETY -> electricalSafetyStep
+            ELECTRICAL_SAFETY -> electricalSafetyTask.exitStep
             EPC -> epcStep
             TENANCY_DETAILS -> tenancyDetailsStep
         }
@@ -145,7 +158,7 @@ class PropertyReactivationJourney(
     override val infoStep: ReactivationInfoStep,
     override val licensingStep: ReactivationLicensingStep,
     override val gasSafetyTask: GasSafetyTask,
-    override val electricalSafetyStep: ReactivationElectricalSafetyStep,
+    override val electricalSafetyTask: ElectricalSafetyTask,
     override val epcStep: ReactivationEpcStep,
     override val tenancyDetailsStep: ReactivationTenancyDetailsStep,
     override val checkAnswersStep: ReactivationCheckAnswersStep,
@@ -174,7 +187,7 @@ interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
     val infoStep: ReactivationInfoStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask
-    val electricalSafetyStep: ReactivationElectricalSafetyStep
+    val electricalSafetyTask: ElectricalSafetyTask
     val epcStep: ReactivationEpcStep
     val tenancyDetailsStep: ReactivationTenancyDetailsStep
     val checkAnswersStep: ReactivationCheckAnswersStep
