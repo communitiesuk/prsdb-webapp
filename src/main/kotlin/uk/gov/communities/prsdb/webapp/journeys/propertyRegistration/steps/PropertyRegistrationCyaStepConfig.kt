@@ -171,7 +171,8 @@ class PropertyRegistrationCyaStepConfig(
         return mapOf(
             "freeholdersHeadingKey" to "registerProperty.freeholders.checkAnswers.heading.$headingType",
             "freeholdersChangeLinkKey" to "registerProperty.freeholders.checkAnswers.changeLink.$headingType",
-            "freeholdersChangeUrl" to Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
+            "freeholdersChangeUrl" to
+                Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
             "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersTask.freeholdersMap ?: emptyMap()),
         )
     }
