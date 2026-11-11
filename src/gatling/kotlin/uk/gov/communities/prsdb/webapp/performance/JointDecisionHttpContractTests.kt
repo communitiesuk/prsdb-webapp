@@ -39,19 +39,18 @@ class JointDecisionHttpContractTests {
         }
     }
 
-    private fun run(
-        server: DecisionServer,
-    ) = GatlingTestRunner(outputDirectory).run(
-        JointDecisionContractSimulation::class.java,
-        mapOf(
-            "gatling.target" to "local",
-            "gatling.baseUrl" to server.baseUrl,
-            "gatling.simulatorUrl" to server.baseUrl,
-            "gatling.basic.landlordSubject" to "fixture-owner",
-            "gatling.basic.mode" to "baseline",
-            "gatling.basic.iterations" to "1",
-        ),
-    )
+    private fun run(server: DecisionServer) =
+        GatlingTestRunner(outputDirectory).run(
+            JointDecisionContractSimulation::class.java,
+            mapOf(
+                "gatling.target" to "local",
+                "gatling.baseUrl" to server.baseUrl,
+                "gatling.simulatorUrl" to server.baseUrl,
+                "gatling.basic.landlordSubject" to "fixture-owner",
+                "gatling.basic.mode" to "baseline",
+                "gatling.basic.iterations" to "1",
+            ),
+        )
 
     private class DecisionServer(
         private val scenario: String? = null,

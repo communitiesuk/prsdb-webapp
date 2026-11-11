@@ -27,6 +27,7 @@ class OffboardingHttpContractTests {
                 val path = exchange.requestURI.path
                 var code = 200
                 var body = ""
+
                 fun redirect(destination: String) {
                     code = 302
                     exchange.responseHeaders.add("Location", "$destination?journeyId=offboarding-contract")

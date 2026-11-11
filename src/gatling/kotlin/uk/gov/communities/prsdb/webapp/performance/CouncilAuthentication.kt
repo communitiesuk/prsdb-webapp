@@ -15,9 +15,10 @@ object CouncilAuthentication {
         subject: String,
         prefix: String = "",
     ): ChainBuilder {
-        val simulatorUrl = requireNotNull(config.councilSimulatorUrl) {
-            "gatling.council.simulatorUrl must identify the separate internal-access RS256 simulator"
-        }
+        val simulatorUrl =
+            requireNotNull(config.councilSimulatorUrl) {
+                "gatling.council.simulatorUrl must identify the separate internal-access RS256 simulator"
+            }
         val key = OneLoginAuthentication.authorizationUrlKey(PREFIX)
         return exec(
             http("$prefix$PREFIX: start")

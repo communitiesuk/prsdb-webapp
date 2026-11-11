@@ -142,7 +142,8 @@ class ComplianceUpdateHttpContractTests {
     ) : AutoCloseable {
         companion object {
             val PDF = "%PDF-1.4\n% synthetic contract certificate\n%%EOF\n".toByteArray(StandardCharsets.US_ASCII)
-            const val SIGNED_QUERY = "X-Amz-Signature=a%2Bb%2Fc&response-content-disposition=attachment%3B%20filename%3D%22certificate.pdf%22"
+            const val SIGNED_QUERY =
+                "X-Amz-Signature=a%2Bb%2Fc&response-content-disposition=attachment%3B%20filename%3D%22certificate.pdf%22"
         }
 
         private val server = HttpServer.create(InetSocketAddress("localhost", 0), 0)

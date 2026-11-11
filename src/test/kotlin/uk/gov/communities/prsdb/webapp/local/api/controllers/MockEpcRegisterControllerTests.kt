@@ -45,7 +45,10 @@ class MockEpcRegisterControllerTests {
         mvc.perform(
             post("$route/auth/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .with { it.remoteAddr = "192.0.2.1"; it }
+                .with {
+                    it.remoteAddr = "192.0.2.1"
+                    it
+                }
                 .header(HttpHeaders.AUTHORIZATION, credentials)
                 .param("grant_type", "client_credentials"),
         ).andExpect(status().isForbidden)
@@ -59,7 +62,10 @@ class MockEpcRegisterControllerTests {
             .andExpect(status().isUnauthorized)
         mvc.perform(
             get("$route/api/prsdatabase/assessments/search")
-                .with { it.remoteAddr = "192.0.2.1"; it }
+                .with {
+                    it.remoteAddr = "192.0.2.1"
+                    it
+                }
                 .header(HttpHeaders.AUTHORIZATION, "Bearer performance-test-epc-token"),
         ).andExpect(status().isForbidden)
     }

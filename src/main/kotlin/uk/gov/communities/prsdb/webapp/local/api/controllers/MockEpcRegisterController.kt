@@ -67,8 +67,7 @@ class MockEpcRegisterController(
         return result?.let { ResponseEntity.ok(it) } ?: error(HttpStatus.NOT_FOUND, "NOT_FOUND")
     }
 
-    private fun isLoopback(request: HttpServletRequest) =
-        request.remoteAddr in setOf("127.0.0.1", "::1", "0:0:0:0:0:0:0:1")
+    private fun isLoopback(request: HttpServletRequest) = request.remoteAddr in setOf("127.0.0.1", "::1", "0:0:0:0:0:0:0:1")
 
     private fun error(
         status: HttpStatus,

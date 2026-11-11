@@ -20,12 +20,14 @@ class RampedLoadSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
         val config = BasicRunConfig.from(properties).copy(thinkTime = THINK_TIME)
-        val agentPassword = requireNotNull(properties["gatling.agent.password"]?.takeIf { it.isNotBlank() }) {
-            "gatling.agent.password must configure a disposable password for prepared agent access"
-        }
-        val runId = requireNotNull(properties["gatling.organisation.runId"]?.takeIf { it.matches(Regex("[a-z0-9-]{1,40}")) }) {
-            "gatling.organisation.runId must identify this run's prepared invitations"
-        }
+        val agentPassword =
+            requireNotNull(properties["gatling.agent.password"]?.takeIf { it.isNotBlank() }) {
+                "gatling.agent.password must configure a disposable password for prepared agent access"
+            }
+        val runId =
+            requireNotNull(properties["gatling.organisation.runId"]?.takeIf { it.matches(Regex("[a-z0-9-]{1,40}")) }) {
+                "gatling.organisation.runId must identify this run's prepared invitations"
+            }
         val registrationSubject =
             requireNotNull(properties["gatling.basic.registrationSubject"]?.takeIf { it.isNotBlank() }) {
                 "gatling.basic.registrationSubject must be provided for the registration journey"
@@ -76,7 +78,11 @@ class RampedLoadSimulation : Simulation() {
         val registrationFixtures = RegistrationFixture.parse(fixtureJson("gatling.registration.fixturePath"), registrationTimes.size)
         val reservedSubjects = mutableSetOf<String>()
         val reservedProperties = mutableSetOf<Long>()
-        fun reserve(subjects: List<String>, propertyIds: List<Long> = emptyList()) {
+
+        fun reserve(
+            subjects: List<String>,
+            propertyIds: List<Long> = emptyList(),
+        ) {
             require(subjects.all { reservedSubjects.add(it) }) { "Mixed workload families share a mutable actor" }
             require(propertyIds.all { reservedProperties.add(it) }) { "Mixed workload families share a mutable property" }
         }
@@ -126,13 +132,13 @@ class RampedLoadSimulation : Simulation() {
             }
         val completed =
             completedPropertyFixtures.take(completedTimes.size).zip(completedTimes) { fixture, at ->
-                    scenario("Ramped completed property ${fixture.subject}")
-                        .exec(OneLoginAuthentication.loginChain(config, fixture.subject, PROPERTY_LOGIN_PREFIX, ""))
-                        .exec(PropertyBranchJourney.chain(config, fixture, ""))
-                        .exec(pause(THINK_TIME))
-                        .exec(CompletedPropertyUpdateJourney.chain(config, fixture, ""))
-                        .arrive(at)
-                }
+                scenario("Ramped completed property ${fixture.subject}")
+                    .exec(OneLoginAuthentication.loginChain(config, fixture.subject, PROPERTY_LOGIN_PREFIX, ""))
+                    .exec(PropertyBranchJourney.chain(config, fixture, ""))
+                    .exec(pause(THINK_TIME))
+                    .exec(CompletedPropertyUpdateJourney.chain(config, fixture, ""))
+                    .arrive(at)
+            }
         val compliance =
             completedPropertyFixtures.drop(completedTimes.size).take(complianceTimes.size).zip(complianceTimes) { fixture, at ->
                 scenario("Ramped certificates and compliance ${fixture.subject}")
@@ -143,7 +149,12 @@ class RampedLoadSimulation : Simulation() {
         val organisations =
             OrganisationFixture.parse(fixtureJson("gatling.organisation.fixturePath"), organisationTimes.size)
                 .also {
-                    require(it.all { fixture -> fixture.invitationToken != null }) { "Organisation team invitations must be prepared via HTTP" }
+                    require(
+                        it.all {
+                                fixture ->
+                            fixture.invitationToken != null
+                        },
+                    ) { "Organisation team invitations must be prepared via HTTP" }
                     reserve(it.map { fixture -> fixture.subject })
                 }
                 .zip(organisationTimes) { fixture, at ->
@@ -157,7 +168,14 @@ class RampedLoadSimulation : Simulation() {
                         .exec(OrganisationOperationsJourney.team(config, fixture, "$runId-load", ORGANISATION_PREFIX))
                         .exec(OrganisationOperationsJourney.changeAccessLevel(config, ORGANISATION_PREFIX))
                         .exec(flushCookieJar())
-                        .exec(OrganisationOperationsJourney.accept(config, fixture.copy(name = OrganisationProfileJourney.NAME), runId, ORGANISATION_PREFIX))
+                        .exec(
+                            OrganisationOperationsJourney.accept(
+                                config,
+                                fixture.copy(name = OrganisationProfileJourney.NAME),
+                                runId,
+                                ORGANISATION_PREFIX,
+                            ),
+                        )
                         .arrive(at)
                 }
 
@@ -179,20 +197,20 @@ class RampedLoadSimulation : Simulation() {
                         it.map { fixture -> fixture.propertyOwnershipId },
                     )
                 }.zip(jointTimes) { fixture, at ->
-                scenario("Ramped joint landlord acceptance ${fixture.inviteeSubject}")
-                    .exec(OneLoginAuthentication.loginChain(config, requireNotNull(fixture.inviteeSubject), JOINT_LOGIN_PREFIX, ""))
-                    .exec(JointLandlordJourney.decisionChain(config, fixture, JOINT_PREFIX))
-                    .arrive(at)
-            }
+                    scenario("Ramped joint landlord acceptance ${fixture.inviteeSubject}")
+                        .exec(OneLoginAuthentication.loginChain(config, requireNotNull(fixture.inviteeSubject), JOINT_LOGIN_PREFIX, ""))
+                        .exec(JointLandlordJourney.decisionChain(config, fixture, JOINT_PREFIX))
+                        .arrive(at)
+                }
         val agents =
             AgentFixture.parseAccessFixtures(fixtureJson("gatling.agent.fixturePath"), agentTimes.size, hasPassword = false)
                 .also {
                     reserve(it.map { fixture -> fixture.ownerSubject }, it.map { fixture -> fixture.propertyOwnershipId })
                 }.zip(agentTimes) { fixture, at ->
-                scenario("Ramped letting agent access and update ${fixture.ownerSubject}")
-                    .exec(AgentJourney.accessAndUpdateChain(config, fixture, agentPassword, AGENT_PREFIX))
-                    .arrive(at)
-            }
+                    scenario("Ramped letting agent access and update ${fixture.ownerSubject}")
+                        .exec(AgentJourney.accessAndUpdateChain(config, fixture, agentPassword, AGENT_PREFIX))
+                        .arrive(at)
+                }
         val offboardingFixtures = OffboardingFixture.parse(fixtureJson("gatling.offboarding.fixturePath"), offboardingTimes.size)
         reserve(offboardingFixtures.map { it.subject }, offboardingFixtures.map { it.propertyOwnershipId })
         val offboarding =
@@ -213,29 +231,37 @@ class RampedLoadSimulation : Simulation() {
                 details("$INDIVIDUAL_PREFIX${LandlordPhoneUpdateJourney.DETAILS_REQUEST}")
                     .successfulRequests().count().`is`(individualTimes.size.toLong()),
                 details(SavedRegistrationJourney.requestNames.last()).successfulRequests().count().`is`(savedTimes.size.toLong()),
-                details(CompletedPropertyUpdateJourney.requestNames.last()).successfulRequests().count().`is`(completedTimes.size.toLong()),
+                details(CompletedPropertyUpdateJourney.requestNames.last())
+                    .successfulRequests().count().`is`(completedTimes.size.toLong()),
                 details("$ORGANISATION_PREFIX${OrganisationProfileJourney.requestNames.last()}")
                     .successfulRequests().count().`is`(organisationTimes.size.toLong()),
                 details("$ORGANISATION_PREFIX${OrganisationRegistrationJourney.requestNames("company").last()}")
                     .successfulRequests().count().`is`(organisationTimes.size.toLong()),
                 details("$ORGANISATION_PREFIX${OrganisationOperationsJourney.acceptRequestNames.last()}")
                     .successfulRequests().count().`is`(organisationTimes.size.toLong()),
-                details("$ORGANISATION_PREFIX${OrganisationOperationsJourney.accessLevelRequestNames.last()}")
+                details(
+                    "$ORGANISATION_PREFIX${OrganisationOperationsJourney.accessLevelRequestNames.last()}",
+                )
                     .successfulRequests().count().`is`(organisationTimes.size.toLong()),
                 details("$ORGANISATION_PREFIX${OrganisationOperationsJourney.teamRequestNames.last()}")
                     .successfulRequests().count().`is`(organisationTimes.size.toLong()),
                 details("$JOINT_PREFIX${JointLandlordJourney.decisionRequestNames.last()}")
                     .successfulRequests().count().`is`(jointTimes.size.toLong()),
-                details("$AGENT_PREFIX${AgentJourney.accessRequestNames(false).last()}").successfulRequests().count().`is`(agentTimes.size.toLong()),
+                details("$AGENT_PREFIX${AgentJourney.accessRequestNames(false).last()}")
+                    .successfulRequests().count().`is`(agentTimes.size.toLong()),
                 details("$OFFBOARDING_PREFIX${OffboardingJourney.requestNames.last()}")
                     .successfulRequests().count().`is`(offboardingTimes.size.toLong()),
-            ) + OperatorJourney.operationRequestNames.map { name ->
-                details("$OPERATOR_PREFIX$name").successfulRequests().count().`is`(operatorTimes.size.toLong())
-            } + ComplianceUpdateJourney.completedPropertyKinds.map { kind ->
-                details(ComplianceUpdateJourney.requestNames(kind).last()).successfulRequests().count().`is`(complianceTimes.size.toLong())
-            } + RegistrationJourney.requiredRequests.map { name ->
-                details("$PROPERTY_REGISTRATION_PREFIX$name").successfulRequests().count().`is`(registrationTimes.size.toLong())
-            }
+            ) +
+                OperatorJourney.operationRequestNames.map { name ->
+                    details("$OPERATOR_PREFIX$name").successfulRequests().count().`is`(operatorTimes.size.toLong())
+                } +
+                ComplianceUpdateJourney.completedPropertyKinds.map { kind ->
+                    details(ComplianceUpdateJourney.requestNames(kind).last())
+                        .successfulRequests().count().`is`(complianceTimes.size.toLong())
+                } +
+                RegistrationJourney.requiredRequests.map { name ->
+                    details("$PROPERTY_REGISTRATION_PREFIX$name").successfulRequests().count().`is`(registrationTimes.size.toLong())
+                }
         setUp(populations)
             .protocols(http.baseUrl(config.baseUrl).acceptHeader("text/html").userAgentHeader("PRSDB-Gatling-Performance-Tests"))
             .assertions(listOf(global().failedRequests().percent().`is`(0.0)) + coverageAssertions)

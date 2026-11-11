@@ -34,7 +34,9 @@ data class OffboardingFixture(
             require(node.isObject) { "Every offboarding fixture must be an object" }
             require(requiredText(node, "action") == "deregister-property") { "Offboarding requires property deregistration fixtures" }
             return OffboardingFixture(
-                requiredText(node, "subject"), requiredPositiveLong(node, "propertyOwnershipId"), requiredText(node, "address"),
+                requiredText(node, "subject"),
+                requiredPositiveLong(node, "propertyOwnershipId"),
+                requiredText(node, "address"),
             )
         }
 
@@ -59,6 +61,5 @@ data class OffboardingFixture(
             }
             return value.asLong()
         }
-
     }
 }

@@ -160,7 +160,10 @@ object ComplianceUpdateJourney {
                             )
                             .check(css(HttpDestination.CERTIFICATE_LINK_SELECTOR, "href").findAll().optional().saveAs("cuSafeLinks")),
                     ).exitHereIfFailed()
-                        .exec { session -> prepare(session, config, fixture, kind, variant, propertyPathPattern, scanWaitLimit) }.exitHereIfFailed()
+                        .exec {
+                                session ->
+                            prepare(session, config, fixture, kind, variant, propertyPathPattern, scanWaitLimit)
+                        }.exitHereIfFailed()
                         .doIf { session -> session.getBoolean("cuScanPending") }.then(exec { it }.pause(scanPollInterval))
                         .doIf { session -> session.getBoolean("cuPost") && !session.getBoolean("cuScanPending") }.then(
                             exec { it }.pause(config.thinkTime),

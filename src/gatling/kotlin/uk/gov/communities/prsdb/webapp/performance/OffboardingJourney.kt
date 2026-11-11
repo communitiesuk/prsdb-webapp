@@ -33,8 +33,10 @@ object OffboardingJourney {
                 .get { HttpDestination.withCacheBuster(config.baseUrl + details) }
                 .disableFollowRedirect()
                 .check(status().`is`(200))
-                .check(css("a[href*='$route/deregister']", "href").transform { HttpDestination.resolve(it, config.baseUrl) }
-                    .saveAs("offNext")),
+                .check(
+                    css("a[href*='$route/deregister']", "href").transform { HttpDestination.resolve(it, config.baseUrl) }
+                        .saveAs("offNext"),
+                ),
         ).exitHereIfFailed()
             .exec(
                 http(names.next()).get("#{offNext}").disableFollowRedirect()
@@ -96,7 +98,9 @@ object OffboardingJourney {
         exec(
             http(name).post { session ->
                 JointAgentJourneySupport.formAction(
-                    requireNotNull(session.getString("offAction")), config, requireNotNull(session.getString("offNext")),
+                    requireNotNull(session.getString("offAction")),
+                    config,
+                    requireNotNull(session.getString("offNext")),
                 )
             }.disableFollowRedirect()
                 .formParamMap { session ->

@@ -9,9 +9,13 @@ import io.gatling.javaapi.http.HttpDsl.status
 object OperatorJourney {
     val operationRequestNames =
         listOf(
-            "Operator: dashboard", "Operator: council administrators", "Operator: invitation form",
-            "Council access 1: persisted role", "Council access 2: persisted role",
-            "Council invitation: confirmation", "Council invitation: persisted cancellation",
+            "Operator: dashboard",
+            "Operator: council administrators",
+            "Operator: invitation form",
+            "Council access 1: persisted role",
+            "Council access 2: persisted role",
+            "Council invitation: confirmation",
+            "Council invitation: persisted cancellation",
             "Council access removal: persisted deletion",
         )
 

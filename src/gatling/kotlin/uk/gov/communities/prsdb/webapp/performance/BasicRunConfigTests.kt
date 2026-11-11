@@ -23,10 +23,11 @@ class BasicRunConfigTests {
         for (invalid in listOf("http://localhost:3000", "http://localhost:3001", "https://council.example.test/path")) {
             assertFailsWith<IllegalArgumentException> {
                 BasicRunConfig.from(
-                    localProperties + mapOf(
-                        "gatling.target" to "nft",
-                        "gatling.council.simulatorUrl" to invalid,
-                    ),
+                    localProperties +
+                        mapOf(
+                            "gatling.target" to "nft",
+                            "gatling.council.simulatorUrl" to invalid,
+                        ),
                 )
             }
         }
@@ -61,10 +62,11 @@ class BasicRunConfigTests {
     fun `NFT certificate origin must be a separate HTTPS S3 bucket origin`() {
         val origin = "https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com"
         val properties =
-            localProperties + mapOf(
-                "gatling.target" to "nft",
-                "gatling.baseUrl" to "https://app.example.test",
-            )
+            localProperties +
+                mapOf(
+                    "gatling.target" to "nft",
+                    "gatling.baseUrl" to "https://app.example.test",
+                )
         assertEquals(
             origin,
             BasicRunConfig.from(properties + ("gatling.certificate.downloadOrigin" to origin)).certificateDownloadOrigin,
@@ -94,10 +96,11 @@ class BasicRunConfigTests {
                 .filter { it.startsWith("-Dgatling.") }
                 .associate {
                     val (key, value) = it.removePrefix("-D").split("=", limit = 2)
-                    key to value.removeSurrounding("\"").replace(
-                        "\$COUNCIL_SIMULATOR_URL",
-                        "https://council-simulator.example.test",
-                    )
+                    key to
+                        value.removeSurrounding("\"").replace(
+                            "\$COUNCIL_SIMULATOR_URL",
+                            "https://council-simulator.example.test",
+                        )
                 }
         val config = BasicRunConfig.from(arguments)
         assertEquals(PerformanceTarget.NFT, config.target)

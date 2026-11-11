@@ -242,7 +242,7 @@ object RegistrationJourney {
                                 (
                                     variant.licensing == "PROVIDE_LATER" ||
                                         rows.any { it.contains("Licensing type") && it.contains(licensingLabel(variant.licensing)) }
-                                    ) &&
+                                ) &&
                                 rows.any { it.contains("Contact address") && it.contains("NFT correspondence ${fixture.uprn}") } &&
                                 rows.any {
                                     it.contains("Is this property occupied by tenants?") &&
@@ -254,8 +254,8 @@ object RegistrationJourney {
                                             rows.any { it.contains("Number of households") && it.contains("1") } &&
                                                 rows.any { it.contains("Number of tenants") && it.contains("2") } &&
                                                 rows.any { it.contains("Rent amount") && it.contains("£950.00") }
-                                            )
-                                    )
+                                        )
+                                )
                         }.`is`(true),
                     ),
             ).exitHereIfFailed()
@@ -406,7 +406,7 @@ object RegistrationJourney {
             "confirm-missing-compliance" -> mapOf("wantsToProceed" to "true")
             "check-answers", "payment-summary", "payment-return",
             "gas-safety-certificate-file-upload", "eicr-file-upload", "no-address-found",
-                -> emptyMap()
+            -> emptyMap()
 
             else -> error("Unimplemented registration step: ${URI.create(current).path}")
         }
@@ -414,8 +414,7 @@ object RegistrationJourney {
 
     private fun step(session: Session): String = URI.create(requireNotNull(session.getString("regCurrent"))).path.substringAfterLast('/')
 
-    internal fun isUploadCheck(step: String) =
-        step in setOf("check-gas-safety-certificate-uploads", "check-eicr-uploads")
+    internal fun isUploadCheck(step: String) = step in setOf("check-gas-safety-certificate-uploads", "check-eicr-uploads")
 
     // Mirrors TokenCookieService: one-use token scoped to the exact upload step path, always HttpOnly and Secure.
     internal fun isUploadCookie(
@@ -488,8 +487,7 @@ object RegistrationJourney {
         }
         require(title == EPC_CARD) { "Unknown compliance card $title" }
 
-        fun number() =
-            ComplianceJourney.certificateNumber(requireNotNull(fixture) { "EPC card checks require a fixture" }, variant)
+        fun number() = ComplianceJourney.certificateNumber(requireNotNull(fixture) { "EPC card checks require a fixture" }, variant)
         return when (variant.epc) {
             "valid" -> listOf(number(), "Valid")
             "exempt" -> listOf("less than 4 months a year")

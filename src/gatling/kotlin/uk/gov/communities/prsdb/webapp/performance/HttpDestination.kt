@@ -15,9 +15,14 @@ object HttpDestination {
             runCatching { URI.create(appOrigin).resolve(value) }
                 .getOrElse { throw IllegalArgumentException("Invalid certificate download URL") }
         require(destination.rawFragment == null) { "Unexpected certificate download fragment" }
-        val origin = if (destination.host == URI.create(appOrigin).host) appOrigin else requireNotNull(downloadOrigin) {
-            "Certificate download origin is not configured"
-        }
+        val origin =
+            if (destination.host == URI.create(appOrigin).host) {
+                appOrigin
+            } else {
+                requireNotNull(downloadOrigin) {
+                    "Certificate download origin is not configured"
+                }
+            }
         return resolve(destination.toString(), origin)
     }
 

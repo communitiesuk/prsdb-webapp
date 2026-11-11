@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
 import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository

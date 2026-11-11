@@ -68,15 +68,16 @@ class RegistrationHttpContractTests {
         }
     }
 
-    private fun run(
-        server: RegistrationServer,
-    ): GatlingTestRunner.Result {
+    private fun run(server: RegistrationServer): GatlingTestRunner.Result {
         val directory = Files.createDirectories(Path.of("build/registration-contract-tests", UUID.randomUUID().toString()))
         return GatlingTestRunner(directory).run(
             RegistrationContractSimulation::class.java,
             mapOf(
-                "gatling.target" to "local", "gatling.baseUrl" to server.baseUrl, "gatling.simulatorUrl" to server.baseUrl,
-                "gatling.basic.landlordSubject" to "synthetic-landlord", "gatling.basic.mode" to "baseline",
+                "gatling.target" to "local",
+                "gatling.baseUrl" to server.baseUrl,
+                "gatling.simulatorUrl" to server.baseUrl,
+                "gatling.basic.landlordSubject" to "synthetic-landlord",
+                "gatling.basic.mode" to "baseline",
                 "gatling.basic.iterations" to "1",
             ),
         )

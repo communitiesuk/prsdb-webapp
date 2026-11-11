@@ -73,7 +73,7 @@ object IndividualLandlordRegistrationJourney {
                     REAUTHENTICATION_REQUEST,
                 ) +
                 listOf(CONFIRMATION_REQUEST, DASHBOARD_REQUEST)
-            ).map { options.requestNamePrefix + it } +
+        ).map { options.requestNamePrefix + it } +
             OneLoginAuthentication.identityVerificationRequestNames.map { options.requestNamePrefix + it } +
             // The confirmation re-authentication starts via REAUTHENTICATION_REQUEST, so only the callback is a login request.
             listOf(options.requestNamePrefix + OneLoginAuthentication.loginRequestNames(POST_REGISTRATION_AUTHENTICATION_PREFIX).last())

@@ -36,7 +36,8 @@ class RegistrationFixtureTests {
     fun `allocates enough distinct property registration fixtures for the normal calibration run`() {
         val fixtures =
             (1..455).joinToString(prefix = "[", postfix = "]") { number ->
-                """{"subject":"owner-$number","address":"$number Fixture Road, FA1 1AA","postcode":"FA1 1AA","building":"$number","localCouncilId":1,"uprn":${900000 + number}}"""
+                """{"subject":"owner-$number","address":"$number Fixture Road, FA1 1AA","postcode":"FA1 1AA","building":"$number",""" +
+                    """"localCouncilId":1,"uprn":${900000 + number}}"""
             }
 
         assertEquals(455, RegistrationFixture.parse(fixtures, 455).size)

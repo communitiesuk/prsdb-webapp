@@ -70,12 +70,10 @@ object OrganisationOperationsJourney {
     val accessLevelRequestNames =
         listOf("members", "start", "form", "submit", "saved members").map { "Organisation team access level: $it" }
 
-
     fun acceptSubject(
         runId: String,
         fixture: OrganisationFixture,
     ): String = "urn:fdc:gov.uk:2022:gatling-org-accept-$runId-${fixture.organisationId}"
-
 
     fun teamEmail(
         runId: String,
@@ -378,7 +376,6 @@ object OrganisationOperationsJourney {
                     }.saveAs(PAGE),
                 ),
         ).exitHereIfFailed()
-
 
     private fun normalise(value: String) = value.trim().replace(Regex("\\s+"), " ")
 

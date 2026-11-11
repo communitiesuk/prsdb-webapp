@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class OrganisationOperationsHttpContractTests {
@@ -110,7 +109,6 @@ class OrganisationOperationsHttpContractTests {
         fun first(name: String) = fields.firstOrNull { it.first == name }?.second
 
         fun all(name: String) = fields.filter { it.first == name }.map { it.second }
-
     }
 
     private abstract class ContractServer : AutoCloseable {

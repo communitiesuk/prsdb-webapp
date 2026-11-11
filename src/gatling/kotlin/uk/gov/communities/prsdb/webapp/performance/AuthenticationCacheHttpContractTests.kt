@@ -35,6 +35,7 @@ class AuthenticationCacheHttpContractTests {
         server.createContext("/") { exchange ->
             var code = 200
             var body = ""
+
             fun redirect(location: String) {
                 code = 302
                 exchange.responseHeaders.add("Location", location)

@@ -45,7 +45,11 @@ class OperatorHttpContractTests {
                     )
                 assertEquals(if (includeCsrf) 0 else 2, result.exitCode, result.output)
                 assertEquals(
-                    listOf("/system-operator/dashboard", "/system-operator/manage-local-council-admins", "/system-operator/invite-lc-admin"),
+                    listOf(
+                        "/system-operator/dashboard",
+                        "/system-operator/manage-local-council-admins",
+                        "/system-operator/invite-lc-admin",
+                    ),
                     paths,
                 )
             } finally {

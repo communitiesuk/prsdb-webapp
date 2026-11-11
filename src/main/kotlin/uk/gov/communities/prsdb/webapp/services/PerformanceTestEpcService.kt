@@ -33,18 +33,20 @@ class PerformanceTestEpcService(
         val manual = digits.startsWith("1")
         val certificate = digits.chunked(4).joinToString("-")
         return mapOf(
-            "data" to mapOf(
-                "epcRrn" to certificate,
-                "latestEpcRrnForAddress" to certificate,
-                "address" to mapOf(
-                    "addressLine1" to if (manual) "NFT registration $number" else parts.first(),
-                    "addressLine2" to if (manual) "" else parts.drop(1).dropLast(2).joinToString(", "),
-                    "town" to if (manual) "Performance Town" else parts[parts.lastIndex - 1],
-                    "postcode" to requireNotNull(address.postcode),
+            "data" to
+                mapOf(
+                    "epcRrn" to certificate,
+                    "latestEpcRrnForAddress" to certificate,
+                    "address" to
+                        mapOf(
+                            "addressLine1" to if (manual) "NFT registration $number" else parts.first(),
+                            "addressLine2" to if (manual) "" else parts.drop(1).dropLast(2).joinToString(", "),
+                            "town" to if (manual) "Performance Town" else parts[parts.lastIndex - 1],
+                            "postcode" to requireNotNull(address.postcode),
+                        ),
+                    "currentEnergyEfficiencyBand" to "C",
+                    "expiryDate" to LocalDate.now().plusYears(10).toString(),
                 ),
-                "currentEnergyEfficiencyBand" to "C",
-                "expiryDate" to LocalDate.now().plusYears(10).toString(),
-            ),
         )
     }
 }

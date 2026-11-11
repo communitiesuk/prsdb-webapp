@@ -23,5 +23,4 @@ class CouncilFixtureTests {
         }
         assertFailsWith<IllegalArgumentException> { CouncilFixture.parse("[$row]", 2) }
     }
-
 }
