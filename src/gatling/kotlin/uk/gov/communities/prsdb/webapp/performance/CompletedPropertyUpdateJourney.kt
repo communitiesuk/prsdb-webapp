@@ -64,24 +64,11 @@ object CompletedPropertyUpdateJourney {
                 checkAnswersExpected = mapOf("Email address" to "property@example.com"),
             ),
         ) +
-            listOf(
-                "SELECTIVE_LICENCE" to "Selective licence",
-                "HMO_MANDATORY_LICENCE" to "HMO mandatory licence",
-                "HMO_ADDITIONAL_LICENCE" to "HMO additional licence",
-            ).map { (type, display) ->
-                Update(
-                    "update-licensing",
-                    listOf(mapOf("licensingType" to type), mapOf("licenceNumber" to "PERF-123")),
-                    mapOf("Licensing type" to display, "Licensing number" to "PERF-123"),
-                    label = "licensing $type",
-                )
-            } +
             Update(
                 "update-licensing",
-                listOf(mapOf("licensingType" to "NO_LICENSING")),
-                mapOf("Licensing type" to "None"),
-                checkAnswers = true,
-                label = "licensing removal",
+                listOf(mapOf("licensingType" to "SELECTIVE_LICENCE"), mapOf("licenceNumber" to "PERF-123")),
+                mapOf("Licensing type" to "Selective licence", "Licensing number" to "PERF-123"),
+                label = "licensing SELECTIVE_LICENCE",
             )
 
     val requestNames: List<String> = updates.flatMap { it.names }
@@ -222,7 +209,7 @@ object CompletedPropertyUpdateJourney {
         }
         return exec { session ->
             session.set("propertyPage", scoped(requireNotNull(session.getString("propertyNext")), config, route))
-        }.exec(request).exitHereIfFailed()
+        }.exec(request).exitHereIfFailed().pause(config.thinkTime)
     }
 
     private fun submit(

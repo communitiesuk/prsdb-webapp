@@ -19,6 +19,20 @@ class BasicRunConfigTests {
         )
 
     @Test
+    fun `council simulator cannot reuse One Login or send NFT authentication to loopback`() {
+        for (invalid in listOf("http://localhost:3000", "http://localhost:3001", "https://council.example.test/path")) {
+            assertFailsWith<IllegalArgumentException> {
+                BasicRunConfig.from(
+                    localProperties + mapOf(
+                        "gatling.target" to "nft",
+                        "gatling.council.simulatorUrl" to invalid,
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `gated mode rejects missing response time limits`() {
         val properties =
             localProperties +
@@ -80,7 +94,10 @@ class BasicRunConfigTests {
                 .filter { it.startsWith("-Dgatling.") }
                 .associate {
                     val (key, value) = it.removePrefix("-D").split("=", limit = 2)
-                    key to value.removeSurrounding("\"")
+                    key to value.removeSurrounding("\"").replace(
+                        "\$COUNCIL_SIMULATOR_URL",
+                        "https://council-simulator.example.test",
+                    )
                 }
         val config = BasicRunConfig.from(arguments)
         assertEquals(PerformanceTarget.NFT, config.target)

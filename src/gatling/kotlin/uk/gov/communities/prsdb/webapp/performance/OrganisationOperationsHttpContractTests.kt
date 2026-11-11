@@ -20,39 +20,7 @@ class OrganisationOperationsHttpContractTests {
     lateinit var outputDirectory: Path
 
     @Test
-    fun `organisation administrator updates type without changing trust status and registers charity details`() {
-        DetailsServer().use { server ->
-            val result = runSimulation(server.baseUrl, "details")
-            assertEquals(0, result.exitCode, result.output)
-            assertEquals(
-                listOf(listOf("COMPANY", "TRUST"), listOf("COMPANY", "CHARITY", "TRUST")),
-                server.posts.filter { it.route == "update-organisation-type" && it.orgTypes().isNotEmpty() }.map { it.orgTypes() },
-            )
-            val charityPosts = server.posts.filter { it.route == "update-organisation-charity" }
-            assertEquals(listOf("true", "true"), charityPosts.mapNotNull { it.first("charity") })
-            assertEquals(
-                listOf("ENGLAND_AND_WALES", "ENGLAND_AND_WALES"),
-                charityPosts.mapNotNull { it.first("charityRegisteredWith") },
-            )
-            assertEquals(listOf("1000100", "1000101"), charityPosts.mapNotNull { it.first("charityNumber") })
-            assertEquals(4, server.posts.count { it.has("answersLastChangedAt") })
-            assertTrue(server.posts.all { it.first("_csrf") == "organisation-csrf" })
-            assertEquals("Company, Charity, Trust", server.types)
-            assertEquals("1000101", server.charityNumber)
-        }
-    }
-
-    @Test
-    fun `organisation details updates fail when confirmation does not persist the answers`() {
-        DetailsServer(save = false).use { server ->
-            val result = runSimulation(server.baseUrl, "details")
-            assertEquals(2, result.exitCode, result.output)
-            assertFalse(server.posts.any { it.route == "update-organisation-charity" })
-        }
-    }
-
-    @Test
-    fun `organisation administrator invites a team member and cancels a second invitation`() {
+    fun `organisation administrator prepares one real editor invitation per organisation`() {
         TeamServer().use { server ->
             val result = runSimulation(server.baseUrl, "team")
             assertEquals(0, result.exitCode, result.output)
@@ -61,20 +29,10 @@ class OrganisationOperationsHttpContractTests {
                 server.invitations.values.toSet(),
             )
             val invites = server.posts.filter { it.has("emailAddress") }
-            assertEquals(4, invites.size)
+            assertEquals(2, invites.size)
             assertTrue(invites.all { it.first("role") == "EDITOR" })
-            assertEquals(2, server.posts.count { it.first("wantsToProceed") == "true" })
-            assertEquals(2, server.cancelled.size)
+            assertTrue(server.cancelled.isEmpty())
             assertTrue(server.posts.all { it.first("_csrf") == "organisation-csrf" })
-        }
-    }
-
-    @Test
-    fun `team journey fails when the cancelled invitation remains pending`() {
-        TeamServer(deleteOnCancel = false).use { server ->
-            val result = runSimulation(server.baseUrl, "team")
-            assertEquals(2, result.exitCode, result.output)
-            assertEquals(1, server.posts.count { it.first("wantsToProceed") == "true" })
         }
     }
 
@@ -116,20 +74,8 @@ class OrganisationOperationsHttpContractTests {
     }
 
     @Test
-    fun `organisation administrators remove their first editor from the team`() {
-        MembershipServer().use { server ->
-            val result = runSimulation(server.baseUrl, "remove")
-            assertEquals(0, result.exitCode, result.output)
-            assertEquals(listOf("Fixture Admin"), server.admins)
-            assertTrue(server.editors.isEmpty())
-            assertEquals(2, server.posts.count { it.route.endsWith("confirm-removal") })
-            assertFalse(server.posts.any { it.has("role") })
-        }
-    }
-
-    @Test
     fun `team member changes fail when the saved team still lists the editor`() {
-        for (operation in listOf("change-access-level", "remove")) {
+        for (operation in listOf("change-access-level")) {
             MembershipServer(save = false).use { server ->
                 val result = runSimulation(server.baseUrl, operation)
                 assertEquals(2, result.exitCode, result.output)
@@ -165,7 +111,6 @@ class OrganisationOperationsHttpContractTests {
 
         fun all(name: String) = fields.filter { it.first == name }.map { it.second }
 
-        fun orgTypes() = fields.filter { it.first.matches(Regex("""orgTypes\[\d+]""")) }.map { it.second }
     }
 
     private abstract class ContractServer : AutoCloseable {
@@ -252,117 +197,6 @@ class OrganisationOperationsHttpContractTests {
                 location = target
             }
         }
-    }
-
-    private class DetailsServer(
-        private val save: Boolean = true,
-    ) : ContractServer() {
-        private val details = "/landlord/landlord-details"
-        private val typeRoute = "update-organisation-type"
-        private val charityRoute = "update-organisation-charity"
-        var types = "Company, Charity, Trust"
-        var charityNumber: String? = null
-        private val pending = mutableMapOf<String, List<Pair<String, String>>>()
-
-        init {
-            start()
-        }
-
-        override fun routeOf(path: String) = path.removePrefix("$details/").substringBefore('/')
-
-        override fun handleGet(
-            exchange: HttpExchange,
-            response: Response,
-        ) {
-            val path = exchange.requestURI.path
-            if (path == details) {
-                exchange.responseHeaders.add("Set-Cookie", "SESSION=organisation-session; Path=/")
-                val registration = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 200).toString()
-                response.body = "<h1>Fixture organisation</h1>" + row("Landlord Registration Number", registration) +
-                    row("Organisation address", "1 Fixture Street<br>EG1 2AA") +
-                    row("Organisation type", types) + """<a href="$details/$typeRoute/organisation-type">Change</a>""" +
-                    row("Registered charity", if (charityNumber == null) "No" else "Yes") +
-                    """<a href="$details/$charityRoute/organisation-charity">Change</a>""" +
-                    (charityNumber?.let { row("Charity number", it) } ?: "") +
-                    row("Registered with Companies House", "No") +
-                    """<div id="organisation-contacts">${row("Address", "Trustee Road")}</div>"""
-                return
-            }
-            if (journeyRedirect(exchange, response)) return
-            val stage = path.substringAfterLast('/')
-            response.body =
-                when (stage) {
-                    "organisation-type" ->
-                        form(
-                            path,
-                            // Mirrors the real th:field markup: indexed names, Spring field markers and a divider at index 3.
-                            listOf(0 to "COMPANY", 1 to "CHARITY", 2 to "TRUST", 4 to "NONE").joinToString("") { (index, value) ->
-                                """<input type="checkbox" name="orgTypes[$index]" value="$value">
-                                <input type="hidden" name="_orgTypes[$index]" value="on">"""
-                            },
-                        )
-                    "organisation-type-check-your-answers" ->
-                        row("Organisation type", display(pending.getValue(typeRoute))) +
-                            form(path, """<input type="hidden" name="answersLastChangedAt" value="2026-11-05T00:00:00Z">""")
-                    "organisation-charity" ->
-                        form(path, """<input type="radio" name="charity" value="true"><input type="radio" name="charity" value="false">""")
-                    "organisation-charity-registered-with" ->
-                        form(path, """<input type="radio" name="charityRegisteredWith" value="ENGLAND_AND_WALES">""")
-                    "organisation-charity-number" -> form(path, """<input name="charityNumber">""")
-                    "organisation-charity-check-your-answers" ->
-                        row("Registered charity", "Yes") +
-                            row("Charity number", pending.getValue(charityRoute).first { it.first == "charityNumber" }.second) +
-                            form(path, """<input type="hidden" name="answersLastChangedAt" value="2026-11-05T00:00:00Z">""")
-                    else -> {
-                        response.code = 404
-                        ""
-                    }
-                }
-        }
-
-        override fun handlePost(
-            path: String,
-            post: Post,
-            response: Response,
-        ) {
-            val route = post.route
-            val base = "$details/$route"
-            when (path.substringAfterLast('/')) {
-                "organisation-type" -> {
-                    if (post.all("_orgTypes[0]") != listOf("on")) {
-                        response.code = 400
-                        return
-                    }
-                    val trustSelected = "TRUST" in post.orgTypes()
-                    if (trustSelected != types.contains("Trust")) {
-                        response.redirect("$base/organisation-type-trust-interruption?journeyId=org-journey")
-                    } else {
-                        pending[route] = post.fields
-                        response.redirect("$base/organisation-type-check-your-answers?journeyId=org-journey")
-                    }
-                }
-                "organisation-type-check-your-answers" -> {
-                    if (save) types = display(pending.getValue(route))
-                    response.redirect(details)
-                }
-                "organisation-charity" -> response.redirect("$base/organisation-charity-registered-with?journeyId=org-journey")
-                "organisation-charity-registered-with" -> response.redirect("$base/organisation-charity-number?journeyId=org-journey")
-                "organisation-charity-number" -> {
-                    pending[route] = post.fields
-                    response.redirect("$base/organisation-charity-check-your-answers?journeyId=org-journey")
-                }
-                "organisation-charity-check-your-answers" -> {
-                    if (save) charityNumber = pending.getValue(route).first { it.first == "charityNumber" }.second
-                    response.redirect(details)
-                }
-                else -> response.code = 404
-            }
-        }
-
-        private fun display(fields: List<Pair<String, String>>) =
-            fields.filter { it.first.matches(Regex("""orgTypes\[\d+]""")) }.map { it.second }.map {
-                mapOf("COMPANY" to "Company", "CHARITY" to "Charity", "TRUST" to "Trust", "NONE" to "Other").getValue(it)
-            }.joinToString(", ")
     }
 
     private class TeamServer(

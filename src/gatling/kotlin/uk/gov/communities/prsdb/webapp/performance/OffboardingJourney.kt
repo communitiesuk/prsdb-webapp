@@ -85,7 +85,7 @@ object OffboardingJourney {
                 .check(css("form input[name=_csrf]", "value").exists())
                 .check(css("form input[type=hidden]", "name").findAll().saveAs("offHiddenNames"))
                 .check(css("form input[type=hidden]", "value").findAll().saveAs("offHiddenValues")),
-        ).exitHereIfFailed()
+        ).exitHereIfFailed().pause(config.thinkTime)
 
     private fun submitForm(
         config: BasicRunConfig,

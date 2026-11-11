@@ -286,8 +286,8 @@ export async function exportSavedRegistrationFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-saved-registration-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
-    'Saved-registration fixtures need 11 to 101 distinct owners');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 39 && fixtures.length <= 101,
+    'Saved-registration fixtures need 39 to 101 distinct owners for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     ['subject', 'resumeJourneyId', 'deleteJourneyId', 'address'].every(field =>
       typeof row?.[field] === 'string' && row[field].trim())),
@@ -309,8 +309,8 @@ export async function exportCompletedPropertyFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-completed-property-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
-    'Completed-property fixtures need 11 to 101 distinct owners');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 56 && fixtures.length <= 101,
+    'Completed-property fixtures need 56 to 101 distinct owners for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     typeof row?.subject === 'string' && row.subject.trim() &&
     typeof row?.address === 'string' && row.address.trim() &&
@@ -319,9 +319,21 @@ export async function exportCompletedPropertyFixtures(outputPath, {
   requireCondition(new Set(fixtures.map(row => row.subject)).size === fixtures.length &&
     new Set(fixtures.map(row => row.propertyOwnershipId)).size === fixtures.length,
   'Completed-property fixtures contain shared owners or reused properties');
+  requireOwnedCertificateFiles(fixtures);
   await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
   log(`Exported ${fixtures.length} distinct completed-property owners; database unchanged.`);
   return fixtures;
+}
+
+function requireOwnedCertificateFiles(fixtures) {
+  const keys = new Set();
+  requireCondition(fixtures.every(row => Array.isArray(row.files) && row.files.length <= 20 &&
+    row.files.every(file => {
+      if (!new RegExp(`^certificateUpload\\.seed-${row.propertyOwnershipId}\\.[a-z-]+\\.member-[0-9]+$`).test(file?.objectKey) ||
+          !['png', 'pdf'].includes(file?.extension) || keys.has(file.objectKey)) return false;
+      keys.add(file.objectKey);
+      return true;
+    })), 'Certificate objects must be exclusive synthetic files owned by the exported property');
 }
 
 export async function exportRegistrationFixtures(outputPath, {
@@ -374,11 +386,32 @@ export async function exportJourneyFixtures(family, outputPath, {
       sqlFile: 'data-nft-agent-fixtures.sql',
     },
     joint: {
-      strings: ['ownerSubject', 'address'],
+      strings: ['ownerSubject', 'address', 'inviteeSubject', 'invitedEmail'],
       integers: ['propertyOwnershipId'],
-      unique: ['ownerSubject', 'propertyOwnershipId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'inviteeSubject', 'invitedEmail'],
       minimum: 28,
-      sqlFile: 'data-nft-joint-landlord-fixtures.sql',
+      sqlFile: 'data-nft-joint-invite-fixtures.sql',
+    },
+    'joint-accept': {
+      strings: ['ownerSubject', 'address', 'token', 'inviteeSubject', 'invitedEmail'],
+      integers: ['propertyOwnershipId', 'invitationId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'token', 'invitationId', 'inviteeSubject', 'invitedEmail'],
+      minimum: 28,
+      sqlFile: 'data-nft-joint-accept-fixtures.sql',
+    },
+    'agent-access': {
+      strings: ['ownerSubject', 'address', 'token', 'invitedEmail'],
+      integers: ['propertyOwnershipId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'token', 'invitedEmail'],
+      minimum: 28,
+      sqlFile: 'data-nft-agent-access-fixtures.sql',
+    },
+    'organisation-team': {
+      strings: ['subject', 'name', 'invitationToken'],
+      integers: ['organisationId', 'registrationNumber'],
+      unique: ['subject', 'organisationId', 'registrationNumber', 'invitationToken'],
+      minimum: 17,
+      sqlFile: 'data-nft-organisation-team-fixtures.sql',
     },
     offboarding: {
       strings: ['action', 'subject', 'address'],
@@ -411,6 +444,22 @@ export async function exportJourneyFixtures(family, outputPath, {
     requireCondition(fixtures.every(row => row.action === schema.action),
       `Offboarding fixtures must all select ${schema.action}`);
   }
+  if (family === 'joint' || family === 'joint-accept') {
+    const owners = new Set(fixtures.map(row => row.ownerSubject));
+    requireCondition(fixtures.every(row => !owners.has(row.inviteeSubject)),
+      'Joint invitation owners and invitees must be disjoint');
+  }
+  if (['agent', 'joint', 'joint-accept', 'agent-access', 'offboarding'].includes(family)) {
+    requireOwnedCertificateFiles(fixtures);
+  }
+  if (family === 'joint-accept' || family === 'agent-access' || family === 'organisation-team') {
+    requireCondition(fixtures.every(row => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      .test(row.token ?? row.invitationToken)),
+      'Prepared invitation tokens must be UUIDs');
+    if (family === 'agent-access') {
+      requireCondition(fixtures.every(row => row.hasPassword === false), 'Agent access requires fresh password setup');
+    }
+  }
   if (family === 'council' || family === 'operator') {
     const subjects = new Set(fixtures.map(row => row.subject));
     requireCondition(fixtures.every(row => typeof row.targetManager === 'boolean' && !subjects.has(row.targetSubject)),
@@ -437,8 +486,8 @@ export async function exportOrganisationFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-organisation-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 11 && fixtures.length <= 101,
-    'Organisation fixtures need 11 to 101 distinct administrators');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 39 && fixtures.length <= 101,
+    'Organisation fixtures need 39 to 101 distinct administrators for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     typeof row?.subject === 'string' && row.subject.trim() &&
     typeof row?.name === 'string' && row.name.trim() &&

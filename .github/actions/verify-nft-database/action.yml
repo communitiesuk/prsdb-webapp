@@ -28,7 +28,7 @@ runs:
           registration-fixtures) check_option=--export-registration-fixtures ;;
           property-fixtures) check_option=--export-property-fixtures ;;
           organisation-fixtures) check_option=--export-organisation-fixtures ;;
-          council-fixtures|operator-fixtures|agent-fixtures|joint-fixtures|offboarding-fixtures)
+          council-fixtures|operator-fixtures|agent-fixtures|agent-access-fixtures|joint-fixtures|joint-accept-fixtures|organisation-team-fixtures|offboarding-fixtures)
             check_option=--export-journey-fixtures ;;
           *) echo "::error::Unsupported NFT database check."; exit 1 ;;
         esac

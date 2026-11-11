@@ -7,7 +7,7 @@ import {
   simulatorOrigin, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
 
-export async function prepareEnvironment({runnerIp, runId, expectedSha, failSmoke = false}, {
+export async function prepareEnvironment({runnerIp, runId, expectedSha, failSmoke = false, performanceMocks = false}, {
   aws, fetchImpl = fetch, log = console.log, sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
   now = Date.now, timeoutMs = 600000, pollMs = 10000, signal,
 }) {
@@ -40,7 +40,7 @@ export async function prepareEnvironment({runnerIp, runId, expectedSha, failSmok
     requireCondition(stable(baseline.simulator, state.originalSimulator.taskDefinition, 0), 'Simulator baseline is not stopped');
     const {taskDefinition: appTask} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalApp.taskDefinition});
     const {taskDefinition: simulatorTask} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalSimulator.taskDefinition});
-    const cloned = cloneForSimulator(appTask);
+    const cloned = cloneForSimulator(appTask, performanceMocks);
     requireCondition(appTask.taskRoleArn === `arn:aws:iam::${account}:role/nft-webapp-ecs-task` &&
       appTask.executionRoleArn === `arn:aws:iam::${account}:role/nft-ecs-task-execution`, 'Unexpected app task roles');
     const appContainer = appTask.containerDefinitions.find(value => value.name === 'prsdb-webapp');
@@ -136,6 +136,12 @@ export async function prepareEnvironment({runnerIp, runId, expectedSha, failSmok
     state.appSwitchAttempted = true;
     await aws('ecs', 'update-service', {cluster, service: appName, taskDefinition: state.temporaryArn});
     await waitApp(state.temporaryArn);
+    if (performanceMocks) {
+      const epc = await request(`${appOrigin}/local/epc/health?readiness=${runId}`);
+      requireCondition(epc?.status === 200, 'NFT synthetic EPC profile is not deployed or active');
+      const health = await epc.json();
+      requireCondition(health.status === 'UP' && health.dependency === 'synthetic-epc', 'Unexpected EPC dependency readiness response');
+    }
     if (failSmoke) throw new Error('Controlled smoke failure');
     const discovery = await request(`${simulatorOrigin}/.well-known/openid-configuration`);
     requireCondition(discovery?.status === 200, 'Simulator discovery failed');
@@ -171,6 +177,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       runId: `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
       expectedSha: process.env.EXPECTED_NFT_SHA,
       failSmoke: process.env.FAIL_READINESS_SMOKE === 'true',
+      performanceMocks: process.env.PERFORMANCE_TEST_MOCKS_ENABLED === 'true',
     }, {aws: awsCommand, signal: controller.signal});
     await writeFile(statePath, JSON.stringify(state));
   } catch (error) {

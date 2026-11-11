@@ -13,9 +13,6 @@ class ComplianceUpdateContractSimulation : Simulation() {
         val config = BasicRunConfig.from(properties)
         val certificatePath = requireNotNull(properties["gatling.contract.certificatePath"])
         val fixture = RegistrationFixture("synthetic-landlord", "1 Fixture Road, FA1 1AA", "FA1 1AA", "1", 1, 901)
-        val electricalVariant =
-            properties["gatling.contract.electricalVariant"]?.let(RegistrationVariant::valueOf)
-                ?: ComplianceUpdateJourney.updatedVariant
         val scanPollInterval =
             properties["gatling.contract.scanPollIntervalMillis"]?.toLongOrNull()?.let { intervalMillis ->
                 require(intervalMillis > 0) { "gatling.contract.scanPollIntervalMillis must be positive" }
@@ -36,14 +33,13 @@ class ComplianceUpdateContractSimulation : Simulation() {
                         fixture,
                         kind,
                         certificatePath,
-                        electricalVariant = electricalVariant,
                         expectSuccessBanner = properties["gatling.contract.expectSuccessBanner"].toBoolean(),
                         scanPollInterval = scanPollInterval,
                         scanWaitLimit = scanWaitLimit,
                     ),
                 )
             }
-                .exec(ComplianceUpdateJourney.verifyAll(config, fixture, gas14MonthExpiry = true, electricalVariant = electricalVariant))
+                .exec(ComplianceUpdateJourney.verifyAll(config, fixture))
         val completedProperty = properties["gatling.contract.completedProperty"].toBoolean()
         val chain =
             if (completedProperty) {

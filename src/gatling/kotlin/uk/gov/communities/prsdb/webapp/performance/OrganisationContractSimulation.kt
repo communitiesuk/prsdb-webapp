@@ -9,7 +9,7 @@ class OrganisationContractSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
         val config = BasicRunConfig.from(properties)
-        val operation = properties["gatling.contract.organisation"] ?: "details"
+        val operation = properties["gatling.contract.organisation"] ?: "team"
         val fixtures =
             listOf(
                 OrganisationFixture("admin-a", 100, 200, "Fixture organisation", "invitation-100"),
@@ -22,8 +22,7 @@ class OrganisationContractSimulation : Simulation() {
                     operation == "team" -> OrganisationOperationsJourney.team(config, fixture, "contract", prefix)
                     operation == "accept" -> OrganisationOperationsJourney.accept(config, fixture, "contract", prefix)
                     operation == "change-access-level" -> OrganisationOperationsJourney.changeAccessLevel(config, prefix)
-                    operation == "remove" -> OrganisationOperationsJourney.removeMember(config, prefix)
-                    else -> OrganisationOperationsJourney.details(config, fixture, prefix)
+                    else -> error("Unsupported organisation operation")
                 }
             }
         val requestNames =
@@ -31,8 +30,7 @@ class OrganisationContractSimulation : Simulation() {
                 operation == "team" -> OrganisationOperationsJourney.teamRequestNames
                 operation == "accept" -> OrganisationOperationsJourney.acceptRequestNames
                 operation == "change-access-level" -> OrganisationOperationsJourney.accessLevelRequestNames
-                operation == "remove" -> OrganisationOperationsJourney.removalRequestNames
-                else -> OrganisationOperationsJourney.detailsRequestNames
+                else -> error("Unsupported organisation operation")
             }
         setUp(
             scenario("Organisation $operation HTTP contract")

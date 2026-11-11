@@ -16,7 +16,7 @@ class OrganisationOperationsSimulation : Simulation() {
         val path =
             requireNotNull(properties["gatling.organisation.operationsFixturePath"]?.takeIf { it.isNotBlank() }) {
                 "gatling.organisation.operationsFixturePath must identify the read-only export from " +
-                    "data-nft-organisation-operations-fixtures.sql, or data-nft-organisation-team-fixtures.sql for team membership"
+                    "data-nft-organisation-fixtures.sql, or data-nft-organisation-team-fixtures.sql for acceptance"
             }
         val offset = properties["gatling.organisation.fixtureOffset"]?.toIntOrNull() ?: 0
         require(offset >= 0) { "gatling.organisation.fixtureOffset must not be negative" }
@@ -43,8 +43,7 @@ class OrganisationOperationsSimulation : Simulation() {
                             when (operation) {
                                 "team" -> OrganisationOperationsJourney.team(config, fixture, runId, prefix)
                                 "change-access-level" -> OrganisationOperationsJourney.changeAccessLevel(config, prefix)
-                                "remove" -> OrganisationOperationsJourney.removeMember(config, prefix)
-                                else -> OrganisationOperationsJourney.details(config, fixture, prefix)
+                                else -> error("Unsupported organisation operation")
                             },
                         ).injectOpen(atOnceUsers(1))
                 }
@@ -61,8 +60,7 @@ class OrganisationOperationsSimulation : Simulation() {
                                 when (operation) {
                                     "team" -> OrganisationOperationsJourney.teamRequestNames
                                     "change-access-level" -> OrganisationOperationsJourney.accessLevelRequestNames
-                                    "remove" -> OrganisationOperationsJourney.removalRequestNames
-                                    else -> OrganisationOperationsJourney.detailsRequestNames
+                                    else -> error("Unsupported organisation operation")
                                 }
                     },
                 ),
@@ -71,6 +69,6 @@ class OrganisationOperationsSimulation : Simulation() {
 
     private companion object {
         const val LOGIN_PREFIX = "Organisation authentication"
-        val OPERATIONS = listOf("details", "team", "accept", "change-access-level", "remove")
+        val OPERATIONS = listOf("team", "accept", "change-access-level")
     }
 }

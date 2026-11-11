@@ -3,7 +3,11 @@ WITH fixtures AS (
            l.individual_subject_identifier AS subject,
            p.id AS "propertyOwnershipId",
            a.single_line_address AS address
-    FROM landlord l
+    FROM (
+        SELECT * FROM landlord
+        WHERE individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
+        ORDER BY individual_subject_identifier LIMIT 1000
+    ) l
     JOIN ownership_link ol ON ol.landlord_id = l.id
     JOIN property_ownership p ON p.id = ol.landlordship_id
     JOIN address a ON a.id = p.address_id

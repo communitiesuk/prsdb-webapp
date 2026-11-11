@@ -9,14 +9,11 @@ class JointContractSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
         val config = BasicRunConfig.from(properties)
-        val preparing = properties["gatling.joint.mode"] == "prepare-decision"
-
-        fun invitee(id: Long) = if (preparing) "invitee-$id" else null
-
-        fun email(id: Long) = if (preparing) "invitee-$id@example.test" else null
+        fun invitee(id: Long) = "invitee-$id"
+        fun email(id: Long) = "invitee-$id@example.test"
         val warmUp = JointLandlordFixture("owner-warmup", 101, "1 Fixture Road", null, null, invitee(101), email(101))
         val measured = JointLandlordFixture("owner-measured", 102, "2 Fixture Road", null, null, invitee(102), email(102))
-        val requestNames = if (preparing) JointLandlordJourney.preparationRequestNames else JointLandlordJourney.requestNames
+        val requestNames = JointLandlordJourney.preparationRequestNames
         setUp(
             scenario("Joint landlord HTTP contract")
                 .exec(JointLandlordJourney.chain(config, warmUp, "Warm-up: "))

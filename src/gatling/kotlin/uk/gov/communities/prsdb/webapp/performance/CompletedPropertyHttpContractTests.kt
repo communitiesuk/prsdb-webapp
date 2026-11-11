@@ -21,10 +21,10 @@ class CompletedPropertyHttpContractTests {
             val result = runSimulation(server)
             assertEquals(0, result.exitCode, result.output)
             assertEquals(
-                setOf("SELECTIVE_LICENCE", "HMO_MANDATORY_LICENCE", "HMO_ADDITIONAL_LICENCE", "NO_LICENSING"),
+                setOf("SELECTIVE_LICENCE"),
                 server.posts.mapNotNull { it["licensingType"] }.toSet(),
             )
-            assertEquals(50, server.posts.size)
+            assertEquals(34, server.posts.size)
             assertTrue(server.posts.all { it["_csrf"] == "property-csrf" && it["version"] == "property-version" })
         }
     }

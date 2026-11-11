@@ -14,28 +14,25 @@ class AgentSimulation : Simulation() {
         val fixturePath =
             requireNotNull(properties["gatling.agent.fixturePath"]?.takeIf { it.isNotBlank() }) {
                 "gatling.agent.fixturePath must identify the read-only export from " +
-                    "data-nft-agent-fixtures.sql or data-nft-agent-prepare-fixtures.sql"
+                    "data-nft-agent-fixtures.sql"
             }
-        val preparing =
-            when (properties["gatling.agent.mode"]?.takeIf { it.isNotBlank() } ?: "delegate-remove") {
-                "delegate-remove" -> false
-                "prepare-delegation" -> true
-                else -> throw IllegalArgumentException("gatling.agent.mode must be delegate-remove or prepare-delegation")
-            }
+        require(properties["gatling.agent.mode"] in listOf(null, "prepare-delegation")) {
+            "AgentSimulation only prepares pending delegations"
+        }
         val families = AgentJourney.preparationFamilies
-        val required = if (preparing) families.size * (config.iterations + 1) else config.iterations + 1
+        val required = families.size * (config.iterations + 1)
         val fixtures = AgentFixture.parse(Files.readString(Path.of(fixturePath)), required)
         require(fixtures.all { it.token == null }) {
             "Agent owner delegation fixtures must not contain existing access tokens"
         }
         val scenarios =
             fixtures.mapIndexed { index, fixture ->
-                val family = if (preparing) families[index % families.size] else null
-                val pass = if (preparing) index / families.size else index
-                val familyPrefix = family?.let { AgentJourney.preparationPrefix(it) }.orEmpty()
+                val family = families[index % families.size]
+                val pass = index / families.size
+                val familyPrefix = AgentJourney.preparationPrefix(family)
                 val warmUpPrefix = if (pass == 0) "Warm-up: " else ""
                 val prefix = warmUpPrefix + familyPrefix
-                val preparedEmail = family?.let { AgentJourney.preparationEmail(it, fixture.propertyOwnershipId) }
+                val preparedEmail = AgentJourney.preparationEmail(family, fixture.propertyOwnershipId)
                 scenario("Letting agent $familyPrefix${if (pass == 0) "warm-up" else "iteration $pass"} ${fixture.propertyOwnershipId}")
                     .exec(OneLoginAuthentication.loginChain(config, fixture.ownerSubject, loginPrefix(family), warmUpPrefix))
                     .exec(AgentJourney.ownerChain(config, fixture, prefix, preparedEmail))
@@ -46,13 +43,9 @@ class AgentSimulation : Simulation() {
             .assertions(
                 BasicPerformanceAssertions.forRequests(
                     config,
-                    if (preparing) {
-                        families.flatMap { family ->
-                            OneLoginAuthentication.loginRequestNames(loginPrefix(family)) +
-                                AgentJourney.preparationRequestNames.map { AgentJourney.preparationPrefix(family) + it }
-                        }
-                    } else {
-                        OneLoginAuthentication.loginRequestNames(LOGIN_PREFIX) + AgentJourney.ownerRequestNames
+                    families.flatMap { family ->
+                        OneLoginAuthentication.loginRequestNames(loginPrefix(family)) +
+                            AgentJourney.preparationRequestNames.map { AgentJourney.preparationPrefix(family) + it }
                     },
                 ),
             )

@@ -198,7 +198,7 @@ Two further destructive correctness simulations use separate read-only fixture e
 
 | Simulation | Implemented variants | Verified large-local result |
 |---|---|---|
-| `CompletedPropertySimulation` | Ownership, bedrooms, furnishings, households/tenants, rent frequency/amount, water/custom/excluded bills, account/different correspondence email, selected/manual correspondence address, vacant/occupied and deferred tenancy completion; selective, mandatory HMO, additional HMO and removed licensing | 1,771/1,771 requests, 1m 54s |
+| `CompletedPropertySimulation` | Ownership, bedrooms, furnishings, households/tenants, rent frequency/amount, water bills, correspondence email and one selective licence | Earlier expanded chain: 1,771/1,771 requests, 1m 54s; not evidence for the narrowed chain |
 | `OrganisationProfileSimulation` | Organisation name, email, phone, selected/manual address and main contact, authenticated as existing organisation administrators | 440/440 requests, 11s |
 
 Both results include warm-up plus ten measured passes, with a different owner/organisation per pass.
@@ -299,41 +299,61 @@ establish their remote dependency readiness or a combined fresh-restore run.
 
 ### NFT workflow and mixed-ramp coverage
 
-The mixed ramp currently has chains labelled for all 11 listed journey families, but **does not yet
-implement all agreed representative paths or their prerequisites**. The table below describes the
-current implementation, not completed PDJB-553 acceptance. Do not use `gatlingRun --all`
+The mixed ramp composes ten selected journey families. Council authentication/journeys are explicitly
+deferred to future work, not silently counted as covered. The table below
+describes implemented HTTP chains, **not completed PDJB-553 performance acceptance**. Do not use `gatlingRun --all`
 against NFT: that includes local-only payment journeys, contract simulations and examples. Property
 registration uses the app-side performance-test payment mock; the simulation must not call the real
 GOV.UK Pay service. The ramp is skipped unless the NFT GitHub environment variable
-`NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY` is `true`; set it only after the app-side test profile is
-configured to route payment API calls to the local mock. The workflow does not deploy or enable that
-profile.
+`NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY` is `true`.
+The existing temporary app-task clone then adds `performance-test` alongside `one-login-simulator`,
+routes payment and EPC/OAuth calls to app-side mocks only for that
+temporary revision. Normal cleanup restores the original revision; no Terraform changes are needed.
+This requires the matching application code to have been deployed, not merely an `expected-app-sha` override.
+
+No hosted council provider or separate EPC service is required for this narrowed workload.
+The EPC mock is enabled only with `performance-test & nft & !production`. Its token and search
+endpoints under `/local/epc` reject non-loopback callers and use synthetic OAuth credentials.
+It returns a valid band-C certificate for an active address matched by UPRN or the existing synthetic
+certificate-number encoding; unknown addresses and malformed queries fail rather than succeeding.
+The real EPC HTTP client, application validation and persistence are unchanged.
+Readiness probes the profile's health marker; registration execution must still prove the actual
+OAuth/API lookup and saved result. The stub adds work to the app process, so timings do not measure
+the real external EPC service and include this mock's address lookup cost.
+No real Notify delivery is enabled by the temporary `one-login-simulator` profile.
+Local contracts do not prove that the matching app revision has been deployed to NFT.
 
 The agreed calibration profile has a five-minute linear ramp and fifteen-minute hold, including 26
-actual property registrations per minute. The 1 arrival per minute for each of the other ten families
-and the two-second think pauses after authentication and between completed-property stages remain
+actual property registrations per minute. The 1 arrival per minute for each of the other nine families
+and the two-second think pauses at natural decision transitions remain
 provisional. None of these rates is an approved capacity target or performance budget. The schedule yields 455 property
-registrations and 17 arrivals per other family (625 starts total); arrivals are not completed-request
+registrations and 17 arrivals per other family (608 starts total); arrivals are not completed-request
 throughput. Mean and maximum timings are reported for calibration only.
 
-| Journey family | Sequential NFT stage | Mixed ramp | Not covered by the representative chain |
+| Journey family | Preparation/correctness | Mixed ramp | Selected path / exclusions |
 |---|---|---|---|
-| Individual landlord registration | Yes | 1/min | Other registration variants |
-| Property registration | No | 26/min | One vacant, manually addressed, exempt variant; payment retries/pending states and registration-led certificate updates are excluded |
+| Individual landlord registration/profile | Basic correctness | 1/min | Fresh registration followed by a persisted phone update |
+| Property registration | Export owned allocations | 26/min | Occupied, selected address, gas/EICR uploads, valid EPC and successful controlled payment; no retry/error matrix |
 | Saved property registration resume/save/delete | Yes | 1/min | Uses owned incomplete properties rather than new registrations |
 | Completed-property details and licensing/ownership/occupancy updates | Yes | 1/min | Uses distinct, exclusive owners and properties |
-| Certificates and compliance | Yes | 1/min | Gas/electrical uploads on separate completed properties; registration-led uploads and other certificate variants are excluded |
-| Organisation profile | Yes | 1/min | Initial registration, team invitations/access changes and structure variants |
+| Certificates and compliance | Upload correctness | 1/min | Gas/EICR updates on separate completed properties; representative EPC is exercised in occupied registration |
+| Organisation | HTTP invitation preparation | 1/min | One company registration, profile update, invitation, editor access change and fresh-member acceptance; no structure/legal-form matrix |
 | System operator | Yes | 1/min | Dashboard, administrator access changes and invite/cancel; passcodes and successful metrics results are excluded |
-| Local council | No | 1/min | Search/details, access changes, invite/cancel; invitation acceptance and council registration are excluded |
-| Joint landlord | No | 1/min | Owner-side invite/resend/cancel; accept/reject and new-user decisions are excluded |
-| Letting agent | No | 1/min | Owner-side delegation/removal; agent login, password and certificate/update flows are excluded |
+| Local council | Deferred | Excluded | Separate council authentication and load coverage are future work |
+| Joint landlord | HTTP invite then read-only token export | 1/min | Existing-user invitation acceptance; no resend/cancel/reject/new-user matrix |
+| Letting agent | HTTP delegation then read-only token export | 1/min | Fresh password/access, licensing and tenancy update; no owner-removal or agent-compliance matrix |
 | Property offboarding | No | 1/min | Property deregistration only; leave/switch ownership and account deregistration are excluded |
 
 The completed-property update and compliance families use disjoint slices of the exported fixtures.
 Sequential update fixtures use indices 0–10, sequential certificates use 11–21, and ramped update and
 compliance fixtures start at 22. Operator removals use targets disjoint from the correctness stage.
 Fixture parsers fail before load starts if an export is too small or contains shared actors/targets.
+Minimum exports include the correctness-stage reservations: 39 saved owners, 56 completed-property owners,
+39 organisation administrators, 28 operator/agent/joint/offboarding records, and 456 registration allocations.
+Prepared organisation invitations use 17 organisations after the first 22 correctness reservations.
+Completed-property, agent, joint, offboarding and registration targets have separate seeded
+owner pools. The mixed constructor also rejects cross-family actor/property collisions. Destructive
+exports reject certificate keys belonging to a different property, duplicate object keys and unsafe extensions.
 
 The ramp retains zero-failed-request assertions and additionally requires every scheduled operator
 to reach the checked outcomes and every completed-property actor to persist both certificates.
@@ -348,24 +368,20 @@ cache keys, retaining same-origin checks, explicit callbacks and unexpected-resp
 Local contracts reproduce the shared-authorization and stale-role cache defects. They do not prove
 the cause of every live redirect; the isolated simulator HTTP 403 from the last ramp remains unresolved.
 
-For the remaining families, prepare and audit fixtures through the real HTTP journeys before measuring
-them, reserve separate sequential/ramp allocations, and export tokens only after their prerequisite
-stage succeeds. Keep notifications stubbed and scheduled writers paused, validate identity providers
-and controlled dependencies before traffic, and retain aggregate failure plus QA recovery. Council
-infrastructure and payment dependencies must not be bypassed to make a run appear complete.
+Invitation/delegation preparation precedes real-token export; a failed prerequisite blocks the ramp.
+Keep notifications stubbed and scheduled writers paused, validate identity providers
+and controlled dependencies before traffic, and retain aggregate failure plus QA recovery.
+Reports must retain the explicit council exclusion.
 
 ### Remaining normal-load acceptance work
 
-Select the agreed occupied-property happy path rather than the current vacant variant. Complete only
-the selected organisation/team, existing-user joint acceptance and agent access/update paths, preparing
-invitations through HTTP before exporting real tokens. Offboarding uses exclusive sole-owner property
-deregistration fixtures, without manufacturing joint ownership. Check allocation disjointness
-across families, not only within individual exports.
-
-Verify council client/callback/signing configuration, controlled payment readiness and certificate
-objects before any approved remote run. Move provisional think pauses to natural decision transitions,
-excluding authentication. Keep the existing council search timeout as an observation requiring fresh
-evidence, not a confirmed load-related regression.
+Deploy the matching application revision and verify the temporary mock profile and fixture capacity
+before any approved remote run. Retain the existing certificate fixes; new fixture selections need
+normal pre-run availability checks, not another certificate implementation. The local helper accepts
+the 456-row registration export, retaining loopback guards and only the valid EPC/successful payment
+representative, including normal pending-payment polling. It is not a remote service deployment tool.
+Think time excludes authentication and polling. The earlier council search timeout remains a
+future-work observation, not a confirmed load-related regression.
 
 Run the selected correctness checks and repeated, separately approved 5+15-minute calibration runs
 with QA recovery. Agree mean/max/error acceptance limits from that evidence and workload-owner review
@@ -628,14 +644,22 @@ journeys or making a full-day capacity claim; row counts alone are insufficient.
 The corrected isolated local rebuild uses a fresh migrated QA fixture, `NFT_SEED_GENERATED_ADDRESSES=3000000`
 and `NFT_SEED_MINIMUM_FREE_ADDRESSES=12537`, with the full completed/incomplete targets above. It leaves
 277,777 independently verified free addresses. The original archive is retained unchanged; the replacement
-has been exported and restored into a separate local database, but has not been uploaded to S3.
+was exported, independently restored locally and subsequently uploaded to S3.
 Do not reuse the earlier generated-address calculation based on the defective archive's allocations.
 The final local candidate, `prsdb-performance-seed-corrected-qa.dump`, also includes complete street/town
 components for the synthetic QA address fallbacks, so record headings retain the full address.
-Its SHA256 is `f55efa64e33b168969fdb887996a2ef38db3340ff5f2826f92d420d8a82b432e`.
+That pre-certificate-pool candidate's SHA256 is `f55efa64e33b168969fdb887996a2ef38db3340ff5f2826f92d420d8a82b432e`.
 A fresh four-worker restore passed both allocation/schema and all-26-QA-record audits. The expanded local
 baseline passed 913/913 requests over ten measured passes plus warm-up, in 27 seconds. This is a sequential
 correctness check, not an NFT timing, concurrency, average-use or spike result; broader journey coverage remains unfinished.
+
+The subsequent certificate-pool archive was uploaded as S3 version `hucCJibWPgKJBVGSEQ5uTu7x7UiGqB35`
+and pinned by restore-worker revision `:5`. Performance run `42848429197` on 10 November 2026
+successfully restored, migrated and verified the pinned dataset. This is historical verification,
+not confirmation of the current S3 latest version or capacity for the newly selected mixed workload.
+Before another run, verify the worker pin and its checksum, then run the current migration,
+allocation and journey-fixture checks. These workload changes do not themselves require reseeding
+or replacing the archive.
 
 The current suite updates name, date of birth, phone, email and selected/manual address on the fixed synthetic landlord subject
 `urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo`. Dump preparation belongs to the seeding
@@ -657,8 +681,9 @@ deliberately selected reference date rather than assuming the task definition in
 
 The large dump is intended to be created once and loaded before performance testing, with migrations applied to
 match the deployed NFT revision. Basic, load and later spike suites should use the same restored starting database
-in one run; do not reset between suites. The performance workflow currently runs the basic and saved-registration suites, with separate
-bounded restore, compilation, test and recovery jobs. It does not yet include load/spike simulations.
+in one run; do not reset between suites. The performance workflow includes the basic, saved-registration
+and selected representative suites followed by the provisional ten-family normal-load ramp, with separate
+bounded restore, compilation, test and recovery jobs. Spikes remain outside this delivery.
 A full eight-hour capacity is the agreed dataset sizing model, not a claim that the current workflow can
 run for eight hours. Any future scheduling and suite orchestration must account for the selected test duration.
 

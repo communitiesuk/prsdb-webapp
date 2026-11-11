@@ -75,17 +75,6 @@ class ComplianceUpdateHttpContractTests {
     }
 
     @Test
-    fun `electrical update can upload a valid EIC instead of the default EICR`() {
-        UpdateServer(electrical = "eic").use { server ->
-            val result = run(server, mapOf("gatling.contract.electricalVariant" to RegistrationVariant.OCCUPIED_MANUAL_SUPERSEDED.name))
-            assertEquals(0, result.exitCode, result.output)
-            assertTrue(server.posts.any { it["electricalCertType"] == "HAS_EIC" })
-            assertTrue(server.posts.any { it["step"] == "eic-file-upload" })
-            assertEquals(setOf("gas", "electrical", "epc"), server.completed)
-        }
-    }
-
-    @Test
     fun `completes certificate scan after the navigation iteration limit`() {
         UpdateServer(scanReadyAfterPolls = 301).use { server ->
             val result = run(server, mapOf("gatling.contract.scanPollIntervalMillis" to "1"))

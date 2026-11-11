@@ -18,7 +18,7 @@ import java.util.AbstractMap.SimpleEntry
 object OrganisationRegistrationJourney {
     const val AUTHENTICATION_PREFIX = "Organisation registration authentication"
     const val CONFIRMATION_AUTHENTICATION_PREFIX = "Organisation registration confirmation authentication"
-    val variants = listOf("company", "charity-trust", "other")
+    val variants = listOf("company")
 
     private const val REGISTRATION = RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE
     private const val START = RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE
@@ -48,31 +48,15 @@ object OrganisationRegistrationJourney {
         val organisationName = "Performance Organisation $token"
         val organisationEmail = "organisation-$token@example.invalid"
         val organisationPhone = "02079460132"
-        val types =
-            when (variant) {
-                "company" -> listOf("COMPANY")
-                "charity-trust" -> listOf("CHARITY", "TRUST")
-                else -> listOf("NONE")
-            }
-        val trust = "TRUST" in types
-        val charity = "CHARITY" in types
-        val company = variant == "company"
+        val types = listOf("COMPANY")
         val companyNumber = "PR" + String.format("%06d", number)
-        val charityNumber = String.format("1%06d", number)
-        val leadTrusteeName = "Performance Lead Trustee $token"
-        val leadTrusteeEmail = "org-lead-trustee-$token@example.invalid"
-        val leadTrusteePhone = "02079460133"
-        val memberName = "Performance Governing Member $token"
         val mainContactName = "Performance Main Contact $token"
         val mainContactEmail = "org-main-contact-$token@example.invalid"
         val mainContactPhone = "02079460134"
 
         // Values that must appear on both the check answers page and the saved landlord details page.
         val expectedAnswers: List<String> =
-            listOf(organisationName, organisationEmail, mainContactName, mainContactEmail) +
-                (if (company) listOf(companyNumber) else listOf(memberName)) +
-                (if (trust) listOf(leadTrusteeName, leadTrusteeEmail) else emptyList()) +
-                (if (charity) listOf(charityNumber) else emptyList())
+            listOf(organisationName, organisationEmail, mainContactName, mainContactEmail, companyNumber)
 
         init {
             require(variant in variants) { "Unknown organisation registration variant: $variant" }
@@ -261,79 +245,26 @@ object OrganisationRegistrationJourney {
         step(
             "organisation type",
             values.types.map { "input[type=checkbox][value=$it]" },
-            if (values.trust) "lead-trustee-name" else "organisation-charity",
+            "organisation-charity",
             listOf(
                 css("form input[type=checkbox]", "name").findAll().saveAs(CHECKBOX_NAMES),
                 css("form input[type=checkbox]", "value").findAll().saveAs(CHECKBOX_VALUES),
             ),
         ) { session -> typeFields(session, values.types) }
-        if (values.trust) {
-            step("lead trustee name", listOf("input[name=name]"), "lead-trustee-dob") { listOf("name" to values.leadTrusteeName) }
-            step("lead trustee date of birth", listOf("input[name=day]", "input[name=month]", "input[name=year]"), "lead-trustee-email") {
-                listOf("day" to "1", "month" to "1", "year" to "1980")
-            }
-            step("lead trustee email", listOf("input[name=emailAddress]"), "lead-trustee-phone") {
-                listOf("emailAddress" to values.leadTrusteeEmail)
-            }
-            step("lead trustee phone", listOf("input[name=phoneNumber]"), "lead-trustee-address/lookup-address") {
-                listOf("phoneNumber" to values.leadTrusteePhone)
-            }
-            address("lead trustee address", "lead-trustee-address", "organisation-charity")
-        }
         step(
             "registered charity",
             listOf("input[name=charity]"),
-            if (values.charity) "organisation-charity-registered-with" else "organisation-companies-house",
+            "organisation-companies-house",
         ) {
-            listOf("charity" to values.charity.toString())
-        }
-        if (values.charity) {
-            step("charity regulator", listOf("input[name=charityRegisteredWith][value=ENGLAND_AND_WALES]"), "organisation-charity-number") {
-                listOf("charityRegisteredWith" to "ENGLAND_AND_WALES")
-            }
-            step("charity number", listOf("input[name=charityNumber]"), "organisation-companies-house") {
-                listOf("charityNumber" to values.charityNumber)
-            }
+            listOf("charity" to "false")
         }
         step(
             "Companies House registration",
             listOf("input[name=companiesHouse]"),
-            if (values.company) "organisation-company-number" else "organisation-governing-body-details",
-        ) { listOf("companiesHouse" to values.company.toString()) }
-        if (values.company) {
-            step("company number", listOf("input[name=companyNumber]"), "organisation-main-contact") {
-                listOf("companyNumber" to values.companyNumber)
-            }
-        } else {
-            step(
-                "governing body details",
-                listOf("button[name=orgGovBodyDetailsMode][value=HAS_DETAILS]"),
-                "organisation-governing-body-who-to-provide",
-            ) { listOf("orgGovBodyDetailsMode" to "HAS_DETAILS") }
-            step(
-                "governing body member role",
-                listOf("input[name=whoToProvide][value=TRUSTEE]"),
-                "organisation-governing-body-member-name",
-            ) { listOf("whoToProvide" to "TRUSTEE") }
-            step("governing body member name", listOf("input[name=name]"), "organisation-governing-body-member-dob") {
-                listOf("name" to values.memberName)
-            }
-            step(
-                "governing body member date of birth",
-                listOf("input[name=day]", "input[name=month]", "input[name=year]"),
-                "organisation-governing-body-member-address/lookup-address",
-            ) { listOf("day" to "2", "month" to "2", "year" to "1975") }
-            address(
-                "governing body member address",
-                "organisation-governing-body-member-address",
-                "organisation-governing-body-member-list",
-            )
-            step(
-                "governing body member list",
-                emptyList(),
-                "organisation-main-contact",
-                listOf(bodyString().transform { values.memberName in it }.`is`(true)),
-            )
+            "organisation-company-number",
+        ) { listOf("companiesHouse" to "true") }
+        step("company number", listOf("input[name=companyNumber]"), "organisation-main-contact") {
+            listOf("companyNumber" to values.companyNumber)
         }
         step(
             "main contact",
@@ -384,6 +315,7 @@ object OrganisationRegistrationJourney {
         return exec { it.set(PAGE, it.getString(NEXT)) }
             .exec(page)
             .exitHereIfFailed()
+            .pause(config.thinkTime)
             .exec(
                 http("$prefix${step.name}")
                     .post { session ->

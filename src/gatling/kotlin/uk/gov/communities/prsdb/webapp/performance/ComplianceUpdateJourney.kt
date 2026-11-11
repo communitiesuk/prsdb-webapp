@@ -46,8 +46,6 @@ object ComplianceUpdateJourney {
     private val defaultScanWaitLimit = Duration.ofMinutes(5)
     private val defaultScanPollInterval = Duration.ofMillis(250)
 
-    // Registered with every certificate missing, then each certificate is updated to the CERTIFICATES variant's valid answers.
-    val registeredVariant = RegistrationVariant.OCCUPIED_SELECTED_MISSING
     val updatedVariant = RegistrationVariant.OCCUPIED_SELECTED_CERTIFICATES
     private val permittedQuery = setOf("journeyId", "memberId")
     val LANDLORD_PROPERTY_PATH = Regex("/landlord/property-details/[0-9]+")
@@ -83,16 +81,13 @@ object ComplianceUpdateJourney {
         propertyPathPattern: Regex = LANDLORD_PROPERTY_PATH,
         // Anonymous letting-agent sessions cannot fetch authenticated /local-file links; the safe link must still appear.
         verifySafeDownload: Boolean = true,
-        // Electrical answers come from this variant: the default EICR or an EIC upload such as OCCUPIED_MANUAL_SUPERSEDED.
-        electricalVariant: RegistrationVariant = updatedVariant,
         // The landlord property page never renders the flashed updateSuccessBanner; the letting-agent page does.
         expectSuccessBanner: Boolean = false,
         scanPollInterval: Duration = defaultScanPollInterval,
         scanWaitLimit: Duration = defaultScanWaitLimit,
     ): ChainBuilder {
-        require(electricalVariant.electrical in setOf("eic-upload", "eicr-upload")) { "Electrical updates must upload a valid EIC or EICR" }
-        val variant = if (kind == ComplianceUpdateKind.ELECTRICAL) electricalVariant else updatedVariant
-        val electrical = electricalVariant.electrical.removeSuffix("-upload")
+        val variant = updatedVariant
+        val electrical = "eicr"
         require(fixture != null || kind != ComplianceUpdateKind.EPC) { "An EPC update requires a registration fixture" }
         val digest = RegistrationJourney.sha256(Files.readAllBytes(Path.of(certificatePath)))
         val form = "form[method=post]"
@@ -167,6 +162,9 @@ object ComplianceUpdateJourney {
                     ).exitHereIfFailed()
                         .exec { session -> prepare(session, config, fixture, kind, variant, propertyPathPattern, scanWaitLimit) }.exitHereIfFailed()
                         .doIf { session -> session.getBoolean("cuScanPending") }.then(exec { it }.pause(scanPollInterval))
+                        .doIf { session -> session.getBoolean("cuPost") && !session.getBoolean("cuScanPending") }.then(
+                            exec { it }.pause(config.thinkTime),
+                        )
                         .doIf {
                                 session ->
                             verifySafeDownload && RegistrationJourney.isUploadCheck(step(session)) && !session.getBoolean("cuScanPending")
@@ -238,7 +236,7 @@ object ComplianceUpdateJourney {
                 .disableFollowRedirect().check(status().`is`(200)).check(css(".govuk-error-summary").notExists())
                 .check(
                     css(".govuk-summary-card").findAll().transform { cards ->
-                        RegistrationJourney.persistedCompliance(cards, variant, fixture, gas14MonthExpiry = false, only = kind.card)
+                        RegistrationJourney.persistedCompliance(cards, variant, fixture, only = kind.card)
                     }.`is`(true),
                 )
                 // Gatling passes null to transform when no banner matches.
@@ -254,9 +252,7 @@ object ComplianceUpdateJourney {
     fun verifyAll(
         config: BasicRunConfig,
         fixture: RegistrationFixture,
-        gas14MonthExpiry: Boolean,
         prefix: String = "",
-        electricalVariant: RegistrationVariant = updatedVariant,
     ): ChainBuilder =
         exec(
             http("$prefix$finalRequest").get { session -> HttpDestination.withCacheBuster(propertyUrl(session)) }
@@ -264,8 +260,7 @@ object ComplianceUpdateJourney {
                 .check(
                     css(".govuk-summary-card").findAll().transform { cards ->
                         ComplianceUpdateKind.entries.all { kind ->
-                            val variant = if (kind == ComplianceUpdateKind.ELECTRICAL) electricalVariant else updatedVariant
-                            RegistrationJourney.persistedCompliance(cards, variant, fixture, gas14MonthExpiry, only = kind.card)
+                            RegistrationJourney.persistedCompliance(cards, updatedVariant, fixture, only = kind.card)
                         }
                     }.`is`(true),
                 ),

@@ -1,6 +1,10 @@
 -- Read-only. Synthetic seeded identities only; each administrator and mutation
 -- target is exclusive to one fixture. Odd manager IDs are reserved for operators.
-WITH actors AS (
+WITH read_owners AS MATERIALIZED (
+    SELECT id FROM landlord
+    WHERE individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
+    ORDER BY individual_subject_identifier OFFSET 5000 LIMIT 1000
+), actors AS (
     SELECT DISTINCT ON (a.local_council_id)
            a.subject_identifier AS subject, a.id, a.name, a.local_council_id
     FROM local_council_user a
@@ -41,7 +45,12 @@ WITH actors AS (
           AND EXISTS (
               SELECT 1 FROM ownership_link ol JOIN landlord l ON l.id = ol.landlord_id
               WHERE ol.landlordship_id = p.id AND l.landlord_type = 0
+                AND l.id IN (SELECT id FROM read_owners)
                 AND l.individual_is_active AND l.individual_email LIKE '%@example.com'
+          )
+          AND NOT EXISTS (
+             SELECT 1 FROM ownership_link ol
+             WHERE ol.landlordship_id = p.id AND ol.landlord_id NOT IN (SELECT id FROM read_owners)
           )
         ORDER BY p.id LIMIT 1
     ) p ON true

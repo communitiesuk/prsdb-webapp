@@ -352,7 +352,7 @@ object IndividualLandlordRegistrationJourney {
                 .check(css("form input[type=hidden]", "name").findAll().saveAs("registrationHiddenNames"))
                 .check(css("form input[type=hidden]", "value").findAll().saveAs("registrationHiddenValues"))
                 .check(css("input[name='$requiredFieldName']").exists()),
-        ).exitHereIfFailed()
+        ).exitHereIfFailed().pause(config.thinkTime)
 
     private fun submitForm(
         config: BasicRunConfig,

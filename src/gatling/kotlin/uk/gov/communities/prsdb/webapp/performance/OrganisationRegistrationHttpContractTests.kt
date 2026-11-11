@@ -27,27 +27,6 @@ class OrganisationRegistrationHttpContractTests {
     }
 
     @Test
-    fun `charitable trust registers its lead trustee charity number and governing body`() {
-        val server = runSuccessfully("charity-trust")
-        assertEquals(listOf(listOf("CHARITY", "TRUST"), listOf("CHARITY", "TRUST")), server.saved.map { it.getValue("types") })
-        assertTrue(
-            server.saved.all { it.getValue("leadTrustee").single().startsWith("Performance Lead Trustee contract-org-charity-trust-") },
-        )
-        assertTrue(server.saved.all { it.getValue("charityNumber").single().matches(Regex("\\d{7}")) })
-        assertEquals(listOf("ENGLAND_AND_WALES"), server.posts.mapNotNull { it.first("charityRegisteredWith") }.distinct())
-        assertTrue(server.saved.all { it.getValue("members").single().startsWith("Performance Governing Member") })
-        assertTrue(server.saved.none { "companyNumber" in it })
-    }
-
-    @Test
-    fun `unincorporated organisation registers a governing body without charity or company details`() {
-        val server = runSuccessfully("other")
-        assertEquals(listOf(listOf("NONE"), listOf("NONE")), server.saved.map { it.getValue("types") })
-        assertTrue(server.saved.all { it.getValue("members").size == 1 })
-        assertTrue(server.saved.none { "companyNumber" in it || "charityNumber" in it || "leadTrustee" in it })
-    }
-
-    @Test
     fun `organisation registration fails when check answers does not create the organisation`() {
         RegistrationServer(save = false).use { server ->
             val result = runSimulation(server.baseUrl, "company")

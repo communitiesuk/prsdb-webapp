@@ -23,7 +23,8 @@ export function environment(container) {
   return Object.fromEntries((container.environment ?? []).map(({name, value}) => [name, value]));
 }
 
-export function cloneForSimulator(task) {
+export function cloneForSimulator(task, performanceMocks = false) {
+  requireCondition(typeof performanceMocks === 'boolean', 'Performance mocks must be explicitly enabled');
   requireCondition(task.family === 'prsdb-webapp-nft', 'Unexpected app task family');
   const copy = structuredClone(task);
   const container = copy.containerDefinitions.find(value => value.name === 'prsdb-webapp');
@@ -32,6 +33,17 @@ export function cloneForSimulator(task) {
   requireCondition(profile && profile.value.split(',').map(value => value.trim()).sort().join(',') === 'default,nft',
     'Unexpected app baseline profile');
   profile.value += ',one-login-simulator';
+  if (performanceMocks) {
+    profile.value += ',performance-test';
+    const overrides = {
+      GOV_UK_PAY_MOCK_BASE_URL: `${appOrigin}/local/gov-uk-pay`,
+      EPC_REGISTER_CLIENT_ID: 'performance-test',
+      EPC_REGISTER_CLIENT_SECRET: 'performance-test',
+    };
+    container.environment = container.environment.filter(({name}) => !(name in overrides));
+    container.secrets = (container.secrets ?? []).filter(({name}) => !(name in overrides));
+    container.environment.push(...Object.entries(overrides).map(([name, value]) => ({name, value})));
+  }
   for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
     'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
   return copy;

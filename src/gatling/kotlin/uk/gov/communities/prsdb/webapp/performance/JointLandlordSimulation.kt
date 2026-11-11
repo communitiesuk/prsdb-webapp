@@ -13,25 +13,11 @@ class JointLandlordSimulation : Simulation() {
         val config = BasicRunConfig.from(properties)
         val fixturePath =
             requireNotNull(properties["gatling.joint.fixturePath"]?.takeIf { it.isNotBlank() }) {
-                "gatling.joint.fixturePath must identify the read-only export from data-nft-joint-landlord-fixtures.sql"
+                "gatling.joint.fixturePath must identify the read-only export from data-nft-joint-invite-fixtures.sql"
             }
-        val mode = properties["gatling.joint.mode"]?.takeIf { it.isNotBlank() } ?: "invite-resend-cancel"
-        require(mode == "invite-resend-cancel" || mode == "prepare-decision") {
-            "gatling.joint.mode must be invite-resend-cancel or prepare-decision"
-        }
-        val preparing = mode == "prepare-decision"
         val json = Files.readString(Path.of(fixturePath))
-        val fixtures =
-            if (preparing) {
-                JointLandlordFixture.parsePreparations(json, config.iterations + 1)
-            } else {
-                JointLandlordFixture.parse(json, config.iterations + 1).also { fixtures ->
-                    require(fixtures.all { it.invitedEmail == null }) {
-                        "Invite-resend-cancel fixtures must not name an invitee; use gatling.joint.mode=prepare-decision"
-                    }
-                }
-            }
-        val requestNames = if (preparing) JointLandlordJourney.preparationRequestNames else JointLandlordJourney.requestNames
+        val fixtures = JointLandlordFixture.parsePreparations(json, config.iterations + 1)
+        val requestNames = JointLandlordJourney.preparationRequestNames
         val scenarios =
             fixtures.mapIndexed { pass, fixture ->
                 val prefix = if (pass == 0) "Warm-up: " else ""

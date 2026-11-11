@@ -9,6 +9,10 @@ WITH fixtures AS (
     JOIN registration_number r ON r.id = l.registration_number_id
     WHERE l.landlord_type = 1 AND l.id > 26 AND u.role = 0
       AND u.subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
+      AND EXISTS (
+          SELECT 1 FROM organisational_landlord_user editor
+          WHERE editor.organisation_landlord_id = l.id AND editor.role = 1
+      )
       AND NOT EXISTS (
           SELECT 1 FROM landlord individual
           WHERE individual.individual_subject_identifier = u.subject_identifier

@@ -6,10 +6,12 @@ import kotlin.test.assertTrue
 
 class RampScheduleTests {
     @Test
-    fun `normal calibration profile includes all journey families at approved provisional rates`() {
+    fun `normal calibration profile schedules ten families with council deferred`() {
         val schedules = RampedLoadProfile.schedules(rampSeconds = 300.0, holdSeconds = 900.0)
 
         assertEquals(RampedJourneyFamily.entries.toSet(), schedules.keys)
+        assertEquals(10, schedules.size)
+        assertEquals(608, schedules.values.sumOf { it.arrivalTimesMillis().size })
         assertEquals(455, schedules.getValue(RampedJourneyFamily.PROPERTY_REGISTRATION).arrivalTimesMillis().size)
         assertTrue(
             schedules.filterKeys { it != RampedJourneyFamily.PROPERTY_REGISTRATION }

@@ -10,12 +10,7 @@ import java.nio.file.Path
 class CouncilOperationsSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
-        val config =
-            BasicRunConfig.from(properties).let {
-                properties["gatling.council.simulatorUrl"]?.let { simulator ->
-                    BasicRunConfig.from(properties + ("gatling.simulatorUrl" to simulator))
-                } ?: it
-            }
+        val config = BasicRunConfig.from(properties)
         require(properties["gatling.council.emailDeliveryStub"] == "true") {
             "Council mutations require explicit confirmation that email delivery is stubbed: gatling.council.emailDeliveryStub=true"
         }

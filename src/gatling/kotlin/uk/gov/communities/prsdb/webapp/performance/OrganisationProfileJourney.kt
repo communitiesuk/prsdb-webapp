@@ -21,7 +21,7 @@ object OrganisationProfileJourney {
         val names get() = listOf("details", "start", "form", "submit", "saved details").map { "Organisation $field: $it" }
     }
 
-    private const val NAME = "Performance Organisation"
+    const val NAME = "Performance Organisation"
     private const val DETAILS = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
     private const val ADDRESS_ROUTE = UpdateOrganisationalLandlordAddressController.UPDATE_ORG_ADDRESS_ROUTE
     private const val MAIN_CONTACT_ROUTE = UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE
@@ -94,7 +94,7 @@ object OrganisationProfileJourney {
                             .check(css("form input[name=${update.field}]").exists())
                             .check(css("form input[type=hidden]", "name").findAll().saveAs("orgHiddenNames"))
                             .check(css("form input[type=hidden]", "value").findAll().saveAs("orgHiddenValues")),
-                    ).exitHereIfFailed()
+                    ).exitHereIfFailed().pause(config.thinkTime)
                     .exec(
                         http(names[3]).post { session ->
                             scoped(
@@ -325,7 +325,7 @@ object OrganisationProfileJourney {
         return exec { session ->
             val nextUrl = HttpDestination.resolve(requireNotNull(session.getString(nextKey)), config.baseUrl)
             session.set(pageKey, scoped(nextUrl, config, route))
-        }.exec(request).exitHereIfFailed()
+        }.exec(request).exitHereIfFailed().pause(config.thinkTime)
     }
 
     private fun submitForm(

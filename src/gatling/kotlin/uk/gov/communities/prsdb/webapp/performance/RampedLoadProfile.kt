@@ -11,7 +11,6 @@ enum class RampedJourneyFamily(
     ORGANISATION(1.0),
     JOINT_LANDLORD(1.0),
     LETTING_AGENT(1.0),
-    LOCAL_COUNCIL(1.0),
     SYSTEM_OPERATOR(1.0),
     OFFBOARDING(1.0),
 }

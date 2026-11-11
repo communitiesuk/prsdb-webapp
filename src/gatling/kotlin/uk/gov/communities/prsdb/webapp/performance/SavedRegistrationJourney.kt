@@ -130,7 +130,7 @@ object SavedRegistrationJourney {
         }
         return exec { session ->
             session.set("savedPageUrl", HttpDestination.resolve(requireNotNull(session.getString("savedNextUrl")), config.baseUrl))
-        }.exec(request).exitHereIfFailed()
+        }.exec(request).exitHereIfFailed().pause(config.thinkTime)
     }
 
     private fun submit(

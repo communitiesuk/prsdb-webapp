@@ -14,15 +14,16 @@ const config = {
 const validSeedCounts = '2450026|272223|1|5|277777|0|0|0|0|0|2';
 const requirements = {minimumCompleted: 2450000, minimumIncomplete: 272223, minimumFreeAddresses: 12537};
 
-const savedFixtures = Array.from({length: 11}, (_, i) => ({
+const savedFixtures = Array.from({length: 39}, (_, i) => ({
   subject: `owner-${i}`, resumeJourneyId: `resume-${i}`, deleteJourneyId: `delete-${i}`, address: `${i} Fixture Road`,
 }));
 
-const propertyFixtures = Array.from({length: 11}, (_, i) => ({
+const propertyFixtures = Array.from({length: 56}, (_, i) => ({
   subject: `owner-${i}`, propertyOwnershipId: i + 100, address: `${i} Fixture Road`,
+  files: [],
 }));
 
-const organisationFixtures = Array.from({length: 11}, (_, i) => ({
+const organisationFixtures = Array.from({length: 39}, (_, i) => ({
   subject: `admin-${i}`, organisationId: i + 100, registrationNumber: i + 200, name: `Fixture organisation ${i}`,
 }));
 

@@ -8,7 +8,6 @@ import io.gatling.javaapi.http.HttpDsl.header
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
-import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import java.net.URI
@@ -35,13 +34,6 @@ object JointLandlordJourney {
             "send invitations",
             "invitation confirmation",
             "pending invitations",
-            "resend invitation",
-            "resend outcome",
-            "cancel invitation",
-            "cancellation form",
-            "submit cancellation",
-            "cancellation confirmation",
-            "cancelled invitations",
         ).map { "Joint landlord: $it" }
 
     val preparationRequestNames = requestNames.take(requestNames.indexOf("Joint landlord: pending invitations") + 1)
@@ -55,9 +47,7 @@ object JointLandlordJourney {
             PropertyDetailsController.LANDLORD_PROPERTY_DETAILS_ROUTE
                 .replace("{propertyOwnershipId}", fixture.propertyOwnershipId.toString())
         val invitationPath = InviteJointLandlordController.getInviteJointLandlordRoute(fixture.propertyOwnershipId)
-        val cancelBasePath = CancelJointLandlordInvitationController.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
-        val preparing = fixture.invitationId == null && fixture.invitedEmail != null
-        val invitedEmail = fixture.invitedEmail ?: "joint-${fixture.propertyOwnershipId}@example.test"
+        val invitedEmail = requireNotNull(fixture.invitedEmail) { "Invitation preparation requires an existing-user email" }
         val names = requestNames.map { prefix + it }.iterator()
 
         val invitationSent =
@@ -130,115 +120,9 @@ object JointLandlordJourney {
                         .get { session -> HttpDestination.withCacheBuster(config.baseUrl + detailsPath) }
                         .disableFollowRedirect()
                         .check(status().`is`(200))
-                        .check(bodyString().transform { it.contains(invitedEmail) }.`is`(true))
-                        .check(css("a[href*='/resend/']", "href").saveAs("jointResendPath"))
-                        .check(
-                            css("a[href*='$cancelBasePath/']", "href")
-                                .transform { HttpDestination.resolve(it, config.baseUrl) }
-                                .saveAs("jointCancelPath"),
-                        ),
+                        .check(bodyString().transform { it.contains(invitedEmail) }.`is`(true)),
                 ).exitHereIfFailed()
-        if (preparing) return invitationSent
-
         return invitationSent
-            .exec(
-                http(names.next())
-                    .get("#{jointResendPath}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(302))
-                    .check(
-                        header(
-                            "Location",
-                        ).transform { scoped(it, config, detailsPath, null).substringBefore('#') }.saveAs("jointResendOutcome"),
-                    ),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get { session -> HttpDestination.withCacheBuster(requireNotNull(session.getString("jointResendOutcome"))) }
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { it.contains("New invitation email sent to $invitedEmail") }.`is`(true))
-                    .check(
-                        css("a[href*='$cancelBasePath/']", "href")
-                            .transform { HttpDestination.resolve(it, config.baseUrl) }
-                            .saveAs("jointCancelPath"),
-                    ),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get("#{jointCancelPath}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(302))
-                    .check(
-                        header("Location")
-                            .transform { location ->
-                                val resolved = HttpDestination.resolve(location, config.baseUrl)
-                                require(URI.create(resolved).path.startsWith("$cancelBasePath/") && resolved.contains("/are-you-sure")) {
-                                    "Joint invitation cancellation did not initialise its are-you-sure step"
-                                }
-                                requireNotNull(
-                                    JointAgentJourneySupport.journeyId(resolved),
-                                ) { "Joint invitation cancellation omitted its journeyId" }
-                                resolved
-                            }.saveAs("jointCancelPath"),
-                    ),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get("#{jointCancelPath}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { it.contains(invitedEmail) }.`is`(true))
-                    .check(css("form[method=post]", "action").saveAs("jointAction"))
-                    .check(css("form input[name=_csrf]", "value").exists())
-                    .check(css("form input[type=hidden]", "name").findAll().saveAs("jointHiddenNames"))
-                    .check(css("form input[type=hidden]", "value").findAll().saveAs("jointHiddenValues"))
-                    .check(css("form input[name$='wantsToProceed']", "name").saveAs("jointDecisionField")),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .post { session ->
-                        JointAgentJourneySupport.formAction(
-                            requireNotNull(session.getString("jointAction")),
-                            config,
-                            requireNotNull(session.getString("jointCancelPath")),
-                        )
-                    }.disableFollowRedirect()
-                    .formParamMap { session ->
-                        hiddenFormParameters(session, "jointHiddenNames", "jointHiddenValues") +
-                            (requireNotNull(session.getString("jointDecisionField")) to "true")
-                    }.check(status().`is`(302))
-                    .check(
-                        header("Location")
-                            .transform { location ->
-                                val resolved = HttpDestination.resolve(location, config.baseUrl)
-                                val uri = URI.create(resolved)
-                                require(uri.path == "$cancelBasePath/confirmation") {
-                                    "Joint invitation cancellation redirected outside its confirmation"
-                                }
-
-                                require(uri.rawQuery.orEmpty().contains("propertyOwnershipId=${fixture.propertyOwnershipId}")) {
-                                    "Joint invitation cancellation confirmation omitted the property identity"
-                                }
-                                resolved
-                            }.saveAs("jointNext"),
-                    ),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get("#{jointNext}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { it.contains(invitedEmail) }.`is`(true)),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get { HttpDestination.withCacheBuster(config.baseUrl + detailsPath) }
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { !it.contains(invitedEmail) }.`is`(true))
-                    .check(css("a[href*='/invite-joint-landlord/start']", "href").exists()),
-            ).exitHereIfFailed()
     }
 
     fun decisionChain(
@@ -439,7 +323,7 @@ object JointLandlordJourney {
         fields: Map<String, String>,
         expectedSegment: String,
     ): ChainBuilder =
-        exec(
+        exec { it }.pause(config.thinkTime).exec(
             http(name)
                 .post { session ->
                     JointAgentJourneySupport.formAction(

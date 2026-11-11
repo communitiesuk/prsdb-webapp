@@ -15,6 +15,9 @@ object CouncilAuthentication {
         subject: String,
         prefix: String = "",
     ): ChainBuilder {
+        val simulatorUrl = requireNotNull(config.councilSimulatorUrl) {
+            "gatling.council.simulatorUrl must identify the separate internal-access RS256 simulator"
+        }
         val key = OneLoginAuthentication.authorizationUrlKey(PREFIX)
         return exec(
             http("$prefix$PREFIX: start")
@@ -22,7 +25,7 @@ object CouncilAuthentication {
                 .disableFollowRedirect()
                 .check(status().`is`(302))
                 .check(
-                    header("Location").transform { HttpDestination.resolve(it, config.simulatorUrl) }.saveAs(key),
+                    header("Location").transform { HttpDestination.resolve(it, simulatorUrl) }.saveAs(key),
                 ),
         ).exitHereIfFailed()
             .exec(
@@ -30,7 +33,7 @@ object CouncilAuthentication {
                     .check(status().`is`(200))
                     .check(
                         css("form[method=post]", "action")
-                            .transform { HttpDestination.resolve(it, config.simulatorUrl) }.saveAs("councilAuthenticationAction"),
+                            .transform { HttpDestination.resolve(it, simulatorUrl) }.saveAs("councilAuthenticationAction"),
                     )
                     .check(css("form input[type=hidden]", "name").findAll().saveAs("councilAuthenticationNames"))
                     .check(css("form input[type=hidden]", "value").findAll().saveAs("councilAuthenticationValues"))

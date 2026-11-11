@@ -86,7 +86,7 @@ object CouncilManagementJourney {
                     .check(css("form input[type=hidden]", "name").findAll().saveAs("councilHiddenNames"))
                     .check(css("form input[type=hidden]", "value").findAll().saveAs("councilHiddenValues"))
                     .check(css("form input[name=_csrf]", "value").exists()),
-            ).exitHereIfFailed()
+            ).exitHereIfFailed().pause(config.thinkTime)
             .exec(
                 http("${prefix}Council invitation: cancel").post("#{councilFormAction}").disableFollowRedirect()
                     .formParamMap { session ->

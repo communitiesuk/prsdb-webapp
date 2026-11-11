@@ -2,7 +2,13 @@ WITH owners AS (
     SELECT row_number() OVER (ORDER BY selected.subject) AS allocation, selected.subject
     FROM (
         SELECT l.individual_subject_identifier AS subject
-        FROM landlord l
+        FROM (
+            SELECT *
+            FROM landlord
+            WHERE individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
+            ORDER BY individual_subject_identifier
+            OFFSET 4000 LIMIT 600
+        ) l
         WHERE l.individual_is_active AND l.individual_has_accepted_privacy_notice
           AND l.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
           AND NOT EXISTS (
@@ -10,7 +16,7 @@ WITH owners AS (
               WHERE lip.user_id = l.individual_subject_identifier
           )
         ORDER BY l.individual_subject_identifier
-         LIMIT 456 OFFSET 1000
+         LIMIT 456
     ) selected
 ), addresses AS (
     SELECT row_number() OVER (ORDER BY selected.uprn) AS allocation, selected.*

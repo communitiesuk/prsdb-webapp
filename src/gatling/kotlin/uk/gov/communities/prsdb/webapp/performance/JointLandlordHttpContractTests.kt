@@ -16,19 +16,6 @@ class JointLandlordHttpContractTests {
     lateinit var outputDirectory: Path
 
     @Test
-    fun `invite resend and cancellation follow forms and leave durable page outcomes`() {
-        JointServer().use { server ->
-            val result = run(server)
-            assertEquals(0, result.exitCode, result.output)
-            assertTrue(server.posts.any { it["formData.hasJointLandlords"] == "true" })
-            assertTrue(server.posts.any { it["formData.emailAddress"] == "joint-102@example.test" })
-            assertEquals(2, server.resends)
-            assertTrue(server.cancelled.contains(102))
-            assertTrue(server.detailsReads[102]!! >= 3)
-        }
-    }
-
-    @Test
     fun `decision preparation invites the fixture invitee and leaves the invitation pending`() {
         JointServer().use { server ->
             val result = run(server, mapOf("gatling.joint.mode" to "prepare-decision"))

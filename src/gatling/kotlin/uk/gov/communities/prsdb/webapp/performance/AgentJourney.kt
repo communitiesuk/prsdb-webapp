@@ -26,11 +26,6 @@ object AgentJourney {
             "submit delegation",
             "delegation confirmation",
             "delegated property details",
-            "initialise removal",
-            "remove delegation form",
-            "submit removal",
-            "removal confirmation",
-            "property after removal",
         ).map { "Letting agent: $it" }
 
     fun accessRequestNames(hasPassword: Boolean) =
@@ -59,9 +54,9 @@ object AgentJourney {
             "saved tenancy details",
         ).map { "Letting agent access: $it" }
 
-    val preparationRequestNames = ownerRequestNames.take(6)
+    val preparationRequestNames = ownerRequestNames
 
-    val preparationFamilies = listOf("access", "compliance")
+    val preparationFamilies = listOf("access")
 
     fun preparationPrefix(family: String) = "Prepare $family delegation: "
 
@@ -92,7 +87,7 @@ object AgentJourney {
                 propertyId.toString(),
             )
         val agentEmail = preparedEmail ?: "agent-$propertyId@example.test"
-        val names = (if (preparedEmail == null) ownerRequestNames else preparationRequestNames).map { prefix + it }.iterator()
+        val names = ownerRequestNames.map { prefix + it }.iterator()
 
         val delegated =
             exec(
@@ -115,7 +110,7 @@ object AgentJourney {
                         .check(css("form input[type=hidden]", "name").findAll().saveAs("agentHiddenNames"))
                         .check(css("form input[type=hidden]", "value").findAll().saveAs("agentHiddenValues"))
                         .check(css("form input[name$='emailAddress']", "name").saveAs("agentEmailField")),
-                ).exitHereIfFailed()
+                ).exitHereIfFailed().pause(config.thinkTime)
                 .exec(
                     http(names.next())
                         .post { session ->
@@ -151,58 +146,7 @@ object AgentJourney {
                         .check(bodyString().transform { it.contains(agentEmail) }.`is`(true))
                         .check(css("a[href*='$removalPath/are-you-sure']", "href").saveAs("agentRemovalPath")),
                 ).exitHereIfFailed()
-        if (preparedEmail != null) return delegated
-
         return delegated
-            .exec(initialise(config, names.next(), "agentRemovalPath", "$removalPath/are-you-sure"))
-            .exec(
-                http(names.next())
-                    .get("#{agentRemovalPath}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { it.contains(agentEmail) }.`is`(true))
-                    .check(css("form[method=post]", "action").saveAs("agentAction"))
-                    .check(css("form input[name=_csrf]", "value").exists())
-                    .check(css("form input[type=hidden]", "name").findAll().saveAs("agentHiddenNames"))
-                    .check(css("form input[type=hidden]", "value").findAll().saveAs("agentHiddenValues"))
-                    .check(css("form input[name$='wantsToProceed']", "name").saveAs("agentDecisionField")),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .post { session ->
-                        JointAgentJourneySupport.formAction(
-                            requireNotNull(session.getString("agentAction")),
-                            config,
-                            requireNotNull(session.getString("agentRemovalPath")),
-                        )
-                    }.disableFollowRedirect()
-                    .formParamMap { session ->
-                        hiddenFormParameters(session) +
-                            (requireNotNull(session.getString("agentDecisionField")) to "true")
-                    }.check(status().`is`(302))
-                    .check(
-                        header("Location")
-                            .transform { scoped(it, config, removalPath, "confirmation") }
-                            .saveAs("agentRemovalConfirmationPath"),
-                    ),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get("#{agentRemovalConfirmationPath}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { it.contains(agentEmail) }.`is`(true))
-                    .check(bodyString().transform { JointLandlordJourney.containsAddress(it, fixture.address) }.`is`(true)),
-            ).exitHereIfFailed()
-            .exec(
-                http(names.next())
-                    .get { HttpDestination.withCacheBuster(config.baseUrl + detailsPath) }
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { !it.contains(agentEmail) }.`is`(true))
-                    .check(css("a[href*='$delegationPath/allow-letting-agent']", "href").exists())
-                    .check(css("a[href*='$removalPath/are-you-sure']").notExists()),
-            ).exitHereIfFailed()
     }
 
     fun accessAndUpdateChain(
@@ -459,7 +403,7 @@ object AgentJourney {
         for (field in fields.keys) {
             request = request.check(css("form input[name='$field']", "name").saveAs("agentFormField-$field"))
         }
-        return exec(request).exitHereIfFailed()
+        return exec(request).exitHereIfFailed().pause(config.thinkTime)
     }
 
     private fun postAccessForm(

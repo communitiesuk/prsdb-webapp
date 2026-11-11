@@ -29,8 +29,7 @@ object RegistrationJourney {
         paymentBaseUrl: String,
         certificatePath: String?,
         prefix: String = "",
-        gas14MonthExpiry: Boolean = true,
-        eicIssueDate: Boolean = true,
+        thinkTime: Duration = config.thinkTime,
     ): ChainBuilder {
         val paymentBase = PaymentJourney.baseUrl(paymentBaseUrl, config.target, config.baseUrl)
         val certificateDigest = certificatePath?.let { sha256(Files.readAllBytes(Path.of(it))) }
@@ -103,7 +102,7 @@ object RegistrationJourney {
                             .check(css(HttpDestination.CERTIFICATE_LINK_SELECTOR, "href").findAll().optional().saveAs("regDownloads")),
                     ).exitHereIfFailed()
                         .exec { session ->
-                            prepare(session, config, fixture, variant, expectedAddress, certificatePath, eicIssueDate)
+                            prepare(session, config, fixture, variant, expectedAddress, certificatePath)
                         }
                         .exitHereIfFailed()
                         .doIf { session -> session.getBoolean("regScanPending") }.then(exec { it }.pause(Duration.ofMillis(250)))
@@ -149,6 +148,9 @@ object RegistrationJourney {
                                 )
                                 .exitHereIfFailed().pause(Duration.ofMillis(250)),
                         )
+                        .doIf { session -> session.getBoolean("regPost") && !session.getBoolean("regScanPending") }.then(
+                            exec { it }.pause(thinkTime),
+                        )
                         .doIf { session ->
                             session.getBoolean("regPost") && !session.getBoolean("regUpload")
                         }.then(exec(post).exitHereIfFailed())
@@ -180,7 +182,7 @@ object RegistrationJourney {
             require(session.getBoolean("regDone")) { "Registration exceeded bounded navigation budget" }
             val visited = session.get<Set<String>>("regVisited")!!
             val expectedDownloads =
-                (if (variant.gas == "upload" || (variant.gas == "boundary" && gas14MonthExpiry)) 1 else 0) +
+                (if (variant.gas == "upload") 1 else 0) +
                     (if (variant.electrical.endsWith("upload")) 1 else 0)
             require(session.getInt("regScannedDownloads") == expectedDownloads) { "Real scanner and safe-file downloads were not verified" }
             require(
@@ -265,7 +267,7 @@ object RegistrationJourney {
                     .check(css("h1").exists()).check(css(".govuk-error-summary").notExists())
                     .check(
                         css(".govuk-summary-card").findAll().transform { cards ->
-                            persistedCompliance(cards, variant, fixture, gas14MonthExpiry)
+                            persistedCompliance(cards, variant, fixture)
                         }.`is`(true),
                     ),
             ).exitHereIfFailed()
@@ -278,7 +280,6 @@ object RegistrationJourney {
         variant: RegistrationVariant,
         expectedAddress: String,
         certificatePath: String?,
-        eicIssueDate: Boolean,
     ): Session {
         val current = requireNotNull(session.getString("regCurrent"))
         val currentStep = step(session)
@@ -309,11 +310,6 @@ object RegistrationJourney {
             session.getString("regContentType").orEmpty().substringBefore(';').trim() == "text/html",
         ) { "Registration did not return HTML" }
         require(!session.contains("regErrors")) { "Registration validation error at $current" }
-        if (currentStep == "eic-expired") {
-            val heading =
-                if (eicIssueDate) "You need a different electrical safety certificate" else "This electrical safety certificate has expired"
-            require(session.getString("regBody").orEmpty().contains(heading)) { "EIC date profile did not render the expected flag branch" }
-        }
         if (currentStep == "confirmation") {
             require(session.getString("regBody").orEmpty().contains(fixture.postcode)) { "Confirmation shows a different property" }
             return result.set("regDone", true)
@@ -398,26 +394,9 @@ object RegistrationJourney {
             "correspondence-email" -> mapOf("correspondenceEmailOption" to "ACCOUNT_EMAIL")
             "occupancy" -> mapOf("occupied" to variant.occupied.toString())
             "who-provides-rental-details" -> mapOf("whoProvides" to "LANDLORD")
-            "licensing-type" ->
-                if (variant.licensing == "PROVIDE_LATER") {
-                    mapOf(
-                        "action" to "provideThisLater",
-                    )
-                } else {
-                    mapOf("licensingType" to variant.licensing)
-                }
-
+            "licensing-type" -> mapOf("licensingType" to variant.licensing)
             "selective-licence" -> mapOf("licenceNumber" to "NFT-${fixture.uprn}")
-            "hmo-mandatory-licence" -> mapOf("licenceNumber" to "NFT-${fixture.uprn}")
-            "hmo-additional-licence" -> mapOf("licenceNumber" to "NFT-${fixture.uprn}")
-            "number-of-households" ->
-                if (variant.gas == "later") {
-                    mapOf(
-                        "action" to "provideThisLater",
-                    )
-                } else {
-                    mapOf("numberOfHouseholds" to "1")
-                }
+            "number-of-households" -> mapOf("numberOfHouseholds" to "1")
 
             "number-of-people" -> mapOf("numberOfPeople" to "2")
             "rent-includes-bills" -> mapOf("rentIncludesBills" to "false")
@@ -425,8 +404,8 @@ object RegistrationJourney {
             "rent-frequency" -> mapOf("rentFrequency" to "MONTHLY")
             "rent-amount" -> mapOf("rentAmount" to "950")
             "confirm-missing-compliance" -> mapOf("wantsToProceed" to "true")
-            "check-answers", "payment-summary", "payment-return", "provide-licensing-later", "provide-tenancy-details-later",
-            "gas-safety-certificate-file-upload", "eic-file-upload", "eicr-file-upload", "no-address-found",
+            "check-answers", "payment-summary", "payment-return",
+            "gas-safety-certificate-file-upload", "eicr-file-upload", "no-address-found",
                 -> emptyMap()
 
             else -> error("Unimplemented registration step: ${URI.create(current).path}")
@@ -436,7 +415,7 @@ object RegistrationJourney {
     private fun step(session: Session): String = URI.create(requireNotNull(session.getString("regCurrent"))).path.substringAfterLast('/')
 
     internal fun isUploadCheck(step: String) =
-        step in setOf("check-gas-safety-certificate-uploads", "check-eic-uploads", "check-eicr-uploads")
+        step in setOf("check-gas-safety-certificate-uploads", "check-eicr-uploads")
 
     // Mirrors TokenCookieService: one-use token scoped to the exact upload step path, always HttpOnly and Secure.
     internal fun isUploadCookie(
@@ -473,7 +452,6 @@ object RegistrationJourney {
         cards: List<String>,
         variant: RegistrationVariant,
         fixture: RegistrationFixture?,
-        gas14MonthExpiry: Boolean,
         only: String? = null,
     ): Boolean {
         fun card(title: String) =
@@ -482,7 +460,7 @@ object RegistrationJourney {
         val titles = only?.let { listOf(it) } ?: listOf(GAS_CARD, ELECTRICAL_CARD, EPC_CARD)
         return titles.all { title ->
             val text = card(title)
-            text.isNotBlank() && expectedCard(title, variant, fixture, gas14MonthExpiry).all { text.contains(it, ignoreCase = true) }
+            text.isNotBlank() && expectedCard(title, variant, fixture).all { text.contains(it, ignoreCase = true) }
         }
     }
 
@@ -490,15 +468,11 @@ object RegistrationJourney {
         title: String,
         variant: RegistrationVariant,
         fixture: RegistrationFixture?,
-        gas14MonthExpiry: Boolean,
     ): List<String> {
         if (title == GAS_CARD) {
             return when (variant.gas) {
                 "none" -> listOf("Does the property have a gas supply or any gas appliances?", "No")
                 "upload" -> listOf("Valid", "performance-certificate.pdf")
-                "boundary" -> if (gas14MonthExpiry) listOf("Valid", "performance-certificate.pdf") else listOf("Expired")
-                "expired" -> listOf("Expired")
-                "later" -> listOf("Provide this later")
                 else -> listOf("Do you have a gas safety certificate for this property?", "No")
             }
         }
@@ -508,22 +482,17 @@ object RegistrationJourney {
                     "upload",
                 ) -> listOf("Valid", "performance-certificate.pdf", if (variant.electrical.startsWith("eicr")) "(EICR)" else "(EIC)")
 
-                variant.electrical.endsWith("expired") -> listOf("Expired")
-                variant.electrical == "later" || !variant.occupied -> listOf("Provide this later")
+                !variant.occupied -> listOf("Provide this later")
                 else -> listOf("None")
             }
         }
         require(title == EPC_CARD) { "Unknown compliance card $title" }
 
-        fun number(supersededLatest: Boolean = false) =
-            ComplianceJourney.certificateNumber(requireNotNull(fixture) { "EPC card checks require a fixture" }, variant, supersededLatest)
+        fun number() =
+            ComplianceJourney.certificateNumber(requireNotNull(fixture) { "EPC card checks require a fixture" }, variant)
         return when (variant.epc) {
-            "valid", "uprn" -> listOf(number(), "Valid")
-            "superseded" -> listOf(number(supersededLatest = true), "Valid")
-            "low" -> listOf(number(), "High cost")
-            "expired" -> listOf(number(), "Expired")
+            "valid" -> listOf(number(), "Valid")
             "exempt" -> listOf("less than 4 months a year")
-            "later" -> listOf("Provide this later")
             else -> listOf("Do you have an EPC for this property?", "No")
         }
     }

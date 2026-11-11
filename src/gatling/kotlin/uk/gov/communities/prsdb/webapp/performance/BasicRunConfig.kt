@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.performance
 
 import java.net.URI
 import java.net.URISyntaxException
+import java.time.Duration
 
 enum class PerformanceTarget(
     val propertyValue: String,
@@ -32,6 +33,8 @@ data class BasicRunConfig(
     val iterations: Int,
     val maxIterations: Int,
     val certificateDownloadOrigin: String? = null,
+    val councilSimulatorUrl: String? = null,
+    val thinkTime: Duration = Duration.ZERO,
 ) {
     companion object {
         fun from(properties: Map<String, String>): BasicRunConfig {
@@ -82,6 +85,21 @@ data class BasicRunConfig(
                     origin
                 }
 
+            val councilSimulatorUrl =
+                properties["gatling.council.simulatorUrl"]?.let {
+                    val origin = originUrl(properties, "gatling.council.simulatorUrl")
+                    require(origin != originUrl(properties, "gatling.simulatorUrl")) {
+                        "Council RS256 authentication requires a separate simulator, not the One Login ES256 client"
+                    }
+                    require(target != PerformanceTarget.NFT || URI.create(origin).scheme == "https") {
+                        "NFT council authentication requires an explicitly configured HTTPS simulator"
+                    }
+                    require(target != PerformanceTarget.NFT || URI.create(origin).host !in setOf("localhost", "127.0.0.1", "[::1]")) {
+                        "NFT council authentication cannot use loopback"
+                    }
+                    origin
+                }
+
             return BasicRunConfig(
                 target = target,
                 mode = mode,
@@ -92,6 +110,7 @@ data class BasicRunConfig(
                 iterations = iterations,
                 maxIterations = maxIterations,
                 certificateDownloadOrigin = certificateDownloadOrigin,
+                councilSimulatorUrl = councilSimulatorUrl,
             )
         }
 

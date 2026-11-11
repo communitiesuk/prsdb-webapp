@@ -54,7 +54,7 @@ object CouncilHttpForms {
         if (identity != null) {
             request = request.check(css("main, body").transform { it.contains(identity) }.`is`(true))
         }
-        return exec(request).exitHereIfFailed()
+        return exec(request).exitHereIfFailed().pause(config.thinkTime)
     }
 
     fun submit(

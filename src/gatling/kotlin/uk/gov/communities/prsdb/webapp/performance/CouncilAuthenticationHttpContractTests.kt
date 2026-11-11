@@ -51,7 +51,8 @@ class CouncilAuthenticationHttpContractTests {
                 "gatling.basic.iterations" to "1",
                 "gatling.basic.landlordSubject" to "council-db-subject",
                 "gatling.baseUrl" to server.baseUrl,
-                "gatling.simulatorUrl" to server.baseUrl,
+                "gatling.simulatorUrl" to "http://localhost:3000",
+                "gatling.council.simulatorUrl" to server.baseUrl,
             ),
         )
     }

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {buildCouncilConfiguration, requireInteractiveAuthorization} from '../../../scripts/performance-tests/council-local-simulator.mjs';
+import {cloneForSimulator} from '../../../scripts/performance-tests/nft-shared.mjs';
 
 const existing = {
   simulatorUrl: 'http://127.0.0.1:19090',
@@ -13,6 +14,24 @@ const existing = {
     redirectUrls: ['http://localhost:18080/login/oauth2/code/one-login'],
   },
 };
+
+test('performance mocks only change the temporary NFT task without needing council or hosted EPC services', () => {
+  const task = {family: 'prsdb-webapp-nft', containerDefinitions: [{
+    name: 'prsdb-webapp', environment: [{name: 'SPRING_PROFILES_ACTIVE', value: 'default,nft'}],
+    secrets: [{name: 'EPC_REGISTER_CLIENT_SECRET', valueFrom: 'real-secret-reference'}],
+  }]};
+  const container = cloneForSimulator(task, true).containerDefinitions[0];
+  const environment = Object.fromEntries(container.environment.map(({name, value}) => [name, value]));
+  assert.equal(environment.SPRING_PROFILES_ACTIVE, 'default,nft,one-login-simulator,performance-test');
+  assert.ok(!('PERFORMANCE_TEST_EPC_BASE_URL' in environment));
+  assert.ok(!('PERFORMANCE_TEST_COUNCIL_SIMULATOR_URL' in environment));
+  assert.equal(environment.GOV_UK_PAY_MOCK_BASE_URL, 'https://nft.register-home-to-rent.test.communities.gov.uk/local/gov-uk-pay');
+  assert.equal(environment.EPC_REGISTER_CLIENT_SECRET, 'performance-test');
+  assert.deepEqual(container.secrets, []);
+  assert.equal(task.containerDefinitions[0].environment[0].value, 'default,nft');
+  assert.equal(cloneForSimulator(task).containerDefinitions[0].environment[0].value, 'default,nft,one-login-simulator');
+  assert.throws(() => cloneForSimulator(task, {epcBaseUrl: 'https://external.example.test'}));
+});
 
 test('council bootstrap isolates RS256 internal access from the existing ES256 One Login client', () => {
   const {simulatorConfiguration, springConfiguration} = buildCouncilConfiguration(existing, {

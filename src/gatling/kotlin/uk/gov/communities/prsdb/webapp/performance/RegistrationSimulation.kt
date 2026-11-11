@@ -11,11 +11,7 @@ class RegistrationSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
         val config = BasicRunConfig.from(properties)
-        require(config.target == PerformanceTarget.LOCAL) { "Full registration currently requires controlled loopback dependencies" }
-        val selected =
-            properties["gatling.registration.variants"]?.split(',')?.map { RegistrationVariant.valueOf(it.trim()) }
-                ?: RegistrationVariant.entries.filter { it.gas != "boundary" }
-        require(selected.isNotEmpty() && selected.distinct().size == selected.size) { "Registration variants must be unique" }
+        val selected = listOf(RegistrationVariant.OCCUPIED_SELECTED_CERTIFICATES)
         val fixturePath =
             requireNotNull(properties["gatling.registration.fixturePath"]?.takeIf { it.isNotBlank() }) {
                 "gatling.registration.fixturePath must identify the read-only export from data-nft-registration-fixtures.sql"
@@ -28,16 +24,14 @@ class RegistrationSimulation : Simulation() {
                 offset + (config.iterations + 1) * selected.size,
             ).drop(offset)
         val certificatePath = properties["gatling.registration.certificatePath"]
-        val gas14Months = properties["gatling.registration.gas14Months"]?.toBooleanStrict() ?: true
-        val eicIssueDate = properties["gatling.registration.eicIssueDate"]?.toBooleanStrict() ?: true
-        if (selected.any { it.gas == "upload" || (it.gas == "boundary" && gas14Months) || it.electrical.endsWith("upload") }) {
-            require(certificatePath != null && Files.isRegularFile(Path.of(certificatePath))) {
-                "A real local PDF certificate is required before starting upload variants"
-            }
+        require(certificatePath != null && Files.isRegularFile(Path.of(certificatePath))) {
+            "A synthetic PDF certificate is required for occupied property registration"
         }
         val paymentBase =
-            PaymentJourney.localBaseUrl(
+            PaymentJourney.baseUrl(
                 properties["gatling.registration.paymentBaseUrl"] ?: "${config.baseUrl}/local/gov-uk-pay",
+                config.target,
+                config.baseUrl,
             )
         val populations =
             fixtures.mapIndexed { index, fixture ->
@@ -54,8 +48,6 @@ class RegistrationSimulation : Simulation() {
                             paymentBase,
                             certificatePath,
                             prefix,
-                            gas14MonthExpiry = gas14Months,
-                            eicIssueDate = eicIssueDate,
                         ),
                     )
                     .injectOpen(atOnceUsers(1))

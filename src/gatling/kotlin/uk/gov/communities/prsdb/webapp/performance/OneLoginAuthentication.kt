@@ -85,22 +85,27 @@ object OneLoginAuthentication {
                 .exec(authenticationCompletionChain(config, subject, requestNamePrefix, authorizeUrlKey, requestLabelPrefix))
 
         if (requireLandlordDetails) {
-            chain =
-                chain.exec(
-                    http("$requestLabelPrefix$DETAILS_REQUEST")
-                        .get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-                        .disableFollowRedirect()
-                        .check(status().`is`(200))
-                        .check(header("Content-Type").transform { it.substringBefore(';').trim().lowercase() }.`is`("text/html"))
-                        .check(
-                            css("a[href*='/landlord-details/update-phone-number']", "href")
-                                .transform { HttpDestination.resolve(it, config.baseUrl) }
-                                .saveAs("phoneUpdateEntry"),
-                        ),
-                ).exitHereIfFailed()
+            chain = chain.exec(landlordDetailsChain(config, requestLabelPrefix))
         }
         return chain
     }
+
+    fun landlordDetailsChain(
+        config: BasicRunConfig,
+        prefix: String = "",
+    ): ChainBuilder =
+        exec(
+            http("$prefix$DETAILS_REQUEST")
+                .get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
+                .disableFollowRedirect()
+                .check(status().`is`(200))
+                .check(header("Content-Type").transform { it.substringBefore(';').trim().lowercase() }.`is`("text/html"))
+                .check(
+                    css("a[href*='/landlord-details/update-phone-number']", "href")
+                        .transform { HttpDestination.resolve(it, config.baseUrl) }
+                        .saveAs("phoneUpdateEntry"),
+                ),
+        ).exitHereIfFailed()
 
     fun authenticationCompletionChain(
         config: BasicRunConfig,

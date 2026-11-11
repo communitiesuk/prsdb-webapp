@@ -10,3 +10,23 @@ gov-uk-pay:
   mock-card-entry-delay-seconds: 0
   mock-failing-calls-from-capture: 0
   mock-failing-capture-takes-payment: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "performance-test & nft & !production"
+  security:
+    oauth2:
+      client:
+        registration:
+          epc-register:
+            client-id: performance-test
+            client-secret: performance-test
+        provider:
+          epc-register:
+            token-uri: http://localhost:${server.port}/local/epc/auth/oauth/token
+
+epc:
+  base-url: http://localhost:${server.port}/local/epc
+  certificate-base-url: http://localhost:${server.port}/local/epc/energy-certificate

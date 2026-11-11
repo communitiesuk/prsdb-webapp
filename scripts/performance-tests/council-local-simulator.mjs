@@ -100,12 +100,11 @@ async function configure() {
   await writeFile(output, `${JSON.stringify(configuration.springConfiguration, null, 2)}\n`, {flag: 'wx', mode: 0o600});
   console.log(`Council OIDC configured at ${loopbackOrigin(simulatorUrl)}; merge ${output} into the existing local Spring JSON before restarting.`);
   console.log('Use gatling.council.simulatorUrl for this simulator; existing gatling.simulatorUrl remains One Login.');
-  console.log('Passcodes remain disabled: explicitly add require-passcode to the local Spring profiles and gatling.operator.passcodes=true for a separate passcode run.');
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  configure().catch(error => {
-    console.error(error.message);
+  configure().catch(() => {
+    console.error('Council simulator configuration or readiness verification failed.');
     process.exitCode = 1;
   });
 }

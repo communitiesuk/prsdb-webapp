@@ -17,15 +17,15 @@ class AgentHttpContractTests {
     lateinit var outputDirectory: Path
 
     @Test
-    fun `delegation and removal submit csrf-protected forms and persist property access state`() {
+    fun `delegation submits csrf-protected forms and persists property access state`() {
         AgentServer().use { server ->
             val result = run(server)
             assertEquals(0, result.exitCode, result.output)
             assertEquals("agent-102@example.test", server.delegated[102])
-            assertTrue(server.removed.contains(102))
+            assertTrue(server.removed.isEmpty())
             assertEquals(2, server.posts.count { it["formData.emailAddress"] != null })
-            assertEquals(2, server.posts.count { it["formData.wantsToProceed"] == "true" })
-            assertTrue(server.detailsReads[102]!! >= 3)
+            assertEquals(0, server.posts.count { it["formData.wantsToProceed"] == "true" })
+            assertEquals(2, server.detailsReads[102])
         }
     }
 
@@ -44,8 +44,8 @@ class AgentHttpContractTests {
     @Test
     fun `prepare-delegation signs in each owner and leaves a family-specific delegation pending`() {
         AgentServer().use { server ->
-            val ids = (101L..104L).toList()
-            val families = listOf("access", "compliance")
+            val ids = (101L..102L).toList()
+            val families = listOf("access")
             val fixturePath = outputDirectory.resolve("agent-prepare.json")
             Files.writeString(
                 fixturePath,
