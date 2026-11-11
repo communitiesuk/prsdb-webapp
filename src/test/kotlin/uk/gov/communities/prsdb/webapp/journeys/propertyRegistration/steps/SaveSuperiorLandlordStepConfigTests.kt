@@ -75,13 +75,7 @@ class SaveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(
-            mapOf(
-                1 to existingSuperiorLandlord,
-                4 to SuperiorLandlordDataModel(detailsKnown = false),
-            ),
-            savedMap,
-        )
+        assertEquals(mapOf(1 to existingSuperiorLandlord, 4 to SuperiorLandlordDataModel(detailsKnown = false)), savedMap)
         verify(mockState).nextSuperiorLandlordId = 5
         verify(mockState).editingSuperiorLandlordId = null
     }
@@ -99,13 +93,7 @@ class SaveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(
-            mapOf(
-                1 to otherSuperiorLandlord,
-                2 to SuperiorLandlordDataModel(detailsKnown = false),
-            ),
-            savedMap,
-        )
+        assertEquals(mapOf(1 to otherSuperiorLandlord, 2 to SuperiorLandlordDataModel(detailsKnown = false)), savedMap)
         verify(mockState, never()).nextSuperiorLandlordId = any()
         verify(mockState).editingSuperiorLandlordId = null
     }

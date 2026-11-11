@@ -211,7 +211,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
     }
 
     @Test
-    fun `removing a property manager deletes it`() {
+    fun `removing a property manager from a property ownership deletes it from the database`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
         inTransaction {

@@ -73,10 +73,7 @@ class SaveFreeholderStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(
-            mapOf(1 to existingFreeholder, 4 to FreeholderDataModel(detailsKnown = false)),
-            savedMap,
-        )
+        assertEquals(mapOf(1 to existingFreeholder, 4 to FreeholderDataModel(detailsKnown = false)), savedMap)
         verify(mockState).nextFreeholderId = 5
         verify(mockState).editingFreeholderId = null
     }
@@ -94,10 +91,7 @@ class SaveFreeholderStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        assertEquals(
-            mapOf(1 to otherFreeholder, 2 to FreeholderDataModel(detailsKnown = false)),
-            savedMap,
-        )
+        assertEquals(mapOf(1 to otherFreeholder, 2 to FreeholderDataModel(detailsKnown = false)), savedMap)
         verify(mockState, never()).nextFreeholderId = any()
         verify(mockState).editingFreeholderId = null
     }
