@@ -706,22 +706,47 @@ change the dataset or the seeder's own configuration.
 head differs from the last successful run; if unchanged, it skips all AWS and database operations unless `force`
 is selected. The `restore-task-definition` input identifies an exact worker revision, never `latest`; scheduled runs
 use the NFT Environment variable `NFT_RESTORE_TASK_DEFINITION`. Neither has a default worker.
-The original temporary proof-of-concept worker has been retired. Do not dispatch another run until an approved
-replacement worker and its scoped permissions are provisioned and its exact active ARN is configured.
+Verify that the selected worker and its scoped permissions remain active before dispatch; an historical worker
+revision or a previous successful run is not evidence that the worker is still available.
 The deployed app image must carry the workflow's NFT SHA, checked before shutdown. Before testing, the
 workflow waits for actual app tasks to reach `STOPPED`: service `runningCount=0` is insufficient while ALB draining
 keeps containers and database connections alive. The dedicated worker validates the pinned dump version, size,
 checksum and archive, checks for database clients, then restores `s3://prsdb-seed-data-nft/seed-data.dump` directly
 to RDS. Actions migrates it to the deployed NFT revision and verifies required data through SSM. It starts the app and runs
-`BasicJourneysSimulation` followed by `SavedRegistrationSimulation` in baseline mode after the One Login simulator is prepared. Additional
-load/spike/performance suites should run against this same restored dataset before cleanup; do not reset between
-suites in a combined run. Gatling compilation runs in parallel with restore and transfers the compiled classes/resources
+the basic, saved-registration, completed-property, organisation-profile, certificate and operator checks,
+then prepares agent, joint and organisation invitations through HTTP before the ten-family mixed ramp.
+All stages use the same restored dataset; do not reset between suites.
+Gatling compilation runs in parallel with restore and transfers the compiled classes/resources
 to the test runner, which skips recompilation. Restore has a 45-minute budget, compilation 20 minutes, and
-simulator preparation plus Gatling 35 minutes. Preparation and HTTP tests deliberately share one runner because
+simulator preparation plus Gatling 90 minutes. Preparation and HTTP tests deliberately share one runner because
 WAF and simulator access belong to that runner's IPv4 address. Each AWS job obtains fresh credentials.
 The restore job uploads its own recovery state and a pre-restore checkpoint; the performance job uploads
 Gatling reports and its separate preparation state. A separate recovery job
 restores the original app/simulator state and its own WAF/security-group changes.
+
+Recovery state artifacts contain the short-lived runner IP and AWS resource identifiers needed to remove only
+this run's access and restore its exact baseline. They must not contain credentials, OAuth codes or fixture data.
+Removing these ownership fields would prevent safe automated recovery; they are not secret credentials.
+Missing preparation state is allowed only when the preparation step was explicitly skipped. Unknown or attempted
+preparation without readable state blocks database reset while still attempting restore-worker shutdown.
+
+### Local registration dependency helpers
+
+`scripts/performance-tests/local-registration-dependencies.mjs` provides loopback-only synthetic EPC/payment
+responses using explicit exported fixture allocations. Pass
+`--fixture-path=PATH --app-url=http://localhost:18080 --port=19091`; `--self-test` checks the helper without an app.
+For local certificate callbacks, `local-registration-scan.mjs` invokes the real scan processor only for allocated
+actors/properties and verifies the exact synthetic PDF bytes. It is not used in NFT.
+Pass `--fixture-path=PATH --certificate-path=PATH --config-file=PATH --working-directory=PATH`,
+either `--application-jar=PATH` or `--classpath-file=PATH`, and explicit
+`--database-container=NAME --database-port=PORT` for the isolated local PostgreSQL container and its published port.
+The database remains `prsdblocal` on loopback; `DOCKER_HOST` must explicitly identify a local Unix socket.
+The app configuration must use that same local database and synthetic dependency settings.
+
+Property allocation uses an address-ID keyset cursor and shuffles only within each fetched batch. NGD address-ID
+order is not guaranteed to be geographically random, so this is not evidence of representative council coverage.
+Council journeys are deferred from the current mixed workload. Before drawing council-search performance
+conclusions, measure the seeded council distribution against the address source; do not infer it from shuffled batches.
 
 After the performance job completes, recovery stops the owned restore task, restores simulator configuration/access
 and waits for the actual app tasks to stop. Reset is blocked if this cannot be verified or the latest active app

@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -199,7 +198,6 @@ class PropertyRegistrationService(
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
                 isDelegatedToLettingAgent,
-                isPdjb939PhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO),
                 licenseProvideLater = licenseProvideLater,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,

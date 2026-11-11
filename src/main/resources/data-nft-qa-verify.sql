@@ -1,12 +1,12 @@
 WITH expected (id, address_id, registration_number_id) AS (
-    VALUES (1, 1::bigint, 21), (2, 2, 22), (3, 3, 23), (4, 4, 24), (5, 5, 25),
+    VALUES (1, 1::bigint, 21), (2, 2, 22), (3, 3, 23), (4, 4, 24), (5, 5, 911),
            (6, 7449161, 31), (7, 7449162, 32), (8, 7449163, 33),
            (9, 7449166, 34), (10, 7449167, 35), (11, 7449170, 36),
            (12, 7449175, 37), (13, 7449181, 38), (14, 7449182, 39),
            (15, 7449164, 40), (16, 7449168, 41), (17, 7449171, 42),
-           (18, 9000000001, 43), (19, 9000000002, 44), (20, 9000000003, 45),
-           (21, 9000000004, 46), (22, 9000000005, 47), (23, 9000000006, 48),
-           (24, 9000000007, 49), (25, 9000000008, 50), (26, 9000000009, 51)
+           (18, 9000000001, 902), (19, 9000000002, 903), (20, 9000000003, 904),
+           (21, 9000000004, 905), (22, 9000000005, 906), (23, 9000000006, 907),
+           (24, 9000000007, 908), (25, 9000000008, 909), (26, 9000000009, 910)
 )
 SELECT (SELECT count(*) FROM property_ownership) AS properties,
        (SELECT count(*) FROM landlord_incomplete_properties) AS incomplete_properties,
@@ -18,7 +18,7 @@ SELECT (SELECT count(*) FROM property_ownership) AS properties,
            JOIN ownership_link ol ON ol.landlordship_id = po.id AND ol.landlord_id = 1
            JOIN landlord l ON l.id = ol.landlord_id
            WHERE po.id = e.id AND po.address_id = e.address_id
-             AND po.registration_number_id = e.registration_number_id AND po.is_active
+             AND po.registration_number_id = e.registration_number_id AND rn.type = 0 AND po.is_active
              AND a.local_council_id IS NOT NULL
              AND CASE
                  WHEN a.single_line_address LIKE '% QA Fixture Road, Testville, QA1 1AA'

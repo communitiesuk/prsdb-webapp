@@ -45,6 +45,30 @@ class OwnershipTypeConverterTests {
         assertEquals(expectedOrdinalPairs[legacy.ordinal], expected.ordinal)
     }
 
+    @ParameterizedTest
+    @MethodSource("provideCurrentToBeforePdjb955Mappings")
+    fun `convertToBeforePdjb955 maps each ownership type to its beforePdjb955 equivalent`(
+        ownershipType: OwnershipType,
+        expected: OwnershipTypeBeforePdjb955,
+    ) {
+        // Act
+        val result = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
+
+        // Assert
+        assertEquals(expected, result)
+    }
+
+    @ParameterizedTest
+    @EnumSource(OwnershipTypeBeforePdjb955::class)
+    fun `every beforePdjb955 ownership type round-trips through the current enum unchanged`(beforePdjb955: OwnershipTypeBeforePdjb955) {
+        // Act
+        val result = OwnershipTypeConverter.convertToBeforePdjb955(OwnershipTypeConverter.convert(beforePdjb955))
+
+        // Assert - this is what keeps the flag-off path's behaviour unchanged, despite the
+        // conversion being lossy in the other direction
+        assertEquals(beforePdjb955, result)
+    }
+
     companion object {
         @JvmStatic
         fun provideLegacyToCurrentMappings() =
@@ -53,6 +77,21 @@ class OwnershipTypeConverterTests {
                 Arguments.of(OwnershipTypeBeforePdjb955.LEASEHOLD, OwnershipType.LEASEHOLD_ONLY),
                 Arguments.of(OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD, OwnershipType.JOINT_TENANTS),
                 Arguments.of(OwnershipTypeBeforePdjb955.COMMONHOLD, OwnershipType.COMMONHOLD),
+            )
+
+        @JvmStatic
+        fun provideCurrentToBeforePdjb955Mappings() =
+            listOf(
+                Arguments.of(OwnershipType.NONE, OwnershipTypeBeforePdjb955.LEASEHOLD),
+                Arguments.of(OwnershipType.LEASEHOLD_ONLY, OwnershipTypeBeforePdjb955.LEASEHOLD),
+                Arguments.of(OwnershipType.SOLE_FREEHOLD, OwnershipTypeBeforePdjb955.FREEHOLD),
+                Arguments.of(OwnershipType.JOINT_TENANTS, OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD),
+                Arguments.of(OwnershipType.TENANTS_IN_COMMON, OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD),
+                Arguments.of(OwnershipType.COMMONHOLD, OwnershipTypeBeforePdjb955.COMMONHOLD),
+                Arguments.of(OwnershipType.SHARE_OF_SOLE_FREEHOLD, OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD),
+                Arguments.of(OwnershipType.SHARE_OF_JOINT_TENANTS, OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD),
+                Arguments.of(OwnershipType.SHARE_OF_TENANTS_IN_COMMON, OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD),
+                Arguments.of(OwnershipType.SHARE_OF_COMMONHOLD, OwnershipTypeBeforePdjb955.COMMONHOLD),
             )
     }
 }

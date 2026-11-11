@@ -1,18 +1,25 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
+import jakarta.servlet.http.Cookie
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.util.ResourceUtils
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
@@ -22,10 +29,13 @@ import uk.gov.communities.prsdb.webapp.constants.REACTIVATE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
@@ -43,8 +53,21 @@ class ReactivatePropertyControllerTests(
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
+    @MockitoBean
+    private lateinit var certificateUploadHelper: CertificateUploadHelper
+
     private val propertyOwnershipId = 1L
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
+
+    private val uploadGasCertPath =
+        "${getPropertyReactivationBasePath(propertyOwnershipId)}/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=any-id"
+    private val fileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
+    private val fileUploadEntity =
+        MultipartEntityBuilder
+            .create()
+            .addTextBody("_csrf", "any-csrf-token")
+            .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
+            .build()
 
     @BeforeEach
     fun setUp() {
@@ -158,6 +181,62 @@ class ReactivatePropertyControllerTests(
             }.andExpect {
                 status { isOk() }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData returns 404 without uploading when the property cannot be reactivated by the current user`() {
+        mockPropertyCannotBeReactivated()
+
+        mvc
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
+                with(csrf().asHeader())
+                cookie(fileUploadCookie)
+            }.andExpect {
+                status { isNotFound() }
+            }
+
+        verifyNoInteractions(certificateUploadHelper)
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData returns 400 for a landlord of the inactive property without a cookie`() {
+        mvc
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
+                with(csrf().asHeader())
+            }.andExpect {
+                status { isBadRequest() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData delegates to the certificate upload helper and redirects for a landlord of the inactive property`() {
+        val redirectUrl = "any-url"
+        whenever(propertyReactivationJourneyFactory.createJourneySteps(propertyOwnershipId))
+            .thenReturn(mapOf(UploadGasCertStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(certificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
+            .thenReturn(mapOf<String, Any>())
+        whenever(mockStepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("redirect:$redirectUrl"))
+
+        mvc
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
+                with(csrf().asHeader())
+                cookie(fileUploadCookie)
+            }.andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(redirectUrl)
+            }
+
+        verify(certificateUploadHelper).uploadFileAndReturnFormModel(any(), any(), eq(fileUploadCookie.value), any())
     }
 
     @Test

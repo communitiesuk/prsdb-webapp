@@ -2,16 +2,18 @@ package uk.gov.communities.prsdb.webapp.performance
 
 import com.sun.net.httpserver.HttpServer
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import java.nio.file.Path
-import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 
 class CouncilAuthenticationHttpContractTests {
+    @TempDir
+    lateinit var directory: Path
+
     @Test
     fun `internal access preserves simulator fields state cookie and database subject`() {
         AuthenticationServer().use { server ->
@@ -31,17 +33,6 @@ class CouncilAuthenticationHttpContractTests {
     }
 
     private fun run(server: AuthenticationServer): GatlingTestRunner.Result {
-        val directory =
-            Files.createDirectories(
-                Path.of(
-                    System.getProperty("user.home"),
-                    ".copilot",
-                    "session-state",
-                    "0adcbe66-1747-4ffa-ba2b-ff54b2db6dfe",
-                    "files",
-                    "council-auth-contract-${UUID.randomUUID()}",
-                ),
-            )
         return GatlingTestRunner(directory).run(
             CouncilContractSimulation::class.java,
             mapOf(

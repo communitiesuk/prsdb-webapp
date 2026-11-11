@@ -18,7 +18,7 @@ class OrganisationOperationsSimulation : Simulation() {
                 "gatling.organisation.operationsFixturePath must identify the read-only export from " +
                     "data-nft-organisation-fixtures.sql, or data-nft-organisation-team-fixtures.sql for acceptance"
             }
-        val offset = properties["gatling.organisation.fixtureOffset"]?.toIntOrNull() ?: 0
+        val offset = properties["gatling.organisation.fixtureOffset"]?.toInt() ?: 0
         require(offset >= 0) { "gatling.organisation.fixtureOffset must not be negative" }
         val runId =
             properties["gatling.organisation.runId"]?.takeIf { it.matches(Regex("[a-z0-9-]{1,40}")) }

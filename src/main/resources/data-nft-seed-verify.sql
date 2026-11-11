@@ -22,7 +22,7 @@ SELECT
     (SELECT count(*) FROM landlord_incomplete_properties),
     (SELECT count(*) FROM landlord
      WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'
-       AND individual_is_active AND individual_has_accepted_privacy_notice AND NOT individual_is_verified),
+       AND is_active AND individual_has_accepted_privacy_notice AND NOT individual_is_verified),
     (SELECT count(*) FROM address a
      JOIN label_counts labels ON labels.single_line_address = a.single_line_address AND labels.matches = 1
      WHERE a.id BETWEEN 9100000001 AND 9100000005

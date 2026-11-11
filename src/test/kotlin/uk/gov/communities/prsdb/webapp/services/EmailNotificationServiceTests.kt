@@ -117,4 +117,25 @@ class EmailNotificationServiceTests {
         verifyNoInteractions(emailDeliveryService)
         verifyNoInteractions(emailQueueService)
     }
+
+    @Test
+    fun `getLandlordRecipientAddresses returns only the organisation's administrators`() {
+        val organisationalLandlord = createOrgLandlord(registrantEmail = "admin@example.com")
+        createOrganisationalLandlordUser(
+            organisationalLandlord = organisationalLandlord,
+            email = "editor@example.com",
+            role = OrganisationalLandlordUserRole.EDITOR,
+        )
+
+        assertEquals(listOf("admin@example.com"), emailNotificationService.getLandlordRecipientAddresses(organisationalLandlord))
+    }
+
+    @Test
+    fun `getLandlordRecipientAddresses throws when the organisation has no administrators`() {
+        val organisationalLandlord = createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.EDITOR)
+
+        assertThrows<NoLandlordEmailRecipientsException> {
+            emailNotificationService.getLandlordRecipientAddresses(organisationalLandlord)
+        }
+    }
 }

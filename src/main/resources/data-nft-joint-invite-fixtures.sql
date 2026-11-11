@@ -1,5 +1,5 @@
 WITH owner_pool AS MATERIALIZED (
-    SELECT id, individual_subject_identifier, individual_is_active, individual_has_accepted_privacy_notice
+    SELECT id, individual_subject_identifier, is_active, individual_has_accepted_privacy_notice
     FROM landlord
     WHERE individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
     ORDER BY individual_subject_identifier
@@ -30,7 +30,7 @@ WITH owner_pool AS MATERIALIZED (
            row_number() OVER (ORDER BY candidate.subject) AS pair_rank
     FROM invitee_pool candidate
     JOIN landlord invitee ON invitee.id = candidate.id
-    WHERE invitee.individual_is_active
+    WHERE invitee.is_active
       AND invitee.individual_has_accepted_privacy_notice
       AND candidate.email LIKE '%@example.com'
       AND lower(candidate.email) NOT IN (SELECT email FROM duplicated_invitee_emails)
@@ -69,7 +69,7 @@ WITH owner_pool AS MATERIALIZED (
     FROM owner_pool l
     JOIN ownership_link ol ON ol.landlord_id = l.id
     JOIN property_ownership p ON p.id = ol.landlordship_id
-    WHERE l.individual_is_active AND l.individual_has_accepted_privacy_notice
+    WHERE l.is_active AND l.individual_has_accepted_privacy_notice
       AND p.id > 26 AND p.is_active AND p.marked_joint_landlord IS NOT TRUE
       AND NOT EXISTS (SELECT 1 FROM app_touched_landlords touched WHERE touched.landlord_id = l.id)
       AND NOT EXISTS (SELECT 1 FROM joint_touched_landlords touched WHERE touched.landlord_id = l.id)

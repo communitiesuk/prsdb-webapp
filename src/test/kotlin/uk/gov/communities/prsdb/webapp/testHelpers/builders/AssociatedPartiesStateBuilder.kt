@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
@@ -17,8 +18,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -36,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Ownership
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
@@ -61,7 +65,7 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withOwnershipKind(ownershipKind: OwnershipKind = OwnershipKind.FREEHOLD_ONLY): SelfType {
         val ownershipKindFormModel =
             OwnershipKindFormModel().apply {
-                this.ownershipKind = ownershipKind
+                ownershipKinds = ownershipKind.options.map { it.name }.toMutableList()
             }
         withSubmittedValue(OwnershipKindStep.ROUTE_SEGMENT, ownershipKindFormModel)
         return self()
@@ -165,9 +169,44 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withSuperiorLandlordNameComplete(name: String = "Test Superior Landlord"): SelfType {
+    fun withSuperiorLandlordName(name: String = "Test Superior Landlord"): SelfType {
         val superiorLandlordNameFormModel = SuperiorLandlordNameFormModel(name = name)
         withSubmittedValue(SuperiorLandlordNameStep.ROUTE_SEGMENT, superiorLandlordNameFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlordContactType(contactType: SuperiorLandlordContactType = SuperiorLandlordContactType.EMAIL): SelfType {
+        withSubmittedValue(
+            SuperiorLandlordContactTypeStep.ROUTE_SEGMENT,
+            SuperiorLandlordContactTypeFormModel(contactType = contactType),
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordLookupAddress(
+        houseNameOrNumber: String = "1",
+        postcode: String = "FA1 1AA",
+    ): SelfType {
+        // The superior landlord address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = SuperiorLandlordAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Fictional Road, $postcode", localCouncilId = 22, uprn = 44)
+        additionalDataMap["$routePrefix/cachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            },
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordManualAddressSelected(): SelfType {
+        withSubmittedValue(
+            "${SuperiorLandlordAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
+        )
         return self()
     }
 

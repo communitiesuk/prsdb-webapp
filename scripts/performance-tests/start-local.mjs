@@ -63,6 +63,7 @@ try {
       'classpath:data-local.sql',
       'classpath:data-metrics-local.sql',
       'classpath:data-nft-performance.sql',
+      'classpath:data-placeholder-freeholders.sql',
     ],
     'spring.security.oauth2.client.registration.one-login.client-id': clientId,
     'spring.security.oauth2.client.provider.one-login.issuer-uri': `${simulatorUrl}/`,

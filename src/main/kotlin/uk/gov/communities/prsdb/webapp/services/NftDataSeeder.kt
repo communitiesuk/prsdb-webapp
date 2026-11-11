@@ -318,6 +318,7 @@ class NftDataSeeder(
                         organisationGoverningBodyMemberStmt,
                         it.details,
                         it.anniversary,
+                        hasRegisteredProperty = it.properties.any { property -> property.scenario.isRegistrationComplete },
                         registrationNumberId = startingIds.getValue("registration_number") + ++registrationNumbersAdded,
                     )
 
@@ -543,6 +544,7 @@ class NftDataSeeder(
         organisationGoverningBodyMemberStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
         anniversary: MonthDay?,
+        hasRegisteredProperty: Boolean,
         registrationNumberId: Long,
     ) {
         prsdbUserStmt.setString(1, coreDetails.subjectId)
@@ -557,7 +559,7 @@ class NftDataSeeder(
 
         when (coreDetails.landlordType) {
             LandlordType.INDIVIDUAL -> {
-                addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, registrationNumberId)
+                addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, hasRegisteredProperty, registrationNumberId)
             }
 
             LandlordType.ORGANISATION -> {
@@ -569,6 +571,7 @@ class NftDataSeeder(
                     organisationGoverningBodyMemberStmt,
                     coreDetails,
                     anniversary,
+                    hasRegisteredProperty,
                     registrationNumberId,
                 )
             }
@@ -579,6 +582,7 @@ class NftDataSeeder(
         landlordStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
         anniversary: MonthDay?,
+        hasRegisteredProperty: Boolean,
         registrationNumberId: Long,
     ) {
         val name = NftDataFaker.generateName()
@@ -597,6 +601,7 @@ class NftDataSeeder(
         landlordStmt.setBoolean(11, isVerified)
         landlordStmt.setIntOrNull(12, anniversary?.dayOfMonth)
         landlordStmt.setIntOrNull(13, anniversary?.monthValue)
+        landlordStmt.setBoolean(14, hasRegisteredProperty)
         landlordStmt.addBatch()
     }
 
@@ -608,6 +613,7 @@ class NftDataSeeder(
         organisationGoverningBodyMemberStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
         anniversary: MonthDay?,
+        hasRegisteredProperty: Boolean,
         registrationNumberId: Long,
     ) {
         val details =
@@ -643,6 +649,7 @@ class NftDataSeeder(
         organisationLandlordStmt.setString(26, details.registrantPhoneNumber)
         organisationLandlordStmt.setIntOrNull(27, anniversary?.dayOfMonth)
         organisationLandlordStmt.setIntOrNull(28, anniversary?.monthValue)
+        organisationLandlordStmt.setBoolean(29, hasRegisteredProperty)
         organisationLandlordStmt.addBatch()
 
         details.users.forEachIndexed { index, user ->

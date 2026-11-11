@@ -11,6 +11,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -76,7 +78,10 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.test.assertNotNull
 
 class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
@@ -103,6 +108,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         // TODO PDJB-1828: Remove this setup when the MULTI_USER_ORGANISATIONS feature flag is removed
         featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+        // TODO PDJB-2149: Remove this setup when the ACTIVE_INACTIVE feature flag is removed
+        featureFlagManager.enableFeature(ACTIVE_INACTIVE)
     }
 
     @Test
@@ -154,6 +161,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
+        val expectedDeactivationDate = formatExpectedDeactivationDate(createdLandlord.createdDate)
+        assertThat(confirmationPage.deactivationParagraph).containsText(
+            "If you do not submit a property registration by $expectedDeactivationDate your landlord account will be deactivated.",
+        )
         confirmationPage.goToDashboardLink.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
 
@@ -375,6 +386,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", ORG_LANDLORD_REGISTRATION_SURVEY_URL)
         assertThat(confirmationPage.whatYouCanDoNowHeading).isVisible()
+        val expectedDeactivationDate = formatExpectedDeactivationDate(createdOrgLandlord.createdDate)
+        assertThat(confirmationPage.deactivationParagraph).containsText(
+            "If your organisation does not submit a property registration by $expectedDeactivationDate " +
+                "your landlord account will be deactivated.",
+        )
         confirmationPage.goToDashboardLink.clickAndWait()
 
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
@@ -1139,4 +1155,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualCounty = manualCounty,
         manualPostcode = manualPostcode,
     )
+
+    private fun formatExpectedDeactivationDate(createdDate: Instant): String =
+        createdDate
+            .atZone(DateTimeHelper.UK_ZONE)
+            .toLocalDate()
+            .plusMonths(3)
+            .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 }

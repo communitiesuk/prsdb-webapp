@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
+import java.util.TimeZone
 
 // This test seeds a small but non-trivial volume of data, so it exercises the same batching, address-generation and
 // organisation-landlord branching logic as a real NFT run, just at a scale that completes quickly on a test database.
@@ -216,7 +217,7 @@ class NftDataSeederTests(
                 selected
             }
         assertEquals(allIds.size, allIds.toSet().size)
-        jdbcTemplate.update("UPDATE landlord SET individual_is_active = false WHERE individual_subject_identifier = ?", subjects.first())
+        jdbcTemplate.update("UPDATE landlord SET is_active = false WHERE individual_subject_identifier = ?", subjects.first())
         val remaining = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
         assertTrue(remaining.none { it.jsonObject.getValue("subject").jsonPrimitive.content == subjects.first() })
     }
@@ -272,7 +273,7 @@ class NftDataSeederTests(
                 ),
             )
         }
-        jdbcTemplate.update("UPDATE landlord SET individual_is_active = false WHERE individual_subject_identifier = ?", subjects[0])
+        jdbcTemplate.update("UPDATE landlord SET is_active = false WHERE individual_subject_identifier = ?", subjects[0])
         jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = true WHERE id = ?", ids[1])
         jdbcTemplate.update(
             "INSERT INTO letting_agent_access (token, invited_email, property_ownership_id) VALUES (gen_random_uuid(), ?, ?)",
@@ -351,6 +352,19 @@ class NftDataSeederTests(
 
         assertEquals(26, jdbcTemplate.queryForObject("SELECT count(*) FROM property_ownership", Int::class.java))
         assertEquals(
+            0,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*) FROM property_ownership po
+                JOIN registration_number rn ON rn.id = po.registration_number_id
+                WHERE rn.type <> 0 OR EXISTS (
+                    SELECT 1 FROM landlord l WHERE l.registration_number_id = rn.id
+                )
+                """.trimIndent(),
+                Int::class.java,
+            ),
+        )
+        assertEquals(
             26,
             jdbcTemplate.queryForObject(
                 """
@@ -407,6 +421,43 @@ class NftDataSeederTests(
             jdbcTemplate.queryForObject("SELECT single_line_address FROM address WHERE id = 1", String::class.java),
         )
         assertEquals(8000001L, jdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('address', 'id'))", Long::class.java))
+    }
+
+    @Test
+    fun `basic performance subject fallback owns an active property and is idempotent`() {
+        newSeeder().seedDatabase()
+        jdbcTemplate.execute(
+            """
+            UPDATE landlord SET is_active = true, individual_is_verified = false,
+                individual_has_accepted_privacy_notice = true WHERE landlord_type = 0;
+            DELETE FROM ownership_link
+                WHERE landlord_id = (SELECT min(id) FROM landlord WHERE landlord_type = 0);
+            """.trimIndent(),
+        )
+        val expectedLandlordId =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT min(l.id) FROM landlord l
+                JOIN ownership_link ol ON ol.landlord_id = l.id
+                JOIN property_ownership po ON po.id = ol.landlordship_id
+                WHERE l.landlord_type = 0 AND po.is_active
+                """.trimIndent(),
+                Long::class.java,
+            )
+        assertTrue(expectedLandlordId != null)
+
+        repeat(2) {
+            jdbcTemplate.execute(ClassPathResource("data-nft-performance-landlord.sql").getContentAsString(Charsets.UTF_8))
+        }
+
+        assertEquals(
+            expectedLandlordId,
+            jdbcTemplate.queryForObject(
+                "SELECT id FROM landlord WHERE individual_subject_identifier = ?",
+                Long::class.java,
+                "urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo",
+            ),
+        )
     }
 
     @Test
@@ -513,7 +564,7 @@ class NftDataSeederTests(
             VALUES (2147484000, current_timestamp, 210000000001, 1);
             INSERT INTO landlord
                 (id, registration_number_id, individual_address_id, created_date, individual_email,
-                 individual_is_active, individual_name, individual_phone_number, individual_subject_identifier,
+                 is_active, individual_name, individual_phone_number, individual_subject_identifier,
                  individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                  individual_has_accepted_privacy_notice)
             VALUES (2147484000, 2147484000, 1, current_timestamp, 'fixture@example.com',
@@ -813,6 +864,27 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase marks exactly the landlords with registered properties as having registered a property`() {
+        newSeeder().seedDatabase()
+
+        val mismatchedCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM landlord l
+                WHERE l.has_registered_property <> EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id)
+                """.trimIndent(),
+                Long::class.java,
+            )
+        val registeredCount =
+            jdbcTemplate.queryForObject("SELECT count(*) FROM landlord WHERE has_registered_property", Long::class.java)!!
+
+        assertEquals(0L, mismatchedCount)
+        assertTrue(registeredCount > 0, "Expected some landlords to have registered a property")
+        assertTrue(registeredCount < numOfLandlords, "Expected some landlords not to have registered a property")
+    }
+
+    @Test
     fun `seedDatabase gives every organisation landlord a registrant admin user and any extra users have their own prsdb user`() {
         newSeeder().seedDatabase()
 
@@ -972,6 +1044,29 @@ class NftDataSeederTests(
         val secondRunSnapshot = captureSeedSnapshot()
 
         assertEquals(firstRunSnapshot, secondRunSnapshot)
+    }
+
+    @Test
+    fun `seedDatabase produces the same data whatever the default time zone`() {
+        val ukSnapshot = seedWithDefaultTimeZone("Europe/London")
+
+        IntegrationTestHelper.resetDatabase(jdbcTemplate)
+
+        val utcSnapshot = seedWithDefaultTimeZone("UTC")
+
+        assertEquals(ukSnapshot, utcSnapshot)
+    }
+
+    // The snapshot is captured in the original time zone, as JDBC converts dates using the default time zone
+    private fun seedWithDefaultTimeZone(timeZoneId: String): SeedSnapshot {
+        val originalTimeZone = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone(timeZoneId))
+            newSeeder().seedDatabase()
+        } finally {
+            TimeZone.setDefault(originalTimeZone)
+        }
+        return captureSeedSnapshot()
     }
 
     private fun countRows(tableName: String): Long =

@@ -19,7 +19,7 @@ object CouncilHttpForms {
         relativeTo: String = config.baseUrl + expectedPath,
     ): String {
         val resolved = HttpDestination.resolve(location, config.baseUrl, relativeTo)
-        require(URI.create(resolved).path == expectedPath) { "Unexpected council/operator destination: $resolved" }
+        require(URI.create(resolved).path == expectedPath) { "Unexpected council/operator destination path" }
         return resolved
     }
 

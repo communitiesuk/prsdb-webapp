@@ -173,9 +173,6 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-01-01"
-    - name: "pdjb-939-property-registration-phase-two"
-      enabled: true
-      expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-three"
       enabled: false
       expiry-date: "2027-01-01"

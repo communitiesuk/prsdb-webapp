@@ -46,7 +46,7 @@ WITH read_owners AS MATERIALIZED (
               SELECT 1 FROM ownership_link ol JOIN landlord l ON l.id = ol.landlord_id
               WHERE ol.landlordship_id = p.id AND l.landlord_type = 0
                 AND l.id IN (SELECT id FROM read_owners)
-                AND l.individual_is_active AND l.individual_email LIKE '%@example.com'
+                AND l.is_active AND l.individual_email LIKE '%@example.com'
           )
           AND NOT EXISTS (
              SELECT 1 FROM ownership_link ol
@@ -60,7 +60,7 @@ WITH read_owners AS MATERIALIZED (
     JOIN LATERAL (
         SELECT l.* FROM ownership_link ol JOIN landlord l ON l.id = ol.landlord_id
         WHERE ol.landlordship_id = p.id AND l.landlord_type = 0
-          AND l.individual_is_active AND l.individual_email LIKE '%@example.com'
+          AND l.is_active AND l.individual_email LIKE '%@example.com'
         ORDER BY l.id LIMIT 1
     ) l ON true
     JOIN registration_number lr ON lr.id = l.registration_number_id

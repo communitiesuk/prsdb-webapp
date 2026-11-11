@@ -125,6 +125,35 @@ export async function stopRestoreTask(overrides = {}) {
   }
 }
 
+export async function cleanupNftEnvironment(config, loadReadiness, overrides = {}) {
+  const deps = runtime(overrides);
+  const {state} = deps;
+  await identity(deps.aws);
+  requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition,
+    'Cleanup state belongs to another workflow');
+  const errors = [];
+  try {
+    await stopRestoreTask(deps);
+  } catch (error) {
+    errors.push(error);
+  }
+  try {
+    await restoreEnvironment(await loadReadiness(), {
+      aws: deps.aws, log: deps.log, timeoutMs: 1200000, appHealthy: app => healthyAppTarget(deps.aws, app),
+    });
+  } catch (error) {
+    errors.push(error);
+  }
+  if (errors.length) throw new AggregateError(errors,
+    `Cleanup incomplete; refusing database reset: ${errors.map(error => error.message).join('; ')}`);
+  await stopNftWriters(config, deps);
+  const latest = await deps.aws('ecs', 'list-task-definitions', {
+    familyPrefix: 'prsdb-webapp-nft', status: 'ACTIVE', sort: 'DESC', maxResults: 1,
+  });
+  requireCondition(latest.taskDefinitionArns?.[0] === state.originalApp.taskDefinition,
+    'Latest app revision is not the reset baseline; refusing automatic reset');
+}
+
 async function workerLogs(deps) {
   const {aws, state, persist, log} = deps;
   const definition = state.worker;
@@ -273,26 +302,15 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     else if (command === 'start') await startNftApp(deps);
     else if (command === 'start-after-reset') await startNftApp(deps, {afterReset: true});
     else if (command === 'cleanup') {
-      await identity(deps.aws);
-      requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition,
-        'Cleanup state belongs to another workflow');
-      await stopRestoreTask(deps);
       const readinessPath = process.env.READINESS_STATE_PATH ||
         (process.env.RUNNER_TEMP && join(process.env.RUNNER_TEMP, 'nft-state.json'));
       requireCondition(readinessPath, 'READINESS_STATE_PATH is required outside GitHub Actions');
-      const readiness = await readFile(readinessPath, 'utf8').then(JSON.parse).catch(error => {
-        if (error.code === 'ENOENT') return null;
-        throw new Error('Readiness state cannot be read safely');
-      });
-      await restoreEnvironment(readiness, {
-        aws: deps.aws, timeoutMs: 1200000, appHealthy: app => healthyAppTarget(deps.aws, app),
-      });
-      await stopNftWriters(config, deps);
-      const latest = await deps.aws('ecs', 'list-task-definitions', {
-        familyPrefix: 'prsdb-webapp-nft', status: 'ACTIVE', sort: 'DESC', maxResults: 1,
-      });
-      requireCondition(latest.taskDefinitionArns?.[0] === state.originalApp.taskDefinition,
-        'Latest app revision is not the reset baseline; refusing automatic reset');
+      await cleanupNftEnvironment(config, async () => {
+        return await readFile(readinessPath, 'utf8').then(JSON.parse).catch(error => {
+          if (error.code === 'ENOENT' && process.env.READINESS_STATE_REQUIRED !== 'true') return null;
+          throw new Error('Readiness state cannot be read safely');
+        });
+      }, deps);
     } else throw new Error('Expected stop, run, start, start-after-reset or cleanup');
   } catch (error) {
     console.log(`NFT VPC restore details: ${error.message}`);

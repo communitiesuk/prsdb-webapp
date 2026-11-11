@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
@@ -213,11 +214,14 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnsProperty() = beforePropertyRegistrationHasJointLandlords().withHasNoJointLandlords()
 
+        fun beforePropertyRegistrationOwnershipKind() = beforePropertyRegistrationOwnsProperty().withOwnsProperty()
+
+        fun beforePropertyRegistrationFreeholdType(ownershipKind: OwnershipKind = OwnershipKind.FREEHOLD_ONLY) =
+            beforePropertyRegistrationOwnershipKind().withOwnershipKind(ownershipKind)
+
         fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
             if (isJointFreeholder) {
-                beforePropertyRegistrationOwnsProperty()
-                    .withOwnsProperty()
-                    .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+                beforePropertyRegistrationFreeholdType(OwnershipKind.FREEHOLD_ONLY)
                     .withFreeholdType(FreeholdType.JOINT_TENANTS)
             } else {
                 beforePropertyRegistrationOwnsProperty()
@@ -286,9 +290,7 @@ class PropertyStateSessionBuilder(
             .withFreeholderManualAddressSelected()
 
         fun beforePropertyRegistrationHasSuperiorLandlords() =
-            beforePropertyRegistrationOwnsProperty()
-                .withOwnsProperty()
-                .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+            beforePropertyRegistrationFreeholdType(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
         fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
@@ -321,9 +323,27 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationSuperiorLandlordProvideDetails()
                 .withSuperiorLandlordProvideDetails()
 
-        fun beforePropertyRegistrationSuperiorLandlordContactType() =
+        fun beforePropertyRegistrationSuperiorLandlordContactType(superiorLandlordName: String = "Test Superior Landlord") =
             beforePropertyRegistrationSuperiorLandlordName()
-                .withSuperiorLandlordNameComplete()
+                .withSuperiorLandlordName(superiorLandlordName)
+
+        fun beforePropertyRegistrationSuperiorLandlordEmail(existingSuperiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null) =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
+                .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
+
+        fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
+            beforePropertyRegistrationSuperiorLandlordContactType()
+                .withSuperiorLandlordContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationSuperiorLandlordSelectAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+
+        fun beforePropertyRegistrationSuperiorLandlordManualAddress() =
+            beforePropertyRegistrationSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordLookupAddress()
+                .withSuperiorLandlordManualAddressSelected()
 
         fun beforePropertyRegistrationSuperiorLandlordsList(
             superiorLandlords: Map<Int, SuperiorLandlordDataModel> = DEFAULT_SUPERIOR_LANDLORDS,

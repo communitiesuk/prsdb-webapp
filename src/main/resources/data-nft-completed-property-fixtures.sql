@@ -12,7 +12,7 @@ WITH fixtures AS (
     JOIN property_ownership p ON p.id = ol.landlordship_id
     JOIN address a ON a.id = p.address_id
     JOIN property_compliance pc ON pc.property_ownership_id = p.id
-    WHERE l.individual_is_active AND l.individual_has_accepted_privacy_notice
+    WHERE l.is_active AND l.individual_has_accepted_privacy_notice
       AND l.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
       AND p.id > 26 AND p.is_active AND p.is_occupied
       AND p.tenancy_provide_later IS NOT TRUE

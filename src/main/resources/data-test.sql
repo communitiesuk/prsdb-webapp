@@ -242,19 +242,20 @@ SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(i
 -- PDJB-1048 / PDJB-1305 provide-later + compliance-banner property record QA (landlord 1):
 -- registration numbers for property_ownership 18-26
 INSERT INTO registration_number (id, created_date, number, type)
-VALUES (43, '2026-04-14 00:00:00+00', 210000000043, 0),
-       (44, '2026-04-14 00:00:00+00', 210000000044, 0),
-       (45, '2026-04-14 00:00:00+00', 210000000045, 0),
-       (46, '2026-04-14 00:00:00+00', 210000000046, 0),
-       (47, '2026-04-14 00:00:00+00', 210000000047, 0),
-       (48, '2026-04-14 00:00:00+00', 210000000048, 0),
-       (49, '2026-04-14 00:00:00+00', 210000000049, 0),
-       (50, '2026-04-14 00:00:00+00', 210000000050, 0),
-       (51, '2026-04-14 00:00:00+00', 210000000051, 0) ON CONFLICT DO NOTHING;
+VALUES (902, '2026-04-14 00:00:00+00', 210000000902, 0),
+       (903, '2026-04-14 00:00:00+00', 210000000903, 0),
+       (904, '2026-04-14 00:00:00+00', 210000000904, 0),
+       (905, '2026-04-14 00:00:00+00', 210000000905, 0),
+       (906, '2026-04-14 00:00:00+00', 210000000906, 0),
+       (907, '2026-04-14 00:00:00+00', 210000000907, 0),
+       (908, '2026-04-14 00:00:00+00', 210000000908, 0),
+       (909, '2026-04-14 00:00:00+00', 210000000909, 0),
+       (910, '2026-04-14 00:00:00+00', 210000000910, 0),
+       (911, '2026-04-14 00:00:00+00', 210000000911, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRSDB+landlord@softwire.com', null::varchar, true, '2025-02-25 16:17:18.075473+00'::timestamptz, 'PRSD Landlord',
@@ -334,7 +335,7 @@ SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRS
        (39, 55, 1, '2026-09-09 00:00:00+00', 'Victoria.Greenwell@communities.gov.uk', null, true, null, 'Victoria Greenwell',
         '07777777777', 'urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E', '1990-01-01', 'England or Wales', true,
         true)) AS v (
-                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
                                    last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                                    individual_has_accepted_privacy_notice)
 -- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
@@ -421,7 +422,7 @@ VALUES (1, true, 1, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, 
        (2, true, 0, 2, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (3, true, 0, 2, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (4, true, 0, 2, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (5, true, 0, 2, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
+       (5, true, 0, 2, 0, 0, 911, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
        (6, true, 1, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (7, true, 1, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (8, true, 1, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
@@ -469,15 +470,15 @@ SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM lice
 WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
                      furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
                      license_provide_later, tenancy_provide_later) AS (
-         VALUES (1, 18, 43, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (2, 19, 44, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (3, 20, 45, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
-                (4, 21, 46, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
-                (5, 22, 47, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (6, 23, 48, null, 0, 0, null, null, null, false, null, true, false),
-                (7, 24, 49, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (8, 25, 50, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (9, 26, 51, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
+         VALUES (1, 18, 902, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (2, 19, 903, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (3, 20, 904, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
+                (4, 21, 905, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
+                (5, 22, 906, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (6, 23, 907, null, 0, 0, null, null, null, false, null, true, false),
+                (7, 24, 908, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (8, 25, 909, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (9, 26, 910, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
 INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
@@ -533,6 +534,9 @@ SELECT * FROM (VALUES (1, 18, '2025-01-15'::timestamp),
 -- Only insert links for landlords that were actually seeded (see note above).
 WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
 ON CONFLICT DO NOTHING;
+UPDATE landlord l
+SET has_registered_property = true
+WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 -- TODO PDJB-1673: Add some EIC example data (electrical_cert_type = 1 with an eic_issue_date)
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,

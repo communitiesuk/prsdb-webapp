@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
+import {cleanupNftEnvironment, restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 import {restoreEnvironment} from '../../../scripts/performance-tests/nft-restore.mjs';
 
 const prefix = 'arn:aws:ecs:eu-west-2:448120078528:';
@@ -66,6 +66,48 @@ test('waits for actual app tasks STOPPED even after ECS reports zero running', a
   assert.equal(polls.length, 2);
   assert.ok(deps.calls.find(([operation]) => operation === 'persist')[1].originalApp);
   assert.equal(deps.state.writersStopped, true);
+});
+
+test('attempts readiness cleanup even when stopping the restore worker fails and never resets', async () => {
+  const deps = dependencies();
+  Object.assign(deps.state, {runId: config.runId, taskDefinition: workerArn, launchAttempted: true});
+  let ownedAccessChecked = false;
+  deps.aws = async (service, operation) => {
+    deps.calls.push([operation]);
+    if (operation === 'get-caller-identity') return {Account: '448120078528'};
+    if (operation === 'get-ip-set') {
+      ownedAccessChecked = true;
+      return {IPSet: {Addresses: []}};
+    }
+    throw new Error('worker lookup failed');
+  };
+  await assert.rejects(cleanupNftEnvironment(config, async () => {
+    return {ownedSets: [{input: {Id: 'owned-set'}, wafRegion: 'eu-west-2'}], cidr: '203.0.113.1/32'};
+  }, deps), /Cleanup incomplete/);
+  assert.equal(ownedAccessChecked, true);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
+});
+
+test('can safely reset after app startup fails before preparation has changed anything', async () => {
+  const deps = dependencies();
+  Object.assign(deps.state, {runId: config.runId, taskDefinition: workerArn});
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) => operation === 'list-task-definitions'
+    ? {taskDefinitionArns: [appArn]} : original(service, operation, input);
+  await cleanupNftEnvironment(config, async () => null, deps);
+  assert.equal(deps.state.writersStopped, true);
+});
+
+test('unreadable preparation state prevents reset but still attempts worker shutdown', async () => {
+  const deps = dependencies();
+  Object.assign(deps.state, {
+    runId: config.runId, taskDefinition: workerArn, launchAttempted: true, taskArn,
+  });
+  await assert.rejects(cleanupNftEnvironment(config, async () => {
+    throw new Error('state unreadable');
+  }, deps), /Cleanup incomplete/);
+  assert.equal(deps.calls.some(([operation]) => operation === 'describe-tasks'), true);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
 });
 
 test('rejects scheduled writers before stopping the app', async () => {

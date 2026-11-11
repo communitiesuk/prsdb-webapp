@@ -26,10 +26,10 @@ WITH invitation_emails AS MATERIALIZED (
     WHERE invitation.created_date >= current_timestamp - interval '26 days'
       AND invitation.is_hidden IS FALSE
       AND invitation.invitation_expired_email_sent IS FALSE
-      AND owner.individual_is_active
+      AND owner.is_active
       AND owner.individual_has_accepted_privacy_notice
       AND owner.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
-      AND invitee.individual_is_active
+      AND invitee.is_active
       AND invitee.individual_has_accepted_privacy_notice
       AND invitee.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
       AND invitee.id <> owner.id

@@ -8,11 +8,15 @@ import { loadAllocationExports } from './local-registration-dependencies.mjs';
 
 const options = Object.fromEntries(process.argv.slice(2).map(argument => {
   const index = argument.indexOf('=');
-  assert.ok(index > 2, 'Use --fixture-path=PATH --certificate-path=PATH --application-jar=PATH (or --classpath-file=PATH) --config-file=PATH --working-directory=PATH');
+  assert.ok(index > 2, 'Use --fixture-path=PATH --certificate-path=PATH --application-jar=PATH (or --classpath-file=PATH) --config-file=PATH --working-directory=PATH --database-container=NAME --database-port=PORT');
   return [argument.substring(2, index), argument.substring(index + 1)];
 }));
-assert.ok(Object.keys(options).every(key => ['fixture-path', 'certificate-path', 'classpath-file', 'application-jar', 'config-file', 'working-directory', 'duration-seconds', 'java'].includes(key)));
-for (const name of ['fixture-path', 'certificate-path', 'config-file', 'working-directory']) assert.ok(options[name], `Missing --${name}`);
+assert.ok(Object.keys(options).every(key => ['fixture-path', 'certificate-path', 'classpath-file', 'application-jar', 'config-file', 'working-directory', 'duration-seconds', 'java', 'database-container', 'database-port'].includes(key)));
+for (const name of ['fixture-path', 'certificate-path', 'config-file', 'working-directory', 'database-container', 'database-port']) assert.ok(options[name], `Missing --${name}`);
+const databaseContainer = options['database-container'];
+assert.match(databaseContainer, /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/);
+const databasePort = Number(options['database-port']);
+assert.ok(Number.isInteger(databasePort) && databasePort >= 1024 && databasePort <= 65535);
 assert.ok(Boolean(options['classpath-file']) !== Boolean(options['application-jar']), 'Provide exactly one --classpath-file or --application-jar');
 const directory = await realpath(options['working-directory']);
 const config = await realpath(options['config-file']);
@@ -57,14 +61,18 @@ async function run(command, args, { env = process.env, cwd = directory, timeout 
 
 async function query(sql) {
   return await run('docker', ['exec', '-e', 'PGOPTIONS=-c default_transaction_read_only=on -c statement_timeout=15000',
-    'prsdb-gatling-corrected-20261105', 'psql', '-U', 'postgres', '-d', 'prsdblocal', '-At', '-v', 'ON_ERROR_STOP=1', '-c', sql],
+    databaseContainer, 'psql', '-U', 'postgres', '-d', 'prsdblocal', '-At', '-v', 'ON_ERROR_STOP=1', '-c', sql],
   { env: dockerEnvironment, timeout: 20000 });
 }
 
 const containerEnvironment = JSON.parse(await run('docker', ['inspect', '--format', '{{json .Config.Env}}',
-  'prsdb-gatling-corrected-20261105'], { env: dockerEnvironment }));
+  databaseContainer], { env: dockerEnvironment }));
 const password = containerEnvironment.find(value => value.startsWith('POSTGRES_PASSWORD='))?.substring('POSTGRES_PASSWORD='.length);
 assert.ok(password, 'The pinned isolated PostgreSQL container must provide its local password');
+const ports = JSON.parse(await run('docker', ['inspect', '--format', '{{json .NetworkSettings.Ports}}',
+  databaseContainer], { env: dockerEnvironment }));
+assert.ok(ports['5432/tcp']?.some(binding => Number(binding.HostPort) === databasePort),
+  'The database port must be published by the selected isolated PostgreSQL container');
 
 const sqlSubjects = subjects.length ? subjects.map(subject => `'${subject}'`).join(',') : 'NULL';
 const sqlPropertyIds = propertyIds.length ? propertyIds.join(',') : 'NULL';
@@ -103,7 +111,7 @@ while (!stopping && Date.now() < deadline) {
     const output = await run(options.java ?? 'java', [...application,
       `--spring.config.additional-location=file:${config}`,
       '--spring.profiles.active=local,web-server-deactivated,scan-processor',
-      '--spring.datasource.url=jdbc:postgresql://localhost:55433/prsdblocal',
+      `--spring.datasource.url=jdbc:postgresql://localhost:${databasePort}/prsdblocal`,
       '--spring.datasource.username=postgres', '--spring.sql.init.mode=never', '--spring.flyway.enabled=false',
       '--management.cloudwatch.metrics.export.namespace=local-registration', '--management.cloudwatch.metrics.export.enabled=false',
       '--notify.api-key=local-registration-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000',

@@ -145,6 +145,8 @@ jobs:
     environment: nft
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    outputs:
+      preparation-outcome: ${{ steps.prepare.outcome }}
     permissions:
       contents: read
       id-token: write
@@ -541,7 +543,7 @@ jobs:
       id-token: write
     env:
       NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
-      READINESS_STATE_REQUIRED: ${{ needs.performance-tests.result != 'skipped' }}
+      READINESS_STATE_REQUIRED: ${{ needs.performance-tests.result != 'skipped' && needs.performance-tests.outputs.preparation-outcome != 'skipped' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -559,12 +561,7 @@ jobs:
           aws-region: eu-west-2
           role-duration-seconds: 3600
       - name: Stop owned worker, restore simulator configuration and wait for actual app shutdown
-        run: |
-          if [[ "$READINESS_STATE_REQUIRED" == "true" ]] && [[ ! -s "$RUNNER_TEMP/nft-state.json" ]]; then
-            echo "::error::Preparation ran but its recovery state is missing; refusing automatic reset."
-            exit 1
-          fi
-          node scripts/performance-tests/nft-vpc-restore.mjs cleanup
+        run: node scripts/performance-tests/nft-vpc-restore.mjs cleanup
 
   reset-database:
     name: Reset NFT database

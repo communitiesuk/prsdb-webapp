@@ -15,7 +15,7 @@ WITH eligible AS (
       AND property.is_occupied
       AND access.encoded_password IS NULL
       AND access.invited_email LIKE 'agent-access-%@example.test'
-      AND owner.individual_is_active
+      AND owner.is_active
       AND owner.individual_has_accepted_privacy_notice
       AND owner.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
       AND NOT EXISTS (

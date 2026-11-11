@@ -9,7 +9,7 @@ WITH owners AS (
             ORDER BY individual_subject_identifier
             OFFSET 4000 LIMIT 600
         ) l
-        WHERE l.individual_is_active AND l.individual_has_accepted_privacy_notice
+        WHERE l.is_active AND l.individual_has_accepted_privacy_notice
           AND l.individual_subject_identifier LIKE 'urn:fdc:gov.uk:2022:%'
           AND NOT EXISTS (
               SELECT 1 FROM landlord_incomplete_properties lip

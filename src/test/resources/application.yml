@@ -104,9 +104,6 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-01-01"
-    - name: "pdjb-939-property-registration-phase-two"
-      enabled: false
-      expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-three"
       enabled: false
       expiry-date: "2027-01-01"
@@ -132,7 +129,7 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
-      enabled: false
+      enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-844-active-inactive"
       enabled: false

@@ -21,7 +21,7 @@ test('prepares actual synthetic PNG and PDF bodies only in explicitly isolated s
     for (const file of fixtures[0].files) {
       const path = join(root, '.local-uploads', 'safe', file.objectKey);
       const body = await readFile(path);
-      assert.equal((await stat(path)).mode & 0o777, 0o600);
+      if (process.platform !== 'win32') assert.equal((await stat(path)).mode & 0o777, 0o600);
       if (file.extension === 'png') {
         assert.deepEqual([...body.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
         assert.match(body.toString('latin1'), /SYNTHETIC PERFORMANCE TEST/);
@@ -66,9 +66,11 @@ test('preserves different existing objects and rejects symlinked storage', async
   const external = await mkdtemp(join(tmpdir(), 'prsdb-seed-target-'));
   try {
     await mkdir(join(root, '.local-uploads'));
-    await symlink(external, join(root, '.local-uploads', 'safe'));
-    await assert.rejects(preparation.prepareLocalSeedFiles(fixtures, root), /symlinks/);
-    await rm(join(root, '.local-uploads', 'safe'));
+    if (process.platform !== 'win32') {
+      await symlink(external, join(root, '.local-uploads', 'safe'));
+      await assert.rejects(preparation.prepareLocalSeedFiles(fixtures, root), /symlinks/);
+      await rm(join(root, '.local-uploads', 'safe'));
+    }
     await mkdir(join(root, '.local-uploads', 'safe'));
     const path = join(root, '.local-uploads', 'safe', fixtures[0].files[0].objectKey);
     await writeFile(path, 'existing object');

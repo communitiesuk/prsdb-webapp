@@ -8,20 +8,22 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
-// TODO PDJB-1959: replace this placeholder with the real "Do you own the property?" question
-//  (content, validation and persistence). Rendered with the shared forms/todoWithRadios placeholder page.
 @JourneyFrameworkComponent
 class OwnsPropertyStepConfig : AbstractRequestableStepConfig<YesOrNo, OwnsPropertyFormModel, JourneyState>() {
     override val formModelClass = OwnsPropertyFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
         mapOf(
-            "fieldName" to "ownsProperty",
             "fieldSetHeading" to "registerProperty.ownsProperty.fieldSetHeading",
-            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "fieldSetHint" to "registerProperty.ownsProperty.fieldSetHint",
+            "radioOptions" to
+                RadiosViewModel.yesOrNoRadios(
+                    yesHint = "registerProperty.ownsProperty.radios.option.yes.hint",
+                    noHint = "registerProperty.ownsProperty.radios.option.no.hint",
+                ),
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: JourneyState) = "forms/ownsPropertyForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.ownsProperty?.let { if (it) YesOrNo.YES else YesOrNo.NO }
 }

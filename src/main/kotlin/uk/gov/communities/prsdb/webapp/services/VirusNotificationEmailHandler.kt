@@ -14,6 +14,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
@@ -46,21 +48,23 @@ class VirusNotificationEmailHandler(
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
         if (monitoringEmailAddress != null) {
-            emailNotificationService.sendEmail(
+            sendEmailAfterCommit(
                 monitoringEmailAddress,
                 buildAlertEmail(notification.certificateType, ownership.address.toMultiLineAddress()),
             )
         } else {
             ownership.landlords.forEach { landlord ->
-                emailNotificationService.sendEmailToLandlord(
-                    landlord,
-                    buildAlertEmail(notification.certificateType, ownership.address.toMultiLineAddress()),
-                )
+                emailNotificationService.getLandlordRecipientAddresses(landlord).forEach { recipientAddress ->
+                    sendEmailAfterCommit(
+                        recipientAddress,
+                        buildAlertEmail(notification.certificateType, ownership.address.toMultiLineAddress()),
+                    )
+                }
             }
 
             val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)
             if (PropertyOwnershipService.hasLettingAgent(ownership, lettingAgentAccess)) {
-                emailNotificationService.sendEmail(
+                sendEmailAfterCommit(
                     lettingAgentAccess!!.invitedEmail,
                     buildAlertEmail(
                         notification.certificateType,
@@ -85,7 +89,7 @@ class VirusNotificationEmailHandler(
                     notification.certificateType,
                     savedJourneyState.getPropertyRegistrationMultiLineAddress(),
                 )
-            emailNotificationService.sendEmail(monitoringEmailAddress, email)
+            sendEmailAfterCommit(monitoringEmailAddress, email)
         } else {
             val userDetails = landlordUserEmailService.getUserDetailsByBaseUserId(savedJourneyState.user.id)
             val email =
@@ -93,7 +97,7 @@ class VirusNotificationEmailHandler(
                     notification.certificateType,
                     savedJourneyState.getPropertyRegistrationMultiLineAddress(),
                 )
-            emailNotificationService.sendEmail(userDetails.email, email)
+            sendEmailAfterCommit(userDetails.email, email)
         }
     }
 
@@ -141,8 +145,18 @@ class VirusNotificationEmailHandler(
         }
 
     private fun getPropertyOwnership(id: Long): PropertyOwnership =
-        propertyOwnershipRepository.findByIdAndIsActiveTrue(id)
-            ?: throw IllegalStateException("No active property ownership found for id: $id")
+        propertyOwnershipRepository.findById(id).orElseThrow {
+            IllegalStateException("No property ownership found for id: $id")
+        }
+
+    private fun sendEmailAfterCommit(
+        recipientAddress: String,
+        email: VirusScanUnsuccessfulEmail,
+    ) = runAfterTransactionCommits {
+        sendEmailAndLogFailures("a virus scan unsuccessful email") {
+            emailNotificationService.sendEmail(recipientAddress, email)
+        }
+    }
 
     private fun buildAlertEmail(
         certificateType: CertificateType,

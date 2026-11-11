@@ -2,7 +2,7 @@ WITH owners AS (
     SELECT lip.user_id
     FROM landlord_incomplete_properties lip
     JOIN landlord l ON l.individual_subject_identifier = lip.user_id
-    WHERE l.individual_is_active AND l.individual_has_accepted_privacy_notice
+    WHERE l.is_active AND l.individual_has_accepted_privacy_notice
       AND lip.user_id LIKE 'urn:fdc:gov.uk:2022:%'
     GROUP BY lip.user_id
     HAVING count(*) >= 2
