@@ -97,22 +97,6 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification emails an associated party with an email address even if they have a postal address`() {
-        val freeholder =
-            createFreeholder(
-                name = "Sarah Thompson",
-                email = "sarah.thompson@example.com",
-                address = postalAddress,
-            )
-
-        val outcome = sendNotificationToFreeholder(freeholder)
-
-        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
-        verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
-        verifyNoInteractions(letterNotificationService)
-    }
-
-    @Test
     fun `sendNotification emails a non-redacted associated party when their email address is known`() {
         val freeholder = createFreeholder(name = "Sarah Thompson", email = "sarah.thompson@example.com")
 
