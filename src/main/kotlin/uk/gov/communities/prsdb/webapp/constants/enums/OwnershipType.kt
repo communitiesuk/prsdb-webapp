@@ -37,8 +37,6 @@ enum class OwnershipType {
                 SHARE_OF_TENANTS_IN_COMMON,
             )
 
-    // TODO PDJB-1985: use this to decide whether to show the superior landlords section on the check
-    //  your answers page.
     // TODO PDJB-1997: use this to decide whether to show the superior landlords section on the
     //  property record.
     fun requiresSuperiorLandlordInfo() =

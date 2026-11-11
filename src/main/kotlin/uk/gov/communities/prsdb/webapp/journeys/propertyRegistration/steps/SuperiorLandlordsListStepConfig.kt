@@ -1,22 +1,21 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
 class SuperiorLandlordsListStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
+    private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, SuperiorLandlordsDetailsState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -31,30 +30,10 @@ class SuperiorLandlordsListStepConfig(
             "addAnotherUrl" to Destination(state.superiorLandlordProvideDetailsStep).toUrlStringOrNull(),
         )
 
-    private fun getSuperiorLandlordCards(state: SuperiorLandlordsDetailsState): List<SummaryCardViewModel> {
-        val superiorLandlordsMap = state.superiorLandlordsMap ?: emptyMap()
-        return superiorLandlordsMap
-            .toSortedMap()
-            .map { (superiorLandlordId, superiorLandlord) ->
-                val actions = getCardActions(state, superiorLandlordId)
-                if (superiorLandlord.detailsKnown) {
-                    SummaryCardViewModel(
-                        title =
-                            superiorLandlord.name
-                                ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
-                        summaryList = getContactRows(superiorLandlord),
-                        actions = actions,
-                    )
-                } else {
-                    SummaryCardViewModel(
-                        title = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title",
-                        summaryList = emptyList(),
-                        actions = actions,
-                        bodyTextKey = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.body",
-                    )
-                }
-            }
-    }
+    private fun getSuperiorLandlordCards(state: SuperiorLandlordsDetailsState): List<SummaryCardViewModel> =
+        superiorLandlordSummaryCardHelper.getSummaryCards(state.superiorLandlordsMap ?: emptyMap()) { superiorLandlordId ->
+            getCardActions(state, superiorLandlordId)
+        }
 
     private fun getCardActions(
         state: SuperiorLandlordsDetailsState,
@@ -68,19 +47,6 @@ class SuperiorLandlordsListStepConfig(
             removeUrl?.let { SummaryCardActionViewModel(text = "forms.links.remove", url = it) },
         )
     }
-
-    private fun getContactRows(superiorLandlord: SuperiorLandlordDataModel): List<SummaryListRowViewModel> =
-        listOfNotNull(
-            superiorLandlord.email?.let {
-                SummaryListRowViewModel(fieldHeading = "registerProperty.superiorLandlords.list.emailAddress", fieldValue = it)
-            },
-            superiorLandlord.address?.let {
-                SummaryListRowViewModel(
-                    fieldHeading = "registerProperty.superiorLandlords.list.postalAddress",
-                    fieldValue = it.toMultiLineAddress().split("\n"),
-                )
-            },
-        ).ifEmpty { throw PrsdbWebException("Superior landlord has known details but no email or postal address") }
 
     override fun chooseTemplate(state: SuperiorLandlordsDetailsState) = "forms/addAnotherCardsForm"
 
