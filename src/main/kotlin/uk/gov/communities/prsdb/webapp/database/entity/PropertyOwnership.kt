@@ -142,8 +142,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var renewalDate: LocalDate
         private set
 
-    @Column(name = "deactivation_date")
-    var deactivationDate: LocalDate? = null
+    @Column(name = "last_deactivated_date")
+    var lastDeactivatedDate: LocalDate? = null
         private set
 
     constructor(
