@@ -16,3 +16,4 @@ jobs:
     with:
       environment: nft
       aws-account-id: 448120078528
+      checkout-ref: ${{ github.sha }}
