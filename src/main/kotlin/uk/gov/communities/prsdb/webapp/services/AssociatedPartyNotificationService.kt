@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -22,21 +23,32 @@ class AssociatedPartyNotificationService(
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
         TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
+    // TODO PDJB-1991: implement email notification to a property manager
+    internal fun sendNotificationToPropertyManager(
+        propertyManager: PropertyManager,
+        email: EmailTemplateModel,
+    ): AssociatedPartyNotificationOutcome = TODO("Implement property manager email notification")
+
     internal fun sendNotificationToFreeholder(
         freeholder: Freeholder,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
+    ): AssociatedPartyNotificationOutcome {
+        val name = freeholder.name?.takeIf { it.isNotBlank() } ?: return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        return sendNotification(name, freeholder.email, freeholder.address, email, letter)
+    }
 
     internal fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlord,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome =
-        sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
+    ): AssociatedPartyNotificationOutcome {
+        val name = superiorLandlord.name?.takeIf { it.isNotBlank() } ?: return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        return sendNotification(name, superiorLandlord.email, superiorLandlord.address, email, letter)
+    }
 
     private fun sendNotification(
-        name: String?,
+        name: String,
         emailAddress: String?,
         postalAddress: Address?,
         email: EmailTemplateModel,
@@ -51,13 +63,9 @@ class AssociatedPartyNotificationService(
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
-        val recipientName =
-            checkNotNull(name?.takeIf { it.isNotBlank() }) {
-                "An associated party must have a name to receive a letter"
-            }
         val recipientAddress =
             checkNotNull(postalAddress) { "An associated party that is not fully redacted and has no email must have an address" }
-        letterNotificationService.sendLetter(letterAddress(recipientName, recipientAddress), letter)
+        letterNotificationService.sendLetter(letterAddress(name, recipientAddress), letter)
         return AssociatedPartyNotificationOutcome.LETTER_SENT
     }
 

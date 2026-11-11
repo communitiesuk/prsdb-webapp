@@ -9,6 +9,7 @@ import org.mockito.kotlin.verify
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
@@ -52,6 +53,17 @@ class AssociatedPartyNotificationServiceTests {
 
         assertThrows(NotImplementedError::class.java) {
             associatedPartyNotificationService.sendCreationNotificationForSuperiorLandlord(superiorLandlord)
+        }
+
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `notification for a property manager fails explicitly until implemented`() {
+        val propertyManager = PropertyManager("Best Property Managers Ltd", "manager@example.com")
+
+        assertThrows(NotImplementedError::class.java) {
+            associatedPartyNotificationService.sendNotificationToPropertyManager(propertyManager, email)
         }
 
         verifyNoInteractions(emailNotificationService, letterNotificationService)
@@ -101,14 +113,13 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification emails an associated party with an email address when their name and address are unknown`() {
+    fun `sendNotification does not notify an associated party with an unknown name`() {
         val freeholder = Freeholder(createPropertyOwnership(), email = "sarah.thompson@example.com")
 
         val outcome = sendNotificationToFreeholder(freeholder)
 
-        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
-        verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
-        verifyNoInteractions(letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
@@ -159,25 +170,23 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification rejects a postal letter when the associated party's name is missing`() {
+    fun `sendNotification does not try to notify by post when the associated party's name is missing`() {
         val freeholder = Freeholder(createPropertyOwnership(), address = postalAddress)
 
-        assertThrows(IllegalStateException::class.java) {
-            sendNotificationToFreeholder(freeholder)
-        }
+        val outcome = sendNotificationToFreeholder(freeholder)
 
-        verifyNoInteractions(letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
-    fun `sendNotification rejects a postal letter when the associated party's name is blank`() {
+    fun `sendNotification does not try to notify by post when the associated party's name is blank`() {
         val freeholder = Freeholder(createPropertyOwnership(), name = " ", address = postalAddress)
 
-        assertThrows(IllegalStateException::class.java) {
-            sendNotificationToFreeholder(freeholder)
-        }
+        val outcome = sendNotificationToFreeholder(freeholder)
 
-        verifyNoInteractions(letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
