@@ -1617,7 +1617,8 @@ class PropertyRegistrationServiceTests {
                     electricalSafetyCertProvideLater &&
                     epcProvideLater &&
                     tenancyProvideLater &&
-                    !isDelegatedToLettingAgent
+                    !isDelegatedToLettingAgent &&
+                    toHashMap()["hasMissingDetails"] == "yes"
             },
         )
     }
