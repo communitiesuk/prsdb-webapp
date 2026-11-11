@@ -25,12 +25,11 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -145,7 +144,7 @@ class PropertyRegistrationServiceTests {
                         propertyType = PropertyType.DETACHED_HOUSE,
                         licenseType = LicensingType.NO_LICENSING,
                         licenceNumber = "license number",
-                        ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                        ownershipType = OwnershipType.SOLE_FREEHOLD,
                         isOccupied = true,
                         numberOfHouseholds = 1,
                         numberOfPeople = 1,
@@ -198,7 +197,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -231,7 +230,7 @@ class PropertyRegistrationServiceTests {
                     propertyType = PropertyType.DETACHED_HOUSE,
                     licenseType = LicensingType.NO_LICENSING,
                     licenceNumber = "",
-                    ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                    ownershipType = OwnershipType.SOLE_FREEHOLD,
                     isOccupied = true,
                     numberOfHouseholds = 1,
                     numberOfPeople = 1,
@@ -254,7 +253,7 @@ class PropertyRegistrationServiceTests {
         // Arrange
         val correspondenceEmail = "chosen.contact@example.com"
         val correspondenceAddressModel = AddressDataModel.fromManualAddressData("12 Contact Road", "Leeds", "LS1 1AA")
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val isOccupied = true
         val numberOfHouseholds = 1
         val numberOfPeople = 2
@@ -277,7 +276,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
@@ -447,7 +446,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -553,7 +552,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.SELECTIVE_LICENCE,
                 licenceNumber = "Licence",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 2,
                 numberOfPeople = 1,
@@ -585,7 +584,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty registers the property if there is no license`() {
         // Arrange
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -605,7 +604,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -703,7 +702,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not create a license and sets licenseProvideLater when the user provides licensing later`() {
         // Arrange
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -722,7 +721,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -824,7 +823,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty sends joint landlord invitation emails when joint landlord emails are provided`() {
         // Arrange
         val jointLandlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -838,7 +837,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -923,7 +922,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not send joint landlord invitation emails when no joint landlord emails provided`() {
         // Arrange
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -935,7 +934,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1007,7 +1006,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty persists a letting agent invitation when a letting agent email is provided`() {
         // Arrange
         val lettingAgentEmail = "agent@example.com"
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1019,7 +1018,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1106,7 +1105,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty does not persist a letting agent invitation when no letting agent email is provided`() {
         // Arrange
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1118,7 +1117,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1189,7 +1188,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty does not send joint landlord invitation emails when empty list provided`() {
         // Arrange
         val jointLandlordEmails = emptyList<String>()
-        val ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD
+        val ownershipType = OwnershipType.SOLE_FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -1201,7 +1200,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                ownershipTypeBeforePdjb955 = ownershipType,
+                ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -1323,7 +1322,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -1422,7 +1421,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = false,
                 numberOfHouseholds = 0,
                 numberOfPeople = 0,
@@ -1517,7 +1516,7 @@ class PropertyRegistrationServiceTests {
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -1547,6 +1546,7 @@ class PropertyRegistrationServiceTests {
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 landlords = mutableSetOf(landlord),
+                isOccupied = true,
                 registrationNumber = registrationNumber,
             )
 
@@ -1582,15 +1582,13 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
-
         propertyRegistrationService.registerProperty(
             MockPropertyRegistrationData.createPropertyRegistrationDataModel(
                 addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
                 propertyType = PropertyType.DETACHED_HOUSE,
                 licenseType = LicensingType.NO_LICENSING,
                 licenceNumber = "",
-                ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
                 isOccupied = true,
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
@@ -1614,13 +1612,13 @@ class PropertyRegistrationServiceTests {
         verify(mockConfirmationEmailSender).sendEmail(
             eq(currentUserEmail),
             argThat<PropertyRegistrationConfirmationEmail> {
-                isPdjb939PhaseTwoEnabled &&
-                    licenseProvideLater &&
+                licenseProvideLater &&
                     gasSafetyCertProvideLater &&
                     electricalSafetyCertProvideLater &&
                     epcProvideLater &&
                     tenancyProvideLater &&
-                    !isDelegatedToLettingAgent
+                    !isDelegatedToLettingAgent &&
+                    toHashMap()["hasMissingDetails"] == "yes"
             },
         )
     }
@@ -1850,7 +1848,6 @@ class PropertyRegistrationServiceTests {
     private fun stubConfirmationEmailDependencies() {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(CURRENT_USER_EMAIL)
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(false)
     }
 
     private fun createLettingAgentInvitation(propertyOwnership: PropertyOwnership) =

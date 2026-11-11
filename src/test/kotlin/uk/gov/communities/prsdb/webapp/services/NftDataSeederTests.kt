@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlor
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.IntegrationTestHelper
+import java.util.TimeZone
 
 // This test seeds a small but non-trivial volume of data, so it exercises the same batching, address-generation and
 // organisation-landlord branching logic as a real NFT run, just at a scale that completes quickly on a test database.
@@ -207,6 +208,27 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase marks exactly the landlords with registered properties as having registered a property`() {
+        newSeeder().seedDatabase()
+
+        val mismatchedCount =
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM landlord l
+                WHERE l.has_registered_property <> EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id)
+                """.trimIndent(),
+                Long::class.java,
+            )
+        val registeredCount =
+            jdbcTemplate.queryForObject("SELECT count(*) FROM landlord WHERE has_registered_property", Long::class.java)!!
+
+        assertEquals(0L, mismatchedCount)
+        assertTrue(registeredCount > 0, "Expected some landlords to have registered a property")
+        assertTrue(registeredCount < numOfLandlords, "Expected some landlords not to have registered a property")
+    }
+
+    @Test
     fun `seedDatabase gives every organisation landlord a registrant admin user and any extra users have their own prsdb user`() {
         newSeeder().seedDatabase()
 
@@ -366,6 +388,29 @@ class NftDataSeederTests(
         val secondRunSnapshot = captureSeedSnapshot()
 
         assertEquals(firstRunSnapshot, secondRunSnapshot)
+    }
+
+    @Test
+    fun `seedDatabase produces the same data whatever the default time zone`() {
+        val ukSnapshot = seedWithDefaultTimeZone("Europe/London")
+
+        IntegrationTestHelper.resetDatabase(jdbcTemplate)
+
+        val utcSnapshot = seedWithDefaultTimeZone("UTC")
+
+        assertEquals(ukSnapshot, utcSnapshot)
+    }
+
+    // The snapshot is captured in the original time zone, as JDBC converts dates using the default time zone
+    private fun seedWithDefaultTimeZone(timeZoneId: String): SeedSnapshot {
+        val originalTimeZone = TimeZone.getDefault()
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone(timeZoneId))
+            newSeeder().seedDatabase()
+        } finally {
+            TimeZone.setDefault(originalTimeZone)
+        }
+        return captureSeedSnapshot()
     }
 
     private fun countRows(tableName: String): Long =

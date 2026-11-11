@@ -60,7 +60,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
@@ -77,7 +76,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
 
@@ -100,7 +98,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
@@ -684,8 +681,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
-            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            var confirmRemovePage = assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class)
+            assertThat(confirmRemovePage.heading).containsText("Are you sure you want to remove Superior Landlord With Email?")
+            confirmRemovePage.submitWantsToProceed()
             val afterFirstRemoval = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(afterFirstRemoval.heading).containsText("added 2 people in the ownership chain")
             assertThat(afterFirstRemoval.getSummaryCard(0).title).hasText("Superior Landlord With Address")
@@ -696,8 +694,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
-            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            confirmRemovePage = assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class)
+            confirmRemovePage.submitWantsToProceed()
             val afterSecondRemoval = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(afterSecondRemoval.heading).containsText("added 1 person in the ownership chain")
             assertThat(afterSecondRemoval.getSummaryCard(0).title).hasText("Unknown person")
@@ -707,9 +705,42 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .getAction("Remove")
                 .link
                 .clickAndWait()
-            // TODO PDJB-1979: update this usage when the real remove superior landlord confirmation page is added
-            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submit()
+            confirmRemovePage = assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class)
+            assertThat(confirmRemovePage.heading).containsText("Are you sure you want to remove this unknown person?")
+            confirmRemovePage.submitWantsToProceed()
             assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Choosing not to remove a superior landlord keeps them in the list`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).submitDoesNotWantToProceed()
+
+            val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.heading).containsText("added 3 people in the ownership chain")
+            assertThat(updatedListPage.getSummaryCard(1).title).hasText("Superior Landlord With Email")
+        }
+
+        @Test
+        fun `Cancelling removal of a superior landlord keeps them in the list`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class).cancelLink.clickAndWait()
+
+            val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.heading).containsText("added 3 people in the ownership chain")
+            assertThat(updatedListPage.getSummaryCard(1).title).hasText("Superior Landlord With Email")
         }
     }
 

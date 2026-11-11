@@ -6,10 +6,9 @@
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showCancelLink" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="showSectionHeader" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${formModel}, ~{::#form-content}, ${backUrl}, ${showSectionHeader == true ? sectionHeaderInfo : null})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content"
           th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)},
                    submitButtonKey=${submitButtonTextKey == null ? 'forms.buttons.continue' : submitButtonTextKey},
