@@ -851,7 +851,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -1220,7 +1219,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
@@ -2313,7 +2311,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
             assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitNo()
 

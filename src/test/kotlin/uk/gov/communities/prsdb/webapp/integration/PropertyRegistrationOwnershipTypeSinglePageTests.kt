@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipKindFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 
 class PropertyRegistrationOwnershipTypeSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -46,6 +47,27 @@ class PropertyRegistrationOwnershipTypeSinglePageTests : IntegrationTestWithImmu
             ownershipKindPage.backLink.clickAndWait()
 
             assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholdTypeStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val freeholdTypePage = navigator.skipToPropertyRegistrationFreeholdTypePage()
+
+            freeholdTypePage.form.submit()
+
+            assertThat(freeholdTypePage.form.getErrorMessage()).containsText("Select a type of freehold")
+        }
+
+        @Test
+        fun `Back link returns to the ownership kind page`(page: Page) {
+            val freeholdTypePage = navigator.skipToPropertyRegistrationFreeholdTypePage()
+
+            freeholdTypePage.backLink.clickAndWait()
+
+            assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
         }
     }
 }

@@ -31,7 +31,6 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
                 .containsText("Select if there is anyone else in the ownership chain")
         }
 
-        // TODO PDJB-1961: update the expected page when the real freehold type page is added
         @Test
         fun `Back link returns to the freehold type page when freeholders were not asked about`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
