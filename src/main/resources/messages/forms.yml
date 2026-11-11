@@ -316,9 +316,7 @@ occupancy:
       missing: Select whether the property is occupied
     option:
       'yes':
-        hint: One or more tenants live in the property
-      'no':
-        hint: There are no tenants living in the property
+        hint: Includes if the property is let, but tenants have not moved in yet
   fieldSetHeading: Is your property occupied by tenants?
   fieldSetHint: What you choose here decides which compliance and rent details you need to add.
 numberOfHouseholds:
