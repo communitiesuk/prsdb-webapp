@@ -6,13 +6,24 @@ import kotlin.test.assertTrue
 
 class RampScheduleTests {
     @Test
-    fun `supported baseline schedules landlord registrations and three update families`() {
-        val registrations = RampSchedule(26.0, rampSeconds = 300.0, holdSeconds = 900.0).arrivalTimesMillis()
-        val updates = RampSchedule(4.0, rampSeconds = 300.0, holdSeconds = 900.0).arrivalTimesMillis()
-
-        assertEquals(455, registrations.size)
-        assertEquals(70, updates.size)
-        assertEquals(665, registrations.size + 3 * updates.size)
+    fun `baseline schedules all supported families at their approved rates`() {
+        val counts = BaselineLoadProfile.schedules(emptyMap()).mapValues { it.value.arrivalTimesMillis().size }
+        assertEquals(
+            mapOf(
+                BaselineFamily.LANDLORD to 455,
+                BaselineFamily.SAVED to 70,
+                BaselineFamily.PROPERTY to 70,
+                BaselineFamily.ORGANISATION_PROFILE to 70,
+                BaselineFamily.COMPLIANCE to 17,
+                BaselineFamily.ORGANISATION_TEAM to 17,
+                BaselineFamily.JOINT to 17,
+                BaselineFamily.AGENT to 17,
+                BaselineFamily.OPERATOR to 17,
+                BaselineFamily.OFFBOARDING to 17,
+            ),
+            counts,
+        )
+        assertEquals(767, counts.values.sum())
     }
 
     @Test
