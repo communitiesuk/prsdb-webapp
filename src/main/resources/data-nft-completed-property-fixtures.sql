@@ -28,7 +28,7 @@ WITH fixtures AS (
           WHERE lip.user_id = l.individual_subject_identifier
       )
     ORDER BY l.individual_subject_identifier, p.id
-    LIMIT 101
+    LIMIT 121
 ), fixture_files AS MATERIALIZED (
     SELECT pc.property_ownership_id, f.object_key AS "objectKey", f.extension
     FROM fixtures

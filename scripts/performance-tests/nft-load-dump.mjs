@@ -309,8 +309,8 @@ export async function exportCompletedPropertyFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-completed-property-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 56 && fixtures.length <= 101,
-    'Completed-property fixtures need 56 to 101 distinct owners for correctness and mixed load');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 109 && fixtures.length <= 121,
+    'Completed-property fixtures need 109 to 121 distinct owners for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     typeof row?.subject === 'string' && row.subject.trim() &&
     typeof row?.address === 'string' && row.address.trim() &&
@@ -334,6 +334,133 @@ function requireOwnedCertificateFiles(fixtures) {
       keys.add(file.objectKey);
       return true;
     })), 'Certificate objects must be exclusive synthetic files owned by the exported property');
+}
+
+export async function exportJourneyFixtures(family, outputPath, {
+  aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
+} = {}) {
+  const schemas = {
+    operator: {
+      strings: ['subject', 'councilName', 'targetName', 'targetEmail', 'targetSubject'],
+      integers: ['councilId', 'targetId'],
+      unique: ['subject', 'targetId'],
+      minimum: 28,
+    },
+    agent: {
+      strings: ['ownerSubject', 'address'],
+      integers: ['propertyOwnershipId'],
+      unique: ['ownerSubject', 'propertyOwnershipId'],
+      minimum: 28,
+      sqlFile: 'data-nft-agent-fixtures.sql',
+    },
+    joint: {
+      strings: ['ownerSubject', 'address', 'inviteeSubject', 'invitedEmail'],
+      integers: ['propertyOwnershipId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'inviteeSubject', 'invitedEmail'],
+      minimum: 28,
+      sqlFile: 'data-nft-joint-invite-fixtures.sql',
+    },
+    'joint-accept': {
+      strings: ['ownerSubject', 'address', 'token', 'inviteeSubject', 'invitedEmail'],
+      integers: ['propertyOwnershipId', 'invitationId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'token', 'invitationId', 'inviteeSubject', 'invitedEmail'],
+      minimum: 28,
+      sqlFile: 'data-nft-joint-accept-fixtures.sql',
+    },
+    'agent-access': {
+      strings: ['ownerSubject', 'address', 'token', 'invitedEmail'],
+      integers: ['propertyOwnershipId'],
+      unique: ['ownerSubject', 'propertyOwnershipId', 'token', 'invitedEmail'],
+      minimum: 28,
+      sqlFile: 'data-nft-agent-access-fixtures.sql',
+    },
+    'organisation-team-ramp-preparation': {
+      strings: ['subject', 'name'],
+      integers: ['organisationId', 'registrationNumber'],
+      unique: ['subject', 'organisationId', 'registrationNumber'],
+      minimum: 17,
+      sqlFile: 'data-nft-organisation-team-ramp-fixtures.sql',
+    },
+    'organisation-team-ramp': {
+      strings: ['subject', 'name', 'invitationToken', 'invitedEmail'],
+      integers: ['organisationId', 'registrationNumber'],
+      unique: ['subject', 'organisationId', 'registrationNumber', 'invitationToken', 'invitedEmail'],
+      minimum: 17,
+      sqlFile: 'data-nft-organisation-team-ramp-fixtures.sql',
+    },
+    'organisation-team-preparation': {
+      strings: ['subject', 'name'],
+      integers: ['organisationId', 'registrationNumber'],
+      unique: ['subject', 'organisationId', 'registrationNumber'],
+      minimum: 17,
+      sqlFile: 'data-nft-organisation-team-fixtures.sql',
+    },
+    'organisation-team': {
+      strings: ['subject', 'name', 'invitationToken', 'invitedEmail'],
+      integers: ['organisationId', 'registrationNumber'],
+      unique: ['subject', 'organisationId', 'registrationNumber', 'invitationToken'],
+      minimum: 17,
+      sqlFile: 'data-nft-organisation-team-fixtures.sql',
+    },
+    offboarding: {
+      strings: ['action', 'subject', 'address'],
+      integers: ['propertyOwnershipId'],
+      unique: ['subject', 'propertyOwnershipId'],
+      minimum: 28,
+      sqlFile: 'data-nft-joint-offboarding-deregister-property-fixtures.sql',
+      action: 'deregister-property',
+    },
+  };
+  const schema = Object.hasOwn(schemas, family) && schemas[family];
+  requireCondition(schema, 'Unsupported journey fixtures family');
+  requireCondition(typeof outputPath === 'string' && outputPath.trim(), 'An output path is required for journey fixtures');
+  const environment = {...postgresEnvironment(env), PGOPTIONS: '-c default_transaction_read_only=on'};
+  requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+  const sql = await readFile(
+    new URL(`../../src/main/resources/${schema.sqlFile ?? `data-nft-${family}-fixtures.sql`}`, import.meta.url),
+    'utf8',
+  );
+  const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= schema.minimum && fixtures.length <= 101,
+    `Journey fixtures need ${schema.minimum} to 101 distinct actors`);
+  requireCondition(fixtures.every(row =>
+    schema.strings.every(field => typeof row?.[field] === 'string' && row[field].trim()) &&
+    schema.integers.every(field => Number.isSafeInteger(row?.[field]) && row[field] > 0)),
+  'Journey fixtures have missing fields or unsafe IDs');
+  requireCondition(schema.unique.every(field => new Set(fixtures.map(row => row[field])).size === fixtures.length),
+    'Journey fixtures contain shared actors or records');
+  if (schema.action) {
+    requireCondition(fixtures.every(row => row.action === schema.action),
+      `Offboarding fixtures must all select ${schema.action}`);
+  }
+  if (family === 'joint' || family === 'joint-accept') {
+    const owners = new Set(fixtures.map(row => row.ownerSubject));
+    requireCondition(fixtures.every(row => !owners.has(row.inviteeSubject)),
+      'Joint invitation owners and invitees must be disjoint');
+  }
+  if (['agent', 'joint', 'joint-accept', 'agent-access', 'offboarding'].includes(family)) {
+    requireOwnedCertificateFiles(fixtures);
+  }
+  if (family === 'joint-accept' || family === 'agent-access' || family === 'organisation-team' || family === 'organisation-team-ramp') {
+    requireCondition(fixtures.every(row => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      .test(row.token ?? row.invitationToken)),
+      'Prepared invitation tokens must be UUIDs');
+    if (family === 'agent-access') {
+      requireCondition(fixtures.every(row => row.hasPassword === false), 'Agent access requires fresh password setup');
+    }
+  }
+  if (family === 'organisation-team-ramp-preparation' || family === 'organisation-team-preparation') {
+    requireCondition(fixtures.every(row => !row.invitationToken && !row.invitedEmail),
+      'Organisation preparation requires uninvited actors');
+  }
+  if (family === 'operator') {
+    const subjects = new Set(fixtures.map(row => row.subject));
+    requireCondition(fixtures.every(row => typeof row.targetManager === 'boolean' && !subjects.has(row.targetSubject)),
+      'Journey fixtures contain unsafe removal targets');
+  }
+  await save(outputPath, `${JSON.stringify(fixtures)}\n`, {mode: 0o600});
+  log(`Exported ${fixtures.length} distinct ${family} actors; database unchanged.`);
+  return fixtures;
 }
 
 export async function exportOrganisationFixtures(outputPath, {
@@ -367,6 +494,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     else if (process.argv[2] === '--export-saved-fixtures') await exportSavedRegistrationFixtures(process.argv[3]);
     else if (process.argv[2] === '--export-property-fixtures') await exportCompletedPropertyFixtures(process.argv[3]);
     else if (process.argv[2] === '--export-organisation-fixtures') await exportOrganisationFixtures(process.argv[3]);
+    else if (process.argv[2] === '--export-journey-fixtures') await exportJourneyFixtures(process.argv[3], process.argv[4]);
     else if (process.argv[2]) throw new Error('Unsupported NFT database operation');
     else await loadSeededDataset({
       target: process.env.DEPLOYMENT_ENVIRONMENT,

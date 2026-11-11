@@ -2,7 +2,7 @@ name: Verify NFT database through SSM
 description: Migrate and verify the large dataset, verify the QA reset, or export owned journey fixtures
 inputs:
   mode:
-    description: seed, qa, fixtures, property-fixtures, or organisation-fixtures
+    description: seed, qa, saved/property/organisation and supported journey fixture exports
     required: true
 runs:
   using: composite
@@ -27,6 +27,8 @@ runs:
           fixtures) check_option=--export-saved-fixtures ;;
           property-fixtures) check_option=--export-property-fixtures ;;
           organisation-fixtures) check_option=--export-organisation-fixtures ;;
+          operator-fixtures|agent-fixtures|agent-access-fixtures|joint-fixtures|joint-accept-fixtures|organisation-team-fixtures|organisation-team-preparation-fixtures|organisation-team-ramp-preparation-fixtures|organisation-team-ramp-fixtures|offboarding-fixtures)
+            check_option=--export-journey-fixtures ;;
           *) echo "::error::Unsupported NFT database check."; exit 1 ;;
         esac
         bastion_id="$(aws ec2 describe-instances --region eu-west-2 --output text \
@@ -85,5 +87,7 @@ runs:
           check_args+=("$RUNNER_TEMP/nft-completed-property-fixtures.json")
         elif [[ "$CHECK_MODE" == "organisation-fixtures" ]]; then
           check_args+=("$RUNNER_TEMP/nft-organisation-fixtures.json")
+        elif [[ "$check_option" == "--export-journey-fixtures" ]]; then
+          check_args+=("${CHECK_MODE%-fixtures}" "$RUNNER_TEMP/nft-${CHECK_MODE}.json")
         fi
         node scripts/performance-tests/nft-load-dump.mjs "${check_args[@]}"

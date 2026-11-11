@@ -1,9 +1,19 @@
 # Performance tests
 
-The supported NFT workflow runs basic landlord journeys, saved-registration resume and deletion,
-completed-property updates, organisation profile updates and certificate correctness checks before a
-four-family concurrent ramp. The landlord registration journey is a proxy; it does not measure paid
-property-registration capacity.
+The NFT workflow runs basic landlord journeys, saved-registration resume/deletion, completed-property
+and organisation updates, gas/electrical certificates, organisation registration/team operations,
+joint invitations/acceptance, agent access/property updates, operator operations and property
+deregistration. Ten families run concurrently; preparation and sequential checks also exercise the
+restored journeys. Landlord registration is a proxy, not paid property-registration capacity.
+
+## Merge and release order
+
+The changes are split for focused review: seeder/data generation (#2259), Gatling journeys/assertions
+(#2260), fixtures/workflow/recovery (#2261), and infrastructure (communitiesuk/prsdb-infra#395).
+Merge #2259, then #2260, then #2261; update/retarget each child onto main and rerun checks after its
+parent merges. Infra can merge independently, but the approved NFT task-definition-state plan,
+apply/configuration of the managed worker revision and webapp release are required before execution.
+Merging alone does not deploy or establish load acceptance.
 
 ## Prerequisites
 
@@ -68,9 +78,12 @@ keys. The generated certificate is synthetic and not valid for any real complian
 Dispatch **Run Performance Tests** from `nft`. It checks for changes, compiles Gatling, stops actual
 writers, restores the pinned dump in the VPC, migrates and verifies it, starts the app and prepares
 the simulator. It exports bounded, distinct saved-registration owners, sole-property owners and
-organisation administrators through a read-only tunnel. Correctness stages precede the ramp; the ramp
-uses exclusive actors, two-second pauses, a five-minute ramp and a fifteen-minute hold. It requires
-zero request failures and exact journey completions.
+organisation administrators through a read-only tunnel. It prepares invitations through the application
+and re-exports matching tokens before their consumers run. Basic/property/profile/certificate checks
+precede the ramp; additional restored sequential checks follow it. The ramp uses exclusive actors,
+properties and organisations, two-second pauses, a five-minute ramp and a fifteen-minute hold.
+It requires zero request failures and exact journey completions. Insufficient or overlapping fixture
+pools fail closed; randomized seed eligibility is not assumed to guarantee capacity.
 
 The workflow records non-secret ownership and recovery metadata for the exact run, workers, services
 and simulator state. It records the async service's original task definition and desired count before
@@ -87,12 +100,36 @@ No unattended restoration of modified environment settings is claimed.
 
 Large datasets can require additional app startup time; ensure the environment's startup readiness
 configuration is appropriate before an approved run. Run
-`./gradlew performanceTest -x buildFrontendAssets --console=plain` for the supported Gatling contracts.
+`./gradlew performanceTest --console=plain` for the Gatling contracts.
 
 ## Limitations and evidence
 
-Run 43063425738 passed correctness, but the ramp had two failed simulator OAuth authorizations out of
-31,257 requests: WAF `SQLi_QUERYARGUMENTS` falsely matched nonce/state values. All QA recovery jobs
-passed. This is not a successful load acceptance result, an agreed latency SLO, or evidence of paid
-property-registration capacity. Council, agent, joint, operator, organisation-team and offboarding
-journeys are not part of this supported baseline.
+The concurrent mix retains the landlord-registration proxy at 26/minute and saved, completed-property
+and organisation-profile updates at 4/minute each. Six additional families run at provisional 1/minute:
+gas/electrical compliance, organisation registration/team, joint acceptance, agent access/update,
+operator and deregistration. Organisation registration/team share one arrival. This is 44 arrivals/minute
+at hold and 767 starts overall; the added rates are assumptions, not measured production traffic.
+The 26/minute planning forecast concerns paid property registrations, which the proxy does not prove.
+
+Previously successful **local real-application Gatling runs** recorded:
+
+| Journey | Successful requests |
+|---|---:|
+| Organisation registration / team invitation / acceptance / access change | 572 / 187 / 253 / 99 |
+| Joint invitation operations / acceptance | 264 / 156 |
+| Agent preparation / access and updates | 360 / 264 |
+| Operator operations | 300 |
+| Property deregistration | 156 |
+
+These are historical sequential results, not expanded concurrent or NFT acceptance. Fresh fixture/HTTP
+contracts validate restored code; a subsequent approved NFT run must validate the combined workload.
+Joint rejection and existing-password agent variants are not claimed: preserved simulations support
+acceptance and unclaimed invitations. Council execution, paid property registration, the failing public
+EPC readiness path and EPC-dependent scenarios remain excluded. Gas/electrical checks remain included.
+
+NFT run 43063425738 passed its then-supported correctness checks and QA recovery, but two of 31,257
+ramp requests failed at simulator OAuth authorization because WAF `SQLi_QUERYARGUMENTS` matched nonce/state.
+It did not run the restored extended families. Earlier expanded NFT attempts stopped in preparation;
+skipped journeys are not demonstrated failures. Public EPC readiness failure does not establish an
+internal loopback EPC failure; the payment roundtrip was skipped rather than proven failing.
+No agreed latency SLO, successful combined NFT acceptance or paid-registration capacity is claimed.

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.core.io.ClassPathResource
+import org.springframework.jdbc.core.ConnectionCallback
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForList
 import org.springframework.test.context.ActiveProfiles
@@ -1082,6 +1083,40 @@ class NftDataSeederTests(
         val remaining = fixtures()
         assertEquals(1, remaining.count { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() == ids[1] })
         assertTrue(remaining.none { it.jsonObject.getValue("organisationId").jsonPrimitive.content.toLong() == ids[0] })
+    }
+
+    @Test
+    fun `restored journey exports execute read only against the seeded schema`() {
+        newSeeder().seedDatabase()
+        val exports =
+            listOf(
+                "data-nft-operator-fixtures.sql",
+                "data-nft-agent-fixtures.sql",
+                "data-nft-agent-access-fixtures.sql",
+                "data-nft-joint-invite-fixtures.sql",
+                "data-nft-joint-accept-fixtures.sql",
+                "data-nft-organisation-team-fixtures.sql",
+                "data-nft-organisation-team-ramp-fixtures.sql",
+                "data-nft-joint-offboarding-deregister-property-fixtures.sql",
+            )
+        jdbcTemplate.execute(
+            ConnectionCallback { connection ->
+                connection.createStatement().use { statement ->
+                    statement.execute("BEGIN READ ONLY")
+                    try {
+                        for (file in exports) {
+                            val sql = ClassPathResource(file).getContentAsString(Charsets.UTF_8)
+                            statement.executeQuery(sql).use { result ->
+                                assertTrue(result.next(), "$file must return a fixture array")
+                                Json.parseToJsonElement(result.getString(1)).jsonArray
+                            }
+                        }
+                    } finally {
+                        statement.execute("ROLLBACK")
+                    }
+                }
+            },
+        )
     }
 
     @Test
