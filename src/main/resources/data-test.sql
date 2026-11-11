@@ -242,16 +242,16 @@ SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(i
 -- PDJB-1048 / PDJB-1305 provide-later + compliance-banner property record QA (landlord 1):
 -- registration numbers for property_ownership 18-26
 INSERT INTO registration_number (id, created_date, number, type)
-VALUES (902, '2026-04-14 00:00:00+00', 210000000902, 0),
-       (903, '2026-04-14 00:00:00+00', 210000000903, 0),
-       (904, '2026-04-14 00:00:00+00', 210000000904, 0),
-       (905, '2026-04-14 00:00:00+00', 210000000905, 0),
-       (906, '2026-04-14 00:00:00+00', 210000000906, 0),
-       (907, '2026-04-14 00:00:00+00', 210000000907, 0),
-       (908, '2026-04-14 00:00:00+00', 210000000908, 0),
-       (909, '2026-04-14 00:00:00+00', 210000000909, 0),
-       (910, '2026-04-14 00:00:00+00', 210000000910, 0),
-       (911, '2026-04-14 00:00:00+00', 210000000911, 0) ON CONFLICT DO NOTHING;
+VALUES (9000000902, '2026-04-14 00:00:00+00', 210000000902, 0),
+       (9000000903, '2026-04-14 00:00:00+00', 210000000903, 0),
+       (9000000904, '2026-04-14 00:00:00+00', 210000000904, 0),
+       (9000000905, '2026-04-14 00:00:00+00', 210000000905, 0),
+       (9000000906, '2026-04-14 00:00:00+00', 210000000906, 0),
+       (9000000907, '2026-04-14 00:00:00+00', 210000000907, 0),
+       (9000000908, '2026-04-14 00:00:00+00', 210000000908, 0),
+       (9000000909, '2026-04-14 00:00:00+00', 210000000909, 0),
+       (9000000910, '2026-04-14 00:00:00+00', 210000000910, 0),
+       (9000000911, '2026-04-14 00:00:00+00', 210000000911, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -422,7 +422,7 @@ VALUES (1, true, 1, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1, 1, null, 
        (2, true, 0, 2, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (3, true, 0, 2, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
        (4, true, 0, 2, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 9000000001, current_date + 365),
-       (5, true, 0, 2, 0, 0, 911, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
+       (5, true, 0, 2, 0, 0, 9000000911, 5, '2026-02-27 00:00:00+00', null, 4, null, null, null, null, null, null, null, 'End terrace', false, 'email@example.com', 9000000001, current_date + 365),
        (6, true, 1, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (7, true, 1, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
        (8, true, 1, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, 'email@example.com', 9000000001, current_date + 365),
@@ -470,15 +470,15 @@ SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM lice
 WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
                      furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
                      license_provide_later, tenancy_provide_later) AS (
-         VALUES (1, 18, 902, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (2, 19, 903, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (3, 20, 904, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
-                (4, 21, 905, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
-                (5, 22, 906, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
-                (6, 23, 907, null, 0, 0, null, null, null, false, null, true, false),
-                (7, 24, 908, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (8, 25, 909, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
-                (9, 26, 910, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
+         VALUES (1, 18, 9000000902, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (2, 19, 9000000903, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (3, 20, 9000000904, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
+                (4, 21, 9000000905, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
+                (5, 22, 9000000906, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (6, 23, 9000000907, null, 0, 0, null, null, null, false, null, true, false),
+                (7, 24, 9000000908, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (8, 25, 9000000909, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (9, 26, 9000000910, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
 INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,

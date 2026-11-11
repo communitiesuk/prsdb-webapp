@@ -403,6 +403,37 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `QA property registrations do not reuse bulk landlord registration IDs`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO registration_number (id, created_date, number, type)
+            SELECT id, current_timestamp, 100000000000 + id, 1 FROM generate_series(902, 911) id;
+            """.trimIndent(),
+        )
+
+        jdbcTemplate.execute(ClassPathResource("data-test.sql").getContentAsString(Charsets.UTF_8))
+
+        assertEquals(
+            10,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*) FROM property_ownership po
+                JOIN registration_number rn ON rn.id = po.registration_number_id
+                WHERE (po.id = 5 OR po.id BETWEEN 18 AND 26) AND rn.type = 0
+                """.trimIndent(),
+                Int::class.java,
+            ),
+        )
+        assertEquals(
+            10,
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM registration_number WHERE id BETWEEN 902 AND 911 AND type = 1",
+                Int::class.java,
+            ),
+        )
+    }
+
+    @Test
     fun `QA fixture preserves imported addresses and remains idempotent`() {
         jdbcTemplate.execute(
             """
