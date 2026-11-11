@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -179,6 +180,18 @@ class PropertyRegistrationJourneyFactory(
                 SuperiorLandlordsListStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask)
+                }
+
+                FreeholdersListStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    val ownershipTypeTask = ownershipStructureTask.ownershipTypeTask
+                    val freeholdersTask = ownershipStructureTask.freeholdersTask
+                    checkAnswerTask(ownershipTypeTask)
+                    checkAnswerTaskFrom(
+                        freeholdersTask,
+                        { ownershipStructureTask },
+                        startStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep,
+                    )
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {

@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
@@ -32,6 +34,7 @@ class PropertyRegistrationCyaStepConfig(
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
     private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
+    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -153,7 +156,25 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
-        ) + getSuperiorLandlordsContent(state)
+        ) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state)
+
+    private fun getFreeholdersContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
+        val ownershipType = ownershipStructureTask.ownershipTypeTask.ownershipType ?: return emptyMap()
+        if (!ownershipType.requiresFreeholderRecords()) return emptyMap()
+
+        val freeholdersTask = ownershipStructureTask.freeholdersTask
+        val freeholdersListStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep
+        val headingType = if (ownershipType.isJointFreeholder()) "joint" else "nonJoint"
+        return mapOf(
+            "freeholdersHeadingKey" to "registerProperty.freeholders.checkAnswers.heading.$headingType",
+            "freeholdersChangeLinkKey" to "registerProperty.freeholders.checkAnswers.changeLink.$headingType",
+            "freeholdersChangeUrl" to Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
+            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersTask.freeholdersMap ?: emptyMap()),
+        )
+    }
 
     private fun getSuperiorLandlordsContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()

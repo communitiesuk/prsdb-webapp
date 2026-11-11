@@ -114,6 +114,16 @@ class CheckAnswersPagePropertyRegistration(
 
     val superiorLandlordsChangeLink = Link.byText(page, "Add, change or remove people in the ownership chain")
 
+    val freeholdersHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Freeholders$"))))
+
+    val jointFreeholdersHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Joint freeholders$"))))
+
+    val freeholdersChangeLink = Link.byText(page, "Add, change or remove freeholders")
+
+    val jointFreeholdersChangeLink = Link.byText(page, "Add, change or remove joint freeholders")
+
     fun getSummaryCard(
         title: String,
         headingLevel: String,
