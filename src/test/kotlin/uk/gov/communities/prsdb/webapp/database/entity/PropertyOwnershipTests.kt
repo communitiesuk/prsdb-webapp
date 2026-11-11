@@ -128,7 +128,7 @@ class PropertyOwnershipTests {
         property.deactivate(LocalDate.of(2004, 7, 7))
 
         assertFalse(property.isActive)
-        assertEquals(LocalDate.of(2004, 7, 7), property.deactivationDate)
+        assertEquals(LocalDate.of(2004, 7, 7), property.lastDeactivatedDate)
     }
 
     @Test
@@ -139,6 +139,6 @@ class PropertyOwnershipTests {
         property.reactivate()
 
         assertTrue(property.isActive)
-        assertNull(property.deactivationDate)
+        assertNull(property.lastDeactivatedDate)
     }
 }

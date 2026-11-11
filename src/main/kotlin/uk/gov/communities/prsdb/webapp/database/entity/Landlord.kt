@@ -91,11 +91,11 @@ abstract class Landlord : ModifiableAuditableEntity() {
 
     fun deactivate(deactivationDate: LocalDate) {
         isActive = false
-        this.deactivationDate = deactivationDate
+        lastDeactivatedDate = deactivationDate
     }
 
     fun reactivate() {
         isActive = true
-        deactivationDate = null
+        lastDeactivatedDate = null
     }
 }

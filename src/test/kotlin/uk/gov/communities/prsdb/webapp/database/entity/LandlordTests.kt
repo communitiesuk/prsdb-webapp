@@ -71,7 +71,7 @@ class LandlordTests {
         landlord.deactivate(LocalDate.of(2004, 7, 7))
 
         assertFalse(landlord.isActive)
-        assertEquals(LocalDate.of(2004, 7, 7), landlord.deactivationDate)
+        assertEquals(LocalDate.of(2004, 7, 7), landlord.lastDeactivatedDate)
     }
 
     @Test
@@ -82,6 +82,6 @@ class LandlordTests {
         landlord.reactivate()
 
         assertTrue(landlord.isActive)
-        assertNull(landlord.deactivationDate)
+        assertNull(landlord.lastDeactivatedDate)
     }
 }

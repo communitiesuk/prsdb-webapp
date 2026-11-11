@@ -44,7 +44,7 @@ class ActiveStatusServiceTests {
         activeStatusService.deactivateLandlord(landlord, DEACTIVATION_DATE)
 
         assertFalse(landlord.isActive)
-        assertEquals(DEACTIVATION_DATE, landlord.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
     }
 
@@ -56,7 +56,7 @@ class ActiveStatusServiceTests {
         activeStatusService.deactivateLandlord(landlord, DEACTIVATION_DATE)
 
         assertFalse(landlord.isActive)
-        assertEquals(ORIGINAL_DATE, landlord.deactivationDate)
+        assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
     }
 
@@ -68,7 +68,7 @@ class ActiveStatusServiceTests {
         assertThrows<IllegalStateException> { activeStatusService.deactivateLandlord(landlord, DEACTIVATION_DATE) }
 
         assertTrue(landlord.isActive)
-        assertNull(landlord.deactivationDate)
+        assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
     }
 
@@ -80,7 +80,7 @@ class ActiveStatusServiceTests {
         activeStatusService.reactivateLandlord(landlord)
 
         assertTrue(landlord.isActive)
-        assertNull(landlord.deactivationDate)
+        assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
     }
 
@@ -105,7 +105,7 @@ class ActiveStatusServiceTests {
         activeStatusService.deactivateProperty(PROPERTY_ID, DEACTIVATION_DATE)
 
         assertFalse(property.isActive)
-        assertEquals(DEACTIVATION_DATE, property.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, property.lastDeactivatedDate)
         verify(propertyOwnershipRepository).save(property)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
     }
@@ -121,7 +121,7 @@ class ActiveStatusServiceTests {
         activeStatusService.deactivateProperty(PROPERTY_ID, DEACTIVATION_DATE)
 
         assertFalse(landlord.isActive)
-        assertEquals(DEACTIVATION_DATE, landlord.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
     }
 
@@ -136,7 +136,7 @@ class ActiveStatusServiceTests {
         activeStatusService.deactivateProperty(PROPERTY_ID, DEACTIVATION_DATE)
 
         assertTrue(landlord.isActive)
-        assertNull(landlord.deactivationDate)
+        assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
     }
 
@@ -167,7 +167,7 @@ class ActiveStatusServiceTests {
 
         assertTrue(landlordWithOtherProperty.isActive)
         assertFalse(landlordWithNoOtherProperty.isActive)
-        assertEquals(DEACTIVATION_DATE, landlordWithNoOtherProperty.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, landlordWithNoOtherProperty.lastDeactivatedDate)
         verify(landlordRepository).save(landlordWithNoOtherProperty)
         verify(landlordRepository, never()).save(landlordWithOtherProperty)
     }
@@ -183,7 +183,7 @@ class ActiveStatusServiceTests {
 
         activeStatusService.deactivateProperty(PROPERTY_ID, DEACTIVATION_DATE)
 
-        assertEquals(ORIGINAL_DATE, landlord.deactivationDate)
+        assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
     }
 
@@ -196,7 +196,7 @@ class ActiveStatusServiceTests {
 
         activeStatusService.deactivateProperty(PROPERTY_ID, DEACTIVATION_DATE)
 
-        assertNull(property.deactivationDate)
+        assertNull(property.lastDeactivatedDate)
         assertTrue(landlord.isActive)
         verify(propertyOwnershipRepository, never()).save(any())
         verifyNoInteractions(lettingAgentAccessService, landlordRepository)
@@ -223,7 +223,7 @@ class ActiveStatusServiceTests {
         activeStatusService.reactivateProperty(PROPERTY_ID)
 
         assertTrue(property.isActive)
-        assertNull(property.deactivationDate)
+        assertNull(property.lastDeactivatedDate)
         verify(propertyOwnershipRepository).save(property)
         assertFalse(landlord.isActive)
         verifyNoInteractions(landlordRepository)

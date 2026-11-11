@@ -26,11 +26,11 @@ class ActiveStatusServicePersistenceTests : IntegrationTestWithMutableData("data
 
         val property = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get()
         assertFalse(property.isActive)
-        assertEquals(DEACTIVATION_DATE, property.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, property.lastDeactivatedDate)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
         val deactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
         assertFalse(deactivatedLandlord.isActive)
-        assertEquals(DEACTIVATION_DATE, deactivatedLandlord.deactivationDate)
+        assertEquals(DEACTIVATION_DATE, deactivatedLandlord.lastDeactivatedDate)
     }
 
     @Test
