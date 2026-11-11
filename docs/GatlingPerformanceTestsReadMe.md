@@ -730,6 +730,13 @@ Removing these ownership fields would prevent safe automated recovery; they are 
 Missing preparation state is allowed only when the preparation step was explicitly skipped. Unknown or attempted
 preparation without readable state blocks database reset while still attempting restore-worker shutdown.
 
+Before a large restore, use **Reset Database - NFT** with `verify-only=true` to check the existing QA baseline
+without resetting it. Set `smoke-performance-profile=true` and `expected-app-sha` to the exact deployed SHA to
+also check performance-profile startup, EPC readiness, simulator discovery, the login redirect and the controlled
+payment HTTP roundtrip. The smoke restores the original app/simulator and removes its own runner access even
+on failure; its recovery artifact is retained for seven days. It does not complete login or run Gatling journeys,
+and does not replace full-dataset fixture-capacity checks or the concurrent load proof.
+
 ### Local registration dependency helpers
 
 `scripts/performance-tests/local-registration-dependencies.mjs` provides loopback-only synthetic EPC/payment
