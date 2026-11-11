@@ -14,28 +14,30 @@ class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
     private val addressService: AddressService,
 ) {
-    // Reconciles the list the user submitted against the freeholders already saved, for the update
-    // journey in PDJB-1993. Returns the newly added freeholders so the caller can write to them;
-    // updated and removed ones are persisted but not reported, as contacting them is PDJB-2171.
-    // Freeholders whose details aren't known have nobody to contact, so may have no email or address.
+    // Modifies the list of existing freeholders to match the list the user submitted.
+    // Returns the newly added freeholders so they can be tracked by the journey and notified.
+    // TODO PDJB-1993: use this to update freeholders.
+    // TODO PDJB-2171: also return updated and removed freeholders so they can be tracked by the
+    //  journey and notified.
     @Transactional
     fun updateFreeholders(
         propertyOwnership: PropertyOwnership,
         freeholders: List<FreeholderDataModel>,
     ): List<FreeholderDataModel> {
-        val existingById = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).associateBy { it.id }
+        val existingFreeholdersKeyedById =
+            freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).associateBy { it.id }
         val submittedIds = freeholders.mapNotNull { it.databaseId }.toSet()
 
-        existingById.values.filter { it.id !in submittedIds }.forEach { removeFreeholder(it) }
+        existingFreeholdersKeyedById.values.filter { it.id !in submittedIds }.forEach { removeFreeholder(it) }
 
         val added = mutableListOf<FreeholderDataModel>()
 
         freeholders.forEach { submitted ->
             // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
             // a new freeholder rather than losing the user's answers.
-            val existing = submitted.databaseId?.let { existingById[it] }
+            val existingFreeholder = submitted.databaseId?.let { existingFreeholdersKeyedById[it] }
             when {
-                existing == null -> {
+                existingFreeholder == null -> {
                     createFreeholder(propertyOwnership, submitted)
                     added.add(submitted)
                 }
@@ -43,7 +45,7 @@ class FreeholderService(
                 // matters for a manual address, which has no UPRN and so would look changed - and be
                 // rewritten, saving a duplicate address row - on every submission.
                 !submitted.editedInJourney -> Unit
-                detailsHaveChanged(existing, submitted) -> updateFreeholder(existing, submitted)
+                detailsHaveChanged(existingFreeholder, submitted) -> updateFreeholder(existingFreeholder, submitted)
                 // One edited but left unchanged matches no branch, so their row is left alone.
             }
         }

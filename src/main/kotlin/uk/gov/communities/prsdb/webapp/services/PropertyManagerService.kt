@@ -22,9 +22,4 @@ class PropertyManagerService(
         propertyManager.email = email
         propertyManagerRepository.save(propertyManager)
     }
-
-    // The caller is responsible for clearing propertyOwnership.propertyManager.
-    fun removePropertyManager(propertyManager: PropertyManager) {
-        propertyManagerRepository.delete(propertyManager)
-    }
 }

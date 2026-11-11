@@ -209,4 +209,24 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         assertEquals(1, countRowsIn("property_manager"))
         assertEquals("Second Manager", jdbcTemplate.queryForObject("SELECT name FROM property_manager", String::class.java))
     }
+
+    @Test
+    fun `removing a property manager deletes it`() {
+        // Arrange
+        val propertyOwnershipId = anyPropertyOwnershipId()
+        inTransaction {
+            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+            propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
+            propertyOwnershipRepository.save(propertyOwnership)
+        }
+        assertEquals(1, countRowsIn("property_manager"))
+
+        // Act
+        inTransaction {
+            propertyOwnershipService.removePropertyManager(propertyOwnershipRepository.findById(propertyOwnershipId).get())
+        }
+
+        // Assert
+        assertEquals(0, countRowsIn("property_manager"))
+    }
 }

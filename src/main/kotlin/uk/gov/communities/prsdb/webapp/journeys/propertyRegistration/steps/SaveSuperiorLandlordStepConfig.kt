@@ -53,11 +53,13 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                 nextKey
             }
 
-        // Keep the database id of the superior landlord being edited, and record that the user went
-        // through their details, so that saving the journey can tell an amended superior landlord from
-        // a new one and leave ones the user never opened alone.
-        currentMap[targetKey] =
-            superiorLandlord.copy(databaseId = currentMap[targetKey]?.databaseId, editedInJourney = true)
+        // Store the database id if the user is updating an existing superior landlord, so that the
+        // journey can distinguish between an updated superior landlord and a new one.
+        val existingDatabaseId = currentMap[targetKey]?.databaseId
+
+        // Record that the user went through this superior landlord's details, so that saving leaves
+        // superior landlords they never opened alone.
+        currentMap[targetKey] = superiorLandlord.copy(databaseId = existingDatabaseId, editedInJourney = true)
         state.superiorLandlordsMap = currentMap
         state.editingSuperiorLandlordId = null
 

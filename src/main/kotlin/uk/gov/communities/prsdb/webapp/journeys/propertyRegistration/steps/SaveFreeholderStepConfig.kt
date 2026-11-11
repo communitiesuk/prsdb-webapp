@@ -50,11 +50,13 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                 nextKey
             }
 
-        // Keep the database id of the freeholder being edited, and record that the user went through
-        // their details, so that saving the journey can tell an amended freeholder from a new one and
-        // leave freeholders the user never opened alone.
-        currentMap[targetKey] =
-            freeholder.copy(databaseId = currentMap[targetKey]?.databaseId, editedInJourney = true)
+        // Store the database id if the user is updating an existing freeholder, so that the journey
+        // can distinguish between an updated freeholder and a new one.
+        val existingDatabaseId = currentMap[targetKey]?.databaseId
+
+        // Record that the user went through this freeholder's details, so that saving leaves
+        // freeholders they never opened alone.
+        currentMap[targetKey] = freeholder.copy(databaseId = existingDatabaseId, editedInJourney = true)
         state.freeholdersMap = currentMap
         state.editingFreeholderId = null
 

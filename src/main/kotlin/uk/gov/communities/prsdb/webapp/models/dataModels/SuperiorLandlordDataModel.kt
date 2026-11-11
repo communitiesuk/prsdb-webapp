@@ -27,9 +27,9 @@ data class SuperiorLandlordDataModel(
     val manualPostcode: String? = null,
 ) {
     companion object {
-        // TODO PDJB-1994: this has no caller until the superior landlords update journey seeds its
-        //  list from the database. It was added to snapshot a superior landlord's previous details,
-        //  which is now PDJB-2171.
+        // TODO PDJB-1994: use this to pre-populate the superior landlords list from the database when
+        //  the update journey starts, leaving editedInJourney false so superior landlords the user
+        //  never opens are not written back.
         fun fromSuperiorLandlord(superiorLandlord: SuperiorLandlord) =
             SuperiorLandlordDataModel(
                 databaseId = superiorLandlord.id,

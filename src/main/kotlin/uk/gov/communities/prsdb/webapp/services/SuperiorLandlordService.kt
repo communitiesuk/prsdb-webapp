@@ -14,29 +14,30 @@ class SuperiorLandlordService(
     private val superiorLandlordRepository: SuperiorLandlordRepository,
     private val addressService: AddressService,
 ) {
-    // Reconciles the list the user submitted against the superior landlords already saved, for the
-    // update journey in PDJB-1994. Returns the newly added ones so the caller can write to them;
-    // updated and removed ones are persisted but not reported, as contacting them is PDJB-2171. Those
-    // whose details aren't known have nobody to contact, so may have no email or address.
+    // Modifies the list of existing superior landlords to match the list the user submitted.
+    // Returns the newly added superior landlords so they can be tracked by the journey and notified.
+    // TODO PDJB-1994: use this to update superior landlords.
+    // TODO PDJB-2171: also return updated and removed superior landlords so they can be tracked by
+    //  the journey and notified.
     @Transactional
     fun updateSuperiorLandlords(
         propertyOwnership: PropertyOwnership,
         superiorLandlords: List<SuperiorLandlordDataModel>,
     ): List<SuperiorLandlordDataModel> {
-        val existingById =
+        val existingSuperiorLandlordsKeyedById =
             superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).associateBy { it.id }
         val submittedIds = superiorLandlords.mapNotNull { it.databaseId }.toSet()
 
-        existingById.values.filter { it.id !in submittedIds }.forEach { removeSuperiorLandlord(it) }
+        existingSuperiorLandlordsKeyedById.values.filter { it.id !in submittedIds }.forEach { removeSuperiorLandlord(it) }
 
         val added = mutableListOf<SuperiorLandlordDataModel>()
 
         superiorLandlords.forEach { submitted ->
             // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
             // a new superior landlord rather than losing the user's answers.
-            val existing = submitted.databaseId?.let { existingById[it] }
+            val existingSuperiorLandlord = submitted.databaseId?.let { existingSuperiorLandlordsKeyedById[it] }
             when {
-                existing == null -> {
+                existingSuperiorLandlord == null -> {
                     createSuperiorLandlord(propertyOwnership, submitted)
                     added.add(submitted)
                 }
@@ -44,7 +45,8 @@ class SuperiorLandlordService(
                 // matters for a manual address, which has no UPRN and so would look changed - and be
                 // rewritten, saving a duplicate address row - on every submission.
                 !submitted.editedInJourney -> Unit
-                detailsHaveChanged(existing, submitted) -> updateSuperiorLandlord(existing, submitted)
+                detailsHaveChanged(existingSuperiorLandlord, submitted) ->
+                    updateSuperiorLandlord(existingSuperiorLandlord, submitted)
                 // One edited but left unchanged matches no branch, so their row is left alone.
             }
         }

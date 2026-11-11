@@ -46,16 +46,4 @@ class PropertyManagerServiceTests {
         assertEquals("new@example.com", existing.email)
         verify(propertyManagerRepository).save(existing)
     }
-
-    @Test
-    fun `removePropertyManager deletes the property manager`() {
-        // Arrange
-        val existing = PropertyManager("Old Agent", "old@example.com")
-
-        // Act
-        propertyManagerService.removePropertyManager(existing)
-
-        // Assert
-        verify(propertyManagerRepository).delete(existing)
-    }
 }

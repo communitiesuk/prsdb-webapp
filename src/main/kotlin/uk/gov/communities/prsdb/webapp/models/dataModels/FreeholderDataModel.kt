@@ -26,9 +26,9 @@ data class FreeholderDataModel(
     val manualPostcode: String? = null,
 ) {
     companion object {
-        // TODO PDJB-1993: this has no caller until the freeholders update journey seeds its list from
-        //  the database. It was added to snapshot a freeholder's previous details, which is now
-        //  PDJB-2171.
+        // TODO PDJB-1993: use this to pre-populate the freeholders list from the database when the
+        //  update journey starts, leaving editedInJourney false so freeholders the user never opens
+        //  are not written back.
         fun fromFreeholder(freeholder: Freeholder) =
             FreeholderDataModel(
                 databaseId = freeholder.id,

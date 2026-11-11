@@ -353,6 +353,13 @@ class PropertyOwnershipService(
         }
     }
 
+    // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
+    @Transactional
+    fun removePropertyManager(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.propertyManager = null
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
     @Transactional
     fun updateIsOccupied(
         id: Long,
