@@ -14,19 +14,21 @@ class AssociatedPartyNotificationService(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
 ) {
+    // TODO PDJB-1987, PDJB-1988: implement once the freeholder creation email and letter templates are available
     fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
         TODO("Implement freeholder creation notification when its email and letter templates are available")
 
+    // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
         TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
-    private fun sendNotificationToFreeholder(
+    internal fun sendNotificationToFreeholder(
         freeholder: Freeholder,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
 
-    private fun sendNotificationToSuperiorLandlord(
+    internal fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlord,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,

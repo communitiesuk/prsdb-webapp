@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
@@ -59,26 +58,10 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     private fun sendNotificationToFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
-        checkNotNull(
-            ReflectionTestUtils.invokeMethod(
-                associatedPartyNotificationService,
-                "sendNotificationToFreeholder",
-                freeholder,
-                email,
-                letter,
-            ),
-        )
+        associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
     private fun sendNotificationToSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
-        checkNotNull(
-            ReflectionTestUtils.invokeMethod(
-                associatedPartyNotificationService,
-                "sendNotificationToSuperiorLandlord",
-                superiorLandlord,
-                email,
-                letter,
-            ),
-        )
+        associatedPartyNotificationService.sendNotificationToSuperiorLandlord(superiorLandlord, email, letter)
 
     @Test
     fun `sendNotification sends nothing to a fully redacted associated party`() {
