@@ -4,7 +4,7 @@ spring:
       on-profile: performance-test
 
 gov-uk-pay:
-  base-url: http://localhost:${server.port}/local/gov-uk-pay
+  base-url: http://localhost:${server.port:8080}/local/gov-uk-pay
   api-key: performance-test
   mock-base-url: ${GOV_UK_PAY_MOCK_BASE_URL}
   mock-card-entry-delay-seconds: 0
@@ -25,8 +25,8 @@ spring:
             client-secret: performance-test
         provider:
           epc-register:
-            token-uri: http://localhost:${server.port}/local/epc/auth/oauth/token
+            token-uri: http://localhost:${server.port:8080}/local/epc/auth/oauth/token
 
 epc:
-  base-url: http://localhost:${server.port}/local/epc
-  certificate-base-url: http://localhost:${server.port}/local/epc/energy-certificate
+  base-url: http://localhost:${server.port:8080}/local/epc
+  certificate-base-url: http://localhost:${server.port:8080}/local/epc/energy-certificate

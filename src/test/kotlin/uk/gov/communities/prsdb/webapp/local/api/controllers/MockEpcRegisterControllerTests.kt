@@ -3,9 +3,12 @@ package uk.gov.communities.prsdb.webapp.local.api.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.boot.env.YamlPropertySourceLoader
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -20,6 +23,26 @@ class MockEpcRegisterControllerTests {
     private val mvc = MockMvcBuilders.standaloneSetup(MockEpcRegisterController(service)).build()
     private val route = "/local/epc"
     private val credentials = "Basic " + Base64.getEncoder().encodeToString("performance-test:performance-test".toByteArray())
+
+    @Test
+    fun `performance mock URLs resolve without an explicit server port and respect an override`() {
+        val environment = MockEnvironment()
+        YamlPropertySourceLoader().load("performance-test", ClassPathResource("application-performance-test.yml"))
+            .forEach { environment.propertySources.addFirst(it) }
+        val paths =
+            mapOf(
+                "gov-uk-pay.base-url" to "/local/gov-uk-pay",
+                "epc.base-url" to "/local/epc",
+                "spring.security.oauth2.client.provider.epc-register.token-uri" to "/local/epc/auth/oauth/token",
+            )
+        for ((key, path) in paths) {
+            assertEquals("http://localhost:8080$path", environment.getRequiredProperty(key))
+        }
+        environment.setProperty("server.port", "9090")
+        for ((key, path) in paths) {
+            assertEquals("http://localhost:9090$path", environment.getRequiredProperty(key))
+        }
+    }
 
     @Test
     fun `loopback client obtains a token and searches the controlled EPC API`() {
