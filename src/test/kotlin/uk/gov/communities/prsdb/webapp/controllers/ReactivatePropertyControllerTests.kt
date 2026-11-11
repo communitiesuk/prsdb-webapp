@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -56,6 +58,16 @@ class ReactivatePropertyControllerTests(
 
     private val propertyOwnershipId = 1L
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
+
+    private val uploadGasCertPath =
+        "${getPropertyReactivationBasePath(propertyOwnershipId)}/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=any-id"
+    private val fileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
+    private val fileUploadEntity =
+        MultipartEntityBuilder
+            .create()
+            .addTextBody("_csrf", "any-csrf-token")
+            .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
+            .build()
 
     @BeforeEach
     fun setUp() {
@@ -175,24 +187,56 @@ class ReactivatePropertyControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `postFileUploadJourneyData returns 404 without uploading when the property cannot be reactivated by the current user`() {
         mockPropertyCannotBeReactivated()
-        val httpEntity =
-            MultipartEntityBuilder
-                .create()
-                .addTextBody("_csrf", "any-csrf-token")
-                .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
-                .build()
 
         mvc
-            .post("${getPropertyReactivationBasePath(propertyOwnershipId)}/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=any-id") {
-                contentType = MediaType.parseMediaType(httpEntity.contentType)
-                content = httpEntity.content.readAllBytes()
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
                 with(csrf().asHeader())
-                cookie(Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token"))
+                cookie(fileUploadCookie)
             }.andExpect {
                 status { isNotFound() }
             }
 
         verifyNoInteractions(certificateUploadHelper)
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData returns 400 for a landlord of the inactive property without a cookie`() {
+        mvc
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
+                with(csrf().asHeader())
+            }.andExpect {
+                status { isBadRequest() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `postFileUploadJourneyData delegates to the certificate upload helper and redirects for a landlord of the inactive property`() {
+        val redirectUrl = "any-url"
+        whenever(propertyReactivationJourneyFactory.createJourneySteps(propertyOwnershipId))
+            .thenReturn(mapOf(UploadGasCertStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(certificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
+            .thenReturn(mapOf<String, Any>())
+        whenever(mockStepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("redirect:$redirectUrl"))
+
+        mvc
+            .post(uploadGasCertPath) {
+                contentType = MediaType.parseMediaType(fileUploadEntity.contentType)
+                content = fileUploadEntity.content.readAllBytes()
+                with(csrf().asHeader())
+                cookie(fileUploadCookie)
+            }.andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(redirectUrl)
+            }
+
+        verify(certificateUploadHelper).uploadFileAndReturnFormModel(any(), any(), eq(fileUploadCookie.value), any())
     }
 
     @Test
