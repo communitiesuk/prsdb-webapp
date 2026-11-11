@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
+import java.time.LocalDate
 import java.time.MonthDay
 
 class LandlordTests {
@@ -59,5 +62,26 @@ class LandlordTests {
 
         assertEquals(15, landlord.anniversaryDay)
         assertEquals(3, landlord.anniversaryMonth)
+    }
+
+    @Test
+    fun `deactivate marks the landlord inactive and sets the deactivation date`() {
+        val landlord = createIndividualLandlord()
+
+        landlord.deactivate(LocalDate.of(2004, 7, 7))
+
+        assertFalse(landlord.isActive)
+        assertEquals(LocalDate.of(2004, 7, 7), landlord.deactivationDate)
+    }
+
+    @Test
+    fun `reactivate marks the landlord active and clears the deactivation date`() {
+        val landlord = createIndividualLandlord()
+        landlord.deactivate(LocalDate.of(2004, 7, 7))
+
+        landlord.reactivate()
+
+        assertTrue(landlord.isActive)
+        assertNull(landlord.deactivationDate)
     }
 }
