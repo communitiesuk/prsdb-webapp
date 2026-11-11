@@ -583,7 +583,7 @@ SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(i
 -- 24: PO 25 gas cert + EPC expired, electrical valid          -> "multiple certificates expired" banner.
 -- 25: PO 26 gas cert "provide later", electrical + EPC valid  -> "add compliance certificates" (missing) banner.
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
                                  gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)

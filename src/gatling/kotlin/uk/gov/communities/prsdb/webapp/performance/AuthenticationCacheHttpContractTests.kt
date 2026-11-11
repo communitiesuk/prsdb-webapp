@@ -104,11 +104,11 @@ class AuthenticationCacheHttpContractTests {
                     mapOf(
                         "gatling.target" to "local",
                         "gatling.baseUrl" to origin,
-                        "gatling.simulatorUrl" to origin,
+                        "gatling.simulatorUrl" to if (council) "http://localhost:${server.address.port}" else origin,
                         "gatling.basic.mode" to "baseline",
                         "gatling.basic.landlordSubject" to "synthetic",
                         "gatling.contract.council" to council.toString(),
-                    ),
+                    ) + if (council) mapOf("gatling.council.simulatorUrl" to origin) else emptyMap(),
                 )
             assertEquals(
                 0,

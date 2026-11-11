@@ -295,6 +295,15 @@ class NftDataSeederTests(
     @Test
     fun `organisation fixtures select administrators once per organisation and exclude editors`() {
         newSeeder().seedDatabase()
+        jdbcTemplate.update(
+            """
+            UPDATE organisational_landlord_user SET role = 1
+            WHERE id IN (
+                SELECT max(id) FROM organisational_landlord_user
+                GROUP BY organisation_landlord_id HAVING count(*) > 1
+            )
+            """.trimIndent(),
+        )
         val sql = ClassPathResource("data-nft-organisation-fixtures.sql").getContentAsString(Charsets.UTF_8)
 
         fun fixtures() = Json.parseToJsonElement(jdbcTemplate.queryForObject(sql, String::class.java)!!).jsonArray
