@@ -61,8 +61,8 @@ abstract class Landlord : ModifiableAuditableEntity() {
     open var hasRegisteredProperty: Boolean = false
         protected set
 
-    @Column(name = "deactivation_date")
-    open var deactivationDate: LocalDate? = null
+    @Column(name = "last_deactivated_date")
+    open var lastDeactivatedDate: LocalDate? = null
         protected set
 
     val anniversary: MonthDay?

@@ -60,7 +60,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
@@ -77,7 +76,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
 
@@ -100,7 +98,6 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 

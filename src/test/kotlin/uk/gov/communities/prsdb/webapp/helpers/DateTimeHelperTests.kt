@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.sql.Timestamp
 import java.time.Clock
 import java.time.ZoneId
 import java.util.Date
@@ -87,6 +86,16 @@ class DateTimeHelperTests {
                 Arguments.of(LocalDate(2024, 1, 31), LocalDate(2024, 2, 28)),
                 Arguments.of(LocalDate(2024, 2, 1), LocalDate(2024, 2, 29)),
                 Arguments.of(LocalDate(2024, 2, 2), LocalDate(2024, 3, 1)),
+            )
+
+        @JvmStatic
+        private fun provideDatesForGet3MonthsFromDate() =
+            listOf(
+                Arguments.of(LocalDate(2026, 11, 9), LocalDate(2027, 2, 9)),
+                Arguments.of(LocalDate(2026, 12, 31), LocalDate(2027, 3, 31)),
+                Arguments.of(LocalDate(2026, 8, 31), LocalDate(2026, 11, 30)),
+                Arguments.of(LocalDate(2026, 11, 30), LocalDate(2027, 2, 28)),
+                Arguments.of(LocalDate(2027, 11, 30), LocalDate(2028, 2, 29)),
             )
 
         @JvmStatic
@@ -165,6 +174,17 @@ class DateTimeHelperTests {
     }
 
     @ParameterizedTest(name = "{1} when {0}")
+    @MethodSource("provideDatesForGet3MonthsFromDate")
+    fun `get3MonthsFromDate returns correct date`(
+        date: LocalDate,
+        expectedDate: LocalDate,
+    ) {
+        val result = DateTimeHelper.get3MonthsFromDate(date)
+
+        assertEquals(expectedDate, result)
+    }
+
+    @ParameterizedTest(name = "{1} when {0}")
     @MethodSource("provideDatesForIsDateInPast")
     fun `isDateInPast returns`(
         date: LocalDate,
@@ -205,36 +225,6 @@ class DateTimeHelperTests {
         val result = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
 
         assertEquals(expectedInstant, result)
-    }
-
-    @Test
-    fun `toInstant returns the same instant as getJavaInstantFromLocalDate`() {
-        val localDate = java.time.LocalDate.of(2020, 1, 1)
-        val expectedInstant = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
-
-        val result = with(DateTimeHelper) { localDate.toInstant() }
-
-        assertEquals(expectedInstant, result)
-    }
-
-    @Test
-    fun `toTimestamp returns a Timestamp matching getJavaInstantFromLocalDate`() {
-        val localDate = java.time.LocalDate.of(2020, 1, 1)
-        val expectedTimestamp = Timestamp.from(DateTimeHelper.getJavaInstantFromLocalDate(localDate))
-
-        val result = with(DateTimeHelper) { localDate.toTimestamp() }
-
-        assertEquals(expectedTimestamp, result)
-    }
-
-    @Test
-    fun `toLocalDate returns the local date corresponding to the instant`() {
-        val localDate = java.time.LocalDate.of(2020, 1, 1)
-        val instant = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
-
-        val result = with(DateTimeHelper) { instant.toLocalDate() }
-
-        assertEquals(localDate, result)
     }
 
     @ParameterizedTest(name = "for {0}")

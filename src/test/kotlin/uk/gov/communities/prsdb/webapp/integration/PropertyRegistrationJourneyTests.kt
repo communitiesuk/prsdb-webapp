@@ -209,8 +209,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     prsdUrl == absoluteLandlordUrl &&
                     isOccupied == expectedIsOccupied &&
                     jointLandlordEmails == expectedJointLandlordEmails &&
-                    !isDelegatedToLettingAgent &&
-                    isPdjb939PhaseTwoEnabled
+                    !isDelegatedToLettingAgent
             },
         )
     }
@@ -764,7 +763,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
+        fun `user can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
             page: Page,
         ) {
             // Start page (not a journey step, but it is how the user accesses the journey)
@@ -851,7 +850,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -1148,7 +1146,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `User can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
+        fun `user can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
             page: Page,
         ) {
             // Start page (not a journey step, but it is how the user accesses the journey)
@@ -1220,7 +1218,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             ownsPropertyPage.submitOwnsProperty(true)
             val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
             ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
@@ -1389,7 +1386,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+        fun `user can choose to provide compliance certificates later if their property is occupied`(page: Page) {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -1459,7 +1456,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+        fun `user can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -1533,7 +1530,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
+        fun `user can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
             // Gas supply page
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
@@ -1649,7 +1646,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can complete the journey with expired compliance certificates for an occupied property (epc found by uprn)`(page: Page) {
+        fun `user can complete the journey with expired compliance certificates for an occupied property (epc found by uprn)`(page: Page) {
             // Gas supply page
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
@@ -1777,7 +1774,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can complete the journey with expired compliance certificates for an unoccupied property (epc not found by uprn)`(
+        fun `user can complete the journey with expired compliance certificates for an unoccupied property (epc not found by uprn)`(
             page: Page,
         ) {
             // Gas supply page
@@ -1927,7 +1924,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
-        fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
+        fun `the Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
             // Skip to Has Electrical Cert page and submit "Yes"
             val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
             assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
@@ -1986,7 +1983,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
-        fun `The Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
+        fun `the Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
             // Skip to Has Electrical Cert page and submit EICR
             val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
             hasElectricalCertPage.submitHasEicr()
@@ -2018,7 +2015,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EICR equivalent of the EIC steps in the whole journey tests above
         @Test
-        fun `The Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
+        fun `the Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
             // Skip to Has Electrical Cert page and submit EICR
             val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied = false)
             hasElectricalCertPage.submitHasEicr()
@@ -2048,7 +2045,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
+        fun `the EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
             // Skip to Find Your EPC page and submit "Superseded EPC Found"
             val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
             assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
@@ -2079,7 +2076,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
+        fun `the EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
             // Skip to Find Your EPC page and submit "No EPC Found"
             val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
             assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
@@ -2130,7 +2127,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can navigate the MEES flow when they have a MEES exemption`(page: Page) {
+        fun `user can navigate the MEES flow when they have a MEES exemption`(page: Page) {
             val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
 
             // Has MEES Exemption - render page
@@ -2149,7 +2146,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
+        fun `user can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
             val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
 
             // Has MEES Exemption - submit no exemption
@@ -2168,7 +2165,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can navigate the EPC exemption flow`(page: Page) {
+        fun `user can navigate the EPC exemption flow`(page: Page) {
             val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
 
             // EPC Exemption - select exemption reason
@@ -2248,7 +2245,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
+        fun `cya shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
 
@@ -2259,7 +2256,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
+        fun `cya shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -2267,7 +2264,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
+        fun `cya shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
 
@@ -2313,7 +2310,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
             assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            // TODO PDJB-1961: update this usage when the real freehold type page is added
             assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitNo()
 
@@ -2387,7 +2383,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `User can choose to provide tenancy details later if their property is occupied`(page: Page) {
+        fun `user can choose to provide tenancy details later if their property is occupied`(page: Page) {
             navigator.skipToTenancyDetailsHouseholdsPage()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             assertThat(householdsPage.provideThisLaterButton).isVisible()
@@ -2403,7 +2399,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
+        fun `occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
             assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
@@ -2418,7 +2414,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
+        fun `task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -2432,7 +2428,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA hides tenancy details section after landlord has chosen to provide tenancy details later`(page: Page) {
+        fun `cya hides tenancy details section after landlord has chosen to provide tenancy details later`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -2446,7 +2442,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Changing tenancy details from CYA and selecting provide this later returns to CYA`(page: Page) {
+        fun `changing tenancy details from CYA and selecting provide this later returns to CYA`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -2465,7 +2461,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Abandoning tenancy details mid journey shows tenancy details as Completed on task list`(page: Page) {
+        fun `abandoning tenancy details mid journey shows tenancy details as Completed on task list`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -2486,7 +2482,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Changing from provide tenancy details later to providing households and people routes through whole tenancy journey to CYA`(
+        fun `changing from provide tenancy details later to providing households and people routes through whole tenancy journey to CYA`(
             page: Page,
         ) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
@@ -2519,7 +2515,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(
+        fun `completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(
             page: Page,
         ) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
@@ -2652,14 +2648,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA does not show Which bills are included row when rent does not include bills`() {
+        fun `cya does not show Which bills are included row when rent does not include bills`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
             assertFalse(checkAnswersPage.tenancyRowHeadings().contains("Which bills are included"))
         }
 
         @Test
-        fun `Changing number of households from CYA only goes through households and people then returns to CYA`(page: Page) {
+        fun `changing number of households from CYA only goes through households and people then returns to CYA`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
@@ -2675,7 +2671,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
+        fun `cya joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -2697,7 +2693,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
+        fun `cya joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
