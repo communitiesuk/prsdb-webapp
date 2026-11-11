@@ -2,9 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -62,6 +64,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class OwnershipTypeUpdates {
+        // TODO PDJB-2016: the ownership type change link is only shown while ASSOCIATED_PARTIES is off
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
@@ -81,6 +89,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class ResumingAbandonedUpdateAfterCompletingAnother {
+        // TODO PDJB-2016: these tests use the ownership type update, whose change link is only shown
+        //  while ASSOCIATED_PARTIES is off
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
             page: Page,

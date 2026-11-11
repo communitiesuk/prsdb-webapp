@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeAnswersConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -98,13 +99,40 @@ abstract class PropertyDetailsViewModelBase(
     protected fun ownershipTypeRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",
-            // TODO PDJB-1996: convert the new OwnershipType to the required answer messages. It is
-            //  rendered as the answers to several questions rather than this single ownership type
-            //  row, so this row cannot simply switch to the new enum.
+            // TODO PDJB-2016: delete this row along with the ASSOCIATED_PARTIES flag. It is only
+            //  still shown with the flag off, and on the local council view until PDJB-1999.
             MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )
+
+    // The ownership information as the answers to the questions the landlord was asked, rather than
+    // as the single derived OwnershipType. A question's row is omitted where it was not asked.
+    // TODO PDJB-2016: add change links to these rows once the ownership update journeys exist.
+    protected fun ownershipAnswerRows(): List<SummaryListRowViewModel> {
+        val answers = OwnershipTypeAnswersConverter.convert(propertyOwnership.ownershipType)
+        return listOfNotNull(
+            row(
+                "propertyDetails.peopleResponsible.ownership.ownsProperty",
+                MessageKeyConverter.convert(answers.ownsProperty),
+                withActionLink = false,
+            ),
+            answers.ownershipKind?.let {
+                row(
+                    "propertyDetails.peopleResponsible.ownership.ownershipType",
+                    MessageKeyConverter.convert(it),
+                    withActionLink = false,
+                )
+            },
+            answers.freeholdType?.let {
+                row(
+                    "propertyDetails.peopleResponsible.ownership.freeholderType",
+                    MessageKeyConverter.convert(it),
+                    withActionLink = false,
+                )
+            },
+        )
+    }
 
     protected fun occupiedRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(

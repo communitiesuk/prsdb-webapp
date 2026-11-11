@@ -10,6 +10,8 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
+    // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag
+    associatedPartiesEnabled: Boolean = false,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
@@ -19,6 +21,26 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
+    // The landlord's ownership information moves from the property record tab to the people
+    // responsible tab when the flag is on.
+    // TODO PDJB-1999: give the local council view its own ownership section on the people
+    //  responsible tab. Until then it keeps the single legacy row on the property record tab.
+    val showPeopleResponsibleOwnership: Boolean = isLandlordView && associatedPartiesEnabled
+
+    val showOwnershipSection: Boolean = !showPeopleResponsibleOwnership
+
+    val peopleResponsibleTabHeadingKey: String =
+        if (associatedPartiesEnabled) {
+            "propertyDetails.peopleResponsible.heading"
+        } else {
+            "propertyDetails.landlordDetails.heading"
+        }
+
+    val peopleResponsibleOwnershipHeadingKey: String = "propertyDetails.peopleResponsible.ownership.heading"
+
+    val peopleResponsibleOwnershipSection: List<SummaryListRowViewModel> =
+        if (showPeopleResponsibleOwnership) ownershipAnswerRows() else emptyList()
+
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
 
@@ -26,7 +48,7 @@ class PropertyDetailsViewModel(
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
     val ownershipSection: List<SummaryListRowViewModel> =
-        listOf(ownershipTypeRow())
+        if (showOwnershipSection) listOf(ownershipTypeRow()) else emptyList()
 
     val correspondenceSection: List<SummaryListRowViewModel> =
         listOf(

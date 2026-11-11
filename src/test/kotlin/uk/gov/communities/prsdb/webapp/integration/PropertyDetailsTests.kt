@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -532,18 +533,41 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
+    inner class PeopleResponsibleOwnership {
+        @Test
+        fun `landlord view shows the ownership answers on the people responsible tab`(page: Page) {
+            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow).not().isVisible()
+        }
+
+        @Test
+        fun `local council view keeps the ownership row on the property record`(page: Page) {
+            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
+        }
+    }
+
+    @Nested
     inner class PropertyDetailsTab {
         @Test
         fun `landlord view groups the property record into sections`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
             assertThat(detailsPage.sectionHeading("Property details")).isVisible()
-            assertThat(detailsPage.sectionHeading("Ownership")).isVisible()
             assertThat(detailsPage.sectionHeading("Who the council should contact")).isVisible()
             assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
-            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
+            // The ownership section moves to the people responsible tab when ASSOCIATED_PARTIES is on
+            assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow).isHidden()
         }
 
         @Test
