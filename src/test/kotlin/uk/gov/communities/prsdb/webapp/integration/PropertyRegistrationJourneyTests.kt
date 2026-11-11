@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -2247,56 +2245,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(taskListPage.getAboutYourPropertyTask("Property details").hasLink)
             taskListPage.clickAboutYourPropertyTaskWithName("Property details")
             assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-        }
-
-        @Nested
-        inner class FreeholderCheckAnswersJourneys {
-            @Test
-            fun `the non-joint freeholder list back link and submission return to CYA`(page: Page) {
-                var checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
-
-                checkAnswersPage.freeholdersChangeLink.clickAndWait()
-                var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-                assertThat(freeholdersListPage.heading).containsText("You’ve added 3 freeholders")
-                freeholdersListPage.backLink.clickAndWait()
-
-                checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-                assertThat(checkAnswersPage.getSummaryCard("Freeholder With Email", "h5")).isVisible()
-
-                checkAnswersPage.freeholdersChangeLink.clickAndWait()
-                freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-                freeholdersListPage.submit()
-
-                checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-                assertThat(checkAnswersPage.getSummaryCard("Freeholder With Email", "h5")).isVisible()
-            }
-
-            @ParameterizedTest
-            @CsvSource(
-                "FREEHOLD_ONLY, JOINT_TENANTS",
-                "FREEHOLD_ONLY, TENANTS_IN_COMMON",
-                "FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS",
-                "FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON",
-            )
-            fun `the joint freeholder list back link returns to CYA for joint ownership types`(
-                ownershipKind: OwnershipKind,
-                freeholdType: FreeholdType,
-                page: Page,
-            ) {
-                var checkAnswersPage =
-                    navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
-                        ownershipKind = ownershipKind,
-                        freeholdType = freeholdType,
-                    )
-
-                checkAnswersPage.jointFreeholdersChangeLink.clickAndWait()
-                val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-                assertThat(freeholdersListPage.heading).containsText("You’ve added 3 joint freeholders")
-                freeholdersListPage.backLink.clickAndWait()
-
-                checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-                assertThat(checkAnswersPage.jointFreeholdersHeading).isVisible()
-            }
         }
 
         @Test

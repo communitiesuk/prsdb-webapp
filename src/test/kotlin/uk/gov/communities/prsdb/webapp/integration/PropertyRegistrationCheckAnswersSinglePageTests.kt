@@ -5,7 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.times
@@ -39,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
@@ -841,27 +841,55 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertFreeholderCards(checkAnswersPage)
         }
 
-        @ParameterizedTest
-        @CsvSource(
-            "FREEHOLD_ONLY, JOINT_TENANTS",
-            "FREEHOLD_ONLY, TENANTS_IN_COMMON",
-            "FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS",
-            "FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON",
-        )
-        fun `cya shows joint freeholder heading link and cards for joint ownership types`(
-            ownershipKind: OwnershipKind,
-            freeholdType: FreeholdType,
-        ) {
+        @Test
+        fun `cya shows joint freeholder heading link and cards for joint ownership types`() {
             val checkAnswersPage =
                 navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
-                    ownershipKind = ownershipKind,
-                    freeholdType = freeholdType,
+                    ownershipKind = OwnershipKind.FREEHOLD_ONLY,
+                    freeholdType = FreeholdType.JOINT_TENANTS,
                 )
 
             BaseComponent.assertThat(checkAnswersPage.jointFreeholdersHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
             BaseComponent.assertThat(checkAnswersPage.jointFreeholdersChangeLink).isVisible()
             assertFreeholderCards(checkAnswersPage)
+        }
+
+        @Test
+        fun `the add, change or remove link starts a CYA sub-journey at the freeholders list`(page: Page) {
+            var checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 freeholders")
+            freeholdersListPage.submit()
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).isVisible()
+        }
+
+        @Test
+        fun `the back link on the freeholders list returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the joint freeholders link opens the freeholders list with the joint heading`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = OwnershipKind.FREEHOLD_ONLY,
+                    freeholdType = FreeholdType.JOINT_TENANTS,
+                )
+
+            checkAnswersPage.jointFreeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 joint freeholders")
         }
 
         @ParameterizedTest

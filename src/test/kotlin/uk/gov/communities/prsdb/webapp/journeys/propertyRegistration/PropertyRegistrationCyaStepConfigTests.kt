@@ -69,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
@@ -778,6 +779,131 @@ class PropertyRegistrationCyaStepConfigTests {
             assertNull(content["superiorLandlordsRows"])
             assertNull(content["superiorLandlordsCards"])
             assertNull(content["superiorLandlordsChangeUrl"])
+        }
+    }
+
+    @Nested
+    inner class FreeholdersContent {
+        @Mock
+        private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+        @Mock
+        private lateinit var mockOwnershipStructureTask: OwnershipStructureTask
+
+        @Mock
+        private lateinit var mockOwnershipTypeTask: OwnershipTypeTask
+
+        @Mock
+        private lateinit var mockFreeholdersTask: FreeholdersTask
+
+        @Mock
+        private lateinit var mockFreeholdersDetailsTask: FreeholdersDetailsTask
+
+        @Mock
+        private lateinit var mockFreeholdersListStep: FreeholdersListStep
+
+        @Mock
+        private lateinit var mockSuperiorLandlordsTask: SuperiorLandlordsTask
+
+        @Mock
+        private lateinit var mockAnyoneInOwnershipChainStep: AnyoneInOwnershipChainStep
+
+        @BeforeEach
+        fun setUpFreeholders() {
+            lenient().`when`(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+            lenient().`when`(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
+            lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
+            lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
+            lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
+            lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
+            lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
+            lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
+            lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
+        }
+
+        // TODO PDJB-2016: Remove test once ASSOCIATED_PARTIES is released
+        @Test
+        fun `associated parties disabled has no freeholders content`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertNoFreeholdersContent(content)
+        }
+
+        @Test
+        fun `ownership type that does not require freeholder records has no freeholders content`() {
+            // Arrange
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertNoFreeholdersContent(content)
+        }
+
+        @Test
+        fun `non-joint ownership type uses the non-joint heading and change link keys`() {
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals("registerProperty.freeholders.checkAnswers.heading.nonJoint", content["freeholdersHeadingKey"])
+            assertEquals("registerProperty.freeholders.checkAnswers.changeLink.nonJoint", content["freeholdersChangeLinkKey"])
+        }
+
+        @Test
+        fun `joint ownership type uses the joint heading and change link keys`() {
+            // Arrange
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.JOINT_TENANTS)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals("registerProperty.freeholders.checkAnswers.heading.joint", content["freeholdersHeadingKey"])
+            assertEquals("registerProperty.freeholders.checkAnswers.changeLink.joint", content["freeholdersChangeLinkKey"])
+        }
+
+        @Test
+        fun `freeholders content has a link to the freeholders list and cards without actions`() {
+            // Arrange
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(
+                mapOf(
+                    2 to FreeholderDataModel(detailsKnown = false),
+                    1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith", email = "email@example.com"),
+                ),
+            )
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(FreeholdersListStep.ROUTE_SEGMENT, "freeholders-change"),
+                content["freeholdersChangeUrl"],
+            )
+            val cards = content["freeholdersCards"] as List<SummaryCardViewModel>
+            assertEquals(
+                listOf("Billie Smith", "registerProperty.freeholders.list.unknownFreeholder.title"),
+                cards.map { it.title },
+            )
+            cards.forEach { assertEquals(emptyList<SummaryCardActionViewModel>(), it.actions) }
+        }
+
+        private fun assertNoFreeholdersContent(content: Map<String, Any?>) {
+            assertNull(content["freeholdersHeadingKey"])
+            assertNull(content["freeholdersChangeLinkKey"])
+            assertNull(content["freeholdersChangeUrl"])
+            assertNull(content["freeholdersCards"])
         }
     }
 
