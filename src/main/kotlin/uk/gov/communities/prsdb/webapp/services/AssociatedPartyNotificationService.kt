@@ -31,8 +31,7 @@ class AssociatedPartyNotificationService(
         freeholder: Freeholder,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome =
-        sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
+    ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
 
     internal fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlord,
