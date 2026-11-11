@@ -8,6 +8,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.boot.env.YamlPropertySourceLoader
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+import org.springframework.core.env.MapPropertySource
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -31,6 +36,35 @@ class MockGovUkPayControllerTests {
     @BeforeEach
     fun setup() {
         mvc = createMvc()
+    }
+
+    @Test
+    fun `performance payment mock starts without an explicit server port and respects an override`() {
+        for (port in listOf(null, "9090")) {
+            AnnotationConfigApplicationContext().use { context ->
+                context.environment.setActiveProfiles("nft", "performance-test")
+                YamlPropertySourceLoader().load("performance-test", ClassPathResource("application-performance-test.yml"))
+                    .forEach { context.environment.propertySources.addLast(it) }
+                context.environment.propertySources.addFirst(
+                    MapPropertySource(
+                        "mock-properties",
+                        buildMap<String, Any> {
+                            put("GOV_UK_PAY_MOCK_BASE_URL", "")
+                            if (port != null) put("server.port", port)
+                        },
+                    ),
+                )
+                context.beanFactory.registerSingleton("objectMapper", objectMapper)
+                context.beanFactory.registerSingleton("paymentRepository", mockPaymentRepository)
+                context.register(PropertySourcesPlaceholderConfigurer::class.java, MockGovUkPayController::class.java)
+                context.refresh()
+
+                MockMvcBuilders.standaloneSetup(context.getBean(MockGovUkPayController::class.java)).build()
+                    .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+                    .andExpect(status().isCreated)
+                    .andExpect(jsonPath("$._links.next_url.href").value(startsWith("http://localhost:${port ?: "8080"}/")))
+            }
+        }
     }
 
     private fun createMvc(

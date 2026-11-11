@@ -53,7 +53,7 @@ import kotlin.random.Random
 @PrsdbRestController
 @RequestMapping("/local/gov-uk-pay")
 class MockGovUkPayController(
-    @Value("\${server.port}") private val serverPort: String,
+    @Value("\${server.port:8080}") private val serverPort: String,
     @Value("\${gov-uk-pay.mock-card-entry-delay-seconds}") private val cardEntryDelaySeconds: Long,
     @Value("\${gov-uk-pay.mock-failing-calls-from-capture}") private val failingCallsFromCapture: Int,
     @Value("\${gov-uk-pay.mock-failing-capture-takes-payment}") private val failingCaptureTakesPayment: Boolean,
