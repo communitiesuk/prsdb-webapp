@@ -7,6 +7,34 @@ The performance code lives in the root project's `src/gatling` source set (added
 the webapp's `src/main` classes, so the journeys reuse the webapp's route constants, but it still drives the running
 application over HTTP. Nothing in `src/gatling` ships in the production jar.
 
+## NFT baseline and deferred coverage
+
+The Actions workflow runs the established simulator-only baseline, not the unfinished ten-family
+workload. It restores and verifies the pinned large dump, runs basic, saved-registration,
+completed-property, organisation-profile and certificate correctness checks, then runs
+`BaselineLoadSimulation`. The four ramp families execute concurrently with exclusive actors:
+landlord registration at 26 arrivals/minute and each update family at 4/minute, with a five-minute
+ramp and fifteen-minute hold (665 starts). Two-second decision pauses are provisional.
+Landlord registration is a load proxy, **not** evidence of property-registration capacity or
+completion of the predicted normal-use scope. Zero failed requests and successful completion
+counts gate the ramp; timings remain calibration evidence pending agreed SLOs.
+
+The existing restore, runner allowlisting, simulator preparation and automatic QA recovery are
+retained. This path does not enable `performance-test`, add routing aliases, change CloudFront
+or require another application deployment. Certificate generation and upload checks remain included.
+`RampedLoadSimulation` retains the ten-family implementation for later verification; Actions
+does not currently execute it.
+
+Additional work to discuss and ticket separately:
+
+| Work | Evidence / acceptance needed |
+|---|---|
+| Actual occupied-property registration and controlled payment ingress | NFT rewrites public `/local/**` paths; agree the dependency/ingress strategy before enabling the payment flow. The failed public EPC health probe does not establish a failure of internal loopback EPC calls. Prove the hosted-payment roundtrip and real registration before claiming this coverage. |
+| Remaining mixed-load families | Prove exclusive invitation/acceptance preparation and concurrent organisation team, joint-landlord, letting-agent, operator and offboarding journeys. Their retained code is not NFT acceptance evidence. |
+| Council load | Agree authentication, representative geographic fixtures and expected council workload before adding it. |
+| Large-dataset cold starts | Observed 255-267-second starts exceeded the existing 180-second ECS grace. Agree an environment setting or investigate startup performance; do not silently make a permanent service change. |
+| Workload/SLO acceptance | Confirm representative arrival rates and timing limits, repeat measured runs, and raise remediation tickets for demonstrated performance failures. A successful proxy baseline does not close these decisions. |
+
 ## Layout
 
 ```
@@ -682,7 +710,7 @@ deliberately selected reference date rather than assuming the task definition in
 The large dump is intended to be created once and loaded before performance testing, with migrations applied to
 match the deployed NFT revision. Basic, load and later spike suites should use the same restored starting database
 in one run; do not reset between suites. The performance workflow includes the basic, saved-registration
-and selected representative suites followed by the provisional ten-family normal-load ramp, with separate
+and selected representative suites followed by the established four-family baseline ramp, with separate
 bounded restore, compilation, test and recovery jobs. Spikes remain outside this delivery.
 A full eight-hour capacity is the agreed dataset sizing model, not a claim that the current workflow can
 run for eight hours. Any future scheduling and suite orchestration must account for the selected test duration.
@@ -713,8 +741,9 @@ workflow waits for actual app tasks to reach `STOPPED`: service `runningCount=0`
 keeps containers and database connections alive. The dedicated worker validates the pinned dump version, size,
 checksum and archive, checks for database clients, then restores `s3://prsdb-seed-data-nft/seed-data.dump` directly
 to RDS. Actions migrates it to the deployed NFT revision and verifies required data through SSM. It starts the app and runs
-the basic, saved-registration, completed-property, organisation-profile, certificate and operator checks,
-then prepares agent, joint and organisation invitations through HTTP before the ten-family mixed ramp.
+the basic, saved-registration, completed-property, organisation-profile and certificate checks,
+then executes the four-family `BaselineLoadSimulation` concurrently. Actual property registration and the
+remaining mixed-load families are deferred as described above; they do not block this baseline.
 All stages use the same restored dataset; do not reset between suites.
 Gatling compilation runs in parallel with restore and transfers the compiled classes/resources
 to the test runner, which skips recompilation. Restore has a 45-minute budget, compilation 20 minutes, and
@@ -733,7 +762,9 @@ preparation without readable state blocks database reset while still attempting 
 Before a large restore, use **Reset Database - NFT** with `verify-only=true` to check the existing QA baseline
 without resetting it. Set `smoke-performance-profile=true` and `expected-app-sha` to the exact deployed SHA to
 also check performance-profile startup, EPC readiness, simulator discovery, the login redirect and the controlled
-payment HTTP roundtrip. The smoke restores the original app/simulator and removes its own runner access even
+payment HTTP roundtrip. This optional extended-profile smoke currently fails at the public EPC health probe
+because of NFT edge rewriting; it is not a prerequisite for the simulator-only baseline.
+The smoke restores the original app/simulator and removes its own runner access even
 on failure; its recovery artifact is retained for seven days. It does not complete login or run Gatling journeys,
 and does not replace full-dataset fixture-capacity checks or the concurrent load proof.
 

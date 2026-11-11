@@ -167,7 +167,7 @@ jobs:
       - name: Check compiled simulation was transferred
         run: |
           test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BasicJourneysSimulation.class
-          test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/RampedLoadSimulation.class
+          test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BaselineLoadSimulation.class
       - uses: actions/download-artifact@v8
         with:
           name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
@@ -192,7 +192,7 @@ jobs:
           EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
           FAIL_READINESS_SMOKE: ${{ inputs.fail-smoke == true }}
           READINESS_STATE_PATH: ${{ runner.temp }}/nft-state.json
-          PERFORMANCE_TEST_MOCKS_ENABLED: ${{ vars.NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY }}
+          PERFORMANCE_TEST_MOCKS_ENABLED: 'false'
         run: node scripts/performance-tests/nft-prepare.mjs
       - name: Export distinct owners and saved registrations through read-only SSM tunnel
         id: exportOwners
@@ -287,162 +287,32 @@ jobs:
             -Dgatling.property.fixtureOffset=11 \
             -Dgatling.certificate.downloadOrigin=https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com \
             -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf"
-      - name: Export operator and exclusive administrator targets through read-only SSM tunnel
-        id: exportOperatorFixtures
-        continue-on-error: true
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: operator-fixtures
-      - name: Run operator access changes and stubbed invitations
-        id: operatorJourneys
-        continue-on-error: true
-        run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
-            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
-            --simulation uk.gov.communities.prsdb.webapp.performance.OperatorOperationsSimulation \
-            -Dgatling.target=nft \
-            -Dgatling.basic.mode=baseline \
-            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
-            -Dgatling.operator.fixturePath="$RUNNER_TEMP/nft-operator-fixtures.json" \
-            -Dgatling.council.emailDeliveryStub=true
-      - name: Export property-registration owners and free addresses for the mixed ramp
-        id: exportRegistrationFixtures
-        continue-on-error: true
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: registration-fixtures
-      - name: Export exclusive letting-agent properties for the mixed ramp
-        id: exportAgentFixtures
-        continue-on-error: true
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: agent-fixtures
-      - name: Export exclusive joint-landlord properties for the mixed ramp
-        id: exportJointFixtures
-        continue-on-error: true
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: joint-fixtures
-      - name: Export exclusive property deregistration fixtures for the mixed ramp
-        id: exportOffboardingFixtures
-        continue-on-error: true
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: offboarding-fixtures
-      - name: Prepare real letting-agent access invitations
-        id: prepareAgentInvitations
-        continue-on-error: true
-        if: steps.exportAgentFixtures.outcome == 'success'
-        run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
-            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
-            --simulation uk.gov.communities.prsdb.webapp.performance.AgentSimulation \
-            -Dgatling.target=nft -Dgatling.basic.mode=baseline \
-            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.basic.landlordSubject=unused-preparation-subject \
-            -Dgatling.basic.iterations=27 \
-            -Dgatling.agent.mode=prepare-delegation \
-            -Dgatling.agent.fixturePath="$RUNNER_TEMP/nft-agent-fixtures.json"
-      - name: Export real prepared letting-agent tokens
-        id: exportAgentAccess
-        continue-on-error: true
-        if: steps.prepareAgentInvitations.outcome == 'success'
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: agent-access-fixtures
-      - name: Prepare real existing-user joint invitations
-        id: prepareJointInvitations
-        continue-on-error: true
-        if: steps.exportJointFixtures.outcome == 'success'
-        run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
-            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
-            --simulation uk.gov.communities.prsdb.webapp.performance.JointLandlordSimulation \
-            -Dgatling.target=nft -Dgatling.basic.mode=baseline \
-            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.basic.landlordSubject=unused-preparation-subject \
-            -Dgatling.basic.iterations=27 \
-            -Dgatling.joint.fixturePath="$RUNNER_TEMP/nft-joint-fixtures.json"
-      - name: Export real prepared joint acceptance tokens
-        id: exportJointAcceptance
-        continue-on-error: true
-        if: steps.prepareJointInvitations.outcome == 'success'
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: joint-accept-fixtures
-      - name: Prepare real organisation team invitations
-        id: prepareOrganisationInvitations
-        continue-on-error: true
-        if: steps.exportOrganisationFixtures.outcome == 'success'
-        run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
-            -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
-            --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationOperationsSimulation \
-            -Dgatling.target=nft -Dgatling.basic.mode=baseline \
-            -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
-            -Dgatling.basic.landlordSubject=unused-preparation-subject \
-            -Dgatling.basic.iterations=16 \
-            -Dgatling.organisation.operation=team \
-            -Dgatling.organisation.fixtureOffset=22 \
-            -Dgatling.organisation.runId="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            -Dgatling.organisation.operationsFixturePath="$RUNNER_TEMP/nft-organisation-fixtures.json"
-      - name: Export real prepared organisation team tokens
-        id: exportOrganisationTeam
-        continue-on-error: true
-        if: steps.prepareOrganisationInvitations.outcome == 'success'
-        uses: ./.github/actions/verify-nft-database
-        with:
-          mode: organisation-team-fixtures
-      - name: Run provisional ten-family concurrent calibration ramp with council deferred
+      - name: Run the established four-family concurrent baseline ramp
         id: rampedJourneys
         continue-on-error: true
         if: >-
-          vars.NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY == 'true' &&
           steps.prepare.outcome == 'success' &&
           steps.exportOwners.outcome == 'success' &&
           steps.exportPropertyFixtures.outcome == 'success' &&
-          steps.exportOrganisationFixtures.outcome == 'success' &&
-          steps.exportOperatorFixtures.outcome == 'success' &&
-          steps.exportRegistrationFixtures.outcome == 'success' &&
-          steps.exportAgentAccess.outcome == 'success' &&
-          steps.exportJointAcceptance.outcome == 'success' &&
-          steps.exportOrganisationTeam.outcome == 'success' &&
-          steps.exportOffboardingFixtures.outcome == 'success'
+          steps.exportOrganisationFixtures.outcome == 'success'
         run: |
-          agent_password="$(openssl rand -hex 24)"
-          echo "::add-mask::$agent_password"
           ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
-            --simulation uk.gov.communities.prsdb.webapp.performance.RampedLoadSimulation \
+            --simulation uk.gov.communities.prsdb.webapp.performance.BaselineLoadSimulation \
             -Dgatling.target=nft \
             -Dgatling.basic.mode=baseline \
             -Dgatling.baseUrl=https://nft.register-home-to-rent.test.communities.gov.uk \
             -Dgatling.simulatorUrl=https://nft.lb.register-home-to-rent.test.communities.gov.uk \
             -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo \
             -Dgatling.basic.registrationSubject="urn:fdc:gov.uk:2026:PERF-RAMP-${GITHUB_RUN_ID}" \
-            -Dgatling.registration.fixturePath="$RUNNER_TEMP/nft-registration-fixtures.json" \
-            -Dgatling.registration.paymentBaseUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/gov-uk-pay \
             -Dgatling.saved.fixturePath="$RUNNER_TEMP/nft-saved-registration-fixtures.json" \
             -Dgatling.property.fixturePath="$RUNNER_TEMP/nft-completed-property-fixtures.json" \
-            -Dgatling.organisation.fixturePath="$RUNNER_TEMP/nft-organisation-team-fixtures.json" \
-            -Dgatling.organisation.runId="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            -Dgatling.operator.fixturePath="$RUNNER_TEMP/nft-operator-fixtures.json" \
-            -Dgatling.agent.fixturePath="$RUNNER_TEMP/nft-agent-access-fixtures.json" \
-            -Dgatling.agent.password="$agent_password" \
-            -Dgatling.joint.fixturePath="$RUNNER_TEMP/nft-joint-accept-fixtures.json" \
-            -Dgatling.offboarding.fixturePath="$RUNNER_TEMP/nft-offboarding-fixtures.json" \
-            -Dgatling.council.emailDeliveryStub=true \
-            -Dgatling.certificate.downloadOrigin=https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com \
-            -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf" \
+            -Dgatling.organisation.fixturePath="$RUNNER_TEMP/nft-organisation-fixtures.json" \
             -Dgatling.ramp.rampMinutes=5 \
             -Dgatling.ramp.holdMinutes=15 \
-            -Dgatling.ramp.fixtureOffset=22 \
-            -Dgatling.ramp.operatorFixtureOffset=11
+            -Dgatling.ramp.registrationsPerMinute=26 \
+            -Dgatling.ramp.updatesPerMinute=4 \
+            -Dgatling.ramp.fixtureOffset=22
       - name: Summarise journey outcomes
         if: always() && steps.prepare.outcome == 'success'
         env:
@@ -454,19 +324,6 @@ jobs:
           EXPORT_ORGANISATION: ${{ steps.exportOrganisationFixtures.outcome }}
           ORGANISATION_PROFILE: ${{ steps.organisationProfileUpdates.outcome }}
           CERTIFICATE_UPLOADS: ${{ steps.certificateUploads.outcome }}
-          EXPORT_OPERATOR: ${{ steps.exportOperatorFixtures.outcome }}
-          OPERATOR_JOURNEYS: ${{ steps.operatorJourneys.outcome }}
-          EXPORT_REGISTRATION: ${{ steps.exportRegistrationFixtures.outcome }}
-          EXPORT_AGENT: ${{ steps.exportAgentFixtures.outcome }}
-          EXPORT_JOINT: ${{ steps.exportJointFixtures.outcome }}
-          EXPORT_OFFBOARDING: ${{ steps.exportOffboardingFixtures.outcome }}
-          PREPARE_AGENT: ${{ steps.prepareAgentInvitations.outcome }}
-          EXPORT_AGENT_ACCESS: ${{ steps.exportAgentAccess.outcome }}
-          PREPARE_JOINT: ${{ steps.prepareJointInvitations.outcome }}
-          EXPORT_JOINT_ACCEPTANCE: ${{ steps.exportJointAcceptance.outcome }}
-          PREPARE_ORGANISATION: ${{ steps.prepareOrganisationInvitations.outcome }}
-          EXPORT_ORGANISATION_TEAM: ${{ steps.exportOrganisationTeam.outcome }}
-          PAYMENT_MOCK_READY: ${{ vars.NFT_PERFORMANCE_TEST_PAYMENT_MOCK_READY == 'true' && 'success' || 'failure' }}
           RAMPED_JOURNEYS: ${{ steps.rampedJourneys.outcome }}
         run: |
           failed=false
@@ -479,19 +336,6 @@ jobs:
             "Export organisation fixtures:$EXPORT_ORGANISATION" \
             "Organisation profile updates:$ORGANISATION_PROFILE" \
             "Certificate uploads:$CERTIFICATE_UPLOADS" \
-            "Export operator fixtures:$EXPORT_OPERATOR" \
-            "Operator journeys:$OPERATOR_JOURNEYS" \
-            "Export property-registration fixtures:$EXPORT_REGISTRATION" \
-            "Export letting-agent fixtures:$EXPORT_AGENT" \
-            "Export joint-landlord fixtures:$EXPORT_JOINT" \
-            "Export offboarding fixtures:$EXPORT_OFFBOARDING" \
-            "Prepare agent invitations:$PREPARE_AGENT" \
-            "Export agent access tokens:$EXPORT_AGENT_ACCESS" \
-            "Prepare joint invitations:$PREPARE_JOINT" \
-            "Export joint acceptance tokens:$EXPORT_JOINT_ACCEPTANCE" \
-            "Prepare organisation invitations:$PREPARE_ORGANISATION" \
-            "Export organisation team tokens:$EXPORT_ORGANISATION_TEAM" \
-            "NFT performance payment and EPC mocks enabled:$PAYMENT_MOCK_READY" \
             "Ramped journeys:$RAMPED_JOURNEYS"; do
             name="${stage%%:*}"
             outcome="${stage#*:}"
@@ -501,12 +345,11 @@ jobs:
             fi
           done
           {
-            echo '### PDJB-553 provisional normal-load calibration'
-            echo 'Covered representatives: individual landlord, paid property registration, saved property, completed property, certificates/compliance, organisation, joint landlord, letting agent, system operator and property offboarding. Council authentication/journeys are explicitly deferred to future work.'
-            echo 'Offered arrival profile: occupied property registration 26/minute; each of the other nine families 1/minute provisionally; 5-minute linear ramp and 15-minute hold (608 starts). Two-second provisional pauses are at user decision transitions, not authentication or polling.'
-            echo 'EPC and payment responses are synthetic app-profile mocks; the real EPC HTTP client, validation and persistence remain exercised. Stub processing shares app resources and does not measure real external-service performance.'
-            echo 'Gates: zero failed requests and expected successful completion counts for each representative family. Gatling mean/max timings are reported for calibration only; no NFT mean/max acceptance thresholds are asserted.'
-            echo 'Third-party simulator and payment front-channel time is not an application performance budget. Repeat the same profile in separately approved runs before agreeing timing limits with the workload/SLO owner.'
+            echo '### PDJB-553 established NFT baseline'
+            echo 'Concurrent families: individual landlord registration, saved registration, completed-property updates and organisation profile updates. Correctness stages also exercise certificate uploads.'
+            echo 'Offered profile: landlord registration 26/minute and each update family 4/minute; five-minute ramp and fifteen-minute hold (665 starts). Landlord registration is a provisional load proxy, NOT a property-registration capacity measurement.'
+            echo 'Gates: zero failed requests and expected successful completions for every included ramp family. Mean/max timings are calibration evidence, not agreed SLO thresholds.'
+            echo 'Actual property registration/payment/EPC routing, organisation team operations, joint landlord, letting agent, operator and offboarding mixed-load coverage remain follow-up work. Council authentication is deferred. This run does not claim ten-family acceptance.'
           } >> "$GITHUB_STEP_SUMMARY"
           if [[ "$failed" == "true" ]]; then
             echo "::error::One or more journey stages failed; see the per-stage outcomes above."

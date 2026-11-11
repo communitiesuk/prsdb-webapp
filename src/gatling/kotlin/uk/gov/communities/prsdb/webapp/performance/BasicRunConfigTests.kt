@@ -89,7 +89,7 @@ class BasicRunConfigTests {
     fun `workflow ramp supplies all mandatory basic configuration`() {
         val command =
             Files.readString(Path.of(".github/workflows/run-performance-tests.yml"))
-                .substringAfter("--simulation ${RampedLoadSimulation::class.java.name}")
+                .substringAfter("--simulation ${BaselineLoadSimulation::class.java.name}")
                 .substringBefore("\n      - name:")
         val arguments =
             command.lineSequence().map { it.trim().removeSuffix("\\").trim() }
@@ -105,22 +105,19 @@ class BasicRunConfigTests {
         val config = BasicRunConfig.from(arguments)
         assertEquals(PerformanceTarget.NFT, config.target)
         assertTrue(config.landlordSubject.isNotBlank())
-        assertEquals(
-            "https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com",
-            config.certificateDownloadOrigin,
-        )
-        assertTrue(arguments.getValue("gatling.registration.certificatePath").endsWith("/performance-certificate.pdf"))
-        assertTrue(arguments.getValue("gatling.operator.fixturePath").endsWith("/nft-operator-fixtures.json"))
-        assertEquals("true", arguments["gatling.council.emailDeliveryStub"])
-        val schedules =
-            RampedLoadProfile.schedules(
-                arguments.getValue("gatling.ramp.rampMinutes").toDouble() * 60,
-                arguments.getValue("gatling.ramp.holdMinutes").toDouble() * 60,
-            )
-        val operatorArrivals = schedules.getValue(RampedJourneyFamily.SYSTEM_OPERATOR).arrivalTimesMillis()
-        val offset = arguments.getValue("gatling.ramp.operatorFixtureOffset").toInt()
-        assertTrue(offset >= config.iterations + 1, "Operator ramp must not reuse removed correctness-stage targets")
-        assertTrue(offset + operatorArrivals.size <= 101, "Operator ramp must fit the exported pool")
+        val rampSeconds = arguments.getValue("gatling.ramp.rampMinutes").toDouble() * 60
+        val holdSeconds = arguments.getValue("gatling.ramp.holdMinutes").toDouble() * 60
+        val registrations =
+            RampSchedule(arguments.getValue("gatling.ramp.registrationsPerMinute").toDouble(), rampSeconds, holdSeconds)
+                .arrivalTimesMillis()
+        val updates =
+            RampSchedule(arguments.getValue("gatling.ramp.updatesPerMinute").toDouble(), rampSeconds, holdSeconds)
+                .arrivalTimesMillis()
+        val offset = arguments.getValue("gatling.ramp.fixtureOffset").toInt()
+        assertTrue(offset >= 2 * (config.iterations + 1), "Ramp must skip property-update and certificate correctness allocations")
+        assertTrue(offset + updates.size <= 101, "Ramp must fit each exported fixture pool")
+        assertEquals(665, registrations.size + 3 * updates.size)
+        assertTrue("gatling.registration.paymentBaseUrl" !in arguments, "Baseline must not require the unfinished payment ingress")
     }
 
     @Test
