@@ -60,11 +60,11 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `notification for a property manager fails explicitly until implemented`() {
+    fun `creation notification for a property manager fails explicitly until implemented`() {
         val propertyManager = createPropertyManager()
 
         assertThrows(NotImplementedError::class.java) {
-            associatedPartyNotificationService.sendNotificationToPropertyManager(propertyManager, email)
+            associatedPartyNotificationService.sendCreationNotificationForPropertyManager(propertyManager)
         }
 
         verifyNoInteractions(emailNotificationService, letterNotificationService)

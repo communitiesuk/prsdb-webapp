@@ -23,11 +23,9 @@ class AssociatedPartyNotificationService(
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
         TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
-    // TODO PDJB-1991: implement email notification to a property manager
-    internal fun sendNotificationToPropertyManager(
-        propertyManager: PropertyManager,
-        email: EmailTemplateModel,
-    ): AssociatedPartyNotificationOutcome = TODO("Implement property manager email notification")
+    // TODO PDJB-1991: implement once the property manager creation email template is available
+    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManager): AssociatedPartyNotificationOutcome =
+        TODO("Implement property manager creation notification when its email template is available")
 
     internal fun sendNotificationToFreeholder(
         freeholder: Freeholder,
