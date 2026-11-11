@@ -543,6 +543,21 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
             assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
             assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow).not().isVisible()
+            // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
+                .hasAttribute("href", "#")
+        }
+
+        @Test
+        fun `landlord view shows the freeholder type row for a freehold property`(page: Page) {
+            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+            // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Freehold")
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow.value).containsText("Sole ownership")
         }
 
         @Test

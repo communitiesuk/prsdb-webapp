@@ -108,31 +108,42 @@ abstract class PropertyDetailsViewModelBase(
 
     // The ownership information as the answers to the questions the landlord was asked, rather than
     // as the single derived OwnershipType. A question's row is omitted where it was not asked.
-    // TODO PDJB-2016: add change links to these rows once the ownership update journeys exist.
     protected fun ownershipAnswerRows(): List<SummaryListRowViewModel> {
         val answers = OwnershipTypeAnswersConverter.convert(propertyOwnership.ownershipType)
         return listOfNotNull(
-            row(
+            ownershipAnswerRow(
                 "propertyDetails.peopleResponsible.ownership.ownsProperty",
                 MessageKeyConverter.convert(answers.ownsProperty),
-                withActionLink = false,
             ),
             answers.ownershipKind?.let {
-                row(
+                ownershipAnswerRow(
                     "propertyDetails.peopleResponsible.ownership.ownershipType",
                     MessageKeyConverter.convert(it),
-                    withActionLink = false,
                 )
             },
             answers.freeholdType?.let {
-                row(
+                ownershipAnswerRow(
                     "propertyDetails.peopleResponsible.ownership.freeholderType",
                     MessageKeyConverter.convert(it),
-                    withActionLink = false,
                 )
             },
         )
     }
+
+    // TODO PDJB-1992: point each of these rows at the real update route once the flag-on ownership
+    //  update journey exists. They currently link to PLACEHOLDER_ACTION_LINK so the Change links are
+    //  visible for design review. The existing UpdateOwnershipTypeJourney is not a valid target: it
+    //  asks the legacy question and, as its own TODO PDJB-1992 notes, rewrites an ownership type with
+    //  no legacy equivalent even when the answer is unchanged.
+    private fun ownershipAnswerRow(
+        key: String,
+        value: Any?,
+    ): SummaryListRowViewModel =
+        rowWithViewTypeSpecificChangeLink(
+            key = key,
+            value = value,
+            landlordActionLink = PLACEHOLDER_ACTION_LINK,
+        )
 
     protected fun occupiedRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
@@ -453,6 +464,9 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
+        // TODO PDJB-1992: remove once the ownership answer rows link to their real update routes.
+        private const val PLACEHOLDER_ACTION_LINK = "#"
+
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }

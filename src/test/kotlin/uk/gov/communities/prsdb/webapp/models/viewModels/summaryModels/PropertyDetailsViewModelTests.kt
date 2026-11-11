@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -194,39 +197,39 @@ class PropertyDetailsViewModelTests {
             ),
             viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading },
         )
-        assertTrue(viewModel.peopleResponsibleOwnershipSection.none { it.hasActions }) {
-            "The ownership answer rows have no update journeys to link to yet"
+        assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.single().url == "#" }) {
+            "The ownership answer rows show placeholder change links until PDJB-1992 builds the update journey"
         }
     }
 
-    @Test
-    fun `the ownership answers omit the questions that were not asked`() {
-        val notOwned =
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideExpectedOwnershipAnswerRows")
+    fun `the ownership answers show the right rows and values for each ownership type`(
+        ownershipType: OwnershipType,
+        expectedRows: List<Pair<String, String>>,
+    ) {
+        val viewModel =
             PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(ownershipType = OwnershipType.NONE),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
-            )
-        val leaseholdOnly =
-            PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                createOccupiedPropertyOwnership(ownershipType = ownershipType),
                 isLandlordView = true,
                 messageSource = mockMessageSource,
                 associatedPartiesEnabled = true,
             )
 
         assertEquals(
-            listOf("propertyDetails.peopleResponsible.ownership.ownsProperty"),
-            notOwned.peopleResponsibleOwnershipSection.map { it.fieldHeading },
+            expectedRows,
+            viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading to it.fieldValue },
         )
+    }
+
+    @Test
+    fun `every ownership type has an expected set of ownership answer rows`() {
         assertEquals(
-            listOf(
-                "propertyDetails.peopleResponsible.ownership.ownsProperty",
-                "propertyDetails.peopleResponsible.ownership.ownershipType",
-            ),
-            leaseholdOnly.peopleResponsibleOwnershipSection.map { it.fieldHeading },
-        )
+            OwnershipType.entries.toSet(),
+            provideExpectedOwnershipAnswerRows().map { it.get()[0] }.toSet(),
+        ) {
+            "Every ownership type must be covered, so a new one cannot be added without checking its rows"
+        }
     }
 
     @Test
@@ -757,5 +760,67 @@ class PropertyDetailsViewModelTests {
             )
 
         assertTrue(viewModel.correspondenceSection.none { it.hasActions })
+    }
+
+    companion object {
+        private const val OWNS_PROPERTY = "propertyDetails.peopleResponsible.ownership.ownsProperty"
+        private const val OWNERSHIP_TYPE = "propertyDetails.peopleResponsible.ownership.ownershipType"
+        private const val FREEHOLDER_TYPE = "propertyDetails.peopleResponsible.ownership.freeholderType"
+
+        private const val YES = "commonText.yes"
+        private const val NO = "commonText.no"
+
+        private const val FREEHOLD = "registerProperty.ownershipKind.checkbox.freehold.label"
+        private const val LEASEHOLD = "registerProperty.ownershipKind.checkbox.leasehold.label"
+        private const val FREEHOLD_AND_LEASEHOLD = "registerProperty.ownershipKind.value.freeholdAndLeasehold"
+
+        private const val SOLE_OWNERSHIP = "registerProperty.freeholdType.radios.option.soleOwnership.label"
+        private const val JOINT_TENANTS = "registerProperty.freeholdType.radios.option.jointTenants.label"
+        private const val TENANTS_IN_COMMON = "registerProperty.freeholdType.radios.option.tenantsInCommon.label"
+        private const val COMMONHOLD = "registerProperty.freeholdType.radios.option.commonhold.label"
+
+        // The freeholder type row is omitted where there is no freehold to describe, and both the
+        // ownership type and freeholder type rows where the landlord does not own the property.
+        @JvmStatic
+        fun provideExpectedOwnershipAnswerRows() =
+            listOf(
+                Arguments.of(OwnershipType.NONE, listOf(OWNS_PROPERTY to NO)),
+                Arguments.of(
+                    OwnershipType.LEASEHOLD_ONLY,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to LEASEHOLD),
+                ),
+                Arguments.of(
+                    OwnershipType.SOLE_FREEHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                ),
+                Arguments.of(
+                    OwnershipType.JOINT_TENANTS,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                ),
+                Arguments.of(
+                    OwnershipType.TENANTS_IN_COMMON,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                ),
+                Arguments.of(
+                    OwnershipType.COMMONHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_SOLE_FREEHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_JOINT_TENANTS,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_TENANTS_IN_COMMON,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_COMMONHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                ),
+            )
     }
 }
