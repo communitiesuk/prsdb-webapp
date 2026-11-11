@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - nft
+      - feat/PDJB-1748-finish-nft-seeding
 
 permissions:
   id-token: write

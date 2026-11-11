@@ -32,7 +32,7 @@ permissions:
 jobs:
   changes:
     name: Check NFT changes
-    if: github.ref == 'refs/heads/nft'
+    if: github.ref == 'refs/heads/nft' || github.ref == 'refs/heads/feat/PDJB-1748-finish-nft-seeding'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
