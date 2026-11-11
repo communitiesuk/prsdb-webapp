@@ -216,11 +216,12 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOwnershipKind() = beforePropertyRegistrationOwnsProperty().withOwnsProperty()
 
+        fun beforePropertyRegistrationFreeholdType(ownershipKind: OwnershipKind = OwnershipKind.FREEHOLD_ONLY) =
+            beforePropertyRegistrationOwnershipKind().withOwnershipKind(ownershipKind)
+
         fun beforePropertyRegistrationFreeholdersInfo(isJointFreeholder: Boolean = true) =
             if (isJointFreeholder) {
-                beforePropertyRegistrationOwnsProperty()
-                    .withOwnsProperty()
-                    .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+                beforePropertyRegistrationFreeholdType(OwnershipKind.FREEHOLD_ONLY)
                     .withFreeholdType(FreeholdType.JOINT_TENANTS)
             } else {
                 beforePropertyRegistrationOwnsProperty()
@@ -289,9 +290,7 @@ class PropertyStateSessionBuilder(
             .withFreeholderManualAddressSelected()
 
         fun beforePropertyRegistrationHasSuperiorLandlords() =
-            beforePropertyRegistrationOwnsProperty()
-                .withOwnsProperty()
-                .withOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+            beforePropertyRegistrationFreeholdType(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
                 .withFreeholdType(FreeholdType.SOLE_OWNERSHIP)
 
         fun beforePropertyRegistrationHasSuperiorLandlordsAfterFreeholders(
