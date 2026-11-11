@@ -12,30 +12,29 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.LocalDate
 
 @PrsdbWebService
-class ActiveStatusService(
+class ActiveInactiveService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
-    fun deactivateProperty(
-        propertyOwnershipId: Long,
-        deactivationDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
-    ) {
+    fun deactivateProperty(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         if (!propertyOwnership.isActive) {
             println("Property ownership $propertyOwnershipId is already inactive - no change made")
             return
         }
 
+        val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
         propertyOwnershipRepository.save(propertyOwnership)
+        // TODO PDJB-2106: Email the letting agent when their delegation is removed
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
 
         propertyOwnership.landlords
             .filterNot { propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(it.id, propertyOwnershipId) }
-            .forEach { deactivateLandlordIfActive(it, deactivationDate) }
+            .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
 
     // TODO PDJB-2047: Reactivate inactive landlords when a property is reactivated
@@ -52,14 +51,11 @@ class ActiveStatusService(
     }
 
     @Transactional
-    fun deactivateLandlord(
-        landlord: Landlord,
-        deactivationDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
-    ) {
+    fun deactivateLandlord(landlord: Landlord) {
         check(!propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
             "Landlord ${landlord.id} cannot be deactivated while they have active properties"
         }
-        deactivateLandlordIfActive(landlord, deactivationDate)
+        markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
     }
 
     @Transactional
@@ -73,7 +69,7 @@ class ActiveStatusService(
         landlordRepository.save(landlord)
     }
 
-    private fun deactivateLandlordIfActive(
+    private fun markLandlordAsInactive(
         landlord: Landlord,
         deactivationDate: LocalDate,
     ) {

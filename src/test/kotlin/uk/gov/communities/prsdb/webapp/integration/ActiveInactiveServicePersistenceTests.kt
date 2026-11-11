@@ -7,12 +7,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.services.ActiveStatusService
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import java.time.LocalDate
 
-class ActiveStatusServicePersistenceTests : IntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
+class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
     @Autowired
-    private lateinit var activeStatusService: ActiveStatusService
+    private lateinit var activeInactiveService: ActiveInactiveService
 
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -22,23 +23,23 @@ class ActiveStatusServicePersistenceTests : IntegrationTestWithMutableData("data
 
     @Test
     fun `deactivating a jointly owned property deactivates only the landlord with no other active property`() {
-        activeStatusService.deactivateProperty(JOINT_PROPERTY_ID, DEACTIVATION_DATE)
+        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
 
         val property = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get()
         assertFalse(property.isActive)
-        assertEquals(DEACTIVATION_DATE, property.lastDeactivatedDate)
+        assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), property.lastDeactivatedDate)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
         val deactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
         assertFalse(deactivatedLandlord.isActive)
-        assertEquals(DEACTIVATION_DATE, deactivatedLandlord.lastDeactivatedDate)
+        assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), deactivatedLandlord.lastDeactivatedDate)
     }
 
     @Test
     fun `deactivating a landlord's last active property deactivates the landlord`() {
-        activeStatusService.deactivateProperty(SOLE_PROPERTY_ID, DEACTIVATION_DATE)
+        activeInactiveService.deactivateProperty(SOLE_PROPERTY_ID)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
 
-        activeStatusService.deactivateProperty(JOINT_PROPERTY_ID, DEACTIVATION_DATE)
+        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
         assertFalse(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
     }
 
@@ -47,6 +48,5 @@ class ActiveStatusServicePersistenceTests : IntegrationTestWithMutableData("data
         private const val JOINT_PROPERTY_ID = 2L
         private const val LANDLORD_WITH_OTHER_PROPERTY_ID = 1L
         private const val LANDLORD_WITH_NO_OTHER_PROPERTY_ID = 2L
-        private val DEACTIVATION_DATE = LocalDate.of(2026, 11, 10)
     }
 }
