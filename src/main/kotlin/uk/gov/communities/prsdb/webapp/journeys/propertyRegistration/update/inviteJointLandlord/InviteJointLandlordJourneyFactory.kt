@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -49,7 +49,7 @@ class InviteJointLandlordJourneyFactory(
             propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
 
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-        val propertyDetailsLandlordTab = "$propertyDetailsRoute#$LANDLORD_DETAILS_FRAGMENT"
+        val propertyDetailsLandlordTab = "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT"
         val confirmationRoute =
             InviteJointLandlordController.getInviteJointLandlordRoute(propertyId) + "/$CONFIRMATION_PATH_SEGMENT"
 

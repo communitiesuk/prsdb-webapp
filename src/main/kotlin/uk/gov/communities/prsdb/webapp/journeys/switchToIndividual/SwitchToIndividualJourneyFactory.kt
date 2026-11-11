@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.SwitchToIndividualController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -30,7 +30,7 @@ class SwitchToIndividualJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         val propertyDetailsLandlordTab =
-            "${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
+            "${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }

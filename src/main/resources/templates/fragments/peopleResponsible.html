@@ -1,4 +1,4 @@
-<div th:fragment="landlordDetailsTabContent" th:remove="tag">
+<div th:fragment="peopleResponsibleTabContent" th:remove="tag">
                     <h2 class="govuk-heading-m" th:text="#{${propertyDetails.peopleResponsibleTabHeadingKey}}">propertyDetails.peopleResponsible.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
                     <th:block th:each="card : ${landlordSummaryCards}">
