@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
@@ -16,8 +15,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
@@ -135,31 +132,6 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { status { isOk() } }
-                }
-        }
-
-        // TODO PDJB-2016: remove this test when the ASSOCIATED_PARTIES feature flag is removed
-        @Test
-        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-        fun `getPropertyDetails shows the ownership answers on the people responsible tab when associated parties is enabled`() {
-            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS)
-
-            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
-            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
-                .thenReturn(
-                    propertyOwnership,
-                )
-            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-                .thenReturn(Pair(emptyList(), emptyList()))
-
-            mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
-                .andExpect {
-                    status { isOk() }
-                    content { string(containsString("propertyDetails.peopleResponsible.heading")) }
-                    content { string(containsString("propertyDetails.peopleResponsible.ownership.heading")) }
-                    content { string(containsString("propertyDetails.peopleResponsible.ownership.freeholderType")) }
-                    content { string(not(containsString("propertyDetails.propertyRecord.ownership.heading"))) }
                 }
         }
 

@@ -96,11 +96,11 @@ abstract class PropertyDetailsViewModelBase(
             withActionLink = false,
         )
 
-    protected fun ownershipTypeRow(): SummaryListRowViewModel =
+    // TODO PDJB-2016: delete this row along with the ASSOCIATED_PARTIES flag. It is only still shown
+    //  with the flag off, and on the local council view until PDJB-1999.
+    protected fun ownershipTypeRowBeforePdjb955(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",
-            // TODO PDJB-2016: delete this row along with the ASSOCIATED_PARTIES flag. It is only
-            //  still shown with the flag off, and on the local council view until PDJB-1999.
             MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
@@ -131,10 +131,7 @@ abstract class PropertyDetailsViewModelBase(
     }
 
     // TODO PDJB-1992: point each of these rows at the real update route once the flag-on ownership
-    //  update journey exists. They currently link to PLACEHOLDER_ACTION_LINK so the Change links are
-    //  visible for design review. The existing UpdateOwnershipTypeJourney is not a valid target: it
-    //  asks the legacy question and, as its own TODO PDJB-1992 notes, rewrites an ownership type with
-    //  no legacy equivalent even when the answer is unchanged.
+    //  update journey exists.
     private fun ownershipAnswerRow(
         key: String,
         value: Any?,

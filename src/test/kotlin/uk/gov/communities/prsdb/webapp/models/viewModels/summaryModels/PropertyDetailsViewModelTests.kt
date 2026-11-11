@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -153,7 +154,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `registration, ownership and occupation sections contain the expected rows`() {
+    fun `registration and occupation sections contain the expected rows`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
         val viewModel =
@@ -167,17 +168,13 @@ class PropertyDetailsViewModelTests {
             viewModel.registrationDetails.map { it.fieldHeading },
         )
         assertEquals(
-            listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
-            viewModel.ownershipSection.map { it.fieldHeading },
-        )
-        assertEquals(
             listOf("propertyDetails.propertyRecord.occupation.isOccupied"),
             viewModel.occupiedSection.map { it.fieldHeading },
         )
     }
 
     @Test
-    fun `the people responsible tab shows the ownership answers when associated parties is enabled`() {
+    fun `the people responsible tab shows the ownership answers`() {
         val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS)
 
         val viewModel =
@@ -185,7 +182,6 @@ class PropertyDetailsViewModelTests {
                 propertyOwnership,
                 isLandlordView = true,
                 messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
             )
 
         assertTrue(viewModel.showPeopleResponsibleOwnership)
@@ -213,7 +209,6 @@ class PropertyDetailsViewModelTests {
                 createOccupiedPropertyOwnership(ownershipType = ownershipType),
                 isLandlordView = true,
                 messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
             )
 
         assertEquals(
@@ -239,7 +234,6 @@ class PropertyDetailsViewModelTests {
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS),
                 isLandlordView = true,
                 messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
             )
 
         (
@@ -255,65 +249,74 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the landlord's old ownership section is hidden when associated parties is enabled`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
-            )
-
-        assertFalse(viewModel.showOwnershipSection)
-        assertTrue(viewModel.ownershipSection.isEmpty())
-    }
-
-    @Test
-    fun `the local council keeps the old ownership section when associated parties is enabled`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(),
-                isLandlordView = false,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
-            )
-
-        assertTrue(viewModel.showOwnershipSection)
-        assertEquals(
-            listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
-            viewModel.ownershipSection.map { it.fieldHeading },
-        )
-        assertFalse(viewModel.showPeopleResponsibleOwnership)
-    }
-
-    @Test
-    fun `the old ownership section and tab name are kept when associated parties is disabled`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = false,
-            )
-
-        assertTrue(viewModel.showOwnershipSection)
-        assertFalse(viewModel.showPeopleResponsibleOwnership)
-        assertTrue(viewModel.peopleResponsibleOwnershipSection.isEmpty())
-        assertEquals("propertyDetails.landlordDetails.heading", viewModel.peopleResponsibleTabHeadingKey)
-    }
-
-    @Test
-    fun `the tab heading is renamed for both views when associated parties is enabled`() {
+    fun `the tab heading is renamed for both views`() {
         listOf(true, false).forEach { isLandlordView ->
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
                     isLandlordView = isLandlordView,
                     messageSource = mockMessageSource,
-                    associatedPartiesEnabled = true,
                 )
 
             assertEquals("propertyDetails.peopleResponsible.heading", viewModel.peopleResponsibleTabHeadingKey)
+        }
+    }
+
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. It covers the single
+    //  legacy ownership row on the property record tab, which goes with the flag (PDJB-1999 moves the
+    //  local council view onto the people responsible tab first).
+    @Nested
+    inner class OwnershipBeforePdjb955 {
+        @Test
+        fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = true,
+                )
+
+            assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
+        }
+
+        @Test
+        fun `the local council keeps the legacy ownership section when associated parties is enabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = false,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = true,
+                )
+
+            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
+            )
+            assertFalse(viewModel.showPeopleResponsibleOwnership)
+        }
+
+        @Test
+        fun `the legacy ownership section and tab name are kept when associated parties is disabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
+            )
+            assertFalse(viewModel.showPeopleResponsibleOwnership)
+            assertTrue(viewModel.peopleResponsibleOwnershipSection.isEmpty())
+            assertEquals("propertyDetails.landlordDetails.heading", viewModel.peopleResponsibleTabHeadingKey)
         }
     }
 

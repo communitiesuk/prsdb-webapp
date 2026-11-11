@@ -92,9 +92,9 @@
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
                     <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>
                     <!-- TODO PDJB-2016: delete this block along with the ASSOCIATED_PARTIES flag -->
-                    <th:block th:if="${propertyDetails.showOwnershipSection}">
+                    <th:block th:if="${propertyDetails.showOwnershipSectionOnPropertyDetailsTab}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
+                        <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSectionBeforePdjb955)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSectionBeforePdjb955})}"></dl>
                     </th:block>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.correspondence.heading}">propertyDetails.propertyRecord.correspondence.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.correspondenceSection})}"></dl>

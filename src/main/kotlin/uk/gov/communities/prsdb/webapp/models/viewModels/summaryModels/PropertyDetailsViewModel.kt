@@ -10,8 +10,9 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
-    // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag
-    associatedPartiesEnabled: Boolean = false,
+    // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
+    //  defaults to the flag-on behaviour so that removing it leaves the right default.
+    associatedPartiesEnabled: Boolean = true,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
@@ -25,9 +26,12 @@ class PropertyDetailsViewModel(
     // responsible tab when the flag is on.
     // TODO PDJB-1999: give the local council view its own ownership section on the people
     //  responsible tab. Until then it keeps the single legacy row on the property record tab.
+    // TODO PDJB-2016: remove this property, showOwnershipSectionOnPropertyDetailsTab and the
+    //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
+    //  Once PDJB-1999 is done both views always use the flag-on version.
     val showPeopleResponsibleOwnership: Boolean = isLandlordView && associatedPartiesEnabled
 
-    val showOwnershipSection: Boolean = !showPeopleResponsibleOwnership
+    val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
     val peopleResponsibleTabHeadingKey: String =
         if (associatedPartiesEnabled) {
@@ -47,8 +51,8 @@ class PropertyDetailsViewModel(
     val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
-    val ownershipSection: List<SummaryListRowViewModel> =
-        if (showOwnershipSection) listOf(ownershipTypeRow()) else emptyList()
+    val ownershipSectionBeforePdjb955: List<SummaryListRowViewModel> =
+        if (showOwnershipSectionOnPropertyDetailsTab) listOf(ownershipTypeRowBeforePdjb955()) else emptyList()
 
     val correspondenceSection: List<SummaryListRowViewModel> =
         listOf(

@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -221,6 +220,31 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val firstCard = detailsPage.landlordSummaryCards.first()
                 assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
                 assertThat(firstCard.summaryList.registrationNumberRow.value).containsText("L-CKSQ-3SX9")
+            }
+
+            @Test
+            fun `the ownership answers are shown, omitting the rows for questions that were not asked`(page: Page) {
+                // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, so freeholder type is not asked
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow).not().isVisible()
+                // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
+                    .hasAttribute("href", "#")
+            }
+
+            @Test
+            fun `the ownership answers include the freeholder type for a freehold property`(page: Page) {
+                // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Freehold")
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow.value).containsText("Sole ownership")
             }
 
             @Test
@@ -533,36 +557,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class PeopleResponsibleOwnership {
-        @Test
-        fun `landlord view shows the ownership answers on the people responsible tab`(page: Page) {
-            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.tabs.goToPeopleResponsible()
-
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow).not().isVisible()
-            // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
-                .hasAttribute("href", "#")
-        }
-
-        @Test
-        fun `landlord view shows the freeholder type row for a freehold property`(page: Page) {
-            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
-            // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
-            detailsPage.tabs.goToPeopleResponsible()
-
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Freehold")
-            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow.value).containsText("Sole ownership")
-        }
-
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. PDJB-1999 moves the
+    //  local council view onto the people responsible tab, after which no view shows the legacy row.
+    inner class OwnershipBeforePdjb955 {
         @Test
         fun `local council view keeps the ownership row on the property record`(page: Page) {
-            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
@@ -580,7 +579,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
-            // The ownership section moves to the people responsible tab when ASSOCIATED_PARTIES is on
+            // The ownership section is shown on the people responsible tab instead
+            // TODO PDJB-2016: remove these two assertions with the flag, once the legacy row is gone
             assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow).isHidden()
         }
