@@ -1,5 +1,18 @@
 name: Reset Database - NFT
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      verify-only:
+        description: Verify the existing QA baseline without resetting the database
+        type: boolean
+        default: false
+      smoke-performance-profile:
+        description: Check controlled dependencies and simulator wiring, then restore the baseline
+        type: boolean
+        default: false
+      expected-app-sha:
+        description: Exact deployed app SHA required for the performance-profile smoke
+        type: string
 
 concurrency:
   group: nft-app-service-operation
@@ -12,8 +25,67 @@ permissions:
 jobs:
   reset-database:
     name: Reset Database
+    if: inputs.verify-only != true
     uses: ./.github/workflows/reset-database.yml
     with:
       environment: nft
       aws-account-id: 448120078528
       checkout-ref: ${{ github.sha }}
+
+  verify-qa:
+    name: Verify QA baseline and optional performance readiness
+    needs: reset-database
+    if: always() && inputs.verify-only == true
+    environment: nft
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify the exact QA properties and required links
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: qa
+      - name: Validate the requested smoke revision
+        if: inputs.smoke-performance-profile == true
+        env:
+          EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha }}
+        run: |
+          [[ "$EXPECTED_NFT_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::An exact deployed app SHA is required."
+            exit 1
+          }
+      - name: Configure readiness credentials
+        if: inputs.smoke-performance-profile == true
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Read runner IPv4 address
+        if: inputs.smoke-performance-profile == true
+        run: |
+          runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
+          echo "::add-mask::$runner_ip"
+          echo "RUNNER_IP=$runner_ip" >> "$GITHUB_ENV"
+          echo "READINESS_STATE_PATH=$RUNNER_TEMP/nft-state.json" >> "$GITHUB_ENV"
+      - name: Check performance-profile startup and dependency readiness
+        id: prepare
+        if: inputs.smoke-performance-profile == true
+        env:
+          EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha }}
+          PERFORMANCE_TEST_MOCKS_ENABLED: 'true'
+        run: node scripts/performance-tests/nft-prepare.mjs
+      - name: Restore baseline and remove this run's access
+        if: always() && steps.prepare.outcome != 'skipped' && steps.prepare.outcome != ''
+        run: node scripts/performance-tests/nft-restore.mjs
+      - name: Preserve exact recovery state
+        if: always() && steps.prepare.outcome != 'skipped' && steps.prepare.outcome != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-readiness-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nft-state.json
+          if-no-files-found: error
+          retention-days: 7
