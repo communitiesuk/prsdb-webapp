@@ -876,7 +876,45 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             freeholdersListPage.backLink.clickAndWait()
 
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersChangeLink).isVisible()
+        }
+
+        @Test
+        fun `the back link on the freeholders list returns to CYA for a non-property owner`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = null,
+                    ownsProperty = false,
+                )
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.backLink.clickAndWait()
+
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersChangeLink).isVisible()
+        }
+
+        @Test
+        fun `the back link on the joint freeholders list returns to CYA`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = OwnershipKind.FREEHOLD_AND_LEASEHOLD,
+                    freeholdType = FreeholdType.TENANTS_IN_COMMON,
+                )
+
+            checkAnswersPage.jointFreeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 joint freeholders")
+            freeholdersListPage.backLink.clickAndWait()
+
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersChangeLink).isVisible()
         }
 
         @Test
