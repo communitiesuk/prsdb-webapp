@@ -2,24 +2,19 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationGasSafetyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 
-// TODO PDJB-2038: replace this placeholder with the real reactivation gas safety pages
-class GasSafetyFormPagePropertyReactivation(
+class GasCertExpiredFormPagePropertyReactivation(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
         ReactivatePropertyController.getPropertyReactivationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${ReactivationGasSafetyStep.ROUTE_SEGMENT}",
+            "/${GasCertExpiredStep.ROUTE_SEGMENT}",
     ) {
-    val heading = Heading(page.locator("h1"))
-    val backLink = BackLink.default(page)
+    val changeIssueDateLink = Link.byText(page.locator("html"), "Change the issue date")
     val form = PostForm(page)
-
-    fun submit() = form.submit()
 }

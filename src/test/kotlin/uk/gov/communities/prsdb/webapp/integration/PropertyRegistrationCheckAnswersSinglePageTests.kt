@@ -766,7 +766,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withAnyoneInOwnershipChain(false),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            var checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
             assertThat(checkAnswersPage.summaryList.anyoneInOwnershipChainRow.value).hasText("No")
@@ -798,6 +798,17 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
             checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
+        }
+
+        @Test
+        fun `The back link on the superior landlords list page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithSuperiorLandlords(page)
+
+            checkAnswersPage.superiorLandlordsChangeLink.clickAndWait()
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            superiorLandlordsListPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         private fun goToCheckAnswersWithSuperiorLandlords(page: Page): CheckAnswersPagePropertyRegistration {

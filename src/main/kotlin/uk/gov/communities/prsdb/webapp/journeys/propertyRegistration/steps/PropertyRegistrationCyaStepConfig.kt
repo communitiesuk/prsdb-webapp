@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
@@ -185,14 +186,24 @@ class PropertyRegistrationCyaStepConfig(
         val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
         val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
         val anyoneInOwnershipChain =
-            anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain ?: return emptyMap()
+            anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the anyone in ownership chain step was answered",
+                )
 
         return if (anyoneInOwnershipChain) {
             val listStep = superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep
             mapOf(
                 "superiorLandlordsChangeUrl" to Destination.VisitableStep(listStep, state.getCyaJourneyId(listStep)).toUrlStringOrNull(),
                 "superiorLandlordsCards" to
-                    superiorLandlordSummaryCardHelper.getSummaryCards(superiorLandlordsTask.superiorLandlordsMap ?: emptyMap()),
+                    superiorLandlordSummaryCardHelper.getSummaryCards(
+                        superiorLandlordsTask.superiorLandlordsMap
+                            ?: throw UnrecoverableJourneyStateException(
+                                state.journeyId,
+                                "Check your answers was reached with anyone in ownership chain answered yes but no superior landlords",
+                            ),
+                    ),
             )
         } else {
             mapOf(

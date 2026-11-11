@@ -46,11 +46,6 @@ confirmation:
     payment: Payment
     paymentDate: Payment date
     renewalDate: Renewal date
-  whatYouNeedToDoNext:
-    heading: What you need to do next
-    uploadCompliance:
-      heading: Upload compliance certificates
-      paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   whatHappensNext:
     heading: What happens next
     lettingAgent:
@@ -469,6 +464,14 @@ superiorLandlords:
       body: You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another person in the ownership chain
+  remove:
+    fieldSetHeading: 'Are you sure you want to remove {0,,superiorLandlordName}?'
+    unknownSuperiorLandlord:
+      fieldSetHeading: Are you sure you want to remove this unknown person?
+    fieldSetHint: They will be removed from the property’s ownership chain
+    radios:
+      error:
+        missing: Select if you want to remove this person from the ownership chain
   anyoneInOwnershipChain:
     heading: Other people in the ownership chain
     paragraph:
@@ -521,9 +524,22 @@ ownershipKind:
       hint: Have a lease with a freeholder (includes most flats)
   error:
     missing: Select how you own this property
-# TODO PDJB-1961: replace with the real "What kind of freehold do you have?" content
 freeholdType:
-  fieldSetHeading: TODO PDJB-1961 What kind of freehold do you have?
+  fieldSetHeading: Which type of freehold do you have?
+  fieldSetHint: Select one option
   radios:
+    option:
+      soleOwnership:
+        label: Sole ownership
+        hint: Own the property on my own
+      jointTenants:
+        label: Joint tenants
+        hint: Joint ownership with equal rights
+      tenantsInCommon:
+        label: Tenants in common
+        hint: Joint ownership with different shares
+      commonhold:
+        label: Commonhold
+        hint: Own a ‘unit’ and have a Commonhold Community Statement
     error:
-      missing: Select the kind of freehold you have
+      missing: Select a type of freehold

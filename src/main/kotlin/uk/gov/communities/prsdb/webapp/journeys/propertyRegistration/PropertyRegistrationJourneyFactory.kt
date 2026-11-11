@@ -179,7 +179,11 @@ class PropertyRegistrationJourneyFactory(
                 AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
                 SuperiorLandlordsListStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask)
+                    val superiorLandlordsTask = journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+                    checkAnswerTask(superiorLandlordsTask)
+                    configureStep(superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 FreeholdersListStep.ROUTE_SEGMENT -> {

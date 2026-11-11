@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -24,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
@@ -709,7 +711,8 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `associated parties enabled uses the people responsible heading`() {
-            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(null)
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -721,7 +724,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `ownership type that does not require superior landlord info has no superior landlords content`() {
-            // Arrange
+            // Arrange, OwnershipType.SOLE_FREEHOLD is value that returns false for OwnershipType#requiresSuperiorLandlordInfo
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
 
             // Act
@@ -729,6 +732,28 @@ class PropertyRegistrationCyaStepConfigTests {
 
             // Assert
             assertNoSuperiorLandlordsContent(content)
+        }
+
+        @Test
+        fun `missing anyone in ownership chain answer throws an unrecoverable journey state exception`() {
+            // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `answering yes with no superior landlords throws an unrecoverable journey state exception`() {
+            // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = true))
+            whenever(mockSuperiorLandlordsTask.superiorLandlordsMap).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
         }
 
         @Test
@@ -823,6 +848,8 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
             lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
+            lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
         }
 
         // TODO PDJB-2016: Remove test once ASSOCIATED_PARTIES is released
