@@ -11,20 +11,18 @@ import jakarta.persistence.ManyToOne
  * A freeholder of the property. A row with no name, email or address means "no details known".
  */
 @Entity
-class Freeholder() :
-    ModifiableAuditableEntity(),
-    AssociatedParty {
+class Freeholder() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    override var name: String? = null
+    var name: String? = null
 
-    override var email: String? = null
+    var email: String? = null
 
     @ManyToOne
     @JoinColumn(name = "address_id")
-    override var address: Address? = null
+    var address: Address? = null
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "property_ownership_id", nullable = false)

@@ -3,7 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.AssociatedParty
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -13,28 +14,42 @@ class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, Letter
     private val emailNotificationService: EmailNotificationService<EmailModel>,
     private val letterNotificationService: LetterNotificationService<LetterModel>,
 ) {
-    fun sendNotification(
-        associatedParty: AssociatedParty,
+    fun sendNotificationToFreeholder(
+        freeholder: Freeholder,
+        email: EmailModel,
+        letter: LetterModel,
+    ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
+
+    fun sendNotificationToSuperiorLandlord(
+        superiorLandlord: SuperiorLandlord,
+        email: EmailModel,
+        letter: LetterModel,
+    ): AssociatedPartyNotificationOutcome =
+        sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
+
+    private fun sendNotification(
+        name: String?,
+        emailAddress: String?,
+        postalAddress: Address?,
         email: EmailModel,
         letter: LetterModel,
     ): AssociatedPartyNotificationOutcome {
-        if (associatedParty.isFullyRedacted()) {
+        if (emailAddress.isNullOrBlank() && postalAddress == null) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
 
-        val emailAddress = associatedParty.email
         if (!emailAddress.isNullOrBlank()) {
             emailNotificationService.sendEmail(emailAddress, email)
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
-        val name =
-            checkNotNull(associatedParty.name?.takeIf { it.isNotBlank() }) {
+        val recipientName =
+            checkNotNull(name?.takeIf { it.isNotBlank() }) {
                 "An associated party must have a name to receive a letter"
             }
-        val postalAddress =
-            checkNotNull(associatedParty.address) { "An associated party that is not fully redacted and has no email must have an address" }
-        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
+        val recipientAddress =
+            checkNotNull(postalAddress) { "An associated party that is not fully redacted and has no email must have an address" }
+        letterNotificationService.sendLetter(letterAddress(recipientName, recipientAddress), letter)
         return AssociatedPartyNotificationOutcome.LETTER_SENT
     }
 

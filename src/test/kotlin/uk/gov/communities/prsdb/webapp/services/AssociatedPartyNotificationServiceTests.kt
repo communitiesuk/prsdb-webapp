@@ -39,7 +39,17 @@ class AssociatedPartyNotificationServiceTests {
     fun `sendNotification sends nothing to a fully redacted associated party`() {
         val freeholder = Freeholder(createPropertyOwnership())
 
-        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        val outcome = associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
+
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `sendNotificationToSuperiorLandlord sends nothing when contact details are redacted`() {
+        val superiorLandlord = SuperiorLandlord(createPropertyOwnership())
+
+        val outcome = associatedPartyNotificationService.sendNotificationToSuperiorLandlord(superiorLandlord, email, letter)
 
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
@@ -55,7 +65,7 @@ class AssociatedPartyNotificationServiceTests {
                 address = postalAddress,
             )
 
-        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        val outcome = associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
         assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
         verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
@@ -66,10 +76,27 @@ class AssociatedPartyNotificationServiceTests {
     fun `sendNotification emails an associated party with an email address when their name and address are unknown`() {
         val freeholder = Freeholder(createPropertyOwnership(), email = "sarah.thompson@example.com")
 
-        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        val outcome = associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
         assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
         verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    @Test
+    fun `sendNotificationToSuperiorLandlord prefers email when a postal address is also available`() {
+        val superiorLandlord =
+            SuperiorLandlord(
+                createPropertyOwnership(),
+                name = "Daniel Roberts",
+                email = "daniel.roberts@example.com",
+                address = postalAddress,
+            )
+
+        val outcome = associatedPartyNotificationService.sendNotificationToSuperiorLandlord(superiorLandlord, email, letter)
+
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("daniel.roberts@example.com", email)
         verifyNoInteractions(letterNotificationService)
     }
 
@@ -78,7 +105,7 @@ class AssociatedPartyNotificationServiceTests {
         val superiorLandlord =
             SuperiorLandlord(createPropertyOwnership(), name = "Daniel Roberts", address = postalAddress)
 
-        val outcome = associatedPartyNotificationService.sendNotification(superiorLandlord, email, letter)
+        val outcome = associatedPartyNotificationService.sendNotificationToSuperiorLandlord(superiorLandlord, email, letter)
 
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
@@ -93,7 +120,7 @@ class AssociatedPartyNotificationServiceTests {
         val freeholder =
             Freeholder(createPropertyOwnership(), name = "Sarah Thompson", email = " ", address = postalAddress)
 
-        val outcome = associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        val outcome = associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
@@ -108,7 +135,7 @@ class AssociatedPartyNotificationServiceTests {
         val freeholder = Freeholder(createPropertyOwnership(), address = postalAddress)
 
         assertThrows(IllegalStateException::class.java) {
-            associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+            associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
         }
 
         verifyNoInteractions(letterNotificationService)
@@ -119,7 +146,7 @@ class AssociatedPartyNotificationServiceTests {
         val freeholder = Freeholder(createPropertyOwnership(), name = " ", address = postalAddress)
 
         assertThrows(IllegalStateException::class.java) {
-            associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+            associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
         }
 
         verifyNoInteractions(letterNotificationService)
@@ -144,7 +171,7 @@ class AssociatedPartyNotificationServiceTests {
             )
         val freeholder = Freeholder(createPropertyOwnership(), name = "Daniel Roberts", address = fullAddress)
 
-        associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(
@@ -173,7 +200,7 @@ class AssociatedPartyNotificationServiceTests {
             )
         val freeholder = Freeholder(createPropertyOwnership(), name = "Daniel Roberts", address = manualAddress)
 
-        associatedPartyNotificationService.sendNotification(freeholder, email, letter)
+        associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
 
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(
