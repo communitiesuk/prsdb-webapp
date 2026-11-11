@@ -113,13 +113,14 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification does not notify an associated party with an unknown name`() {
-        val freeholder = createFreeholder(email = "sarah.thompson@example.com")
+    fun `sendNotification emails a non-redacted associated party when their email address is known`() {
+        val freeholder = createFreeholder(name = "Sarah Thompson", email = "sarah.thompson@example.com")
 
         val outcome = sendNotificationToFreeholder(freeholder)
 
-        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
-        verifyNoInteractions(emailNotificationService, letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
+        verifyNoInteractions(letterNotificationService)
     }
 
     @Test
