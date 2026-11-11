@@ -798,6 +798,17 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.superiorLandlordsHeading).isVisible()
         }
 
+        @Test
+        fun `The back link on the superior landlords list page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithSuperiorLandlords(page)
+
+            checkAnswersPage.superiorLandlordsChangeLink.clickAndWait()
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            superiorLandlordsListPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
         private fun goToCheckAnswersWithSuperiorLandlords(page: Page): CheckAnswersPagePropertyRegistration {
             val taskListPage =
                 navigator.goToPropertyRegistrationTaskList(
