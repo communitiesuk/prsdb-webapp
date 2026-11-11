@@ -154,6 +154,10 @@ class FreeholderServiceTests {
         val captor = argumentCaptor<Freeholder>()
         verify(freeholderRepository).save(captor.capture())
         assertEquals(propertyOwnership, captor.firstValue.propertyOwnership)
+        // detailsKnown() only looks at the name, so assert the row is empty field by field
+        assertNull(captor.firstValue.name)
+        assertNull(captor.firstValue.email)
+        assertNull(captor.firstValue.address)
         assertFalse(captor.firstValue.detailsKnown())
         verifyNoInteractions(addressService)
     }

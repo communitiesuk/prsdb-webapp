@@ -136,7 +136,9 @@ class PropertyOwnershipService(
                 },
             )
 
-        // TODO PDJB-2015: create the freeholders the landlord gave instead of a placeholder.
+        // TODO PDJB-2015: when ASSOCIATED_PARTIES is on, create the freeholders the landlord gave
+        //  instead of a placeholder. The flag-off journey never asks who they are, so it keeps calling
+        //  createPlaceholderFreeholder until PDJB-2016 removes the flag.
         if (ownershipType.requiresFreeholderRecords()) {
             freeholderService.createPlaceholderFreeholder(propertyOwnership)
         }
@@ -325,9 +327,10 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1992: this should take the landlord's freeholder and superior landlord answers (including
-    //  the yes/no superior landlord question) so that changing the ownership type leaves the property in a
-    //  valid state, rather than falling back on a placeholder freeholder.
+    // TODO PDJB-1992: when ASSOCIATED_PARTIES is on, this should take the landlord's freeholder and
+    //  superior landlord answers (including the yes/no superior landlord question) so that changing the
+    //  ownership type leaves the property in a valid state. The flag-off journey never asks, so it keeps
+    //  falling back on a placeholder freeholder until PDJB-2016 removes the flag.
     @Transactional
     fun updateOwnershipType(
         id: Long,

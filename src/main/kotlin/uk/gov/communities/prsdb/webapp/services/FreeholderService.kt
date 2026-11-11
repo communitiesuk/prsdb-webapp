@@ -40,9 +40,9 @@ class FreeholderService(
         freeholderRepository.deleteByPropertyOwnership(propertyOwnership)
     }
 
-    // TODO PDJB-2015/PDJB-1992: remove this once property registration and the ownership type update
-    //  journey both collect real freeholders. It only exists to keep the invariant that an ownership
-    //  type requiring freeholder records always has at least one freeholder row.
+    // TODO PDJB-2016: remove this with the flag-off code paths, which never ask who the freeholder is.
+    //  It keeps the invariant that an ownership type requiring freeholder records has at least one row.
+    //  PDJB-2015 and PDJB-1992 remove the flag-on callers; the flag-off ones remain until the flag goes.
     @Transactional
     fun createPlaceholderFreeholder(propertyOwnership: PropertyOwnership) {
         freeholderRepository.save(Freeholder(propertyOwnership = propertyOwnership))
