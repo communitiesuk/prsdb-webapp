@@ -10,20 +10,26 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
 
 @PrsdbWebService
-class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, LetterModel : LetterTemplateModel>(
-    private val emailNotificationService: EmailNotificationService<EmailModel>,
-    private val letterNotificationService: LetterNotificationService<LetterModel>,
+class AssociatedPartyNotificationService(
+    private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
+    private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
 ) {
-    fun sendNotificationToFreeholder(
+    fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
+        TODO("Implement freeholder creation notification when its email and letter templates are available")
+
+    fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
+        TODO("Implement superior landlord creation notification when its email and letter templates are available")
+
+    private fun sendNotificationToFreeholder(
         freeholder: Freeholder,
-        email: EmailModel,
-        letter: LetterModel,
+        email: EmailTemplateModel,
+        letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
 
-    fun sendNotificationToSuperiorLandlord(
+    private fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlord,
-        email: EmailModel,
-        letter: LetterModel,
+        email: EmailTemplateModel,
+        letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome =
         sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
 
@@ -31,8 +37,8 @@ class AssociatedPartyNotificationService<EmailModel : EmailTemplateModel, Letter
         name: String?,
         emailAddress: String?,
         postalAddress: Address?,
-        email: EmailModel,
-        letter: LetterModel,
+        email: EmailTemplateModel,
+        letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome {
         if (emailAddress.isNullOrBlank() && postalAddress == null) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
