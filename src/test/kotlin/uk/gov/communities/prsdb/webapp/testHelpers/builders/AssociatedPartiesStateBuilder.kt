@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -213,6 +214,11 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withSuperiorLandlords(superiorLandlords: Map<Int, SuperiorLandlordDataModel>): SelfType {
         additionalDataMap["superiorLandlordsMap"] = Json.encodeToString(serializer(), superiorLandlords)
         additionalDataMap["nextSuperiorLandlordId"] = Json.encodeToString(serializer(), (superiorLandlords.keys.maxOrNull() ?: 0) + 1)
+        return self()
+    }
+
+    fun withSuperiorLandlordsListComplete(): SelfType {
+        withSubmittedValue(SuperiorLandlordsListStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }

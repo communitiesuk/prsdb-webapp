@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -108,6 +109,16 @@ class CheckAnswersPagePropertyRegistration(
 
     val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h4")
 
+    val superiorLandlordsHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Other people in the ownership chain")))
+
+    val superiorLandlordsChangeLink = Link.byText(page, "Add, change or remove people in the ownership chain")
+
+    fun getSummaryCard(
+        title: String,
+        headingLevel: String,
+    ) = SummaryCard(page, title, headingLevel)
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
@@ -131,6 +142,8 @@ class CheckAnswersPagePropertyRegistration(
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
+
+        val anyoneInOwnershipChainRow = getRow("Is there anyone else in the ownership chain?")
     }
 
     class ComplianceSummaryList(

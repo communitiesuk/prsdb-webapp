@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Bedr
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
@@ -79,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
@@ -171,6 +173,16 @@ class PropertyRegistrationJourneyFactory(
 
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
+                }
+
+                AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
+                SuperiorLandlordsListStep.ROUTE_SEGMENT,
+                -> {
+                    val superiorLandlordsTask = journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+                    checkAnswerTask(superiorLandlordsTask)
+                    configureStep(superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
