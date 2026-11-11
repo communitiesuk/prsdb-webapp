@@ -1,0 +1,36 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="tryAgainUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentNotCompleted.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentNotCompleted.heading}">
+        registerProperty.paymentNotCompleted.heading
+    </h1>
+    <p class="govuk-body" th:text="#{registerProperty.paymentNotCompleted.canHappenIf}">
+        registerProperty.paymentNotCompleted.canHappenIf
+    </p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{registerProperty.paymentNotCompleted.bullet.one}">registerProperty.paymentNotCompleted.bullet.one</li>
+        <li th:text="#{registerProperty.paymentNotCompleted.bullet.two}">registerProperty.paymentNotCompleted.bullet.two</li>
+    </ul>
+    <p class="govuk-body" th:text="#{registerProperty.paymentNotCompleted.notRegistered}">
+        registerProperty.paymentNotCompleted.notRegistered
+    </p>
+    <div class="govuk-inset-text" th:text="#{registerProperty.paymentNotCompleted.insetText}">
+        registerProperty.paymentNotCompleted.insetText
+    </div>
+    <h2 class="govuk-heading-m" th:text="#{registerProperty.paymentNotCompleted.whatYouNeedToDo.heading}">
+        registerProperty.paymentNotCompleted.whatYouNeedToDo.heading
+    </h2>
+    <p class="govuk-body" th:text="#{registerProperty.paymentNotCompleted.whatYouNeedToDo.paragraph}">
+        registerProperty.paymentNotCompleted.whatYouNeedToDo.paragraph
+    </p>
+    <p class="govuk-body">
+        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentFailed.tryAgainLink}">
+            registerProperty.paymentFailed.tryAgainLink
+        </a>
+    </p>
+</th:block>
+</html>
