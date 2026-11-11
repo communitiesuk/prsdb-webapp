@@ -8,10 +8,6 @@ data class FreeholderDataModel(
     // Null until the freeholder has been saved. Lets an update journey tell a new freeholder from an
     // existing one, so that existing rows are updated in place and only new freeholders are contacted.
     val databaseId: Long? = null,
-    // Set when the user goes through the freeholder's details in this journey. One they never started
-    // editing cannot have changed, so this stops them being written back needlessly even when their
-    // address has no UPRN to compare on.
-    val editedInJourney: Boolean = false,
     val detailsKnown: Boolean,
     val name: String? = null,
     val email: String? = null,
@@ -27,8 +23,7 @@ data class FreeholderDataModel(
 ) {
     companion object {
         // TODO PDJB-1993: use this to pre-populate the freeholders list from the database when the
-        //  update journey starts, leaving editedInJourney false so freeholders the user never opens
-        //  are not written back.
+        //  update journey starts.
         fun fromFreeholder(freeholder: Freeholder) =
             FreeholderDataModel(
                 databaseId = freeholder.id,

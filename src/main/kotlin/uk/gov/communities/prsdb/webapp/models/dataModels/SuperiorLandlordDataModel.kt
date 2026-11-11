@@ -9,10 +9,6 @@ data class SuperiorLandlordDataModel(
     // landlord from an existing one, so that existing rows are updated in place and only new superior
     // landlords are contacted.
     val databaseId: Long? = null,
-    // Set when the user goes through the superior landlord's details in this journey. One they never
-    // started editing cannot have changed, so this stops them being written back needlessly even when
-    // their address has no UPRN to compare on.
-    val editedInJourney: Boolean = false,
     val detailsKnown: Boolean,
     val name: String? = null,
     val email: String? = null,
@@ -28,8 +24,7 @@ data class SuperiorLandlordDataModel(
 ) {
     companion object {
         // TODO PDJB-1994: use this to pre-populate the superior landlords list from the database when
-        //  the update journey starts, leaving editedInJourney false so superior landlords the user
-        //  never opens are not written back.
+        //  the update journey starts.
         fun fromSuperiorLandlord(superiorLandlord: SuperiorLandlord) =
             SuperiorLandlordDataModel(
                 databaseId = superiorLandlord.id,

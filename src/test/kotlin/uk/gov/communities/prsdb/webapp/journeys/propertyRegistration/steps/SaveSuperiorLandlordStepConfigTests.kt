@@ -78,7 +78,7 @@ class SaveSuperiorLandlordStepConfigTests {
         assertEquals(
             mapOf(
                 1 to existingSuperiorLandlord,
-                4 to SuperiorLandlordDataModel(editedInJourney = true, detailsKnown = false),
+                4 to SuperiorLandlordDataModel(detailsKnown = false),
             ),
             savedMap,
         )
@@ -99,11 +99,10 @@ class SaveSuperiorLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         val savedMap = captureSavedMap()
-        // The superior landlord the user did not edit keeps editedInJourney = false
         assertEquals(
             mapOf(
                 1 to otherSuperiorLandlord,
-                2 to SuperiorLandlordDataModel(editedInJourney = true, detailsKnown = false),
+                2 to SuperiorLandlordDataModel(detailsKnown = false),
             ),
             savedMap,
         )
@@ -123,7 +122,6 @@ class SaveSuperiorLandlordStepConfigTests {
 
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
-                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 email = "superior.landlord@example.com",
@@ -150,7 +148,6 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
-                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = SELECTED_ADDRESS,
@@ -187,7 +184,6 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
-                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = manualAddress,
@@ -241,7 +237,6 @@ class SaveSuperiorLandlordStepConfigTests {
         // Assert
         val expectedSuperiorLandlord =
             SuperiorLandlordDataModel(
-                editedInJourney = true,
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),

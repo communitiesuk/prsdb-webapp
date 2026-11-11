@@ -182,6 +182,27 @@ class SuperiorLandlordServiceTests {
     }
 
     @Test
+    fun `updateSuperiorLandlord keeps an unchanged manual address instead of saving a duplicate`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val existing = SuperiorLandlord(propertyOwnership, name = "Old Name", address = address)
+
+        // Act
+        superiorLandlordService.updateSuperiorLandlord(
+            existing,
+            SuperiorLandlordDataModel(detailsKnown = true, name = "New Name", address = addressDataModel),
+        )
+
+        // Assert
+        assertEquals("New Name", existing.name)
+        assertEquals(address, existing.address)
+        verifyNoInteractions(addressService)
+        verify(superiorLandlordRepository).save(existing)
+    }
+
+    @Test
     fun `removeSuperiorLandlord deletes the superior landlord`() {
         // Arrange
         val existing = SuperiorLandlord(MockLandlordData.createPropertyOwnership(), name = "Alice Superior")
@@ -233,7 +254,6 @@ class SuperiorLandlordServiceTests {
         val amended =
             SuperiorLandlordDataModel(
                 databaseId = 1,
-                editedInJourney = true,
                 detailsKnown = true,
                 name = "Alice Superior",
                 email = "new@example.com",
@@ -250,7 +270,7 @@ class SuperiorLandlordServiceTests {
     }
 
     @Test
-    fun `updateSuperiorLandlords leaves a superior landlord the user started editing but did not change alone`() {
+    fun `updateSuperiorLandlords leaves an unchanged superior landlord alone`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val existing =
@@ -265,7 +285,6 @@ class SuperiorLandlordServiceTests {
                 listOf(
                     SuperiorLandlordDataModel(
                         databaseId = 1,
-                        editedInJourney = true,
                         detailsKnown = true,
                         name = "Alice Superior",
                         email = "alice@example.com",
@@ -279,10 +298,10 @@ class SuperiorLandlordServiceTests {
     }
 
     @Test
-    fun `updateSuperiorLandlords leaves one with a manual address the user never started editing alone`() {
+    fun `updateSuperiorLandlords leaves one with an unchanged manual address alone`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        // A manual address has no UPRN, so comparing details alone could not prove it unchanged
+        // A manual address has no UPRN, so it is compared on the address the user sees
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val untouched =
             savedSuperiorLandlord(
@@ -309,7 +328,8 @@ class SuperiorLandlordServiceTests {
             )
 
         // Assert
-        // Editing a different superior landlord must not rewrite this one and mint a duplicate address row
+        // Rewriting it would mint a duplicate address row, as findOrCreateAddress always saves a
+        // manual address
         assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
         verify(superiorLandlordRepository, never()).save(any())
         verifyNoInteractions(addressService)
@@ -337,7 +357,6 @@ class SuperiorLandlordServiceTests {
                 listOf(
                     SuperiorLandlordDataModel(
                         databaseId = 1,
-                        editedInJourney = true,
                         detailsKnown = true,
                         name = "Alice Superior",
                         address = addressDataModel,
@@ -352,36 +371,34 @@ class SuperiorLandlordServiceTests {
     }
 
     @Test
-    fun `updateSuperiorLandlords treats an edited address with no UPRN as changed`() {
+    fun `updateSuperiorLandlords treats a changed manual address as changed`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        // A manually entered address has no UPRN, so once the user has edited this superior landlord
-        // there is no way to be sure the address is still the same place
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        // Neither manually entered address has a UPRN, so they are compared on the address itself
+        val savedAddress = AddressDataModel("1 Example Road, EG1 2AB")
+        val amendedAddress = AddressDataModel("2 Example Road, EG1 2AB")
         val existing =
             savedSuperiorLandlord(
                 propertyOwnership,
                 id = 1,
                 name = "Alice Superior",
-                address = Address(addressDataModel),
+                address = Address(savedAddress),
             )
         whenever(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id))
             .thenReturn(listOf(existing))
-        whenever(addressService.findOrCreateAddress(addressDataModel)).thenReturn(Address(addressDataModel))
+        whenever(addressService.findOrCreateAddress(amendedAddress)).thenReturn(Address(amendedAddress))
         val resubmitted =
             SuperiorLandlordDataModel(
                 databaseId = 1,
-                editedInJourney = true,
                 detailsKnown = true,
                 name = "Alice Superior",
-                address = addressDataModel,
+                address = amendedAddress,
             )
 
         // Act
         val added = superiorLandlordService.updateSuperiorLandlords(propertyOwnership, listOf(resubmitted))
 
         // Assert
-        // A redundant write is better than missing someone whose address really did change
         verify(superiorLandlordRepository).save(existing)
         assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
     }
@@ -429,7 +446,6 @@ class SuperiorLandlordServiceTests {
         val amended =
             SuperiorLandlordDataModel(
                 databaseId = 2,
-                editedInJourney = true,
                 detailsKnown = true,
                 name = "Bob Superior",
                 email = "new@example.com",

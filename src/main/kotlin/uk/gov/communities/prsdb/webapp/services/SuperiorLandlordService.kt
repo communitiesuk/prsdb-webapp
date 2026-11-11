@@ -14,7 +14,8 @@ class SuperiorLandlordService(
     private val superiorLandlordRepository: SuperiorLandlordRepository,
     private val addressService: AddressService,
 ) {
-    // Modifies the list of existing superior landlords to match the list the user submitted.
+    // Updates the saved superior landlords to match the list the user submitted, creating, updating
+    // and deleting them one at a time.
     // Returns the newly added superior landlords so they can be tracked by the journey and notified.
     // TODO PDJB-1994: use this to update superior landlords.
     // TODO PDJB-2171: also return updated and removed superior landlords so they can be tracked by
@@ -41,13 +42,9 @@ class SuperiorLandlordService(
                     createSuperiorLandlord(propertyOwnership, submitted)
                     added.add(submitted)
                 }
-                // One the user never started editing can't have changed. Skipping the comparison
-                // matters for a manual address, which has no UPRN and so would look changed - and be
-                // rewritten, saving a duplicate address row - on every submission.
-                !submitted.editedInJourney -> Unit
                 detailsHaveChanged(existingSuperiorLandlord, submitted) ->
                     updateSuperiorLandlord(existingSuperiorLandlord, submitted)
-                // One edited but left unchanged matches no branch, so their row is left alone.
+                // An unchanged superior landlord matches no branch, so their row is left alone.
             }
         }
 
@@ -62,8 +59,9 @@ class SuperiorLandlordService(
             existing.email != submitted.email ||
             addressHasChanged(existing.address, submitted.address)
 
-    // Only a UPRN proves two addresses are the same place: findOrCreateAddress saves a new row for
-    // every manual address, so without one we assume a change and accept a redundant write.
+    // Two looked up addresses can be compared on UPRN. A manually entered one has none, so fall back
+    // to the address the user sees: the same single line address means they did not change their
+    // answer, so the superior landlord does not need contacting again.
     private fun addressHasChanged(
         existing: Address?,
         submitted: AddressDataModel?,
@@ -71,7 +69,8 @@ class SuperiorLandlordService(
         when {
             existing == null && submitted == null -> false
             existing == null || submitted == null -> true
-            else -> existing.uprn == null || existing.uprn != submitted.uprn
+            existing.uprn != null && submitted.uprn != null -> existing.uprn != submitted.uprn
+            else -> existing.singleLineAddress != submitted.singleLineAddress
         }
 
     @Transactional
@@ -104,7 +103,11 @@ class SuperiorLandlordService(
     ) {
         superiorLandlord.name = updatedDetails.name
         superiorLandlord.email = updatedDetails.email
-        superiorLandlord.address = updatedDetails.address?.let { addressService.findOrCreateAddress(it) }
+        // Only re-resolve the address when it has changed: findOrCreateAddress saves a new row for
+        // every manual address, so reassigning an unchanged one would leave a duplicate behind.
+        if (addressHasChanged(superiorLandlord.address, updatedDetails.address)) {
+            superiorLandlord.address = updatedDetails.address?.let { addressService.findOrCreateAddress(it) }
+        }
         superiorLandlordRepository.save(superiorLandlord)
     }
 

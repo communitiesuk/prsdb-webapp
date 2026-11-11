@@ -14,7 +14,8 @@ class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
     private val addressService: AddressService,
 ) {
-    // Modifies the list of existing freeholders to match the list the user submitted.
+    // Updates the saved freeholders to match the list the user submitted, creating, updating and
+    // deleting them one at a time.
     // Returns the newly added freeholders so they can be tracked by the journey and notified.
     // TODO PDJB-1993: use this to update freeholders.
     // TODO PDJB-2171: also return updated and removed freeholders so they can be tracked by the
@@ -41,12 +42,8 @@ class FreeholderService(
                     createFreeholder(propertyOwnership, submitted)
                     added.add(submitted)
                 }
-                // One the user never started editing can't have changed. Skipping the comparison
-                // matters for a manual address, which has no UPRN and so would look changed - and be
-                // rewritten, saving a duplicate address row - on every submission.
-                !submitted.editedInJourney -> Unit
                 detailsHaveChanged(existingFreeholder, submitted) -> updateFreeholder(existingFreeholder, submitted)
-                // One edited but left unchanged matches no branch, so their row is left alone.
+                // An unchanged freeholder matches no branch, so their row is left alone.
             }
         }
 
@@ -61,8 +58,9 @@ class FreeholderService(
             existing.email != submitted.email ||
             addressHasChanged(existing.address, submitted.address)
 
-    // Only a UPRN proves two addresses are the same place: findOrCreateAddress saves a new row for
-    // every manual address, so without one we assume a change and accept a redundant write.
+    // Two looked up addresses can be compared on UPRN. A manually entered one has none, so fall back
+    // to the address the user sees: the same single line address means they did not change their
+    // answer, so the freeholder does not need contacting again.
     private fun addressHasChanged(
         existing: Address?,
         submitted: AddressDataModel?,
@@ -70,7 +68,8 @@ class FreeholderService(
         when {
             existing == null && submitted == null -> false
             existing == null || submitted == null -> true
-            else -> existing.uprn == null || existing.uprn != submitted.uprn
+            existing.uprn != null && submitted.uprn != null -> existing.uprn != submitted.uprn
+            else -> existing.singleLineAddress != submitted.singleLineAddress
         }
 
     @Transactional
@@ -103,7 +102,11 @@ class FreeholderService(
     ) {
         freeholder.name = updatedDetails.name
         freeholder.email = updatedDetails.email
-        freeholder.address = updatedDetails.address?.let { addressService.findOrCreateAddress(it) }
+        // Only re-resolve the address when it has changed: findOrCreateAddress saves a new row for
+        // every manual address, so reassigning an unchanged one would leave a duplicate behind.
+        if (addressHasChanged(freeholder.address, updatedDetails.address)) {
+            freeholder.address = updatedDetails.address?.let { addressService.findOrCreateAddress(it) }
+        }
         freeholderRepository.save(freeholder)
     }
 
