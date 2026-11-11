@@ -78,6 +78,36 @@ jobs:
           EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha }}
           PERFORMANCE_TEST_MOCKS_ENABLED: 'true'
         run: node scripts/performance-tests/nft-prepare.mjs
+      - name: Verify the controlled payment HTTP roundtrip
+        if: inputs.smoke-performance-profile == true
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const origin = 'https://nft.register-home-to-rent.test.communities.gov.uk';
+          const paymentBase = `${origin}/local/gov-uk-pay`;
+          const request = (url, options = {}) => fetch(url, {
+            ...options, redirect: 'manual', signal: AbortSignal.timeout(10000),
+          });
+          const created = await request(`${paymentBase}/v1/payments`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              amount: 100, reference: `readiness-${process.env.GITHUB_RUN_ID}`,
+              description: 'Synthetic readiness check', return_url: `${origin}/healthcheck`,
+            }),
+          });
+          assert.equal(created.status, 201);
+          const payment = await created.json();
+          const next = new URL(payment._links.next_url.href);
+          assert.equal(next.origin, origin);
+          assert.ok(next.pathname.startsWith('/local/gov-uk-pay/mock-card-page/'));
+          const card = await request(next.href);
+          assert.equal(card.status, 302);
+          assert.equal(card.headers.get('location'), `${origin}/healthcheck`);
+          const status = await request(`${paymentBase}/v1/payments/${encodeURIComponent(payment.payment_id)}`);
+          assert.equal(status.status, 200);
+          assert.equal((await status.json()).state.status, 'success');
+          console.log('Controlled payment create, hosted redirect and status roundtrip passed.');
+          JS
       - name: Restore baseline and remove this run's access
         if: always() && steps.prepare.outcome != 'skipped' && steps.prepare.outcome != ''
         run: node scripts/performance-tests/nft-restore.mjs
