@@ -1,5 +1,8 @@
 name: Build and Test
 on:
+  push:
+    branches:
+      - feat/PDJB-1748-finish-nft-seeding
   pull_request:
   merge_group:
 
