@@ -15,8 +15,8 @@
         registerProperty.paymentFailed.notRegistered
     </p>
     <p class="govuk-body">
-        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentFailed.tryAgainLink}">
-            registerProperty.paymentFailed.tryAgainLink
+        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentTryAgainLink}">
+            registerProperty.paymentTryAgainLink
         </a>
     </p>
     <details id="details" th:replace="~{fragments/details :: details(#{registerProperty.paymentFailed.getHelp}, ~{::#details/content()})}">
