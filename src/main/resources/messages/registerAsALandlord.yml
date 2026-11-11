@@ -73,11 +73,11 @@ confirmation:
   banner:
     heading: Registered as a landlord
     body:
-      beforeRegistrationNumber: Landlord Registration Number
+      beforeRegistrationNumber: Landlord number
   individual:
-    emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+    emailParagraph: We’ve emailed you a copy of your landlord number.
   organisation:
-    emailParagraph: We’ve emailed you a copy of your organisation’s Landlord Registration Number.
+    emailParagraph: We’ve emailed you a copy of your organisation’s landlord number.
     whatYouCanDoNow:
       heading: What you can do now
       paragraph: 'You are an administrator for your organisation. You can:'
@@ -89,11 +89,7 @@ confirmation:
     heading: What you need to do next
     paragraph:
       one: You now need to register your rental properties.
-      two: Your local council could fine you if you advertise or let a property that is not registered.
-      three: 'You could face fines or even criminal prosecution if you:'
-    bullet:
-      one: repeatedly break the rules
-      two: 'commit a serious offence, like providing false information on this service'
+      two: In the future you will need to include landlord and rental property numbers when advertising a property.
   feedback:
     body: 'Answer a few short questions about <strong>landlord registration</strong>.'
 privacyNotice:
