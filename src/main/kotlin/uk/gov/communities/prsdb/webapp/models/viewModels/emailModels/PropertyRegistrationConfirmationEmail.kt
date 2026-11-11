@@ -12,7 +12,6 @@ data class PropertyRegistrationConfirmationEmail(
     val isOccupied: Boolean,
     val jointLandlordEmails: List<String>? = null,
     val isDelegatedToLettingAgent: Boolean = false,
-    val isPdjb939PhaseTwoEnabled: Boolean = false,
     val licenseProvideLater: Boolean = false,
     val gasSafetyCertProvideLater: Boolean = false,
     val electricalSafetyCertProvideLater: Boolean = false,
@@ -72,7 +71,7 @@ data class PropertyRegistrationConfirmationEmail(
         baseMap[lettingAgentProvideListKey] = if (isDelegatedToLettingAgent) buildLettingProvideList() else ""
 
         val missingDetails = buildMissingDetailsList()
-        val showMissingDetails = isPdjb939PhaseTwoEnabled && !isDelegatedToLettingAgent && isOccupied && missingDetails.isNotEmpty()
+        val showMissingDetails = !isDelegatedToLettingAgent && isOccupied && missingDetails.isNotEmpty()
         baseMap[hasMissingDetailsKey] = if (showMissingDetails) "yes" else "no"
         baseMap[missingDetailsListKey] = if (showMissingDetails) formatAsBulletList(missingDetails) else ""
 

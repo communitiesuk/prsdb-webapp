@@ -48,6 +48,8 @@ class DateTimeHelper(
 
         fun get28DaysFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(days = 28))
 
+        fun get3MonthsFromDate(date: LocalDate): LocalDate = date.plus(DatePeriod(months = 3))
+
         fun getJavaDateFromLocalDate(localDate: java.time.LocalDate): Date = Date.from(getJavaInstantFromLocalDate(localDate))
 
         fun getJavaInstantFromLocalDate(localDate: java.time.LocalDate): java.time.Instant =

@@ -45,11 +45,6 @@ confirmation:
     payment: Payment
     paymentDate: Payment date
     renewalDate: Renewal date
-  whatYouNeedToDoNext:
-    heading: What you need to do next
-    uploadCompliance:
-      heading: Upload compliance certificates
-      paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   whatHappensNext:
     heading: What happens next
     lettingAgent:
@@ -519,9 +514,22 @@ ownershipKind:
       hint: Have a lease with a freeholder (includes most flats)
   error:
     missing: Select how you own this property
-# TODO PDJB-1961: replace with the real "What kind of freehold do you have?" content
 freeholdType:
-  fieldSetHeading: TODO PDJB-1961 What kind of freehold do you have?
+  fieldSetHeading: Which type of freehold do you have?
+  fieldSetHint: Select one option
   radios:
+    option:
+      soleOwnership:
+        label: Sole ownership
+        hint: Own the property on my own
+      jointTenants:
+        label: Joint tenants
+        hint: Joint ownership with equal rights
+      tenantsInCommon:
+        label: Tenants in common
+        hint: Joint ownership with different shares
+      commonhold:
+        label: Commonhold
+        hint: Own a ‘unit’ and have a Commonhold Community Statement
     error:
-      missing: Select the kind of freehold you have
+      missing: Select a type of freehold

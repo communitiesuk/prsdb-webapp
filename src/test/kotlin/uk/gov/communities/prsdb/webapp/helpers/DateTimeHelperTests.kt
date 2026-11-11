@@ -89,6 +89,16 @@ class DateTimeHelperTests {
             )
 
         @JvmStatic
+        private fun provideDatesForGet3MonthsFromDate() =
+            listOf(
+                Arguments.of(LocalDate(2026, 11, 9), LocalDate(2027, 2, 9)),
+                Arguments.of(LocalDate(2026, 12, 31), LocalDate(2027, 3, 31)),
+                Arguments.of(LocalDate(2026, 8, 31), LocalDate(2026, 11, 30)),
+                Arguments.of(LocalDate(2026, 11, 30), LocalDate(2027, 2, 28)),
+                Arguments.of(LocalDate(2027, 11, 30), LocalDate(2028, 2, 29)),
+            )
+
+        @JvmStatic
         private fun provideDatesAndEndOfDayInstantsInUK() =
             listOf(
                 Arguments.of(
@@ -159,6 +169,17 @@ class DateTimeHelperTests {
         expectedDate: LocalDate,
     ) {
         val result = DateTimeHelper.get28DaysFromDate(date)
+
+        assertEquals(expectedDate, result)
+    }
+
+    @ParameterizedTest(name = "{1} when {0}")
+    @MethodSource("provideDatesForGet3MonthsFromDate")
+    fun `get3MonthsFromDate returns correct date`(
+        date: LocalDate,
+        expectedDate: LocalDate,
+    ) {
+        val result = DateTimeHelper.get3MonthsFromDate(date)
 
         assertEquals(expectedDate, result)
     }

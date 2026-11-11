@@ -120,6 +120,27 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @Test
+    fun `handleCallback for send owner email sends email to the landlords of an inactive property`() {
+        // Arrange
+        val (ownershipId, expectedEmail, landlords) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord@example.com"),
+                isActive = false,
+            )
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToLandlords(landlords, expectedEmail)
+    }
+
+    @Test
     fun `handleCallback for send owner email sends email to landlords and letting agent if present`() {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com")
@@ -518,24 +539,28 @@ class VirusNotificationEmailHandlerTests {
     private fun arrangeOwnedPropertyUploadCallback(
         bodyCertificateType: String,
         emailAddresses: List<String>,
+        isActive: Boolean = true,
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> =
         arrangeOwnedPropertyUploadCallbackForLandlords(
             bodyCertificateType,
             emailAddresses.map { MockLandlordData.createIndividualLandlord(email = it) },
+            isActive,
         )
 
     private fun arrangeOwnedPropertyUploadCallbackForLandlords(
         bodyCertificateType: String,
         landlords: List<Landlord>,
+        isActive: Boolean = true,
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 landlords = landlords.toMutableSet(),
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 isOccupied = true,
+                isActive = isActive,
             )
 
-        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+        whenever(propertyOwnershipRepository.findById(ownership.id)).thenReturn(Optional.of(ownership))
         landlords.forEachIndexed { index, landlord ->
             whenever(emailNotificationService.getLandlordRecipientAddresses(landlord)).thenReturn(listOf(landlordRecipientAddress(index)))
         }
