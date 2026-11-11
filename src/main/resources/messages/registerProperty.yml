@@ -46,11 +46,6 @@ confirmation:
     payment: Payment
     paymentDate: Payment date
     renewalDate: Renewal date
-  whatYouNeedToDoNext:
-    heading: What you need to do next
-    uploadCompliance:
-      heading: Upload compliance certificates
-      paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   whatHappensNext:
     heading: What happens next
     lettingAgent:

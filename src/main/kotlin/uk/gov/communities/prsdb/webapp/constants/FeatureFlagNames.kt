@@ -16,8 +16,6 @@ const val PASSWORD_BENCHMARK_ENDPOINT = "pdjb-1664-password-benchmark-endpoint"
 
 const val PAYMENTS = "pdjb-1009-payments"
 
-const val PROPERTY_REGISTRATION_PHASE_TWO = "pdjb-939-property-registration-phase-two"
-
 const val MULTI_USER_ORGANISATIONS = "pdjb-1210-multi-user-organisations"
 
 const val GATLING_POST_ENDPOINT = "pdjb-238-gatling-post-endpoint"
@@ -40,7 +38,6 @@ val featureFlagNames =
         SUBJECT_IDENTIFIER_PAGE,
         PASSWORD_BENCHMARK_ENDPOINT,
         PAYMENTS,
-        PROPERTY_REGISTRATION_PHASE_TWO,
         MULTI_USER_ORGANISATIONS,
         GATLING_POST_ENDPOINT,
         GAS_CERTIFICATE_14_MONTH_EXPIRY,
