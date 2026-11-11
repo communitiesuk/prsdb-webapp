@@ -66,7 +66,11 @@ class NftDataSeeder(
     private var remainingAvailableAddressCount = 0
 
     private val registrationNumberGenerator = RegistrationNumberGenerator()
-    private val landlordAddressGenerator = AddressGenerator()
+
+    // Addresses for people and organisations rather than for the property itself. Unrestricted, so it
+    // draws from every eligible address and does not consume the pool of addresses still available to
+    // be registered as a property.
+    private val contactAddressGenerator = AddressGenerator()
     private val propertyOwnershipAddressGenerator = AddressGenerator(restrictToAvailable = true)
     private val incompletePropertyAddressGenerator = AddressGenerator(restrictToAvailable = true)
 
@@ -306,7 +310,7 @@ class NftDataSeeder(
                 organisationalLandlordInvitationStmt.executeBatch()
                 organisationGoverningBodyMemberStmt.executeBatch()
                 registrationNumberGenerator.forgetUsedValues()
-                landlordAddressGenerator.forgetUsedValues()
+                contactAddressGenerator.forgetUsedValues()
 
                 log("Seeded ${landlordIdRange.last} landlords and $orgUsersAdded organisational landlord users")
 
@@ -375,7 +379,7 @@ class NftDataSeeder(
                             propertyOwnershipAddressGenerator.forgetUsedValues()
                             // Associated party addresses are drawn here too, so bound this generator's
                             // retained values with the property batches rather than the landlord ones.
-                            landlordAddressGenerator.forgetUsedValues()
+                            contactAddressGenerator.forgetUsedValues()
                             fileUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
                             gasSafetyFileUploadsStmt.executeBatch()
@@ -559,7 +563,7 @@ class NftDataSeeder(
         landlordStmt.setString(5, name)
         landlordStmt.setString(6, NftDataFaker.generateEmail(name))
         landlordStmt.setString(7, NftDataFaker.generatePhoneNumber())
-        landlordStmt.setLong(8, landlordAddressGenerator.next().id)
+        landlordStmt.setLong(8, contactAddressGenerator.next().id)
         landlordStmt.setDate(9, NftDataFaker.generateDateOfBirth())
         landlordStmt.setLong(10, registrationNumberId)
         landlordStmt.setBoolean(11, isVerified)
@@ -590,7 +594,7 @@ class NftDataSeeder(
         organisationLandlordStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(coreDetails.createdDate))
         organisationLandlordStmt.setLong(4, registrationNumberId)
         organisationLandlordStmt.setString(5, details.name)
-        organisationLandlordStmt.setLong(6, landlordAddressGenerator.next().id)
+        organisationLandlordStmt.setLong(6, contactAddressGenerator.next().id)
         organisationLandlordStmt.setString(7, details.email)
         organisationLandlordStmt.setString(8, details.phoneNumber)
         organisationLandlordStmt.setBoolean(9, details.isCompany)
@@ -603,7 +607,7 @@ class NftDataSeeder(
         organisationLandlordStmt.setDateOrNull(16, details.leadTrusteeDateOfBirth)
         organisationLandlordStmt.setStringOrNull(17, details.leadTrusteeEmail)
         organisationLandlordStmt.setStringOrNull(18, details.leadTrusteePhone)
-        organisationLandlordStmt.setLongOrNull(19, if (details.isTrust) landlordAddressGenerator.next().id else null)
+        organisationLandlordStmt.setLongOrNull(19, if (details.isTrust) contactAddressGenerator.next().id else null)
         organisationLandlordStmt.setString(20, details.mainContactName)
         organisationLandlordStmt.setString(21, details.mainContactEmail)
         organisationLandlordStmt.setString(22, details.mainContactPhone)
@@ -654,7 +658,7 @@ class NftDataSeeder(
                 organisationGoverningBodyMemberStmt.setInt(4, member.type.ordinal)
                 organisationGoverningBodyMemberStmt.setString(5, member.name)
                 organisationGoverningBodyMemberStmt.setDate(6, member.dateOfBirth)
-                organisationGoverningBodyMemberStmt.setLong(7, landlordAddressGenerator.next().id)
+                organisationGoverningBodyMemberStmt.setLong(7, contactAddressGenerator.next().id)
                 organisationGoverningBodyMemberStmt.addBatch()
             }
         }
@@ -767,17 +771,15 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLongOrNull(25, propertyManagerIdIfManaged)
         propertyOwnershipStmt.addBatch()
 
-        // Addresses come from landlordAddressGenerator, which is unrestricted: unlike property addresses they
-        // can be duplicated and must not consume the available pool.
         if (ownershipType.requiresFreeholderRecords()) {
             NftDataFaker.generateFreeholders().forEach { freeholder ->
-                addAssociatedPartyToBatch(freeholderStmt, createdDate, propertyOwnershipId, freeholder)
+                addFreeholderToBatch(freeholderStmt, createdDate, propertyOwnershipId, freeholder)
             }
         }
 
         if (ownershipType.requiresSuperiorLandlordInfo()) {
             NftDataFaker.generateSuperiorLandlords().forEach { superiorLandlord ->
-                addAssociatedPartyToBatch(superiorLandlordStmt, createdDate, propertyOwnershipId, superiorLandlord)
+                addSuperiorLandlordToBatch(superiorLandlordStmt, createdDate, propertyOwnershipId, superiorLandlord)
             }
         }
 
@@ -800,18 +802,32 @@ class NftDataSeeder(
         membershipStmt.addBatch()
     }
 
-    private fun addAssociatedPartyToBatch(
-        stmt: PreparedStatement,
+    private fun addFreeholderToBatch(
+        freeholderStmt: PreparedStatement,
         createdDate: Timestamp,
         propertyOwnershipId: Long,
-        party: NftDataFaker.AssociatedPartyDetails,
+        freeholder: NftDataFaker.FreeholderDetails,
     ) {
-        stmt.setTimestamp(1, createdDate)
-        stmt.setLong(2, propertyOwnershipId)
-        stmt.setStringOrNull(3, party.name)
-        stmt.setStringOrNull(4, party.email)
-        stmt.setLongOrNull(5, if (party.hasAddress) landlordAddressGenerator.next().id else null)
-        stmt.addBatch()
+        freeholderStmt.setTimestamp(1, createdDate)
+        freeholderStmt.setLong(2, propertyOwnershipId)
+        freeholderStmt.setStringOrNull(3, freeholder.name)
+        freeholderStmt.setStringOrNull(4, freeholder.email)
+        freeholderStmt.setLongOrNull(5, if (freeholder.hasAddress) contactAddressGenerator.next().id else null)
+        freeholderStmt.addBatch()
+    }
+
+    private fun addSuperiorLandlordToBatch(
+        superiorLandlordStmt: PreparedStatement,
+        createdDate: Timestamp,
+        propertyOwnershipId: Long,
+        superiorLandlord: NftDataFaker.SuperiorLandlordDetails,
+    ) {
+        superiorLandlordStmt.setTimestamp(1, createdDate)
+        superiorLandlordStmt.setLong(2, propertyOwnershipId)
+        superiorLandlordStmt.setStringOrNull(3, superiorLandlord.name)
+        superiorLandlordStmt.setStringOrNull(4, superiorLandlord.email)
+        superiorLandlordStmt.setLongOrNull(5, if (superiorLandlord.hasAddress) contactAddressGenerator.next().id else null)
+        superiorLandlordStmt.addBatch()
     }
 
     private fun addIncompletePropertyToBatch(

@@ -468,24 +468,29 @@ object NftDataFaker {
     fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
 
     // A property that requires freeholder records always gets at least one.
-    fun generateFreeholders(): List<AssociatedPartyDetails> = generateAssociatedParties(faker.random().nextInt(1, 3))
+    fun generateFreeholders(): List<FreeholderDetails> = generateAssociatedParties(faker.random().nextInt(1, 3), ::FreeholderDetails)
 
-    // A property can legitimately have no superior landlords on record.
-    fun generateSuperiorLandlords(): List<AssociatedPartyDetails> = generateAssociatedParties(faker.random().nextInt(0, 2))
+    // A property can legitimately have no superior landlords on record, which models the landlord
+    // answering "no" to HasAnySuperiorLandlordsStep.
+    fun generateSuperiorLandlords(): List<SuperiorLandlordDetails> =
+        generateAssociatedParties(faker.random().nextInt(0, 2), ::SuperiorLandlordDetails)
 
     // The landlord does not always know who the other party is, so some rows are seeded as
     // "no details known" placeholders. A named party is contactable by email or by post but never
     // both, because the journey asks for one contact type - see FreeholderContactTypeStep.
-    private fun generateAssociatedParties(count: Int): List<AssociatedPartyDetails> =
+    private fun <T> generateAssociatedParties(
+        count: Int,
+        create: (name: String?, email: String?, hasAddress: Boolean) -> T,
+    ): List<T> =
         (1..count).map {
             if (generateBoolean(probabilityTrue = 0.2)) {
-                AssociatedPartyDetails(name = null, email = null, hasAddress = false)
+                create(null, null, false)
             } else {
                 val name = generateName()
                 if (generateBoolean(probabilityTrue = 0.8)) {
-                    AssociatedPartyDetails(name = name, email = generateEmail(name), hasAddress = false)
+                    create(name, generateEmail(name), false)
                 } else {
-                    AssociatedPartyDetails(name = name, email = null, hasAddress = true)
+                    create(name, null, true)
                 }
             }
         }
@@ -911,7 +916,14 @@ object NftDataFaker {
     )
 
     // A null name, email and address together mean "no details known".
-    data class AssociatedPartyDetails(
+    data class FreeholderDetails(
+        val name: String?,
+        val email: String?,
+        val hasAddress: Boolean,
+    )
+
+    // A null name, email and address together mean "no details known".
+    data class SuperiorLandlordDetails(
         val name: String?,
         val email: String?,
         val hasAddress: Boolean,

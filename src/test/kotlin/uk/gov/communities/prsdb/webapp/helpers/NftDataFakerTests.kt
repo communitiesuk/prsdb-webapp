@@ -277,26 +277,57 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `generated associated parties are either named with one contact method or have no details at all`() {
+    fun `generated freeholders are either named with one contact method or have no details at all`() {
         NftDataFaker.reset(seed = TEST_SEED)
 
-        val parties = List(SAMPLE_SIZE / 100) { NftDataFaker.generateFreeholders() + NftDataFaker.generateSuperiorLandlords() }.flatten()
+        val freeholders = List(SAMPLE_SIZE / 100) { NftDataFaker.generateFreeholders() }.flatten()
 
+        assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+            freeholders,
+            { it.name },
+            { it.email },
+            { it.hasAddress },
+        )
+    }
+
+    @Test
+    fun `generated superior landlords are either named with one contact method or have no details at all`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+
+        val superiorLandlords = List(SAMPLE_SIZE / 100) { NftDataFaker.generateSuperiorLandlords() }.flatten()
+
+        assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+            superiorLandlords,
+            { it.name },
+            { it.email },
+            { it.hasAddress },
+        )
+    }
+
+    private fun <T> assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+        parties: List<T>,
+        name: (T) -> String?,
+        email: (T) -> String?,
+        hasAddress: (T) -> Boolean,
+    ) {
         parties.forEach { party ->
-            if (party.name == null) {
-                assertFalse(party.email != null || party.hasAddress, "Expected a party with no name to have no email or address")
+            if (name(party) == null) {
+                assertFalse(
+                    email(party) != null || hasAddress(party),
+                    "Expected a party with no name to have no email or address",
+                )
             } else {
                 assertNotEquals(
-                    party.email != null,
-                    party.hasAddress,
+                    email(party) != null,
+                    hasAddress(party),
                     "Expected a named party to have exactly one of an email and an address",
                 )
             }
         }
 
-        assertTrue(parties.any { it.name == null }, "Expected at least one party with no details")
-        assertTrue(parties.any { it.email != null }, "Expected at least one party contactable by email")
-        assertTrue(parties.any { it.hasAddress }, "Expected at least one party contactable by post")
+        assertTrue(parties.any { name(it) == null }, "Expected at least one party with no details")
+        assertTrue(parties.any { email(it) != null }, "Expected at least one party contactable by email")
+        assertTrue(parties.any { hasAddress(it) }, "Expected at least one party contactable by post")
     }
 
     private fun generateFakerSample(): List<String> =
