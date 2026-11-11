@@ -70,6 +70,7 @@ class NftDataSeeder(
     private var remainingAvailableAddressCount = 0
 
     private val registrationNumberGenerator = RegistrationNumberGenerator()
+
     // Addresses for people and organisations rather than for the property itself. Unrestricted, so it
     // draws from every eligible address and does not consume the pool of addresses still available to
     // be registered as a property.
