@@ -148,7 +148,9 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 | `nft-seed.system-operators`   | `NFT_SEED_SYSTEM_OPERATORS`     | 5                | Number of system operator users to create.                                                                  |
 | `nft-seed.local-council-users`| `NFT_SEED_LOCAL_COUNCIL_USERS`  | 10               | Number of local council users to create.                                                                    |
 | `nft-seed.landlords`          | `NFT_SEED_LANDLORDS`            | 30               | Total number of landlords to create (individual + organisation, ~95%/5% split).                             |
-| `nft-seed.properties`         | `NFT_SEED_PROPERTIES`           | 45               | Total number of properties/property registrations to create.                                               |
+| `nft-seed.properties`         | `NFT_SEED_PROPERTIES`           | 40               | Completed property registrations to create, in addition to the incomplete registrations below.              |
+| `nft-seed.incomplete-properties` | `NFT_SEED_INCOMPLETE_PROPERTIES` | 5             | Incomplete registrations to create, allocated separate addresses from completed properties.                 |
+| `nft-seed.minimum-free-addresses` | `NFT_SEED_MINIMUM_FREE_ADDRESSES` | 0            | Minimum unallocated lookup addresses to retain after seeding.                                                |
 | `nft-seed.batch-size`         | `NFT_SEED_BATCH_SIZE`           | 10               | Batch size for bulk inserts.                                                                                 |
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
