@@ -21,10 +21,7 @@ class ActiveInactiveService(
     @Transactional
     fun deactivateProperty(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        if (!propertyOwnership.isActive) {
-            println("Property ownership $propertyOwnershipId is already inactive - no change made")
-            return
-        }
+        check(propertyOwnership.isActive) { "Property ownership $propertyOwnershipId is already inactive" }
 
         val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
@@ -41,10 +38,7 @@ class ActiveInactiveService(
     @Transactional
     fun reactivateProperty(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        if (propertyOwnership.isActive) {
-            println("Property ownership $propertyOwnershipId is already active - no change made")
-            return
-        }
+        check(!propertyOwnership.isActive) { "Property ownership $propertyOwnershipId is already active" }
 
         propertyOwnership.reactivate()
         propertyOwnershipRepository.save(propertyOwnership)
@@ -52,6 +46,7 @@ class ActiveInactiveService(
 
     @Transactional
     fun deactivateLandlord(landlord: Landlord) {
+        check(landlord.isActive) { "Landlord ${landlord.id} is already inactive" }
         check(!propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
             "Landlord ${landlord.id} cannot be deactivated while they have active properties"
         }
@@ -60,10 +55,7 @@ class ActiveInactiveService(
 
     @Transactional
     fun reactivateLandlord(landlord: Landlord) {
-        if (landlord.isActive) {
-            println("Landlord ${landlord.id} is already active - no change made")
-            return
-        }
+        check(!landlord.isActive) { "Landlord ${landlord.id} is already active" }
 
         landlord.reactivate()
         landlordRepository.save(landlord)
@@ -73,10 +65,8 @@ class ActiveInactiveService(
         landlord: Landlord,
         deactivationDate: LocalDate,
     ) {
-        if (!landlord.isActive) {
-            println("Landlord ${landlord.id} is already inactive - no change made")
-            return
-        }
+        // TODO PDJB-2047: Throw instead once reactivating a property also reactivates its landlords
+        if (!landlord.isActive) return
 
         landlord.deactivate(deactivationDate)
         landlordRepository.save(landlord)
