@@ -160,7 +160,13 @@ class PropertyRegistrationCyaStepConfig(
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
 
         val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
-        if (ownershipStructureTask.ownershipTypeTask.ownershipType?.requiresSuperiorLandlordInfo() != true) return emptyMap()
+        val ownershipType =
+            ownershipStructureTask.ownershipTypeTask.ownershipType
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the ownership type task was complete",
+                )
+        if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyMap()
 
         val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
         val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
