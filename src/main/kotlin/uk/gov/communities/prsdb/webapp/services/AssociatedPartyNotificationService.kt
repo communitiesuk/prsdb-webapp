@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -47,17 +48,21 @@ class AssociatedPartyNotificationService(
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome {
+        if (name.isNullOrBlank()) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        }
+
         if (!emailAddress.isNullOrBlank()) {
             emailNotificationService.sendEmail(emailAddress, email)
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
-        if (name.isNullOrBlank() || postalAddress == null) {
-            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        if (postalAddress != null) {
+            letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
+            return AssociatedPartyNotificationOutcome.LETTER_SENT
         }
 
-        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
-        return AssociatedPartyNotificationOutcome.LETTER_SENT
+        throw PrsdbWebException("Associated party has a name but no email address or postal address")
     }
 
     private fun letterAddress(
