@@ -276,6 +276,60 @@ class NftDataFakerTests {
         )
     }
 
+    @Test
+    fun `generated freeholders are either named with one contact method or have no details at all`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+
+        val freeholders = List(SAMPLE_SIZE / 100) { NftDataFaker.generateFreeholders() }.flatten()
+
+        assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+            freeholders,
+            { it.name },
+            { it.email },
+            { it.hasAddress },
+        )
+    }
+
+    @Test
+    fun `generated superior landlords are either named with one contact method or have no details at all`() {
+        NftDataFaker.reset(seed = TEST_SEED)
+
+        val superiorLandlords = List(SAMPLE_SIZE / 100) { NftDataFaker.generateSuperiorLandlords() }.flatten()
+
+        assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+            superiorLandlords,
+            { it.name },
+            { it.email },
+            { it.hasAddress },
+        )
+    }
+
+    private fun <T> assertPartiesAreNamedWithOneContactMethodOrHaveNoDetails(
+        parties: List<T>,
+        name: (T) -> String?,
+        email: (T) -> String?,
+        hasAddress: (T) -> Boolean,
+    ) {
+        parties.forEach { party ->
+            if (name(party) == null) {
+                assertFalse(
+                    email(party) != null || hasAddress(party),
+                    "Expected a party with no name to have no email or address",
+                )
+            } else {
+                assertNotEquals(
+                    email(party) != null,
+                    hasAddress(party),
+                    "Expected a named party to have exactly one of an email and an address",
+                )
+            }
+        }
+
+        assertTrue(parties.any { name(it) == null }, "Expected at least one party with no details")
+        assertTrue(parties.any { email(it) != null }, "Expected at least one party contactable by email")
+        assertTrue(parties.any { hasAddress(it) }, "Expected at least one party contactable by post")
+    }
+
     private fun generateFakerSample(): List<String> =
         List(FAKER_SAMPLE_SIZE) {
             listOf(

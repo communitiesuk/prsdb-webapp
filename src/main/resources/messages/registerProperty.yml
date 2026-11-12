@@ -38,9 +38,8 @@ confirmation:
   banner:
     heading: Property registered
   prn:
-    label: 'Your <strong>Property Registration Number</strong> is:'
+    label: 'Your <strong>rental property number</strong> is:'
   keepNumber: We’ve sent you a confirmation email including this number.
-  useInAdverts: Use this Property Registration Number when advertising this property, alongside each landlord’s Landlord Registration Number.
   paymentSummary:
     heading: Payment summary
     payment: Payment
@@ -245,7 +244,7 @@ paymentSummary:
     payment: Payment
     paymentDate: Payment date
     renewalDate: Renewal date
-  prnHint: Your property will be registered when you pay and you will be given a Property Registration Number.
+  prnHint: Your property will be registered when you pay and you will be given a rental property number.
   button: Go to payment
 paymentProcessing:
   heading: Your payment is processing
@@ -394,7 +393,7 @@ freeholders:
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
-      single: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
+      nonJoint: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
     emailAddress: Email address
     postalAddress: Postal address
@@ -403,6 +402,13 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  checkAnswers:
+    heading:
+      joint: Joint freeholders
+      nonJoint: Freeholders
+    changeLink:
+      joint: Add, change or remove joint freeholders
+      nonJoint: Add, change or remove freeholders
   remove:
     fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
     unknownFreeholder:
@@ -485,6 +491,7 @@ superiorLandlords:
         missing: Select if there is anyone else in the ownership chain
   checkAnswers:
     changeLink: Add, change or remove people in the ownership chain
+    anyoneInOwnershipChain: Is there anyone else in the property’s ownership chain?
 ownsProperty:
   fieldSetHeading: Do you own this property?
   fieldSetHint: This helps us understand if there’s anyone else who’s responsible for the property’s condition

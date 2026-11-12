@@ -5,7 +5,7 @@ localCouncilView:
 removeRecord: Delete account
 personalDetails:
   heading: Personal details
-  lrn: Landlord Registration Number
+  lrn: Landlord number
   registrationDate: Registration date
   landlordType: Landlord type
   landlordTypeValue: Individual
