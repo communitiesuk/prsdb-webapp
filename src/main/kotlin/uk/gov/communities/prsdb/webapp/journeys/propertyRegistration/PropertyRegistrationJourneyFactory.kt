@@ -227,7 +227,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask)
+                    checkAnswerTask(journey.tenancyDetailsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
@@ -569,6 +569,7 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
                 task(journey.tenancyDetailsTask) {
+                    withDependencies { HouseHoldsAndTenantsDependencies(true) }
                     parents {
                         AndParents(
                             journey.epcTask.isComplete(),

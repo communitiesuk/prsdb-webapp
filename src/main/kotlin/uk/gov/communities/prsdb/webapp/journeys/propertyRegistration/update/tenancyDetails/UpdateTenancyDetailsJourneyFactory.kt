@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -100,7 +101,8 @@ class UpdateTenancyDetailsJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
                 }
             }
-            replaceHeadingsAndButtons(state)
+            replaceHeadings(state)
+            useContinueButtons(journey)
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -152,41 +154,35 @@ class UpdateTenancyDetailsJourneyFactory(
                     throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
                 }
             }
-            replaceHeadingsAndButtons(state)
+            replaceHeadings(state)
+            useContinueButtons(journey)
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
         }
 
-    private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadingsAndButtons(state: UpdateTenancyDetailsJourney) {
+    private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
         configureStep(journey.householdsAndTenantsTask.households) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentIncludesBillsTask.billsIncluded) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.furnishedStatus) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
             withAdditionalContentProperty { "heading" to "forms.update.rentFrequency.heading" }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
             withAdditionalContentProperty { "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading() }
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
     }
 }
