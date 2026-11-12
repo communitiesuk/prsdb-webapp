@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -1526,6 +1527,20 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         verify(mockFreeholderService).clearFreeholders(propertyOwnership)
+    }
+
+    @Test
+    fun `removePropertyManager clears the property manager and saves the property ownership`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+        propertyOwnership.propertyManager = PropertyManager("Agent Ltd", "agent@example.com")
+
+        // Act
+        propertyOwnershipService.removePropertyManager(propertyOwnership)
+
+        // Assert
+        assertNull(propertyOwnership.propertyManager)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
     }
 
     @Test
