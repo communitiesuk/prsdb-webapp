@@ -373,10 +373,12 @@ class PropertyRegistrationCyaStepConfigTests {
                 .map { assertIs<SummaryListRowViewModel>(it) }
     }
 
+    // TODO PDJB-2016: Remove this class when ASSOCIATED_PARTIES is released
     @Nested
-    inner class JointLandlordsContent {
+    inner class BeforePdjb2146JointLandlordsCheckAnswers {
         @Test
         fun `getStepSpecificContent hides joint landlord invitations when there are no joint landlords`() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
             val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
             whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
@@ -396,11 +398,13 @@ class PropertyRegistrationCyaStepConfigTests {
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
                 peopleResponsibleForThisPropertyRows.last().fieldValue,
             )
+            assertEquals(emptyList<SummaryListRowViewModel>(), content["jointLandlordsRows"])
             assertEquals(expectedOccupancyDetails, occupancyDetails)
         }
 
         @Test
         fun `getStepSpecificContent adds invitations to ownership rows and retains occupancy when there are joint landlords`() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
             val mockInviteJointLandlordsTask = mock<InviteJointLandlordsTask>()
             val mockCheckJointLandlordsStep = mock<CheckJointLandlordsStep>()
             val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
@@ -422,7 +426,71 @@ class PropertyRegistrationCyaStepConfigTests {
                 peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(listOf("joint.landlord@example.com"), peopleResponsibleForThisPropertyRows.last().fieldValue)
+            assertEquals(emptyList<SummaryListRowViewModel>(), content["jointLandlordsRows"])
             assertEquals(expectedOccupancyDetails, occupancyDetails)
+        }
+    }
+
+    @Nested
+    inner class JointLandlordsContent {
+        @Test
+        fun `getStepSpecificContent separates the no joint landlords answer from ownership rows`() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
+            stubOwnershipTypeWithoutSuperiorLandlords()
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val jointLandlordsRows = content["jointLandlordsRows"] as List<SummaryListRowViewModel>
+            val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
+            assertEquals(
+                listOf("forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords"),
+                jointLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+            assertEquals(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                jointLandlordsRows.single().fieldValue,
+            )
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+        }
+
+        @Test
+        fun `getStepSpecificContent separates joint landlord invitations from ownership rows`() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            val mockInviteJointLandlordsTask = mock<InviteJointLandlordsTask>()
+            val mockCheckJointLandlordsStep = mock<CheckJointLandlordsStep>()
+            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(true)
+            whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+            whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("joint.landlord@example.com"))
+            whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
+            stubOwnershipTypeWithoutSuperiorLandlords()
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val jointLandlordsRows = content["jointLandlordsRows"] as List<SummaryListRowViewModel>
+            val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
+            assertEquals(
+                listOf("registerProperty.jointLandlords.checkAnswers.invitations"),
+                jointLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+            assertEquals(listOf("joint.landlord@example.com"), jointLandlordsRows.single().fieldValue)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
+            )
+        }
+
+        private fun stubOwnershipTypeWithoutSuperiorLandlords() {
+            val ownershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
+            val ownershipStructureTask = mock<OwnershipStructureTask>()
+            val ownershipTypeTask = mock<OwnershipTypeTask>()
+            whenever(mockState.ownershipAndLandlordsTask).thenReturn(ownershipAndLandlordsTask)
+            whenever(ownershipAndLandlordsTask.ownershipStructureTask).thenReturn(ownershipStructureTask)
+            whenever(ownershipStructureTask.ownershipTypeTask).thenReturn(ownershipTypeTask)
+            whenever(ownershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
         }
     }
 
@@ -690,7 +758,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `associated parties enabled uses the people responsible heading`() {
+        fun `getStepSpecificContent uses the people responsible heading`() {
             whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
                 .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
 

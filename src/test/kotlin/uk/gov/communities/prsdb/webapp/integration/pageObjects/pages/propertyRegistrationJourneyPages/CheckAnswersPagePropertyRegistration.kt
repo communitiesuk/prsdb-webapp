@@ -37,6 +37,9 @@ class CheckAnswersPagePropertyRegistration(
     val propertyDetailsHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
 
+    val jointLandlordsHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Joint landlords")))
+
     private val correspondenceHeadingLocator =
         page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Who the council should contact"))
 
@@ -139,7 +142,10 @@ class CheckAnswersPagePropertyRegistration(
         val rentAmountRow = getRow("Rent amount")
         val billsIncludedRow = getRow("Which bills are included")
 
-        val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
+        val invitationsRow = getRow(Pattern.compile("^Invitations$"))
+
+        // TODO PDJB-2016: Remove when ASSOCIATED_PARTIES is removed
+        val jointLandlordsInvitationsRowBeforePdjb2146 = getRow("Joint landlord invitations")
 
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
 
