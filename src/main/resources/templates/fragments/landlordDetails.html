@@ -101,7 +101,7 @@
                             </div>
                         </details>
 
-                        <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag, leaving the ownership section always shown -->
+                        <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag, leaving the people responsible ownership section always shown -->
                         <th:block th:if="${propertyDetails.showPeopleResponsibleOwnership}">
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.peopleResponsibleOwnershipHeadingKey}}">propertyDetails.peopleResponsible.ownership.heading</h3>
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>

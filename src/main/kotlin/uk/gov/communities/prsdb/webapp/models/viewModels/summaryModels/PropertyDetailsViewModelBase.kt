@@ -106,8 +106,6 @@ abstract class PropertyDetailsViewModelBase(
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
         )
 
-    // The ownership information as the answers to the questions the landlord was asked, rather than
-    // as the single derived OwnershipType. A question's row is omitted where it was not asked.
     protected fun ownershipAnswerRows(): List<SummaryListRowViewModel> {
         val answers = OwnershipTypeAnswersConverter.convert(propertyOwnership.ownershipType)
         return listOfNotNull(
