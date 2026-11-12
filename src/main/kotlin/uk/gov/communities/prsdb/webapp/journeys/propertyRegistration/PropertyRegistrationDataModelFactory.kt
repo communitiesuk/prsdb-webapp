@@ -9,16 +9,22 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
@@ -44,6 +50,20 @@ class PropertyRegistrationDataModelFactory(
                 ?.values
                 ?.toList()
         val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val isAssociatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
+        val ownershipType =
+            if (isAssociatedPartiesEnabled) {
+                state.ownershipAndLandlordsTask.ownershipStructureTask.ownershipTypeTask.ownershipType
+                    ?: throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "Property registration was submitted before the ownership type task was complete",
+                    )
+            } else {
+                OwnershipTypeConverter.convert(
+                    state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
+                        .notNullValue(OwnershipTypeFormModel::ownershipType),
+                )
+            }
 
         return PropertyRegistrationDataModel(
             addressModel = state.propertyDetailsTask.addressTask.getAddress(),
@@ -58,17 +78,9 @@ class PropertyRegistrationDataModelFactory(
                 },
             licenseType = if (isDelegatedToLettingAgent) LicensingType.PROVIDE_LATER else state.licensingTask.getLicensingType(),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            // TODO PDJB-2015: derive the ownership type from the associated parties answers, via the
-            //  mapping on OwnershipTypeState
-            ownershipType =
-                if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                    OwnershipType.SOLE_FREEHOLD
-                } else {
-                    OwnershipTypeConverter.convert(
-                        state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
-                            .notNullValue(OwnershipTypeFormModel::ownershipType),
-                    )
-                },
+            ownershipType = ownershipType,
+            freeholders = if (isAssociatedPartiesEnabled) getFreeholders(state, ownershipType) else null,
+            superiorLandlords = if (isAssociatedPartiesEnabled) getSuperiorLandlords(state, ownershipType) else emptyList(),
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (shouldRequireTenancyDetails) {
@@ -201,8 +213,70 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
-            // TODO PDJB-1986: add the property manager's name and email address from
-            //  ownershipAndLandlordsTask.propertyManagerTask when the landlord is using a property manager
+            propertyManager = if (isAssociatedPartiesEnabled) getPropertyManager(state) else null,
         )
+    }
+
+    private fun getPropertyManager(state: PropertyRegistrationJourneyState): PropertyManagerDataModel? {
+        val propertyManagerTask = state.ownershipAndLandlordsTask.propertyManagerTask
+        if (propertyManagerTask.propertyManagerStep.outcome != YesOrNo.YES) return null
+
+        val formModel = propertyManagerTask.propertyManagerDetailsStep.formModel
+        return PropertyManagerDataModel(
+            name = formModel.notNullValue(PropertyManagerDetailsFormModel::name),
+            email = formModel.notNullValue(PropertyManagerDetailsFormModel::emailAddress),
+        )
+    }
+
+    private fun getFreeholders(
+        state: PropertyRegistrationJourneyState,
+        ownershipType: OwnershipType,
+    ): List<FreeholderDataModel>? {
+        if (!ownershipType.requiresFreeholderRecords()) return null
+
+        val freeholders =
+            state.ownershipAndLandlordsTask.ownershipStructureTask.freeholdersTask.freeholdersMap
+                ?.values
+                ?.toList()
+
+        if (freeholders.isNullOrEmpty()) {
+            throw UnrecoverableJourneyStateException(
+                state.journeyId,
+                "Property registration was submitted with an ownership type requiring freeholder records but no freeholders",
+            )
+        }
+
+        return freeholders
+    }
+
+    private fun getSuperiorLandlords(
+        state: PropertyRegistrationJourneyState,
+        ownershipType: OwnershipType,
+    ): List<SuperiorLandlordDataModel> {
+        if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyList()
+
+        val superiorLandlordsTask = state.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+        val anyoneInOwnershipChain =
+            superiorLandlordsTask.anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Property registration was submitted before the anyone in ownership chain step was answered",
+                )
+
+        if (!anyoneInOwnershipChain) return emptyList()
+
+        val superiorLandlords =
+            superiorLandlordsTask.superiorLandlordsMap
+                ?.values
+                ?.toList()
+
+        if (superiorLandlords.isNullOrEmpty()) {
+            throw UnrecoverableJourneyStateException(
+                state.journeyId,
+                "Property registration was submitted with anyone in ownership chain answered yes but no superior landlords",
+            )
+        }
+
+        return superiorLandlords
     }
 }

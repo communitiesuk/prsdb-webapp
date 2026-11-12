@@ -55,4 +55,9 @@ data class PropertyRegistrationDataModel(
     val correspondenceEmail: String,
     val correspondenceAddressModel: AddressDataModel,
     val renewalDate: LocalDate? = null,
+    // Null means the freeholders were never collected — either the ASSOCIATED_PARTIES flag is off, or
+    // the ownership type does not require freeholder records. An empty list is an impossible state.
+    val freeholders: List<FreeholderDataModel>? = null,
+    val superiorLandlords: List<SuperiorLandlordDataModel> = emptyList(),
+    val propertyManager: PropertyManagerDataModel? = null,
 )

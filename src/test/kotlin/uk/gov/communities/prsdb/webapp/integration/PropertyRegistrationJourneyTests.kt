@@ -41,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -83,6 +84,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
@@ -135,6 +137,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentFailedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentReturnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
@@ -1227,7 +1230,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             freeholdersListPage.submit()
             assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submitNo()
+            propertyManagerPage.submitYes()
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+                .submitDetails("Pat Manager", "pat.manager@example.com")
+            assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).form.submit()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
@@ -1367,6 +1373,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 propertyOwnershipCaptor.value.correspondenceAddress.singleLineAddress,
             )
             assertNull(propertyOwnershipCaptor.value.correspondenceAddress.uprn)
+            assertEquals(OwnershipType.SHARE_OF_JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
+            assertEquals("Pat Manager", propertyOwnershipCaptor.value.propertyManager?.name)
+            assertEquals("pat.manager@example.com", propertyOwnershipCaptor.value.propertyManager?.email)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
