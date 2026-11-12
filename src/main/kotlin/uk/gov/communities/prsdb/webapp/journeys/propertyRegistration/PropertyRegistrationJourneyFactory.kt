@@ -102,6 +102,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -541,20 +542,7 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                    backStep {
-                        val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
-                        // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
-                        if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
-                            electricalSafetyDetailsTask.eicIssueDateStep
-                        } else {
-                            electricalSafetyDetailsTask.eicExpiryDateStep
-                        }
-                    }
-                }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
-                }
+                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)

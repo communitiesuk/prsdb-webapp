@@ -8,6 +8,7 @@ import kotlinx.datetime.plus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
@@ -302,7 +303,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     private fun expiredCertDate(certificateType: CertificateType) =
         when (certificateType) {
-            CertificateType.Eic -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 6))
+            CertificateType.Eic -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
             else -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
         }
 

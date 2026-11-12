@@ -7,20 +7,24 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 
-private fun JourneyBuilder<*>.useContinueButtons(vararg steps: JourneyStep<*, *, *>) {
+private fun JourneyBuilder<*>.useSubmitButtonText(
+    vararg steps: JourneyStep<*, *, *>,
+    messageKey: () -> String,
+) {
     steps.forEach { step ->
         configureStep(step) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            withAdditionalContentProperty { "submitButtonText" to messageKey() }
         }
     }
 }
 
+private fun JourneyBuilder<*>.useContinueButtons(vararg steps: JourneyStep<*, *, *>) =
+    useSubmitButtonText(*steps) { "forms.buttons.continue" }
+
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
     useContinueButtons(task.hasGasSupplyStep, task.hasGasCertStep, task.gasCertIssueDateStep, task.checkGasCertUploadsStep)
-    configureStep(task.gasCertExpiredStep) {
-        withAdditionalContentProperty {
-            "submitButtonText" to if (task.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
-        }
+    useSubmitButtonText(task.gasCertExpiredStep) {
+        if (task.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
     }
 }
 
@@ -39,15 +43,8 @@ fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyDetailsTask) {
         task.eicrExpiryDateStep,
         task.checkEicrUploadsStep,
     )
-    configureStep(task.eicExpiredStep) {
-        withAdditionalContentProperty {
-            "submitButtonText" to if (task.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-        }
-    }
-    configureStep(task.eicrExpiredStep) {
-        withAdditionalContentProperty {
-            "submitButtonText" to if (task.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-        }
+    useSubmitButtonText(task.eicExpiredStep, task.eicrExpiredStep) {
+        if (task.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
     }
 }
 

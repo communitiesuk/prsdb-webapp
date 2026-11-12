@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
@@ -66,20 +67,7 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.parentsFor(ELECTRICAL_SAFETY) }
                 nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
             }
-            configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                backStep {
-                    val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
-                    // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
-                    if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
-                        electricalSafetyDetailsTask.eicIssueDateStep
-                    } else {
-                        electricalSafetyDetailsTask.eicExpiryDateStep
-                    }
-                }
-            }
-            configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
-            }
+            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             // TODO PDJB-2040: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.epcStep) {
