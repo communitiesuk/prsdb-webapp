@@ -65,7 +65,8 @@
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsRows})}"></dl>
         </th:block>
         <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
-        <!--/* TODO: PDJB-2014: Add Ownership type header & rows */-->
+        <!--/* TODO PDJB-2014: Add Ownership type header & rows. Until then the placeholder ownership type row above
+                renders under the Joint landlords sub-heading when ASSOCIATED_PARTIES is enabled */-->
         <th:block th:if="${freeholdersCards != null}">
             <h4 class="govuk-heading-s" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h4>
             <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
