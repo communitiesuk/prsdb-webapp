@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import software.amazon.awssdk.transfer.s3.S3TransferManager
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class AwsS3DequarantiningFileCopier(
     private val transferManager: S3TransferManager,
     @Value("\${aws.s3.quarantineBucket}")
