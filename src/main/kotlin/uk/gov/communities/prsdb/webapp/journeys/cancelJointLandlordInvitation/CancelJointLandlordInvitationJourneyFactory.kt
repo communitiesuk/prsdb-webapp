@@ -4,7 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -37,7 +37,7 @@ class CancelJointLandlordInvitationJourneyFactory(
 
         val propertyRecordUrl =
             PropertyDetailsController.getPropertyDetailsPath(invitation.registeredOwnership.id) +
-                "#$LANDLORD_DETAILS_FRAGMENT"
+                "#$PEOPLE_RESPONSIBLE_FRAGMENT"
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }

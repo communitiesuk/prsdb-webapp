@@ -40,6 +40,33 @@ class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("da
     }
 
     @Test
+    fun `reactivating a property reactivates its inactive landlords`() {
+        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        assertFalse(landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get().isActive)
+
+        activeInactiveService.reactivateProperty(JOINT_PROPERTY_ID)
+
+        assertTrue(propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().isActive)
+        val reactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
+        assertTrue(reactivatedLandlord.isActive)
+        assertNull(reactivatedLandlord.lastDeactivatedDate)
+    }
+
+    @Test
+    fun `reactivating a property leaves its already active landlords unchanged`() {
+        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        val activeLandlordBefore = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
+        assertTrue(activeLandlordBefore.isActive)
+
+        activeInactiveService.reactivateProperty(JOINT_PROPERTY_ID)
+
+        val activeLandlordAfter = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
+        assertTrue(activeLandlordAfter.isActive)
+        assertNull(activeLandlordAfter.lastDeactivatedDate)
+        assertEquals(activeLandlordBefore.lastModifiedDate, activeLandlordAfter.lastModifiedDate)
+    }
+
+    @Test
     fun `deactivating a landlord's last active property deactivates the landlord`() {
         activeInactiveService.deactivateProperty(SOLE_PROPERTY_ID)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
