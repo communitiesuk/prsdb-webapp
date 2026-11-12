@@ -165,7 +165,7 @@ deregisterPropertyLink:
   text: Deregister property
 propertyRecord:
   registrationDate: Registration date
-  registrationNumber: Property Registration Number
+  registrationNumber: Rental property number
   localCouncil: Local council
   propertyType: Property type
   heading: Property and tenancy details

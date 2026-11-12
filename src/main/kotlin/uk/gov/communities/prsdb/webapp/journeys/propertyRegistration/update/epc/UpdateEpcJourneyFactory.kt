@@ -10,12 +10,12 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -86,7 +86,7 @@ class UpdateEpcJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
                 }
             }
-            replaceButtons()
+            useContinueButtons(journey.epcDetailsTask)
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -112,35 +112,8 @@ class UpdateEpcJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            replaceButtons()
+            useContinueButtons(journey.epcDetailsTask)
         }
-
-    private fun JourneyBuilder<UpdateEpcJourney>.replaceButtons() {
-        configureStep(journey.epcDetailsTask.hasEpcStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.checkUprnMatchedEpcStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.confirmEpcDetailsRetrievedByCertificateNumberStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.isEpcRequiredStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.epcExemptionStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.hasMeesExemptionStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.epcDetailsTask.meesExemptionStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-    }
 
     fun initializeJourneyState(
         seed: Any?,

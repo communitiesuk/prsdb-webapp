@@ -14,12 +14,13 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
 
     override fun getStepSpecificContent(state: RentFrequencyAndAmountState): Map<String, Any?> {
         val rentFrequency = state.rentFrequency.formModel.rentFrequency!!
+        val isOtherRentFrequency = rentFrequency == RentFrequency.OTHER
         return mapOf(
             "heading" to getHeading(rentFrequency),
             "subheading" to getSubheadingForRentFrequency(rentFrequency),
-            "fieldSetHint" to "forms.rentAmount.fieldSetHint",
+            "fieldSetHint" to if (isOtherRentFrequency) "forms.rentAmount.fieldSetHint.other" else "forms.rentAmount.fieldSetHint.default",
             "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),
-            "showRentCalculationSection" to (rentFrequency == RentFrequency.OTHER),
+            "showRentCalculationSection" to isOtherRentFrequency,
         )
     }
 
@@ -31,6 +32,7 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
         when (rentFrequency) {
             RentFrequency.WEEKLY -> "forms.rentAmount.heading.weekly"
             RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.heading.fourWeekly"
+            RentFrequency.OTHER -> "forms.rentAmount.heading.other"
             else -> "forms.rentAmount.heading.monthly"
         }
 
@@ -38,6 +40,7 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
         when (rentFrequency) {
             RentFrequency.WEEKLY -> "forms.rentAmount.paragraph.one.weekly"
             RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.paragraph.one.fourWeekly"
+            RentFrequency.OTHER -> "forms.rentAmount.paragraph.one.other"
             else -> "forms.rentAmount.paragraph.one.monthly"
         }
 
@@ -45,6 +48,7 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
         when (rentFrequency) {
             RentFrequency.WEEKLY -> "forms.rentAmount.subheading.weekly"
             RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.subheading.fourWeekly"
+            RentFrequency.OTHER -> "forms.rentAmount.subheading.other.two"
             else -> "forms.rentAmount.subheading.monthly"
         }
 }

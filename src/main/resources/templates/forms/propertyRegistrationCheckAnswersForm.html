@@ -6,6 +6,10 @@
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="peopleResponsibleForThisPropertyHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="peopleResponsibleForThisPropertyRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="freeholdersHeadingKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersChangeLinkKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersChangeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
 <!--/*@thymesVar id="superiorLandlordsRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="superiorLandlordsChangeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="superiorLandlordsCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
@@ -59,7 +63,16 @@
             <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
             <!--/* TODO: PDJB-2146: Add Joint Landlords header & row */-->
             <!--/* TODO: PDJB-2014: Add Ownership type header & rows */-->
-            <!--/* TODO: PDJB-1984: Add Freeholders header & rows */-->
+            <th:block th:if="${freeholdersCards != null}">
+                <h4 class="govuk-heading-s" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h4>
+                <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
+                    <a class="govuk-link" th:href="@{${freeholdersChangeUrl}}"
+                       th:text="#{${freeholdersChangeLinkKey}}">freeholdersChangeLinkKey</a>
+                </p>
+                <th:block th:each="card : ${freeholdersCards}">
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
+                </th:block>
+            </th:block>
             <th:block th:if="${superiorLandlordsRows != null or superiorLandlordsCards != null}">
                 <h4 class="govuk-heading-s"
                     th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h4>
