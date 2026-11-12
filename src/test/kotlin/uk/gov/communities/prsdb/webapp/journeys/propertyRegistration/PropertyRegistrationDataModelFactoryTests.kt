@@ -378,6 +378,16 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
+    fun `fromJourneyState throws when the property manager step was not answered`() {
+        // Arrange
+        setupStateForPropertyRegistration(isAssociatedPartiesEnabled = true, isUsingPropertyManager = null)
+        setupStateForComplianceDataWithNullValues()
+
+        // Act, Assert
+        assertThrows<UnrecoverableJourneyStateException> { factory.fromJourneyState(mockState) }
+    }
+
+    @Test
     fun `fromJourneyState returns the property manager when the landlord uses one`() {
         // Arrange
         setupStateForPropertyRegistration(
@@ -744,6 +754,8 @@ class PropertyRegistrationDataModelFactoryTests {
         anyoneInOwnershipChain: Boolean? = false,
         superiorLandlords: Map<Int, SuperiorLandlordDataModel>? = null,
         propertyManager: PropertyManagerDataModel? = null,
+        // Null when the property manager step has not been answered at all
+        isUsingPropertyManager: Boolean? = propertyManager != null,
         // Details left behind when a landlord goes back through RemovePropertyManagerStep and answers "no"
         stalePropertyManagerDetails: PropertyManagerDataModel? = null,
     ) {
@@ -787,12 +799,15 @@ class PropertyRegistrationDataModelFactoryTests {
             whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
             whenever(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
             whenever(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
+            lenient().`when`(mockOwnershipTypeTask.journeyId).thenReturn("test-journey-id")
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(ownershipType)
 
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.journeyId).thenReturn("test-journey-id")
             lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(freeholders)
 
             lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
+            lenient().`when`(mockSuperiorLandlordsTask.journeyId).thenReturn("test-journey-id")
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(
                 anyoneInOwnershipChain?.let { AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = it) },
@@ -801,7 +816,9 @@ class PropertyRegistrationDataModelFactoryTests {
 
             lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
             lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
-            lenient().`when`(mockPropertyManagerStep.outcome).thenReturn(if (propertyManager == null) YesOrNo.NO else YesOrNo.YES)
+            lenient().`when`(mockPropertyManagerStep.outcome).thenReturn(
+                isUsingPropertyManager?.let { if (it) YesOrNo.YES else YesOrNo.NO },
+            )
             lenient().`when`(mockPropertyManagerTask.propertyManagerDetailsStep).thenReturn(mockPropertyManagerDetailsStep)
             lenient().`when`(mockPropertyManagerDetailsStep.formModel).thenReturn(
                 PropertyManagerDetailsFormModel().apply {

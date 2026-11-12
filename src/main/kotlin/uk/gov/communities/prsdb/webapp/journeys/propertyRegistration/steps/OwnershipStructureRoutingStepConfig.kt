@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
-import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipStructureState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getOwnershipType
 
 enum class OwnershipStructureRouteMode {
     SKIP_ALL,
@@ -17,11 +17,7 @@ enum class OwnershipStructureRouteMode {
 class OwnershipStructureRoutingStepConfig : AbstractInternalStepConfig<OwnershipStructureRouteMode, OwnershipStructureState>() {
     override fun mode(state: OwnershipStructureState): OwnershipStructureRouteMode {
         val ownershipType =
-            state.ownershipTypeTask.ownershipType
-                ?: throw UnrecoverableJourneyStateException(
-                    state.journeyId,
-                    "Ownership structure routing was reached before the ownership type task was complete",
-                )
+            state.ownershipTypeTask.getOwnershipType()
 
         val asksFreeholders = ownershipType.requiresFreeholderRecords()
         val asksSuperiorLandlords = ownershipType.requiresSuperiorLandlordInfo()

@@ -10,6 +10,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyoneInOwnershipChain
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholders
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getOwnershipType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlords
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
@@ -50,14 +54,12 @@ class PropertyRegistrationDataModelFactory(
                 ?.values
                 ?.toList()
         val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        // TODO PDJB-2016: remove this with the flag, keeping the flag-on branches that depend on it.
         val isAssociatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
         val ownershipType =
             if (isAssociatedPartiesEnabled) {
-                state.ownershipAndLandlordsTask.ownershipStructureTask.ownershipTypeTask.ownershipType
-                    ?: throw UnrecoverableJourneyStateException(
-                        state.journeyId,
-                        "Property registration was submitted before the ownership type task was complete",
-                    )
+                state.ownershipAndLandlordsTask.ownershipStructureTask.ownershipTypeTask
+                    .getOwnershipType()
             } else {
                 OwnershipTypeConverter.convert(
                     state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
@@ -219,7 +221,13 @@ class PropertyRegistrationDataModelFactory(
 
     private fun getPropertyManager(state: PropertyRegistrationJourneyState): PropertyManagerDataModel? {
         val propertyManagerTask = state.ownershipAndLandlordsTask.propertyManagerTask
-        if (propertyManagerTask.propertyManagerStep.outcome != YesOrNo.YES) return null
+        val usingPropertyManager =
+            propertyManagerTask.propertyManagerStep.outcome
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Property registration was submitted before the property manager step was answered",
+                )
+        if (usingPropertyManager == YesOrNo.NO) return null
 
         val formModel = propertyManagerTask.propertyManagerDetailsStep.formModel
         return PropertyManagerDataModel(
@@ -234,19 +242,10 @@ class PropertyRegistrationDataModelFactory(
     ): List<FreeholderDataModel>? {
         if (!ownershipType.requiresFreeholderRecords()) return null
 
-        val freeholders =
-            state.ownershipAndLandlordsTask.ownershipStructureTask.freeholdersTask.freeholdersMap
-                ?.values
-                ?.toList()
-
-        if (freeholders.isNullOrEmpty()) {
-            throw UnrecoverableJourneyStateException(
-                state.journeyId,
-                "Property registration was submitted with an ownership type requiring freeholder records but no freeholders",
-            )
-        }
-
-        return freeholders
+        return state.ownershipAndLandlordsTask.ownershipStructureTask.freeholdersTask
+            .getFreeholders()
+            .values
+            .toList()
     }
 
     private fun getSuperiorLandlords(
@@ -256,27 +255,11 @@ class PropertyRegistrationDataModelFactory(
         if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyList()
 
         val superiorLandlordsTask = state.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
-        val anyoneInOwnershipChain =
-            superiorLandlordsTask.anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
-                ?: throw UnrecoverableJourneyStateException(
-                    state.journeyId,
-                    "Property registration was submitted before the anyone in ownership chain step was answered",
-                )
+        if (!superiorLandlordsTask.anyoneInOwnershipChain) return emptyList()
 
-        if (!anyoneInOwnershipChain) return emptyList()
-
-        val superiorLandlords =
-            superiorLandlordsTask.superiorLandlordsMap
-                ?.values
-                ?.toList()
-
-        if (superiorLandlords.isNullOrEmpty()) {
-            throw UnrecoverableJourneyStateException(
-                state.journeyId,
-                "Property registration was submitted with anyone in ownership chain answered yes but no superior landlords",
-            )
-        }
-
-        return superiorLandlords
+        return superiorLandlordsTask
+            .getSuperiorLandlords()
+            .values
+            .toList()
     }
 }

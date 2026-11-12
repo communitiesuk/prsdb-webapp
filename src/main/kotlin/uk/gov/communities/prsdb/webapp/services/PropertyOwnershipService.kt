@@ -147,8 +147,8 @@ class PropertyOwnershipService(
         if (ownershipType.requiresFreeholderRecords()) {
             when {
                 // TODO PDJB-2016: delete this branch with the flag. The flag-off journey never asks who
-                //  the freeholders are, so nothing is collected and a placeholder keeps the invariant
-                //  that an ownership type requiring freeholder records has at least one row.
+                //  the freeholders are, so we use createPlaceholderFreeholder to supply one if required
+                //  by the OwnershipType.
                 freeholders == null -> freeholderService.createPlaceholderFreeholder(propertyOwnership)
                 freeholders.isEmpty() ->
                     throw IllegalArgumentException(

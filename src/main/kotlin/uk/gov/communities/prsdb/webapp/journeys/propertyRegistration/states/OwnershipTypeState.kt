@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeAnswersConverter
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -24,3 +25,11 @@ interface OwnershipTypeState : JourneyState {
     val isJointFreeholder: Boolean
         get() = ownershipType?.isJointFreeholder() ?: false
 }
+
+// Only call this once the ownership type task is known to be complete.
+fun OwnershipTypeState.getOwnershipType(): OwnershipType =
+    ownershipType
+        ?: throw UnrecoverableJourneyStateException(
+            journeyId,
+            "The ownership type was read before the ownership type task was complete",
+        )

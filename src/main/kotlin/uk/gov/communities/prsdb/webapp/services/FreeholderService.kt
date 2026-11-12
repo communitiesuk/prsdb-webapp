@@ -42,8 +42,8 @@ class FreeholderService(
 
     // TODO PDJB-2016: remove this with the flag-off code paths, which never ask who the freeholder is.
     //  It keeps the invariant that an ownership type requiring freeholder records has at least one row.
-    //  PDJB-2015 has removed the flag-on caller in registration; PDJB-1992 removes the one in
-    //  updateOwnershipType. The flag-off callers remain until the flag goes.
+    //  PDJB-1992 will remove the remaining flag-on caller in updateOwnershipType. The flag-off callers
+    //  remain until the flag goes.
     @Transactional
     fun createPlaceholderFreeholder(propertyOwnership: PropertyOwnership) {
         freeholderRepository.save(Freeholder(propertyOwnership = propertyOwnership))
