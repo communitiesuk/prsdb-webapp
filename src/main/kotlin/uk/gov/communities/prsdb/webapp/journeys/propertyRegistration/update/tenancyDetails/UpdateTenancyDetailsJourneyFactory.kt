@@ -76,7 +76,7 @@ class UpdateTenancyDetailsJourneyFactory(
             task(journey.householdsAndTenantsTask) {
                 initialStep()
                 backUrl { returnUrl }
-                withDependencies { HouseHoldsAndTenantsDependencies(false) }
+                withDependencies { journey }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
             }
             task(journey.rentIncludesBillsTask) {
@@ -115,11 +115,11 @@ class UpdateTenancyDetailsJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
                     configureStep(journey.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
@@ -205,10 +205,12 @@ class UpdateTenancyDetailsJourney(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
 interface UpdateTenancyDetailsJourneyState :
     TenancyDetailsState,
+    HouseHoldsAndTenantsDependencies,
     CheckYourAnswersJourneyState {
     override val cyaStep: UpdateTenancyDetailsCyaStep
     val propertyId: Long

@@ -59,7 +59,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 initialStep()
                 backUrl { returnUrl }
                 nextStep { journey.cyaStep }
-                withDependencies { HouseHoldsAndTenantsDependencies(false) }
+                withDependencies { journey }
             }
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
@@ -80,7 +80,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         journey(state) {
             unreachableStepUrl { returnUrl }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+            checkAnswerTask(journey.householdsAndTenantsTask, { journey })
             if (state.checkingAnswersFor == TenantsStep.ROUTE_SEGMENT) {
                 configureStep(journey.householdsAndTenantsTask.tenants) {
                     backDestination { journey.returnToCyaPageDestination }
@@ -136,9 +136,12 @@ class UpdateHouseholdsAndTenantsJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
-interface UpdateHouseholdsAndTenantsJourneyState : CheckYourAnswersJourneyState {
+interface UpdateHouseholdsAndTenantsJourneyState :
+    CheckYourAnswersJourneyState,
+    HouseHoldsAndTenantsDependencies {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep
     val propertyId: Long

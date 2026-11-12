@@ -78,7 +78,7 @@ class PropertyReactivationJourneyFactory(
                 nextStep { journey.nextStepAfter(EPC) }
             }
             task(journey.tenancyDetailsTask) {
-                withDependencies { HouseHoldsAndTenantsDependencies(false) }
+                withDependencies { journey }
                 parents { journey.parentsFor(TENANCY_DETAILS) }
                 nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
             }
@@ -162,6 +162,7 @@ class PropertyReactivationJourney(
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
@@ -180,7 +181,8 @@ interface PropertyReactivationJourneyState :
     PropertyOwnershipJourneyState,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
-    EpcDependencies {
+    EpcDependencies,
+    HouseHoldsAndTenantsDependencies {
     val infoStep: ReactivationInfoStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask
