@@ -190,6 +190,7 @@ class PropertyRegistrationJourneyFactory(
                     val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
                     val ownershipTypeTask = ownershipStructureTask.ownershipTypeTask
                     val freeholdersTask = ownershipStructureTask.freeholdersTask
+                    // TODO PDJB-2146: Revisit whether check-answer routing should use freeholdersTask; ownershipTypeTask provides joint ownership.
                     checkAnswerTask(ownershipTypeTask)
                     checkAnswerTaskFrom(
                         freeholdersTask,
