@@ -69,6 +69,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         const val ACTIVE_PROPERTY = 1L
     }
 
+    private val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
+
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
@@ -79,8 +81,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord can walk through every provide later step to the confirmation page`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         assertThat(infoPage.heading).containsText("Reactivate your property")
         infoPage.submit()
@@ -123,15 +123,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord can provide a gas safety certificate and every gas safety button says continue`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        infoPage.submit()
-
-        val licensingPage = assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments)
-        licensingPage.submit()
-
-        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
+        val hasGasSupplyPage = navigateToHasGasSupplyPage(page)
         assertThat(hasGasSupplyPage.provideThisLaterButton).isHidden()
         assertThat(hasGasSupplyPage.form.submitButton).hasText("Continue")
         hasGasSupplyPage.submitHasGasSupply()
@@ -174,33 +166,31 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         certificateType: CertificateType,
         page: Page,
     ) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-        val hasElectricalCertPage = navigateToHasElectricalCertPage(page, urlArguments)
+        val hasElectricalCertPage = navigateToHasElectricalCertPage(page)
         assertThat(hasElectricalCertPage.provideThisLaterButton).isHidden()
         assertThat(hasElectricalCertPage.form.submitButton).hasText("Continue")
         submitHasCertificate(hasElectricalCertPage, certificateType)
 
-        var certDatePage = assertCertDatePage(page, certificateType, urlArguments)
+        var certDatePage = assertCertDatePage(page, certificateType)
         assertThat(certDatePage.form.submitButton).hasText("Continue")
         certDatePage.submitDate(expiredCertDate(certificateType))
 
-        val (expiredPageForm, changeDateLink) = assertExpiredPageFormAndChangeDateLink(page, certificateType, urlArguments)
+        val (expiredPageForm, changeDateLink) = assertExpiredPageFormAndChangeDateLink(page, certificateType)
         assertThat(expiredPageForm.submitButton).hasText("Continue without a valid electrical safety certificate")
         changeDateLink.clickAndWait()
 
-        certDatePage = assertCertDatePage(page, certificateType, urlArguments)
+        certDatePage = assertCertDatePage(page, certificateType)
         certDatePage.submitDate(validCertDate(certificateType))
 
-        assertUploadPage(page, certificateType, urlArguments).uploadCertificate("validFile.png")
+        assertUploadPage(page, certificateType).uploadCertificate("validFile.png")
 
-        var checkUploadsPage = assertCheckUploadsPage(page, certificateType, urlArguments)
+        var checkUploadsPage = assertCheckUploadsPage(page, certificateType)
         assertThat(checkUploadsPage.form.submitButton).hasText("Continue")
         checkUploadsPage.backLink.clickAndWait()
 
-        assertCertDatePage(page, certificateType, urlArguments).submitDate(validCertDate(certificateType))
+        assertCertDatePage(page, certificateType).submitDate(validCertDate(certificateType))
 
-        checkUploadsPage = assertCheckUploadsPage(page, certificateType, urlArguments)
+        checkUploadsPage = assertCheckUploadsPage(page, certificateType)
         checkUploadsPage.form.submit()
 
         val checkElectricalSafetyAnswersPage =
@@ -213,9 +203,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord can provide an EPC exemption and every EPC button on the way says continue`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-        navigateToEpcTask(page, urlArguments)
+        navigateToEpcTask(page)
 
         val confirmEpcPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments)
         assertThat(confirmEpcPage.form.submitButton).hasText("Continue")
@@ -244,21 +232,19 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord goes straight to check answers when there are no details to provide`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
+        val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, noDetailsUrlArguments)
         checkAnswersPage.backLink.clickAndWait()
 
-        assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+        assertPageIs(page, InfoFormPagePropertyReactivation::class, noDetailsUrlArguments)
     }
 
     @Test
     fun `the back link on a provide later step returns to the previous step`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
@@ -270,13 +256,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `the back links into and out of the gas safety task return to the adjacent steps`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        infoPage.submit()
-        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
-
-        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
+        val hasGasSupplyPage = navigateToHasGasSupplyPage(page)
         hasGasSupplyPage.backLink.clickAndWait()
         assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
 
@@ -291,9 +271,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `the back links into and out of the EPC task return to the adjacent steps`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-        navigateToEpcTask(page, urlArguments)
+        navigateToEpcTask(page)
 
         val confirmEpcPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments)
         confirmEpcPage.backLink.clickAndWait()
@@ -310,11 +288,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord is sent to the info page if they visit a step the property does not need`(page: Page) {
-        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
+        val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
 
-        assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+        assertPageIs(page, InfoFormPagePropertyReactivation::class, noDetailsUrlArguments)
     }
 
     @Test
@@ -339,31 +317,27 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         ) {
         @Test
         fun `a landlord is asked whether they have an EPC when the address has no UPRN to look one up with`(page: Page) {
-            val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
-
-            navigateToEpcTask(page, urlArguments)
+            navigateToEpcTask(page)
 
             assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
             verify(epcRegisterClient, never()).getByUprn(any())
         }
     }
 
-    private fun navigateToHasElectricalCertPage(
-        page: Page,
-        urlArguments: Map<String, String>,
-    ): HasElectricalCertFormPagePropertyReactivation {
+    private fun navigateToHasGasSupplyPage(page: Page): HasGasSupplyFormPagePropertyReactivation {
         navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
         assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
-        assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
+        return assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    private fun navigateToHasElectricalCertPage(page: Page): HasElectricalCertFormPagePropertyReactivation {
+        navigateToHasGasSupplyPage(page).submitHasNoGasSupply()
         assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
         return assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
     }
 
-    private fun navigateToEpcTask(
-        page: Page,
-        urlArguments: Map<String, String>,
-    ) {
-        navigateToHasElectricalCertPage(page, urlArguments).submitHasNoCert()
+    private fun navigateToEpcTask(page: Page) {
+        navigateToHasElectricalCertPage(page).submitHasNoCert()
         assertPageIs(page, ElectricalCertMissingFormPagePropertyReactivation::class, urlArguments).form.submit()
         assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
     }
@@ -392,7 +366,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     private fun assertCertDatePage(
         page: Page,
         certificateType: CertificateType,
-        urlArguments: Map<String, String>,
     ): DateFormPage =
         when (certificateType) {
             CertificateType.Eic -> assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
@@ -403,7 +376,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     private fun assertExpiredPageFormAndChangeDateLink(
         page: Page,
         certificateType: CertificateType,
-        urlArguments: Map<String, String>,
     ): Pair<PostForm, Link> =
         when (certificateType) {
             CertificateType.Eic ->
@@ -418,7 +390,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     private fun assertUploadPage(
         page: Page,
         certificateType: CertificateType,
-        urlArguments: Map<String, String>,
     ): UploadCertificateFormPage =
         when (certificateType) {
             CertificateType.Eic -> assertPageIs(page, UploadEicFormPagePropertyReactivation::class, urlArguments)
@@ -429,7 +400,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     private fun assertCheckUploadsPage(
         page: Page,
         certificateType: CertificateType,
-        urlArguments: Map<String, String>,
     ): CheckElectricalCertUploadsFormBasePage =
         when (certificateType) {
             CertificateType.Eic -> assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments)

@@ -22,8 +22,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
@@ -58,18 +61,18 @@ class PropertyReactivationJourneyFactory(
                 nextStep { journey.nextStepAfter(LICENSING) }
             }
             task(journey.gasSafetyTask) {
-                withDependencies { ReactivationGasSafetyDependencies(journey) }
+                withDependencies { journey }
                 parents { journey.parentsFor(GAS_SAFETY) }
                 nextStep { journey.nextStepAfter(GAS_SAFETY) }
             }
             task(journey.electricalSafetyTask) {
-                withDependencies { ReactivationElectricalSafetyDependencies(journey) }
+                withDependencies { journey }
                 parents { journey.parentsFor(ELECTRICAL_SAFETY) }
                 nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
             }
             useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             task(journey.epcTask) {
-                withDependencies { ReactivationEpcDependencies(journey) }
+                withDependencies { journey }
                 parents { journey.parentsFor(EPC) }
                 nextStep { journey.nextStepAfter(EPC) }
             }
@@ -158,6 +161,7 @@ class PropertyReactivationJourney(
     override var requiredTaskTypes: List<ReactivationTaskType> by delegateProvider.requiredImmutableDelegate("requiredTaskTypes")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
+    override val allowProvideCertificateLaterRoute: Boolean = false
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
@@ -172,7 +176,11 @@ class PropertyReactivationJourney(
     }
 }
 
-interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
+interface PropertyReactivationJourneyState :
+    PropertyOwnershipJourneyState,
+    GasSafetyDependencies,
+    ElectricalSafetyDependencies,
+    EpcDependencies {
     val infoStep: ReactivationInfoStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask
@@ -181,6 +189,7 @@ interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
     val tenancyDetailsStep: ReactivationTenancyDetailsStep
     val checkAnswersStep: ReactivationCheckAnswersStep
     var requiredTaskTypes: List<ReactivationTaskType>
-    var isOccupied: Boolean
-    var uprn: Long?
+    override var propertyOwnershipId: Long
+    override var isOccupied: Boolean
+    override var uprn: Long?
 }
