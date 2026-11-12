@@ -49,24 +49,24 @@ class InviteJointLandlordJourneyFactory(
             propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
 
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-        val propertyDetailsLandlordTab = "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT"
+        val propertyDetailsPeopleResponsibleTab = "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT"
         val confirmationRoute =
             InviteJointLandlordController.getInviteJointLandlordRoute(propertyId) + "/$CONFIRMATION_PATH_SEGMENT"
 
         return if (propertyMarkedAsJointLandlord) {
-            buildAlreadyJointLandlordInviteJourney(state, propertyDetailsLandlordTab, confirmationRoute)
+            buildAlreadyJointLandlordInviteJourney(state, propertyDetailsPeopleResponsibleTab, confirmationRoute)
         } else {
-            buildNotCurrentlyJointLandlordInviteJourney(state, propertyDetailsLandlordTab, confirmationRoute)
+            buildNotCurrentlyJointLandlordInviteJourney(state, propertyDetailsPeopleResponsibleTab, confirmationRoute)
         }
     }
 
     private fun buildAlreadyJointLandlordInviteJourney(
         state: InviteJointLandlordJourney,
-        propertyDetailsLandlordTab: String,
+        propertyDetailsPeopleResponsibleTab: String,
         confirmationRoute: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepUrl { propertyDetailsLandlordTab }
+            unreachableStepUrl { propertyDetailsPeopleResponsibleTab }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
@@ -76,10 +76,10 @@ class InviteJointLandlordJourneyFactory(
             task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.startInviteJointLandlordStep.isComplete() }
-                backUrl { propertyDetailsLandlordTab }
+                backUrl { propertyDetailsPeopleResponsibleTab }
                 nextDestination { _ ->
                     if (journey.inviteJointLandlordsTask.invitedJointLandlords.isEmpty()) {
-                        Destination.ExternalUrl(propertyDetailsLandlordTab)
+                        Destination.ExternalUrl(propertyDetailsPeopleResponsibleTab)
                     } else {
                         Destination(journey.checkInvitationsStep)
                     }
@@ -98,11 +98,11 @@ class InviteJointLandlordJourneyFactory(
 
     private fun buildNotCurrentlyJointLandlordInviteJourney(
         state: InviteJointLandlordJourney,
-        propertyDetailsLandlordTab: String,
+        propertyDetailsPeopleResponsibleTab: String,
         confirmationRoute: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepUrl { propertyDetailsLandlordTab }
+            unreachableStepUrl { propertyDetailsPeopleResponsibleTab }
             // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
@@ -122,7 +122,7 @@ class InviteJointLandlordJourneyFactory(
             task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
-                backUrl { propertyDetailsLandlordTab }
+                backUrl { propertyDetailsPeopleResponsibleTab }
                 nextDestination { _ ->
                     if (journey.inviteJointLandlordsTask.invitedJointLandlords.isEmpty()) {
                         Destination(journey.hasJointLandlordsStep)
@@ -147,7 +147,7 @@ class InviteJointLandlordJourneyFactory(
                     if (journey.hasJointLandlordsStep.outcome == YesOrNo.YES) {
                         confirmationRoute
                     } else {
-                        propertyDetailsLandlordTab
+                        propertyDetailsPeopleResponsibleTab
                     }
                 }
             }

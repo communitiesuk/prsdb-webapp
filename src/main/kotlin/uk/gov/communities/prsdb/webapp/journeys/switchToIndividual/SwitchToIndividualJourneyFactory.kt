@@ -29,15 +29,15 @@ class SwitchToIndividualJourneyFactory(
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
-        val propertyDetailsLandlordTab =
+        val propertyDetailsPeopleResponsibleTab =
             "${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
 
         return journey(state) {
-            unreachableStepUrl { propertyDetailsLandlordTab }
+            unreachableStepUrl { propertyDetailsPeopleResponsibleTab }
             step(journey.hasPendingInvitationsStep) {
                 routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
                 initialStep()
-                backUrl { propertyDetailsLandlordTab }
+                backUrl { propertyDetailsPeopleResponsibleTab }
                 nextStep { mode ->
                     when (mode) {
                         HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
