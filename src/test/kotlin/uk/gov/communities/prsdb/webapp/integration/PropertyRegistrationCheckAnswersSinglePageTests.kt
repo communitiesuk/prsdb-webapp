@@ -85,6 +85,30 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
     }
 
+    // TODO PDJB-2016: Remove this class once ASSOCIATED_PARTIES is released.
+    @Nested
+    inner class BeforePdjb955 {
+        @Test
+        fun `cya hides the freeholder section when the associated parties feature is disabled`(page: Page) {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+                        .withFreeholders(PropertyStateSessionBuilder.DEFAULT_FREEHOLDERS)
+                        .withFreeholdersInfoComplete()
+                        .withFreeholdersListComplete(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).hasCount(0)
+        }
+    }
+
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
@@ -962,27 +986,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.jointFreeholdersHeading).hasCount(0)
             BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).hasCount(0)
             BaseComponent.assertThat(checkAnswersPage.submitButton).isVisible()
-        }
-
-        // TODO PDJB-2016: Remove test once ASSOCIATED_PARTIES is released
-        @Test
-        fun `cya hides the freeholder section when the associated parties feature is disabled`(page: Page) {
-            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswers()
-                        .withBedrooms()
-                        .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
-                        .withFreeholders(PropertyStateSessionBuilder.DEFAULT_FREEHOLDERS)
-                        .withFreeholdersInfoComplete()
-                        .withFreeholdersListComplete(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
-            BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).hasCount(0)
         }
 
         private fun assertFreeholderCards(checkAnswersPage: CheckAnswersPagePropertyRegistration) {
