@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
@@ -19,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -76,19 +77,7 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                backStep {
-                    // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
-                    if (journey.electricalSafetyDetailsTask.isEicIssueDateEnabled) {
-                        journey.electricalSafetyDetailsTask.eicIssueDateStep
-                    } else {
-                        journey.electricalSafetyDetailsTask.eicExpiryDateStep
-                    }
-                }
-            }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                backStep { journey.electricalSafetyDetailsTask.eicrExpiryDateStep }
-            }
+            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyDetailsTask)
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -102,7 +91,7 @@ class UpdateElectricalSafetyJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
                 }
             }
-            replaceButtons()
+            useContinueButtons(journey.electricalSafetyDetailsTask)
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -157,42 +146,8 @@ class UpdateElectricalSafetyJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            replaceButtons()
+            useContinueButtons(journey.electricalSafetyDetailsTask)
         }
-
-    private fun JourneyBuilder<UpdateElectricalSafetyJourney>.replaceButtons() {
-        configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
-        configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.eicIssueDateStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.eicExpiredStep) {
-            withAdditionalContentProperty {
-                "submitButtonText" to
-                    if (journey.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-            }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.eicrExpiryDateStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.eicrExpiredStep) {
-            withAdditionalContentProperty {
-                "submitButtonText" to
-                    if (journey.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-            }
-        }
-    }
 
     fun initialiseJourneyState(
         seed: Any?,
