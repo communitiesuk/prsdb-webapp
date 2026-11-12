@@ -29,6 +29,7 @@ class ScanProcessingOnlyTests {
                 Arguments.of(listOf("default", "integration", "require-passcode"), false),
                 Arguments.of(listOf("web-server-deactivated", "email-worker", "integration"), false),
                 Arguments.of(listOf("web-server-deactivated", "email-worker", "scan-result-worker", "integration"), true),
+                Arguments.of(listOf("web-server-deactivated", "scan-result-worker", "integration"), true),
                 Arguments.of(listOf("web-server-deactivated", "scan-processor", "integration"), true),
                 Arguments.of(listOf("web-server-deactivated", "scheduled-task", "integration"), true),
                 Arguments.of(listOf("local"), true),
