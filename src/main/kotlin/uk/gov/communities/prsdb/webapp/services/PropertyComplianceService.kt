@@ -52,6 +52,18 @@ class PropertyComplianceService(
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+
+        fun getElectricalSafetyExpiryDate(
+            propertyCompliance: PropertyCompliance,
+            eicDateService: EicDateService,
+        ): LocalDate? =
+            when (propertyCompliance.electricalCertType) {
+                CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
+
+                // Any other cert type, including none, keeps reading the stored column so that records predating
+                // the cert type column behave exactly as they did before this date access moved onto the service.
+                else -> propertyCompliance.eicrExpiryDate
+            }
     }
 
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
@@ -93,15 +105,6 @@ class PropertyComplianceService(
         propertyComplianceRepository.save(propertyCompliance)
     }
 
-    fun getElectricalSafetyExpiryDate(propertyCompliance: PropertyCompliance): LocalDate? =
-        when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> getEicExpiryDate(propertyCompliance)
-
-            // Any other cert type, including none, keeps reading the stored column so that records predating
-            // the cert type column behave exactly as they did before this date access moved onto the service.
-            else -> propertyCompliance.eicrExpiryDate
-        }
-
     fun isElectricalSafetyExpired(propertyCompliance: PropertyCompliance): Boolean? =
         when (propertyCompliance.electricalCertType) {
             CertificateType.Eic -> {
@@ -127,12 +130,13 @@ class PropertyComplianceService(
         PrsdbWebException("Electrical cert type must be EIC or EICR but was ${propertyCompliance.electricalCertType}")
 
     fun isElectricalSafetyMissing(propertyCompliance: PropertyCompliance): Boolean =
-        getElectricalSafetyExpiryDate(propertyCompliance) == null
+        getElectricalSafetyExpiryDate(propertyCompliance, eicDateService) == null
 
     fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
         ComplianceStatusDataModel.fromPropertyCompliance(
             propertyCompliance = propertyCompliance,
-            electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance),
+            eicIssueDate = null,
+            electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
             isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
         )
 
@@ -447,7 +451,7 @@ class PropertyComplianceService(
                     if (showEicIssueDate) {
                         getEicIssueDate(propertyCompliance)
                     } else {
-                        getElectricalSafetyExpiryDate(propertyCompliance)
+                        getElectricalSafetyExpiryDate(propertyCompliance, eicDateService)
                     },
                 certificateDateHeading =
                     if (showEicIssueDate) {

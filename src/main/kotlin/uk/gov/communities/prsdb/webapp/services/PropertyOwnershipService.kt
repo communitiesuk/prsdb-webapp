@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -25,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
@@ -562,7 +560,10 @@ class PropertyOwnershipService(
                     OutstandingActionsDataModel.fromPropertyOwnership(
                         propertyOwnership,
                         eicIssueDate = propertyCompliance?.takeIf { isEicIssueDateEnabled }?.let(eicDateService::issueDateFrom),
-                        electricalSafetyExpiryDate = propertyCompliance?.let(::electricalSafetyExpiryDateOf),
+                        electricalSafetyExpiryDate =
+                            propertyCompliance?.let {
+                                PropertyComplianceService.getElectricalSafetyExpiryDate(it, eicDateService)
+                            },
                         isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                     )
                 }.filter { it.shouldShowOnOutstandingActionsPage }
@@ -571,12 +572,6 @@ class PropertyOwnershipService(
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allOutstandingActions.size)
         return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
     }
-
-    private fun electricalSafetyExpiryDateOf(propertyCompliance: PropertyCompliance): LocalDate? =
-        when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
-            else -> propertyCompliance.eicrExpiryDate
-        }
 
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
