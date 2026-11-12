@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Bedr
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
@@ -79,6 +80,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
@@ -102,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -171,6 +174,16 @@ class PropertyRegistrationJourneyFactory(
 
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
+                }
+
+                AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
+                SuperiorLandlordsListStep.ROUTE_SEGMENT,
+                -> {
+                    val superiorLandlordsTask = journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
+                    checkAnswerTask(superiorLandlordsTask)
+                    configureStep(superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
@@ -541,20 +554,7 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                    backStep {
-                        val electricalSafetyDetailsTask = journey.electricalSafetyTask.electricalSafetyDetailsTask
-                        // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
-                        if (electricalSafetyDetailsTask.isEicIssueDateEnabled) {
-                            electricalSafetyDetailsTask.eicIssueDateStep
-                        } else {
-                            electricalSafetyDetailsTask.eicExpiryDateStep
-                        }
-                    }
-                }
-                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep }
-                }
+                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)

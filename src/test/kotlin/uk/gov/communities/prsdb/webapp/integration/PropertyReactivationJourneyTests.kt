@@ -4,31 +4,49 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicUploadsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicrUploadsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckElectricalSafetyAnswersFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEpcAnswersFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasCertUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasSafetyAnswersFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmationPagePropertyReactivation
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ElectricalSafetyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicExpiredFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicIssueDateFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicrExpiredFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicrExpiryDateFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ElectricalCertMissingFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EpcExemptionFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.GasCertExpiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.GasCertIssueDateFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasElectricalCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasEpcFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
@@ -36,6 +54,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.IsEpcRequiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.TenancyDetailsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicrFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.nio.file.Path
@@ -76,9 +96,16 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkGasSafetyAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("No")
         checkGasSafetyAnswersPage.form.submit()
 
-        val electricalSafetyPage = assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments)
-        assertThat(electricalSafetyPage.heading).containsText("PDJB-2039")
-        electricalSafetyPage.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
+        hasElectricalCertPage.submitHasNoCert()
+
+        val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyReactivation::class, urlArguments)
+        assertThat(electricalCertMissingPage.form.submitButton).hasText("Continue without a valid electrical safety certificate")
+        electricalCertMissingPage.form.submit()
+
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments)
+        checkElectricalSafetyAnswersPage.form.submit()
 
         assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments).submitYes()
         assertPageIs(page, CheckEpcAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
@@ -138,19 +165,57 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkGasSafetyAnswersPage.form.submitButton).hasText("Continue")
         checkGasSafetyAnswersPage.form.submit()
 
-        assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments)
+        assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+    fun `a landlord can provide an electrical safety certificate and every electrical safety button says continue`(
+        certificateType: CertificateType,
+        page: Page,
+    ) {
+        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
+
+        val hasElectricalCertPage = navigateToHasElectricalCertPage(page, urlArguments)
+        assertThat(hasElectricalCertPage.provideThisLaterButton).isHidden()
+        assertThat(hasElectricalCertPage.form.submitButton).hasText("Continue")
+        submitHasCertificate(hasElectricalCertPage, certificateType)
+
+        var certDatePage = assertCertDatePage(page, certificateType, urlArguments)
+        assertThat(certDatePage.form.submitButton).hasText("Continue")
+        certDatePage.submitDate(expiredCertDate(certificateType))
+
+        val (expiredPageForm, changeDateLink) = assertExpiredPageFormAndChangeDateLink(page, certificateType, urlArguments)
+        assertThat(expiredPageForm.submitButton).hasText("Continue without a valid electrical safety certificate")
+        changeDateLink.clickAndWait()
+
+        certDatePage = assertCertDatePage(page, certificateType, urlArguments)
+        certDatePage.submitDate(validCertDate(certificateType))
+
+        assertUploadPage(page, certificateType, urlArguments).uploadCertificate("validFile.png")
+
+        var checkUploadsPage = assertCheckUploadsPage(page, certificateType, urlArguments)
+        assertThat(checkUploadsPage.form.submitButton).hasText("Continue")
+        checkUploadsPage.backLink.clickAndWait()
+
+        assertCertDatePage(page, certificateType, urlArguments).submitDate(validCertDate(certificateType))
+
+        checkUploadsPage = assertCheckUploadsPage(page, certificateType, urlArguments)
+        checkUploadsPage.form.submit()
+
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments)
+        assertThat(checkElectricalSafetyAnswersPage.form.submitButton).hasText("Continue")
+        checkElectricalSafetyAnswersPage.form.submit()
+
+        assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments)
     }
 
     @Test
     fun `a landlord can provide an EPC exemption and every EPC button on the way says continue`(page: Page) {
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
-        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        infoPage.submit()
-        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
-        assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
-        assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
-        assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments).submit()
+        navigateToEpcTask(page, urlArguments)
 
         val confirmEpcPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments)
         assertThat(confirmEpcPage.form.submitButton).hasText("Continue")
@@ -218,8 +283,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
         assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
 
-        val electricalSafetyPage = assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments)
-        electricalSafetyPage.backLink.clickAndWait()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
+        hasElectricalCertPage.backLink.clickAndWait()
 
         assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments)
     }
@@ -228,16 +293,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `the back links into and out of the EPC task return to the adjacent steps`(page: Page) {
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
-        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        infoPage.submit()
-        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
-        assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
-        assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
-        assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments).submit()
+        navigateToEpcTask(page, urlArguments)
 
         val confirmEpcPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments)
         confirmEpcPage.backLink.clickAndWait()
-        assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments).submit()
+        assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
 
         assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments).submitYes()
         assertPageIs(page, CheckEpcAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
@@ -281,15 +341,99 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `a landlord is asked whether they have an EPC when the address has no UPRN to look one up with`(page: Page) {
             val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
-            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-            infoPage.submit()
-            assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
-            assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
-            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
-            assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments).submit()
+            navigateToEpcTask(page, urlArguments)
 
             assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
             verify(epcRegisterClient, never()).getByUprn(any())
         }
     }
+
+    private fun navigateToHasElectricalCertPage(
+        page: Page,
+        urlArguments: Map<String, String>,
+    ): HasElectricalCertFormPagePropertyReactivation {
+        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
+        assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
+        assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
+        return assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    private fun navigateToEpcTask(
+        page: Page,
+        urlArguments: Map<String, String>,
+    ) {
+        navigateToHasElectricalCertPage(page, urlArguments).submitHasNoCert()
+        assertPageIs(page, ElectricalCertMissingFormPagePropertyReactivation::class, urlArguments).form.submit()
+        assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
+    }
+
+    private fun submitHasCertificate(
+        hasElectricalCertPage: HasElectricalCertFormPagePropertyReactivation,
+        certificateType: CertificateType,
+    ) = when (certificateType) {
+        CertificateType.Eic -> hasElectricalCertPage.submitHasEic()
+        CertificateType.Eicr -> hasElectricalCertPage.submitHasEicr()
+        else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+    }
+
+    private fun validCertDate(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 1))
+            else -> DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 1))
+        }
+
+    private fun expiredCertDate(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
+            else -> DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
+        }
+
+    private fun assertCertDatePage(
+        page: Page,
+        certificateType: CertificateType,
+        urlArguments: Map<String, String>,
+    ): DateFormPage =
+        when (certificateType) {
+            CertificateType.Eic -> assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
+            CertificateType.Eicr -> assertPageIs(page, EicrExpiryDateFormPagePropertyReactivation::class, urlArguments)
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    private fun assertExpiredPageFormAndChangeDateLink(
+        page: Page,
+        certificateType: CertificateType,
+        urlArguments: Map<String, String>,
+    ): Pair<PostForm, Link> =
+        when (certificateType) {
+            CertificateType.Eic ->
+                assertPageIs(page, EicExpiredFormPagePropertyReactivation::class, urlArguments)
+                    .let { it.form to it.changeIssueDateLink }
+            CertificateType.Eicr ->
+                assertPageIs(page, EicrExpiredFormPagePropertyReactivation::class, urlArguments)
+                    .let { it.form to it.changeExpiryDateLink }
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    private fun assertUploadPage(
+        page: Page,
+        certificateType: CertificateType,
+        urlArguments: Map<String, String>,
+    ): UploadCertificateFormPage =
+        when (certificateType) {
+            CertificateType.Eic -> assertPageIs(page, UploadEicFormPagePropertyReactivation::class, urlArguments)
+            CertificateType.Eicr -> assertPageIs(page, UploadEicrFormPagePropertyReactivation::class, urlArguments)
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    private fun assertCheckUploadsPage(
+        page: Page,
+        certificateType: CertificateType,
+        urlArguments: Map<String, String>,
+    ): CheckElectricalCertUploadsFormBasePage =
+        when (certificateType) {
+            CertificateType.Eic -> assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments)
+            CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyReactivation::class, urlArguments)
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
 }

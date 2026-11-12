@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
@@ -17,10 +18,14 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerReposi
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SuperiorLandlordRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @Autowired
+    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Autowired
     private lateinit var freeholderRepository: FreeholderRepository
@@ -52,6 +57,28 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
     )!!
 
     private fun anyPropertyOwnershipId() = propertyOwnershipRepository.findAll().minOf { it.id }
+
+    private fun anyActivePropertyOwnershipId() =
+        jdbcTemplate.queryForObject("SELECT MIN(id) FROM property_ownership WHERE is_active = true", Long::class.java)!!
+
+    private fun setOwnershipType(
+        propertyOwnershipId: Long,
+        ownershipType: OwnershipType,
+    ) = jdbcTemplate.update(
+        "UPDATE property_ownership SET ownership_type = ? WHERE id = ?",
+        ownershipType.ordinal,
+        propertyOwnershipId,
+    )
+
+    private fun updateOwnershipType(
+        propertyOwnershipId: Long,
+        ownershipType: OwnershipType,
+    ) {
+        val lastModifiedDate =
+            inTransactionReturning { propertyOwnershipRepository.findById(propertyOwnershipId).get().getMostRecentlyUpdated() }
+
+        propertyOwnershipService.updateOwnershipType(propertyOwnershipId, ownershipType, lastModifiedDate)
+    }
 
     private fun countAddressesWithId(addressId: Long) =
         jdbcTemplate.queryForObject("SELECT COUNT(*) FROM address WHERE id = ?", Int::class.java, addressId)!!
@@ -118,6 +145,46 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
             )
 
         assertEquals(emptyList<Long>(), propertiesWithoutAFreeholder)
+    }
+
+    @Test
+    fun `updating to an ownership type that requires freeholder records creates a placeholder freeholder`() {
+        // Arrange
+        val propertyOwnershipId = anyActivePropertyOwnershipId()
+        setOwnershipType(propertyOwnershipId, OwnershipType.SOLE_FREEHOLD)
+        jdbcTemplate.update("DELETE FROM freeholder WHERE property_ownership_id = ?", propertyOwnershipId)
+
+        // Act
+        updateOwnershipType(propertyOwnershipId, OwnershipType.LEASEHOLD_ONLY)
+
+        // Assert
+        assertEquals(1, countRowsFor("freeholder", propertyOwnershipId))
+        val freeholder =
+            jdbcTemplate.queryForMap(
+                "SELECT name, email, address_id FROM freeholder WHERE property_ownership_id = ?",
+                propertyOwnershipId,
+            )
+        assertNull(freeholder["name"])
+        assertNull(freeholder["email"])
+        assertNull(freeholder["address_id"])
+    }
+
+    @Test
+    fun `updating to an ownership type that requires no freeholder records deletes the existing ones`() {
+        // Arrange
+        val propertyOwnershipId = anyActivePropertyOwnershipId()
+        setOwnershipType(propertyOwnershipId, OwnershipType.LEASEHOLD_ONLY)
+        inTransaction {
+            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+            propertyOwnership.freeholders.add(freeholderRepository.save(Freeholder(propertyOwnership)))
+            propertyOwnershipRepository.save(propertyOwnership)
+        }
+
+        // Act
+        updateOwnershipType(propertyOwnershipId, OwnershipType.SOLE_FREEHOLD)
+
+        // Assert
+        assertEquals(0, countRowsFor("freeholder", propertyOwnershipId))
     }
 
     @Test
