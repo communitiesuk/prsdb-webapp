@@ -142,7 +142,7 @@ class RentFrequencyAndAmountStateTests {
         @JvmStatic
         private fun provideRentFrequencyForUpdateHeadingScenarios() =
             arrayOf(
-                arguments(Named.of("custom", RentFrequency.OTHER), "forms.update.rentAmount.monthly.fieldSetHeading"),
+                arguments(Named.of("custom", RentFrequency.OTHER), "forms.update.rentAmount.other.fieldSetHeading"),
                 arguments(Named.of("weekly", RentFrequency.WEEKLY), "forms.update.rentAmount.weekly.fieldSetHeading"),
                 arguments(Named.of("four weekly", RentFrequency.FOUR_WEEKLY), "forms.update.rentAmount.fourWeekly.fieldSetHeading"),
                 arguments(Named.of("monthly", RentFrequency.MONTHLY), "forms.update.rentAmount.monthly.fieldSetHeading"),
