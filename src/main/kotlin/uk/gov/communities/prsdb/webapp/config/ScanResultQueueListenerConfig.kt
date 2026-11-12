@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidScanResultMessageException
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentScanResultProcessingException
 
 @Configuration
 @Profile(ScanResultQueueListenerConfig.SCAN_RESULT_QUEUE_LISTENER_PROFILES)
@@ -30,7 +31,12 @@ class ScanResultQueueListenerConfig {
                 visibilityTimeoutMultiplier = visibilityTimeoutMultiplier,
                 maxVisibilityTimeoutSeconds = maxVisibilityTimeoutSeconds,
             ),
-            persistentFailureTypes = setOf(InvalidScanResultMessageException::class, SerializationException::class),
+            persistentFailureTypes =
+                setOf(
+                    InvalidScanResultMessageException::class,
+                    PersistentScanResultProcessingException::class,
+                    SerializationException::class,
+                ),
         )
 
     companion object {
