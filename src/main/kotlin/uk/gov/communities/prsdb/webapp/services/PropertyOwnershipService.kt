@@ -522,9 +522,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
         landlord.markAsHavingRegisteredProperty()
         landlordRepository.save(landlord)
-        if (!landlord.isActive) {
-            activeInactiveService.reactivateLandlord(landlord)
-        }
+        activeInactiveService.reactivateLandlordIfInactive(landlord)
     }
 
     @Transactional

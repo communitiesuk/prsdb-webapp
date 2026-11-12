@@ -2372,24 +2372,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `addLandlordToPropertyOwnership reactivates the landlord if they are inactive`() {
-            // Arrange
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-            val newLandlord = MockLandlordData.createIndividualLandlord()
-            newLandlord.deactivate(LocalDate.of(2025, 1, 1))
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
-
-            // Act
-            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
-
-            // Assert
-            verify(mockActiveInactiveService).reactivateLandlord(newLandlord)
-        }
-
-        @Test
-        fun `addLandlordToPropertyOwnership does not reactivate the landlord if they are already active`() {
+        fun `addLandlordToPropertyOwnership reactivates the landlord via the active inactive service if they are inactive`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
             val newLandlord = MockLandlordData.createIndividualLandlord()
@@ -2401,7 +2384,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
 
             // Assert
-            verifyNoInteractions(mockActiveInactiveService)
+            verify(mockActiveInactiveService).reactivateLandlordIfInactive(newLandlord)
         }
     }
 
