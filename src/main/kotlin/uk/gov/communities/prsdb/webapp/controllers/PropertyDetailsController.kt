@@ -15,9 +15,9 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
@@ -165,7 +165,7 @@ class PropertyDetailsController(
     ): String {
         jointLandlordInvitationService.hideExpiredInvitation(invitationId)
         redirectAttributes.addFlashAttribute("inviteRemoved", true)
-        return "redirect:${getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
+        return "redirect:${getPropertyDetailsPath(propertyOwnershipId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
     }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
@@ -177,7 +177,7 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
-        val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
+        val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(PEOPLE_RESPONSIBLE_FRAGMENT)
 
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)

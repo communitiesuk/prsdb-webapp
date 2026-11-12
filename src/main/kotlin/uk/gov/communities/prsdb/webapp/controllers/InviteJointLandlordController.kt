@@ -11,8 +11,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
@@ -82,7 +82,7 @@ class InviteJointLandlordController(
         val invitingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val email = jointLandlordInvitationService.resendInvitation(invitationId, propertyOwnership, invitingLandlord)
         redirectAttributes.addFlashAttribute("resendInvitationEmail", email)
-        return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
+        return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
     }
 
     @GetMapping(CONFIRMATION_PATH_SEGMENT)
@@ -93,7 +93,7 @@ class InviteJointLandlordController(
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         model.addAttribute(
             "propertyDetailsUrl",
-            PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) + "#$LANDLORD_DETAILS_FRAGMENT",
+            PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) + "#$PEOPLE_RESPONSIBLE_FRAGMENT",
         )
         return "inviteJointLandlordConfirmation"
     }
