@@ -715,6 +715,14 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
+        fun `missing ownership type throws an unrecoverable journey state exception`() {
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
+
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
         fun `missing anyone in ownership chain answer throws an unrecoverable journey state exception`() {
             // Arrange, the default setup is a journey that should've asked superior landlords
             whenever(mockState.journeyId).thenReturn("journey-id")
