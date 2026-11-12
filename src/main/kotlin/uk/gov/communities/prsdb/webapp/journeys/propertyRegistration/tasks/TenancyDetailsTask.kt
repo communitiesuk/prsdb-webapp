@@ -43,6 +43,7 @@ class TenancyDetailsTask(
                         journey.householdsAndTenantsTask.households.doesNotHaveOutcome(HouseholdMode.PROVIDE_THIS_LATER),
                     )
                 }
+                backUrl { journey.householdsAndTenantsTask.exitStep.backUrl }
                 nextStep { journey.furnishedStatus }
                 savable()
             }

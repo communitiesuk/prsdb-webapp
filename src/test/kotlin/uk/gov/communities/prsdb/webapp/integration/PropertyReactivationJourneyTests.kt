@@ -343,6 +343,18 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
+    fun `the back link on the rent includes bills page returns to the number of people page`(page: Page) {
+        val numberOfHouseholdsPage = navigateToNumberOfHouseholdsPage(page)
+        numberOfHouseholdsPage.submitNumberOfHouseholds(1)
+        assertPageIs(page, NumberOfPeopleFormPagePropertyReactivation::class, urlArguments).submitNumOfPeople(2)
+
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyReactivation::class, urlArguments)
+        rentIncludesBillsPage.backLink.clickAndWait()
+
+        assertPageIs(page, NumberOfPeopleFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
     fun `a landlord is sent to the info page if they visit a step the property does not need`(page: Page) {
         val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
