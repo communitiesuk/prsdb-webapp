@@ -13,13 +13,16 @@ import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.EPC
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.GAS_SAFETY
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.LICENSING
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.TENANCY_DETAILS
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
@@ -46,9 +49,19 @@ class PropertyReactivationJourneyFactory(
                 initialStep()
                 // TODO PDJB-2034: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
-                // TODO PDJB-2046: route to the "property already registered" page when there is another
-                //  active registration for this address
-                nextStep { journey.stepAfterInfo() }
+                nextStep { mode ->
+                    when (mode) {
+                        ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.stepAfterInfo()
+                        ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED -> journey.alreadyRegisteredStep
+                    }
+                }
+            }
+            step(journey.alreadyRegisteredStep) {
+                routeSegment(ReactivationAlreadyRegisteredStep.ROUTE_SEGMENT)
+                // TODO PDJB-2045: also allow this step to be reached when the check just before reactivating the
+                //  property finds that it has already been registered
+                parents { journey.infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED) }
+                noNextDestination()
             }
             // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
@@ -131,12 +144,18 @@ class PropertyReactivationJourneyFactory(
         requiredTaskTypes.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
 
     private fun PropertyReactivationJourneyState.parentsFor(taskType: ReactivationTaskType): Parentage {
-        val previousStep = requiredTaskTypes.filter { it < taskType }.maxOrNull()?.let { completionStepFor(it) } ?: infoStep
-        return SingleParent(previousStep) { taskType in requiredTaskTypes && previousStep.outcome != null }
+        val previousStep = requiredTaskTypes.filter { it < taskType }.maxOrNull()?.let { completionStepFor(it) }
+        return if (previousStep == null) {
+            SingleParent(infoStep) { taskType in requiredTaskTypes && infoStep.outcome == ReactivationInfoMode.PROPERTY_AVAILABLE }
+        } else {
+            SingleParent(previousStep) { taskType in requiredTaskTypes && previousStep.outcome != null }
+        }
     }
 
     private fun PropertyReactivationJourneyState.checkAnswersParents(): Parentage {
-        val previousStep = requiredTaskTypes.maxOrNull()?.let { completionStepFor(it) } ?: infoStep
+        val previousStep =
+            requiredTaskTypes.maxOrNull()?.let { completionStepFor(it) }
+                ?: return infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_AVAILABLE)
         return SingleParent(previousStep) { previousStep.outcome != null }
     }
 }
@@ -144,6 +163,7 @@ class PropertyReactivationJourneyFactory(
 @JourneyFrameworkComponent
 class PropertyReactivationJourney(
     override val infoStep: ReactivationInfoStep,
+    override val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep,
     override val licensingStep: ReactivationLicensingStep,
     override val gasSafetyTask: GasSafetyTask,
     override val electricalSafetyTask: ElectricalSafetyTask,
@@ -157,6 +177,7 @@ class PropertyReactivationJourney(
     override var propertyOwnershipId: Long by delegateProvider.requiredImmutableDelegate("propertyOwnershipId")
     override var requiredTaskTypes: List<ReactivationTaskType> by delegateProvider.requiredImmutableDelegate("requiredTaskTypes")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
+    override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
@@ -173,6 +194,7 @@ class PropertyReactivationJourney(
 
 interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
     val infoStep: ReactivationInfoStep
+    val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask
     val electricalSafetyTask: ElectricalSafetyTask
@@ -181,4 +203,5 @@ interface PropertyReactivationJourneyState : PropertyOwnershipJourneyState {
     val checkAnswersStep: ReactivationCheckAnswersStep
     var requiredTaskTypes: List<ReactivationTaskType>
     var isOccupied: Boolean
+    var isPropertyAlreadyRegistered: Boolean?
 }

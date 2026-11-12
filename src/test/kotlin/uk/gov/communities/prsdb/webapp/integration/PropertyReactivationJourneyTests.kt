@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.AlreadyRegisteredPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicrUploadsFormPagePropertyReactivation
@@ -52,6 +53,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         const val INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER = 52L
         const val INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER = 6L
         const val INACTIVE_PROPERTY_OWNED_BY_ANOTHER_LANDLORD = 2L
+        const val INACTIVE_PROPERTY_REGISTERED_AGAIN_BY_ANOTHER_LANDLORD = 53L
         const val ACTIVE_PROPERTY = 1L
     }
 
@@ -256,6 +258,45 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
+
+        assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord is shown the already registered page when the property has already been registered again`(page: Page) {
+        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_REGISTERED_AGAIN_BY_ANOTHER_LANDLORD.toString())
+
+        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_REGISTERED_AGAIN_BY_ANOTHER_LANDLORD)
+        infoPage.submit()
+
+        val alreadyRegisteredPage = assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
+        alreadyRegisteredPage.backLink.clickAndWait()
+
+        assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord is sent to the info page if they visit the already registered page when the property hasn't already been registered`(
+        page: Page,
+    ) {
+        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
+
+        navigator.navigateToPropertyReactivationAlreadyRegisteredPageAfterInfo(
+            INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            isPropertyAlreadyRegistered = false,
+        )
+
+        assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord is sent to the info page if they visit a task step when the property has already been registered`(page: Page) {
+        val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
+
+        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(
+            INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            isPropertyAlreadyRegistered = true,
+        )
 
         assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
     }
