@@ -122,6 +122,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
 
+    @Mock
+    private lateinit var mockActiveInactiveService: ActiveInactiveService
+
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
@@ -2366,6 +2369,39 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(newLandlord.hasRegisteredProperty)
             verify(mockLandlordRepository).save(newLandlord)
+        }
+
+        @Test
+        fun `addLandlordToPropertyOwnership reactivates the landlord if they are inactive`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createIndividualLandlord()
+            newLandlord.deactivate(LocalDate.of(2025, 1, 1))
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            // Assert
+            verify(mockActiveInactiveService).reactivateLandlord(newLandlord)
+        }
+
+        @Test
+        fun `addLandlordToPropertyOwnership does not reactivate the landlord if they are already active`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            // Assert
+            verifyNoInteractions(mockActiveInactiveService)
         }
     }
 
