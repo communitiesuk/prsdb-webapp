@@ -1,5 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
-interface HouseHoldsAndTenantsDependencies {
+interface HouseholdsAndTenantsDependencies {
     val allowProvideTenancyDetailsLaterRoute: Boolean
 }

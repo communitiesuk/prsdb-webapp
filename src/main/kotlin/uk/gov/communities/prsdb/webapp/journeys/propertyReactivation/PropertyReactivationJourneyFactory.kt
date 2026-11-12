@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
@@ -182,7 +182,7 @@ interface PropertyReactivationJourneyState :
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
     EpcDependencies,
-    HouseHoldsAndTenantsDependencies {
+    HouseholdsAndTenantsDependencies {
     val infoStep: ReactivationInfoStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask

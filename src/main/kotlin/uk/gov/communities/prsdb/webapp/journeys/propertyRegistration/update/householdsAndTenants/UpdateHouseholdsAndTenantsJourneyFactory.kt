@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -141,7 +141,7 @@ class UpdateHouseholdsAndTenantsJourney(
 
 interface UpdateHouseholdsAndTenantsJourneyState :
     CheckYourAnswersJourneyState,
-    HouseHoldsAndTenantsDependencies {
+    HouseholdsAndTenantsDependencies {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep
     val propertyId: Long

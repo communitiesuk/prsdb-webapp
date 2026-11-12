@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
@@ -210,7 +210,7 @@ class UpdateTenancyDetailsJourney(
 
 interface UpdateTenancyDetailsJourneyState :
     TenancyDetailsState,
-    HouseHoldsAndTenantsDependencies,
+    HouseholdsAndTenantsDependencies,
     CheckYourAnswersJourneyState {
     override val cyaStep: UpdateTenancyDetailsCyaStep
     val propertyId: Long

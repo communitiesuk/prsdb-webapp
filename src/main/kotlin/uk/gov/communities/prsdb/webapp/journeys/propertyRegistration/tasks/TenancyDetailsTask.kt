@@ -20,7 +20,7 @@ class TenancyDetailsTask(
     override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-) : Task<TenancyDetailsState, HouseHoldsAndTenantsDependencies>(journeyStateService),
+) : Task<TenancyDetailsState, HouseholdsAndTenantsDependencies>(journeyStateService),
     TenancyDetailsState {
     override val taskState get() = this
 

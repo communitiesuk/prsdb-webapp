@@ -93,7 +93,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
@@ -840,7 +840,7 @@ interface PropertyRegistrationJourneyState :
     OccupationState,
     BedroomsState,
     TenancyDetailsState,
-    HouseHoldsAndTenantsDependencies,
+    HouseholdsAndTenantsDependencies,
     InviteJointLandlordsTaskDependencies,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
