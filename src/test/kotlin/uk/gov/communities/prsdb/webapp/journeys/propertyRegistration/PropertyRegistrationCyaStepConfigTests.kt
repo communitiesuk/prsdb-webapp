@@ -752,7 +752,7 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             val row = (content["superiorLandlordsRows"] as List<SummaryListRowViewModel>).single()
-            assertEquals("registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.heading", row.fieldHeading)
+            assertEquals("registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain", row.fieldHeading)
             assertEquals("commonText.no", row.fieldValue)
             assertEquals(
                 JourneyStateService.urlWithJourneyState(AnyoneInOwnershipChainStep.ROUTE_SEGMENT, "chain-change"),
