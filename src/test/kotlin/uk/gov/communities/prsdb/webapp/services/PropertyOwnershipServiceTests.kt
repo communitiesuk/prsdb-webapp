@@ -38,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
@@ -2239,17 +2240,47 @@ class PropertyOwnershipServiceTests {
                     // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
                     OutstandingActionsDataModel.fromPropertyOwnership(
                         tenancyProvideLaterProperty,
+                        eicIssueDate = null,
                         electricalSafetyExpiryDate = null,
                         isGas14MonthExpiryEnabled = true,
                     ),
                     OutstandingActionsDataModel.fromPropertyOwnership(
                         gasProvideLaterProperty,
+                        eicIssueDate = null,
                         electricalSafetyExpiryDate = null,
                         isGas14MonthExpiryEnabled = true,
                     ),
                 ),
                 outstandingActions.content,
             )
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `outstanding actions omit the EIC issue date when the EIC issue date flag is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+            val eicExpiryDate = LocalDate.of(2000, 6, 1)
+            val eicOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 501L)
+            val eicCompliance =
+                PropertyComplianceBuilder()
+                    .withPropertyOwnership(eicOwnership)
+                    .withElectricalSafety(expiryDate = eicExpiryDate, certType = CertificateType.Eic)
+                    .build()
+            ReflectionTestUtils.setField(eicOwnership, "propertyCompliance", eicCompliance)
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(listOf(eicOwnership))
+
+            val eicStatus =
+                propertyOwnershipService
+                    .getOutstandingActionsForLandlord(landlord, 0)
+                    .content
+                    .single()
+                    .complianceStatus!!
+
+            assertEquals(null, eicStatus.eicIssueDate)
+            assertEquals(eicExpiryDate, eicStatus.electricalSafetyExpiryDate)
+            verify(eicDateService, never()).issueDateFrom(eicCompliance)
         }
 
         @Test

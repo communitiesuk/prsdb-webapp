@@ -10,10 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
@@ -572,13 +571,20 @@ class PropertyOwnershipService(
     ): Page<OutstandingActionsDataModel> {
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
         val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+        // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
+        val isEicIssueDateEnabled = featureFlagManager.checkFeature(EIC_ISSUE_DATE)
         val allOutstandingActions =
             retrieveAllActivePropertiesForLandlord(landlord)
-                .map {
+                .map { propertyOwnership ->
+                    val propertyCompliance = propertyOwnership.propertyCompliance
                     OutstandingActionsDataModel.fromPropertyOwnership(
-                        it,
-                        it.propertyCompliance?.let(::electricalSafetyExpiryDateOf),
-                        isGas14MonthExpiryEnabled,
+                        propertyOwnership,
+                        eicIssueDate = propertyCompliance?.takeIf { isEicIssueDateEnabled }?.let(eicDateService::issueDateFrom),
+                        electricalSafetyExpiryDate =
+                            propertyCompliance?.let {
+                                PropertyComplianceService.getElectricalSafetyExpiryDate(it, eicDateService)
+                            },
+                        isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                     )
                 }.filter { it.shouldShowOnOutstandingActionsPage }
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
@@ -586,14 +592,6 @@ class PropertyOwnershipService(
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allOutstandingActions.size)
         return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
     }
-
-    // TODO PDJB-1676: Use PropertyComplianceService.getComplianceStatus instead of repeating the EIC/EICR choice
-    // (PropertyComplianceService can't be injected here as it already depends on this service)
-    private fun electricalSafetyExpiryDateOf(propertyCompliance: PropertyCompliance): LocalDate? =
-        when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
-            else -> propertyCompliance.eicrExpiryDate
-        }
 
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
