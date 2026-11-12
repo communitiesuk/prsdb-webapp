@@ -1676,21 +1676,24 @@ class Navigator(
     fun navigateToPropertyReactivationLicensingPageAfterInfo(
         propertyOwnershipId: Long,
         isPropertyAlreadyRegistered: Boolean = false,
-    ) {
-        setJourneyStateInSession(
-            PropertyReactivationStateSessionBuilder()
-                .withInfoCompleted()
-                .withIsPropertyAlreadyRegistered(isPropertyAlreadyRegistered)
-                .build(),
-        )
-        navigate(
-            ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
-                "/${ReactivationLicensingStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
-        )
-    }
+    ) = navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId,
+        ReactivationLicensingStep.ROUTE_SEGMENT,
+        isPropertyAlreadyRegistered,
+    )
 
     fun navigateToPropertyReactivationAlreadyRegisteredPageAfterInfo(
         propertyOwnershipId: Long,
+        isPropertyAlreadyRegistered: Boolean,
+    ) = navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId,
+        ReactivationAlreadyRegisteredStep.ROUTE_SEGMENT,
+        isPropertyAlreadyRegistered,
+    )
+
+    private fun navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId: Long,
+        routeSegment: String,
         isPropertyAlreadyRegistered: Boolean,
     ) {
         setJourneyStateInSession(
@@ -1701,7 +1704,7 @@ class Navigator(
         )
         navigate(
             ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
-                "/${ReactivationAlreadyRegisteredStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+                "/$routeSegment?journeyId=$TEST_JOURNEY_ID",
         )
     }
 
