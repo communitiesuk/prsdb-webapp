@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
@@ -66,7 +67,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
@@ -177,6 +180,20 @@ class PropertyRegistrationJourneyFactory(
 
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
+                }
+
+                OwnsPropertyStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.ownershipAndLandlordsTask.ownershipStructureTask)
+                }
+
+                OwnershipKindStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    checkAnswerTaskFrom(ownershipStructureTask, startStep = ownershipStructureTask.ownershipTypeTask.ownershipKindStep)
+                }
+
+                FreeholdTypeStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    checkAnswerTaskFrom(ownershipStructureTask, startStep = ownershipStructureTask.ownershipTypeTask.freeholdTypeStep)
                 }
 
                 AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
