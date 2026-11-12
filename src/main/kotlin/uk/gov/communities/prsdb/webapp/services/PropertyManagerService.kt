@@ -1,0 +1,15 @@
+package uk.gov.communities.prsdb.webapp.services
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
+
+@PrsdbWebService
+class PropertyManagerService(
+    private val propertyManagerRepository: PropertyManagerRepository,
+) {
+    fun createPropertyManager(
+        name: String,
+        email: String,
+    ): PropertyManager = propertyManagerRepository.save(PropertyManager(name, email))
+}

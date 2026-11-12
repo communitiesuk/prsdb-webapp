@@ -256,18 +256,23 @@ paymentProcessing:
     notConfirmed: We have not yet received confirmation that your payment was successful.
     checkStatus: Select Check payment status to see if your payment has been completed.
     button: Check payment status
+paymentTryAgainLink: Go back to try the payment again
 paymentFailed:
   heading: Your payment has been declined
   contactBank: Contact your bank for more details. No money has been taken from your account.
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
-  tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
 paymentNotCompleted:
-  heading: Your payment could not be completed
-  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
-  notRegistered: Your property has not been registered.
-  refund: If any money was taken from your account, it will be refunded.
-  payAgain: You need to pay again to register this property.
+  heading: Your payment was not completed
+  canHappenIf: 'This can happen if:'
+  bullet:
+    one: you made a payment for this property in a different tab or window
+    two: there was a problem with GOV.UK Pay
+  notRegistered: This means your property has not been registered.
+  insetText: Any money taken from your account will be refunded.
+  whatYouNeedToDo:
+    heading: What you need to do
+    paragraph: Try the payment again to complete your property registration.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
@@ -478,6 +483,8 @@ superiorLandlords:
         'no': 'No'
       error:
         missing: Select if there is anyone else in the ownership chain
+  checkAnswers:
+    changeLink: Add, change or remove people in the ownership chain
 ownsProperty:
   fieldSetHeading: Do you own this property?
   fieldSetHint: This helps us understand if there’s anyone else who’s responsible for the property’s condition

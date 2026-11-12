@@ -78,7 +78,6 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
                     RadiosButtonViewModel(
                         value = false,
                         labelMsgKey = "forms.radios.option.no.label",
-                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
                     ),
                 ),
         )

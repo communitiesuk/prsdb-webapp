@@ -88,4 +88,14 @@ abstract class Landlord : ModifiableAuditableEntity() {
     fun markAsHavingRegisteredProperty() {
         hasRegisteredProperty = true
     }
+
+    fun deactivate(deactivationDate: LocalDate) {
+        isActive = false
+        lastDeactivatedDate = deactivationDate
+    }
+
+    fun reactivate() {
+        isActive = true
+        lastDeactivatedDate = null
+    }
 }
