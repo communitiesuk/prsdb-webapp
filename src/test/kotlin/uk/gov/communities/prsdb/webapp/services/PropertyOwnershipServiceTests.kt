@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -665,6 +666,38 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
+        }
+    }
+
+    @Nested
+    inner class GetDeactivatedPropertiesForLandlordUser {
+        @Test
+        fun `Returns the landlord's deactivated properties as view models`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val deactivatedProperty =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord),
+                    address = MockLandlordData.createAddress("6 Mythical Place, FA1 1AK"),
+                    registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 7654321),
+                    isActive = false,
+                )
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id))
+                .thenReturn(listOf(deactivatedProperty))
+
+            val result = propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord)
+
+            assertEquals(
+                listOf(
+                    DeactivatedPropertyLandlordViewModel(
+                        address = "6 Mythical Place, FA1 1AK",
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(deactivatedProperty.registrationNumber)
+                                .toString(),
+                    ),
+                ),
+                result,
+            )
         }
     }
 

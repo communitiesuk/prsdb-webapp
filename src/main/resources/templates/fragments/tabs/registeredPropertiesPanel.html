@@ -1,3 +1,4 @@
+<!--/* TODO PDJB-2149: Delete this fragment when the ACTIVE_INACTIVE feature flag is removed */-->
 <th:block th:fragment="registeredPropertiesPanelContent" th:remove="tag">
     <th:block th:unless="${#lists.isEmpty(registeredPropertiesList)}">
         <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">

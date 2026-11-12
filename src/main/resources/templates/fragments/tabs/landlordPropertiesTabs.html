@@ -1,0 +1,13 @@
+<th:block th:fragment="landlordPropertiesTabListItems" th:remove="tag">
+    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${activePropertiesTabId}, #{landlordDetails.activeProperties.tabHeading(${#lists.size(registeredPropertiesList)})})}"></li>
+    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${deactivatedPropertiesTabId}, #{landlordDetails.deactivatedProperties.tabHeading(${#lists.size(deactivatedPropertiesList)})})}"></li>
+</th:block>
+
+<th:block th:fragment="landlordPropertiesTabPanels" th:remove="tag">
+    <div id="active-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${activePropertiesTabId}, ~{::#active-properties-panel/content()})}">
+        <th:block th:replace="~{fragments/tabs/activePropertiesPanel :: activePropertiesPanelContent}"></th:block>
+    </div>
+    <div id="deactivated-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${deactivatedPropertiesTabId}, ~{::#deactivated-properties-panel/content()})}">
+        <th:block th:replace="~{fragments/tabs/deactivatedPropertiesPanel :: deactivatedPropertiesPanelContent}"></th:block>
+    </div>
+</th:block>

@@ -12,16 +12,30 @@
     <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
         <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
             <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}"></li>
-            <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
+            <!--/* TODO PDJB-2149: Remove the th:if (keep the contents) when the ACTIVE_INACTIVE feature flag is removed */-->
+            <th:block th:if="${isActiveInactiveEnabled}">
+                <th:block th:replace="~{fragments/tabs/landlordPropertiesTabs :: landlordPropertiesTabListItems}"></th:block>
+            </th:block>
+            <!--/* TODO PDJB-2149: Delete this block when the ACTIVE_INACTIVE feature flag is removed */-->
+            <th:block th:unless="${isActiveInactiveEnabled}">
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
+            </th:block>
         </ul>
 
         <div id="personal-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel/content()})}">
             <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
         </div>
 
-        <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
-            <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
-        </div>
+        <!--/* TODO PDJB-2149: Remove the th:if (keep the contents) when the ACTIVE_INACTIVE feature flag is removed */-->
+        <th:block th:if="${isActiveInactiveEnabled}">
+            <th:block th:replace="~{fragments/tabs/landlordPropertiesTabs :: landlordPropertiesTabPanels}"></th:block>
+        </th:block>
+        <!--/* TODO PDJB-2149: Delete this block when the ACTIVE_INACTIVE feature flag is removed */-->
+        <th:block th:unless="${isActiveInactiveEnabled}">
+            <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
+                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+            </div>
+        </th:block>
     </div>
 </main>
 </html>

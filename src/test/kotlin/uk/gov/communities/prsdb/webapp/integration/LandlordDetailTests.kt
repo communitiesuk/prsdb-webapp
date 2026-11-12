@@ -1,8 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PERSONAL_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -24,8 +28,10 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertEquals(detailsPage.tabs.activeTabPanelId, PERSONAL_DETAILS_FRAGMENT)
         }
 
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
         @Test
         fun `the registered properties tab contains the registered properties table when the landlord has properties`() {
+            featureFlagManager.disableFeature(ACTIVE_INACTIVE)
             val detailsPage = navigator.goToLandlordDetails()
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -36,8 +42,10 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.noRegisteredPropertiesMessage).isHidden()
         }
 
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
         @Test
         fun `in the registered properties table the property address link goes to the landlord view of the property's details`(page: Page) {
+            featureFlagManager.disableFeature(ACTIVE_INACTIVE)
             val propertyOwnershipId = 1
             val detailsPage = navigator.goToLandlordDetails()
             detailsPage.tabs.goToRegisteredProperties()
@@ -66,8 +74,10 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
         @Nested
         inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-no-properties.sql") {
+            // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
             @Test
             fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
+                featureFlagManager.disableFeature(ACTIVE_INACTIVE)
                 val detailsPage = navigator.goToLandlordDetails()
 
                 detailsPage.tabs.goToRegisteredProperties()
@@ -80,8 +90,10 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 assertPageIs(page, RegisterPropertyStartPage::class)
             }
 
+            // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
             @Test
             fun `clicking back from register a property link returns to landlord details registered properties tab`(page: Page) {
+                featureFlagManager.disableFeature(ACTIVE_INACTIVE)
                 val detailsPage = navigator.goToLandlordDetails()
                 detailsPage.tabs.goToRegisteredProperties()
                 detailsPage.noRegisteredPropertiesLink.clickAndWait()
@@ -89,6 +101,69 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
                 assertEquals(REGISTERED_PROPERTIES_FRAGMENT, returnedDetailsPage.tabs.activeTabPanelId)
+            }
+        }
+    }
+
+    @Nested
+    inner class LandlordDetailsPropertiesTabs : NestedIntegrationTestWithImmutableData("data-local.sql") {
+        @Test
+        fun `the deactivated properties tab shows the landlord's deactivated properties without links`() {
+            val detailsPage = navigator.goToLandlordDetails()
+
+            assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (2)")
+            detailsPage.tabs.goToDeactivatedProperties()
+
+            assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            assertThat(detailsPage.deactivatedPropertiesTable.headerRow.getCell(0)).containsText("Property address")
+            assertThat(detailsPage.deactivatedPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
+            assertThat(detailsPage.deactivatedPropertiesTable).containsText("6 Mythical Place")
+            assertThat(detailsPage.deactivatedPropertiesTable).containsText("Inactive House, PRSDB Road, IN1 1AA")
+            assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(0)
+            assertThat(detailsPage.noDeactivatedPropertiesMessage).isHidden()
+        }
+
+        @Test
+        fun `the active properties tab shows active properties and back returns to it`(page: Page) {
+            val detailsPage = navigator.goToLandlordDetails()
+            detailsPage.tabs.goToActiveProperties()
+
+            assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            assertThat(detailsPage.activePropertiesTable.getCell(0, 0)).isVisible()
+            assertThat(detailsPage.noActivePropertiesMessage).isHidden()
+
+            detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
+            val propertyDetailsView =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+
+            propertyDetailsView.backLink.clickAndWait()
+            val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
+            assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+        }
+
+        @Nested
+        inner class LandlordWithoutProperties :
+            NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-no-properties.sql") {
+            @Test
+            fun `both property tabs show their zero-properties variants`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                assertThat(detailsPage.tabs.activePropertiesTab).containsText("Active properties (0)")
+                assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (0)")
+
+                detailsPage.tabs.goToDeactivatedProperties()
+                assertThat(detailsPage.deactivatedPropertiesTable).isHidden()
+                assertThat(detailsPage.noDeactivatedPropertiesMessage).containsText("You have no deactivated properties.")
+
+                detailsPage.tabs.goToActiveProperties()
+                assertThat(detailsPage.activePropertiesTable).isHidden()
+                assertThat(detailsPage.noActivePropertiesMessage).containsText("You have no active properties.")
+
+                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+                startPage.backLink.clickAndWait()
+                val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+                assertEquals(ACTIVE_PROPERTIES_FRAGMENT, returnedDetailsPage.tabs.activeTabPanelId)
             }
         }
     }

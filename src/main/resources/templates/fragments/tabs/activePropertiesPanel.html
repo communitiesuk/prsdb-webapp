@@ -1,0 +1,23 @@
+<th:block th:fragment="activePropertiesPanelContent" th:remove="tag">
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.activeProperties.heading}">landlordDetails.activeProperties.heading</h2>
+
+    <th:block th:unless="${#lists.isEmpty(registeredPropertiesList)}">
+        <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row" th:each="property: ${registeredPropertiesList}">
+                    <td class="govuk-table__cell govuk-!-width-one-half">
+                        <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">${property.address}</a>
+                    </td>
+                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.registrationNumber}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <th:block th:if="${#lists.isEmpty(registeredPropertiesList)}">
+        <p class="govuk-body" data-testid="no-active-properties-msg" th:text="#{landlordDetails.activeProperties.none}">landlordDetails.activeProperties.none</p>
+        <p class="govuk-body">
+            <a class="govuk-link" th:href="@{${registerPropertyUrl}}" th:text="#{landlordDetails.activeProperties.registerLink}">landlordDetails.activeProperties.registerLink</a>
+        </p>
+    </th:block>
+</th:block>

@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -71,10 +73,7 @@ class LandlordController(
 
         model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
-        model.addAttribute(
-            "viewPropertiesUrl",
-            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
-        )
+        model.addAttribute("viewPropertiesUrl", landlordPropertiesUrl())
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         // TODO PDJB-2006: When the PROPERTY_REGISTRATION_PHASE_THREE flag is removed, always use OUTSTANDING_ACTIONS_URL,
         //  and remove outstandingActionsButtonKey and outstandingActionsLinkTextKey by using the outstanding actions message
@@ -125,13 +124,17 @@ class LandlordController(
         model.addAttribute("complianceActions", complianceActions)
         model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedNonCompliantProperties.totalPages, request))
 
-        model.addAttribute(
-            "viewRegisteredPropertiesUrl",
-            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
-        )
+        model.addAttribute("viewRegisteredPropertiesUrl", landlordPropertiesUrl())
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "complianceActions"
+    }
+
+    private fun landlordPropertiesUrl(): String {
+        // TODO PDJB-2149: Always use ACTIVE_PROPERTIES_FRAGMENT when the ACTIVE_INACTIVE feature flag is removed
+        val propertiesFragment =
+            if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) ACTIVE_PROPERTIES_FRAGMENT else REGISTERED_PROPERTIES_FRAGMENT
+        return "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$propertiesFragment"
     }
 
     @AvailableWhenFeatureEnabled(PROPERTY_REGISTRATION_PHASE_THREE)
