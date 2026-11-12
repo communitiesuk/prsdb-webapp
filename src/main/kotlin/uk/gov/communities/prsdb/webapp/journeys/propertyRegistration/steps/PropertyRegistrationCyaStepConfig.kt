@@ -173,12 +173,19 @@ class PropertyRegistrationCyaStepConfig(
         val freeholdersTask = ownershipStructureTask.freeholdersTask
         val freeholdersListStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep
         val headingType = if (ownershipType.isJointFreeholder()) "joint" else "nonJoint"
+        val freeholdersMap =
+            freeholdersTask.freeholdersMap
+                ?.takeIf { it.isNotEmpty() }
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached with no freeholders",
+                )
         return mapOf(
             "freeholdersHeadingKey" to "registerProperty.freeholders.checkAnswers.heading.$headingType",
             "freeholdersChangeLinkKey" to "registerProperty.freeholders.checkAnswers.changeLink.$headingType",
             "freeholdersChangeUrl" to
                 Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
-            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersTask.freeholdersMap ?: emptyMap()),
+            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersMap),
         )
     }
 

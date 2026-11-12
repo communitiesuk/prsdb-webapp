@@ -683,6 +683,7 @@ class PropertyRegistrationCyaStepConfigTests {
             // LEASEHOLD_ONLY requires superior-landlord information, so this enables that content.
             lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
             lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
             lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
             lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
@@ -842,6 +843,7 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
             lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
             lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
             lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
             lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
@@ -883,6 +885,26 @@ class PropertyRegistrationCyaStepConfigTests {
             // Arrange
             whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `missing freeholders throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `empty freeholders throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(emptyMap())
 
             // Act & Assert
             assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
