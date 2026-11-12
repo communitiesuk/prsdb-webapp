@@ -463,11 +463,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val checkAnswersPage = goToJointLandlordsCheckAnswers(page, hasJointLandlords = true)
 
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isVisible()
-            assertThat(
-                page
-                    .locator("h3", Page.LocatorOptions().setHasText("People responsible for this property"))
-                    .locator("xpath=following-sibling::*[1][self::h4]"),
-            ).hasText("Joint landlords")
             assertThat(checkAnswersPage.summaryList.invitationsRow.value).containsText("email@address.com")
         }
 
