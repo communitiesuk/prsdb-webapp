@@ -37,8 +37,12 @@ class CheckAnswersPagePropertyRegistration(
     val propertyDetailsHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
 
-    val jointLandlordsHeading =
-        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Joint landlords")))
+    private val jointLandlordsHeadingLocator =
+        page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Joint landlords"))
+
+    val jointLandlordsHeading = Heading(jointLandlordsHeadingLocator)
+
+    val jointLandlordsSummaryList = jointLandlordsHeadingLocator.locator("xpath=following-sibling::dl[1]")
 
     private val correspondenceHeadingLocator =
         page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Who the council should contact"))

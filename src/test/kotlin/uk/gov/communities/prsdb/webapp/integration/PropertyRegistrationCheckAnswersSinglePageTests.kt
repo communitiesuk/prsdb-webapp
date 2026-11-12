@@ -463,7 +463,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val checkAnswersPage = goToJointLandlordsCheckAnswers(page, hasJointLandlords = true)
 
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isVisible()
-            assertThat(checkAnswersPage.summaryList.invitationsRow.value).containsText("email@address.com")
+            assertThat(checkAnswersPage.jointLandlordsSummaryList).containsText("Invitations")
+            assertThat(checkAnswersPage.jointLandlordsSummaryList).containsText("email@address.com")
         }
 
         @Test
