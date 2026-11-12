@@ -485,6 +485,7 @@ superiorLandlords:
         missing: Select if there is anyone else in the ownership chain
   checkAnswers:
     changeLink: Add, change or remove people in the ownership chain
+    anyoneInOwnershipChain: Is there anyone else in the property’s ownership chain?
 ownsProperty:
   fieldSetHeading: Do you own this property?
   fieldSetHint: This helps us understand if there’s anyone else who’s responsible for the property’s condition

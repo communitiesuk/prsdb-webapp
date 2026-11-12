@@ -189,7 +189,7 @@ class PropertyRegistrationCyaStepConfig(
                 "superiorLandlordsRows" to
                     listOf(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.heading",
+                            "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
                             "commonText.no",
                             Destination.VisitableStep(anyoneInOwnershipChainStep, state.getCyaJourneyId(anyoneInOwnershipChainStep)),
                         ),
