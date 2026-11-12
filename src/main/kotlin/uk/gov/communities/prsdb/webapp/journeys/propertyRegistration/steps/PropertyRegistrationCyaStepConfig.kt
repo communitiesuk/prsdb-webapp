@@ -150,14 +150,13 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
-        ) + getPeopleResponsibleForThisPropertyRows(state) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state)
+        ) + getPeopleResponsibleForThisPropertyContent(state) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state)
 
-    private fun getPeopleResponsibleForThisPropertyRows(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
+    private fun getPeopleResponsibleForThisPropertyContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val ownershipTypeRow = getOwnershipTypeRow(state)
-        val jointLandlordsRow = getJointLandLordsSummaryRow(state, associatedPartiesEnabled)
+        val jointLandlordsRow = getJointLandLordsSummaryRow(state)
 
-        return if (associatedPartiesEnabled) {
+        return if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
             mapOf(
                 // TODO PDJB-1986: add rows for whether a property manager is used and, if so, their name and email address
                 "peopleResponsibleForThisPropertyRows" to listOf(ownershipTypeRow),
@@ -167,7 +166,6 @@ class PropertyRegistrationCyaStepConfig(
             // TODO PDJB-2016: Remove this branch when ASSOCIATED_PARTIES is removed
             mapOf(
                 "peopleResponsibleForThisPropertyRows" to listOf(ownershipTypeRow, jointLandlordsRow),
-                "jointLandlordsRows" to emptyList<SummaryListRowViewModel>(),
             )
         }
     }
@@ -290,15 +288,12 @@ class PropertyRegistrationCyaStepConfig(
             HasJointLandlordsFormModel::hasJointLandlords,
         )
 
-    private fun getJointLandLordsSummaryRow(
-        state: PropertyRegistrationJourneyState,
-        associatedPartiesEnabled: Boolean,
-    ): SummaryListRowViewModel {
+    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val jointLandlordsTask = state.getJointLandlordsTask(featureFlagManager)
         return if (hasJointLandlords(state)) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 // TODO PDJB-2016: Remove the flag-off message when ASSOCIATED_PARTIES is removed
-                if (associatedPartiesEnabled) {
+                if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
                     "registerProperty.jointLandlords.checkAnswers.invitations"
                 } else {
                     "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations"

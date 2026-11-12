@@ -404,7 +404,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
                 peopleResponsibleForThisPropertyRows.last().fieldValue,
             )
-            assertEquals(emptyList<SummaryListRowViewModel>(), content["jointLandlordsRows"])
+            assertNull(content["jointLandlordsRows"])
             assertEquals(expectedOccupancyDetails, occupancyDetails)
         }
 
@@ -432,7 +432,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(listOf("joint.landlord@example.com"), peopleResponsibleForThisPropertyRows.last().fieldValue)
-            assertEquals(emptyList<SummaryListRowViewModel>(), content["jointLandlordsRows"])
+            assertNull(content["jointLandlordsRows"])
             assertEquals(expectedOccupancyDetails, occupancyDetails)
         }
     }
