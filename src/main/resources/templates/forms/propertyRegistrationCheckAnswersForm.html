@@ -70,7 +70,7 @@
                     <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
                 </th:block>
                 <th:block th:if="${superiorLandlordsCards != null}">
-                    <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
+                    <p class="govuk-body">
                         <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
                            th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
                     </p>
@@ -86,7 +86,7 @@
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyManagerRows})}"></dl>
                 </th:block>
                 <th:block th:if="${propertyManagerCards != null}">
-                    <p th:if="${propertyManagerChangeUrl != null}" class="govuk-body">
+                    <p class="govuk-body">
                         <a class="govuk-link" th:href="@{${propertyManagerChangeUrl}}"
                            th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
                     </p>

@@ -700,16 +700,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `associated parties disabled uses the ownership and landlords heading and has no superior landlords content`() {
-            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.checkPropertyAnswers.ownershipAndLandlords.heading", content["peopleResponsibleForThisPropertyHeadingKey"])
-            assertNoSuperiorLandlordsContent(content)
-        }
-
-        @Test
         fun `associated parties enabled uses the people responsible heading`() {
             whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
                 .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
@@ -859,17 +849,6 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `associated parties disabled has no property manager content`() {
-            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertNull(content["propertyManagerRows"])
-            assertNull(content["propertyManagerCards"])
-            assertNull(content["propertyManagerChangeUrl"])
-        }
-
-        @Test
         fun `missing property manager answer throws an unrecoverable journey state exception`() {
             whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockPropertyManagerStep.formModelIfReachableOrNull).thenReturn(null)
@@ -923,6 +902,34 @@ class PropertyRegistrationCyaStepConfigTests {
             assertEquals("manager@example.com", card.summaryList.single().fieldValue)
             assertEquals(emptyList<SummaryCardActionViewModel>(), card.actions)
             assertNull(content["propertyManagerRows"])
+        }
+    }
+
+    // TODO PDJB-2016: Remove these tests when the ASSOCIATED_PARTIES flag is removed
+    @Nested
+    inner class BeforeAssociatedPartiesContent {
+        @BeforeEach
+        fun setUpAssociatedPartiesDisabled() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+        }
+
+        @Test
+        fun `associated parties disabled uses the ownership and landlords heading and has no superior landlords content`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.checkPropertyAnswers.ownershipAndLandlords.heading", content["peopleResponsibleForThisPropertyHeadingKey"])
+            assertNull(content["superiorLandlordsRows"])
+            assertNull(content["superiorLandlordsCards"])
+            assertNull(content["superiorLandlordsChangeUrl"])
+        }
+
+        @Test
+        fun `associated parties disabled has no property manager content`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertNull(content["propertyManagerRows"])
+            assertNull(content["propertyManagerCards"])
+            assertNull(content["propertyManagerChangeUrl"])
         }
     }
 
