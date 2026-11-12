@@ -294,7 +294,7 @@ class PropertyRegistrationCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 // TODO PDJB-2016: Remove the flag-off message when ASSOCIATED_PARTIES is removed
                 if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                    "registerProperty.jointLandlords.checkAnswers.invitations"
+                    "forms.checkPropertyAnswers.jointLandlordsDetails.invitations"
                 } else {
                     "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations"
                 },

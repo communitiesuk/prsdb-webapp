@@ -325,10 +325,6 @@ occupancyChangeInterruption:
     three: You must now complete this registration yourself, adding as many details as you can.
     four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
     five: You can go back to undo this change.
-jointLandlords:
-  checkAnswers:
-    heading: Joint landlords
-    invitations: Invitations
 freeholders:
   intro:
     heading:

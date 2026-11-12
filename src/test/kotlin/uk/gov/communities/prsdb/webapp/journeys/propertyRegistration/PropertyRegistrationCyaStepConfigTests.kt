@@ -479,7 +479,7 @@ class PropertyRegistrationCyaStepConfigTests {
             val jointLandlordsRows = content["jointLandlordsRows"] as List<SummaryListRowViewModel>
             val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
             assertEquals(
-                listOf("registerProperty.jointLandlords.checkAnswers.invitations"),
+                listOf("forms.checkPropertyAnswers.jointLandlordsDetails.invitations"),
                 jointLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(listOf("joint.landlord@example.com"), jointLandlordsRows.single().fieldValue)

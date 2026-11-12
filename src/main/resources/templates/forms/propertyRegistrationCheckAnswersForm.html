@@ -61,7 +61,7 @@
             th:text="#{${peopleResponsibleForThisPropertyHeadingKey}}">peopleResponsibleForThisPropertyHeadingKey</h3>
         <th:block th:if="${jointLandlordsRows != null}">
             <h4 class="govuk-heading-s"
-                th:text="#{registerProperty.jointLandlords.checkAnswers.heading}">registerProperty.jointLandlords.checkAnswers.heading</h4>
+                th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}">forms.checkPropertyAnswers.jointLandlordsDetails.heading</h4>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsRows})}"></dl>
         </th:block>
         <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
