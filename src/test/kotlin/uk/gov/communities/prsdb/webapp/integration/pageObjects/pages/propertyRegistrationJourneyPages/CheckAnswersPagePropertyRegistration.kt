@@ -110,7 +110,7 @@ class CheckAnswersPagePropertyRegistration(
     val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h4")
 
     val superiorLandlordsHeading =
-        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Other people in the ownership chain")))
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Other people in the property’s ownership chain")))
 
     val superiorLandlordsChangeLink = Link.byText(page, "Add, change or remove people in the ownership chain")
 
@@ -153,7 +153,7 @@ class CheckAnswersPagePropertyRegistration(
 
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
 
-        val anyoneInOwnershipChainRow = getRow("Is there anyone else in the ownership chain?")
+        val anyoneInOwnershipChainRow = getRow("Is there anyone else in the property’s ownership chain?")
     }
 
     class ComplianceSummaryList(
