@@ -151,14 +151,24 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
+    fun preparePropertyManagerStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO property_manager 
+            (id, created_date, last_modified_date, name, email) 
+            VALUES (?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
     fun preparePropertyOwnershipStatement(): PreparedStatement {
         val query =
             """
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
              license_id, property_build_type, address_id, num_bedrooms,
-             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, ownership_type_before_pdjb955, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, ownership_type_before_pdjb955, property_manager_id, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }
@@ -167,8 +177,18 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO freeholder 
-            (created_date, property_ownership_id) 
-            VALUES (?, ?)
+            (created_date, property_ownership_id, name, email, address_id) 
+            VALUES (?, ?, ?, ?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareSuperiorLandlordStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO superior_landlord 
+            (created_date, property_ownership_id, name, email, address_id) 
+            VALUES (?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -331,6 +351,7 @@ class NftDataSeederDao(
                 "registration_number",
                 "landlord",
                 "license",
+                "property_manager",
                 "property_ownership",
                 "file_upload",
                 "property_compliance",
