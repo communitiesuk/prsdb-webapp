@@ -23,6 +23,11 @@ interface PropertyOwnershipRepository :
 
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): Boolean
 
+    fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(
+        landlordId: Long,
+        id: Long,
+    ): Boolean
+
     fun countByCreatedDateBetween(
         start: Instant,
         end: Instant,

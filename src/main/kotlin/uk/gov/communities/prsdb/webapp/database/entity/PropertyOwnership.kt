@@ -30,6 +30,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @Column(nullable = false)
     var isActive: Boolean = false
+        private set
 
     @Column(nullable = false)
     lateinit var ownershipType: OwnershipType
@@ -237,5 +238,15 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     fun addLandlord(landlord: Landlord) {
         ownershipLinks.add(OwnershipLink(landlord, this))
+    }
+
+    fun deactivate(deactivationDate: LocalDate) {
+        isActive = false
+        lastDeactivatedDate = deactivationDate
+    }
+
+    fun reactivate() {
+        isActive = true
+        lastDeactivatedDate = null
     }
 }

@@ -564,7 +564,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 page.navigate(replacedPaymentReturnUrl)
 
                 val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
-                assertThat(paymentFailedPage.heading).containsText("Your payment could not be completed")
+                assertThat(paymentFailedPage.heading).containsText("Your payment was not completed")
                 assertThat(paymentFailedPage.tryAgainLink).isVisible()
                 assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
                 verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)

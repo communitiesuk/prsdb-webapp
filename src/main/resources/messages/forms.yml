@@ -411,33 +411,30 @@ furnishedStatus:
   fieldSetHeading: Is the property furnished?
   fieldSetHint: Select the option that best describes what is provided with the property.
 rentFrequency:
-  heading: When you charge rent
-  subheading: When to take payment
-  paragraph:
-    one: The rent charge is the actual amount your tenants pay. This may be different from the price you advertised.
-    two: 'You must:'
-  bullet:
-    one: only ask for rent payments once both you and the tenant have signed the tenancy agreement
-    two: ensure you receive rent on the specific date set out in the agreement
-  warningText: You can ask for rent in advance after the contract is signed but before the tenancy starts. This is limited to one month’s rent, or 28 days if rent is paid at any other interval, such as weekly or every 4 weeks.
-  fieldSetHeading: How often do you charge rent?
-  label: Select how often you will receive rent payments.
+  heading: How often do you charge rent?
+  details:
+    summary: Help with rent in advance
+    paragraph:
+      one: You can no longer ask for tenants to pay for multiple months of rent in advance.
+      two: 'You can only ask for:'
+      three: You can only ask for this rent in advance during the ‘pre-tenancy period’. This is the time between signing the tenancy agreement and starting the tenancy.
+    bullet:
+      one: 1 month of rent, if rent will be paid monthly
+      two: 28 days of rent, if rent will be paid at any other interval (for example, weekly)
   radios:
     option:
       monthly:
         label: Monthly
-        hint: You receive rent on the same date each month (for example, 15 March, then 15 April)
+        hint: You collect rent on the same date each month
       fourWeekly:
         label: 4 weekly
-        hint: You receive rent every 28 days. This means you receive 13 payments a year (for example, 15 March, then 12 April)
+        hint: You collect rent every 28 days
       weekly:
         label: Weekly
-        hint: You receive rent once every 7 days
       other:
         label: Other
-        hint: Select this if you receive rent at a different interval, such as quarterly or annually
         input:
-          label: Give details of the rent frequency
+          label: How often do you charge rent?
           error:
             missing: Enter how often you charge rent
     error:
@@ -447,31 +444,41 @@ rentAmount:
     weekly: What is the weekly rent?
     fourWeekly: What is the 4-weekly rent?
     monthly: What is the monthly rent?
+    other: Equivalent monthly rent
   subheading:
     weekly: Weekly rent
     fourWeekly: 4-weekly rent
     monthly: Monthly rent
+    other:
+      one: What to include
+      two: What is the rent, as a monthly figure in pounds?
   paragraph:
     one:
       weekly: The amount you enter must be the total weekly rent agreed with the tenant.
       fourWeekly: The amount you enter must be the total 4-weekly rent agreed with the tenant.
       monthly: The amount you enter must be the total monthly rent agreed with the tenant.
+      other: The amount you enter must be the total monthly rent agreed with the tenant.
     two: 'You must include:'
     three: 'Do not include:'
     four: Enter the amount in pounds. For example, 705 or 705.50
+    five: Tell us how much rent you charge, converted into a monthly figure.
   bullet:
     one: the agreed rent
     two: the rent for the whole property (if the property is an HMO, do not enter the price per room)
     three: any bills or services included in the rent, such as gas, electricity or cleaning
     four: rent arrears
     five: rent in advance payments
-  conditionalSection:
+  details:
+    summary: How to calculate a monthly figure
+    subheading:
+      one: If you charge rent every 2 weeks
+      two: Other rent periods
     paragraph:
-      one: 'To work out the monthly equivalent, divide your rent amount by the number of months it covers. For example:'
-    bullet:
-      one: if you charge a 6-monthly amount of £3,000, divide £3,000 by 6.
-      two: the equivalent monthly amount is £500
-  fieldSetHint: Do not use the £ sign or commas.
+      one: Multiply the rent by 26, then divide it by 12.
+      two: Calculate how much the rent is per year, then divide it by 12.
+  fieldSetHint:
+    default: Do not use the £ sign or commas.
+    other: For example, 650.50
   error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
 licensingType:
   fieldSetHeading: Select the type of licence you have for your property
@@ -557,7 +564,7 @@ checkPropertyAnswers:
   peopleResponsibleForThisProperty:
     heading: People responsible for this property
     otherPeopleInOwnershipChain:
-      heading: Other people in the ownership chain
+      heading: Other people in the property’s ownership chain
   # TODO PDJB-1307: Move these messages out of forms.yml
   correspondence:
     emailAddress: Email address
@@ -652,6 +659,8 @@ update:
     fourWeekly:
       fieldSetHeading: Update your 4-weekly rent
     monthly:
+      fieldSetHeading: Update your monthly rent
+    other:
       fieldSetHeading: Update your monthly rent
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property

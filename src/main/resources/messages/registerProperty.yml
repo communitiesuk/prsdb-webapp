@@ -38,9 +38,8 @@ confirmation:
   banner:
     heading: Property registered
   prn:
-    label: 'Your <strong>Property Registration Number</strong> is:'
+    label: 'Your <strong>rental property number</strong> is:'
   keepNumber: We’ve sent you a confirmation email including this number.
-  useInAdverts: Use this Property Registration Number when advertising this property, alongside each landlord’s Landlord Registration Number.
   paymentSummary:
     heading: Payment summary
     payment: Payment
@@ -245,7 +244,7 @@ paymentSummary:
     payment: Payment
     paymentDate: Payment date
     renewalDate: Renewal date
-  prnHint: Your property will be registered when you pay and you will be given a Property Registration Number.
+  prnHint: Your property will be registered when you pay and you will be given a rental property number.
   button: Go to payment
 paymentProcessing:
   heading: Your payment is processing
@@ -256,18 +255,23 @@ paymentProcessing:
     notConfirmed: We have not yet received confirmation that your payment was successful.
     checkStatus: Select Check payment status to see if your payment has been completed.
     button: Check payment status
+paymentTryAgainLink: Go back to try the payment again
 paymentFailed:
   heading: Your payment has been declined
   contactBank: Contact your bank for more details. No money has been taken from your account.
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
-  tryAgainLink: Go back to try the payment again.
   getHelp: Get help with payment
 paymentNotCompleted:
-  heading: Your payment could not be completed
-  reason: This can happen if you started another payment in a different tab or window, or if there was a problem with GOV.UK Pay.
-  notRegistered: Your property has not been registered.
-  refund: If any money was taken from your account, it will be refunded.
-  payAgain: You need to pay again to register this property.
+  heading: Your payment was not completed
+  canHappenIf: 'This can happen if:'
+  bullet:
+    one: you made a payment for this property in a different tab or window
+    two: there was a problem with GOV.UK Pay
+  notRegistered: This means your property has not been registered.
+  insetText: Any money taken from your account will be refunded.
+  whatYouNeedToDo:
+    heading: What you need to do
+    paragraph: Try the payment again to complete your property registration.
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
@@ -393,7 +397,7 @@ freeholders:
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
-      single: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
+      nonJoint: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
     emailAddress: Email address
     postalAddress: Postal address
@@ -402,6 +406,13 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  checkAnswers:
+    heading:
+      joint: Joint freeholders
+      nonJoint: Freeholders
+    changeLink:
+      joint: Add, change or remove joint freeholders
+      nonJoint: Add, change or remove freeholders
   remove:
     fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
     unknownFreeholder:
@@ -484,6 +495,7 @@ superiorLandlords:
         missing: Select if there is anyone else in the ownership chain
   checkAnswers:
     changeLink: Add, change or remove people in the ownership chain
+    anyoneInOwnershipChain: Is there anyone else in the property’s ownership chain?
 ownsProperty:
   fieldSetHeading: Do you own this property?
   fieldSetHint: This helps us understand if there’s anyone else who’s responsible for the property’s condition

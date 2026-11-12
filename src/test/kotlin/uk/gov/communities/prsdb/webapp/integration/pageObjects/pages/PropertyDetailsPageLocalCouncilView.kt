@@ -41,7 +41,7 @@ class PropertyDetailsPageLocalCouncilView(
     class LandlordCardSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
-        val registrationNumberRow = getRow("Landlord Registration Number")
+        val registrationNumberRow = getRow("Landlord number")
         val emailAddressRow = getRow("Email address")
         val contactNumberRow = getRow("Contact number")
         val contactAddressRow = getRow("Contact address")

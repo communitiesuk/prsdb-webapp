@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
@@ -60,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
@@ -82,6 +84,30 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             navigator.navigateToPropertyRegistrationConfirmationPage()
             val errorPage = assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+        }
+    }
+
+    // TODO PDJB-2016: Remove this class once ASSOCIATED_PARTIES is released.
+    @Nested
+    inner class BeforePdjb955 {
+        @Test
+        fun `cya hides the freeholder section when the associated parties feature is disabled`(page: Page) {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withOwnershipKind(OwnershipKind.LEASEHOLD_ONLY)
+                        .withFreeholders(PropertyStateSessionBuilder.DEFAULT_FREEHOLDERS)
+                        .withFreeholdersInfoComplete()
+                        .withFreeholdersListComplete(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).hasCount(0)
         }
     }
 
@@ -914,6 +940,161 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class FreeholdersCheckAnswers {
+        @Test
+        fun `cya shows freeholder cards without per-card actions`() {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
+
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).isVisible()
+
+            assertFreeholderCards(checkAnswersPage)
+        }
+
+        @Test
+        fun `cya shows non-joint freeholder cards when the landlord does not own the property`() {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = null,
+                    ownsProperty = false,
+                )
+
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.jointFreeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).isVisible()
+            assertFreeholderCards(checkAnswersPage)
+        }
+
+        @Test
+        fun `cya shows joint freeholder heading link and cards for joint ownership types`() {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = OwnershipKind.FREEHOLD_ONLY,
+                    freeholdType = FreeholdType.JOINT_TENANTS,
+                )
+
+            BaseComponent.assertThat(checkAnswersPage.jointFreeholdersHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.jointFreeholdersChangeLink).isVisible()
+            assertFreeholderCards(checkAnswersPage)
+        }
+
+        @Test
+        fun `the add, change or remove link starts a CYA sub-journey at the freeholders list`(page: Page) {
+            var checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 freeholders")
+            freeholdersListPage.submit()
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).isVisible()
+        }
+
+        @Test
+        fun `the back link on the freeholders list returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders()
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.backLink.clickAndWait()
+
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersChangeLink).isVisible()
+        }
+
+        @Test
+        fun `the back link on the freeholders list returns to CYA for a non-property owner`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = null,
+                    ownsProperty = false,
+                )
+
+            checkAnswersPage.freeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.backLink.clickAndWait()
+
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(returnedCheckAnswersPage.freeholdersChangeLink).isVisible()
+        }
+
+        @Test
+        fun `the back link on the joint freeholders list returns to CYA`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = OwnershipKind.FREEHOLD_AND_LEASEHOLD,
+                    freeholdType = FreeholdType.TENANTS_IN_COMMON,
+                )
+
+            checkAnswersPage.jointFreeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 joint freeholders")
+            freeholdersListPage.backLink.clickAndWait()
+
+            val returnedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersHeading).isVisible()
+            BaseComponent.assertThat(returnedCheckAnswersPage.jointFreeholdersChangeLink).isVisible()
+        }
+
+        @Test
+        fun `the joint freeholders link opens the freeholders list with the joint heading`(page: Page) {
+            val checkAnswersPage =
+                navigator.goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+                    ownershipKind = OwnershipKind.FREEHOLD_ONLY,
+                    freeholdType = FreeholdType.JOINT_TENANTS,
+                )
+
+            checkAnswersPage.jointFreeholdersChangeLink.clickAndWait()
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(freeholdersListPage.heading).containsText("You’ve added 3 joint freeholders")
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = FreeholdType::class, names = ["SOLE_OWNERSHIP", "COMMONHOLD"])
+        fun `cya does not show freeholders for sole ownership or commonhold`(
+            freeholdType: FreeholdType,
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+                        .withFreeholdType(freeholdType),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.freeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.jointFreeholdersHeading).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.freeholdersChangeLink).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.submitButton).isVisible()
+        }
+
+        private fun assertFreeholderCards(checkAnswersPage: CheckAnswersPagePropertyRegistration) {
+            val addressCard = checkAnswersPage.getSummaryCard("Freeholder With Address", "h5")
+            BaseComponent.assertThat(addressCard).containsText("1 Freehold Street")
+            BaseComponent.assertThat(addressCard.getAction("Change")).hasCount(0)
+            BaseComponent.assertThat(addressCard.getAction("Remove")).hasCount(0)
+
+            val emailCard = checkAnswersPage.getSummaryCard("Freeholder With Email", "h5")
+            BaseComponent.assertThat(emailCard).containsText("freeholder@example.com")
+            BaseComponent.assertThat(emailCard.getAction("Change")).hasCount(0)
+            BaseComponent.assertThat(emailCard.getAction("Remove")).hasCount(0)
+
+            val unknownCard = checkAnswersPage.getSummaryCard("Unknown freeholder", "h5")
+            BaseComponent.assertThat(unknownCard).containsText("You told us there was another freeholder")
+            BaseComponent.assertThat(unknownCard.getAction("Change")).hasCount(0)
+            BaseComponent.assertThat(unknownCard.getAction("Remove")).hasCount(0)
         }
     }
 
