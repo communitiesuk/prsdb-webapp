@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{reactivateProperty.alreadyRegistered.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{reactivateProperty.alreadyRegistered.heading}">
+            reactivateProperty.alreadyRegistered.heading
+        </h1>
+        <p class="govuk-body" th:text="#{reactivateProperty.alreadyRegistered.paragraph}">
+            reactivateProperty.alreadyRegistered.paragraph
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{reactivateProperty.alreadyRegistered.ifYouAreTheLandlord.heading}">
+            reactivateProperty.alreadyRegistered.ifYouAreTheLandlord.heading
+        </h2>
+        <p class="govuk-body" th:text="#{reactivateProperty.alreadyRegistered.ifYouAreTheLandlord.paragraph}">
+            reactivateProperty.alreadyRegistered.ifYouAreTheLandlord.paragraph
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{reactivateProperty.alreadyRegistered.contactUs.heading}">
+            reactivateProperty.alreadyRegistered.contactUs.heading
+        </h2>
+        <p th:replace="~{fragments/contactDetails :: contactDetails}"></p>
+        <p class="govuk-body">
+            <a id="register-new-property-link" class="govuk-link" th:href="@{${registerPropertyUrl}}"
+               th:text="#{reactivateProperty.alreadyRegistered.registerNewPropertyLink}">
+                reactivateProperty.alreadyRegistered.registerNewPropertyLink
+            </a>
+        </p>
+    </div>
+</main>
+</html>
