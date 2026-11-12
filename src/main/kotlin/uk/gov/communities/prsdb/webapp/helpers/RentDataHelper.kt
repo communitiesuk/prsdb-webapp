@@ -38,6 +38,7 @@ class RentDataHelper {
             when (rentFrequency) {
                 RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
                 RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
+                RentFrequency.OTHER -> "forms.update.rentAmount.other.fieldSetHeading"
                 else -> "forms.update.rentAmount.monthly.fieldSetHeading"
             }
     }
