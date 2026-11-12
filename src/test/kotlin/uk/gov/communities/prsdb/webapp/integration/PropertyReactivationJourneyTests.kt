@@ -4,8 +4,12 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -48,9 +52,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
+    @BeforeEach
+    fun stubEpcLookup() {
+        whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
+    }
+
     @Test
     fun `a landlord can walk through every provide later step to the confirmation page`(page: Page) {
-        whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
@@ -135,7 +143,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord can provide an EPC exemption and every EPC button on the way says continue`(page: Page) {
-        whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
@@ -219,7 +226,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `the back links into and out of the EPC task return to the adjacent steps`(page: Page) {
-        whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
         val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
@@ -264,5 +270,26 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             navigator.navigate(ReactivatePropertyController.getPropertyReactivationPath(INACTIVE_PROPERTY_OWNED_BY_ANOTHER_LANDLORD))
 
         assertEquals(404, response?.status())
+    }
+
+    @Nested
+    inner class PropertyWithManualAddress :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-local.sql", "data-overlay-inactive-property-has-manual-address.sql"),
+        ) {
+        @Test
+        fun `a landlord is asked whether they have an EPC when the address has no UPRN to look one up with`(page: Page) {
+            val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
+
+            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
+            infoPage.submit()
+            assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
+            assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
+            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
+            assertPageIs(page, ElectricalSafetyFormPagePropertyReactivation::class, urlArguments).submit()
+
+            assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
+            verify(epcRegisterClient, never()).getByUprn(any())
+        }
     }
 }
