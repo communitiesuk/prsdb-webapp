@@ -193,6 +193,7 @@ class PropertyDetailsViewModelTests {
             ),
             viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading },
         )
+        // TODO PDJB-1992: update this assertion when the ownership update journey replaces the placeholder links
         assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.single().url == "#" }) {
             "The ownership answer rows show placeholder change links until PDJB-1992 builds the update journey"
         }
