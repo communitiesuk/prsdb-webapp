@@ -42,9 +42,7 @@ class ActiveInactiveService(
         propertyOwnership.reactivate()
         propertyOwnershipRepository.save(propertyOwnership)
 
-        propertyOwnership.landlords
-            .filterNot { it.isActive }
-            .forEach { reactivateLandlord(it) }
+        propertyOwnership.landlords.forEach { reactivateLandlordIfInactive(it) }
     }
 
     @Transactional
