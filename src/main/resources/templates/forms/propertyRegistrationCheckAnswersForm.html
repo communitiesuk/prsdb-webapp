@@ -57,45 +57,42 @@
         <h2 class="govuk-heading-l" th:text="#{${aboutPropertyHeadingKey}}"></h2>
         <h3 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-        <!--/* TODO: PDJB-2146: This header & section no longer need to be optional */-->
-        <th:block th:if="${!#lists.isEmpty(peopleResponsibleForThisPropertyRows)}">
-            <h3 class="govuk-heading-m"
-                th:text="#{${peopleResponsibleForThisPropertyHeadingKey}}">peopleResponsibleForThisPropertyHeadingKey</h3>
-            <th:block th:if="${!#lists.isEmpty(jointLandlordsRows)}">
-                <h4 class="govuk-heading-s"
-                    th:text="#{registerProperty.jointLandlords.checkAnswers.heading}">registerProperty.jointLandlords.checkAnswers.heading</h4>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsRows})}"></dl>
+        <h3 class="govuk-heading-m"
+            th:text="#{${peopleResponsibleForThisPropertyHeadingKey}}">peopleResponsibleForThisPropertyHeadingKey</h3>
+        <th:block th:if="${!#lists.isEmpty(jointLandlordsRows)}">
+            <h4 class="govuk-heading-s"
+                th:text="#{registerProperty.jointLandlords.checkAnswers.heading}">registerProperty.jointLandlords.checkAnswers.heading</h4>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsRows})}"></dl>
+        </th:block>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
+        <!--/* TODO: PDJB-2014: Add Ownership type header & rows */-->
+        <th:block th:if="${freeholdersCards != null}">
+            <h4 class="govuk-heading-s" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h4>
+            <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
+                <a class="govuk-link" th:href="@{${freeholdersChangeUrl}}"
+                   th:text="#{${freeholdersChangeLinkKey}}">freeholdersChangeLinkKey</a>
+            </p>
+            <th:block th:each="card : ${freeholdersCards}">
+                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
             </th:block>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
-            <!--/* TODO: PDJB-2014: Add Ownership type header & rows */-->
-            <th:block th:if="${freeholdersCards != null}">
-                <h4 class="govuk-heading-s" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h4>
-                <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
-                    <a class="govuk-link" th:href="@{${freeholdersChangeUrl}}"
-                       th:text="#{${freeholdersChangeLinkKey}}">freeholdersChangeLinkKey</a>
+        </th:block>
+        <th:block th:if="${superiorLandlordsRows != null or superiorLandlordsCards != null}">
+            <h4 class="govuk-heading-s"
+                th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h4>
+            <th:block th:if="${superiorLandlordsRows != null}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
+            </th:block>
+            <th:block th:if="${superiorLandlordsCards != null}">
+                <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
+                    <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
+                       th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
                 </p>
-                <th:block th:each="card : ${freeholdersCards}">
+                <th:block th:each="card : ${superiorLandlordsCards}">
                     <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
                 </th:block>
             </th:block>
-            <th:block th:if="${superiorLandlordsRows != null or superiorLandlordsCards != null}">
-                <h4 class="govuk-heading-s"
-                    th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h4>
-                <th:block th:if="${superiorLandlordsRows != null}">
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
-                </th:block>
-                <th:block th:if="${superiorLandlordsCards != null}">
-                    <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
-                        <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
-                           th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
-                    </p>
-                    <th:block th:each="card : ${superiorLandlordsCards}">
-                        <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
-                    </th:block>
-                </th:block>
-            </th:block>
-            <!--/* TODO: PDJB-1986: Add Property Manager header & rows */-->
         </th:block>
+        <!--/* TODO: PDJB-1986: Add Property Manager header & rows */-->
         <th:block th:if="${!#lists.isEmpty(correspondenceRows)}">
             <h3 class="govuk-heading-m"
                 th:text="#{registerProperty.taskList.aboutYourProperty.correspondence}">registerProperty.taskList.aboutYourProperty.correspondence</h3>
