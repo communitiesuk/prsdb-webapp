@@ -61,6 +61,11 @@ class ActiveInactiveService(
         landlordRepository.save(landlord)
     }
 
+    @Transactional
+    fun reactivateLandlordIfInactive(landlord: Landlord) {
+        if (!landlord.isActive) reactivateLandlord(landlord)
+    }
+
     private fun markLandlordAsInactive(
         landlord: Landlord,
         deactivationDate: LocalDate,
