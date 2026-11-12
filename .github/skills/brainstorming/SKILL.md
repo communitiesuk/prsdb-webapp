@@ -22,7 +22,8 @@ approved it.
 5. **Stress-test the design** — walk every decision branch, resolve gaps
 6. **Write design spec** — save to session workspace (`~/.copilot/session-state/<session-id>/files/design-spec.md`)
 7. **Self-review** — check for placeholders, contradictions, ambiguity
-8. **User reviews spec** — wait for approval before proceeding
+8. **User reviews spec** — present it with the `presenting-documents-for-review`
+   skill, then wait for approval before proceeding
 9. **Transition** — invoke `writing-plans` skill
 
 ## Asking Questions
@@ -31,11 +32,15 @@ approved it.
 - Prefer multiple choice (with freeform allowed)
 - Focus on: purpose, constraints, success criteria, user-visible behaviour
 - If the request spans multiple independent subsystems, flag decomposition first
+- Text written before an `ask_user` call may be hidden — make every question
+  self-contained (see `presenting-documents-for-review`)
 
 ## Exploring Approaches
 
 - Always propose 2-3 options with trade-offs
 - Lead with the recommended option and explain why
+- Put each option's one-line trade-off in the `ask_user` choices or question,
+  not only in preceding chat text
 - Consider existing patterns in the codebase before suggesting new ones
 
 ## Presenting the Design

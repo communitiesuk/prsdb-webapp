@@ -1,8 +1,9 @@
 # Phase 3 — Plan
 
-1. Invoke the `writing-plans` skill. The plan must be written and printed to
-   the screen in the main process (not in a sub-agent) so the user can review
-   it. **The plan file must be saved to the session workspace**
+1. Invoke the `writing-plans` skill. The plan must be written in the main
+   process (not in a sub-agent) and presented to the user using the
+   `presenting-documents-for-review` skill so they can review it.
+   **The plan file must be saved to the session workspace**
    (`~/.copilot/session-state/<session-id>/files/plan.md`), not to the
    repository. Plans are session artifacts and must not be committed.
 
@@ -56,8 +57,9 @@
 
    Bug fixes do NOT require feature flags (they restore correct behaviour).
 
-6. After the plan is written, present the PR breakdown and verification
-   strategy to the user for confirmation. Do not proceed until the user agrees.
+6. After the plan is written, present it (step 1) and ask the user to confirm
+   the PR breakdown and verification strategy — summarise both in the approval
+   question itself. Do not proceed until the user agrees.
 
 7. If the plan defines more than one PR, ask the user:
    *"Should the PRs be raised as a stack (all raised at once, each targeting the
