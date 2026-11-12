@@ -66,7 +66,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
     @Test
     fun `Clicking invite link on individual property, answering yes, and submitting emails shows pending invitations`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.inviteJointLandlordLink.clickAndWait()
 
         val hasJointLandlordsPage =
@@ -95,7 +95,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         page: Page,
     ) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.inviteJointLandlordLink.clickAndWait()
 
         val hasJointLandlordsPage =
@@ -108,7 +108,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        returnedDetailsPage.tabs.goToLandlordDetails()
+        returnedDetailsPage.tabs.goToPeopleResponsible()
         assertThat(returnedDetailsPage.inviteJointLandlordLink.locator).isVisible()
     }
 
@@ -122,7 +122,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         @Test
         fun `Landlord can invite a joint landlord using the same email as an expired invitation`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipIdWithExpiredInvite)
-            detailsPage.tabs.goToLandlordDetails()
+            detailsPage.tabs.goToPeopleResponsible()
             detailsPage.inviteJointLandlordLink.clickAndWait()
 
             val hasJointLandlordsPage =
@@ -148,7 +148,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
             // The stale expired invitation should no longer be shown once replaced by the new pending one
             val returnedDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipIdWithExpiredInvite)
-            returnedDetailsPage.tabs.goToLandlordDetails()
+            returnedDetailsPage.tabs.goToPeopleResponsible()
             assertThat(returnedDetailsPage.pendingInvitationsDetails).containsText("Pending invitations (2)")
             assertThat(returnedDetailsPage.pendingInvitationsDetails).containsText("expired@example.com")
             assertThat(returnedDetailsPage.expiredInvitationsDetails).isHidden()
@@ -186,7 +186,7 @@ class InviteJointLandlordOrgLandlordJourneyTests : IntegrationTestWithMutableDat
     @Test
     fun `An org landlord can invite a joint landlord to a property they solely own`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(solePropertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.inviteJointLandlordLink.clickAndWait()
 
         val hasJointLandlordsPage =

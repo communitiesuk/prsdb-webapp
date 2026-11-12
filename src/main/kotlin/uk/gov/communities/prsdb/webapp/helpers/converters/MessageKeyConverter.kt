@@ -13,6 +13,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 class MessageKeyConverter {
     companion object {
@@ -50,9 +53,36 @@ class MessageKeyConverter {
 
                 is CharityRegulator -> convertCharityRegulator(enum)
 
+                is YesOrNo -> convertYesOrNo(enum)
+
+                is OwnershipKind -> convertOwnershipKind(enum)
+
+                is FreeholdType -> convertFreeholdType(enum)
+
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
+            }
+
+        private fun convertYesOrNo(yesOrNo: YesOrNo): String =
+            when (yesOrNo) {
+                YesOrNo.YES -> "commonText.yes"
+                YesOrNo.NO -> "commonText.no"
+            }
+
+        private fun convertOwnershipKind(ownershipKind: OwnershipKind): String =
+            when (ownershipKind) {
+                OwnershipKind.FREEHOLD_ONLY -> "registerProperty.ownershipKind.checkbox.freehold.label"
+                OwnershipKind.LEASEHOLD_ONLY -> "registerProperty.ownershipKind.checkbox.leasehold.label"
+                OwnershipKind.FREEHOLD_AND_LEASEHOLD -> "registerProperty.ownershipKind.value.freeholdAndLeasehold"
+            }
+
+        private fun convertFreeholdType(freeholdType: FreeholdType): String =
+            when (freeholdType) {
+                FreeholdType.SOLE_OWNERSHIP -> "registerProperty.freeholdType.radios.option.soleOwnership.label"
+                FreeholdType.JOINT_TENANTS -> "registerProperty.freeholdType.radios.option.jointTenants.label"
+                FreeholdType.TENANTS_IN_COMMON -> "registerProperty.freeholdType.radios.option.tenantsInCommon.label"
+                FreeholdType.COMMONHOLD -> "registerProperty.freeholdType.radios.option.commonhold.label"
             }
 
         private fun convertGoverningBodyMemberType(type: GoverningBodyMemberType): String =

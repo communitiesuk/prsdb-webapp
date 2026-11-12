@@ -109,6 +109,9 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockPaymentRepository: PaymentRepository
 
+    @Mock
+    private lateinit var mockActiveInactiveService: ActiveInactiveService
+
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
 
@@ -1952,6 +1955,21 @@ class PropertyRegistrationServiceTests {
             argThat<PropertyRegistrationConfirmationEmail> { paymentDetails == null },
         )
         verifyNoInteractions(mockPaymentRepository)
+    }
+
+    @Test
+    fun `registerProperty reactivates the landlord via the active inactive service if they are inactive`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+
+        // Assert
+        verify(mockActiveInactiveService).reactivateLandlordIfInactive(landlord)
     }
 
     private fun stubPropertyOwnershipCreation(
