@@ -879,6 +879,16 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
+        fun `missing ownership type throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
         fun `non-joint ownership type uses the non-joint heading and change link keys`() {
             // Act
             val content = stepConfig.getStepSpecificContent(mockState)
