@@ -21,6 +21,7 @@ data class ComplianceStatusDataModel(
     val electricalSafetyExpiryDate: LocalDate? = null,
     val epcExpiryDate: LocalDate? = null,
     val tenancyStartedBeforeEpcExpiry: Boolean = false,
+    val eicIssueDate: LocalDate? = null,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
@@ -54,6 +55,7 @@ data class ComplianceStatusDataModel(
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
+            eicIssueDate: LocalDate?,
             electricalSafetyExpiryDate: LocalDate?,
             isGas14MonthExpiryEnabled: Boolean,
         ): ComplianceStatusDataModel =
@@ -73,6 +75,7 @@ data class ComplianceStatusDataModel(
                 provideLaterDeadline = propertyCompliance.propertyOwnership.provideLaterDeadline,
                 gasSafetyExpiryDate = propertyCompliance.getGasSafetyCertExpiryDate(isGas14MonthExpiryEnabled),
                 electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                eicIssueDate = eicIssueDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )

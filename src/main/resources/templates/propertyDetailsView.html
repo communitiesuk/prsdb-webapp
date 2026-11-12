@@ -82,7 +82,7 @@
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
                 <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{${propertyDetails.peopleResponsibleTabHeadingKey}})}"></li>
                 <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${complianceInfoTabId}, #{propertyDetails.complianceInformation.heading})}"></li>
             </ul>
 
@@ -91,8 +91,11 @@
                     <dl th:if="${not #lists.isEmpty(propertyDetails.registrationDetails)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.registrationDetails})}"></dl>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
                     <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>
-                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
-                    <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
+                    <!-- TODO PDJB-2016: delete this block along with the ASSOCIATED_PARTIES flag -->
+                    <th:block th:if="${propertyDetails.showOwnershipSectionOnPropertyDetailsTab}">
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
+                        <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSectionBeforePdjb955)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSectionBeforePdjb955})}"></dl>
+                    </th:block>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.correspondence.heading}">propertyDetails.propertyRecord.correspondence.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.correspondenceSection})}"></dl>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.occupation.heading}">propertyDetails.propertyRecord.occupation.heading</h3>

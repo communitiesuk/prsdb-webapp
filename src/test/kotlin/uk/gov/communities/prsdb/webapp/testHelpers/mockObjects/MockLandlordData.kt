@@ -308,6 +308,7 @@ class MockLandlordData {
 
         fun createOccupiedPropertyOwnership(
             ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType: OwnershipType = OwnershipType.SOLE_FREEHOLD,
             currentNumHouseholds: Int = 2,
             currentNumTenants: Int = 1,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
@@ -333,6 +334,7 @@ class MockLandlordData {
                 createPropertyOwnership(
                     id = id,
                     ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955,
+                    ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     isOccupied = true,

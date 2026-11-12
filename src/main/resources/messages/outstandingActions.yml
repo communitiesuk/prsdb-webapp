@@ -14,6 +14,7 @@ status:
     electricalSafety: No valid electrical safety certificate
     epc: No valid EPC
   expired: Expired on {0}
+  expiredEic: Expired (issued on {0})
   provideLater: Provide this later (before {0})
   provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
 none:
