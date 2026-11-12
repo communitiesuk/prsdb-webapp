@@ -55,6 +55,16 @@ class PropertyDetailsPageLandlordView(
             return (0 until count).map { LandlordSummaryCard(page.locator("#landlord-details .govuk-summary-card").nth(it)) }
         }
 
+    val peopleResponsibleOwnershipSummaryList = PeopleResponsibleOwnershipSummaryList(page)
+
+    class PeopleResponsibleOwnershipSummaryList(
+        page: Page,
+    ) : SummaryList(page.locator("#landlord-details")) {
+        val ownsPropertyRow = getRow("Do you own this property?")
+        val ownershipTypeRow = getRow("Ownership type")
+        val freeholderTypeRow = getRow("Freeholder type")
+    }
+
     class LandlordSummaryCard(
         locator: Locator,
     ) : SummaryCard(locator) {

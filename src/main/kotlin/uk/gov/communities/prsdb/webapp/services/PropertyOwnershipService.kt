@@ -103,9 +103,7 @@ class PropertyOwnershipService(
             propertyOwnershipRepository.save(
                 PropertyOwnership(
                     ownershipType = ownershipType,
-                    // TODO PDJB-2019: delete this line with the legacy column. Derived rather than passed
-                    //  in, because the column is NOT NULL and PropertyDetailsViewModelBase renders it
-                    //  until PDJB-1996.
+                    // TODO PDJB-2019: delete this line with the legacy column (required until then as it is not nullable)
                     ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
                     currentNumHouseholds = numberOfHouseholds,
                     currentNumTenants = numberOfPeople,

@@ -12,6 +12,8 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -48,6 +50,8 @@ class PropertyDetailsController(
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
+    // TODO PDJB-2016: remove this once the ASSOCIATED_PARTIES flag is removed
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -66,6 +70,7 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 isLandlordView = true,
                 messageSource = messageSource,
+                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
             )
 
         val propertyComplianceDetails =
@@ -184,6 +189,7 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 isLandlordView = false,
                 messageSource = messageSource,
+                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
             )
 
         val landlordSummaryCards =
