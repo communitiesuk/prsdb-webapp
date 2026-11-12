@@ -60,69 +60,81 @@ class OutstandingActionViewModelBuilder {
             if (complianceStatus.shouldShowGasSafetyAction()) {
                 addCertRow(
                     "outstandingActions.summaryRow.gasSafety",
-                    complianceStatus.gasSafetyStatus,
-                    "gasSafety",
-                    complianceStatus.provideLaterDeadline,
-                    complianceStatus.gasSafetyExpiryDate,
+                    getCertStatusDisplay(
+                        complianceStatus.gasSafetyStatus,
+                        "gasSafety",
+                        complianceStatus.provideLaterDeadline,
+                        complianceStatus.gasSafetyExpiryDate,
+                    ),
                 )
             }
             if (complianceStatus.shouldShowElectricalSafetyAction()) {
-                // TODO PDJB-1673: Review EIC action content, which currently uses "Expired on" with the calculated expiry date.
                 addCertRow(
                     "outstandingActions.summaryRow.electricalSafety",
-                    complianceStatus.electricalSafetyStatus,
-                    "electricalSafety",
-                    complianceStatus.provideLaterDeadline,
-                    complianceStatus.electricalSafetyExpiryDate,
+                    getElectricalSafetyStatusDisplay(complianceStatus),
                 )
             }
             if (complianceStatus.shouldShowEpcAction()) {
                 addCertRow(
                     "outstandingActions.summaryRow.energyPerformance",
-                    complianceStatus.epcStatus,
-                    "epc",
-                    complianceStatus.provideLaterDeadline,
-                    complianceStatus.epcExpiryDate,
+                    getCertStatusDisplay(
+                        complianceStatus.epcStatus,
+                        "epc",
+                        complianceStatus.provideLaterDeadline,
+                        complianceStatus.epcExpiryDate,
+                    ),
                 )
             }
         }
 
         private fun MutableList<SummaryListRowViewModel>.addCertRow(
             label: String,
-            status: ComplianceCertStatus,
-            certTypeKey: String,
-            provideLaterDeadline: LocalDate?,
-            expiryDate: LocalDate?,
+            certStatusDisplay: CertStatusDisplay,
         ) {
             add(
                 SummaryListRowViewModel(
                     fieldHeading = label,
-                    fieldValue = getCertStatusValue(status, certTypeKey, provideLaterDeadline),
-                    optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, expiryDate),
+                    fieldValue = certStatusDisplay.messageKey,
+                    optionalFieldValueParam = certStatusDisplay.date?.format(DATE_FORMATTER),
                 ),
             )
         }
 
-        private fun getCertStatusValue(
+        private fun getElectricalSafetyStatusDisplay(complianceStatus: ComplianceStatusDataModel): CertStatusDisplay {
+            val eicIssueDate = complianceStatus.eicIssueDate
+            return if (complianceStatus.electricalSafetyStatus == ComplianceCertStatus.EXPIRED && eicIssueDate != null) {
+                CertStatusDisplay("outstandingActions.status.expiredEic", eicIssueDate)
+            } else {
+                getCertStatusDisplay(
+                    complianceStatus.electricalSafetyStatus,
+                    "electricalSafety",
+                    complianceStatus.provideLaterDeadline,
+                    complianceStatus.electricalSafetyExpiryDate,
+                )
+            }
+        }
+
+        private fun getCertStatusDisplay(
             status: ComplianceCertStatus,
             certTypeKey: String,
             provideLaterDeadline: LocalDate?,
-        ): String =
+            expiryDate: LocalDate?,
+        ): CertStatusDisplay =
             when (status) {
                 ComplianceCertStatus.HAS_FAULTS -> {
-                    "outstandingActions.status.hasFaults.$certTypeKey"
+                    CertStatusDisplay("outstandingActions.status.hasFaults.$certTypeKey")
                 }
 
                 ComplianceCertStatus.PROVIDE_LATER -> {
                     if (provideLaterDeadline == null) {
-                        "outstandingActions.status.provideLaterNoDeadline"
+                        CertStatusDisplay("outstandingActions.status.provideLaterNoDeadline")
                     } else {
-                        "outstandingActions.status.provideLater"
+                        CertStatusDisplay("outstandingActions.status.provideLater", provideLaterDeadline)
                     }
                 }
 
                 ComplianceCertStatus.EXPIRED -> {
-                    "outstandingActions.status.expired"
+                    CertStatusDisplay("outstandingActions.status.expired", expiryDate)
                 }
 
                 else -> {
@@ -130,24 +142,10 @@ class OutstandingActionViewModelBuilder {
                 }
             }
 
-        private fun getCertStatusValueParam(
-            status: ComplianceCertStatus,
-            provideLaterDeadline: LocalDate?,
-            expiryDate: LocalDate?,
-        ): String? =
-            when (status) {
-                ComplianceCertStatus.PROVIDE_LATER -> {
-                    provideLaterDeadline?.format(DATE_FORMATTER)
-                }
-
-                ComplianceCertStatus.EXPIRED -> {
-                    expiryDate?.format(DATE_FORMATTER)
-                }
-
-                else -> {
-                    null
-                }
-            }
+        private data class CertStatusDisplay(
+            val messageKey: String,
+            val date: LocalDate? = null,
+        )
 
         private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? =
             if (dataModel.epcStatus == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&

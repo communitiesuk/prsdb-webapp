@@ -1,28 +1,27 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
 class FreeholdersListStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
+    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, FreeholdersDetailsState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: FreeholdersDetailsState) =
         mapOf(
-            "addAnotherTitle" to "registerProperty.freeholders.list.heading.${if (state.isJointFreeholder) "joint" else "single"}",
+            "addAnotherTitle" to "registerProperty.freeholders.list.heading.${if (state.isJointFreeholder) "joint" else "nonJoint"}",
             "optionalAddAnotherTitleParam" to (state.freeholdersMap?.size ?: 0),
             "insetText" to "registerProperty.freeholders.list.insetText",
             "summaryCards" to getFreeholderCards(state),
@@ -34,25 +33,9 @@ class FreeholdersListStepConfig(
     private fun getFreeholderCards(state: FreeholdersDetailsState): List<SummaryCardViewModel> {
         val freeholdersMap = state.freeholdersMap ?: emptyMap()
         val showRemove = freeholdersMap.size > 1 || state.allowRemovingLastMember
-        return freeholdersMap
-            .toSortedMap()
-            .map { (freeholderId, freeholder) ->
-                val actions = getCardActions(state, freeholderId, showRemove)
-                if (freeholder.detailsKnown) {
-                    SummaryCardViewModel(
-                        title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
-                        summaryList = getContactRows(freeholder),
-                        actions = actions,
-                    )
-                } else {
-                    SummaryCardViewModel(
-                        title = "registerProperty.freeholders.list.unknownFreeholder.title",
-                        summaryList = emptyList(),
-                        actions = actions,
-                        bodyTextKey = "registerProperty.freeholders.list.unknownFreeholder.body",
-                    )
-                }
-            }
+        return freeholderSummaryCardHelper.getSummaryCards(freeholdersMap) { freeholderId ->
+            getCardActions(state, freeholderId, showRemove)
+        }
     }
 
     private fun getCardActions(
@@ -69,19 +52,6 @@ class FreeholdersListStepConfig(
             removeUrl?.let { SummaryCardActionViewModel(text = "forms.links.remove", url = it) },
         )
     }
-
-    private fun getContactRows(freeholder: FreeholderDataModel): List<SummaryListRowViewModel> =
-        listOfNotNull(
-            freeholder.email?.let {
-                SummaryListRowViewModel(fieldHeading = "registerProperty.freeholders.list.emailAddress", fieldValue = it)
-            },
-            freeholder.address?.let {
-                SummaryListRowViewModel(
-                    fieldHeading = "registerProperty.freeholders.list.postalAddress",
-                    fieldValue = it.toMultiLineAddress().split("\n"),
-                )
-            },
-        ).ifEmpty { throw PrsdbWebException("Freeholder has known details but no email or postal address") }
 
     override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/addAnotherCardsForm"
 
