@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
@@ -30,6 +31,10 @@ class IncompletePropertiesControllerTests(
 
     @MockitoBean
     private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
+
+    // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE feature flag is removed
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `landlordIncompleteProperties returns a redirect for unauthenticated user`() {

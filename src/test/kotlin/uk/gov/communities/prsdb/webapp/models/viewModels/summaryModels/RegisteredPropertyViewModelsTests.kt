@@ -124,4 +124,25 @@ class RegisteredPropertyViewModelsTests {
             assertEquals(expectedRegisteredPropertyLandlordViewModel, result)
         }
     }
+
+    @Nested
+    inner class DeactivatedPropertyLandlordViewModelTests {
+        @Test
+        fun `Returns a corresponding DeactivatedPropertyLandlordViewModel from a PropertyOwnership`() {
+            val propertyOwnership = createPropertyOwnership(isActive = false)
+
+            val expectedViewModel =
+                DeactivatedPropertyLandlordViewModel(
+                    address = propertyOwnership.address.singleLineAddress,
+                    registrationNumber =
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                            .toString(),
+                )
+
+            val result = DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(propertyOwnership)
+
+            assertEquals(expectedViewModel, result)
+        }
+    }
 }

@@ -16,6 +16,9 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
@@ -39,6 +42,7 @@ class IncompletePropertiesController(
     private val propertyRegistrationService: PropertyRegistrationConfirmationService,
     private val usersIncompletePropertyService: UsersIncompletePropertyService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("/${INCOMPLETE_PROPERTIES_PATH_SEGMENT}")
     fun landlordIncompleteProperties(
@@ -71,9 +75,12 @@ class IncompletePropertiesController(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
         )
+        // TODO PDJB-2149: Always use ACTIVE_PROPERTIES_FRAGMENT when the ACTIVE_INACTIVE feature flag is removed
+        val propertiesFragment =
+            if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) ACTIVE_PROPERTIES_FRAGMENT else REGISTERED_PROPERTIES_FRAGMENT
         model.addAttribute(
             "viewRegisteredPropertiesUrl",
-            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#${REGISTERED_PROPERTIES_FRAGMENT}"
+            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$propertiesFragment"
                 .overrideBackLinkForUrl(backUrlKey),
         )
 

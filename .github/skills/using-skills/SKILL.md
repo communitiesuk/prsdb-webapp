@@ -14,6 +14,7 @@ Before responding to any task, check whether a repository skill applies.
 | `development-workflow` | Starting a new development task from a Jira ticket |
 | `brainstorming` | Any creative work — features, components, behaviour changes |
 | `writing-plans` | Turning a spec/requirements into an implementation plan |
+| `presenting-documents-for-review` | Asking the user to review or approve a spec, plan, or other generated document |
 | `subagent-driven-development` | Executing a plan with independent tasks |
 | `test-driven-development` | Implementing any feature or bugfix |
 | `systematic-debugging` | Any bug, test failure, or unexpected behaviour |
