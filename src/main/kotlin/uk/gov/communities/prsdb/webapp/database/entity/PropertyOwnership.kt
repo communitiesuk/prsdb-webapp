@@ -147,6 +147,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     var lastDeactivatedDate: LocalDate? = null
         private set
 
+    // Only changes when a payment is taken, whereas renewalDate can also change at other times (e.g. reactivation).
+    @Column(name = "paid_for_until", nullable = false)
+    lateinit var paidForUntil: LocalDate
+
     constructor(
         ownershipType: OwnershipType,
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955,
@@ -174,6 +178,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        paidForUntil: LocalDate = renewalDate,
     ) : this() {
         this.ownershipType = ownershipType
         this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
@@ -188,6 +193,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.correspondenceEmail = correspondenceEmail
         this.correspondenceAddress = correspondenceAddress
         this.renewalDate = renewalDate
+        this.paidForUntil = paidForUntil
         this.isActive = isActive
         this.numBedrooms = numBedrooms
         this.billsIncludedList = billsIncludedList

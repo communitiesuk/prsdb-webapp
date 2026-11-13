@@ -87,6 +87,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.temporal.ChronoUnit
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -537,11 +538,177 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `createPropertyOwnership sets paidForUntil to the renewal date by default`() {
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
+        val renewalDate = LocalDate.of(2027, 3, 15)
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.of(3, 15),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = address,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+            renewalDate = renewalDate,
+        )
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(renewalDate, propertyOwnershipCaptor.value.paidForUntil)
+    }
+
+    @Test
+    fun `createPropertyOwnership sets paidForUntil to the given date when one is supplied`() {
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
+        val renewalDate = LocalDate.of(2027, 3, 15)
+        val paidForUntil = LocalDate.of(2026, 3, 15)
+
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer {
+            it.arguments[0] as PropertyOwnership
+        }
+        whenever(mockAddressService.findOrCreateAddress(MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL))
+            .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
+
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipType.SOLE_FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            registeringLandlord = landlord,
+            anniversary = MonthDay.of(3, 15),
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = address,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+            renewalDate = renewalDate,
+            paidForUntil = paidForUntil,
+        )
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(paidForUntil, propertyOwnershipCaptor.value.paidForUntil)
+        assertEquals(renewalDate, propertyOwnershipCaptor.value.renewalDate)
+    }
+
+    @Test
     fun `getPropertyRenewalDate returns the property's stored renewal date`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 7, renewalDate = LocalDate.of(2027, 2, 1))
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(7)).thenReturn(propertyOwnership)
 
         assertEquals(LocalDate.of(2027, 2, 1), propertyOwnershipService.getPropertyRenewalDate(7))
+    }
+
+    @Test
+    fun `getPropertyPaidForUntil returns the property's stored paid for until date`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                renewalDate = LocalDate.of(2028, 2, 1),
+                paidForUntil = LocalDate.of(2027, 2, 1),
+            )
+        whenever(mockPropertyOwnershipRepository.findById(7)).thenReturn(Optional.of(propertyOwnership))
+
+        assertEquals(LocalDate.of(2027, 2, 1), propertyOwnershipService.getPropertyPaidForUntil(7))
+    }
+
+    @Test
+    fun `getPropertyPaidForUntil returns the stored paid for until date for an inactive property`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                isActive = false,
+                renewalDate = LocalDate.of(2028, 2, 1),
+                paidForUntil = LocalDate.of(2027, 2, 1),
+            )
+        whenever(mockPropertyOwnershipRepository.findById(7)).thenReturn(Optional.of(propertyOwnership))
+
+        assertEquals(LocalDate.of(2027, 2, 1), propertyOwnershipService.getPropertyPaidForUntil(7))
+    }
+
+    @Test
+    fun `updatePaidForUntil saves the new paid for until date without changing the renewal date`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                renewalDate = LocalDate.of(2028, 2, 1),
+                paidForUntil = LocalDate.of(2027, 2, 1),
+            )
+        whenever(mockPropertyOwnershipRepository.findById(7)).thenReturn(Optional.of(propertyOwnership))
+
+        propertyOwnershipService.updatePaidForUntil(7, LocalDate.of(2028, 6, 1))
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertSame(propertyOwnership, propertyOwnershipCaptor.value)
+        assertEquals(LocalDate.of(2028, 6, 1), propertyOwnershipCaptor.value.paidForUntil)
+        assertEquals(LocalDate.of(2028, 2, 1), propertyOwnershipCaptor.value.renewalDate)
+    }
+
+    @Test
+    fun `updatePaidForUntil saves the new paid for until date for an inactive property`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                isActive = false,
+                renewalDate = LocalDate.of(2028, 2, 1),
+                paidForUntil = LocalDate.of(2027, 2, 1),
+            )
+        whenever(mockPropertyOwnershipRepository.findById(7)).thenReturn(Optional.of(propertyOwnership))
+
+        propertyOwnershipService.updatePaidForUntil(7, LocalDate.of(2028, 6, 1))
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(LocalDate.of(2028, 6, 1), propertyOwnershipCaptor.value.paidForUntil)
+    }
+
+    @Test
+    fun `updatePaidForUntil throws a not found error and saves nothing when the property does not exist`() {
+        whenever(mockPropertyOwnershipRepository.findById(7)).thenReturn(Optional.empty())
+
+        val exception =
+            assertThrows<ResponseStatusException> {
+                propertyOwnershipService.updatePaidForUntil(7, LocalDate.of(2028, 6, 1))
+            }
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        verify(mockPropertyOwnershipRepository, never()).save(any<PropertyOwnership>())
     }
 
     @Nested

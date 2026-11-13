@@ -20,6 +20,25 @@ class PropertyOwnershipTests {
     }
 
     @Test
+    fun `paidForUntil defaults to the renewal date when not specified`() {
+        val property = MockLandlordData.createPropertyOwnership(renewalDate = LocalDate.of(2027, 2, 1))
+
+        assertEquals(LocalDate.of(2027, 2, 1), property.paidForUntil)
+    }
+
+    @Test
+    fun `paidForUntil can be set independently of the renewal date`() {
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                renewalDate = LocalDate.of(2028, 2, 1),
+                paidForUntil = LocalDate.of(2027, 2, 1),
+            )
+
+        assertEquals(LocalDate.of(2027, 2, 1), property.paidForUntil)
+        assertEquals(LocalDate.of(2028, 2, 1), property.renewalDate)
+    }
+
+    @Test
     fun `isSolelyOwnedBy is true when the landlord is the only owner`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
