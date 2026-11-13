@@ -36,6 +36,16 @@ email-queue:
     visibility-timeout-multiplier: 2.0
     max-visibility-timeout-seconds: 10
 
+scan-result-queue:
+  name: prsdb-scan-result-queue
+  listener:
+    # Started only in PrsdbScanResultWorkerApplicationTests, for the same reason as the email queue listener
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
+
 argon2:
   iterations: 2
   memory: 16384
