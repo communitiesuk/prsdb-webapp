@@ -164,7 +164,6 @@ class PropertyRegistrationCyaStepConfig(
 
         return if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
             mapOf(
-                // TODO PDJB-1986: add rows for whether a property manager is used and, if so, their name and email address
                 "peopleResponsibleForThisPropertyRows" to listOf(ownershipTypeRow),
                 "jointLandlordsRows" to listOf(jointLandlordsRow),
             )
