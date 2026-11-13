@@ -15,9 +15,9 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfPeople.fieldSetHeading",
-            "fieldSetHint" to "forms.numberOfPeople.fieldSetHint",
-            "label" to "forms.numberOfPeople.label",
+            "fieldSetHeading" to "tenancyDetails.numberOfPeople.fieldSetHeading",
+            "fieldSetHint" to "tenancyDetails.numberOfPeople.fieldSetHint",
+            "label" to "tenancyDetails.numberOfPeople.label",
         )
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String = "forms/numberOfPeopleForm"
@@ -43,7 +43,7 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
         if (numberOfPeopleFormModel.numberOfPeople.toInt() < numberOfHouseholdsFormModel.numberOfHouseholds.toInt()) {
             rejectValueWithMessageKey(
                 numberOfPeopleFormModel::numberOfPeople.name,
-                "forms.numberOfPeople.input.error.invalidNumber",
+                "tenancyDetails.numberOfPeople.input.error.invalidNumber",
             )
         }
     }

@@ -699,7 +699,8 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"),
         )
         assertEquals(
-            "Message for forms.billsIncluded.checkbox.electricity, Message for forms.billsIncluded.checkbox.water, Cat sitting",
+            "Message for tenancyDetails.billsIncluded.checkbox.electricity, " +
+                "Message for tenancyDetails.billsIncluded.checkbox.water, Cat sitting",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded"),
         )
         assertEquals(

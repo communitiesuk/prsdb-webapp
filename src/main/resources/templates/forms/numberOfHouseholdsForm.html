@@ -3,27 +3,27 @@
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.numberOfHouseholds.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{tenancyDetails.numberOfHouseholds.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{forms.numberOfHouseholds.heading}">
-        forms.numberOfHouseholds.heading
+    <h1 class="govuk-heading-l" th:text="#{tenancyDetails.numberOfHouseholds.heading}">
+        tenancyDetails.numberOfHouseholds.heading
     </h1>
-    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.one}">
-        forms.numberOfHouseholds.paragraph.one
+    <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.one}">
+        tenancyDetails.numberOfHouseholds.paragraph.one
     </p>
-    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.two}">
-        forms.numberOfHouseholds.paragraph.two
+    <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.two}">
+        tenancyDetails.numberOfHouseholds.paragraph.two
     </p>
     <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{forms.numberOfHouseholds.bullet.point.one}">forms.numberOfHouseholds.bullet.point.one</li>
-        <li th:text="#{forms.numberOfHouseholds.bullet.point.two}">forms.numberOfHouseholds.bullet.point.two</li>
-        <li th:text="#{forms.numberOfHouseholds.bullet.point.three}">forms.numberOfHouseholds.bullet.point.three</li>
+        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.one}">tenancyDetails.numberOfHouseholds.bullet.point.one</li>
+        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.two}">tenancyDetails.numberOfHouseholds.bullet.point.two</li>
+        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.three}">tenancyDetails.numberOfHouseholds.bullet.point.three</li>
     </ul>
-    <p class="govuk-body" th:text="#{forms.numberOfHouseholds.paragraph.three}">
-        forms.numberOfHouseholds.paragraph.three
+    <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.three}">
+        tenancyDetails.numberOfHouseholds.paragraph.three
     </p>
-    <h2 class="govuk-heading-m" th:text="#{forms.numberOfHouseholds.questionHeading}">
-        forms.numberOfHouseholds.questionHeading
+    <h2 class="govuk-heading-m" th:text="#{tenancyDetails.numberOfHouseholds.questionHeading}">
+        tenancyDetails.numberOfHouseholds.questionHeading
     </h2>
 </th:block>
 <th:block id="form-content">

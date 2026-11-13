@@ -18,7 +18,12 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
         return mapOf(
             "heading" to getHeading(rentFrequency),
             "subheading" to getSubheadingForRentFrequency(rentFrequency),
-            "fieldSetHint" to if (isOtherRentFrequency) "forms.rentAmount.fieldSetHint.other" else "forms.rentAmount.fieldSetHint.default",
+            "fieldSetHint" to
+                if (isOtherRentFrequency) {
+                    "tenancyDetails.rentAmount.fieldSetHint.other"
+                } else {
+                    "tenancyDetails.rentAmount.fieldSetHint.default"
+                },
             "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),
             "showRentCalculationSection" to isOtherRentFrequency,
         )
@@ -30,26 +35,26 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
 
     private fun getHeading(rentFrequency: RentFrequency): String =
         when (rentFrequency) {
-            RentFrequency.WEEKLY -> "forms.rentAmount.heading.weekly"
-            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.heading.fourWeekly"
-            RentFrequency.OTHER -> "forms.rentAmount.heading.other"
-            else -> "forms.rentAmount.heading.monthly"
+            RentFrequency.WEEKLY -> "tenancyDetails.rentAmount.heading.weekly"
+            RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentAmount.heading.fourWeekly"
+            RentFrequency.OTHER -> "tenancyDetails.rentAmount.heading.other"
+            else -> "tenancyDetails.rentAmount.heading.monthly"
         }
 
     private fun getBillsExplanationForRentFrequency(rentFrequency: RentFrequency): String =
         when (rentFrequency) {
-            RentFrequency.WEEKLY -> "forms.rentAmount.paragraph.one.weekly"
-            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.paragraph.one.fourWeekly"
-            RentFrequency.OTHER -> "forms.rentAmount.paragraph.one.other"
-            else -> "forms.rentAmount.paragraph.one.monthly"
+            RentFrequency.WEEKLY -> "tenancyDetails.rentAmount.paragraph.one.weekly"
+            RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentAmount.paragraph.one.fourWeekly"
+            RentFrequency.OTHER -> "tenancyDetails.rentAmount.paragraph.one.other"
+            else -> "tenancyDetails.rentAmount.paragraph.one.monthly"
         }
 
     private fun getSubheadingForRentFrequency(rentFrequency: RentFrequency): String =
         when (rentFrequency) {
-            RentFrequency.WEEKLY -> "forms.rentAmount.subheading.weekly"
-            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.subheading.fourWeekly"
-            RentFrequency.OTHER -> "forms.rentAmount.subheading.other.two"
-            else -> "forms.rentAmount.subheading.monthly"
+            RentFrequency.WEEKLY -> "tenancyDetails.rentAmount.subheading.weekly"
+            RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentAmount.subheading.fourWeekly"
+            RentFrequency.OTHER -> "tenancyDetails.rentAmount.subheading.other.two"
+            else -> "tenancyDetails.rentAmount.subheading.monthly"
         }
 }
 
