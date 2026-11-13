@@ -12,13 +12,19 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmationAccountDeactivated
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.net.URI
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -40,6 +46,15 @@ class LeavePropertyServiceTests {
 
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
+
+    @Mock
+    private lateinit var mockActiveInactiveService: ActiveInactiveService
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
+    @Mock
+    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @InjectMocks
     private lateinit var leavePropertyService: LeavePropertyService
@@ -193,6 +208,85 @@ class LeavePropertyServiceTests {
     }
 
     @Test
+    fun `leavePropertyOwnership deactivates the landlord if they have no active properties left`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(mockActiveInactiveService).deactivateLandlordIfNoActiveProperties(landlord)
+    }
+
+    @Test
+    fun `leavePropertyOwnership sends the account deactivated email when the landlord was deactivated and ACTIVE_INACTIVE is enabled`() {
+        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+                address = address,
+            )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(DASHBOARD_URL))
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(emailSender).sendEmail(
+            "alice@example.com",
+            JointLandlordYouLeftConfirmationAccountDeactivated(
+                recipientName = "Alice",
+                propertyAddress = address.toMultiLineAddress(),
+                dashboardUrl = DASHBOARD_URL,
+            ),
+        )
+        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmation>())
+    }
+
+    @Test
+    fun `leavePropertyOwnership sends the standard confirmation email when the landlord was not deactivated`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(false)
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(emailSender).sendEmail(eq("alice@example.com"), isA<JointLandlordYouLeftConfirmation>())
+        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmationAccountDeactivated>())
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `leavePropertyOwnership sends the standard confirmation email when ACTIVE_INACTIVE is disabled`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        whenever(mockCurrentUserService.getRegisteredUserDetails())
+            .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
+        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(emailSender).sendEmail(eq("alice@example.com"), isA<JointLandlordYouLeftConfirmation>())
+        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmationAccountDeactivated>())
+    }
+
+    @Test
     fun `addLeftPropertyOwnershipToSession appends the property ownership to the list stored in the session`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val existingOwnerships = mutableMapOf((456L to "First address"), (789L to "Second address"))
@@ -223,5 +317,9 @@ class LeavePropertyServiceTests {
         val result = leavePropertyService.getLeftPropertyOwnershipsFromSession()
 
         assertEquals(emptyMap(), result)
+    }
+
+    companion object {
+        private const val DASHBOARD_URL = "https://example.com/landlord/dashboard"
     }
 }

@@ -9,6 +9,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotification
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -17,16 +19,19 @@ import kotlin.test.assertEquals
 class JointLandlordOtherLandlordLeftEmailServiceTests {
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var mockNotificationEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftNotification>
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
     private lateinit var emailService: JointLandlordOtherLandlordLeftEmailService
 
     @BeforeEach
     fun setup() {
         mockAbsoluteUrlProvider = mock()
         mockNotificationEmailService = mock()
+        mockFeatureFlagManager = mock()
         emailService =
             JointLandlordOtherLandlordLeftEmailService(
                 mockAbsoluteUrlProvider,
                 mockNotificationEmailService,
+                mockFeatureFlagManager,
             )
     }
 
@@ -56,11 +61,32 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
         assertEquals("Alice", bobEmail.leavingLandlord)
         assertEquals(address.toMultiLineAddress(), bobEmail.address)
         assertEquals(propertyRecordUri.toString(), bobEmail.propertyRecordUrl)
+        assertEquals("deregister", bobEmail.removalAction)
 
         val carolEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Carol" }
         assertEquals("Alice", carolEmail.leavingLandlord)
         assertEquals(address.toMultiLineAddress(), carolEmail.address)
         assertEquals(propertyRecordUri.toString(), carolEmail.propertyRecordUrl)
+    }
+
+    @Test
+    fun `sendNotificationToRemainingLandlords uses deactivate as the removal action when ACTIVE_INACTIVE is enabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                landlords = mutableSetOf(MockLandlordData.createIndividualLandlord(name = "Bob")),
+            )
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(7)).thenReturn(URI("https://example.com"))
+
+        emailService.sendNotificationToRemainingLandlords(
+            propertyOwnership,
+            MockLandlordData.createIndividualLandlord(name = "Alice"),
+        )
+
+        val emailCaptor = argumentCaptor<JointLandlordOtherLandlordLeftNotification>()
+        verify(mockNotificationEmailService).sendEmailToLandlord(any(), emailCaptor.capture())
+        assertEquals("deactivate", emailCaptor.firstValue.removalAction)
     }
 
     @Test

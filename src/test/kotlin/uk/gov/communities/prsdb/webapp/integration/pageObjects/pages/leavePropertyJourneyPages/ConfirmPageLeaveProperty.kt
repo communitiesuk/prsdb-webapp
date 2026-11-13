@@ -25,6 +25,9 @@ class ConfirmPageLeaveProperty(
     val warningText
         get() = page.locator(".govuk-warning-text__text")
 
+    val insetText
+        get() = page.locator(".govuk-inset-text")
+
     val confirmButton = Button(page.locator("button.govuk-button--warning"))
     val cancelLink = Link.byText(page, "Cancel")
     val backLink = BackLink.default(page)

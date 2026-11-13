@@ -1,15 +1,19 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmationAccountDeactivated
 import kotlin.String
 
 @PrsdbWebService
@@ -17,9 +21,13 @@ class LeavePropertyService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
+    private val accountDeactivatedConfirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmationAccountDeactivated>,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val currentUserService: CurrentUserService,
+    private val activeInactiveService: ActiveInactiveService,
+    private val featureFlagManager: FeatureFlagManager,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun getPropertyOwnershipIfUserCanLeave(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
@@ -38,6 +46,7 @@ class LeavePropertyService(
         return propertyOwnership
     }
 
+    @Transactional
     fun leavePropertyOwnership(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
@@ -45,16 +54,29 @@ class LeavePropertyService(
         val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
+        val landlordWasDeactivated = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
 
         TransactionHelper.runAfterTransactionCommits {
             EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {
-                confirmationEmailSender.sendEmail(
-                    currentUser.email,
-                    JointLandlordYouLeftConfirmation(
-                        recipientName = currentUser.name,
-                        propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    ),
-                )
+                // TODO PDJB-2149: Remove the feature flag check when ACTIVE_INACTIVE is removed
+                if (landlordWasDeactivated && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+                    accountDeactivatedConfirmationEmailSender.sendEmail(
+                        currentUser.email,
+                        JointLandlordYouLeftConfirmationAccountDeactivated(
+                            recipientName = currentUser.name,
+                            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                            dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                        ),
+                    )
+                } else {
+                    confirmationEmailSender.sendEmail(
+                        currentUser.email,
+                        JointLandlordYouLeftConfirmation(
+                            recipientName = currentUser.name,
+                            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                        ),
+                    )
+                }
             }
             // TODO: PDJB-1274: Update emails to account for other users in the org
             EmailHelper.sendEmailAndLogFailures("the swap to individual nudge email for property ownership ${propertyOwnership.id}") {
