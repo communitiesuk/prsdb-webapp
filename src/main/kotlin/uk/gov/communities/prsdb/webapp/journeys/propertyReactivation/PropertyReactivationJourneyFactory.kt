@@ -102,12 +102,15 @@ class PropertyReactivationJourneyFactory(
             hideCheckAnswersSectionHeader(journey.gasSafetyTask)
             hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
             hideCheckAnswersSectionHeader(journey.epcTask)
-            // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
-            // and updating entryStepFor and completionStepFor
-            step(journey.tenancyDetailsStep) {
-                routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
-                parents { journey.parentsFor(TENANCY_DETAILS) }
-                nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
+            section {
+                withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
+                // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
+                // and updating entryStepFor and completionStepFor
+                step(journey.tenancyDetailsStep) {
+                    routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
+                    parents { journey.parentsFor(TENANCY_DETAILS) }
+                    nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
+                }
             }
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)

@@ -576,7 +576,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
+                withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
                 task(journey.tenancyDetailsTask) {
                     parents {
                         AndParents(

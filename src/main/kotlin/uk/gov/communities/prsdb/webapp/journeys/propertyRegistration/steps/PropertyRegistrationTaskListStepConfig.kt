@@ -129,15 +129,15 @@ class PropertyRegistrationTaskListStepConfig(
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
             TaskListItemViewModel(
-                nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
+                nameKey = "tenancyDetails.sectionHeading",
                 status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET),
                 hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint",
                 url = null,
             )
         } else if (state.isDelegatedToLettingAgent()) {
-            notRequiredLettingAgentItem("registerProperty.taskList.rentedOut.tenancyDetails")
+            notRequiredLettingAgentItem("tenancyDetails.sectionHeading")
         } else {
-            TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
+            TaskListItemViewModel.fromTask("tenancyDetails.sectionHeading", state.tenancyDetailsTask)
         }
 
     private fun whoProvidesDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =

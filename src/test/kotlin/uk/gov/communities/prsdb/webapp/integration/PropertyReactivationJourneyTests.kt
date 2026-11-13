@@ -235,7 +235,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.form.submitButton).hasText("Continue")
         checkEpcAnswersPage.form.submit()
 
-        assertPageIs(page, TenancyDetailsFormPagePropertyReactivation::class, urlArguments)
+        val tenancyDetailsPage = assertPageIs(page, TenancyDetailsFormPagePropertyReactivation::class, urlArguments)
+        assertThat(tenancyDetailsPage.sectionHeader).containsText("Tenancy details")
     }
 
     @Test
