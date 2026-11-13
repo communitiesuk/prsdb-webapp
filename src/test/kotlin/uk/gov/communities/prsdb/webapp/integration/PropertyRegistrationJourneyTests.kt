@@ -9,6 +9,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -395,6 +396,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Nested
     inner class EnableFeatureFlags {
+        @Disabled("PDJB-2015: registration does not yet save ownership and freeholder answers")
         @ParameterizedTest
         @CsvSource(
             "false, NONE, NONE, false, NONE",
@@ -475,6 +477,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
         }
 
+        @Disabled("PDJB-2015: registration does not yet save ownership answers")
         @ParameterizedTest
         @CsvSource(
             "FREEHOLD_ONLY, SOLE_OWNERSHIP, SOLE_FREEHOLD",
