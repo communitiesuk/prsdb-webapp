@@ -69,8 +69,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
@@ -102,6 +104,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockFreeholderService: FreeholderService
+
+    @Mock
+    private lateinit var mockSuperiorLandlordService: SuperiorLandlordService
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
@@ -1387,27 +1392,34 @@ class PropertyOwnershipServiceTests {
             .thenReturn(MockPropertyRegistrationData.createDefaultCorrespondenceAddress())
     }
 
-    private fun createPropertyOwnershipWithType(ownershipType: OwnershipType) =
-        propertyOwnershipService.createPropertyOwnership(
-            ownershipType = ownershipType,
-            isOccupied = false,
-            numberOfHouseholds = 0,
-            numberOfPeople = 0,
-            registeringLandlord = MockLandlordData.createIndividualLandlord(),
-            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
-            propertyBuildType = PropertyType.OTHER,
-            customPropertyType = "End terrace",
-            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
-            numBedrooms = 1,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = null,
-            correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
-            correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
-        )
+    private fun createPropertyOwnershipWithType(
+        ownershipType: OwnershipType,
+        freeholders: List<FreeholderDataModel>? = null,
+        superiorLandlords: List<SuperiorLandlordDataModel> = emptyList(),
+        propertyManager: PropertyManager? = null,
+    ) = propertyOwnershipService.createPropertyOwnership(
+        ownershipType = ownershipType,
+        isOccupied = false,
+        numberOfHouseholds = 0,
+        numberOfPeople = 0,
+        registeringLandlord = MockLandlordData.createIndividualLandlord(),
+        anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
+        propertyBuildType = PropertyType.OTHER,
+        customPropertyType = "End terrace",
+        address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+        numBedrooms = 1,
+        billsIncludedList = null,
+        customBillsIncluded = null,
+        furnishedStatus = null,
+        rentFrequency = null,
+        customRentFrequency = null,
+        rentAmount = null,
+        correspondenceEmail = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_EMAIL,
+        correspondenceAddressModel = MockPropertyRegistrationData.DEFAULT_CORRESPONDENCE_ADDRESS_MODEL,
+        freeholders = freeholders,
+        superiorLandlords = superiorLandlords,
+        propertyManager = propertyManager,
+    )
 
     @Test
     fun `createPropertyOwnership creates a placeholder freeholder when the ownership type requires one`() {
@@ -1431,6 +1443,98 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         verifyNoInteractions(mockFreeholderService)
+    }
+
+    @Test
+    fun `createPropertyOwnership creates the given freeholders without adding a placeholder`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+        val freeholders = listOf(FreeholderDataModel(detailsKnown = false))
+
+        // Act
+        val propertyOwnership = createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY, freeholders = freeholders)
+
+        // Assert
+        verify(mockFreeholderService).createFreeholders(propertyOwnership, freeholders)
+        verify(mockFreeholderService, never()).createPlaceholderFreeholder(any())
+    }
+
+    @Test
+    fun `createPropertyOwnership throws when freeholder records are required but an empty list is given`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+
+        // Act, Assert
+        assertThrows<IllegalArgumentException> {
+            createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY, freeholders = emptyList())
+        }
+    }
+
+    @Test
+    fun `createPropertyOwnership creates no freeholders when the ownership type does not require records`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+
+        // Act
+        createPropertyOwnershipWithType(
+            OwnershipType.SOLE_FREEHOLD,
+            freeholders = listOf(FreeholderDataModel(detailsKnown = false)),
+        )
+
+        // Assert
+        verifyNoInteractions(mockFreeholderService)
+    }
+
+    @Test
+    fun `createPropertyOwnership creates the given superior landlords`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+        val superiorLandlords = listOf(SuperiorLandlordDataModel(detailsKnown = true, name = "Sue Perior"))
+
+        // Act
+        // LEASEHOLD_ONLY requires superior landlord info, so this is a state the journey can produce
+        val propertyOwnership =
+            createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY, superiorLandlords = superiorLandlords)
+
+        // Assert
+        verify(mockSuperiorLandlordService).createSuperiorLandlords(propertyOwnership, superiorLandlords)
+    }
+
+    @Test
+    fun `createPropertyOwnership creates no superior landlords when none were given`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+
+        // Act
+        createPropertyOwnershipWithType(OwnershipType.SOLE_FREEHOLD)
+
+        // Assert
+        verifyNoInteractions(mockSuperiorLandlordService)
+    }
+
+    @Test
+    fun `createPropertyOwnership links the given property manager`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+        val propertyManager = PropertyManager("Pat Manager", "pat@example.com")
+
+        // Act
+        val result = createPropertyOwnershipWithType(OwnershipType.SOLE_FREEHOLD, propertyManager = propertyManager)
+
+        // Assert
+        assertSame(propertyManager, result.propertyManager)
+    }
+
+    @Test
+    fun `createPropertyOwnership links no property manager when none was given`() {
+        // Arrange
+        arrangeCreatePropertyOwnership()
+
+        // Act
+        val result = createPropertyOwnershipWithType(OwnershipType.SOLE_FREEHOLD)
+
+        // Assert
+        assertNull(result.propertyManager)
     }
 
     @Test
