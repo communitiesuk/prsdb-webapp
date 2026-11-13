@@ -451,7 +451,7 @@ class PropertyRegistrationCyaStepConfigTests {
         fun `getStepSpecificContent separates the no joint landlords answer from ownership rows`() {
             whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
-            stubOwnershipTypeWithoutSuperiorLandlords()
+            stubOwnershipAndLandlordsTaskWithoutOtherParties()
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -480,7 +480,7 @@ class PropertyRegistrationCyaStepConfigTests {
             whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
             whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("joint.landlord@example.com"))
             whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
-            stubOwnershipTypeWithoutSuperiorLandlords()
+            stubOwnershipAndLandlordsTaskWithoutOtherParties()
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -497,7 +497,7 @@ class PropertyRegistrationCyaStepConfigTests {
             )
         }
 
-        private fun stubOwnershipTypeWithoutSuperiorLandlords() {
+        private fun stubOwnershipAndLandlordsTaskWithoutOtherParties() {
             val ownershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
             val ownershipStructureTask = mock<OwnershipStructureTask>()
             val ownershipTypeTask = mock<OwnershipTypeTask>()
@@ -505,6 +505,15 @@ class PropertyRegistrationCyaStepConfigTests {
             whenever(ownershipAndLandlordsTask.ownershipStructureTask).thenReturn(ownershipStructureTask)
             whenever(ownershipStructureTask.ownershipTypeTask).thenReturn(ownershipTypeTask)
             whenever(ownershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
+
+            val propertyManagerTask = mock<PropertyManagerTask>()
+            val propertyManagerStep = mock<PropertyManagerStep>()
+            whenever(ownershipAndLandlordsTask.propertyManagerTask).thenReturn(propertyManagerTask)
+            whenever(propertyManagerTask.propertyManagerStep).thenReturn(propertyManagerStep)
+            whenever(propertyManagerStep.formModelIfReachableOrNull)
+                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
+            whenever(propertyManagerStep.isStepReachable).thenReturn(true)
+            whenever(propertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
         }
     }
 
