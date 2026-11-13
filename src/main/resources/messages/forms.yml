@@ -751,7 +751,7 @@ uploadCertificate:
       missing: Select an electrical safety certificate
   label: Upload a file
   error:
-    wrongType: 'The selected file must be a PDF, PNG or JPG'
+    wrongType: 'The selected file must be a PDF, JPEG or PNG'
     tooBig: The selected file must be smaller than 15MB
     unsuccessfulUpload: The selected file could not be uploaded - try again
   noScript: You do not have JavaScript enabled.
