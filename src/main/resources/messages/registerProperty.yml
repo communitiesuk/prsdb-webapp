@@ -82,13 +82,13 @@ taskList:
     ownershipAndLandlords: Ownership and landlords
     peopleResponsible: People responsible for this property
     correspondence: Who the council should contact
-    occupied: Tell us if your property’s occupied
+    occupied: Tell us if this property is occupied
   rentedOut:
-    heading: How your property’s rented out
+    heading: How your property is rented out
     whoProvidesDetails: Who will provide these details
     whoProvidesDetailsOccupiedHint: If you’re using a letting agent or property manager, they can provide the rest of this section
     whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
-    licensing: Tell us if your property needs a license
+    licensing: Tell us if your property needs a licence
     tenancyDetails: Tenancy details
     tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
@@ -227,6 +227,8 @@ propertyManager:
     radios:
       error:
         missing: Select if you want to remove this property manager
+  checkAnswers:
+    changeLink: Add, change or remove the property manager
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee

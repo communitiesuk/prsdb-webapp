@@ -39,13 +39,6 @@ abstract class PropertyDetailsBasePage(
     class PropertyDetailsTabs(
         page: Page,
     ) : Tabs(page) {
-        // TODO PDJB-2016: drop the "Landlords" alternative, and this method in favour of
-        //  goToPeopleResponsible, once the ASSOCIATED_PARTIES flag is removed
-        fun goToLandlordDetails() {
-            val tabNames = setOf("Landlords", "People responsible for this property")
-            tabsList.all().single { it.textContent().trim() in tabNames }.click()
-        }
-
         fun goToPeopleResponsible() {
             goToTab("People responsible for this property")
         }

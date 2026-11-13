@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckPropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
@@ -57,6 +58,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
@@ -65,6 +68,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.AssociatedPartiesStateBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertEquals
@@ -1091,6 +1095,99 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(unknownCard).containsText("You told us there was another freeholder")
             BaseComponent.assertThat(unknownCard.getAction("Change")).hasCount(0)
             BaseComponent.assertThat(unknownCard.getAction("Remove")).hasCount(0)
+        }
+    }
+
+    @Nested
+    inner class PropertyManagerCheckAnswers {
+        @Test
+        fun `when not using a property manager, a summary row links to the property manager question`(page: Page) {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.propertyManagerHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.usingPropertyManagerRow.value)
+                .hasText("No, I manage this property (or another joint landlord does)")
+            BaseComponent.assertThat(checkAnswersPage.propertyManagerChangeLink).hasCount(0)
+
+            checkAnswersPage.summaryList.usingPropertyManagerRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `changing from not using to using a property manager goes through the details and check pages back to the CYA page`(
+            page: Page,
+        ) {
+            // Arrange
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            var checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            // Act
+            checkAnswersPage.summaryList.usingPropertyManagerRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+                .submitDetails(name = "Other Managers Ltd", email = "other@example.com")
+            assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).form.submit()
+
+            // Assert
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAnswersPage.summaryList.usingPropertyManagerRow).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.getSummaryCard("Other Managers Ltd", "h5").title).hasText("Other Managers Ltd")
+        }
+
+        @Test
+        fun `when using a property manager, they are shown as a card without actions`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithPropertyManager(page)
+
+            BaseComponent.assertThat(checkAnswersPage.propertyManagerHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.summaryList.usingPropertyManagerRow).hasCount(0)
+            val card = checkAnswersPage.getSummaryCard(AssociatedPartiesStateBuilder.DEFAULT_PROPERTY_MANAGER_NAME, "h5")
+            BaseComponent.assertThat(card.title).hasText(AssociatedPartiesStateBuilder.DEFAULT_PROPERTY_MANAGER_NAME)
+            BaseComponent.assertThat(card.getAction("Change")).hasCount(0)
+            BaseComponent.assertThat(card.getAction("Remove")).hasCount(0)
+        }
+
+        @Test
+        fun `the add, change or remove link starts a CYA sub-journey at the check property manager page`(page: Page) {
+            var checkAnswersPage = goToCheckAnswersWithPropertyManager(page)
+
+            checkAnswersPage.propertyManagerChangeLink.clickAndWait()
+            val checkPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+            checkPropertyManagerPage.form.submit()
+
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAnswersPage.propertyManagerHeading).isVisible()
+        }
+
+        @Test
+        fun `The back link on the check property manager page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = goToCheckAnswersWithPropertyManager(page)
+
+            checkAnswersPage.propertyManagerChangeLink.clickAndWait()
+            val checkPropertyManagerPage = assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class)
+            checkPropertyManagerPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        private fun goToCheckAnswersWithPropertyManager(page: Page): CheckAnswersPagePropertyRegistration {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms()
+                        .withPropertyManager(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }
 

@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class LandlordUserEmailService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,

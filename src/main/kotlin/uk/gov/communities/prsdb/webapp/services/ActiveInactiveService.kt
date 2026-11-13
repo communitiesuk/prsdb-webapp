@@ -34,7 +34,6 @@ class ActiveInactiveService(
             .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
 
-    // TODO PDJB-2047: Reactivate inactive landlords when a property is reactivated
     @Transactional
     fun reactivateProperty(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
@@ -42,6 +41,8 @@ class ActiveInactiveService(
 
         propertyOwnership.reactivate()
         propertyOwnershipRepository.save(propertyOwnership)
+
+        propertyOwnership.landlords.forEach { reactivateLandlordIfInactive(it) }
     }
 
     @Transactional
@@ -61,12 +62,16 @@ class ActiveInactiveService(
         landlordRepository.save(landlord)
     }
 
+    @Transactional
+    fun reactivateLandlordIfInactive(landlord: Landlord) {
+        if (!landlord.isActive) reactivateLandlord(landlord)
+    }
+
     private fun markLandlordAsInactive(
         landlord: Landlord,
         deactivationDate: LocalDate,
     ) {
-        // TODO PDJB-2047: Throw instead once reactivating a property also reactivates its landlords
-        if (!landlord.isActive) return
+        check(landlord.isActive) { "Landlord ${landlord.id} is already inactive" }
 
         landlord.deactivate(deactivationDate)
         landlordRepository.save(landlord)

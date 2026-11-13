@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlor
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -65,7 +65,7 @@ class CancelJointLandlordInvitationController(
         modelAndView.addObject("cancelledEmail", cancelledEmail)
         modelAndView.addObject(
             "propertyRecordUrl",
-            PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) + "#$LANDLORD_DETAILS_FRAGMENT",
+            PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) + "#$PEOPLE_RESPONSIBLE_FRAGMENT",
         )
         return modelAndView
     }
