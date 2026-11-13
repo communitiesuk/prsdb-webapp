@@ -206,3 +206,8 @@ After writing the complete plan:
 3. **Type consistency:** Do names match across tasks?
 
 Fix inline. Do not re-review.
+
+## Presenting the Plan
+
+Present the saved plan to the user with the `presenting-documents-for-review`
+skill before asking for approval. Saving the file alone is not enough.

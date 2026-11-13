@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class UploadDequarantiner(
     private val dequarantiningFileCopier: DequarantiningFileCopier,
     private val quarantinedFileDeleter: QuarantinedFileDeleter,

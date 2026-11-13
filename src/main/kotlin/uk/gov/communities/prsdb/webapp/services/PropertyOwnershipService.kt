@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
@@ -223,7 +224,7 @@ class PropertyOwnershipService(
         return propertyOwnership
     }
 
-    fun getRegisteredPropertiesForLandlordUser(
+    fun getActivePropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =
@@ -233,6 +234,11 @@ class PropertyOwnershipService(
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
+
+    fun getDeactivatedPropertiesForLandlordUser(landlord: Landlord): List<DeactivatedPropertyLandlordViewModel> =
+        propertyOwnershipRepository
+            .findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
+            .map { DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(it) }
 
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,

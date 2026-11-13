@@ -79,9 +79,17 @@ local:
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
   sqs:
     endpoint: http://localhost:${ELASTICMQ_PORT:9324}
+  virus-scan:
+    simulated-scan-delay-seconds: 5
 
 email-queue:
   name: prsdb-email-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
+
+scan-result-queue:
+  name: prsdb-scan-result-queue
   listener:
     initial-visibility-timeout-seconds: 1
     max-visibility-timeout-seconds: 10

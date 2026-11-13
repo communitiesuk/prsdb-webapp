@@ -37,7 +37,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
         dashboard.viewPropertyRecordsButton.clickAndWait()
         val properties = assertPageIs(page, LandlordDetailsPage::class)
 
-        BaseComponent.assertThat(properties.registeredPropertiesTable.rows).not().containsText("3 Imaginary Street")
+        BaseComponent.assertThat(properties.activePropertiesTable.rows).not().containsText("3 Imaginary Street")
     }
 
     @Test

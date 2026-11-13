@@ -19,7 +19,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
     fun `user can complete the switch to individual journey with pending invitations`(page: Page) {
         val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_WITH_PENDING_INVITATIONS_AND_NO_JOINT_LANDLORDS
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(propertyDetailsPage.markAsSingleLandlordInsetText).isVisible()
         propertyDetailsPage.switchToIndividualLink.clickAndWait()
 
@@ -54,7 +54,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        returnedPropertyDetailsPage.tabs.goToLandlordDetails()
+        returnedPropertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(returnedPropertyDetailsPage.inviteJointLandlordIndividualText).isVisible()
         assertThat(propertyDetailsPage.markAsSingleLandlordInsetText).isHidden()
     }
@@ -63,7 +63,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
     fun `cancelling from check invitations page returns to property details with mark as single landlord inset still shown`(page: Page) {
         val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_WITH_PENDING_INVITATIONS_AND_NO_JOINT_LANDLORDS
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         propertyDetailsPage.switchToIndividualLink.clickAndWait()
 
         val checkInvitationsPage =
@@ -80,7 +80,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        returnedPropertyDetailsPage.tabs.goToLandlordDetails()
+        returnedPropertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(returnedPropertyDetailsPage.markAsSingleLandlordInsetText).isVisible()
     }
 
@@ -88,7 +88,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
     fun `cancelling from confirm page returns to property details with mark as single landlord inset still shown`(page: Page) {
         val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_WITH_PENDING_INVITATIONS_AND_NO_JOINT_LANDLORDS
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         propertyDetailsPage.switchToIndividualLink.clickAndWait()
 
         val checkInvitationsPage =
@@ -113,7 +113,7 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        returnedPropertyDetailsPage.tabs.goToLandlordDetails()
+        returnedPropertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(returnedPropertyDetailsPage.markAsSingleLandlordInsetText).isVisible()
     }
 }
