@@ -185,7 +185,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
     fun `landlordDashboard links to the active properties tab`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
-        // TODO PDJB-2149: Remove this stub (and the flag mention in the test name) when the ACTIVE_INACTIVE feature flag is removed
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
 
         mvc

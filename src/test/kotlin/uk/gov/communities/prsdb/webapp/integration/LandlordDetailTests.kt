@@ -107,6 +107,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
     @Nested
     inner class LandlordDetailsPropertiesTabs : NestedIntegrationTestWithImmutableData("data-local.sql") {
+        // TODO PDJB-2035: Update this test to check the addresses link to the deactivated property record
         @Test
         fun `the deactivated properties tab shows the landlord's deactivated properties without links`() {
             val detailsPage = navigator.goToLandlordDetails()
