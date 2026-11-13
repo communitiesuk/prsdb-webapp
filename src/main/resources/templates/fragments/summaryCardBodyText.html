@@ -1,3 +1,6 @@
 <p th:fragment="summaryCardBodyText(messageKey)" th:if="${messageKey != null}" class="govuk-body govuk-!-margin-bottom-0" th:text="#{${messageKey}}">
     summaryCardBodyText
 </p>
+<p th:fragment="summaryCardBodyTextWithHtml(messageKey)" th:if="${messageKey != null}" class="govuk-body govuk-!-margin-bottom-0" th:utext="#{${messageKey}}">
+    summaryCardBodyTextWithHtml
+</p>
