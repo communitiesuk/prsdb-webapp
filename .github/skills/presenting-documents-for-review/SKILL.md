@@ -52,11 +52,13 @@ outside the project, so open a review copy in the project's gitignored `.idea`
 folder:
 
 1. `projectPath` = the worktree path (or current working directory).
-2. Create `<projectPath>\.idea\copilot-review\<name>-r<N>.md` with the file
-   creation tool, using the session file's content. Do not use shell copy
-   commands. Increment `N` for each revision so no file is ever overwritten.
+2. Create `<projectPath>\.idea\copilot-review-<name>-r<N>.md` with the file
+   creation tool, using the session file's content. Write it directly in
+   `.idea` (which always exists for a project open in IntelliJ) — do not create
+   subfolders or use shell copy commands. Increment `N` for each revision so no
+   file is ever overwritten.
 3. Call the JetBrains MCP `open_file_in_editor` with `projectPath` and
-   `filePath: ".idea/copilot-review/<name>-r<N>.md"`.
+   `filePath: ".idea/copilot-review-<name>-r<N>.md"`.
 4. Ask for approval.
 
 If the user says they edited the IntelliJ copy, read it and apply the changes
