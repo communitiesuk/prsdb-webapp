@@ -34,6 +34,17 @@ dashboard:
       linkText: View compliance actions
     outstandingActions:
       linkText: View outstanding actions
+  inactiveLandlordBanner:
+    individual:
+      heading: Your landlord account has been deactivated.
+      beforeLink: Your landlord account has been deactivated. To reactivate it,
+    organisation:
+      heading: Your organisation’s landlord account has been deactivated.
+      beforeLink: Your organisation’s landlord account has been deactivated. To reactivate it,
+    toReactivateIt: 'To reactivate it:'
+    reactivateAProperty: reactivate a property
+    completeADraft: complete a draft
+    registerAProperty: register a property
 incompleteProperties:
   heading: Incomplete property details
   text: 'Complete the missing details for these properties. After 28 days, incomplete properties are deleted.'

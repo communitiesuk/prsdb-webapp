@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -165,6 +168,96 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 val dashboard = navigator.goToLandlordDashboard()
                 dashboard.notificationBanner.outstandingActionsLink.clickAndWait()
                 assertPageIs(page, OutstandingActionsPage::class)
+            }
+        }
+    }
+
+    @Nested
+    inner class InactiveLandlordNotificationBanner {
+        // TODO PDJB-2149: Remove this setup when the ACTIVE_INACTIVE flag is removed
+        @BeforeEach
+        fun enableActiveInactiveFlag() {
+            featureFlagManager.enableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Nested
+        inner class WithNoDeactivatedOrIncompleteProperties :
+            NestedIntegrationTestWithImmutableData("data-mockuser-inactive-landlord.sql") {
+            @Test
+            fun `the banner shows the single sentence variant`() {
+                val dashboard = navigator.goToLandlordDashboard()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.title).containsText("Important")
+                assertThat(dashboard.inactiveLandlordNotificationBanner.content.heading)
+                    .hasText("Your landlord account has been deactivated. To reactivate it, register a property.")
+            }
+
+            @Test
+            fun `the register a property link goes to the property registration start page`(page: Page) {
+                val dashboard = navigator.goToLandlordDashboard()
+                dashboard.inactiveLandlordNotificationBanner.registerAPropertyLink.clickAndWait()
+                assertPageIs(page, RegisterPropertyStartPage::class)
+            }
+        }
+
+        @Nested
+        inner class WithDeactivatedAndIncompleteProperties :
+            NestedIntegrationTestWithImmutableData(
+                listOf(
+                    "data-mockuser-inactive-landlord.sql",
+                    "data-overlay-inactive-landlord-has-deactivated-property.sql",
+                    "data-overlay-inactive-landlord-has-incomplete-property.sql",
+                ),
+            ) {
+            @Test
+            fun `the banner shows all reactivation options instead of the outstanding actions banner`(page: Page) {
+                val dashboard = navigator.goToLandlordDashboard()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.content.heading)
+                    .hasText("Your landlord account has been deactivated.")
+                assertThat(dashboard.inactiveLandlordNotificationBanner.content).containsText("To reactivate it:")
+                assertThat(dashboard.inactiveLandlordNotificationBanner.reactivateAPropertyLink).isVisible()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.completeADraftLink).isVisible()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.registerAPropertyLink).isVisible()
+                assertEquals(1, page.locator(".govuk-notification-banner").count())
+            }
+
+            @Test
+            fun `the reactivate a property link goes to the landlord record properties tab`(page: Page) {
+                val dashboard = navigator.goToLandlordDashboard()
+                dashboard.inactiveLandlordNotificationBanner.reactivateAPropertyLink.clickAndWait()
+                val detailsPage = assertPageIs(page, LandlordDetailsPage::class)
+                assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            }
+
+            @Test
+            fun `the complete a draft link goes to the incomplete properties page`(page: Page) {
+                val dashboard = navigator.goToLandlordDashboard()
+                dashboard.inactiveLandlordNotificationBanner.completeADraftLink.clickAndWait()
+                assertPageIs(page, LandlordIncompletePropertiesPage::class)
+            }
+        }
+
+        @Nested
+        inner class WithOnlyIncompleteProperties :
+            NestedIntegrationTestWithImmutableData(
+                listOf("data-mockuser-inactive-landlord.sql", "data-overlay-inactive-landlord-has-incomplete-property.sql"),
+            ) {
+            @Test
+            fun `the banner does not show the reactivate a property link`(page: Page) {
+                val dashboard = navigator.goToLandlordDashboard()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.completeADraftLink).isVisible()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.registerAPropertyLink).isVisible()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.reactivateAPropertyLink).isHidden()
+                assertEquals(1, page.locator(".govuk-notification-banner").count())
+            }
+        }
+
+        @Nested
+        inner class OrgLandlord : NestedIntegrationTestWithImmutableData("data-mockuser-inactive-org-landlord.sql") {
+            @Test
+            fun `the banner uses organisation copy`() {
+                val dashboard = navigator.goToLandlordDashboard()
+                assertThat(dashboard.inactiveLandlordNotificationBanner.content.heading)
+                    .hasText("Your organisation’s landlord account has been deactivated. To reactivate it, register a property.")
             }
         }
     }
