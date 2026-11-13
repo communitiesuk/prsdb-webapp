@@ -93,7 +93,7 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-        fun `getUserLandlordDetails adds active and deactivated properties attributes when ACTIVE_INACTIVE is enabled`() {
+        fun `getUserLandlordDetails adds active and deactivated properties attributes`() {
             // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord()

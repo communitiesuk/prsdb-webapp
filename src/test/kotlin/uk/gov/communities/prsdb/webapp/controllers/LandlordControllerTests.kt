@@ -183,7 +183,7 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `landlordDashboard links to the active properties tab when ACTIVE_INACTIVE is enabled`() {
+    fun `landlordDashboard links to the active properties tab`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         // TODO PDJB-2149: Remove this stub (and the flag mention in the test name) when the ACTIVE_INACTIVE feature flag is removed
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
@@ -485,7 +485,7 @@ class LandlordControllerTests(
         // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed (the test above will cover it)
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
-        fun `getComplianceActions links to the active properties tab when ACTIVE_INACTIVE is enabled`() {
+        fun `getComplianceActions links to the active properties tab`() {
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
             whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
                 PageImpl(emptyList()),
