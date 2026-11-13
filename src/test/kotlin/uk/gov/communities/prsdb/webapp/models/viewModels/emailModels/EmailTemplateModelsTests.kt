@@ -395,6 +395,24 @@ class EmailTemplateModelsTests {
                     "/emails/SwapToIndividualNudge.md",
                 ),
                 EmailTemplateTestData(
+                    JointLandlordYouLeftConfirmationAccountDeactivated(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordOtherLandlordLeftNotification(
+                        leavingLandlord = "Alice",
+                        notifiedLandlord = "Bob",
+                        address = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                        removalAction = "deactivate",
+                    ),
+                    "/emails/JointLandlordOtherLandlordLeftNotification.md",
+                ),
+                EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",
                         propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",

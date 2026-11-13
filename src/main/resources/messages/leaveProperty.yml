@@ -7,6 +7,7 @@ confirm:
     two: you’re no longer a joint landlord (for example, you’ve been bought out)
   councilNote: The local council will no longer see your details when they view this property.
   warning: You cannot undo this action. If you need to join the property again in the future, you’ll need to be invited by another landlord or send a request to join.
+  insetText: To become a landlord for this property again, another landlord will need to invite you.
   confirmButton: I’m no longer a landlord
   cancelLink: Cancel (go back to property record)
 confirmation:

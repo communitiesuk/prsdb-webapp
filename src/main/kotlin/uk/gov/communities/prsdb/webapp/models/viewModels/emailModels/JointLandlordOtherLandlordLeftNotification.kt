@@ -5,11 +5,13 @@ data class JointLandlordOtherLandlordLeftNotification(
     val notifiedLandlord: String,
     val address: String,
     val propertyRecordUrl: String,
+    val removalAction: String,
 ) : EmailTemplateModel {
     private val leavingLandlordKey = "leaving landlord"
     private val notifiedLandlordKey = "notified landlord"
     private val addressKey = "property address"
     private val propertyRecordUrlKey = "property record url"
+    private val removalActionKey = "removal action"
 
     override val template = EmailTemplate.JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION
 
@@ -19,5 +21,6 @@ data class JointLandlordOtherLandlordLeftNotification(
             notifiedLandlordKey to notifiedLandlord,
             addressKey to address,
             propertyRecordUrlKey to propertyRecordUrl,
+            removalActionKey to removalAction,
         )
 }

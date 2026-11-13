@@ -19,7 +19,13 @@
         <p class="govuk-body" th:text="#{leaveProperty.confirm.councilNote}">
             leaveProperty.confirm.councilNote
         </p>
-        <div th:replace="~{fragments/warningText :: warningText(#{leaveProperty.confirm.warning})}"></div>
+        <!-- TODO PDJB-2149: Remove the warning when the ACTIVE_INACTIVE flag is removed -->
+        <th:block th:if="${!isActiveInactiveEnabled}">
+            <div th:replace="~{fragments/warningText :: warningText(#{leaveProperty.confirm.warning})}"></div>
+        </th:block>
+        <div th:if="${isActiveInactiveEnabled}" class="govuk-inset-text" th:text="#{leaveProperty.confirm.insetText}">
+            leaveProperty.confirm.insetText
+        </div>
         <form th:action="@{''}" method="post" novalidate>
             <div class="govuk-button-group">
                 <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{leaveProperty.confirm.confirmButton})}"></button>

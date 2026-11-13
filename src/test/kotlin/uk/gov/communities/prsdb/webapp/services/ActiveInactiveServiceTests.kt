@@ -73,6 +73,44 @@ class ActiveInactiveServiceTests {
     }
 
     @Test
+    fun `deactivateLandlordIfNoActiveProperties deactivates an active landlord with no active properties`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
+
+        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+
+        assertTrue(result)
+        assertFalse(landlord.isActive)
+        assertEquals(today(), landlord.lastDeactivatedDate)
+        verify(landlordRepository).save(landlord)
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties makes no change when the landlord still has active properties`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(true)
+
+        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+
+        assertFalse(result)
+        assertTrue(landlord.isActive)
+        assertNull(landlord.lastDeactivatedDate)
+        verify(landlordRepository, never()).save(any())
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties makes no change for an already inactive landlord`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        landlord.deactivate(ORIGINAL_DATE)
+
+        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+
+        assertFalse(result)
+        assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
+        verify(landlordRepository, never()).save(any())
+    }
+
+    @Test
     fun `reactivateLandlord marks an inactive landlord active, clears the date and saves it`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         landlord.deactivate(ORIGINAL_DATE)
