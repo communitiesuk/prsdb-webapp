@@ -111,7 +111,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         fun `the deactivated properties tab shows the landlord's deactivated properties without links`() {
             val detailsPage = navigator.goToLandlordDetails()
 
-            assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (2)")
+            assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (3)")
             detailsPage.tabs.goToDeactivatedProperties()
 
             assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
@@ -119,6 +119,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.deactivatedPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("6 Mythical Place")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("Inactive House, PRSDB Road, IN1 1AA")
+            assertThat(detailsPage.deactivatedPropertiesTable).containsText("3 Fake Way")
             assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(0)
             assertThat(detailsPage.noDeactivatedPropertiesMessage).isHidden()
         }
