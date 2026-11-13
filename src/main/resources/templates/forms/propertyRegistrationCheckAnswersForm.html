@@ -95,20 +95,20 @@
                     <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5', ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
                 </th:block>
             </th:block>
-            <th:block th:if="${propertyManagerRows != null or propertyManagerCards != null}">
-                <h4 class="govuk-heading-s"
-                    th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading</h4>
-                <th:block th:if="${propertyManagerRows != null}">
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyManagerRows})}"></dl>
-                </th:block>
-                <th:block th:if="${propertyManagerCards != null}">
-                    <p th:if="${propertyManagerChangeUrl != null}" class="govuk-body">
-                        <a class="govuk-link" th:href="@{${propertyManagerChangeUrl}}"
-                           th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
-                    </p>
-                    <th:block th:each="card : ${propertyManagerCards}">
-                        <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5')}"></div>
-                    </th:block>
+        </th:block>
+        <th:block th:if="${propertyManagerRows != null or propertyManagerCards != null}">
+            <h4 class="govuk-heading-s"
+                th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading</h4>
+            <th:block th:if="${propertyManagerRows != null}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyManagerRows})}"></dl>
+            </th:block>
+            <th:block th:if="${propertyManagerCards != null}">
+                <p th:if="${propertyManagerChangeUrl != null}" class="govuk-body">
+                    <a class="govuk-link" th:href="@{${propertyManagerChangeUrl}}"
+                       th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
+                </p>
+                <th:block th:each="card : ${propertyManagerCards}">
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5')}"></div>
                 </th:block>
             </th:block>
         </th:block>
