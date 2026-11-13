@@ -21,16 +21,9 @@ import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
-import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
-import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
-import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
-import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
-import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
-import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 import uk.gov.service.notify.NotificationClient
@@ -88,13 +81,6 @@ class PrsdbWebappApplicationTests {
     fun `process only PRSDB beans aren't available in web mode`() {
         val processOnlyBeansByName =
             listOf(
-                AwsS3QuarantinedFileDeleter::class.simpleBeanName,
-                LocalQuarantinedFileDeleter::class.simpleBeanName,
-                AwsS3DequarantiningFileCopier::class.simpleBeanName,
-                LocalDequarantiningFileCopier::class.simpleBeanName,
-                UploadDequarantiner::class.simpleBeanName,
-                VirusScanProcessingService::class.simpleBeanName,
-                VirusNotificationEmailHandler::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()

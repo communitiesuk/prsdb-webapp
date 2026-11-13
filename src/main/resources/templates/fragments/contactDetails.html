@@ -1,0 +1,7 @@
+<p th:fragment="contactDetails" class="govuk-body">
+    <span th:text="#{common.contactDetails.phone}">common.contactDetails.phone</span><br>
+    <span th:text="#{common.contactDetails.phoneHours}">common.contactDetails.phoneHours</span><br>
+    <span th:text="#{common.contactDetails.emailLabel}">common.contactDetails.emailLabel</span>
+    <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}"
+       th:text="#{common.contactDetails.email}">common.contactDetails.email</a>
+</p>

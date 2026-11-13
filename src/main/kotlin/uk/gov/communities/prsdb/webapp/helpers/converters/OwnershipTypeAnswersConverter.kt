@@ -5,8 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// TODO PDJB-1996: use this to show the ownership answer rows on the property record, which has
-//  only the stored OwnershipType to work from.
 // TODO PDJB-2014: optionally use this for the same rows on the property registration check your
 //  answers page to keep cya consistent with the property record.
 object OwnershipTypeAnswersConverter {

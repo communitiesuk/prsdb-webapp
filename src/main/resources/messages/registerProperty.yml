@@ -82,13 +82,13 @@ taskList:
     ownershipAndLandlords: Ownership and landlords
     peopleResponsible: People responsible for this property
     correspondence: Who the council should contact
-    occupied: Tell us if your property’s occupied
+    occupied: Tell us if this property is occupied
   rentedOut:
-    heading: How your property’s rented out
+    heading: How your property is rented out
     whoProvidesDetails: Who will provide these details
     whoProvidesDetailsOccupiedHint: If you’re using a letting agent or property manager, they can provide the rest of this section
     whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
-    licensing: Tell us if your property needs a license
+    licensing: Tell us if your property needs a licence
     tenancyDetails: Tenancy details
     tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
@@ -395,7 +395,7 @@ freeholders:
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'
-      single: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
+      nonJoint: '{0,choice,1#You’ve added 1 freeholder|1<You’ve added {0} freeholders}'
     insetText: After you submit and pay, we’ll contact these people to say they’re listed on your registration. They will not be able to change any of the registration’s details.
     emailAddress: Email address
     postalAddress: Postal address
@@ -404,6 +404,13 @@ freeholders:
       body: You told us there was another freeholder, but you cannot currently provide their details. Return and add these details when you can.
     buttons:
       addAnother: Add another freeholder
+  checkAnswers:
+    heading:
+      joint: Joint freeholders
+      nonJoint: Freeholders
+    changeLink:
+      joint: Add, change or remove joint freeholders
+      nonJoint: Add, change or remove freeholders
   remove:
     fieldSetHeading: 'Are you sure you want to remove {0,,freeholderName}?'
     unknownFreeholder:
@@ -522,6 +529,8 @@ ownershipKind:
     leasehold:
       label: Leasehold
       hint: Have a lease with a freeholder (includes most flats)
+  value:
+    freeholdAndLeasehold: Freehold and leasehold
   error:
     missing: Select how you own this property
 freeholdType:

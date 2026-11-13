@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
@@ -15,6 +16,8 @@ open class HasElectricalCertFormBasePage(
     val heading = Heading(page.locator("h1"))
 
     val form = HasElectricalCertForm(page)
+    val provideThisLaterButton: Locator =
+        page.locator("button[name='action'][value='$PROVIDE_THIS_LATER_BUTTON_ACTION_NAME']")
 
     fun submitHasEic() {
         form.hasCertRadios.selectValue(HasElectricalSafetyCertificate.HAS_EIC)

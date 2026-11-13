@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeAnswersConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -95,15 +96,48 @@ abstract class PropertyDetailsViewModelBase(
             withActionLink = false,
         )
 
-    protected fun ownershipTypeRow(): SummaryListRowViewModel =
+    // TODO PDJB-2016: delete this row along with the ASSOCIATED_PARTIES flag. It is only still shown
+    //  with the flag off, and on the local council view until PDJB-1999.
+    protected fun ownershipTypeRowBeforePdjb955(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",
-            // TODO PDJB-1996: convert the new OwnershipType to the required answer messages. It is
-            //  rendered as the answers to several questions rather than this single ownership type
-            //  row, so this row cannot simply switch to the new enum.
             MessageKeyConverter.convert(propertyOwnership.ownershipTypeBeforePdjb955),
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
+        )
+
+    protected fun ownershipAnswerRows(): List<SummaryListRowViewModel> {
+        val answers = OwnershipTypeAnswersConverter.convert(propertyOwnership.ownershipType)
+        return listOfNotNull(
+            ownershipAnswerRow(
+                "propertyDetails.peopleResponsible.ownership.ownsProperty",
+                MessageKeyConverter.convert(answers.ownsProperty),
+            ),
+            answers.ownershipKind?.let {
+                ownershipAnswerRow(
+                    "propertyDetails.peopleResponsible.ownership.ownershipType",
+                    MessageKeyConverter.convert(it),
+                )
+            },
+            answers.freeholdType?.let {
+                ownershipAnswerRow(
+                    "propertyDetails.peopleResponsible.ownership.freeholderType",
+                    MessageKeyConverter.convert(it),
+                )
+            },
+        )
+    }
+
+    // TODO PDJB-1992: point each of these rows at the real update route once the flag-on ownership
+    //  update journey exists.
+    private fun ownershipAnswerRow(
+        key: String,
+        value: Any?,
+    ): SummaryListRowViewModel =
+        rowWithViewTypeSpecificChangeLink(
+            key = key,
+            value = value,
+            landlordActionLink = PLACEHOLDER_ACTION_LINK,
         )
 
     protected fun occupiedRow(): SummaryListRowViewModel =
@@ -425,6 +459,9 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
+        // TODO PDJB-1992: remove once the ownership answer rows link to their real update routes.
+        private const val PLACEHOLDER_ACTION_LINK = "#"
+
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }

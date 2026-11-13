@@ -169,6 +169,7 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (86, '01/15/25', 1502423348, 0),
        (87, '01/15/25', 1502423351, 0),
        (88, '01/15/25', 1502423352, 0),
+       (89, '01/15/25', 1502423353, 0),
        (900, '07/23/26', 1502423349, 1), -- Test org landlord (Team-PRSDB+orglandlord)
        (901, '07/23/26', 1502423350, 1); -- Test editor org landlord (Team-PRSDB+orglandlordeditor)
 
@@ -407,7 +408,9 @@ VALUES (39, true, 1, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_
        (50, true, 1, 1, 0, 0, 86, 58, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
        (51, true, 1, 1, 1, 2, 87, 59, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, null, false, false, 'email@example.com', 1, current_date + 365),
        -- PDJB-844: inactive, occupied property with every detail marked "provide later", for the reactivation journey
-       (52, false, 1, 1, 1, 2, 88, 60, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365);
+       (52, false, 1, 1, 1, 2, 88, 60, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, true, 'email@example.com', 1, current_date + 365),
+       -- PDJB-2046: inactive property whose address has since been registered again by another landlord (property 3)
+       (53, false, 1, 1, 0, 0, 89, 8, '01/15/25', '01/15/25', null, 1, null, null, null, null, null, null, null, null, false, false, null, false, false, 'email@example.com', 1, current_date + 365);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -472,7 +475,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 49, '2026-08-19'),
        (1, 50, '2025-01-15'),
        (1, 51, '2025-01-15'),
-       (1, 52, '2025-01-15')
+       (1, 52, '2025-01-15'),
+       (1, 53, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
 UPDATE landlord l

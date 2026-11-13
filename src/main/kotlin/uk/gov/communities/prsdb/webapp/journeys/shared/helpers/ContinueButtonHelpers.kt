@@ -4,6 +4,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 
@@ -21,11 +23,21 @@ private fun JourneyBuilder<*>.useSubmitButtonText(
 private fun JourneyBuilder<*>.useContinueButtons(vararg steps: JourneyStep<*, *, *>) =
     useSubmitButtonText(*steps) { "forms.buttons.continue" }
 
+private fun JourneyBuilder<*>.useContinueWithoutCertButtons(
+    vararg steps: JourneyStep<*, *, *>,
+    isOccupied: () -> Boolean,
+    continueWithoutCertMessageKey: String,
+) = useSubmitButtonText(*steps) {
+    if (isOccupied()) continueWithoutCertMessageKey else "forms.buttons.continue"
+}
+
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
     useContinueButtons(task.hasGasSupplyStep, task.hasGasCertStep, task.gasCertIssueDateStep, task.checkGasCertUploadsStep)
-    useSubmitButtonText(task.gasCertExpiredStep) {
-        if (task.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
-    }
+    useContinueWithoutCertButtons(
+        task.gasCertExpiredStep,
+        isOccupied = task::isOccupied,
+        continueWithoutCertMessageKey = "forms.buttons.continueWithoutGasSafety",
+    )
 }
 
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyTask) {
@@ -43,9 +55,12 @@ fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyDetailsTask) {
         task.eicrExpiryDateStep,
         task.checkEicrUploadsStep,
     )
-    useSubmitButtonText(task.eicExpiredStep, task.eicrExpiredStep) {
-        if (task.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-    }
+    useContinueWithoutCertButtons(
+        task.eicExpiredStep,
+        task.eicrExpiredStep,
+        isOccupied = task::isOccupied,
+        continueWithoutCertMessageKey = "forms.buttons.continueWithoutElectricalSafety",
+    )
 }
 
 fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyTask) {
@@ -53,4 +68,20 @@ fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyTask) {
     useContinueButtons(task.checkElectricalSafetyAnswersStep)
 }
 
-// TODO PDJB-2040: Add overloads for the EPC tasks, replacing UpdateEpcJourneyFactory.replaceButtons()
+fun JourneyBuilder<*>.useContinueButtons(task: EpcDetailsTask) {
+    useContinueButtons(
+        task.hasEpcStep,
+        task.checkUprnMatchedEpcStep,
+        task.confirmEpcDetailsRetrievedByCertificateNumberStep,
+        task.epcInDateAtStartOfTenancyCheckStep,
+        task.isEpcRequiredStep,
+        task.epcExemptionStep,
+        task.hasMeesExemptionStep,
+        task.meesExemptionStep,
+    )
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: EpcTask) {
+    useContinueButtons(task.epcDetailsTask)
+    useContinueButtons(task.checkEpcAnswersStep)
+}
