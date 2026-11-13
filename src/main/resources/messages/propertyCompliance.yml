@@ -3,6 +3,7 @@ uploadedFile:
   virusScanPendingWithName: "{0} (Pending virus scan)"
   virusScanFailed: Not added (virus scan failed)
 gasSafetyTask:
+  sectionHeading: Gas safety certificate
   gasSupply:
     heading: Does the property have a gas supply or any gas appliances?
     error:
@@ -135,6 +136,7 @@ gasSafetyTask:
       whenToProvide:
         paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and complete this section within 28 days of a tenant moving in.
 electricalSafetyTask:
+  sectionHeading: Electrical safety certificate
   electricalCert:
     error:
       missing: Select which electrical safety certificate you have
@@ -293,6 +295,7 @@ electricalSafetyTask:
           heading: You must upload an electrical safety certificate to this service
           paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
+  sectionHeading: Energy performance certificate (EPC)
   confirmEpcDetailsFromUprn:
     error:
       missing: Select if you want to use the EPC we found for your property
