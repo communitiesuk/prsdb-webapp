@@ -471,6 +471,26 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase sets each property's paid for until date to its seeded payment's period end and its renewal date`() {
+        newSeeder().seedDatabase()
+
+        assertTrue(jdbcTemplate.queryForObject("SELECT count(*) FROM property_ownership", Long::class.java)!! > 0)
+        assertEquals(
+            0L,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM property_ownership po
+                JOIN payment p ON p.associated_property_id = po.id
+                WHERE po.paid_for_until IS DISTINCT FROM p.for_period_ending
+                   OR po.paid_for_until IS DISTINCT FROM po.renewal_date
+                """.trimIndent(),
+                Long::class.java,
+            ),
+        )
+    }
+
+    @Test
     fun `seedDatabase is deterministic for a given random seed`() {
         newSeeder().seedDatabase()
         val firstRunSnapshot = captureSeedSnapshot()

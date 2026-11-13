@@ -438,6 +438,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -542,6 +543,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -1314,6 +1316,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1367,6 +1370,7 @@ class PropertyRegistrationServiceTests {
             correspondenceEmail = anyOrNull(),
             correspondenceAddressModel = anyOrNull(),
             renewalDate = any(),
+            paidForUntil = any(),
         )
     }
 
@@ -1413,6 +1417,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1466,6 +1471,7 @@ class PropertyRegistrationServiceTests {
             correspondenceEmail = anyOrNull(),
             correspondenceAddressModel = anyOrNull(),
             renewalDate = any(),
+            paidForUntil = any(),
         )
     }
 
@@ -1509,6 +1515,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
@@ -1582,6 +1589,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
@@ -1859,6 +1867,7 @@ class PropertyRegistrationServiceTests {
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
             ),
         ).thenReturn(propertyOwnership)
     }
