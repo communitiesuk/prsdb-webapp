@@ -24,40 +24,43 @@ class FreeholderSummaryCardHelper {
         freeholders
             .sortedBy { it.id }
             .map { freeholder ->
-                val card =
-                    buildSummaryCard(
-                        freeholder.id.toString(),
-                        FreeholderDataModel.fromFreeholder(freeholder),
-                        emptyList(),
-                        includePostalAddress = false,
-                    )
-                if (freeholder.detailsKnown() && freeholder.address != null) {
-                    card.copy(bodyTextKey = "propertyDetails.peopleResponsible.freeholder.postalAddressNote")
-                } else {
-                    card
-                }
+                buildSummaryCard(
+                    freeholder.id.toString(),
+                    FreeholderDataModel.fromFreeholder(freeholder),
+                    emptyList(),
+                    showPostalAddressAsNote = true,
+                )
             }
 
+    // On the property record, a postal address is replaced by a note saying it was used to contact the freeholder.
     private fun buildSummaryCard(
         freeholderId: String,
         freeholder: FreeholderDataModel,
         actions: List<SummaryCardActionViewModel>,
-        includePostalAddress: Boolean = true,
-    ): SummaryCardViewModel =
-        if (freeholder.detailsKnown) {
-            SummaryCardViewModel(
-                title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
-                summaryList = getContactRows(freeholder, includePostalAddress),
-                actions = actions,
-            )
-        } else {
-            SummaryCardViewModel(
+        showPostalAddressAsNote: Boolean = false,
+    ): SummaryCardViewModel {
+        if (!freeholder.detailsKnown) {
+            return SummaryCardViewModel(
                 title = "registerProperty.freeholders.list.unknownFreeholder.title",
                 summaryList = emptyList(),
                 actions = actions,
                 bodyTextKey = "registerProperty.freeholders.list.unknownFreeholder.body",
             )
         }
+
+        val name = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name")
+        if (freeholder.email == null && freeholder.address == null) {
+            throw PrsdbWebException("Freeholder $freeholderId has known details but no email or postal address")
+        }
+
+        val showNote = showPostalAddressAsNote && freeholder.address != null
+        return SummaryCardViewModel(
+            title = name,
+            summaryList = getContactRows(freeholder, includePostalAddress = !showPostalAddressAsNote),
+            actions = actions,
+            bodyTextKey = if (showNote) "propertyDetails.peopleResponsible.freeholder.postalAddressNote" else null,
+        )
+    }
 
     private fun getContactRows(
         freeholder: FreeholderDataModel,
@@ -73,11 +76,5 @@ class FreeholderSummaryCardHelper {
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        ).ifEmpty {
-            if (!includePostalAddress && freeholder.address != null) {
-                emptyList()
-            } else {
-                throw PrsdbWebException("Freeholder has known details but no email or postal address")
-            }
-        }
+        )
 }
