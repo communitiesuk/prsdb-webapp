@@ -6,4 +6,15 @@ class InactiveLandlordNotificationBannerViewModel(
     val hasIncompleteProperties: Boolean,
 ) {
     val showReactivationOptionsList: Boolean = hasDeactivatedProperties || hasIncompleteProperties
+
+    private val messageKeyPrefix =
+        if (isOrganisation) {
+            "landlord.dashboard.inactiveLandlordBanner.organisation"
+        } else {
+            "landlord.dashboard.inactiveLandlordBanner.individual"
+        }
+
+    val headingKey: String = "$messageKeyPrefix.heading"
+
+    val beforeLinkKey: String = "$messageKeyPrefix.beforeLink"
 }

@@ -376,7 +376,7 @@ class LandlordControllerTests(
         fun `landlordDashboard adds the inactive landlord banner for an inactive individual landlord`() {
             val landlord = createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(propertyOwnershipService.hasDeactivatedProperties(landlord)).thenReturn(true)
+            whenever(propertyOwnershipService.doesLandlordHaveDeactivatedProperties(landlord)).thenReturn(true)
             whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(0)
 
             val result =
@@ -406,7 +406,7 @@ class LandlordControllerTests(
         fun `landlordDashboard adds the inactive landlord banner for an inactive org landlord with incomplete properties`() {
             val landlord = createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(propertyOwnershipService.hasDeactivatedProperties(landlord)).thenReturn(false)
+            whenever(propertyOwnershipService.doesLandlordHaveDeactivatedProperties(landlord)).thenReturn(false)
             whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
 
             val result =

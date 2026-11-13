@@ -77,7 +77,7 @@ class LandlordController(
                 "inactiveLandlordNotificationBannerViewModel",
                 InactiveLandlordNotificationBannerViewModel(
                     isOrganisation = landlord is OrganisationalLandlord,
-                    hasDeactivatedProperties = propertyOwnershipService.hasDeactivatedProperties(landlord),
+                    hasDeactivatedProperties = propertyOwnershipService.doesLandlordHaveDeactivatedProperties(landlord),
                     hasIncompleteProperties = numberOfIncompleteProperties > 0,
                 ),
             )

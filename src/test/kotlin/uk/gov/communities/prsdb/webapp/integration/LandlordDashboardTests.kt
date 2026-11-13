@@ -199,7 +199,13 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
 
         @Nested
         inner class WithDeactivatedAndIncompleteProperties :
-            NestedIntegrationTestWithImmutableData("data-mockuser-inactive-landlord-with-deactivated-and-incomplete-properties.sql") {
+            NestedIntegrationTestWithImmutableData(
+                listOf(
+                    "data-mockuser-inactive-landlord.sql",
+                    "data-overlay-inactive-landlord-has-deactivated-property.sql",
+                    "data-overlay-inactive-landlord-has-incomplete-property.sql",
+                ),
+            ) {
             @Test
             fun `the banner shows all reactivation options instead of the outstanding actions banner`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
@@ -231,7 +237,9 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
 
         @Nested
         inner class WithOnlyIncompleteProperties :
-            NestedIntegrationTestWithImmutableData("data-mockuser-inactive-landlord-with-incomplete-property.sql") {
+            NestedIntegrationTestWithImmutableData(
+                listOf("data-mockuser-inactive-landlord.sql", "data-overlay-inactive-landlord-has-incomplete-property.sql"),
+            ) {
             @Test
             fun `the banner does not show the reactivate a property link`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()

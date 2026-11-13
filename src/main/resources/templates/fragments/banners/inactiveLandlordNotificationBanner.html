@@ -1,7 +1,6 @@
-<div th:fragment="inactiveLandlordNotificationBanner(viewModel, deactivatedPropertiesUrl, viewIncompletePropertiesUrl, registerPropertyUrl)"
-     th:with="messagePrefix=${viewModel.isOrganisation ? 'landlord.dashboard.inactiveLandlordBanner.organisation' : 'landlord.dashboard.inactiveLandlordBanner.individual'}">
+<div th:fragment="inactiveLandlordNotificationBanner(viewModel, deactivatedPropertiesUrl, viewIncompletePropertiesUrl, registerPropertyUrl)">
     <div id="inactive-landlord-notification-banner-list" th:replace="${viewModel.showReactivationOptionsList} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notificationBanner.title}, ~{::#inactive-landlord-notification-banner-list/content()})} : ~{}">
-        <p class="govuk-notification-banner__heading" th:text="#{${messagePrefix + '.heading'}}">landlord.dashboard.inactiveLandlordBanner.individual.heading</p>
+        <p class="govuk-notification-banner__heading" th:text="#{${viewModel.headingKey}}">landlord.dashboard.inactiveLandlordBanner.individual.heading</p>
         <p class="govuk-body" th:text="#{landlord.dashboard.inactiveLandlordBanner.toReactivateIt}">landlord.dashboard.inactiveLandlordBanner.toReactivateIt</p>
         <ul class="govuk-list govuk-list--bullet">
             <li th:if="${viewModel.hasDeactivatedProperties}">
@@ -18,7 +17,7 @@
 
     <div id="inactive-landlord-notification-banner-single" th:replace="${!viewModel.showReactivationOptionsList} ? ~{fragments/banners/notificationBanner :: notificationBanner(#{landlord.dashboard.notificationBanner.title}, ~{::#inactive-landlord-notification-banner-single/content()})} : ~{}">
         <p class="govuk-notification-banner__heading">
-            <span th:remove="tag" th:text="#{${messagePrefix + '.beforeLink'}}">landlord.dashboard.inactiveLandlordBanner.individual.beforeLink</span>
+            <span th:remove="tag" th:text="#{${viewModel.beforeLinkKey}}">landlord.dashboard.inactiveLandlordBanner.individual.beforeLink</span>
             <a class="govuk-notification-banner__link" th:href="@{${registerPropertyUrl}}" th:text="#{landlord.dashboard.inactiveLandlordBanner.registerAProperty}">landlord.dashboard.inactiveLandlordBanner.registerAProperty</a>.
         </p>
     </div>
