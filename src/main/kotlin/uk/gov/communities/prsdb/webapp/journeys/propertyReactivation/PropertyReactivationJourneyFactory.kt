@@ -67,12 +67,15 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED) }
                 noNextDestination()
             }
-            // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
-            // and updating entryStepFor and completionStepFor
-            step(journey.licensingStep) {
-                routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
-                parents { journey.parentsFor(LICENSING) }
-                nextStep { journey.nextStepAfter(LICENSING) }
+            section {
+                withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
+                // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
+                // and updating entryStepFor and completionStepFor
+                step(journey.licensingStep) {
+                    routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
+                    parents { journey.parentsFor(LICENSING) }
+                    nextStep { journey.nextStepAfter(LICENSING) }
+                }
             }
             section {
                 withHeadingMessageKey("propertyCompliance.gasSafetyTask.sectionHeading", shouldUseNumbering = false)

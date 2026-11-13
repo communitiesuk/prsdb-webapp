@@ -89,6 +89,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val licensingPage = assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments)
         assertThat(licensingPage.heading).containsText("PDJB-2037")
+        assertThat(licensingPage.sectionHeader).containsText("Tell us if your property needs a licence")
         licensingPage.submit()
 
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)

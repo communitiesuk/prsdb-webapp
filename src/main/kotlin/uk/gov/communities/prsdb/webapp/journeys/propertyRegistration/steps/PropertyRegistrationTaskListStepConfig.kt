@@ -97,7 +97,7 @@ class PropertyRegistrationTaskListStepConfig(
                 "rented-out",
                 buildList {
                     add(whoProvidesDetailsItem(state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.rentedOut.licensing", state.licensingTask, state))
+                    add(rentedOutComplianceItem("licensing.sectionHeading", state.licensingTask, state))
                     add(rentedOutComplianceItem("propertyCompliance.gasSafetyTask.sectionHeading", state.gasSafetyTask, state))
                     add(
                         rentedOutComplianceItem(

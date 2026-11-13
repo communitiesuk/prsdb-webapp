@@ -520,7 +520,7 @@ class PropertyRegistrationJourneyFactory(
                 saveProgress()
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
+                withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {

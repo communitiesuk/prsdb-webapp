@@ -85,7 +85,6 @@ taskList:
     whoProvidesDetails: Who will provide these details
     whoProvidesDetailsOccupiedHint: If you’re using a letting agent or property manager, they can provide the rest of this section
     whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
-    licensing: Tell us if your property needs a licence
     tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
