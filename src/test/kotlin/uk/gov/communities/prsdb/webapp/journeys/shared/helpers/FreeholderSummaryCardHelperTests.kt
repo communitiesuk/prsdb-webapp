@@ -2,12 +2,17 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class FreeholderSummaryCardHelperTests {
     private val helper = FreeholderSummaryCardHelper()
@@ -29,6 +34,72 @@ class FreeholderSummaryCardHelperTests {
         assertEquals(
             listOf("James Hassan", "Billie Smith", "registerProperty.freeholders.list.unknownFreeholder.title"),
             cards.map { it.title },
+        )
+    }
+
+    @Test
+    fun `persisted freeholders produce ordered read-only summary cards`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val later = Freeholder(propertyOwnership, name = "Zoe Smith", email = "zoe@example.com")
+        val earlier = Freeholder(propertyOwnership)
+        ReflectionTestUtils.setField(later, "id", 2L)
+        ReflectionTestUtils.setField(earlier, "id", 1L)
+
+        // Act
+        val cards = helper.getSummaryCards(listOf(later, earlier))
+
+        // Assert
+        assertEquals(
+            listOf("registerProperty.freeholders.list.unknownFreeholder.title", "Zoe Smith"),
+            cards.map { it.title },
+        )
+        assertEquals("registerProperty.freeholders.list.unknownFreeholder.body", cards[0].bodyTextKey)
+        assertTrue(cards[0].summaryList.isEmpty())
+        assertEquals("registerProperty.freeholders.list.emailAddress", cards[1].summaryList.single().fieldHeading)
+        assertEquals("zoe@example.com", cards[1].summaryList.single().fieldValue)
+        assertTrue(cards.all { it.actions.isNullOrEmpty() })
+    }
+
+    @Test
+    fun `persisted postal-address freeholder gets property-record note only`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val postalAddress =
+            Address(
+                AddressDataModel.fromManualAddressData(
+                    "36 Sunnyside Lane",
+                    "Biggleswade",
+                    "SG18 9EJ",
+                ),
+            )
+        val postal = Freeholder(propertyOwnership, name = "Casey Address", address = postalAddress)
+        val email = Freeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com")
+        val both = Freeholder(propertyOwnership, name = "Alex Both", email = "alex@example.com", address = postalAddress)
+        val unknown = Freeholder(propertyOwnership)
+
+        // Act
+        val cards = helper.getSummaryCards(listOf(postal, email, both, unknown)).associateBy { it.title }
+
+        // Assert
+        assertEquals(
+            "propertyDetails.peopleResponsible.freeholder.postalAddressNote",
+            cards.getValue("Casey Address").bodyTextKey,
+        )
+        assertTrue(cards.getValue("Casey Address").summaryList.isEmpty())
+        assertNull(cards.getValue("Jordan Email").bodyTextKey)
+        assertEquals(
+            "registerProperty.freeholders.list.emailAddress",
+            cards.getValue("Alex Both").summaryList.single().fieldHeading,
+        )
+        assertEquals("alex@example.com", cards.getValue("Alex Both").summaryList.single().fieldValue)
+        assertEquals(
+            "propertyDetails.peopleResponsible.freeholder.postalAddressNote",
+            cards.getValue("Alex Both").bodyTextKey,
+        )
+        assertEquals(
+            "registerProperty.freeholders.list.unknownFreeholder.body",
+            cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
         )
     }
 
