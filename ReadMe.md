@@ -368,6 +368,15 @@ By default, when the service is run locally, it uses the `LocalFileUploader` ins
 You can manually switch by manipulating the profiles and attributes on those classes.
 Currently, there isn't a profile which connects to AWS with an otherwise local build.
 
+#### Virus scanning locally
+
+Deployed environments scan uploaded files with GuardDuty, which sends each scan result to an SQS queue that the async
+worker processes. Locally, `LocalVirusScanSimulator` instead adds a scan result to the `prsdb-scan-result-queue`
+ElasticMQ queue a few seconds after each upload, and the app processes it in the same way.
+
+Uploaded files are reported as clean, so they become downloadable shortly after uploading. If the file name contains
+`virus`, the file is reported as infected instead: it's deleted and the virus scan unsuccessful emails are sent.
+
 ## Releasing
 
 ### Release flows
