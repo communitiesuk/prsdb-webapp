@@ -78,7 +78,8 @@ noAddressFound:
   paragraph:
     one:
       beforeLink: Check the address details you entered and
-      linkText: search again.
+      linkText: search again
+      afterLink: .
     two: Or you can enter this address manually.
   button:
     text: Enter address manually
