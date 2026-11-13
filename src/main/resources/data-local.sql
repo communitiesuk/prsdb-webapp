@@ -646,3 +646,69 @@ VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111
        ('letting.agent.details@example.com', 39, '3334abcd-5678-abcd-1234-567abcd2222a', NULL, current_date),
        ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, current_date),
        ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, current_date);
+
+-- Local-only property examples for the property-record freeholder cards.
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (20000, current_timestamp, 900000020000, 0),
+       (20001, current_timestamp, 900000020001, 0),
+       (20002, current_timestamp, 900000020002, 0)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO address (id, created_date, uprn, single_line_address, local_council_id, postcode, building_name, building_number, street_name)
+VALUES (20000, current_timestamp, NULL, 'Joint Freeholders House, PRSDB Road, JF1 1AA', 1, 'JF1 1AA', 'Joint Freeholders House', NULL, 'PRSDB Road'),
+       (20001, current_timestamp, NULL, 'Non-Joint Freeholders House, PRSDB Road, NF1 1AA', 1, 'NF1 1AA', 'Non-Joint Freeholders House', NULL, 'PRSDB Road'),
+       (20002, current_timestamp, NULL, '12 Joint Freeholder Road, JF1 2AA', 1, 'JF1 2AA', NULL, '12', 'Joint Freeholder Road'),
+       (20003, current_timestamp, NULL, '12 Non-Joint Freeholder Road, NF1 2AA', 1, 'NF1 2AA', NULL, '12', 'Non-Joint Freeholder Road'),
+       (20004, current_timestamp, NULL, 'No Freeholders House, PRSDB Road, NF1 3AA', 1, 'NF1 3AA', 'No Freeholders House', NULL, 'PRSDB Road')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households,
+                                current_num_tenants, registration_number_id, address_id, created_date, last_modified_date,
+                                license_id, property_build_type, num_bedrooms, bills_included_list, custom_bills_included,
+                                furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type,
+                                marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later,
+                                tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (20000, true, 2, 3, 0, 0, 20000, 20000, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 20000, current_date + 365),
+       (20001, true, 1, 1, 0, 0, 20001, 20001, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 20001, current_date + 365),
+       (20002, true, 0, 2, 0, 0, 20002, 20004, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 20004, current_date + 365)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 20000, current_timestamp),
+       (1, 20001, current_timestamp),
+       (1, 20002, current_timestamp)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_compliance (property_ownership_id, created_date, last_modified_date, has_gas_supply,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration,
+                                 has_responsibility_to_tenants_declaration)
+VALUES (20000, current_timestamp, NULL, false, true, true, true),
+       (20001, current_timestamp, NULL, false, true, true, true),
+       (20002, current_timestamp, NULL, false, true, true, true)
+ON CONFLICT (property_ownership_id) DO NOTHING;
+
+INSERT INTO freeholder (name, email, address_id, property_ownership_id)
+SELECT seeded.name, seeded.email, seeded.address_id, seeded.property_ownership_id
+FROM (
+    VALUES ('Jordan Joint'::varchar, 'joint.freeholder@example.com'::varchar, NULL::bigint, 20000::bigint),
+           ('Casey Joint'::varchar, NULL::varchar, 20002::bigint, 20000::bigint),
+           (NULL::varchar, NULL::varchar, NULL::bigint, 20000::bigint),
+           ('Taylor Non-Joint'::varchar, 'nonjoint.freeholder@example.com'::varchar, NULL::bigint, 20001::bigint),
+           ('Alex Non-Joint'::varchar, NULL::varchar, 20003::bigint, 20001::bigint),
+           (NULL::varchar, NULL::varchar, NULL::bigint, 20001::bigint)
+) AS seeded(name, email, address_id, property_ownership_id)
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM freeholder existing
+    WHERE existing.property_ownership_id = seeded.property_ownership_id
+      AND existing.name IS NOT DISTINCT FROM seeded.name
+      AND existing.email IS NOT DISTINCT FROM seeded.email
+      AND existing.address_id IS NOT DISTINCT FROM seeded.address_id
+);
+
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

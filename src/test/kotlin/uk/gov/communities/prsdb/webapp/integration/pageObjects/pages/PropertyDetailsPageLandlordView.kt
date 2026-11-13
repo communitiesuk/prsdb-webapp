@@ -36,6 +36,17 @@ class PropertyDetailsPageLandlordView(
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 
+    val freeholderSection: Locator
+        get() = page.locator("#freeholder-section")
+
+    val freeholderCards: List<FreeholderSummaryCard>
+        get() {
+            val locator = page.locator("#freeholder-cards .govuk-summary-card")
+            return (0 until locator.count()).map { FreeholderSummaryCard(locator.nth(it)) }
+        }
+
+    val freeholderUpdateLink = Link(page.locator("#freeholder-update-link"))
+
     val pendingInvitationsSummary: Locator
         get() = page.locator(".govuk-details__summary:has-text('Pending invitations')")
 
@@ -51,8 +62,8 @@ class PropertyDetailsPageLandlordView(
 
     val landlordSummaryCards: List<LandlordSummaryCard>
         get() {
-            val count = page.locator("#people-responsible .govuk-summary-card").count()
-            return (0 until count).map { LandlordSummaryCard(page.locator("#people-responsible .govuk-summary-card").nth(it)) }
+            val locator = page.locator("#landlord-summary-cards .govuk-summary-card")
+            return (0 until locator.count()).map { LandlordSummaryCard(locator.nth(it)) }
         }
 
     val peopleResponsibleOwnershipSummaryList = PeopleResponsibleOwnershipSummaryList(page)
@@ -69,6 +80,13 @@ class PropertyDetailsPageLandlordView(
         locator: Locator,
     ) : SummaryCard(locator) {
         override val summaryList = LandlordCardSummaryList(locator)
+    }
+
+    class FreeholderSummaryCard(
+        locator: Locator,
+    ) : SummaryCard(locator, headingLevel = "h4") {
+        val bodyText = locator.locator(".govuk-summary-card__content p")
+        val actionLinks = locator.locator(".govuk-summary-card__action")
     }
 
     class LandlordCardSummaryList(
