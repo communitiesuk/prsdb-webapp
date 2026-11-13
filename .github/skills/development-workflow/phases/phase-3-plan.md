@@ -57,8 +57,9 @@
 
    Bug fixes do NOT require feature flags (they restore correct behaviour).
 
-6. After the plan is written, present it (step 1) and ask the user to confirm
-   the PR breakdown and verification strategy — summarise both in the approval
+6. After the plan is written, present it using the
+   `presenting-documents-for-review` skill and ask the user to confirm the PR
+   breakdown and verification strategy — summarise both in the approval
    question itself. Do not proceed until the user agrees.
 
 7. If the plan defines more than one PR, ask the user:

@@ -33,7 +33,8 @@ approved it.
 - Focus on: purpose, constraints, success criteria, user-visible behaviour
 - If the request spans multiple independent subsystems, flag decomposition first
 - Text written before an `ask_user` call may be hidden — make every question
-  self-contained (see `presenting-documents-for-review`)
+  self-contained (see "Asking the User Questions" in
+  `.github/copilot-instructions.md`)
 
 ## Exploring Approaches
 

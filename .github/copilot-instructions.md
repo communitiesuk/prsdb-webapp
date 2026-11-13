@@ -117,6 +117,16 @@ Never create temporary files (diffs, scripts, command output, snapshots) in the 
 the session workspace at `~/.copilot/session-state/<session-id>/files/` for any temporary artifacts. This keeps the repo
 clean and avoids untracked files appearing in `git status`.
 
+## Asking the User Questions
+
+Chat text written in the same turn as an `ask_user` call may be collapsed or hidden when the question appears. Every
+`ask_user` question must make sense on its own:
+
+- Include the context needed to answer (e.g. a 2-5 line summary of what is being approved, and where to find it).
+- When choosing between options, put each option's one-line trade-off in the question or its choices.
+- If the user needs to read something long first, present it with the `presenting-documents-for-review` skill, or end
+  the turn and ask in the closing lines of the message instead of calling `ask_user`.
+
 ## Architecture
 
 ### Spring Boot + Kotlin + Thymeleaf Stack
