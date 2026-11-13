@@ -14,20 +14,6 @@ ifOccupied:
   bullet:
     one: how many people live in the property
     two: the rent you charge
-provideTenancyDetailsLater:
-  heading: Provide tenancy details later
-  paragraph:
-    one: You can continue and submit your registration now, but you’ll need to return later and provide details about the current tenancy.
-  whenToProvide:
-    heading: When you’ll need to provide these tenancy details
-    insetText: To keep your property registered, you must provide its tenancy details within 28 days.
-    paragraph: This is because you’ve told us this property’s occupied by tenants.
-  reason: 'We’ll need to know:'
-  weWillNeedToKnow:
-    bullet:
-      one: how many people are living in the property
-      two: if you’ve provided furniture
-      three: how much the rent is
 afterRegistered:
   heading: After you’ve registered
   paragraph:
@@ -144,29 +130,6 @@ confirmMissingCompliance:
     error:
       missing: Select whether you want to submit this registration
   button: Confirm and submit
-provideLicensingLater:
-  occupied:
-    heading: Provide details about property licensing later
-    paragraph:
-      one: You can continue and submit your registration now, but you’ll need to return later and provide details about this property’s license.
-    whenToAdd:
-      heading: When you must do this by
-      insetText: To keep your property registered, you must provide its licensing details within 28 days.
-      paragraph: This is because you’ve told us this property’s occupied by tenants.
-  unoccupied:
-    heading: Provide details about property licensing later
-    paragraph:
-      one: If you’re unsure, check with the local council if your property needs a license to be rented out.
-    whenToAdd:
-      heading: When you’ll need to provide these property licensing details
-      paragraph:
-        one: You can continue to finish your registration and get a Property Registration Number.
-        two: 'Once your property’s occupied, you have 28 days to return and tell us:'
-  weWillNeedToKnow:
-    intro: 'We’ll need to know:'
-    bullet:
-      one: if your property needs a license or not
-      two: details about the license (if your property needs one)
 correspondenceEmail:
   heading: Where should the council send emails?
   hint: This is the email address the council will use if they need to contact someone about the property

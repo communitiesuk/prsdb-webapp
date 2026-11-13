@@ -24,8 +24,8 @@ class HouseholdStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockHouseholdsAndTenantsState)
 
         // Assert
-        assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
-        assertEquals("forms.numberOfHouseholds.label", content["label"])
+        assertEquals("tenancyDetails.numberOfHouseholds.heading", content["fieldSetHeading"])
+        assertEquals("tenancyDetails.numberOfHouseholds.label", content["label"])
         assertEquals("forms/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockHouseholdsAndTenantsState))
     }
 }

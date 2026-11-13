@@ -111,40 +111,40 @@ class MessageKeyConverter {
 
         private fun convertBillsIncluded(billsIncluded: BillsIncluded): String =
             when (billsIncluded) {
-                BillsIncluded.GAS -> "forms.billsIncluded.checkbox.gas"
-                BillsIncluded.ELECTRICITY -> "forms.billsIncluded.checkbox.electricity"
-                BillsIncluded.WATER -> "forms.billsIncluded.checkbox.water"
-                BillsIncluded.COUNCIL_TAX -> "forms.billsIncluded.checkbox.councilTax"
-                BillsIncluded.LANDLINE -> "forms.billsIncluded.checkbox.landline"
-                BillsIncluded.BROADBAND -> "forms.billsIncluded.checkbox.broadband"
-                BillsIncluded.TV_LICENCE -> "forms.billsIncluded.checkbox.tvLicence"
-                BillsIncluded.CABLE_OR_SATELLITE_TV -> "forms.billsIncluded.checkbox.cableSatelliteTV"
-                BillsIncluded.PARKING -> "forms.billsIncluded.checkbox.parking"
-                BillsIncluded.GARDENING -> "forms.billsIncluded.checkbox.gardening"
-                BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS -> "forms.billsIncluded.checkbox.communalAreasCleaner"
+                BillsIncluded.GAS -> "tenancyDetails.billsIncluded.checkbox.gas"
+                BillsIncluded.ELECTRICITY -> "tenancyDetails.billsIncluded.checkbox.electricity"
+                BillsIncluded.WATER -> "tenancyDetails.billsIncluded.checkbox.water"
+                BillsIncluded.COUNCIL_TAX -> "tenancyDetails.billsIncluded.checkbox.councilTax"
+                BillsIncluded.LANDLINE -> "tenancyDetails.billsIncluded.checkbox.landline"
+                BillsIncluded.BROADBAND -> "tenancyDetails.billsIncluded.checkbox.broadband"
+                BillsIncluded.TV_LICENCE -> "tenancyDetails.billsIncluded.checkbox.tvLicence"
+                BillsIncluded.CABLE_OR_SATELLITE_TV -> "tenancyDetails.billsIncluded.checkbox.cableSatelliteTV"
+                BillsIncluded.PARKING -> "tenancyDetails.billsIncluded.checkbox.parking"
+                BillsIncluded.GARDENING -> "tenancyDetails.billsIncluded.checkbox.gardening"
+                BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS -> "tenancyDetails.billsIncluded.checkbox.communalAreasCleaner"
                 BillsIncluded.SOMETHING_ELSE -> ""
             }
 
         private fun convertRentFrequency(rentFrequency: RentFrequency): String =
             when (rentFrequency) {
-                RentFrequency.WEEKLY -> "forms.rentFrequency.radios.option.weekly.label"
-                RentFrequency.FOUR_WEEKLY -> "forms.rentFrequency.radios.option.fourWeekly.label"
-                RentFrequency.MONTHLY -> "forms.rentFrequency.radios.option.monthly.label"
+                RentFrequency.WEEKLY -> "tenancyDetails.rentFrequency.radios.option.weekly.label"
+                RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentFrequency.radios.option.fourWeekly.label"
+                RentFrequency.MONTHLY -> "tenancyDetails.rentFrequency.radios.option.monthly.label"
                 RentFrequency.OTHER -> ""
             }
 
         private fun convertFurnishedStatus(furnishedStatus: FurnishedStatus): String =
             when (furnishedStatus) {
-                FurnishedStatus.FURNISHED -> "forms.furnishedStatus.radios.options.furnished.label"
-                FurnishedStatus.PART_FURNISHED -> "forms.furnishedStatus.radios.options.partFurnished.label"
-                FurnishedStatus.UNFURNISHED -> "forms.furnishedStatus.radios.options.unfurnished.label"
+                FurnishedStatus.FURNISHED -> "tenancyDetails.furnishedStatus.radios.options.furnished.label"
+                FurnishedStatus.PART_FURNISHED -> "tenancyDetails.furnishedStatus.radios.options.partFurnished.label"
+                FurnishedStatus.UNFURNISHED -> "tenancyDetails.furnishedStatus.radios.options.unfurnished.label"
             }
 
         private fun convertLicensingType(licensingType: LicensingType): String =
             when (licensingType) {
-                LicensingType.SELECTIVE_LICENCE -> "forms.licensingType.radios.option.selectiveLicence.label"
-                LicensingType.HMO_MANDATORY_LICENCE -> "forms.licensingType.radios.option.hmoMandatory.label"
-                LicensingType.HMO_ADDITIONAL_LICENCE -> "forms.licensingType.radios.option.hmoAdditional.label"
+                LicensingType.SELECTIVE_LICENCE -> "licensing.licensingType.radios.option.selectiveLicence.label"
+                LicensingType.HMO_MANDATORY_LICENCE -> "licensing.licensingType.radios.option.hmoMandatory.label"
+                LicensingType.HMO_ADDITIONAL_LICENCE -> "licensing.licensingType.radios.option.hmoAdditional.label"
                 LicensingType.NO_LICENSING -> "forms.checkPropertyAnswers.propertyDetails.noLicensing"
                 LicensingType.PROVIDE_LATER -> "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater"
             }

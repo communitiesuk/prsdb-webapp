@@ -74,9 +74,9 @@ class RegisteredPropertyViewModelsTests {
 
         @ParameterizedTest
         @CsvSource(
-            "SELECTIVE_LICENCE,forms.licensingType.radios.option.selectiveLicence.label",
-            "HMO_MANDATORY_LICENCE,forms.licensingType.radios.option.hmoMandatory.label",
-            "HMO_ADDITIONAL_LICENCE,forms.licensingType.radios.option.hmoAdditional.label",
+            "SELECTIVE_LICENCE,licensing.licensingType.radios.option.selectiveLicence.label",
+            "HMO_MANDATORY_LICENCE,licensing.licensingType.radios.option.hmoMandatory.label",
+            "HMO_ADDITIONAL_LICENCE,licensing.licensingType.radios.option.hmoAdditional.label",
             "NO_LICENSING,forms.checkPropertyAnswers.propertyDetails.noLicensing",
         )
         fun `Returns correct licensing display name for licence`(
