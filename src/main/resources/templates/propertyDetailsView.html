@@ -41,14 +41,28 @@
                 </p>
             </div>
         </th:block>
-        <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
+        <span class="govuk-caption-l"
+              th:text="${isDeactivated == true} ? #{propertyDetails.deactivated.caption} : #{propertyDetails.heading}">propertyDetails.heading</span>
         <h1 class="govuk-heading-l">
             <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
         </h1>
         <p class="govuk-body">
             <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
         </p>
-        <th:block th:if="${isLandlordView}">
+        <div th:if="${isDeactivated == true}" id="reactivate-property-panel" class="govuk-!-width-two-thirds">
+            <article id="reactivate-property-ticket-panel"
+                     th:replace="~{fragments/ticketPanel ::
+                     ticketPanel('propertyDetails.deactivated.panel.heading',
+                     ~{::#reactivate-property-ticket-panel/content()}, null)}">
+                <p class="govuk-body" th:text="#{propertyDetails.deactivated.panel.body}">
+                    propertyDetails.deactivated.panel.body
+                </p>
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${reactivatePropertyUrl}, #{propertyDetails.deactivated.panel.button})}">
+                    propertyDetails.deactivated.panel.button
+                </a>
+            </article>
+        </div>
+        <th:block th:if="${isLandlordView and isDeactivated != true}">
             <th:block th:if="${propertyIsOccupied}">
                 <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
                     <article id="letting-agent-panel"
@@ -114,7 +128,7 @@
                         <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
                         <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                     </th:block>
-                <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
+                <p th:if="${isLandlordView and isDeactivated != true}" class="govuk-body prsd-deregister-link" >
                     <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
                         propertyDetails.deregisterPropertyLink.text
                     </a>

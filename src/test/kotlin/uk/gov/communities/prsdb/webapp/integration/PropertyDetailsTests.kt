@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -327,6 +328,63 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     "Once your property’s occupied, they can keep details updated for you",
                 )
                 assertThat(detailsPage.delegateToLettingAgentLink).not().isVisible()
+            }
+        }
+
+        @Nested
+        inner class DeactivatedProperty {
+            // Property 52: inactive, occupied, all details "provide later", owned by the mock landlord
+            private val inactivePropertyOwnershipId = 52L
+
+            @Test
+            fun `the deactivated caption and reactivation panel are shown`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                assertThat(detailsPage.caption).hasText("Deactivated property")
+                assertThat(detailsPage.reactivatePropertyPanel).containsText("Your property has been deactivated")
+            }
+
+            @Test
+            fun `the reactivate button starts the reactivation journey`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                detailsPage.reactivatePropertyButton.clickAndWait()
+
+                assertPageIs(
+                    page,
+                    InfoFormPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to inactivePropertyOwnershipId.toString()),
+                )
+            }
+
+            @Test
+            fun `the property tab has no change links, letting agent panel or deregister link`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.actionLinks).hasCount(0)
+                assertThat(detailsPage.delegateToLettingAgentLink).isHidden()
+                assertThat(detailsPage.deregisterPropertyLink).isHidden()
+            }
+
+            @Test
+            fun `the people responsible tab has no invite or remove actions`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertEquals(1, detailsPage.landlordSummaryCards.size)
+                assertThat(detailsPage.inviteJointLandlordLink).isHidden()
+                assertThat(detailsPage.inviteJointLandlordButton).isHidden()
+            }
+
+            @Test
+            fun `the compliance tab has no change actions or notification banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.gasSafetyCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.electricalSafetyCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.epcCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
         }
     }

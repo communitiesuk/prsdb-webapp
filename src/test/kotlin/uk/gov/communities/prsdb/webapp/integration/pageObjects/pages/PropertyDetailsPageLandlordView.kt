@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
 
 class PropertyDetailsPageLandlordView(
@@ -25,6 +26,13 @@ class PropertyDetailsPageLandlordView(
     val removeLettingAgentLink = Link.byText(page, "Remove your letting agent or property manager")
     val inviteJointLandlordLink = Link.byText(page, "invite them to join the property")
     val inviteJointLandlordButton = Button.byText(page, "Invite a joint landlord")
+
+    val caption: Locator
+        get() = page.locator("main .govuk-caption-l")
+
+    val reactivatePropertyPanel = TicketPanel(page.locator("#reactivate-property-panel"))
+
+    val reactivatePropertyButton = Button.byText(page, "Reactivate this property")
 
     val markAsSingleLandlordInsetText: Locator
         get() = page.locator(".govuk-inset-text:has-text(\"confirm that you're the only landlord\")")

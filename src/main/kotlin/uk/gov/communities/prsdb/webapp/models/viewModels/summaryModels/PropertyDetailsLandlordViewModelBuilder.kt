@@ -20,6 +20,7 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlords: Set<Landlord>,
             currentLandlord: Landlord,
             propertyOwnershipId: Long,
+            isReadOnly: Boolean = false,
         ): List<SummaryCardViewModel> =
             landlords
                 .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.name })
@@ -43,7 +44,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                             title = titleKey,
                             cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
-                            actions = if (landlords.size > 1) listOf(removeMeAction) else null,
+                            actions = if (landlords.size > 1 && !isReadOnly) listOf(removeMeAction) else null,
                         )
                     } else {
                         SummaryCardViewModel(
