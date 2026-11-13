@@ -288,6 +288,63 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `the freeholder section uses ownership specific labels and update url`() {
+        val ownershipTypes =
+            listOf(
+                Triple(
+                    OwnershipType.SHARE_OF_JOINT_TENANTS,
+                    "registerProperty.freeholders.checkAnswers.heading.joint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.joint",
+                ),
+                Triple(
+                    OwnershipType.LEASEHOLD_ONLY,
+                    "registerProperty.freeholders.checkAnswers.heading.nonJoint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.nonJoint",
+                ),
+            )
+
+        ownershipTypes.forEachIndexed { index, (ownershipType, headingKey, linkTextKey) ->
+            val propertyId = 100L + index
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = ownershipType, id = propertyId),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                )
+
+            assertTrue(viewModel.showFreeholderSection)
+            assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
+            assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
+            assertEquals("#", viewModel.freeholderSectionUpdateUrl)
+        }
+    }
+
+    @Test
+    fun `the freeholder section is limited to landlord associated parties and eligible ownership types`() {
+        val ineligibleViewModels =
+            listOf(
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                    isLandlordView = false,
+                    messageSource = mockMessageSource,
+                ),
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                ),
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                ),
+            )
+
+        assertTrue(ineligibleViewModels.none { it.showFreeholderSection })
+    }
+
+    @Test
     fun `every ownership type has an expected set of ownership answer rows`() {
         assertEquals(
             OwnershipType.entries.toSet(),
