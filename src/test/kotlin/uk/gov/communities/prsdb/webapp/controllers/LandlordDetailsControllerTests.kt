@@ -4,6 +4,7 @@ import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -97,7 +98,8 @@ class LandlordDetailsControllerTests(
             // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord()
-            val deactivatedProperties = listOf(DeactivatedPropertyLandlordViewModel("6 Mythical Place", "P-XXXX-XXXX"))
+            val deactivatedProperties =
+                listOf(DeactivatedPropertyLandlordViewModel("6 Mythical Place", "P-XXXX-XXXX", "/landlord/property/6"))
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
@@ -105,8 +107,12 @@ class LandlordDetailsControllerTests(
                     currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 ),
             ).thenReturn(emptyList())
-            whenever(propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord))
-                .thenReturn(deactivatedProperties)
+            whenever(
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(deactivatedProperties)
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
@@ -143,7 +149,7 @@ class LandlordDetailsControllerTests(
                     attributeDoesNotExist("deactivatedPropertiesList", "activePropertiesTabId", "deactivatedPropertiesTabId")
                 }
             }
-            verify(propertyOwnershipService, never()).getDeactivatedPropertiesForLandlordUser(any())
+            verify(propertyOwnershipService, never()).getDeactivatedPropertiesForLandlordUser(any(), anyOrNull())
             verify(backLinkStorageService).storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
         }
 

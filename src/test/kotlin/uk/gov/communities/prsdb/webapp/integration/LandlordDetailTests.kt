@@ -107,9 +107,8 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
     @Nested
     inner class LandlordDetailsPropertiesTabs : NestedIntegrationTestWithImmutableData("data-local.sql") {
-        // TODO PDJB-2035: Update this test to check the addresses link to the deactivated property record
         @Test
-        fun `the deactivated properties tab shows the landlord's deactivated properties without links`() {
+        fun `the deactivated properties tab links to deactivated property records and back returns to it`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
             assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (3)")
@@ -121,8 +120,17 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("6 Mythical Place")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("Inactive House, PRSDB Road, IN1 1AA")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("3 Fake Way")
-            assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(0)
+            assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(3)
             assertThat(detailsPage.noDeactivatedPropertiesMessage).isHidden()
+
+            detailsPage.getPropertyAddressLink("Inactive House, PRSDB Road, IN1 1AA").clickAndWait()
+            val propertyDetailsView =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "52"))
+            assertThat(propertyDetailsView.caption).hasText("Deactivated property")
+
+            propertyDetailsView.backLink.clickAndWait()
+            val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
+            assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test

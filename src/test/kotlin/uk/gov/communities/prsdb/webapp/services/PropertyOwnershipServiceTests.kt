@@ -39,6 +39,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -684,8 +685,15 @@ class PropertyOwnershipServiceTests {
                 )
             whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id))
                 .thenReturn(listOf(deactivatedProperty))
+            val expectedCurrentUrlKey = 12
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(DEACTIVATED_PROPERTIES_FRAGMENT))
+                .thenReturn(expectedCurrentUrlKey)
 
-            val result = propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord)
+            val result =
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                )
 
             assertEquals(
                 listOf(
@@ -695,6 +703,10 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(deactivatedProperty.registrationNumber)
                                 .toString(),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(deactivatedProperty.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 ),
                 result,

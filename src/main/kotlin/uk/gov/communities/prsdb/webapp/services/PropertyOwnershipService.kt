@@ -235,10 +235,18 @@ class PropertyOwnershipService(
             )
         }
 
-    fun getDeactivatedPropertiesForLandlordUser(landlord: Landlord): List<DeactivatedPropertyLandlordViewModel> =
+    fun getDeactivatedPropertiesForLandlordUser(
+        landlord: Landlord,
+        currentUrlFragment: String? = null,
+    ): List<DeactivatedPropertyLandlordViewModel> =
         propertyOwnershipRepository
             .findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
-            .map { DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(it) }
+            .map { propertyOwnership ->
+                DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(
+                    propertyOwnership,
+                    currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
+                )
+            }
 
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,

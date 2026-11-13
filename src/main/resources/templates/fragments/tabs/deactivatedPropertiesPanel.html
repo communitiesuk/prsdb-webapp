@@ -5,8 +5,9 @@
         <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">
             <tbody class="govuk-table__body">
                 <tr class="govuk-table__row" th:each="property: ${deactivatedPropertiesList}">
-                    <!--/* TODO PDJB-2035: Link the address to the deactivated property record */-->
-                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.address}"></td>
+                    <td class="govuk-table__cell govuk-!-width-one-half">
+                        <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">${property.address}</a>
+                    </td>
                     <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.registrationNumber}"></td>
                 </tr>
             </tbody>

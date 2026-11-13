@@ -6,17 +6,22 @@ import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -55,7 +60,7 @@ class PropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
 
-    // TODO PDJB-2016: remove this mock when the ASSOCIATED_PARTIES feature flag is removed
+    // TODO PDJB-2016 and PDJB-2149: remove this mock when the ASSOCIATED_PARTIES and ACTIVE_INACTIVE flags are removed
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
 
@@ -494,6 +499,107 @@ class PropertyDetailsControllerTests(
                     status { isOk() }
                     model { attribute("propertyIsOccupied", true) }
                     model { attributeExists("lettingAgentPanelLink") }
+                }
+        }
+    }
+
+    @Nested
+    inner class GetDeactivatedPropertyDetailsLandlordViewTests {
+        private val landlord = createIndividualLandlord()
+        private val inactivePropertyOwnership =
+            createPropertyOwnership(id = 2, isActive = false, landlords = mutableSetOf(landlord))
+        private val path =
+            PropertyDetailsController.getPropertyDetailsPath(inactivePropertyOwnership.id, isLocalCouncilView = false)
+
+        @BeforeEach
+        fun setUpDeactivated() {
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(propertyOwnershipService.retrievePropertyOwnershipById(inactivePropertyOwnership.id)).thenReturn(null)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails returns the deactivated view for an inactive property of the current landlord`() {
+            whenever(propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(inactivePropertyOwnership.id))
+                .thenReturn(inactivePropertyOwnership)
+
+            mvc.get(path).andExpect {
+                status { isOk() }
+                view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
+                model { attribute("isDeactivated", true) }
+                model { attribute("isLandlordView", true) }
+                model {
+                    attribute(
+                        "reactivatePropertyUrl",
+                        ReactivatePropertyController.getPropertyReactivationPath(inactivePropertyOwnership.id),
+                    )
+                }
+                model { attribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL) }
+                model { attributeExists("propertyDetails", "landlordSummaryCards", "landlordCount") }
+                model {
+                    attributeDoesNotExist(
+                        "notificationBanner",
+                        "deregisterPropertyLink",
+                        "delegatesToLettingAgent",
+                        "lettingAgentPanelLink",
+                        "inviteJointLandlordUrl",
+                        "switchToIndividualLink",
+                        "pendingInvitations",
+                        "expiredInvitations",
+                    )
+                }
+            }
+
+            verify(viewModelFactory).create(
+                any(),
+                any(),
+                eq(PropertyDetailsViewType.DEACTIVATED_LANDLORD),
+                eq(inactivePropertyOwnership.id),
+                anyOrNull(),
+            )
+            verify(propertyOwnershipService, never()).getLettingAgentAccess(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails returns 404 for an inactive property the current landlord does not own`() {
+            whenever(propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(inactivePropertyOwnership.id))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get(path).andExpect { status { isNotFound() } }
+        }
+
+        // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails does not show the deactivated view when the active inactive flag is off`() {
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(inactivePropertyOwnership.id))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get(path).andExpect { status { isNotFound() } }
+
+            verify(propertyOwnershipService, never()).getInactivePropertyOwnershipForCurrentLandlord(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails shows the normal view for an active property`() {
+            val activePropertyOwnership = createPropertyOwnership(id = 3, landlords = mutableSetOf(landlord))
+            whenever(propertyOwnershipService.retrievePropertyOwnershipById(activePropertyOwnership.id))
+                .thenReturn(activePropertyOwnership)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(activePropertyOwnership.id))
+                .thenReturn(activePropertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(activePropertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(activePropertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attributeDoesNotExist("isDeactivated") }
+                    model { attributeExists("deregisterPropertyLink") }
                 }
         }
     }

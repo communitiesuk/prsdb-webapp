@@ -124,7 +124,10 @@ class LandlordDetailsController(
                 model.addAttribute("deactivatedPropertiesTabId", DEACTIVATED_PROPERTIES_FRAGMENT)
                 model.addAttribute(
                     "deactivatedPropertiesList",
-                    propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord),
+                    propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                        landlord,
+                        currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                    ),
                 )
                 ACTIVE_PROPERTIES_FRAGMENT
             } else {
