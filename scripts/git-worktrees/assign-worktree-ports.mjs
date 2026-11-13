@@ -51,8 +51,11 @@ function findUsedPorts(worktreePath) {
 }
 
 function setEnvVar(content, key, value) {
-    const keyPattern = new RegExp(`^${key}=.*$`, "m");
-    return keyPattern.test(content) ? content.replace(keyPattern, `${key}="${value}"`) : `${content.trimEnd()}\n${key}="${value}"\n`;
+    const lines = content.split("\n");
+    const index = lines.findIndex((line) => line.startsWith(`${key}=`));
+    if (index === -1) return `${content.trimEnd()}\n${key}="${value}"\n`;
+    lines[index] = `${key}="${value}"${lines[index].endsWith("\r") ? "\r" : ""}`;
+    return lines.join("\n");
 }
 
 export function assignPorts(worktreePath) {
