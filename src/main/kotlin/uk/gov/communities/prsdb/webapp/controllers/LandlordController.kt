@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -19,9 +20,11 @@ import uk.gov.communities.prsdb.webapp.constants.OUTSTANDING_ACTIONS_PATH_SEGMEN
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveLandlordNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OutstandingActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -66,6 +69,24 @@ class LandlordController(
             )
 
         model.addAttribute("landlordDashboardNotificationBannerViewModel", landlordDashboardNotificationBannerViewModel)
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+        val showInactiveLandlordBanner = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
+        model.addAttribute("showInactiveLandlordBanner", showInactiveLandlordBanner)
+        if (showInactiveLandlordBanner) {
+            model.addAttribute(
+                "inactiveLandlordNotificationBannerViewModel",
+                InactiveLandlordNotificationBannerViewModel(
+                    isOrganisation = landlord is OrganisationalLandlord,
+                    hasDeactivatedProperties = propertyOwnershipService.hasDeactivatedProperties(landlord),
+                    hasIncompleteProperties = numberOfIncompleteProperties > 0,
+                ),
+            )
+            // TODO PDJB-2033: Link to the deactivated properties tab (DEACTIVATED_PROPERTIES_FRAGMENT) instead
+            model.addAttribute(
+                "deactivatedPropertiesUrl",
+                "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+            )
+        }
         model.addAttribute("landlordName", landlord.name)
         model.addAttribute("lrn", RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber))
 

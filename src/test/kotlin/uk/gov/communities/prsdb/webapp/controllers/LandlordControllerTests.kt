@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
@@ -28,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveLandlordNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OutstandingActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -37,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 @WebMvcTest(LandlordController::class)
@@ -358,6 +361,102 @@ class LandlordControllerTests(
                 status { isOk() }
                 model { attributeExists("paginationViewModel") }
             }
+    }
+
+    @Nested
+    inner class InactiveLandlordNotificationBanner {
+        // TODO PDJB-2149: Remove this setup when the ACTIVE_INACTIVE flag is removed
+        @BeforeEach
+        fun enableActiveInactiveFlag() {
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `landlordDashboard adds the inactive landlord banner for an inactive individual landlord`() {
+            val landlord = createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(propertyOwnershipService.hasDeactivatedProperties(landlord)).thenReturn(true)
+            whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(0)
+
+            val result =
+                mvc
+                    .get(LANDLORD_DASHBOARD_URL)
+                    .andExpect {
+                        status { isOk() }
+                        model {
+                            attribute("showInactiveLandlordBanner", true)
+                            attribute(
+                                "deactivatedPropertiesUrl",
+                                "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+                            )
+                        }
+                    }.andReturn()
+
+            val bannerViewModel =
+                result.modelAndView?.model?.get("inactiveLandlordNotificationBannerViewModel")
+                    as InactiveLandlordNotificationBannerViewModel
+            assertEquals(false, bannerViewModel.isOrganisation)
+            assertEquals(true, bannerViewModel.hasDeactivatedProperties)
+            assertEquals(false, bannerViewModel.hasIncompleteProperties)
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `landlordDashboard adds the inactive landlord banner for an inactive org landlord with incomplete properties`() {
+            val landlord = createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(propertyOwnershipService.hasDeactivatedProperties(landlord)).thenReturn(false)
+            whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
+
+            val result =
+                mvc
+                    .get(LANDLORD_DASHBOARD_URL)
+                    .andExpect { status { isOk() } }
+                    .andReturn()
+
+            val bannerViewModel =
+                result.modelAndView?.model?.get("inactiveLandlordNotificationBannerViewModel")
+                    as InactiveLandlordNotificationBannerViewModel
+            assertEquals(true, bannerViewModel.isOrganisation)
+            assertEquals(false, bannerViewModel.hasDeactivatedProperties)
+            assertEquals(true, bannerViewModel.hasIncompleteProperties)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `landlordDashboard does not add the inactive landlord banner for an active landlord`() {
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("showInactiveLandlordBanner", false)
+                        attributeDoesNotExist("inactiveLandlordNotificationBannerViewModel")
+                    }
+                }
+        }
+
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE flag is removed
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `landlordDashboard does not add the inactive landlord banner when ACTIVE_INACTIVE is disabled`() {
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+            val landlord = createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("showInactiveLandlordBanner", false)
+                        attributeDoesNotExist("inactiveLandlordNotificationBannerViewModel")
+                    }
+                }
+        }
     }
 
     // TODO PDJB-2006: Delete this class when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed

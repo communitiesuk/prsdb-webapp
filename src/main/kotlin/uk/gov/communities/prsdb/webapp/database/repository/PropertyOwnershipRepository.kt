@@ -23,6 +23,8 @@ interface PropertyOwnershipRepository :
 
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): Boolean
 
+    fun existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlordId: Long): Boolean
+
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(
         landlordId: Long,
         id: Long,
