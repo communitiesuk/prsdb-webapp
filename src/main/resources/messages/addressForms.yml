@@ -8,7 +8,7 @@ nonEnglandOrWalesAddress:
       afterLink: .
 lookupAddress:
   landlordRegistration:
-    fieldSetHeading: What is your contact address?
+    fieldSetHeading: What is your home address?
     fieldSetHint: This must be an address within England or Wales.
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
@@ -49,6 +49,8 @@ lookupAddress:
       missing: Enter a house name or number
 selectAddress:
   fieldSetHeading: Select your address
+  landlordRegistration:
+    fieldSetHeading: Select your home address
   trusteeRegistration:
     pageTitle: Select the lead trustee’s address
   govBodyMemberRegistration:
@@ -75,14 +77,15 @@ noAddressFound:
       two: Or you can enter the property address manually.
   paragraph:
     one:
-      beforeLink: Check the contact address is in England or Wales and
-      linkText: search again.
-    two: Or you can enter the contact address manually.
+      beforeLink: Check the address details you entered and
+      linkText: search again
+      afterLink: .
+    two: Or you can enter this address manually.
   button:
     text: Enter address manually
 manualAddress:
   landlordRegistration:
-    fieldSetHeading: What is your contact address?
+    fieldSetHeading: What is your home address?
     fieldSetHint: This must be an address within England or Wales.
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
