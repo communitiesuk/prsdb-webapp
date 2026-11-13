@@ -1,7 +1,7 @@
 ---
 name: development-workflow
 description: Use when starting a new development task. Orchestrates the full lifecycle from setup through implementation, review, and PR creation.
-allowed-tools: 'write shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(git branch -m:*) shell(git worktree list) shell(powershell -File scripts\git-worktrees\copy-config-files.ps1:*) shell(./scripts/git-worktrees/copy-config-files.sh:*) shell(node scripts/git-worktrees/assign-worktree-ports.mjs:*) shell(git add) shell(gh pr create) shell(gh pr view) shell(idea64:*) shell(idea:*) shell(idea.cmd:*)'
+allowed-tools: 'write shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(git branch -m:*) shell(git add) shell(gh pr create) shell(gh pr view) shell(idea64:*) shell(idea:*) shell(idea.cmd:*)'
 ---
 
 # Development Workflow
