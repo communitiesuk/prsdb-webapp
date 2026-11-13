@@ -1,1 +1,77 @@
 sectionHeading: Tell us if your property needs a licence
+licensingType:
+  fieldSetHeading: Select the type of licence you have for your property
+  fieldSetHint: Select which type of property licence applies to this property
+  radios:
+    error:
+      missing: Select the type of licensing for the property
+    option:
+      selectiveLicence:
+        label: Selective licence
+        hint: Some local councils require this licence for any privately rented homes in specific areas.
+      hmoMandatory:
+        label: HMO mandatory licence
+        hint: A House in Multiple Occupation (HMO) must have a licence if it’s occupied by 5 or more people who form more than 1 household.
+      hmoAdditional:
+        label: HMO additional licence
+        hint: Some local councils require a licence for smaller HMOs that are not covered by the mandatory licensing licence.
+      noLicensing:
+        label: This property does not need a licence
+licenceNumber:
+  error:
+    tooLong: The licensing number is too long
+selectiveLicence:
+  error:
+    missing: Enter the selective licence number
+  fieldSetHeading: What is your selective licence number?
+  label: Enter the selective licence number
+  detail:
+    summary: What is selective licensing?
+    text: Some local councils issue a selective licensing number for privately rented housing in a local area.
+hmoMandatoryLicence:
+  error:
+    missing: Enter the HMO Mandatory licence number
+  fieldSetHeading: What is your HMO mandatory licence number?
+  label: Enter the HMO mandatory licence number
+  detail:
+    summary: What is a House in Multiple Occupation (HMO) licence?
+    paragraph:
+      two: 'If you want to rent out your property as a house in multiple occupation in England or Wales, you must contact your council to check if you need a licence.'
+      three: 'You must have a HMO licence if you’re renting out a large HMO, which means:'
+    bullet:
+      one: it’s rented to 5 or more people who form more than 1 household
+      two: 'some or all tenants share toilet, bathroom or kitchen facilities'
+      three: at least 1 tenant pays rent (or their employer pays it for them)
+hmoAdditionalLicence:
+  error:
+    missing: Enter the HMO additional licence number
+  fieldSetHeading: What is your HMO additional licence number?
+  label: Enter the HMO additional licence number
+  detail:
+    summary: What’s a HMO additional licence?
+    paragraph:
+      two: Some local council areas require licensing on different types of HMOs in its area which are not subject to mandatory licensing.
+      three: Contact the local council your property is in to understand whether your property needs an HMO additional licence.
+provideLicensingLater:
+  occupied:
+    heading: Provide details about property licensing later
+    paragraph:
+      one: You can continue and submit your registration now, but you’ll need to return later and provide details about this property’s license.
+    whenToAdd:
+      heading: When you must do this by
+      insetText: To keep your property registered, you must provide its licensing details within 28 days.
+      paragraph: This is because you’ve told us this property’s occupied by tenants.
+  unoccupied:
+    heading: Provide details about property licensing later
+    paragraph:
+      one: If you’re unsure, check with the local council if your property needs a license to be rented out.
+    whenToAdd:
+      heading: When you’ll need to provide these property licensing details
+      paragraph:
+        one: You can continue to finish your registration and get a Property Registration Number.
+        two: 'Once your property’s occupied, you have 28 days to return and tell us:'
+  weWillNeedToKnow:
+    intro: 'We’ll need to know:'
+    bullet:
+      one: if your property needs a license or not
+      two: details about the license (if your property needs one)

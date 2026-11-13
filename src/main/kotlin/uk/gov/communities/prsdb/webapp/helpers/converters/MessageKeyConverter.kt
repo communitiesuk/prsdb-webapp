@@ -142,9 +142,9 @@ class MessageKeyConverter {
 
         private fun convertLicensingType(licensingType: LicensingType): String =
             when (licensingType) {
-                LicensingType.SELECTIVE_LICENCE -> "forms.licensingType.radios.option.selectiveLicence.label"
-                LicensingType.HMO_MANDATORY_LICENCE -> "forms.licensingType.radios.option.hmoMandatory.label"
-                LicensingType.HMO_ADDITIONAL_LICENCE -> "forms.licensingType.radios.option.hmoAdditional.label"
+                LicensingType.SELECTIVE_LICENCE -> "licensing.licensingType.radios.option.selectiveLicence.label"
+                LicensingType.HMO_MANDATORY_LICENCE -> "licensing.licensingType.radios.option.hmoMandatory.label"
+                LicensingType.HMO_ADDITIONAL_LICENCE -> "licensing.licensingType.radios.option.hmoAdditional.label"
                 LicensingType.NO_LICENSING -> "forms.checkPropertyAnswers.propertyDetails.noLicensing"
                 LicensingType.PROVIDE_LATER -> "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater"
             }
