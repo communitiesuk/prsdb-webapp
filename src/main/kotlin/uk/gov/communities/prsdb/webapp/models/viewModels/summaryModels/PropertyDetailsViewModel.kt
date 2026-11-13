@@ -63,8 +63,7 @@ class PropertyDetailsViewModel(
         }
 
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
-    val freeholderSectionUpdateUrl: String =
-        "#"
+    val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
 
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
