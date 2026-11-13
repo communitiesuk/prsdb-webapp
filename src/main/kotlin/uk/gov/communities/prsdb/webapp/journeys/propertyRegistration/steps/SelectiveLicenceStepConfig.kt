@@ -13,10 +13,10 @@ class SelectiveLicenceStepConfig : AbstractRequestableStepConfig<Complete, Selec
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.selectiveLicence.fieldSetHeading",
-            "label" to "forms.selectiveLicence.label",
-            "detailSummary" to "forms.selectiveLicence.detail.summary",
-            "detailMainText" to "forms.selectiveLicence.detail.text",
+            "fieldSetHeading" to "licensing.selectiveLicence.fieldSetHeading",
+            "label" to "licensing.selectiveLicence.label",
+            "detailSummary" to "licensing.selectiveLicence.detail.summary",
+            "detailMainText" to "licensing.selectiveLicence.detail.text",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 

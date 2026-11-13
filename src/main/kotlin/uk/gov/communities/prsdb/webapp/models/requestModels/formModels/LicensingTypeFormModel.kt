@@ -13,7 +13,7 @@ class LicensingTypeFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.licensingType.radios.error.missing",
+                messageKey = "licensing.licensingType.radios.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "licensingTypeIsValidForAction",
             ),
