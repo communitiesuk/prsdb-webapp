@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyManagerState
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -55,7 +56,7 @@ class CheckPropertyManagerStepConfigTests {
         (stepConfig.getStepSpecificContent(mockState)["summaryCards"] as List<SummaryCardViewModel>).single()
 
     private fun setupStepConfig(): CheckPropertyManagerStepConfig {
-        val stepConfig = CheckPropertyManagerStepConfig()
+        val stepConfig = CheckPropertyManagerStepConfig(PropertyManagerSummaryCardHelper())
         stepConfig.urlPath = CheckPropertyManagerStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 

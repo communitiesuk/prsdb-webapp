@@ -227,6 +227,8 @@ propertyManager:
     radios:
       error:
         missing: Select if you want to remove this property manager
+  checkAnswers:
+    changeLink: Add, change or remove the property manager
 paymentDescription: Register your rental property
 paymentSummary:
   heading: Property fee
