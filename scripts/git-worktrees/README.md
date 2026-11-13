@@ -157,11 +157,12 @@ Sets up worktrees created by the GitHub Copilot app's **New worktree** option. I
 [`.github/github-app.yml`](../../.github/github-app.yml) (each developer must accept the repository configuration in the
 app once), and does nothing for sessions using the main checkout.
 
+The app copies the files listed in [`.worktreeinclude`](../../.worktreeinclude) (`.env`, PEM keys, etc.) into the new
+worktree itself. Keep `.worktreeinclude` in sync with the "Secrets" section of `.gitignore`.
+
 **On session creation (`session.create`):**
-1. Copies any files listed in [`.worktreeinclude`](../../.worktreeinclude) that the app hasn't already copied (`.env`,
-   PEM keys, etc.). Keep `.worktreeinclude` in sync with the "Secrets" section of `.gitignore`.
-2. Assigns unique ports in the worktree's `.env` (see [`assign-worktree-ports.mjs`](#assign-worktree-portsmjs))
-3. Runs `npm install`
+1. Assigns unique ports in the worktree's `.env` (see [`assign-worktree-ports.mjs`](#assign-worktree-portsmjs))
+2. Runs `npm install`
 
 **On session archive (`session.archive`):** runs `docker compose -f docker-compose.local.yml down` so the worktree's
 containers stop and their ports are freed.
