@@ -78,7 +78,7 @@ class LandlordDetailsControllerTests(
             val landlord = MockLandlordData.createIndividualLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),
@@ -100,7 +100,7 @@ class LandlordDetailsControllerTests(
             val deactivatedProperties = listOf(DeactivatedPropertyLandlordViewModel("6 Mythical Place", "P-XXXX-XXXX"))
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
                     currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 ),
@@ -115,7 +115,7 @@ class LandlordDetailsControllerTests(
                     attribute("activePropertiesTabId", ACTIVE_PROPERTIES_FRAGMENT)
                     attribute("deactivatedPropertiesTabId", DEACTIVATED_PROPERTIES_FRAGMENT)
                     attribute("deactivatedPropertiesList", deactivatedProperties)
-                    attribute("registeredPropertiesList", emptyList<Any>())
+                    attribute("activePropertiesList", emptyList<Any>())
                 }
             }
             verify(backLinkStorageService).storeCurrentUrlReturningKey(ACTIVE_PROPERTIES_FRAGMENT)
@@ -129,7 +129,7 @@ class LandlordDetailsControllerTests(
             val landlord = MockLandlordData.createIndividualLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),
@@ -155,7 +155,7 @@ class LandlordDetailsControllerTests(
             val orgLandlord = MockLandlordData.createOrgLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),
@@ -174,7 +174,7 @@ class LandlordDetailsControllerTests(
                     attributeExists(
                         "orgLandlord",
                         "orgLandlordContacts",
-                        "registeredPropertiesList",
+                        "activePropertiesList",
                         "registerPropertyUrl",
                         "backUrl",
                         "showDeleteLandlordRecordLink",
@@ -190,7 +190,7 @@ class LandlordDetailsControllerTests(
             val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),
@@ -229,7 +229,7 @@ class LandlordDetailsControllerTests(
             val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.EDITOR)
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
             whenever(
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),

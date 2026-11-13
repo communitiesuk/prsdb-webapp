@@ -1,5 +1,5 @@
 <th:block th:fragment="landlordPropertiesTabListItems" th:remove="tag">
-    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${activePropertiesTabId}, #{landlordDetails.activeProperties.tabHeading(${#lists.size(registeredPropertiesList)})})}"></li>
+    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${activePropertiesTabId}, #{landlordDetails.activeProperties.tabHeading(${#lists.size(activePropertiesList)})})}"></li>
     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${deactivatedPropertiesTabId}, #{landlordDetails.deactivatedProperties.tabHeading(${#lists.size(deactivatedPropertiesList)})})}"></li>
 </th:block>
 

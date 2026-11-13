@@ -86,7 +86,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 assertThat(detailsPage.registeredPropertiesTable).isHidden()
                 assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
 
-                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                detailsPage.registerPropertyLink.clickAndWait()
                 assertPageIs(page, RegisterPropertyStartPage::class)
             }
 
@@ -96,7 +96,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 featureFlagManager.disableFeature(ACTIVE_INACTIVE)
                 val detailsPage = navigator.goToLandlordDetails()
                 detailsPage.tabs.goToRegisteredProperties()
-                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                detailsPage.registerPropertyLink.clickAndWait()
                 val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
@@ -160,7 +160,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 assertThat(detailsPage.activePropertiesTable).isHidden()
                 assertThat(detailsPage.noActivePropertiesMessage).containsText("You have no active properties.")
 
-                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                detailsPage.registerPropertyLink.clickAndWait()
                 val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
@@ -202,7 +202,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertEquals(detailsPage.tabs.activeTabPanelId, REGISTERED_PROPERTIES_FRAGMENT)
             assertThat(detailsPage.registeredPropertiesTable).isHidden()
             assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
-            assertThat(detailsPage.noRegisteredPropertiesLink).isHidden()
+            assertThat(detailsPage.registerPropertyLink).isHidden()
         }
 
         @Test

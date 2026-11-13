@@ -18,7 +18,7 @@ abstract class LandlordDetailsBasePage(
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
     val noRegisteredPropertiesMessage = Paragraph.byTestId(page, "no-registered-properties-msg")
-    val noRegisteredPropertiesLink = Link.byText(page, "Register a property")
+    val registerPropertyLink = Link.byText(page, "Register a property")
     val activePropertiesTable = Table(page.locator("#active-properties"))
     val deactivatedPropertiesTable = Table(page.locator("#deactivated-properties"))
     val deactivatedPropertiesLinks = Link.default(page.locator("#deactivated-properties"))
@@ -37,8 +37,6 @@ abstract class LandlordDetailsBasePage(
 
         fun goToDeactivatedProperties() = deactivatedPropertiesTab.click()
 
-        // TODO PDJB-2149: Delete goToRegisteredProperties and the noRegisteredProperties* locators if no longer used by
-        //  the local council pages when the ACTIVE_INACTIVE feature flag is removed
         fun goToRegisteredProperties() {
             goToTab("Registered properties")
         }

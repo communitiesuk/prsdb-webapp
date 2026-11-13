@@ -224,7 +224,7 @@ class PropertyOwnershipService(
         return propertyOwnership
     }
 
-    fun getRegisteredPropertiesForLandlordUser(
+    fun getActivePropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =

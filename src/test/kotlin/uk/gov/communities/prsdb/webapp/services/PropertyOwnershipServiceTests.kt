@@ -38,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -578,7 +579,7 @@ class PropertyOwnershipServiceTests {
                 mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
             ).thenReturn(landlordsProperties)
 
-            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(ACTIVE_PROPERTIES_FRAGMENT))
                 .thenReturn(expectedCurrentUrlKey)
 
             val expectedResults: List<RegisteredPropertyLandlordViewModel> =
@@ -608,9 +609,9 @@ class PropertyOwnershipServiceTests {
                 )
 
             val result =
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     currentLandlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 )
 
             assertTrue(result.size == 2)

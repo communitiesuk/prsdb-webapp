@@ -195,7 +195,7 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
             detailsPage.tabs.goToActiveProperties()
 
             assertThat(detailsPage.noActivePropertiesMessage).isVisible()
-            assertThat(detailsPage.noRegisteredPropertiesLink).isVisible()
+            assertThat(detailsPage.registerPropertyLink).isVisible()
         }
     }
 

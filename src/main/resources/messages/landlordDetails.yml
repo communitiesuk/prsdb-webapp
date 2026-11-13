@@ -32,6 +32,7 @@ registeredProperties:
     label: Not licensed
   none:
     beforeLink: No registered properties.
+    # TODO PDJB-2149: Remove link when the ACTIVE_INACTIVE feature flag is removed
     link: Register a property
 activeProperties:
   tabHeading: "Active properties ({0})"
