@@ -15,7 +15,7 @@ Scripts for managing git worktrees in this repository. Both **PowerShell** (`.ps
 - **PowerShell** 5.1+ (or PowerShell Core) — for `.ps1` scripts
 - **Bash** — for `.sh` scripts (Git Bash on Windows, or native on macOS/Linux)
 - **Git**
-- **Node.js / npm** — required by `new-worktree` to install frontend dependencies
+- **Node.js / npm** — required by `new-worktree` and `copy-config-files` to assign ports and install frontend dependencies
 
 ## Scripts
 
@@ -27,7 +27,8 @@ Creates a new git worktree with all necessary configuration files and dependenci
 1. Fetches latest from origin
 2. Creates a new worktree with a new branch (or prompts to use an existing branch)
 3. **Dynamically copies gitignored configuration files** from the main repo (see [Config file copying](#config-file-copying) below)
-4. Runs `npm install` to set up frontend dependencies
+4. Assigns unique ports in the new worktree's `.env` (see [`assign-worktree-ports.mjs`](#assign-worktree-portsmjs))
+5. Runs `npm install` to set up frontend dependencies
 
 **Parameters:**
 
@@ -127,6 +128,7 @@ Copies gitignored configuration files from one worktree to another. Useful when 
 **What it does:**
 1. Discovers gitignored files in the source worktree (same approach as `new-worktree`)
 2. Copies them to the destination, skipping build artifacts and IDE settings
+3. Assigns unique ports in the destination's `.env` (see [`assign-worktree-ports.mjs`](#assign-worktree-portsmjs))
 
 **Parameters:**
 
@@ -146,6 +148,40 @@ Copies gitignored configuration files from one worktree to another. Useful when 
 ./copy-config-files.sh prsdb-webapp prsdb-webapp-2
 ./copy-config-files.sh prsdb-webapp   # copies into current directory
 ```
+
+---
+
+### `copilot-app-worktree.mjs` (GitHub Copilot app)
+
+Sets up worktrees created by the GitHub Copilot app's **New worktree** option. It is run automatically by the app via
+[`.github/github-app.yml`](../../.github/github-app.yml) (each developer must accept the repository configuration in the
+app once), and does nothing for sessions using the main checkout.
+
+**On session creation (`session.create`):**
+1. Copies any files listed in [`.worktreeinclude`](../../.worktreeinclude) that the app hasn't already copied (`.env`,
+   PEM keys, etc.). Keep `.worktreeinclude` in sync with the "Secrets" section of `.gitignore`.
+2. Assigns unique ports in the worktree's `.env` (see [`assign-worktree-ports.mjs`](#assign-worktree-portsmjs))
+3. Runs `npm install`
+
+**On session archive (`session.archive`):** runs `docker compose -f docker-compose.local.yml down` so the worktree's
+containers stop and their ports are freed.
+
+---
+
+### `assign-worktree-ports.mjs`
+
+Assigns unique local ports in a worktree's `.env` so it can run alongside other worktrees. Used by `new-worktree`,
+`copy-config-files` and `copilot-app-worktree.mjs`, so the port logic lives in one place. It is written in Node so the
+same script works on Windows, macOS and Linux.
+
+```bash
+node scripts/git-worktrees/assign-worktree-ports.mjs <worktree-path>
+```
+
+It picks the smallest offset (≥ 1) whose ports aren't used in the `.env` of any other worktree listed by
+`git worktree list`. It then sets `SERVER_PORT`, `POSTGRES_PORT`, `REDIS_PORT` and `ELASTICMQ_PORT`, and updates
+`RDS_URL`, `ELASTICACHE_PORT`, `LANDLORD_BASE_URL` and `LOCAL_AUTHORITY_BASE_URL` to match. If the worktree already has
+unique non-default ports, its `.env` is left unchanged.
 
 ---
 
@@ -195,6 +231,9 @@ These scripts resolve all paths dynamically so they work on any machine:
 
 - **Main repo path** — resolved from the script's location (`$PSScriptRoot\..\..\` / `dirname "$0"/../../`)
 - **Worktree base directory** — the parent folder of the repo (i.e. worktrees are created as siblings)
+
+When assigning ports, `assign-worktree-ports.mjs` checks the `.env` of every worktree listed by `git worktree list`, so
+worktrees outside the base directory (e.g. those created by the GitHub Copilot app) are taken into account.
 
 For example, if your repo is at `C:\Users\you\Work\MHCLG-PRSDB`, worktrees will be created in `C:\Users\you\Work\`.
 

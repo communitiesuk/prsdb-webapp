@@ -37,6 +37,16 @@ powershell -File scripts\git-worktrees\new-worktree.ps1 -WorktreeName "<name>" -
 The script automatically assigns unique `SERVER_PORT`, `POSTGRES_PORT`, and `REDIS_PORT`
 values in the new worktree's `.env` file so it can run alongside other worktrees.
 
+## Copilot app worktree sessions
+
+If you are running in the GitHub Copilot app and the session's workspace type is
+`worktree`, the app has already created the worktree. Do NOT create another one.
+`.github/github-app.yml` runs `scripts/git-worktrees/copilot-app-worktree.mjs`, which
+(together with `.worktreeinclude`) copies the config files, assigns unique ports in
+`.env` and runs `npm install` when the session is created, and stops the worktree's
+Docker containers when the session is archived. Do not remove the worktree yourself —
+the app removes it when the session is archived.
+
 ## Removing a worktree
 
 **PowerShell:**

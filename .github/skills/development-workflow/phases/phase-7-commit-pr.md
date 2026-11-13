@@ -15,4 +15,5 @@ Once the user confirms satisfaction:
 6. Report the PR URL to the user.
 7. **If a worktree was created in Phase 1**, clean up the worktree using the
    `using-git-worktrees` skill. If the user opted to work in the current
-   workspace, skip this step.
+   workspace, or this is a Copilot app worktree session, skip this step (the
+   app removes its worktree when the session is archived).
