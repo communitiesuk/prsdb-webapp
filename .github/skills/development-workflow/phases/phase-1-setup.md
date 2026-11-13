@@ -4,7 +4,15 @@
    If there is no ticket, use `PDJB-NONE`.
 2. Use the `branch-and-commit-naming` skill to determine the branch name for
    the first PR.
-3. Ask the user whether to create a new worktree or use the current workspace:
+3. **Copilot app worktree session** — if you are running in the GitHub Copilot
+   app and the session's workspace type is `worktree`, the app has already
+   created a worktree for this session and set it up via
+   `.github/github-app.yml` (config files copied, unique ports in `.env`,
+   `npm install` run). Do NOT ask about or create another worktree. Rename
+   the session's branch to the branch name from step 2 (use the app's
+   `rename_branch` tool if available, otherwise `git branch -m <branch>`) and
+   continue in the current working directory. Otherwise, ask the user whether
+   to create a new worktree or use the current workspace:
    - **New worktree** — use the `using-git-worktrees` skill to create a
      worktree for the branch. Launch IntelliJ in the worktree folder using
      the command recorded during preflight (e.g. `idea.cmd <worktree-path>`).

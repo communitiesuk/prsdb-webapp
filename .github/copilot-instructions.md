@@ -71,6 +71,10 @@ This repo uses git worktrees for parallel development. Scripts are in `scripts/g
 The `new-worktree` script automatically copies gitignored config files (`.env`, copilot instructions, etc.) into the new
 worktree and runs `npm install`.
 
+In the GitHub Copilot app, start sessions with **New worktree** instead. `.worktreeinclude` and
+`.github/github-app.yml` set up the app's worktree (config files, unique ports, `npm install`) when the session is
+created and stop its Docker containers when the session is archived. See `scripts/git-worktrees/README.md`.
+
 ## Build, Test, and Lint Commands
 
 **PowerShell** (use `.\gradlew`):
