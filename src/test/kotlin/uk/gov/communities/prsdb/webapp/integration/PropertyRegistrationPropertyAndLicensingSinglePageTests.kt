@@ -75,7 +75,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Tell us if your property needs a license")
+                .containsText("Tell us if your property needs a licence")
         }
 
         @Test
@@ -85,7 +85,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Tell us if your property needs a license")
+                .containsText("Tell us if your property needs a licence")
         }
 
         @Test
@@ -102,7 +102,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withOccupancyStatus(true)
                         .withLandlordProvidesRentalDetails(),
                 )
-            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")
+            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a licence")
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
             assertThat(licensingTypePage.provideThisLaterButton).isVisible()
 
@@ -128,7 +128,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withNoPropertyManager()
                         .withOccupancyStatus(false),
                 )
-            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")
+            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a licence")
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
             assertThat(licensingTypePage.provideThisLaterButton).isVisible()
 
