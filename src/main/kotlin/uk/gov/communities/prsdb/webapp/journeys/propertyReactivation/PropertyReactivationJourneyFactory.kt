@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
@@ -73,22 +74,34 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.parentsFor(LICENSING) }
                 nextStep { journey.nextStepAfter(LICENSING) }
             }
-            task(journey.gasSafetyTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(GAS_SAFETY) }
-                nextStep { journey.nextStepAfter(GAS_SAFETY) }
+            section {
+                withHeadingMessageKey("propertyCompliance.gasSafetyTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.gasSafetyTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(GAS_SAFETY) }
+                    nextStep { journey.nextStepAfter(GAS_SAFETY) }
+                }
             }
-            task(journey.electricalSafetyTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(ELECTRICAL_SAFETY) }
-                nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
+            section {
+                withHeadingMessageKey("propertyCompliance.electricalSafetyTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.electricalSafetyTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(ELECTRICAL_SAFETY) }
+                    nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
+                }
+                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
-            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
-            task(journey.epcTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(EPC) }
-                nextStep { journey.nextStepAfter(EPC) }
+            section {
+                withHeadingMessageKey("propertyCompliance.epcTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.epcTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(EPC) }
+                    nextStep { journey.nextStepAfter(EPC) }
+                }
             }
+            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
+            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
+            hideCheckAnswersSectionHeader(journey.epcTask)
             // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
             // and updating entryStepFor and completionStepFor
             step(journey.tenancyDetailsStep) {

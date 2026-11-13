@@ -98,9 +98,15 @@ class PropertyRegistrationTaskListStepConfig(
                 buildList {
                     add(whoProvidesDetailsItem(state))
                     add(rentedOutComplianceItem("registerProperty.taskList.rentedOut.licensing", state.licensingTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.gasSafety", state.gasSafetyTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.electricalSafety", state.electricalSafetyTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.epc", state.epcTask, state))
+                    add(rentedOutComplianceItem("propertyCompliance.gasSafetyTask.sectionHeading", state.gasSafetyTask, state))
+                    add(
+                        rentedOutComplianceItem(
+                            "propertyCompliance.electricalSafetyTask.sectionHeading",
+                            state.electricalSafetyTask,
+                            state,
+                        ),
+                    )
+                    add(rentedOutComplianceItem("propertyCompliance.epcTask.sectionHeading", state.epcTask, state))
                     add(tenancyDetailsItem(state))
                 },
             ),

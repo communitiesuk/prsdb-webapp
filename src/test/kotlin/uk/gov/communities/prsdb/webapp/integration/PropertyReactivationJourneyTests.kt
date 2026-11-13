@@ -126,6 +126,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `a landlord can provide a gas safety certificate and every gas safety button says continue`(page: Page) {
         val hasGasSupplyPage = navigateToHasGasSupplyPage(page)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Gas safety certificate")
         assertThat(hasGasSupplyPage.provideThisLaterButton).isHidden()
         assertThat(hasGasSupplyPage.form.submitButton).hasText("Continue")
         hasGasSupplyPage.submitHasGasSupply()
@@ -155,6 +156,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkUploadsPage.form.submit()
 
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments)
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
         assertThat(checkGasSafetyAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
         assertThat(checkGasSafetyAnswersPage.form.submitButton).hasText("Continue")
         checkGasSafetyAnswersPage.form.submit()
@@ -169,6 +171,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         page: Page,
     ) {
         val hasElectricalCertPage = navigateToHasElectricalCertPage(page)
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Electrical safety certificate")
         assertThat(hasElectricalCertPage.provideThisLaterButton).isHidden()
         assertThat(hasElectricalCertPage.form.submitButton).hasText("Continue")
         submitHasCertificate(hasElectricalCertPage, certificateType)
@@ -197,6 +200,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val checkElectricalSafetyAnswersPage =
             assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyReactivation::class, urlArguments)
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
         assertThat(checkElectricalSafetyAnswersPage.form.submitButton).hasText("Continue")
         checkElectricalSafetyAnswersPage.form.submit()
 
@@ -212,6 +216,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         confirmEpcPage.submitNo()
 
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Energy performance certificate (EPC)")
         assertThat(hasEpcPage.provideThisLaterButton).isHidden()
         assertThat(hasEpcPage.form.submitButton).hasText("Continue")
         hasEpcPage.submitHasNoEpc()
@@ -225,6 +230,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
 
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyReactivation::class, urlArguments)
+        assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
         assertThat(checkEpcAnswersPage.rows.hasEpcRow.value).containsText("No")
         assertThat(checkEpcAnswersPage.form.submitButton).hasText("Continue")
         checkEpcAnswersPage.form.submit()
