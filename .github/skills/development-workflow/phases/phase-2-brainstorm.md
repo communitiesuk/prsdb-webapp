@@ -6,3 +6,5 @@
    screen in the Figma desktop app (the MCP server can see the current
    selection).
 2. Invoke the `brainstorming` skill. Include any Figma link as context.
+3. Present the design spec using the `presenting-documents-for-review` skill
+   and get approval before moving to Phase 3.
