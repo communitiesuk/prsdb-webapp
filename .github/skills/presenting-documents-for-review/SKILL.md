@@ -13,11 +13,11 @@ Try each method in order and stop at the first that succeeds. If a tool is
 missing or a call errors, move to the next method — do not retry with other
 tools.
 
-| # | Method | Use when |
-|---|--------|----------|
-| 1 | Copilot app canvas + artifact | A tool exists to open a side-panel editor canvas |
-| 2 | IntelliJ via JetBrains MCP | JetBrains MCP tools exist and the project is open |
-| 3 | Path + summary in chat | Anything else |
+| # | Method | Available in | Use when |
+|---|--------|--------------|----------|
+| 1 | Copilot app canvas + artifact | App only | A tool exists to open a side-panel editor canvas |
+| 2 | IntelliJ via JetBrains MCP | CLI, or app if JetBrains MCP is configured | JetBrains MCP tools exist and the project is open in IntelliJ |
+| 3 | Path + summary in chat | Both | Always works |
 
 Identify tools by what they do, not by exact name — names vary between app,
 CLI and MCP versions.
@@ -66,14 +66,15 @@ to the session file before continuing — the session file is canonical.
 
 ## 3. Path + Summary
 
-End your message with:
+Use when neither method above worked. Post a chat message containing:
 
 - the full path of the session file,
 - a 3-8 line summary (key decisions, PR breakdown, open questions),
 - "Reply *approve*, tell me what to change, or ask me to print it in full."
 
-Then **end the turn without calling `ask_user`**. Print the full document only
-if the user asks.
+Then **end the turn without calling `ask_user`** — the user replies in chat, so
+this message is the approval request. Print the full document only if the user
+asks.
 
 ## Asking for Approval
 
