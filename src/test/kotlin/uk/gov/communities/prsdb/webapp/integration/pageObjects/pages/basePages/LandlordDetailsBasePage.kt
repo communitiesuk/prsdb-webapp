@@ -35,7 +35,7 @@ abstract class LandlordDetailsBasePage(
         val nameRow = getRow("Name")
         val emailRow = getRow("Email address")
         val phoneNumberRow = getRow("Telephone number")
-        val addressRow = getRow("Contact address")
+        val addressRow = getRow("Home address")
         val dateOfBirthRow = getRow("Date of birth")
         val landlordTypeRow = getRow("Landlord type")
     }

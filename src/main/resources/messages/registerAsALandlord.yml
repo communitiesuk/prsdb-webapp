@@ -30,7 +30,7 @@ checkAnswers:
     email: Email address
     telephoneNumber: Phone number
     englandOrWalesResident: Resident in England or Wales
-    contactAddress: Contact address
+    contactAddress: Home address
     localCouncil: Local Council
     landlordType: Landlord type
 orgCheckAnswers:
