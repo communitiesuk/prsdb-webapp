@@ -53,7 +53,7 @@ class PropertyDetailsController(
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
-    // TODO PDJB-2016: remove this once the ASSOCIATED_PARTIES flag is removed
+    // TODO PDJB-2016 and PDJB-2149: remove this once the ASSOCIATED_PARTIES and ACTIVE_INACTIVE flags are removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @AllowIfLandlord
@@ -61,6 +61,13 @@ class PropertyDetailsController(
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check when the flag is removed
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE) &&
+            propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId) == null
+        ) {
+            return getDeactivatedPropertyDetails(propertyOwnershipId)
+        }
+
         val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val propertyCompliance =
@@ -71,7 +78,7 @@ class PropertyDetailsController(
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = messageSource,
                 associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
             )
@@ -170,6 +177,55 @@ class PropertyDetailsController(
         return modelAndView
     }
 
+    private fun getDeactivatedPropertyDetails(propertyOwnershipId: Long): ModelAndView {
+        val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
+
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+        val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
+        modelAndView.addObject(
+            "propertyDetails",
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = messageSource,
+                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
+            ),
+        )
+        modelAndView.addObject(
+            "complianceDetails",
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                propertyOwnershipId = propertyOwnershipId,
+            ),
+        )
+        modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+        modelAndView.addObject(
+            "landlordSummaryCards",
+            PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                propertyOwnership.landlords,
+                userToLandlordService.getCurrentLandlordForUser(),
+                propertyOwnership.id,
+                isReadOnly = true,
+            ),
+        )
+        modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        modelAndView.addObject("isLandlordView", true)
+        modelAndView.addObject("isDeactivated", true)
+        modelAndView.addObject(
+            "reactivatePropertyUrl",
+            ReactivatePropertyController.getPropertyReactivationPath(propertyOwnershipId),
+        )
+        modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
+
+        return modelAndView
+    }
+
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.PDJB
     @AllowIfLandlord
     @GetMapping(REMOVE_EXPIRED_INVITE_ROUTE)
@@ -202,7 +258,7 @@ class PropertyDetailsController(
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = messageSource,
                 associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
             )
