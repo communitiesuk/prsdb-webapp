@@ -2,15 +2,13 @@
 // Sets up (or tears down) a worktree created by the GitHub Copilot app.
 // Run by the app via .github/github-app.yml, which provides the COPILOT_* environment variables.
 //
-//   session.create (or manual run): copy any .worktreeinclude files the app hasn't already copied,
-//                                    assign unique local ports in .env, and run npm install.
+//   session.create (or manual run): assign unique local ports in .env and run npm install.
+//                                    The app copies the files listed in .worktreeinclude itself.
 //   session.archive:                stop the worktree's local Docker containers so their ports are freed.
 //
 // Does nothing for in-place sessions (where the workspace is the main checkout).
 
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
-import path from "node:path";
 import { assignPorts, normalisePath } from "./assign-worktree-ports.mjs";
 
 const workspacePath = process.env.COPILOT_WORKSPACE_PATH;
@@ -21,38 +19,7 @@ function run(command, args, cwd) {
     return spawnSync(command, args, { cwd, stdio: "inherit", shell: process.platform === "win32" });
 }
 
-function git(args, cwd) {
-    const result = spawnSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-    return result.status === 0 ? result.stdout : "";
-}
-
-function copyWorktreeIncludeFiles() {
-    const includeFile = path.join(rootPath, ".worktreeinclude");
-    if (!existsSync(includeFile)) return;
-
-    const pathspecs = readFileSync(includeFile, "utf8")
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter((line) => line && !line.startsWith("#"))
-        .map((line) => (line.startsWith("!") ? `:(exclude)${line.slice(1)}` : line));
-    if (pathspecs.length === 0) return;
-
-    const files = git(["ls-files", "--others", "--ignored", "--exclude-standard", "--", ...pathspecs], rootPath)
-        .split("\n")
-        .filter(Boolean);
-
-    for (const file of files) {
-        const dest = path.join(workspacePath, file);
-        if (existsSync(dest)) continue;
-        mkdirSync(path.dirname(dest), { recursive: true });
-        copyFileSync(path.join(rootPath, file), dest);
-        console.log(`  Copied ${file}`);
-    }
-}
-
 function setUp() {
-    console.log("Copying .worktreeinclude files missing from the worktree...");
-    copyWorktreeIncludeFiles();
     assignPorts(workspacePath);
 
     console.log("Installing npm dependencies...");
