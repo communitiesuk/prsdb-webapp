@@ -175,6 +175,7 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
     }
+
     private fun getFreeholdersContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
 
