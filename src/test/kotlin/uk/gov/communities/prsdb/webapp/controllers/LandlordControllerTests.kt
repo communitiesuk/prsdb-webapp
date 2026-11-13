@@ -18,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
@@ -175,6 +177,45 @@ class LandlordControllerTests(
                     attribute("outstandingActionsUrl", OUTSTANDING_ACTIONS_URL)
                     attribute("outstandingActionsButtonKey", "landlord.dashboard.outstandingActions.button")
                     attribute("outstandingActionsLinkTextKey", "landlord.dashboard.notificationBanner.outstandingActions.linkText")
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `landlordDashboard links to the active properties tab`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "viewPropertiesUrl",
+                        "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$ACTIVE_PROPERTIES_FRAGMENT",
+                    )
+                }
+            }
+    }
+
+    // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `landlordDashboard links to the registered properties tab when ACTIVE_INACTIVE is disabled`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "viewPropertiesUrl",
+                        "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
+                    )
                 }
             }
     }
@@ -431,11 +472,35 @@ class LandlordControllerTests(
                     status { isOk() }
                     model {
                         attribute("complianceActions", expectedComplianceActions)
+                        // TODO PDJB-2149: Expect ACTIVE_PROPERTIES_FRAGMENT when the ACTIVE_INACTIVE feature flag is removed
                         attribute(
                             "viewRegisteredPropertiesUrl",
                             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
                         )
                         attribute("backUrl", LANDLORD_DASHBOARD_URL)
+                    }
+                }
+        }
+
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed (the test above will cover it)
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], username = "user")
+        fun `getComplianceActions links to the active properties tab`() {
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+            whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
+                PageImpl(emptyList()),
+            )
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+            mvc
+                .get(COMPLIANCE_ACTIONS_URL)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute(
+                            "viewRegisteredPropertiesUrl",
+                            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$ACTIVE_PROPERTIES_FRAGMENT",
+                        )
                     }
                 }
         }
