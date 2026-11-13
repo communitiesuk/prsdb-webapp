@@ -44,9 +44,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             ownershipType: OwnershipType,
             joint: Boolean,
         ) {
-            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 20000", ownershipType.ordinal)
+            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 54", ownershipType.ordinal)
 
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(20000)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).isVisible()
@@ -83,9 +83,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             names = ["SOLE_FREEHOLD", "COMMONHOLD", "SHARE_OF_SOLE_FREEHOLD", "SHARE_OF_COMMONHOLD"],
         )
         fun `the property record hides freeholders for sole ownership and commonhold`(ownershipType: OwnershipType) {
-            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 20000", ownershipType.ordinal)
+            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 54", ownershipType.ordinal)
 
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(20000)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).hasCount(0)
