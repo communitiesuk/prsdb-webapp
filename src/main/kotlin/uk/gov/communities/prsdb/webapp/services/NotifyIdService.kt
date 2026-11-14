@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
+import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import kotlin.jvm.javaClass
 
 @Service
@@ -27,6 +28,9 @@ class NotifyIdService(
 
     private val letterNotifyIdMap: Map<LetterTemplate, NotifyIdData> =
         loadNotifyIdData("/letters/letterTemplates.json", "Letter").associateBy { LetterTemplate.valueOf(it.enumName) }
+
+    private val smsNotifyIdMap: Map<SmsTemplate, NotifyIdData> =
+        loadNotifyIdData("/sms/smsTemplates.json", "SMS").associateBy { SmsTemplate.valueOf(it.enumName) }
 
     private fun loadNotifyIdData(
         templateJsonPath: String,
@@ -49,4 +53,6 @@ class NotifyIdService(
     fun getNotifyIdValue(emailTemplate: EmailTemplate): String = emailNotifyIdMap[emailTemplate]!!.notifyId
 
     fun getNotifyIdValue(letterTemplate: LetterTemplate): String = letterNotifyIdMap[letterTemplate]!!.notifyId
+
+    fun getNotifyIdValue(smsTemplate: SmsTemplate): String = smsNotifyIdMap[smsTemplate]!!.notifyId
 }
