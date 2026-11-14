@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 data class NotifyTemplateMetadata(
     val id: String? = null,
     val enumName: String,
-    val subject: String,
+    val subject: String? = null,
     val bodyLocation: String,
 )
 
