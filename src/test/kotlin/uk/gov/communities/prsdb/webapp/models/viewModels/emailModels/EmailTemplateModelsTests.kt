@@ -403,14 +403,13 @@ class EmailTemplateModelsTests {
                     "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md",
                 ),
                 EmailTemplateTestData(
-                    JointLandlordOtherLandlordLeftNotification(
+                    JointLandlordOtherLandlordLeftDeactivateNotification(
                         leavingLandlord = "Alice",
                         notifiedLandlord = "Bob",
                         address = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         propertyRecordUrl = "https://example.com/property",
-                        removalAction = "deactivate",
                     ),
-                    "/emails/JointLandlordOtherLandlordLeftNotification.md",
+                    "/emails/JointLandlordOtherLandlordLeftDeactivateNotification.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
