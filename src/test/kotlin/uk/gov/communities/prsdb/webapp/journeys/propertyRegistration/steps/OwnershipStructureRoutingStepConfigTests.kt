@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipStructureState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipTypeTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -24,6 +27,13 @@ class OwnershipStructureRoutingStepConfigTests {
         assertEquals(expectedMode, result)
     }
 
+    @Test
+    fun `mode throws if it is reached before the ownership type task is complete`() {
+        val state = stateWith(YesOrNo.YES, null, null)
+
+        assertThrows<UnrecoverableJourneyStateException> { OwnershipStructureRoutingStepConfig().mode(state) }
+    }
+
     private fun stateWith(
         ownsProperty: YesOrNo,
         ownershipKind: OwnershipKind?,
@@ -39,7 +49,10 @@ class OwnershipStructureRoutingStepConfigTests {
                 ownershipKindStep = ownershipKindStep,
                 freeholdTypeStep = freeholdTypeStep,
             )
-        return mock<OwnershipStructureState> { on { this.ownershipTypeTask } doReturn ownershipTypeTask }
+        return mock<OwnershipStructureState> {
+            on { this.ownershipTypeTask } doReturn ownershipTypeTask
+            on { this.journeyId } doReturn "test-journey-id"
+        }
     }
 
     companion object {

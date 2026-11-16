@@ -1,5 +1,5 @@
-<div th:fragment="landlordDetailsTabContent" th:remove="tag">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
+<div th:fragment="peopleResponsibleTabContent" th:remove="tag">
+                    <h2 class="govuk-heading-m" th:text="#{${propertyDetails.peopleResponsibleTabHeadingKey}}">propertyDetails.peopleResponsible.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
                     <th:block th:each="card : ${landlordSummaryCards}">
                         <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
@@ -100,4 +100,10 @@
                                 </th:block>
                             </div>
                         </details>
+
+                        <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag, leaving the people responsible ownership section always shown -->
+                        <th:block th:if="${propertyDetails.showPeopleResponsibleOwnership}">
+                            <h3 class="govuk-heading-s" th:text="#{${propertyDetails.peopleResponsibleOwnershipHeadingKey}}">propertyDetails.peopleResponsible.ownership.heading</h3>
+                            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
+                        </th:block>
 </div>

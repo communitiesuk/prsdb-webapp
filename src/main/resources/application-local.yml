@@ -79,9 +79,17 @@ local:
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
   sqs:
     endpoint: http://localhost:${ELASTICMQ_PORT:9324}
+  virus-scan:
+    simulated-scan-delay-seconds: 5
 
 email-queue:
   name: prsdb-email-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
+
+scan-result-queue:
+  name: prsdb-scan-result-queue
   listener:
     initial-visibility-timeout-seconds: 1
     max-visibility-timeout-seconds: 10
@@ -133,9 +141,6 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "subject-identifier-page"
-      enabled: true
-      expiry-date: "2027-01-01"
-    - name: "pdjb-939-property-registration-phase-two"
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-three"
@@ -294,6 +299,7 @@ nft-seed:
   system-operators: ${NFT_SEED_SYSTEM_OPERATORS:5}
   local-council-users: ${NFT_SEED_LOCAL_COUNCIL_USERS:10}
   landlords: ${NFT_SEED_LANDLORDS:30}
-  properties: ${NFT_SEED_PROPERTIES:45}
+  properties: ${NFT_SEED_PROPERTIES:40}
+  incomplete-properties: ${NFT_SEED_INCOMPLETE_PROPERTIES:5}
   batch-size: ${NFT_SEED_BATCH_SIZE:10}
   generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:1000}

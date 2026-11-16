@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class LetterAddressDataModelTests {
     @Test
@@ -47,5 +48,12 @@ class LetterAddressDataModelTests {
             ),
             personalisation,
         )
+    }
+
+    @Test
+    fun `address rejects more than seven lines`() {
+        assertFailsWith<IllegalArgumentException> {
+            LetterAddressDataModel((1..8).map { "Address line $it" })
+        }
     }
 }

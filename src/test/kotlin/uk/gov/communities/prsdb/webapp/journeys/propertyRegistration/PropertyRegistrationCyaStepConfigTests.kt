@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -17,13 +18,19 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
@@ -31,38 +38,59 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTaskBeforeAssociatedParties
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipTypeTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyManagerTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import kotlin.test.assertIs
@@ -212,6 +240,9 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockComplianceDetailsHelper,
                 mockMessageSource,
                 mockFeatureFlagManager,
+                SuperiorLandlordSummaryCardHelper(),
+                FreeholderSummaryCardHelper(),
+                PropertyManagerSummaryCardHelper(),
             )
         lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
         lenient().`when`(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
@@ -225,9 +256,10 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockPropertyDetailsTask.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockBedroomsFormModel)
-        lenient().`when`(
-            mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
-        ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
+        lenient()
+            .`when`(
+                mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
+            ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
         lenient().`when`(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         lenient().`when`(mockOwnershipTypeStep.formModel).thenReturn(mockOwnershipTypeFormModel)
         lenient().`when`(mockState.getJointLandlordsTask(mockFeatureFlagManager)).thenReturn(mockJointLandlordsTask)
@@ -365,18 +397,18 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
+            val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
             val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
             assertEquals(
                 listOf(
                     "propertyDetails.propertyRecord.ownership.ownershipType",
                     "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
                 ),
-                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+                peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
-                ownershipAndLandlordsRows.last().fieldValue,
+                peopleResponsibleForThisPropertyRows.last().fieldValue,
             )
             assertEquals(expectedOccupancyDetails, occupancyDetails)
         }
@@ -394,16 +426,16 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
+            val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
             val occupancyDetails = content["occupancyDetails"] as List<SummaryListRowViewModel>
             assertEquals(
                 listOf(
                     "propertyDetails.propertyRecord.ownership.ownershipType",
                     "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
                 ),
-                ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
+                peopleResponsibleForThisPropertyRows.map(SummaryListRowViewModel::fieldHeading),
             )
-            assertEquals(listOf("joint.landlord@example.com"), ownershipAndLandlordsRows.last().fieldValue)
+            assertEquals(listOf("joint.landlord@example.com"), peopleResponsibleForThisPropertyRows.last().fieldValue)
             assertEquals(expectedOccupancyDetails, occupancyDetails)
         }
     }
@@ -607,14 +639,486 @@ class PropertyRegistrationCyaStepConfigTests {
         fun `getStepSpecificContent uses ownership question heading under ownership and landlords rows`() {
             val content = stepConfig.getStepSpecificContent(mockState)
             val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
-            val ownershipAndLandlordsRows = content["ownershipAndLandlordsRows"] as List<SummaryListRowViewModel>
+            val peopleResponsibleForThisPropertyRows = content["peopleResponsibleForThisPropertyRows"] as List<SummaryListRowViewModel>
 
             assertTrue(
-                ownershipAndLandlordsRows.any { it.fieldHeading == "propertyDetails.propertyRecord.ownership.ownershipType" },
+                peopleResponsibleForThisPropertyRows.any { it.fieldHeading == "propertyDetails.propertyRecord.ownership.ownershipType" },
             )
             assertTrue(
                 propertyDetailsRows.none { it.fieldHeading == "propertyDetails.propertyRecord.ownership.ownershipType" },
             )
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordsContent {
+        @Mock
+        private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+        @Mock
+        private lateinit var mockOwnershipStructureTask: OwnershipStructureTask
+
+        @Mock
+        private lateinit var mockOwnershipTypeTask: OwnershipTypeTask
+
+        @Mock
+        private lateinit var mockFreeholdersTask: FreeholdersTask
+
+        @Mock
+        private lateinit var mockFreeholdersDetailsTask: FreeholdersDetailsTask
+
+        @Mock
+        private lateinit var mockFreeholdersListStep: FreeholdersListStep
+
+        @Mock
+        private lateinit var mockSuperiorLandlordsTask: SuperiorLandlordsTask
+
+        @Mock
+        private lateinit var mockAnyoneInOwnershipChainStep: AnyoneInOwnershipChainStep
+
+        @Mock
+        private lateinit var mockSuperiorLandlordsDetailsTask: SuperiorLandlordsDetailsTask
+
+        @Mock
+        private lateinit var mockSuperiorLandlordsListStep: SuperiorLandlordsListStep
+
+        @Mock
+        private lateinit var mockPropertyManagerTask: PropertyManagerTask
+
+        @Mock
+        private lateinit var mockPropertyManagerStep: PropertyManagerStep
+
+        @BeforeEach
+        fun setUpSuperiorLandlords() {
+            lenient().`when`(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+            lenient().`when`(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
+            lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
+            // LEASEHOLD_ONLY requires superior-landlord information, so this enables that content.
+            lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
+            lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
+            lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
+            lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
+            lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
+            lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
+            lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
+            lenient().`when`(mockSuperiorLandlordsTask.superiorLandlordsDetailsTask).thenReturn(mockSuperiorLandlordsDetailsTask)
+            lenient().`when`(mockSuperiorLandlordsDetailsTask.superiorLandlordsListStep).thenReturn(mockSuperiorLandlordsListStep)
+            lenient().`when`(mockAnyoneInOwnershipChainStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockAnyoneInOwnershipChainStep.urlPath).thenReturn(AnyoneInOwnershipChainStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockAnyoneInOwnershipChainStep)).thenReturn("chain-change")
+            lenient().`when`(mockSuperiorLandlordsListStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockSuperiorLandlordsListStep.urlPath).thenReturn(SuperiorLandlordsListStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockSuperiorLandlordsListStep)).thenReturn("list-change")
+            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
+            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
+            lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
+                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
+            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
+        }
+
+        @Test
+        fun `associated parties enabled uses the people responsible heading`() {
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(
+                "forms.checkPropertyAnswers.peopleResponsibleForThisProperty.heading",
+                content["peopleResponsibleForThisPropertyHeadingKey"],
+            )
+        }
+
+        @Test
+        fun `ownership type that does not require superior landlord info has no superior landlords content`() {
+            // Arrange, OwnershipType.SOLE_FREEHOLD is value that returns false for OwnershipType#requiresSuperiorLandlordInfo
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertNoSuperiorLandlordsContent(content)
+        }
+
+        @Test
+        fun `missing ownership type throws an unrecoverable journey state exception`() {
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
+
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `missing anyone in ownership chain answer throws an unrecoverable journey state exception`() {
+            // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `answering yes with no superior landlords throws an unrecoverable journey state exception`() {
+            // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = true))
+            whenever(mockSuperiorLandlordsTask.superiorLandlordsMap).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `answering no shows a single row with a change link to the ownership chain question`() {
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val row = (content["superiorLandlordsRows"] as List<SummaryListRowViewModel>).single()
+            assertEquals("registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain", row.fieldHeading)
+            assertEquals("commonText.no", row.fieldValue)
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(AnyoneInOwnershipChainStep.ROUTE_SEGMENT, "chain-change"),
+                row.actions.single().url,
+            )
+            assertNull(content["superiorLandlordsCards"])
+            assertNull(content["superiorLandlordsChangeUrl"])
+        }
+
+        @Test
+        fun `answering yes shows a link to the superior landlords list and cards without actions`() {
+            whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = true))
+            whenever(mockSuperiorLandlordsTask.superiorLandlordsMap).thenReturn(
+                mapOf(
+                    2 to SuperiorLandlordDataModel(detailsKnown = false),
+                    1 to SuperiorLandlordDataModel(detailsKnown = true, name = "Billie Smith", email = "email@example.com"),
+                ),
+            )
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(SuperiorLandlordsListStep.ROUTE_SEGMENT, "list-change"),
+                content["superiorLandlordsChangeUrl"],
+            )
+            val cards = content["superiorLandlordsCards"] as List<SummaryCardViewModel>
+            assertEquals(
+                listOf("Billie Smith", "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title"),
+                cards.map { it.title },
+            )
+            cards.forEach { assertEquals(emptyList<SummaryCardActionViewModel>(), it.actions) }
+            assertNull(content["superiorLandlordsRows"])
+        }
+
+        private fun assertNoSuperiorLandlordsContent(content: Map<String, Any?>) {
+            assertNull(content["superiorLandlordsRows"])
+            assertNull(content["superiorLandlordsCards"])
+            assertNull(content["superiorLandlordsChangeUrl"])
+        }
+    }
+
+    @Nested
+    inner class FreeholdersContent {
+        @Mock
+        private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+        @Mock
+        private lateinit var mockOwnershipStructureTask: OwnershipStructureTask
+
+        @Mock
+        private lateinit var mockOwnershipTypeTask: OwnershipTypeTask
+
+        @Mock
+        private lateinit var mockFreeholdersTask: FreeholdersTask
+
+        @Mock
+        private lateinit var mockFreeholdersDetailsTask: FreeholdersDetailsTask
+
+        @Mock
+        private lateinit var mockFreeholdersListStep: FreeholdersListStep
+
+        @Mock
+        private lateinit var mockSuperiorLandlordsTask: SuperiorLandlordsTask
+
+        @Mock
+        private lateinit var mockAnyoneInOwnershipChainStep: AnyoneInOwnershipChainStep
+
+        @Mock
+        private lateinit var mockPropertyManagerTask: PropertyManagerTask
+
+        @Mock
+        private lateinit var mockPropertyManagerStep: PropertyManagerStep
+
+        @BeforeEach
+        fun setUpFreeholders() {
+            lenient().`when`(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+            lenient().`when`(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
+            lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
+            lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
+            lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
+            lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
+            lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
+            lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
+            lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
+            lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
+            lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
+            lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
+                .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
+            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
+            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
+            lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
+                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
+            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
+        }
+
+        @Test
+        fun `ownership type that does not require freeholder records has no freeholders content`() {
+            // Arrange
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertNoFreeholdersContent(content)
+        }
+
+        @Test
+        fun `missing ownership type throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `missing freeholders throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `empty freeholders throws an unrecoverable journey state exception`() {
+            // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(emptyMap())
+
+            // Act & Assert
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `non-joint ownership type uses the non-joint heading and change link keys`() {
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals("registerProperty.freeholders.checkAnswers.heading.nonJoint", content["freeholdersHeadingKey"])
+            assertEquals("registerProperty.freeholders.checkAnswers.changeLink.nonJoint", content["freeholdersChangeLinkKey"])
+        }
+
+        @Test
+        fun `joint ownership type uses the joint heading and change link keys`() {
+            // Arrange
+            whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.JOINT_TENANTS)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals("registerProperty.freeholders.checkAnswers.heading.joint", content["freeholdersHeadingKey"])
+            assertEquals("registerProperty.freeholders.checkAnswers.changeLink.joint", content["freeholdersChangeLinkKey"])
+        }
+
+        @Test
+        fun `freeholders content has a link to the freeholders list and cards without actions`() {
+            // Arrange
+            whenever(mockFreeholdersTask.freeholdersMap).thenReturn(
+                mapOf(
+                    2 to FreeholderDataModel(detailsKnown = false),
+                    1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith", email = "email@example.com"),
+                ),
+            )
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(FreeholdersListStep.ROUTE_SEGMENT, "freeholders-change"),
+                content["freeholdersChangeUrl"],
+            )
+            val cards = content["freeholdersCards"] as List<SummaryCardViewModel>
+            assertEquals(
+                listOf("Billie Smith", "registerProperty.freeholders.list.unknownFreeholder.title"),
+                cards.map { it.title },
+            )
+            cards.forEach { assertEquals(emptyList<SummaryCardActionViewModel>(), it.actions) }
+        }
+
+        private fun assertNoFreeholdersContent(content: Map<String, Any?>) {
+            assertNull(content["freeholdersHeadingKey"])
+            assertNull(content["freeholdersChangeLinkKey"])
+            assertNull(content["freeholdersChangeUrl"])
+            assertNull(content["freeholdersCards"])
+        }
+    }
+
+    @Nested
+    inner class PropertyManagerContent {
+        @Mock
+        private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+        @Mock
+        private lateinit var mockOwnershipStructureTask: OwnershipStructureTask
+
+        @Mock
+        private lateinit var mockOwnershipTypeTask: OwnershipTypeTask
+
+        @Mock
+        private lateinit var mockPropertyManagerTask: PropertyManagerTask
+
+        @Mock
+        private lateinit var mockPropertyManagerStep: PropertyManagerStep
+
+        @Mock
+        private lateinit var mockPropertyManagerDetailsStep: PropertyManagerDetailsStep
+
+        @Mock
+        private lateinit var mockCheckPropertyManagerStep: CheckPropertyManagerStep
+
+        @BeforeEach
+        fun setUpPropertyManager() {
+            lenient().`when`(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
+            lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+            lenient().`when`(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
+            lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
+            // OwnershipType.SOLE_FREEHOLD returns false for OwnershipType#requiresSuperiorLandlordInfo
+            lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
+            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
+            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
+            lenient().`when`(mockPropertyManagerTask.propertyManagerDetailsStep).thenReturn(mockPropertyManagerDetailsStep)
+            lenient().`when`(mockPropertyManagerTask.checkPropertyManagerStep).thenReturn(mockCheckPropertyManagerStep)
+            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockPropertyManagerStep)).thenReturn("property-manager-change")
+            lenient().`when`(mockCheckPropertyManagerStep.isStepReachable).thenReturn(true)
+            lenient().`when`(mockCheckPropertyManagerStep.urlPath).thenReturn(CheckPropertyManagerStep.ROUTE_SEGMENT)
+            lenient().`when`(mockState.getCyaJourneyId(mockCheckPropertyManagerStep)).thenReturn("check-property-manager-change")
+        }
+
+        @Test
+        fun `missing property manager answer throws an unrecoverable journey state exception`() {
+            whenever(mockState.journeyId).thenReturn("journey-id")
+            whenever(mockPropertyManagerStep.formModelIfReachableOrNull).thenReturn(null)
+
+            assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
+        }
+
+        @Test
+        fun `not using a property manager shows a single row with a change link to the property manager question`() {
+            // Arrange
+            whenever(mockPropertyManagerStep.formModelIfReachableOrNull)
+                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            val row = (content["propertyManagerRows"] as List<SummaryListRowViewModel>).single()
+            assertEquals("registerProperty.propertyManager.usingPropertyManager.fieldSetHeading", row.fieldHeading)
+            assertEquals("registerProperty.propertyManager.usingPropertyManager.radios.no", row.fieldValue)
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(PropertyManagerStep.ROUTE_SEGMENT, "property-manager-change"),
+                row.actions.single().url,
+            )
+            assertNull(content["propertyManagerCards"])
+            assertNull(content["propertyManagerChangeUrl"])
+        }
+
+        @Test
+        fun `using a property manager shows a link to the check property manager page and a card without actions`() {
+            // Arrange
+            whenever(mockPropertyManagerStep.formModelIfReachableOrNull)
+                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = true })
+            whenever(mockPropertyManagerDetailsStep.formModel).thenReturn(
+                PropertyManagerDetailsFormModel().apply {
+                    name = "Best Property Managers Ltd"
+                    emailAddress = "manager@example.com"
+                },
+            )
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            assertEquals(
+                JourneyStateService.urlWithJourneyState(CheckPropertyManagerStep.ROUTE_SEGMENT, "check-property-manager-change"),
+                content["propertyManagerChangeUrl"],
+            )
+            val card = (content["propertyManagerCards"] as List<SummaryCardViewModel>).single()
+            assertEquals("Best Property Managers Ltd", card.title)
+            assertEquals("manager@example.com", card.summaryList.single().fieldValue)
+            assertEquals(emptyList<SummaryCardActionViewModel>(), card.actions)
+            assertNull(content["propertyManagerRows"])
+        }
+    }
+
+    // TODO PDJB-2016: Remove these tests when the ASSOCIATED_PARTIES flag is removed
+    @Nested
+    inner class BeforeAssociatedPartiesContent {
+        @BeforeEach
+        fun setUpAssociatedPartiesDisabled() {
+            whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+        }
+
+        @Test
+        fun `associated parties disabled uses the ownership and landlords heading and has no superior landlords content`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.checkPropertyAnswers.ownershipAndLandlords.heading", content["peopleResponsibleForThisPropertyHeadingKey"])
+            assertNull(content["superiorLandlordsRows"])
+            assertNull(content["superiorLandlordsCards"])
+            assertNull(content["superiorLandlordsChangeUrl"])
+        }
+
+        @Test
+        fun `associated parties disabled has no property manager content`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertNull(content["propertyManagerRows"])
+            assertNull(content["propertyManagerCards"])
+            assertNull(content["propertyManagerChangeUrl"])
+        }
+
+        @Test
+        fun `associated parties disabled has no freeholders content`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertNull(content["freeholdersHeadingKey"])
+            assertNull(content["freeholdersChangeLinkKey"])
+            assertNull(content["freeholdersChangeUrl"])
+            assertNull(content["freeholdersCards"])
         }
     }
 

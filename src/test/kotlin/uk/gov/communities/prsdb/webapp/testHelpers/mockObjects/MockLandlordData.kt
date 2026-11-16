@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -20,9 +21,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInv
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
@@ -204,8 +208,11 @@ class MockLandlordData {
         }
 
         fun createPropertyOwnership(
-            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
             ownershipType: OwnershipType = OwnershipType.SOLE_FREEHOLD,
+            // Derived so that the two columns stay consistent by default, while still letting a test
+            // set them independently to represent pre-existing legacy data.
+            ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 =
+                OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             isOccupied: Boolean = currentNumTenants > 0,
@@ -280,8 +287,28 @@ class MockLandlordData {
             return propertyOwnership
         }
 
+        fun createFreeholder(
+            propertyOwnership: PropertyOwnership = createPropertyOwnership(),
+            name: String? = null,
+            email: String? = null,
+            address: Address? = null,
+        ) = Freeholder(propertyOwnership, name, email, address)
+
+        fun createSuperiorLandlord(
+            propertyOwnership: PropertyOwnership = createPropertyOwnership(),
+            name: String? = null,
+            email: String? = null,
+            address: Address? = null,
+        ) = SuperiorLandlord(propertyOwnership, name, email, address)
+
+        fun createPropertyManager(
+            name: String = "Property Manager",
+            email: String = "manager@example.com",
+        ) = PropertyManager(name, email)
+
         fun createOccupiedPropertyOwnership(
             ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            ownershipType: OwnershipType = OwnershipType.SOLE_FREEHOLD,
             currentNumHouseholds: Int = 2,
             currentNumTenants: Int = 1,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
@@ -307,6 +334,7 @@ class MockLandlordData {
                 createPropertyOwnership(
                     id = id,
                     ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955,
+                    ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     isOccupied = true,

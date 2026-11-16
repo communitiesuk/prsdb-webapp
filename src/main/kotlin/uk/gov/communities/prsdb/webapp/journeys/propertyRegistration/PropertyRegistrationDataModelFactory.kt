@@ -5,9 +5,10 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebCompon
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
@@ -61,10 +62,12 @@ class PropertyRegistrationDataModelFactory(
             //  mapping on OwnershipTypeState
             ownershipType =
                 if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
-                    OwnershipTypeBeforePdjb955.FREEHOLD
+                    OwnershipType.SOLE_FREEHOLD
                 } else {
-                    state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
-                        .notNullValue(OwnershipTypeFormModel::ownershipType)
+                    OwnershipTypeConverter.convert(
+                        state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
+                            .notNullValue(OwnershipTypeFormModel::ownershipType),
+                    )
                 },
             isOccupied = isOccupied,
             numberOfHouseholds =
@@ -198,7 +201,7 @@ class PropertyRegistrationDataModelFactory(
                 state.correspondenceTask.correspondenceEmailStep.formModel
                     .getEmailAddress { state.loggedInLandlordEmailAtStartOfJourney },
             correspondenceAddressModel = state.correspondenceTask.addressTask.getAddress(),
-            // TODO PDJB-1986: add the property manager's name and email address from
+            // TODO PDJB-2015: add the property manager's name and email address from
             //  ownershipAndLandlordsTask.propertyManagerTask when the landlord is using a property manager
         )
     }

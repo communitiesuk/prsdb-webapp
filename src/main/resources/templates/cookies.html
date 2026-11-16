@@ -11,15 +11,22 @@
         <section>
             <h2 class="govuk-heading-m" th:text="#{cookies.essential.heading}">cookies.essential.heading</h2>
             <p class="govuk-body" th:text="#{cookies.essential.paragraph}">cookies.essential.paragraph</p>
-            <table th:replace="~{fragments/tables/table :: table(${ {'cookies.table.heading.name', 'cookies.table.heading.purpose', 'cookies.table.heading.expires'} }, ~{::#essential-tbody}, null)}">
-                <tbody class="govuk-table__body" id="essential-tbody">
-                    <tr class="govuk_table__row">
-                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.name}">cookies.essential.table.session.name</td>
-                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.purpose}">cookies.essential.table.session.purpose</td>
-                        <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.expires}">cookies.essential.table.session.expires</td>
-                    </tr>
-                </tbody>
-            </table>
+            <th:block th:with="captionSize='s'">
+                <table th:replace="~{fragments/tables/table :: table(${ {'cookies.table.heading.name', 'cookies.table.heading.purpose', 'cookies.table.heading.expires'} }, ~{::#essential-tbody}, #{cookies.essential.table.caption})}">
+                    <tbody class="govuk-table__body" id="essential-tbody">
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.name}">cookies.essential.table.session.name</td>
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.purpose}">cookies.essential.table.session.purpose</td>
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.session.expires}">cookies.essential.table.session.expires</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.file-upload-cookie.name}">cookies.essential.table.file-upload-cookie.name</td>
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.file-upload-cookie.purpose}">cookies.essential.table.file-upload-cookie.purpose</td>
+                            <td class="govuk-table__cell" th:text="#{cookies.essential.table.file-upload-cookie.expires}">cookies.essential.table.file-upload-cookie.expires</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </th:block>
         </section>
     </div>
 </main>

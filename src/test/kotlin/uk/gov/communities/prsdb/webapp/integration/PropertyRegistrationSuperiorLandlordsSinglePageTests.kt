@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactTy
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
@@ -30,7 +31,6 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
                 .containsText("Select if there is anyone else in the ownership chain")
         }
 
-        // TODO PDJB-1961: update the expected page when the real freehold type page is added
         @Test
         fun `Back link returns to the freehold type page when freeholders were not asked about`(page: Page) {
             val anyoneInOwnershipChainPage = navigator.skipToPropertyRegistrationAnyoneInOwnershipChainPage()
@@ -277,6 +277,84 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
     }
 
     @Nested
+    inner class SuperiorLandlordEmailStep {
+        @Test
+        fun `heading asks for the superior landlord's email address`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+
+            assertThat(emailPage.heading).containsText("What is Test Superior Landlord’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email returns the missing email error`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.submitEmail("")
+
+            assertThat(emailPage.form.getErrorMessage()).containsText("Enter an email address")
+        }
+
+        @Test
+        fun `submitting an invalid email returns the format error`() {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.submitEmail("not-an-email")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the correct format, like name@example.com")
+        }
+
+        @Test
+        fun `submitting an email already used by another superior landlord returns the duplicate email error`() {
+            val emailPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage(
+                    existingSuperiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = true, email = "james@example.com")),
+                )
+            emailPage.submitEmail("james@example.com")
+
+            assertThat(emailPage.form.getErrorMessage())
+                .containsText(
+                    "You’ve already used this email address for another person in the ownership chain - enter a different email address",
+                )
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+            val emailPage = navigator.skipToPropertyRegistrationSuperiorLandlordEmailPage()
+            emailPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Adding a new superior landlord does not prefill an answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage.addAnotherButton.click()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Test Superior Landlord")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
+
+            val emailPage = assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("")
+        }
+
+        @Test
+        fun `Changing a superior landlord prefills their existing answer`(page: Page) {
+            val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            superiorLandlordsListPage
+                .getSummaryCard(1)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).submitName("Superior Landlord With Email")
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.EMAIL)
+
+            val emailPage = assertPageIs(page, SuperiorLandlordEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("superior.landlord@example.com")
+        }
+    }
+
+    @Nested
     inner class SuperiorLandlordsListStep {
         @Test
         fun `Superior landlords list shows the number of people in the ownership chain`() {
@@ -339,6 +417,110 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
             val superiorLandlordsListPage = navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
             superiorLandlordsListPage.backLink.clickAndWait()
             assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordLookupAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            assertThat(lookupAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+            val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
+            lookupAddressPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordSelectAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val selectAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordSelectAddressPage()
+            assertThat(selectAddressPage.heading).containsText("Select Test Superior Landlord’s address")
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordManualAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val manualAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordManualAddressPage()
+            assertThat(manualAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+    }
+
+    @Nested
+    inner class ConfirmRemoveSuperiorLandlordStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val confirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            confirmRemovePage.form.submit()
+            assertThat(confirmRemovePage.form.getErrorMessage())
+                .containsText("Select if you want to remove this person from the ownership chain")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlords list page`(page: Page) {
+            val confirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            confirmRemovePage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No option is selected when removing another person after removing someone`(page: Page) {
+            val firstConfirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            assertThat(firstConfirmRemovePage.heading).containsText("Superior Landlord With Address")
+            firstConfirmRemovePage.submitWantsToProceed()
+
+            val listPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(listPage.getSummaryCard(0).title).hasText("Superior Landlord With Email")
+
+            val secondConfirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(secondConfirmRemovePage.heading).containsText("Superior Landlord With Email")
+            assertThat(secondConfirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        @Test
+        fun `No option is selected when returning to the page after choosing not to remove someone`(page: Page) {
+            navigateToConfirmRemovePage(page, cardIndex = 0).submitDoesNotWantToProceed()
+
+            val confirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(confirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        @Test
+        fun `No option is selected when returning to the page after selecting an option and cancelling`(page: Page) {
+            val initialConfirmRemovePage = navigateToConfirmRemovePage(page, cardIndex = 0)
+            initialConfirmRemovePage.form.areYouSureRadios.selectValue("true")
+            initialConfirmRemovePage.cancelLink.clickAndWait()
+
+            val confirmRemovePage = clickRemoveOnListPage(page, cardIndex = 0)
+            assertThat(confirmRemovePage.form.areYouSureRadios.selectedRadios).hasCount(0)
+        }
+
+        private fun navigateToConfirmRemovePage(
+            page: Page,
+            cardIndex: Int,
+        ): ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration {
+            navigator.skipToPropertyRegistrationSuperiorLandlordsListPage()
+            return clickRemoveOnListPage(page, cardIndex)
+        }
+
+        private fun clickRemoveOnListPage(
+            page: Page,
+            cardIndex: Int,
+        ): ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration {
+            assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+                .getSummaryCard(cardIndex)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            return assertPageIs(page, ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration::class)
         }
     }
 }
