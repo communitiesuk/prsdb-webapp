@@ -286,8 +286,8 @@ export async function exportSavedRegistrationFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-saved-registration-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 39 && fixtures.length <= 101,
-    'Saved-registration fixtures need 39 to 101 distinct owners for correctness and mixed load');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 92 && fixtures.length <= 101,
+    'Saved-registration fixtures need 92 to 101 distinct owners for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     ['subject', 'resumeJourneyId', 'deleteJourneyId', 'address'].every(field =>
       typeof row?.[field] === 'string' && row[field].trim())),
@@ -329,7 +329,9 @@ function requireOwnedCertificateFiles(fixtures) {
   const keys = new Set();
   requireCondition(fixtures.every(row => Array.isArray(row.files) && row.files.length <= 20 &&
     row.files.every(file => {
-      if (!new RegExp(`^certificateUpload\\.seed-${row.propertyOwnershipId}\\.[a-z-]+\\.member-[0-9]+$`).test(file?.objectKey) ||
+      const match = typeof file?.objectKey === 'string' &&
+        /^certificateUpload\.seed-([0-9]+)\.[a-z-]+\.member-[0-9]+$/.exec(file.objectKey);
+      if (!match || match[1] !== String(row.propertyOwnershipId) ||
           !['png', 'pdf'].includes(file?.extension) || keys.has(file.objectKey)) return false;
       keys.add(file.objectKey);
       return true;
@@ -471,8 +473,8 @@ export async function exportOrganisationFixtures(outputPath, {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
   const sql = await readFile(new URL('../../src/main/resources/data-nft-organisation-fixtures.sql', import.meta.url), 'utf8');
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= 39 && fixtures.length <= 101,
-    'Organisation fixtures need 39 to 101 distinct administrators for correctness and mixed load');
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= 92 && fixtures.length <= 101,
+    'Organisation fixtures need 92 to 101 distinct administrators for correctness and mixed load');
   requireCondition(fixtures.every(row =>
     typeof row?.subject === 'string' && row.subject.trim() &&
     typeof row?.name === 'string' && row.name.trim() &&

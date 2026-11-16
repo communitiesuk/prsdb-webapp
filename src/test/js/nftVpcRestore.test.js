@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {mkdtemp, mkdir, readFile, rm, writeFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
 import {cleanupNftEnvironment, restoreAsyncWorker, restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 import {restoreEnvironment} from '../../../scripts/performance-tests/nft-restore.mjs';
@@ -408,4 +412,125 @@ test('stops only the recorded worker task when its polling deadline expires', as
   const stops = deps.calls.filter(([operation]) => operation === 'stop-task');
   assert.deepEqual(stops, [['stop-task', {cluster: 'nft-app', task: taskArn, reason: 'GitHub NFT restore cleanup'}]]);
   assert.equal(stopRequested, true);
+});
+
+test('manual NFT reset and verification use the NFT revision rather than the dispatch branch', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/reset-database-nft.yml', import.meta.url), 'utf8');
+  assert.doesNotMatch(workflow, /checkout-ref:/);
+  assert.match(workflow.split('  verify-qa:')[1], /actions\/checkout@v7\s+with:\s+ref: nft/);
+});
+
+test('workflow separates reusable classes from versioned recovery checkpoints and fresh workloads', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const compile = workflow.split('  compile-gatling:')[1].split('\n  restore-dataset:')[0];
+  assert.match(compile, /name: gatling-classes-\$\{\{ github\.run_id \}\}\s+overwrite: true/);
+  assert.doesNotMatch(compile, /github\.run_attempt/);
+  for (const job of ['restore-dataset', 'performance-tests']) {
+    const body = workflow.split(`  ${job}:`)[1].split(/\n  [a-z][a-z-]+:/)[0];
+    assert.match(body, /nft-recovery-state\.mjs require-fresh-attempt/);
+  }
+  assert.match(workflow, /nft-load-checkpoint-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
+  for (const job of ['stop-writers-for-reset', 'restore-app-after-database-reset', 'restore-async-after-database-reset']) {
+    const body = workflow.split(`  ${job}:`)[1].split(/\n  [a-z][a-z-]+:/)[0];
+    assert.match(body, /nft-recovery-state\.mjs select/);
+    assert.doesNotMatch(body, /merge-multiple: true/);
+  }
+  assert.match(workflow, /nft-cleanup-state-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
+});
+
+test('new restore attempts fail before state lookup or AWS while recovery remains retryable', () => {
+  const script = fileURLToPath(new URL('../../../scripts/performance-tests/nft-vpc-restore.mjs', import.meta.url));
+  const result = spawnSync(process.execPath, [script, 'stop'], {
+    encoding: 'utf8',
+    env: {PATH: process.env.PATH, GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '2'},
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /fresh workflow run/i);
+});
+
+test('cleanup rejects a non-boolean restoration flag as proof of completed recovery', async () => {
+  const deps = dependencies();
+  await stopNftWriters(config, deps);
+  deps.state.environmentRestored = 'true';
+  await assert.rejects(cleanupNftEnvironment(config, async () => {
+    throw new Error('Unreadable readiness proof');
+  }, deps), /Unreadable readiness proof/);
+});
+
+test('cleanup retries after environment restoration without restarting already stopped writers', async () => {
+  const deps = dependencies();
+  await stopNftWriters(config, deps);
+  deps.state.environmentRestored = true;
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) =>
+    operation === 'list-task-definitions' ? {taskDefinitionArns: [appArn]} : original(service, operation, input);
+  const readiness = async () => { throw new Error('Already restored; do not replay preparation'); };
+  await cleanupNftEnvironment(config, readiness, deps);
+  await cleanupNftEnvironment(config, readiness, deps);
+  assert.equal(deps.state.writersStopped, true);
+});
+
+async function checkpoint(directory, name, state, readiness) {
+  const path = join(directory, name);
+  await mkdir(path, {recursive: true});
+  await writeFile(join(path, 'nft-restore-state.json'), typeof state === 'string' ? state : JSON.stringify(state));
+  if (readiness !== undefined) await writeFile(join(path, 'nft-state.json'), JSON.stringify(readiness));
+}
+
+test('recovery selects the latest same-run checkpoint and preserves its original owner', async t => {
+  const recovery = await import('../../../scripts/performance-tests/nft-recovery-state.mjs');
+  const directory = await mkdtemp(join(tmpdir(), 'nft-recovery-'));
+  t.after(() => rm(directory, {recursive: true, force: true}));
+  const state = {runId: '123-1', taskDefinition: workerArn, readinessAttempted: true};
+  await checkpoint(directory, 'nft-restore-state-123-1', {...state, revision: 1});
+  await checkpoint(directory, 'nft-cleanup-state-123-2', {...state, environmentRestored: true, revision: 2},
+    {marker: 'PDJB-430:123-1'});
+  const outputDirectory = join(directory, 'selected');
+  await recovery.selectRecoveryState(directory, {runId: '123', attempt: 3, outputDirectory});
+  const selected = JSON.parse(await readFile(join(outputDirectory, 'nft-restore-state.json'), 'utf8'));
+  assert.equal(selected.revision, 2);
+  assert.equal(recovery.recoveryOwner(selected, {runId: '123', attempt: 3}), '123-1');
+  assert.deepEqual(JSON.parse(await readFile(join(outputDirectory, 'nft-state.json'), 'utf8')),
+    {marker: 'PDJB-430:123-1'});
+});
+
+test('preparation checkpoint requires readiness evidence and accepts explicit no-change evidence', async t => {
+  const recovery = await import('../../../scripts/performance-tests/nft-recovery-state.mjs');
+  const directory = await mkdtemp(join(tmpdir(), 'nft-recovery-'));
+  t.after(() => rm(directory, {recursive: true, force: true}));
+  const name = 'nft-load-checkpoint-123-1';
+  await checkpoint(directory, name, {runId: '123-1'});
+  const path = join(directory, name, 'nft-restore-state.json');
+  await recovery.markReadinessAttempted(path, {GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '1'});
+  assert.equal(JSON.parse(await readFile(path, 'utf8')).readinessAttempted, true);
+  const options = {runId: '123', attempt: 2, outputDirectory: join(directory, 'selected')};
+  await assert.rejects(recovery.selectRecoveryState(directory, options), /readiness checkpoint/);
+  const readiness = join(directory, 'nft-readiness-state-123-1');
+  await mkdir(readiness);
+  await writeFile(join(readiness, 'nft-state.json'), 'null');
+  await recovery.selectRecoveryState(directory, options);
+  assert.equal(JSON.parse(await readFile(join(options.outputDirectory, 'nft-state.json'), 'utf8')), null);
+});
+
+test('recovery rejects unsafe latest checkpoints rather than falling back to older state', async t => {
+  const recovery = await import('../../../scripts/performance-tests/nft-recovery-state.mjs');
+  for (const [description, artifact, state, readiness] of [
+    ['wrong run', 'nft-cleanup-state-123-2', {runId: '999-1'}],
+    ['future owner', 'nft-cleanup-state-123-2', {runId: '123-4'}],
+    ['future checkpoint', 'nft-cleanup-state-123-4', {runId: '123-1'}],
+    ['malformed newest JSON', 'nft-cleanup-state-123-2', '{'],
+    ['missing readiness', 'nft-load-checkpoint-123-1', {runId: '123-1', readinessAttempted: true}],
+    ['wrong readiness owner', 'nft-cleanup-state-123-2',
+      {runId: '123-1', readinessAttempted: true}, {marker: 'PDJB-430:999-1'}],
+  ]) {
+    await t.test(description, async child => {
+      const directory = await mkdtemp(join(tmpdir(), 'nft-recovery-'));
+      child.after(() => rm(directory, {recursive: true, force: true}));
+      await checkpoint(directory, 'nft-restore-state-123-1', {runId: '123-1'});
+      await checkpoint(directory, artifact, state, readiness);
+      await assert.rejects(
+        recovery.selectRecoveryState(directory, {runId: '123', attempt: 3, outputDirectory: join(directory, 'selected')}),
+      );
+    });
+  }
 });

@@ -23,7 +23,6 @@ jobs:
     with:
       environment: nft
       aws-account-id: 448120078528
-      checkout-ref: ${{ github.sha }}
 
   verify-qa:
     name: Verify QA baseline
@@ -34,6 +33,8 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: nft
       - uses: actions/setup-node@v7
         with:
           node-version: 22

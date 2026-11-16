@@ -34,7 +34,7 @@ test('journey export CLI rejects an unsupported or missing family without restor
   }
 });
 
-const savedFixtures = Array.from({length: 39}, (_, i) => ({
+const savedFixtures = Array.from({length: 92}, (_, i) => ({
   subject: `owner-${i}`, resumeJourneyId: `resume-${i}`, deleteJourneyId: `delete-${i}`, address: `${i} Fixture Road`,
 }));
 
@@ -43,9 +43,34 @@ const propertyFixtures = Array.from({length: 109}, (_, i) => ({
   files: [],
 }));
 
-const organisationFixtures = Array.from({length: 39}, (_, i) => ({
+const organisationFixtures = Array.from({length: 92}, (_, i) => ({
   subject: `admin-${i}`, organisationId: i + 100, registrationNumber: i + 200, name: `Fixture organisation ${i}`,
 }));
+
+for (const [family, exportFixtures, fixtures] of [
+  ['saved-registration', loader.exportSavedRegistrationFixtures, savedFixtures],
+  ['organisation', loader.exportOrganisationFixtures, organisationFixtures],
+]) {
+  for (const size of [91, 92, 102]) {
+    test(`${family} export requires 92 to 101 distinct fixtures (${size})`, async () => {
+      const deps = dependencies();
+      const rows = Array.from({length: size}, (_, i) => ({
+        ...fixtures[i % fixtures.length], subject: `boundary-${i}`,
+        resumeJourneyId: `resume-boundary-${i}`, deleteJourneyId: `delete-boundary-${i}`,
+        organisationId: i + 1000, registrationNumber: i + 2000,
+      }));
+      let written = false;
+      const result = () => exportFixtures('output.json', {
+        aws: deps.aws, env: deps.env, log: deps.log,
+        executeCommand: async () => ({stdout: JSON.stringify(rows)}),
+        save: async () => { written = true; },
+      });
+      if (size === 92) await result();
+      else await assert.rejects(result(), /fixtures/);
+      assert.equal(written, size === 92);
+    });
+  }
+}
 
 test('exports role-correct organisation fixtures read-only through guarded NFT tunnel', async () => {
   assert.equal(typeof loader.exportOrganisationFixtures, 'function');

@@ -6,6 +6,7 @@ import {
   account, appName, awsCommand, cluster, region, requireCondition, servicesFactory, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
+import {recoveryOwner, requireFreshAttempt} from './nft-recovery-state.mjs';
 
 const asyncName = 'nft-async-worker';
 
@@ -182,12 +183,16 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
   } catch (error) {
     errors.push(error);
   }
-  try {
-    await restoreEnvironment(await loadReadiness(), {
-      aws: deps.aws, log: deps.log, timeoutMs: 1200000, appHealthy: app => healthyAppTarget(deps.aws, app),
-    });
-  } catch (error) {
-    errors.push(error);
+  if (state.environmentRestored !== true) {
+    try {
+      await restoreEnvironment(await loadReadiness(), {
+        aws: deps.aws, log: deps.log, timeoutMs: 1200000, appHealthy: app => healthyAppTarget(deps.aws, app),
+      });
+      state.environmentRestored = true;
+      await deps.persist();
+    } catch (error) {
+      errors.push(error);
+    }
   }
   if (errors.length) throw new AggregateError(errors,
     `Cleanup incomplete; refusing database reset: ${errors.map(error => error.message).join('; ')}`);
@@ -347,6 +352,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   process.on('SIGINT', abort);
   try {
     const command = process.argv[2];
+    if (['stop', 'run', 'start'].includes(command)) requireFreshAttempt();
     const path = process.env.NFT_RESTORE_STATE_PATH ||
       (process.env.RUNNER_TEMP && join(process.env.RUNNER_TEMP, 'nft-restore-state.json'));
     requireCondition(path, 'NFT_RESTORE_STATE_PATH is required');
@@ -359,6 +365,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       if (command === 'stop' && error.code === 'ENOENT') return {};
       throw new Error('NFT restore state is missing or unreadable; manual recovery required');
     });
+    if (['cleanup', 'start-after-reset', 'restore-async'].includes(command)) {
+      config.runId = recoveryOwner(state, {
+        runId: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT,
+      });
+    }
     const deps = runtime({
       state, signal: controller.signal,
       persist: async () => {
@@ -381,7 +392,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       requireCondition(readinessPath, 'READINESS_STATE_PATH is required outside GitHub Actions');
       await cleanupNftEnvironment(config, async () => {
         return await readFile(readinessPath, 'utf8').then(JSON.parse).catch(error => {
-          if (error.code === 'ENOENT' && process.env.READINESS_STATE_REQUIRED !== 'true') return null;
+          if (error.code === 'ENOENT' && process.env.READINESS_STATE_REQUIRED !== 'true' && !state.readinessAttempted) return null;
           throw new Error('Readiness state cannot be read safely');
         });
       }, deps);

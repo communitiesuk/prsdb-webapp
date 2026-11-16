@@ -72,7 +72,8 @@ jobs:
         run: ./gradlew gatlingClasses --no-daemon --console=plain
       - uses: actions/upload-artifact@v7
         with:
-          name: gatling-classes-${{ github.run_id }}-${{ github.run_attempt }}
+          name: gatling-classes-${{ github.run_id }}
+          overwrite: true
           path: |
             build/classes/
             build/resources/
@@ -103,6 +104,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Require a fresh dataset attempt
+        run: node scripts/performance-tests/nft-recovery-state.mjs require-fresh-attempt
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -162,8 +165,10 @@ jobs:
           node-version: 22
       - uses: actions/download-artifact@v8
         with:
-          name: gatling-classes-${{ github.run_id }}-${{ github.run_attempt }}
+          name: gatling-classes-${{ github.run_id }}
           path: build
+      - name: Require a fresh performance attempt
+        run: node scripts/performance-tests/nft-recovery-state.mjs require-fresh-attempt
       - name: Check compiled simulation was transferred
         run: |
           test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BasicJourneysSimulation.class
@@ -186,6 +191,15 @@ jobs:
           runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
           echo "::add-mask::$runner_ip"
           echo "RUNNER_IP=$runner_ip" >> "$GITHUB_ENV"
+      - name: Record preparation ownership before any environment changes
+        run: node scripts/performance-tests/nft-recovery-state.mjs mark-readiness
+      - name: Preserve pre-preparation recovery checkpoint
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-load-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nft-restore-state.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Prepare environment
         id: prepare
         env:
@@ -911,9 +925,10 @@ jobs:
           node-version: 22
       - uses: actions/download-artifact@v8
         with:
-          pattern: nft-*-state-${{ github.run_id }}-${{ github.run_attempt }}
-          merge-multiple: true
-          path: ${{ runner.temp }}
+          pattern: nft-*-${{ github.run_id }}-*
+          path: ${{ runner.temp }}/nft-recovery-artifacts
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
@@ -922,6 +937,16 @@ jobs:
           role-duration-seconds: 3600
       - name: Stop owned worker, restore simulator configuration and stop actual writers
         run: node scripts/performance-tests/nft-vpc-restore.mjs cleanup
+      - name: Preserve cleanup recovery checkpoint, including partial failure
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nft-cleanup-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/nft-restore-state.json
+            ${{ runner.temp }}/nft-state.json
+          if-no-files-found: error
+          retention-days: 7
 
   reset-database:
     name: Reset NFT database
@@ -959,8 +984,10 @@ jobs:
           node-version: 22
       - uses: actions/download-artifact@v8
         with:
-          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}
+          pattern: nft-*-${{ github.run_id }}-*
+          path: ${{ runner.temp }}/nft-recovery-artifacts
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -999,8 +1026,10 @@ jobs:
           node-version: 22
       - uses: actions/download-artifact@v8
         with:
-          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}
+          pattern: nft-*-${{ github.run_id }}-*
+          path: ${{ runner.temp }}/nft-recovery-artifacts
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
