@@ -142,6 +142,7 @@ class PropertyRegistrationCyaStepConfig(
                     "forms.checkPropertyAnswers.ownershipAndLandlords.heading"
                 },
             "peopleResponsibleForThisPropertyRows" to
+                // TODO PDJB-2016: change back to listOf once getOwnershipTypeRowBeforeAssociatedParties is removed
                 listOfNotNull(
                     getOwnershipTypeRowBeforeAssociatedParties(state),
                     getJointLandLordsSummaryRow(state),

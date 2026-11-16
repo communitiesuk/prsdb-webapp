@@ -865,12 +865,11 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        private fun goToCheckAnswers(
-            page: Page,
-            stateBuilder: PropertyStateSessionBuilder =
-                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
-        ): CheckAnswersPagePropertyRegistration {
-            val taskListPage = navigator.goToPropertyRegistrationTaskList(stateBuilder)
+        private fun goToCheckAnswers(page: Page): CheckAnswersPagePropertyRegistration {
+            val taskListPage =
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }

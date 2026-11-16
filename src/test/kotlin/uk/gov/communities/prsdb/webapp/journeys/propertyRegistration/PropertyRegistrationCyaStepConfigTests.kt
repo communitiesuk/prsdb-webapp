@@ -258,6 +258,12 @@ class PropertyRegistrationCyaStepConfigTests {
     @Mock
     private lateinit var mockFreeholdersListStep: FreeholdersListStep
 
+    @Mock
+    private lateinit var mockPropertyManagerTask: PropertyManagerTask
+
+    @Mock
+    private lateinit var mockPropertyManagerStep: PropertyManagerStep
+
     private lateinit var stepConfig: PropertyRegistrationCyaStepConfig
 
     @BeforeEach
@@ -374,6 +380,12 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockFreeholdersListStep.isStepReachable).thenReturn(true)
         lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
         lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
+        lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
+        lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
+        lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
+            .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
+        lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
+        lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
     }
 
     @Nested
@@ -710,21 +722,15 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class OwnershipContent {
         @Mock
-        private lateinit var mockPropertyManagerTask: PropertyManagerTask
+        private lateinit var mockSuperiorLandlordsTask: SuperiorLandlordsTask
 
         @Mock
-        private lateinit var mockPropertyManagerStep: PropertyManagerStep
+        private lateinit var mockAnyoneInOwnershipChainStep: AnyoneInOwnershipChainStep
 
         @BeforeEach
         fun setUpOwnership() {
             // SOLE_FREEHOLD needs no superior landlord info, so superior landlords content stays empty
             setUpAssociatedPartiesOwnership(OwnershipType.SOLE_FREEHOLD)
-            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
-            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
-            lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
-                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
-            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
-            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
         }
 
         // TODO PDJB-2016: Remove test once ASSOCIATED_PARTIES is released
@@ -848,8 +854,6 @@ class PropertyRegistrationCyaStepConfigTests {
         private fun ownershipRows() = stepConfig.getStepSpecificContent(mockState)["ownershipRows"] as List<SummaryListRowViewModel>
 
         private fun stubAnyoneInOwnershipChainAnsweredNo() {
-            val mockSuperiorLandlordsTask = mock<SuperiorLandlordsTask>()
-            val mockAnyoneInOwnershipChainStep = mock<AnyoneInOwnershipChainStep>()
             whenever(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
             whenever(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
@@ -871,12 +875,6 @@ class PropertyRegistrationCyaStepConfigTests {
         @Mock
         private lateinit var mockSuperiorLandlordsListStep: SuperiorLandlordsListStep
 
-        @Mock
-        private lateinit var mockPropertyManagerTask: PropertyManagerTask
-
-        @Mock
-        private lateinit var mockPropertyManagerStep: PropertyManagerStep
-
         @BeforeEach
         fun setUpSuperiorLandlords() {
             // LEASEHOLD_ONLY requires superior-landlord information, so this enables that content.
@@ -891,12 +889,6 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockSuperiorLandlordsListStep.isStepReachable).thenReturn(true)
             lenient().`when`(mockSuperiorLandlordsListStep.urlPath).thenReturn(SuperiorLandlordsListStep.ROUTE_SEGMENT)
             lenient().`when`(mockState.getCyaJourneyId(mockSuperiorLandlordsListStep)).thenReturn("list-change")
-            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
-            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
-            lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
-                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
-            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
-            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
         }
 
         @Test
@@ -1013,12 +1005,6 @@ class PropertyRegistrationCyaStepConfigTests {
         @Mock
         private lateinit var mockAnyoneInOwnershipChainStep: AnyoneInOwnershipChainStep
 
-        @Mock
-        private lateinit var mockPropertyManagerTask: PropertyManagerTask
-
-        @Mock
-        private lateinit var mockPropertyManagerStep: PropertyManagerStep
-
         @BeforeEach
         fun setUpFreeholders() {
             setUpAssociatedPartiesOwnership(OwnershipType.LEASEHOLD_ONLY)
@@ -1026,12 +1012,6 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
                 .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
-            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
-            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
-            lenient().`when`(mockPropertyManagerStep.formModelIfReachableOrNull)
-                .thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
-            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
-            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
         }
 
         @Test
@@ -1136,12 +1116,6 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class PropertyManagerContent {
         @Mock
-        private lateinit var mockPropertyManagerTask: PropertyManagerTask
-
-        @Mock
-        private lateinit var mockPropertyManagerStep: PropertyManagerStep
-
-        @Mock
         private lateinit var mockPropertyManagerDetailsStep: PropertyManagerDetailsStep
 
         @Mock
@@ -1151,12 +1125,8 @@ class PropertyRegistrationCyaStepConfigTests {
         fun setUpPropertyManager() {
             // OwnershipType.SOLE_FREEHOLD returns false for OwnershipType#requiresSuperiorLandlordInfo
             setUpAssociatedPartiesOwnership(OwnershipType.SOLE_FREEHOLD)
-            lenient().`when`(mockOwnershipAndLandlordsTask.propertyManagerTask).thenReturn(mockPropertyManagerTask)
-            lenient().`when`(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
             lenient().`when`(mockPropertyManagerTask.propertyManagerDetailsStep).thenReturn(mockPropertyManagerDetailsStep)
             lenient().`when`(mockPropertyManagerTask.checkPropertyManagerStep).thenReturn(mockCheckPropertyManagerStep)
-            lenient().`when`(mockPropertyManagerStep.isStepReachable).thenReturn(true)
-            lenient().`when`(mockPropertyManagerStep.urlPath).thenReturn(PropertyManagerStep.ROUTE_SEGMENT)
             lenient().`when`(mockState.getCyaJourneyId(mockPropertyManagerStep)).thenReturn("property-manager-change")
             lenient().`when`(mockCheckPropertyManagerStep.isStepReachable).thenReturn(true)
             lenient().`when`(mockCheckPropertyManagerStep.urlPath).thenReturn(CheckPropertyManagerStep.ROUTE_SEGMENT)
