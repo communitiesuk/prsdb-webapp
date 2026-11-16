@@ -33,7 +33,7 @@ class FreeholderSummaryCardHelper {
                     freeholder.id.toString(),
                     FreeholderDataModel.fromFreeholder(freeholder),
                     emptyList(),
-                    showPostalAddressAsNote = true,
+                    replacePostalAddressWithNote = true,
                 )
             }
 
@@ -42,7 +42,7 @@ class FreeholderSummaryCardHelper {
         freeholderId: String,
         freeholder: FreeholderDataModel,
         actions: List<SummaryCardActionViewModel>,
-        showPostalAddressAsNote: Boolean = false,
+        replacePostalAddressWithNote: Boolean = false,
         allowEmptyContactRows: Boolean = false,
     ): SummaryCardViewModel {
         if (!freeholder.detailsKnown) {
@@ -63,11 +63,11 @@ class FreeholderSummaryCardHelper {
         }
 
         val showNote =
-            showPostalAddressAsNote && freeholder.address != null ||
+            replacePostalAddressWithNote && freeholder.address != null ||
                 allowEmptyContactRows && freeholder.email == null && freeholder.address == null
         return SummaryCardViewModel(
             title = name,
-            summaryList = getContactRows(freeholder, includePostalAddress = !showPostalAddressAsNote),
+            summaryList = getContactRows(freeholder, replacePostalAddressWithNote),
             actions = actions,
             bodyTextKey = if (showNote) POSTAL_ADDRESS_NOTE_KEY else null,
         )
@@ -75,13 +75,13 @@ class FreeholderSummaryCardHelper {
 
     private fun getContactRows(
         freeholder: FreeholderDataModel,
-        includePostalAddress: Boolean,
+        replacePostalAddressWithNote: Boolean,
     ): List<SummaryListRowViewModel> =
         listOfNotNull(
             freeholder.email?.let {
                 SummaryListRowViewModel(fieldHeading = "registerProperty.freeholders.list.emailAddress", fieldValue = it)
             },
-            freeholder.address?.takeIf { includePostalAddress }?.let {
+            freeholder.address?.takeIf { !replacePostalAddressWithNote }?.let {
                 SummaryListRowViewModel(
                     fieldHeading = "registerProperty.freeholders.list.postalAddress",
                     fieldValue = it.toMultiLineAddress().split("\n"),
