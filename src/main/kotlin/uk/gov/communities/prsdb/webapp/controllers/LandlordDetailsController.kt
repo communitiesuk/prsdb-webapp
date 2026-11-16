@@ -13,6 +13,10 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
@@ -41,6 +45,7 @@ class LandlordDetailsController(
     private val userToLandlordService: UserToLandlordService,
     private val organisationPermissionsProvider: OrganisationPermissionsProvider,
     private val messageSource: MessageSource,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -109,15 +114,32 @@ class LandlordDetailsController(
         landlord: Landlord,
         model: Model,
     ) {
-        val registeredPropertiesList =
-            propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                landlord,
-                currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
-            )
-        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
-        model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+        // TODO PDJB-2149: Remove this check, the else branch and the isActiveInactiveEnabled attribute when the
+        //  ACTIVE_INACTIVE feature flag is removed, and always use ACTIVE_PROPERTIES_FRAGMENT
+        val isActiveInactiveEnabled = featureFlagManager.checkFeature(ACTIVE_INACTIVE)
+        model.addAttribute("isActiveInactiveEnabled", isActiveInactiveEnabled)
+        val propertiesTabId =
+            if (isActiveInactiveEnabled) {
+                model.addAttribute("activePropertiesTabId", ACTIVE_PROPERTIES_FRAGMENT)
+                model.addAttribute("deactivatedPropertiesTabId", DEACTIVATED_PROPERTIES_FRAGMENT)
+                model.addAttribute(
+                    "deactivatedPropertiesList",
+                    propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord),
+                )
+                ACTIVE_PROPERTIES_FRAGMENT
+            } else {
+                model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+                REGISTERED_PROPERTIES_FRAGMENT
+            }
 
-        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
+        val activePropertiesList =
+            propertyOwnershipService.getActivePropertiesForLandlordUser(
+                landlord,
+                currentUrlFragment = propertiesTabId,
+            )
+        model.addAttribute("activePropertiesList", activePropertiesList)
+
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(propertiesTabId)
         model.addAttribute(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),

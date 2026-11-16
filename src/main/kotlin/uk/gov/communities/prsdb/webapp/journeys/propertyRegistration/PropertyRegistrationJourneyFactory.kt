@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bills
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
@@ -71,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Payme
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentStatusCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -198,6 +200,16 @@ class PropertyRegistrationJourneyFactory(
                         { ownershipStructureTask },
                         startStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep,
                     )
+                }
+
+                PropertyManagerStep.ROUTE_SEGMENT,
+                CheckPropertyManagerStep.ROUTE_SEGMENT,
+                -> {
+                    val propertyManagerTask = journey.ownershipAndLandlordsTask.propertyManagerTask
+                    checkAnswerTask(propertyManagerTask)
+                    configureStep(propertyManagerTask.checkPropertyManagerStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {

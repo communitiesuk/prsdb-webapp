@@ -124,6 +124,11 @@ class CheckAnswersPagePropertyRegistration(
 
     val jointFreeholdersChangeLink = Link.byText(page, "Add, change or remove joint freeholders")
 
+    val propertyManagerHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Property manager")))
+
+    val propertyManagerChangeLink = Link.byText(page, "Add, change or remove the property manager")
+
     fun getSummaryCard(
         title: String,
         headingLevel: String,
@@ -154,6 +159,8 @@ class CheckAnswersPagePropertyRegistration(
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
 
         val anyoneInOwnershipChainRow = getRow("Is there anyone else in the property’s ownership chain?")
+
+        val usingPropertyManagerRow = getRow("Are you using a property manager?")
     }
 
     class ComplianceSummaryList(

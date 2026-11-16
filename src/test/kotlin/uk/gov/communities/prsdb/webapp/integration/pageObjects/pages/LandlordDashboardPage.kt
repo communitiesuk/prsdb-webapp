@@ -29,6 +29,7 @@ class LandlordDashboardPage(
     val addComplianceInformationButton = Button.byText(page, "Compliance actions")
     val outstandingActionsButton = Button.byText(page, "Outstanding actions")
     val notificationBanner = DashboardNotificationBanner(page)
+    val inactiveLandlordNotificationBanner = InactiveLandlordNotificationBanner(page)
 
     val footer = Footer(page)
 
@@ -47,5 +48,16 @@ class LandlordDashboardPage(
                 "View outstanding actions",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
+    }
+
+    class InactiveLandlordNotificationBanner(
+        page: Page,
+    ) : NotificationBanner(page) {
+        val reactivateAPropertyLink =
+            Link.byText(page, "reactivate a property", selectorOrLocator = ".govuk-notification-banner__link")
+        val completeADraftLink =
+            Link.byText(page, "complete a draft", selectorOrLocator = ".govuk-notification-banner__link")
+        val registerAPropertyLink =
+            Link.byText(page, "register a property", selectorOrLocator = ".govuk-notification-banner__link")
     }
 }

@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyoneInOwnershipChain
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholders
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetails
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -38,6 +40,7 @@ class PropertyRegistrationCyaStepConfig(
     private val featureFlagManager: FeatureFlagManager,
     private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
     private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
+    private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -143,7 +146,6 @@ class PropertyRegistrationCyaStepConfig(
                     "forms.checkPropertyAnswers.ownershipAndLandlords.heading"
                 },
             "peopleResponsibleForThisPropertyRows" to
-                // TODO PDJB-1986: add rows for whether a property manager is used and, if so, their name and email address
                 listOf(
                     getOwnershipTypeRow(state),
                     getJointLandLordsSummaryRow(state),
@@ -159,7 +161,7 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
-        ) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state)
+        ) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state) + getPropertyManagerContent(state)
 
     private fun getFreeholdersContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
@@ -204,6 +206,42 @@ class PropertyRegistrationCyaStepConfig(
                             "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
                             "commonText.no",
                             Destination.VisitableStep(anyoneInOwnershipChainStep, state.getCyaJourneyId(anyoneInOwnershipChainStep)),
+                        ),
+                    ),
+            )
+        }
+    }
+
+    private fun getPropertyManagerContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val propertyManagerTask = state.ownershipAndLandlordsTask.propertyManagerTask
+        val propertyManagerStep = propertyManagerTask.propertyManagerStep
+        val usingPropertyManager =
+            propertyManagerStep.formModelIfReachableOrNull?.usingPropertyManager
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the property manager step was answered",
+                )
+
+        return if (usingPropertyManager) {
+            val checkPropertyManagerStep = propertyManagerTask.checkPropertyManagerStep
+            mapOf(
+                "propertyManagerChangeUrl" to
+                    Destination
+                        .VisitableStep(checkPropertyManagerStep, state.getCyaJourneyId(checkPropertyManagerStep))
+                        .toUrlStringOrNull(),
+                "propertyManagerCards" to
+                    listOf(propertyManagerSummaryCardHelper.getSummaryCard(propertyManagerTask.propertyManagerDetailsStep.formModel)),
+            )
+        } else {
+            mapOf(
+                "propertyManagerRows" to
+                    listOf(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "registerProperty.propertyManager.usingPropertyManager.fieldSetHeading",
+                            "registerProperty.propertyManager.usingPropertyManager.radios.no",
+                            Destination.VisitableStep(propertyManagerStep, state.getCyaJourneyId(propertyManagerStep)),
                         ),
                     ),
             )

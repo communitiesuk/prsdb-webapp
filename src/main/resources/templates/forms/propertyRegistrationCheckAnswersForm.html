@@ -13,6 +13,9 @@
 <!--/*@thymesVar id="superiorLandlordsRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="superiorLandlordsChangeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="superiorLandlordsCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="propertyManagerRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="propertyManagerChangeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertyManagerCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
 <!--/*@thymesVar id="correspondenceRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="occupancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="rentedOutHeadingKey" type="java.lang.String"*/-->
@@ -80,7 +83,7 @@
                     <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
                 </th:block>
                 <th:block th:if="${superiorLandlordsCards != null}">
-                    <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
+                    <p class="govuk-body">
                         <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
                            th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
                     </p>
@@ -89,7 +92,22 @@
                     </th:block>
                 </th:block>
             </th:block>
-            <!--/* TODO: PDJB-1986: Add Property Manager header & rows */-->
+            <th:block th:if="${propertyManagerRows != null or propertyManagerCards != null}">
+                <h4 class="govuk-heading-s"
+                    th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.propertyManager.heading</h4>
+                <th:block th:if="${propertyManagerRows != null}">
+                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyManagerRows})}"></dl>
+                </th:block>
+                <th:block th:if="${propertyManagerCards != null}">
+                    <p class="govuk-body">
+                        <a class="govuk-link" th:href="@{${propertyManagerChangeUrl}}"
+                           th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
+                    </p>
+                    <th:block th:each="card : ${propertyManagerCards}">
+                        <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h5')}"></div>
+                    </th:block>
+                </th:block>
+            </th:block>
         </th:block>
         <th:block th:if="${!#lists.isEmpty(correspondenceRows)}">
             <h3 class="govuk-heading-m"

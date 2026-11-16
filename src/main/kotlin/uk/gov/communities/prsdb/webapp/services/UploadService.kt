@@ -21,7 +21,7 @@ class UploadService(
         fileName: String? = null,
     ): FileUpload? {
         val uploadResult =
-            uploader.uploadFile(objectKey, inputStream)
+            uploader.uploadFile(objectKey, inputStream, fileName)
                 ?: return null
 
         val fileUpload =
