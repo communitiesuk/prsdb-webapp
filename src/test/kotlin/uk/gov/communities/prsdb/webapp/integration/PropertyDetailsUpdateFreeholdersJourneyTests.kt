@@ -52,8 +52,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals(2, freeholdersListPage.removeActionCount)
         freeholdersListPage.submit()
 
-        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-        updatedPropertyDetailsPage.tabs.goToPeopleResponsible()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertThat(page.locator("#people-responsible")).isVisible()
         assertEquals(2, page.locator("#people-responsible .govuk-summary-card:has-text('Unknown freeholder')").count())
     }
 

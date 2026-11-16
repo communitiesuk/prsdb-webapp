@@ -77,7 +77,7 @@ class UpdateFreeholdersJourneyFactory(
             }
             step(journey.completeFreeholdersUpdateStep) {
                 parents { journey.freeholdersDetailsTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT" }
             }
             configureStep(journey.freeholdersDetailsTask.freeholdersListStep) {
                 withAdditionalContentProperties {
