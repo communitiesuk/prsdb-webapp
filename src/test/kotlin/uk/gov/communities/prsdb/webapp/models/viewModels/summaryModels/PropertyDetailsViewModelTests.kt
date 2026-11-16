@@ -315,6 +315,7 @@ class PropertyDetailsViewModelTests {
             assertTrue(viewModel.showFreeholderSection)
             assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
             assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
+            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
             assertEquals("#", viewModel.freeholderSectionUpdateUrl)
         }
     }
