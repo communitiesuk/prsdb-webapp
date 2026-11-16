@@ -4,7 +4,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
@@ -14,11 +16,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordNameStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -34,8 +40,10 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordProvideDetailsFormModel
 
@@ -61,7 +69,7 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withOwnershipKind(ownershipKind: OwnershipKind = OwnershipKind.FREEHOLD_ONLY): SelfType {
         val ownershipKindFormModel =
             OwnershipKindFormModel().apply {
-                this.ownershipKind = ownershipKind
+                ownershipKinds = ownershipKind.options.map { it.name }.toMutableList()
             }
         withSubmittedValue(OwnershipKindStep.ROUTE_SEGMENT, ownershipKindFormModel)
         return self()
@@ -95,6 +103,22 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
                 usingPropertyManager = false
             }
         withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
+        return self()
+    }
+
+    fun withPropertyManager(
+        name: String = DEFAULT_PROPERTY_MANAGER_NAME,
+        email: String = DEFAULT_PROPERTY_MANAGER_EMAIL,
+    ): SelfType {
+        withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, PropertyManagerFormModel().apply { usingPropertyManager = true })
+        withSubmittedValue(
+            PropertyManagerDetailsStep.ROUTE_SEGMENT,
+            PropertyManagerDetailsFormModel().apply {
+                this.name = name
+                this.emailAddress = email
+            },
+        )
+        withSubmittedValue(CheckPropertyManagerStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -165,9 +189,44 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         return self()
     }
 
-    fun withSuperiorLandlordNameComplete(name: String = "Test Superior Landlord"): SelfType {
+    fun withSuperiorLandlordName(name: String = "Test Superior Landlord"): SelfType {
         val superiorLandlordNameFormModel = SuperiorLandlordNameFormModel(name = name)
         withSubmittedValue(SuperiorLandlordNameStep.ROUTE_SEGMENT, superiorLandlordNameFormModel)
+        return self()
+    }
+
+    fun withSuperiorLandlordContactType(contactType: SuperiorLandlordContactType = SuperiorLandlordContactType.EMAIL): SelfType {
+        withSubmittedValue(
+            SuperiorLandlordContactTypeStep.ROUTE_SEGMENT,
+            SuperiorLandlordContactTypeFormModel(contactType = contactType),
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordLookupAddress(
+        houseNameOrNumber: String = "1",
+        postcode: String = "FA1 1AA",
+    ): SelfType {
+        // The superior landlord address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = SuperiorLandlordAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Fictional Road, $postcode", localCouncilId = 22, uprn = 44)
+        additionalDataMap["$routePrefix/cachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            },
+        )
+        return self()
+    }
+
+    fun withSuperiorLandlordManualAddressSelected(): SelfType {
+        withSubmittedValue(
+            "${SuperiorLandlordAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
+        )
         return self()
     }
 
@@ -175,5 +234,15 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
         additionalDataMap["superiorLandlordsMap"] = Json.encodeToString(serializer(), superiorLandlords)
         additionalDataMap["nextSuperiorLandlordId"] = Json.encodeToString(serializer(), (superiorLandlords.keys.maxOrNull() ?: 0) + 1)
         return self()
+    }
+
+    fun withSuperiorLandlordsListComplete(): SelfType {
+        withSubmittedValue(SuperiorLandlordsListStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    companion object {
+        const val DEFAULT_PROPERTY_MANAGER_NAME = "Best Property Managers Ltd"
+        const val DEFAULT_PROPERTY_MANAGER_EMAIL = "manager@example.com"
     }
 }

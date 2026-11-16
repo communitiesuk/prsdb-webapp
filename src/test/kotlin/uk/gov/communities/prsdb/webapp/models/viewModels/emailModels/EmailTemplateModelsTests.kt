@@ -579,6 +579,42 @@ class EmailTemplateModelsTests {
     }
 
     @ParameterizedTest
+    @CsvSource(
+        "true, false, true, yes",
+        "false, false, true, no",
+        "true, true, true, no",
+        "true, false, false, no",
+    )
+    fun `property registration email shows missing details only when occupied not delegated and details are missing`(
+        isOccupied: Boolean,
+        isDelegatedToLettingAgent: Boolean,
+        licenseProvideLater: Boolean,
+        expectedHasMissingDetails: String,
+    ) {
+        // Arrange
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = isOccupied,
+                isDelegatedToLettingAgent = isDelegatedToLettingAgent,
+                licenseProvideLater = licenseProvideLater,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedHasMissingDetails, hashMap["hasMissingDetails"])
+        if (expectedHasMissingDetails == "yes") {
+            Assertions.assertTrue(hashMap["missingDetailsList"].orEmpty().contains("licensing details"))
+        } else {
+            Assertions.assertEquals("", hashMap["missingDetailsList"])
+        }
+    }
+
+    @ParameterizedTest
     @CsvSource("true,yes", "false,no")
     fun `organisation registration email includes the feature flag as yes or no personalisation`(
         isMultiUserOrganisationsEnabled: Boolean,

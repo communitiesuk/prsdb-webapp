@@ -14,10 +14,14 @@ class PaymentFailedStepConfig : AbstractRequestableStepConfig<Nothing, NoInputFo
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
         mapOf(
             "tryAgainUrl" to Destination(state.paymentSummaryStep).toUrlStringOrNull(),
-            "isNotCompleted" to (state.paymentOutcome == PaymentOutcome.NOT_COMPLETED),
         )
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentFailedForm"
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState) =
+        if (state.paymentOutcome == PaymentOutcome.NOT_COMPLETED) {
+            "forms/paymentNotCompletedForm"
+        } else {
+            "forms/paymentFailedForm"
+        }
 
     override fun mode(state: PropertyRegistrationJourneyState) = null
 }

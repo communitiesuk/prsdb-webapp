@@ -50,7 +50,11 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
                 nextKey
             }
 
-        currentMap[targetKey] = freeholder
+        // Store the database id if the user is updating an existing freeholder, so that the journey
+        // can distinguish between an updated freeholder and a new one.
+        val existingDatabaseId = currentMap[targetKey]?.databaseId
+
+        currentMap[targetKey] = freeholder.copy(databaseId = existingDatabaseId)
         state.freeholdersMap = currentMap
         state.editingFreeholderId = null
 

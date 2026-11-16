@@ -26,7 +26,7 @@ abstract class PropertyDetailsBasePage(
 
     fun sectionHeading(text: String) =
         page.locator(
-            "h3.govuk-heading-s",
+            "#property-details h3.govuk-heading-s",
             Page.LocatorOptions().setHasText(text),
         )
 
@@ -39,8 +39,8 @@ abstract class PropertyDetailsBasePage(
     class PropertyDetailsTabs(
         page: Page,
     ) : Tabs(page) {
-        fun goToLandlordDetails() {
-            goToTab("Landlords")
+        fun goToPeopleResponsible() {
+            goToTab("People responsible for this property")
         }
 
         fun goToPropertyDetails() {

@@ -19,6 +19,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import java.util.Locale
 
 class MessageKeyConverterTests {
@@ -134,6 +137,24 @@ class MessageKeyConverterTests {
     @ParameterizedTest
     @EnumSource(CharityRegulator::class)
     fun `convert returns a resolvable message key for every CharityRegulator`(value: CharityRegulator) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    @ParameterizedTest
+    @EnumSource(YesOrNo::class)
+    fun `convert returns a resolvable message key for every YesOrNo`(value: YesOrNo) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    @ParameterizedTest
+    @EnumSource(OwnershipKind::class)
+    fun `convert returns a resolvable message key for every OwnershipKind`(value: OwnershipKind) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    @ParameterizedTest
+    @EnumSource(FreeholdType::class)
+    fun `convert returns a resolvable message key for every FreeholdType`(value: FreeholdType) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 }

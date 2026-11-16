@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -43,6 +42,7 @@ class PropertyRegistrationService(
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentRepository: PaymentRepository,
+    private val activeInactiveService: ActiveInactiveService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -57,6 +57,8 @@ class PropertyRegistrationService(
                     anniversary,
                     renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
                 )
+
+            activeInactiveService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
@@ -120,7 +122,11 @@ class PropertyRegistrationService(
                     null
                 }
 
-            // TODO PDJB-1986: save the property manager (if provided) and link it to the new property ownership
+            // TODO PDJB-2015: save the property manager (if provided) and link it to the new property
+            //  ownership, and create the freeholders and superior landlords from the registration
+            //  journey's answers. Those two hold a foreign key to the property ownership, so unlike the
+            //  licence and the property manager they have to be created from the saved result rather
+            //  than passed in.
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
@@ -199,7 +205,6 @@ class PropertyRegistrationService(
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
                 isDelegatedToLettingAgent,
-                isPdjb939PhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO),
                 licenseProvideLater = licenseProvideLater,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.helpers.LandlordDeactivationDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -77,6 +80,13 @@ class RegisterLandlordController(
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         val isOrganisation = landlord.landlordType == LandlordType.ORGANISATION
+        model.addAttribute("isOrganisation", isOrganisation)
+
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check and always add the deactivation date
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            val deactivationDate = LandlordDeactivationDateHelper.getDeactivationDateFromCreatedDate(landlord.createdDate)
+            model.addAttribute("deactivationDate", deactivationDate.toJavaLocalDate())
+        }
 
         val surveyUrl =
             if (isOrganisation) {

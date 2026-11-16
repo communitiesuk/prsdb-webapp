@@ -5,24 +5,39 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveFreeholderFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
-// TODO PDJB-1970: replace this placeholder with the real "are you sure you want to remove this freeholder" page
-//  (content, input and validation). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
 class ConfirmRemoveFreeholderStepConfig(
     private val collectionKeyParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<AnyMembers, NoInputFormModel, FreeholdersDetailsState>() {
-    override val formModelClass = NoInputFormModel::class
+) : AbstractRequestableStepConfig<AnyMembers, RemoveFreeholderFormModel, FreeholdersDetailsState>() {
+    override val formModelClass = RemoveFreeholderFormModel::class
 
-    override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> =
-        mapOf(
-            "todoComment" to
-                "TODO (PDJB-1970): Are you sure you want to remove this freeholder? - content, input and validation to be added",
+    override fun getStepSpecificContent(state: FreeholdersDetailsState): Map<String, Any?> {
+        val freeholderToRemove =
+            collectionKeyParameterService
+                .getParameterOrNull()
+                ?.let { state.freeholdersMap?.get(it) }
+        val freeholderName = freeholderToRemove?.takeIf { it.detailsKnown }?.name
+
+        return mapOf(
+            "fieldSetHeading" to
+                if (freeholderName != null) {
+                    "registerProperty.freeholders.remove.fieldSetHeading"
+                } else {
+                    "registerProperty.freeholders.remove.unknownFreeholder.fieldSetHeading"
+                },
+            "optionalFieldSetHeadingParam" to freeholderName.orEmpty(),
+            "fieldSetHint" to "registerProperty.freeholders.remove.fieldSetHint",
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+            "showSectionHeader" to true,
         )
+    }
 
-    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/todo"
+    override fun chooseTemplate(state: FreeholdersDetailsState) = "forms/areYouSureForm"
 
     override fun beforeAttemptingToReachStep(state: FreeholdersDetailsState): Boolean {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
@@ -30,9 +45,11 @@ class ConfirmRemoveFreeholderStepConfig(
         return keyToRemove != null && keyToRemove in currentMap.keys && (currentMap.size > 1 || state.allowRemovingLastMember)
     }
 
-    // TODO PDJB-1970: only remove the freeholder when the user confirms they want to remove them, as in
-    //  RemoveJointLandlordAreYouSureStepConfig
     override fun afterStepDataIsAdded(state: FreeholdersDetailsState) {
+        val wantsToProceed = getFormModelFromStateOrNull(state)?.wantsToProceed
+        state.confirmRemoveFreeholderStep.clearFormData()
+        if (wantsToProceed != true) return
+
         val keyToRemove = collectionKeyParameterService.getParameterOrNull() ?: return
         val currentMap = state.freeholdersMap?.toMutableMap() ?: return
         currentMap.remove(keyToRemove)
@@ -46,7 +63,7 @@ class ConfirmRemoveFreeholderStepConfig(
 @JourneyFrameworkComponent
 final class ConfirmRemoveFreeholderStep(
     stepConfig: ConfirmRemoveFreeholderStepConfig,
-) : RequestableStep<AnyMembers, NoInputFormModel, FreeholdersDetailsState>(stepConfig) {
+) : RequestableStep<AnyMembers, RemoveFreeholderFormModel, FreeholdersDetailsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-freeholder"
     }

@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATIO
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -135,13 +134,8 @@ class RegisterPropertyController(
 
         val actionRequiredForCompliance = hasActionRequiredForCompliance(isOccupied, propertyCompliance)
 
-        // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
-        val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
-        // TODO: PDJB-1742: Remove this model attribute when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
-        model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
-
         val provideMissingDetails =
-            hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
+            hasProvideMissingDetails(isOccupied, propertyOwnership, propertyCompliance)
 
         val delegatedToLettingAgent = propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
@@ -198,13 +192,11 @@ class RegisterPropertyController(
             )
 
     private fun hasProvideMissingDetails(
-        propertyRegistrationPhaseTwoEnabled: Boolean,
         isOccupied: Boolean,
         propertyOwnership: PropertyOwnership,
         propertyCompliance: PropertyCompliance?,
     ): Boolean =
-        propertyRegistrationPhaseTwoEnabled &&
-            isOccupied &&
+        isOccupied &&
             (
                 propertyOwnership.licenseProvideLater == true ||
                     propertyOwnership.tenancyProvideLater == true ||

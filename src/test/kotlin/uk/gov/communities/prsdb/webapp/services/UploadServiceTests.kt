@@ -11,6 +11,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -44,7 +45,7 @@ class UploadServiceTests {
         val proposedObjectKey = "testObjectKey"
         val mockUploadResult = UploadedFileLocator(proposedObjectKey, "mockETag", "mockVersionId")
 
-        whenever(mockUploader.uploadFile(any(), any()))
+        whenever(mockUploader.uploadFile(any(), any(), anyOrNull()))
             .thenReturn(mockUploadResult)
 
         whenever(mockRepository.save(any()))
@@ -69,7 +70,7 @@ class UploadServiceTests {
         val mockUploadResult = UploadedFileLocator(proposedObjectKey, "mockETag", "mockVersionId")
         val fileName = "testDocument.pdf"
 
-        whenever(mockUploader.uploadFile(any(), any()))
+        whenever(mockUploader.uploadFile(any(), any(), anyOrNull()))
             .thenReturn(mockUploadResult)
 
         whenever(mockRepository.save(any()))
@@ -83,10 +84,26 @@ class UploadServiceTests {
     }
 
     @Test
+    fun `uploadFile passes the file name to the uploader`() {
+        // Arrange
+        val proposedObjectKey = "testObjectKey"
+        whenever(mockUploader.uploadFile(any(), any(), anyOrNull()))
+            .thenReturn(UploadedFileLocator(proposedObjectKey, "mockETag", "mockVersionId"))
+        whenever(mockRepository.save(any()))
+            .thenAnswer { invocation -> invocation.getArgument<FileUpload>(0) }
+
+        // Act
+        uploadService.uploadFile(proposedObjectKey, InputStream.nullInputStream(), "pdf", "certificate.pdf")
+
+        // Assert
+        verify(mockUploader).uploadFile(eq(proposedObjectKey), any(), eq("certificate.pdf"))
+    }
+
+    @Test
     fun `when uploading fails, uploadFile does not save a result and returns null`() {
         // Given
         val proposedObjectKey = "testObjectKey"
-        whenever(mockUploader.uploadFile(any(), any()))
+        whenever(mockUploader.uploadFile(any(), any(), anyOrNull()))
             .thenReturn(null)
 
         // When

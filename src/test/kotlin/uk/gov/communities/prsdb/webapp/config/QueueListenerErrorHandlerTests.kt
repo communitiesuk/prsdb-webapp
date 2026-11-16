@@ -22,10 +22,15 @@ import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 
-class EmailQueueErrorHandlerTests {
+class QueueListenerErrorHandlerTests {
     private val visibility: Visibility = mock()
     private val transientFailureErrorHandler: AsyncErrorHandler<Any> = mock()
-    private val errorHandler = EmailQueueErrorHandler(PERSISTENT_FAILURE_VISIBILITY_TIMEOUT_SECONDS, transientFailureErrorHandler)
+    private val errorHandler =
+        QueueListenerErrorHandler(
+            PERSISTENT_FAILURE_VISIBILITY_TIMEOUT_SECONDS,
+            transientFailureErrorHandler,
+            setOf(PersistentEmailSendException::class, SerializationException::class),
+        )
     private val message: Message<Any> =
         MessageBuilder
             .withPayload<Any>("payload")
@@ -53,6 +58,24 @@ class EmailQueueErrorHandlerTests {
         whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
 
         val result = errorHandler.handle(message, listenerFailure)
+
+        assertSame(transientFailureResult, result)
+        verify(visibility, never()).changeToAsync(any())
+    }
+
+    @Test
+    fun `handle passes failures of types not configured as persistent to the transient failure error handler`() {
+        val handlerForOtherTypes =
+            QueueListenerErrorHandler(
+                PERSISTENT_FAILURE_VISIBILITY_TIMEOUT_SECONDS,
+                transientFailureErrorHandler,
+                setOf(IllegalStateException::class),
+            )
+        val listenerFailure = RuntimeException("Listener failed", PersistentEmailSendException("bad request"))
+        val transientFailureResult = CompletableFuture.failedFuture<Void>(listenerFailure)
+        whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
+
+        val result = handlerForOtherTypes.handle(message, listenerFailure)
 
         assertSame(transientFailureResult, result)
         verify(visibility, never()).changeToAsync(any())

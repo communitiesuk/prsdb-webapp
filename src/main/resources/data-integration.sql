@@ -165,7 +165,7 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRSDB+landlord@softwire.com', null::varchar, true, '2025-02-25 16:17:18.075473+00'::timestamptz, 'PRSD Landlord',
@@ -198,7 +198,7 @@ SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRS
        (11, 66, 9073642, '2026-08-25 00:00:00+00', 'Katrina.DiMuro@communities.gov.uk', null, true, null, 'Katrina DiMuro',
         '07777777777', 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '1990-01-01', 'England or Wales', true,
         true)) AS v (
-           id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+           id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, is_active,
            last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
            individual_has_accepted_privacy_notice)
 -- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
@@ -590,7 +590,7 @@ FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
@@ -650,7 +650,7 @@ FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
@@ -690,6 +690,10 @@ SELECT 1400 + i, 1600 + i, po.created_date
 FROM generate_series(1, 100) AS s(i)
 JOIN property_ownership po ON po.id = 1600 + i
 ON CONFLICT DO NOTHING;
+
+UPDATE landlord l
+SET has_registered_property = true
+WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 -- Bump the sequences past the metrics seed ids so any later records get higher ids
 -- (matching the setval pattern used after the other seed inserts above).
