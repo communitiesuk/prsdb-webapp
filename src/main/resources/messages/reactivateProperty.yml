@@ -14,3 +14,12 @@ info:
       four: energy performance certificate (EPC)
       five: tenancy details
   insetText: You must complete all the information and submit in one go. Your answers will not be saved until you submit.
+alreadyRegistered:
+  heading: There is an active registration for this property
+  paragraph: This property has been registered again since it was deactivated. There can only be one active registration for a property.
+  ifYouAreTheLandlord:
+    heading: If you are the landlord for this property
+    paragraph: Check with any joint landlords to make sure they have not registered the property.
+  contactUs:
+    heading: Contact us for help
+  registerNewPropertyLink: Register a new property

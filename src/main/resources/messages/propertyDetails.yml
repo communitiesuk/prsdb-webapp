@@ -25,6 +25,13 @@ lettingAgentView:
     heading: Compliance certificates
   feedback:
     body: Once you have completed one or more of the actions on this page, please click here to provide feedback about your experience
+peopleResponsible:
+  heading: People responsible for this property
+  ownership:
+    heading: Ownership
+    ownsProperty: Do you own this property?
+    ownershipType: Ownership type
+    freeholderType: Freeholder type
 landlordDetails:
   heading: Landlords
   registeredLandlords:

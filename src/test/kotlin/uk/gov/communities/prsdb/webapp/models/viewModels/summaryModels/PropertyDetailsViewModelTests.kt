@@ -1,12 +1,18 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
@@ -148,7 +154,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `registration, ownership and occupation sections contain the expected rows`() {
+    fun `registration and occupation sections contain the expected rows`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
         val viewModel =
@@ -162,13 +168,157 @@ class PropertyDetailsViewModelTests {
             viewModel.registrationDetails.map { it.fieldHeading },
         )
         assertEquals(
-            listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
-            viewModel.ownershipSection.map { it.fieldHeading },
-        )
-        assertEquals(
             listOf("propertyDetails.propertyRecord.occupation.isOccupied"),
             viewModel.occupiedSection.map { it.fieldHeading },
         )
+    }
+
+    @Test
+    fun `the people responsible tab shows the ownership answers`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showPeopleResponsibleOwnership)
+        assertEquals(
+            listOf(
+                "propertyDetails.peopleResponsible.ownership.ownsProperty",
+                "propertyDetails.peopleResponsible.ownership.ownershipType",
+                "propertyDetails.peopleResponsible.ownership.freeholderType",
+            ),
+            viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading },
+        )
+        // TODO PDJB-1992: update this assertion when the ownership update journey replaces the placeholder links
+        assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.single().url == "#" }) {
+            "The ownership answer rows show placeholder change links until PDJB-1992 builds the update journey"
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideExpectedOwnershipAnswerRows")
+    fun `the ownership answers show the right rows and values for each ownership type`(
+        ownershipType: OwnershipType,
+        expectedRows: List<Pair<String, String>>,
+    ) {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = ownershipType),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            expectedRows,
+            viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading to it.fieldValue },
+        )
+    }
+
+    @Test
+    fun `every ownership type has an expected set of ownership answer rows`() {
+        assertEquals(
+            OwnershipType.entries.toSet(),
+            provideExpectedOwnershipAnswerRows().map { it.get()[0] }.toSet(),
+        ) {
+            "Every ownership type must be covered, so a new one cannot be added without checking its rows"
+        }
+    }
+
+    @Test
+    fun `the ownership answer message keys resolve to messages`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        (
+            viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading } +
+                viewModel.peopleResponsibleOwnershipHeadingKey +
+                viewModel.peopleResponsibleTabHeadingKey
+        ).forEach { messageKey ->
+            val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+            assertNotEquals(messageKey, resolvedMessage) {
+                "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
+            }
+        }
+    }
+
+    @Test
+    fun `the tab heading is renamed for both views`() {
+        listOf(true, false).forEach { isLandlordView ->
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = isLandlordView,
+                    messageSource = mockMessageSource,
+                )
+
+            assertEquals("propertyDetails.peopleResponsible.heading", viewModel.peopleResponsibleTabHeadingKey)
+        }
+    }
+
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. It covers the single
+    //  legacy ownership row on the property record tab, which goes with the flag (PDJB-1999 moves the
+    //  local council view onto the people responsible tab first).
+    @Nested
+    inner class OwnershipBeforePdjb955 {
+        @Test
+        fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = true,
+                )
+
+            assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
+        }
+
+        @Test
+        fun `the local council keeps the legacy ownership section when associated parties is enabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = false,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = true,
+                )
+
+            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
+            )
+            assertFalse(viewModel.showPeopleResponsibleOwnership)
+        }
+
+        @Test
+        fun `the legacy ownership section and tab name are kept when associated parties is disabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
+            )
+            assertFalse(viewModel.showPeopleResponsibleOwnership)
+            assertTrue(viewModel.peopleResponsibleOwnershipSection.isEmpty())
+            assertEquals("propertyDetails.landlordDetails.heading", viewModel.peopleResponsibleTabHeadingKey)
+        }
     }
 
     @Test
@@ -614,5 +764,67 @@ class PropertyDetailsViewModelTests {
             )
 
         assertTrue(viewModel.correspondenceSection.none { it.hasActions })
+    }
+
+    companion object {
+        private const val OWNS_PROPERTY = "propertyDetails.peopleResponsible.ownership.ownsProperty"
+        private const val OWNERSHIP_TYPE = "propertyDetails.peopleResponsible.ownership.ownershipType"
+        private const val FREEHOLDER_TYPE = "propertyDetails.peopleResponsible.ownership.freeholderType"
+
+        private const val YES = "commonText.yes"
+        private const val NO = "commonText.no"
+
+        private const val FREEHOLD = "registerProperty.ownershipKind.checkbox.freehold.label"
+        private const val LEASEHOLD = "registerProperty.ownershipKind.checkbox.leasehold.label"
+        private const val FREEHOLD_AND_LEASEHOLD = "registerProperty.ownershipKind.value.freeholdAndLeasehold"
+
+        private const val SOLE_OWNERSHIP = "registerProperty.freeholdType.radios.option.soleOwnership.label"
+        private const val JOINT_TENANTS = "registerProperty.freeholdType.radios.option.jointTenants.label"
+        private const val TENANTS_IN_COMMON = "registerProperty.freeholdType.radios.option.tenantsInCommon.label"
+        private const val COMMONHOLD = "registerProperty.freeholdType.radios.option.commonhold.label"
+
+        // The freeholder type row is omitted where there is no freehold to describe, and both the
+        // ownership type and freeholder type rows where the landlord does not own the property.
+        @JvmStatic
+        fun provideExpectedOwnershipAnswerRows() =
+            listOf(
+                Arguments.of(OwnershipType.NONE, listOf(OWNS_PROPERTY to NO)),
+                Arguments.of(
+                    OwnershipType.LEASEHOLD_ONLY,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to LEASEHOLD),
+                ),
+                Arguments.of(
+                    OwnershipType.SOLE_FREEHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                ),
+                Arguments.of(
+                    OwnershipType.JOINT_TENANTS,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                ),
+                Arguments.of(
+                    OwnershipType.TENANTS_IN_COMMON,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                ),
+                Arguments.of(
+                    OwnershipType.COMMONHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_SOLE_FREEHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_JOINT_TENANTS,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_TENANTS_IN_COMMON,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                ),
+                Arguments.of(
+                    OwnershipType.SHARE_OF_COMMONHOLD,
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                ),
+            )
     }
 }

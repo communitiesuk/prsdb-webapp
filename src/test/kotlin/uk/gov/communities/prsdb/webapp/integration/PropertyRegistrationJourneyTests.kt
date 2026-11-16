@@ -216,8 +216,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     private val propertyDetailsSectionHeader = "Property details"
     private val peopleResponsibleSectionHeader = "People responsible for this property"
-    private val occupiedSectionHeader = "Tell us if your property’s occupied"
-    private val licenseSectionHeader = "Tell us if your property needs a license"
+    private val occupiedSectionHeader = "Tell us if this property is occupied"
+    private val licenseSectionHeader = "Tell us if your property needs a licence"
     private val gasSafetyHeader = "Gas safety certificate"
     private val electricalSafetyHeader = "Electrical safety certificate"
     private val epcSectionHeader = "Energy performance certificate (EPC)"
@@ -2212,21 +2212,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals(3, taskListPage.getSectionCount())
             assertThat(taskListPage.getSectionHeading(0)).hasText("About your property")
-            assertThat(taskListPage.getSectionHeading(1)).hasText("How your property’s rented out")
+            assertThat(taskListPage.getSectionHeading(1)).hasText("How your property is rented out")
             assertThat(taskListPage.getSectionHeading(2)).hasText("Submit your registration")
             assertEquals(
                 listOf(
                     "Property details",
                     "People responsible for this property",
                     "Who the council should contact",
-                    "Tell us if your property’s occupied",
+                    "Tell us if this property is occupied",
                 ),
                 taskListPage.getAboutYourPropertyTaskNames(),
             )
             assertEquals(
                 listOf(
                     "Who will provide these details",
-                    "Tell us if your property needs a license",
+                    "Tell us if your property needs a licence",
                     "Gas safety certificate",
                     "Electrical safety certificate",
                     "Energy performance certificate (EPC)",
@@ -2565,11 +2565,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
+                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
+                taskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
             )
             assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
@@ -2595,7 +2595,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
+                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
             )
             assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals(
@@ -2616,7 +2616,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Completed",
-                taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
+                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
             )
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
@@ -3092,7 +3092,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Not\u00A0started",
-                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
+                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
@@ -3136,7 +3136,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Switch the property back to occupied. Because the delegation was hidden rather than cleared, the previous
             // "letting agent provides" answer resurfaces: the who-provides task is complete again and the tenancy task
             // returns to "Not required", so the registration is complete and the CYA page is reachable once more.
-            unoccupiedTaskListPage.clickAboutYourPropertyTaskWithName("Tell us if your property’s occupied")
+            unoccupiedTaskListPage.clickAboutYourPropertyTaskWithName("Tell us if this property is occupied")
             assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
 
             val reoccupiedTaskListPage = navigator.goToPropertyRegistrationTaskList()

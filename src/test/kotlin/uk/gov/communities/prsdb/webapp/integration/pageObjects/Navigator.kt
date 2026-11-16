@@ -171,6 +171,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.AlreadyRegisteredPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
@@ -279,6 +280,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -296,6 +298,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderEmailStep
@@ -317,6 +320,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
@@ -783,6 +787,33 @@ class Navigator(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun goToPropertyRegistrationCheckAnswersPageWithFreeholders(
+        ownershipKind: OwnershipKind? = OwnershipKind.LEASEHOLD_ONLY,
+        freeholdType: FreeholdType? = null,
+        ownsProperty: Boolean = true,
+    ): CheckAnswersPagePropertyRegistration {
+        val builder =
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswers()
+                .withBedrooms()
+                .withOwnsProperty(ownsProperty)
+        ownershipKind?.let(builder::withOwnershipKind)
+        freeholdType?.let(builder::withFreeholdType)
+        if (!ownsProperty || ownershipKind != OwnershipKind.FREEHOLD_ONLY) {
+            builder.withAnyoneInOwnershipChain(false)
+        }
+
+        val taskListPage =
+            goToPropertyRegistrationTaskList(
+                builder
+                    .withFreeholders(PropertyStateSessionBuilder.DEFAULT_FREEHOLDERS)
+                    .withFreeholdersInfoComplete()
+                    .withFreeholdersListComplete(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
@@ -1671,11 +1702,47 @@ class Navigator(
         )
     }
 
-    fun navigateToPropertyReactivationLicensingPageAfterInfo(propertyOwnershipId: Long) {
-        setJourneyStateInSession(PropertyReactivationStateSessionBuilder().withInfoCompleted().build())
+    fun navigateToPropertyReactivationLicensingPageAfterInfo(
+        propertyOwnershipId: Long,
+        isPropertyAlreadyRegistered: Boolean = false,
+    ) = navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId,
+        ReactivationLicensingStep.ROUTE_SEGMENT,
+        isPropertyAlreadyRegistered,
+    )
+
+    fun navigateToPropertyReactivationAlreadyRegisteredPageAfterInfo(
+        propertyOwnershipId: Long,
+        isPropertyAlreadyRegistered: Boolean,
+    ) = navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId,
+        ReactivationAlreadyRegisteredStep.ROUTE_SEGMENT,
+        isPropertyAlreadyRegistered,
+    )
+
+    private fun navigateToPropertyReactivationStepAfterInfo(
+        propertyOwnershipId: Long,
+        routeSegment: String,
+        isPropertyAlreadyRegistered: Boolean,
+    ) {
+        setJourneyStateInSession(
+            PropertyReactivationStateSessionBuilder()
+                .withInfoCompleted()
+                .withIsPropertyAlreadyRegistered(isPropertyAlreadyRegistered)
+                .build(),
+        )
         navigate(
             ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
-                "/${ReactivationLicensingStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+                "/$routeSegment?journeyId=$TEST_JOURNEY_ID",
+        )
+    }
+
+    fun skipToPropertyReactivationAlreadyRegisteredPage(propertyOwnershipId: Long): AlreadyRegisteredPagePropertyReactivation {
+        navigateToPropertyReactivationAlreadyRegisteredPageAfterInfo(propertyOwnershipId, isPropertyAlreadyRegistered = true)
+        return createValidPage(
+            page,
+            AlreadyRegisteredPagePropertyReactivation::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
 

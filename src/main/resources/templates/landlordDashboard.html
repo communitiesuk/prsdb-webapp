@@ -2,10 +2,15 @@
 <html th:replace="~{fragments/layout :: layout(${landlordName}, ~{::main/content()}, false, null, null)}">
 <main>
     <div id="page-content">
-        <th:block
-                th:if="${landlordDashboardNotificationBannerViewModel.numberOfOutstandingActions != 0}"
-                  th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${landlordDashboardNotificationBannerViewModel}, ${viewIncompletePropertiesUrl}, ${outstandingActionsUrl}, ${outstandingActionsLinkTextKey})}">
-            </th:block>
+        <th:block th:if="${showInactiveLandlordBanner}">
+            <th:block th:replace="~{fragments/banners/inactiveLandlordNotificationBanner :: inactiveLandlordNotificationBanner(${inactiveLandlordNotificationBannerViewModel}, ${deactivatedPropertiesUrl}, ${viewIncompletePropertiesUrl}, ${registerPropertyUrl})}"></th:block>
+        </th:block>
+        <th:block th:unless="${showInactiveLandlordBanner}">
+            <th:block
+                    th:if="${landlordDashboardNotificationBannerViewModel.numberOfOutstandingActions != 0}"
+                      th:replace="~{fragments/banners/landlordDashboardNotificationBanner ::  landlordDashboardNotificationBanner(${landlordDashboardNotificationBannerViewModel}, ${viewIncompletePropertiesUrl}, ${outstandingActionsUrl}, ${outstandingActionsLinkTextKey})}">
+                </th:block>
+        </th:block>
         <div id="dashboard-banner"
              th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(${landlordName}, ~{::#dashboard-banner/content()})}">
             <strong th:text="#{landlord.dashboard.banner.subheading}">landlord.dashboard.banner.subheading</strong>

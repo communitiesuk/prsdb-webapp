@@ -1,20 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyManagerState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 @JourneyFrameworkComponent
-class CheckPropertyManagerStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyManagerState>() {
+class CheckPropertyManagerStepConfig(
+    private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyManagerState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: PropertyManagerState): Map<String, Any?> =
@@ -25,28 +25,18 @@ class CheckPropertyManagerStepConfig : AbstractRequestableStepConfig<Complete, N
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
-    private fun getPropertyManagerCard(state: PropertyManagerState): SummaryCardViewModel {
-        val details = state.propertyManagerDetailsStep.formModel
-        return SummaryCardViewModel(
-            title = details.notNullValue(PropertyManagerDetailsFormModel::name),
-            summaryList =
-                listOf(
-                    SummaryListRowViewModel(
-                        fieldHeading = "registerProperty.propertyManager.check.emailAddress",
-                        fieldValue = details.notNullValue(PropertyManagerDetailsFormModel::emailAddress),
-                    ),
-                ),
-            actions =
-                listOfNotNull(
-                    Destination(state.propertyManagerDetailsStep).toUrlStringOrNull()?.let {
-                        SummaryCardActionViewModel(text = "forms.links.change", url = it)
-                    },
-                    Destination(state.removePropertyManagerStep).toUrlStringOrNull()?.let {
-                        SummaryCardActionViewModel(text = "forms.links.remove", url = it)
-                    },
-                ),
+    private fun getPropertyManagerCard(state: PropertyManagerState): SummaryCardViewModel =
+        propertyManagerSummaryCardHelper.getSummaryCard(
+            state.propertyManagerDetailsStep.formModel,
+            listOfNotNull(
+                Destination(state.propertyManagerDetailsStep).toUrlStringOrNull()?.let {
+                    SummaryCardActionViewModel(text = "forms.links.change", url = it)
+                },
+                Destination(state.removePropertyManagerStep).toUrlStringOrNull()?.let {
+                    SummaryCardActionViewModel(text = "forms.links.remove", url = it)
+                },
+            ),
         )
-    }
 
     override fun chooseTemplate(state: PropertyManagerState) = "forms/addAnotherCardsForm"
 

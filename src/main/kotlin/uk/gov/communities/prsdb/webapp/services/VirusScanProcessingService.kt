@@ -1,17 +1,18 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentScanResultProcessingException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
     private val virusCallbackHandler: VirusNotificationEmailHandler,
@@ -64,8 +65,8 @@ class VirusScanProcessingService(
             }
 
             ScanResult.AccessDenied -> {
-                throw PrsdbWebException(
-                    "GuardDuty does not have access to scan $callbackDetails.fileUpload.objectKey",
+                throw PersistentScanResultProcessingException(
+                    "GuardDuty does not have access to scan ${fileUpload.objectKey}",
                 )
             }
         }
@@ -109,7 +110,7 @@ class VirusScanProcessingService(
         callbacks.forEach { callback ->
             val fileETag = callback.fileUpload.eTag
             if (fileETag != certificateFileLocator.eTag) {
-                throw PrsdbWebException(
+                throw PersistentScanResultProcessingException(
                     "ETag mismatch for object key: ${certificateFileLocator.objectKey}. " +
                         "Expected: $fileETag, Received: ${certificateFileLocator.eTag}",
                 )

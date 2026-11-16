@@ -38,6 +38,8 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
@@ -57,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -70,6 +73,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -121,6 +125,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
+
+    @Mock
+    private lateinit var mockActiveInactiveService: ActiveInactiveService
 
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
@@ -572,7 +579,7 @@ class PropertyOwnershipServiceTests {
                 mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
             ).thenReturn(landlordsProperties)
 
-            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(ACTIVE_PROPERTIES_FRAGMENT))
                 .thenReturn(expectedCurrentUrlKey)
 
             val expectedResults: List<RegisteredPropertyLandlordViewModel> =
@@ -602,9 +609,9 @@ class PropertyOwnershipServiceTests {
                 )
 
             val result =
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     currentLandlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 )
 
             assertTrue(result.size == 2)
@@ -660,6 +667,38 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
+        }
+    }
+
+    @Nested
+    inner class GetDeactivatedPropertiesForLandlordUser {
+        @Test
+        fun `Returns the landlord's deactivated properties as view models`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val deactivatedProperty =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord),
+                    address = MockLandlordData.createAddress("6 Mythical Place, FA1 1AK"),
+                    registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 7654321),
+                    isActive = false,
+                )
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id))
+                .thenReturn(listOf(deactivatedProperty))
+
+            val result = propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord)
+
+            assertEquals(
+                listOf(
+                    DeactivatedPropertyLandlordViewModel(
+                        address = "6 Mythical Place, FA1 1AK",
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(deactivatedProperty.registrationNumber)
+                                .toString(),
+                    ),
+                ),
+                result,
+            )
         }
     }
 
@@ -1528,6 +1567,20 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `removePropertyManager clears the property manager and saves the property ownership`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+        propertyOwnership.propertyManager = PropertyManager("Agent Ltd", "agent@example.com")
+
+        // Act
+        propertyOwnershipService.removePropertyManager(propertyOwnership)
+
+        // Assert
+        assertNull(propertyOwnership.propertyManager)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+    }
+
+    @Test
     fun `updateOwnershipType does nothing to the freeholders when neither type requires any`() {
         // Arrange
         val propertyOwnership =
@@ -2239,17 +2292,47 @@ class PropertyOwnershipServiceTests {
                     // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled arguments
                     OutstandingActionsDataModel.fromPropertyOwnership(
                         tenancyProvideLaterProperty,
+                        eicIssueDate = null,
                         electricalSafetyExpiryDate = null,
                         isGas14MonthExpiryEnabled = true,
                     ),
                     OutstandingActionsDataModel.fromPropertyOwnership(
                         gasProvideLaterProperty,
+                        eicIssueDate = null,
                         electricalSafetyExpiryDate = null,
                         isGas14MonthExpiryEnabled = true,
                     ),
                 ),
                 outstandingActions.content,
             )
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `outstanding actions omit the EIC issue date when the EIC issue date flag is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+            val eicExpiryDate = LocalDate.of(2000, 6, 1)
+            val eicOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 501L)
+            val eicCompliance =
+                PropertyComplianceBuilder()
+                    .withPropertyOwnership(eicOwnership)
+                    .withElectricalSafety(expiryDate = eicExpiryDate, certType = CertificateType.Eic)
+                    .build()
+            ReflectionTestUtils.setField(eicOwnership, "propertyCompliance", eicCompliance)
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(listOf(eicOwnership))
+
+            val eicStatus =
+                propertyOwnershipService
+                    .getOutstandingActionsForLandlord(landlord, 0)
+                    .content
+                    .single()
+                    .complianceStatus!!
+
+            assertEquals(null, eicStatus.eicIssueDate)
+            assertEquals(eicExpiryDate, eicStatus.electricalSafetyExpiryDate)
+            verify(eicDateService, never()).issueDateFrom(eicCompliance)
         }
 
         @Test
@@ -2366,6 +2449,22 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(newLandlord.hasRegisteredProperty)
             verify(mockLandlordRepository).save(newLandlord)
+        }
+
+        @Test
+        fun `addLandlordToPropertyOwnership reactivates the landlord via the active inactive service if they are inactive`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            // Assert
+            verify(mockActiveInactiveService).reactivateLandlordIfInactive(newLandlord)
         }
     }
 

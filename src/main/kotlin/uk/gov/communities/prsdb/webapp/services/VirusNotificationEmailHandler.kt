@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.Incomplete
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.VirusMonitoringEmailNotification
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class VirusNotificationEmailHandler(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,

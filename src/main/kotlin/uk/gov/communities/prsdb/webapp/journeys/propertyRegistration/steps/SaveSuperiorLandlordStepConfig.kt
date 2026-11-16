@@ -53,7 +53,11 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
                 nextKey
             }
 
-        currentMap[targetKey] = superiorLandlord
+        // Store the database id if the user is updating an existing superior landlord, so that the
+        // journey can distinguish between an updated superior landlord and a new one.
+        val existingDatabaseId = currentMap[targetKey]?.databaseId
+
+        currentMap[targetKey] = superiorLandlord.copy(databaseId = existingDatabaseId)
         state.superiorLandlordsMap = currentMap
         state.editingSuperiorLandlordId = null
 

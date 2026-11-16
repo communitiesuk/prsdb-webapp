@@ -24,6 +24,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )
@@ -41,6 +42,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )
@@ -66,6 +68,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )
@@ -82,6 +85,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )
@@ -106,6 +110,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )
@@ -119,12 +124,13 @@ class OutstandingActionsDataModelTests {
     @Test
     fun `fromPropertyOwnership does not show the property when nothing is outstanding`() {
         val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
-        MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyOwnership)
+        val propertyCompliance = MockPropertyComplianceData.createPropertyComplianceForOwnership(propertyOwnership)
 
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
-                electricalSafetyExpiryDate = propertyOwnership.propertyCompliance!!.eicrExpiryDate,
+                eicIssueDate = null,
+                electricalSafetyExpiryDate = propertyCompliance.eicrExpiryDate,
                 isGas14MonthExpiryEnabled = true,
             )
 
@@ -144,6 +150,7 @@ class OutstandingActionsDataModelTests {
         val dataModel =
             OutstandingActionsDataModel.fromPropertyOwnership(
                 propertyOwnership,
+                eicIssueDate = null,
                 electricalSafetyExpiryDate = null,
                 isGas14MonthExpiryEnabled = true,
             )

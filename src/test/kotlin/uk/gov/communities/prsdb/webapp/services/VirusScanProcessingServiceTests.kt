@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentScanResultProcessingException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
@@ -131,7 +132,24 @@ class VirusScanProcessingServiceTests {
             .thenReturn(listOf(VirusScanCallback(fileUpload, "")))
 
         // Act & Assert
-        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, ScanResult.AccessDenied) }
+        assertThrows<PersistentScanResultProcessingException> {
+            virusScanProcessingService.processScan(locator, ScanResult.AccessDenied)
+        }
+    }
+
+    @Test
+    fun `processScan throws an exception when the scanned eTag does not match the file upload`() {
+        // Arrange
+        val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "s3Key", "txt", "eTag", "versionId")
+        val locator = UploadedFileLocator(fileUpload.objectKey, "other-e-tag", fileUpload.versionId)
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, "")))
+
+        // Act & Assert
+        assertThrows<PersistentScanResultProcessingException> {
+            virusScanProcessingService.processScan(locator, ScanResult.NoThreats)
+        }
+        verify(dequarantiner, never()).dequarantineFile(any())
     }
 
     @Test

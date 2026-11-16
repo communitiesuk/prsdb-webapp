@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bills
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
@@ -44,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -70,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Payme
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentStatusCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -182,6 +185,29 @@ class PropertyRegistrationJourneyFactory(
                     val superiorLandlordsTask = journey.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
                     checkAnswerTask(superiorLandlordsTask)
                     configureStep(superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                FreeholdersListStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    val ownershipTypeTask = ownershipStructureTask.ownershipTypeTask
+                    val freeholdersTask = ownershipStructureTask.freeholdersTask
+                    // TODO PDJB-2146: Revisit whether check-answer routing should use freeholdersTask; ownershipTypeTask provides joint ownership.
+                    checkAnswerTask(ownershipTypeTask)
+                    checkAnswerTaskFrom(
+                        freeholdersTask,
+                        { ownershipStructureTask },
+                        startStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep,
+                    )
+                }
+
+                PropertyManagerStep.ROUTE_SEGMENT,
+                CheckPropertyManagerStep.ROUTE_SEGMENT,
+                -> {
+                    val propertyManagerTask = journey.ownershipAndLandlordsTask.propertyManagerTask
+                    checkAnswerTask(propertyManagerTask)
+                    configureStep(propertyManagerTask.checkPropertyManagerStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }

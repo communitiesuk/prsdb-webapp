@@ -16,7 +16,7 @@ class CancelJointLandlordInvitationJourneyTests :
     @Test
     fun `selecting no on the cancel invitation page returns to property record with invitation still visible`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.pendingInvitationsSummary.click()
         detailsPage.cancelInvitationLink.clickAndWait()
 
@@ -30,7 +30,7 @@ class CancelJointLandlordInvitationJourneyTests :
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(propertyDetailsPage.pendingInvitationsDetails).isVisible()
         assertThat(propertyDetailsPage.pendingInvitationsDetails).containsText("pending@example.com")
     }
@@ -38,7 +38,7 @@ class CancelJointLandlordInvitationJourneyTests :
     @Test
     fun `selecting yes on the cancel invitation page cancels the invite and shows confirmation`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.pendingInvitationsSummary.click()
         detailsPage.cancelInvitationLink.clickAndWait()
 
@@ -56,7 +56,7 @@ class CancelJointLandlordInvitationJourneyTests :
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(propertyDetailsPage.pendingInvitationsDetails).hasCount(0)
     }
 }
@@ -69,7 +69,7 @@ class JointLandlordInvitationOrgLandlordJourneyTests : IntegrationTestWithMutabl
     @Test
     fun `An org landlord can cancel a pending invitation on their property`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.pendingInvitationsSummary.click()
         detailsPage.cancelInvitationLink.clickAndWait()
 
@@ -87,14 +87,14 @@ class JointLandlordInvitationOrgLandlordJourneyTests : IntegrationTestWithMutabl
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        propertyDetailsPage.tabs.goToLandlordDetails()
+        propertyDetailsPage.tabs.goToPeopleResponsible()
         assertThat(propertyDetailsPage.pendingInvitationsDetails).hasCount(0)
     }
 
     @Test
     fun `An org landlord can resend a pending invitation on their property`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.tabs.goToPeopleResponsible()
         detailsPage.pendingInvitationsSummary.click()
         detailsPage.resendInvitationLink.clickAndWait()
 

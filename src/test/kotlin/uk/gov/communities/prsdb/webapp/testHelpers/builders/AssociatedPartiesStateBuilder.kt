@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.constants.enums.SuperiorLandlordContactType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholderContactTypeStep
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideSuperiorLandlordDetailsStep
@@ -38,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipKindFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnsPropertyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SuperiorLandlordContactTypeFormModel
@@ -100,6 +103,22 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
                 usingPropertyManager = false
             }
         withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, propertyManagerFormModel)
+        return self()
+    }
+
+    fun withPropertyManager(
+        name: String = DEFAULT_PROPERTY_MANAGER_NAME,
+        email: String = DEFAULT_PROPERTY_MANAGER_EMAIL,
+    ): SelfType {
+        withSubmittedValue(PropertyManagerStep.ROUTE_SEGMENT, PropertyManagerFormModel().apply { usingPropertyManager = true })
+        withSubmittedValue(
+            PropertyManagerDetailsStep.ROUTE_SEGMENT,
+            PropertyManagerDetailsFormModel().apply {
+                this.name = name
+                this.emailAddress = email
+            },
+        )
+        withSubmittedValue(CheckPropertyManagerStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -220,5 +239,10 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withSuperiorLandlordsListComplete(): SelfType {
         withSubmittedValue(SuperiorLandlordsListStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
+    }
+
+    companion object {
+        const val DEFAULT_PROPERTY_MANAGER_NAME = "Best Property Managers Ltd"
+        const val DEFAULT_PROPERTY_MANAGER_EMAIL = "manager@example.com"
     }
 }

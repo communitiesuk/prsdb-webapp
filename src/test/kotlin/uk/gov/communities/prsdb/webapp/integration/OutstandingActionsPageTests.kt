@@ -294,6 +294,21 @@ class OutstandingActionsPageTests : IntegrationTest() {
     }
 
     @Nested
+    inner class LandlordWithExpiredEic :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-landlord-with-compliance-actions.sql", "data-overlay-expired-eic-outstanding-actions.sql"),
+        ) {
+        @Test
+        fun `expired EIC appears with its issue date on outstanding actions`() {
+            val outstandingActionsPage = navigator.goToOutstandingActions()
+            val card = outstandingActionsPage.findSummaryCard("7 Mythical Drive")
+            val expectedIssueDate = LocalDate.of(2000, 6, 1).format(DATE_FORMATTER)
+
+            assertThat(card.summaryList.electricalSafetyRow).containsText("Expired (issued on $expectedIssueDate)")
+        }
+    }
+
+    @Nested
     inner class LandlordsWithPropertyDetailsOutstandingActions :
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-property-details-outstanding-actions.sql") {
         @Test
@@ -346,7 +361,11 @@ class OutstandingActionsPageTests : IntegrationTest() {
         @Test
         fun `the property record back link returns to the outstanding actions page`(page: Page) {
             val outstandingActionsPage = navigator.goToOutstandingActions()
-            outstandingActionsPage.findSummaryCard("10 Licensing Lane").getAction("Go to property").link.clickAndWait()
+            outstandingActionsPage
+                .findSummaryCard("10 Licensing Lane")
+                .getAction("Go to property")
+                .link
+                .clickAndWait()
             val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
 
             propertyDetailsPage.backLink.clickAndWait()
