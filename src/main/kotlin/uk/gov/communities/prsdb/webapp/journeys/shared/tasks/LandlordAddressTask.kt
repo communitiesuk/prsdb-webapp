@@ -28,7 +28,6 @@ class LandlordAddressTask(
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "addressForms.lookupAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "addressForms.lookupAddress.landlordRegistration.fieldSetHint",
         )
 
     override val selectAddressContentProperties: Map<String, Any?> =
@@ -39,6 +38,6 @@ class LandlordAddressTask(
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "addressForms.manualAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "addressForms.manualAddress.landlordRegistration.fieldSetHint",
+            "fieldSetHint" to null,
         )
 }

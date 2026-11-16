@@ -9,7 +9,6 @@ nonEnglandOrWalesAddress:
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?
-    fieldSetHint: This must be an address within England or Wales.
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
     fieldSetHint: Use an address where the trustee can receive correspondence
@@ -86,7 +85,6 @@ noAddressFound:
 manualAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?
-    fieldSetHint: This must be an address within England or Wales.
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
   govBodyMemberRegistration:
