@@ -5,16 +5,26 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailCyaPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderLookupAddressFormPagePropertyUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderManualAddressFormPagePropertyUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderProvideDetailsFormPagePropertyUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderSelectAddressFormPagePropertyUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholdersListFormPagePropertyUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
@@ -30,8 +40,213 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     @Autowired
     private lateinit var addressService: AddressService
 
+    @Autowired
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+
+    @Test
+    fun `landlord can add a named freeholder with an email address`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("New Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
+        FreeholderEmailFormPagePropertyRegistration(page).submitEmail("new.freeholder@example.com")
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
+
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, updatedPropertyDetailsPage.tabs.activeTabPanelId)
+        val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
+        assertEquals(2, savedFreeholders.size)
+        assertEquals(1, savedFreeholders.count { it.id == originalFreeholder.id })
+        val newFreeholder = savedFreeholders.single { it.id != originalFreeholder.id }
+        assertEquals("New Freeholder", newFreeholder.name)
+        assertEquals("new.freeholder@example.com", newFreeholder.email)
+        assertNull(newFreeholder.address)
+    }
+
+    @Test
+    fun `freeholder update list shows the submission warning`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.warning).isVisible()
+    }
+
+    @Test
+    fun `back from the freeholder update list returns to the people responsible tab`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).backLink.clickAndWait()
+
+        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
+    }
+
+    @Test
+    fun `a saved freeholder postal address is prefilled and can be updated by selecting an address`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        originalFreeholder.name = "Existing Freeholder"
+        originalFreeholder.email = null
+        originalFreeholder.address =
+            addressService.findOrCreateAddress(
+                AddressDataModel(
+                    singleLineAddress = "1 Fictional Road, FA1 1AA",
+                    uprn = 1L,
+                    buildingNumber = "1",
+                    postcode = "FA1 1AA",
+                ),
+            )
+        freeholderRepository.save(originalFreeholder)
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+            .getSummaryCard("Existing Freeholder")
+            .getAction("Change")
+            .link
+            .clickAndWait()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+        val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
+        assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
+        contactTypePage.form.submit()
+        var lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+        lookupAddressPage.form.submit()
+
+        var selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
+        assertEquals("1 Fictional Road, FA1 1AA", selectAddressPage.form.addressRadios.selectedValue)
+        selectAddressPage.searchAgain.clickAndWait()
+        lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertEquals("1 PRSDB Square, EG1 2AA", savedFreeholder.address?.singleLineAddress)
+        assertNull(savedFreeholder.email)
+    }
+
+    @Test
+    fun `a saved freeholder manual postal address is prefilled and can be updated`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        originalFreeholder.name = "Existing Freeholder"
+        originalFreeholder.email = null
+        originalFreeholder.address =
+            addressService.findOrCreateAddress(
+                AddressDataModel.fromManualAddressData(
+                    addressLineOne = "1 Example Street",
+                    addressLineTwo = "Example Court",
+                    townOrCity = "Example City",
+                    county = "Exampleshire",
+                    postcode = "FA1 1AA",
+                ),
+            )
+        freeholderRepository.save(originalFreeholder)
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+            .getSummaryCard("Existing Freeholder")
+            .getAction("Change")
+            .link
+            .clickAndWait()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+        FreeholderContactTypeFormPagePropertyRegistration(page).form.submit()
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1 Example Street")
+        lookupAddressPage.form.submit()
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
+        assertEquals(MANUAL_ADDRESS_CHOSEN, selectAddressPage.form.addressRadios.selectedValue)
+        selectAddressPage.form.submit()
+
+        val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyUpdate::class, urlArguments)
+        assertThat(manualAddressPage.form.addressLineOneInput).hasValue("1 Example Street")
+        assertThat(manualAddressPage.form.addressLineTwoInput).hasValue("Example Court")
+        assertThat(manualAddressPage.form.townOrCityInput).hasValue("Example City")
+        assertThat(manualAddressPage.form.countyInput).hasValue("Exampleshire")
+        assertThat(manualAddressPage.form.postcodeInput).hasValue("FA1 1AA")
+        manualAddressPage.submitAddress(addressLineOne = "2 Updated Street")
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertEquals(
+            "2 Updated Street, Example Court, Example City, Exampleshire, FA1 1AA",
+            savedFreeholder.address?.singleLineAddress,
+        )
+        assertNull(savedFreeholder.email)
+    }
+
+    @Test
+    fun `resuming an abandoned freeholder update after another property update discards earlier progress`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
+        val landlordAccountEmail = "alex.surname@example.com"
+        assertNotEquals(
+            landlordAccountEmail,
+            propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
+        )
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitNo()
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertEquals(initialFreeholderCount + 1, freeholdersListPage.removeActionCount)
+
+        propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.propertyDetailsSummaryList.contactEmailAddressRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, CorrespondenceEmailFormPagePropertyDetailsUpdate::class, urlArguments).submitAccountEmail()
+        assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments).confirm()
+        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertEquals(initialFreeholderCount, page.locator(".govuk-summary-card").count())
+        freeholdersListPage.submit()
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
+    }
 
     @Test
     fun `landlord can add a freeholder without removing the existing last freeholder`(page: Page) {

@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
@@ -17,6 +19,8 @@ class FreeholdersListFormPagePropertyUpdate(
         UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(urlArguments["propertyOwnershipId"]!!.toLong()),
     ) {
     val form = PostForm(page)
+    val backLink = BackLink.default(page)
+    val warning = Warning.default(page)
     val addAnotherButton: Locator = page.locator("a.govuk-button--secondary")
 
     fun getSummaryCard(index: Int) = SummaryCard(page, index)
