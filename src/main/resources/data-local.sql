@@ -692,23 +692,12 @@ VALUES (54, current_timestamp, NULL, false, true, true, true),
 ON CONFLICT (property_ownership_id) DO NOTHING;
 
 INSERT INTO freeholder (name, email, address_id, property_ownership_id)
-SELECT seeded.name, seeded.email, seeded.address_id, seeded.property_ownership_id
-FROM (
-    VALUES ('Jordan Joint'::varchar, 'joint.freeholder@example.com'::varchar, NULL::bigint, 54::bigint),
-           ('Casey Joint'::varchar, NULL::varchar, 63::bigint, 54::bigint),
-           (NULL::varchar, NULL::varchar, NULL::bigint, 54::bigint),
-           ('Taylor Non-Joint'::varchar, 'nonjoint.freeholder@example.com'::varchar, NULL::bigint, 55::bigint),
-           ('Alex Non-Joint'::varchar, NULL::varchar, 64::bigint, 55::bigint),
-           (NULL::varchar, NULL::varchar, NULL::bigint, 55::bigint)
-) AS seeded(name, email, address_id, property_ownership_id)
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM freeholder existing
-    WHERE existing.property_ownership_id = seeded.property_ownership_id
-      AND existing.name IS NOT DISTINCT FROM seeded.name
-      AND existing.email IS NOT DISTINCT FROM seeded.email
-      AND existing.address_id IS NOT DISTINCT FROM seeded.address_id
-);
+VALUES ('Jordan Joint', 'joint.freeholder@example.com', NULL, 54),
+       ('Casey Joint', NULL, 63, 54),
+       (NULL, NULL, NULL, 54),
+       ('Taylor Non-Joint', 'nonjoint.freeholder@example.com', NULL, 55),
+       ('Alex Non-Joint', NULL, 64, 55),
+       (NULL, NULL, NULL, 55);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
