@@ -9,7 +9,7 @@
             <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
         </th:block>
         <h1 class="govuk-heading-l" th:text="#{generatePassphrase.heading}">generatePassphrase.heading</h1>
-        <div th:if="${status != null}" class="govuk-inset-text" role="status" th:text="#{${status}(${recipient})}">status</div>
+        <div th:if="${status != null}" class="govuk-inset-text" role="status" th:text="#{${status}}">status</div>
         <div id="passphrase-preview" class="govuk-inset-text">
             <span th:text="#{generatePassphrase.passphrase.label}" th:remove="tag">generatePassphrase.passphrase.label</span>
             <br>

@@ -50,10 +50,19 @@ class GeneratePassphraseController(
         model: Model,
         session: HttpSession,
     ): String {
-        val sendingEnabled =
-            featureFlagManager.checkFeature(PASSPHRASE_SMS) || featureFlagManager.checkFeature(PASSPHRASE_EMAIL)
         // The POST supplies this server-side flash attribute after a send attempt, not a query parameter.
         val attemptedPassphrase = model.getAttribute("attemptedPassphrase") as? String
+        if (
+            attemptedPassphrase != null &&
+            model.getAttribute("status") in listOf("generatePassphrase.sms.accepted", "generatePassphrase.email.accepted")
+        ) {
+            model.addAttribute("passphrase", attemptedPassphrase)
+            model.addAttribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
+            return "generatePassphraseSubmitted"
+        }
+
+        val sendingEnabled =
+            featureFlagManager.checkFeature(PASSPHRASE_SMS) || featureFlagManager.checkFeature(PASSPHRASE_EMAIL)
         val passphrase = attemptedPassphrase ?: passphraseService.generatePassphrase()
         val token =
             if (sendingEnabled && attemptedPassphrase == null) {

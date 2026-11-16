@@ -117,17 +117,77 @@ class GeneratePassphraseControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `generatePassphrase ignores passphrases supplied in query parameters`() {
+    fun `generatePassphrase ignores passphrases and submission status supplied in query parameters`() {
         whenever(passphraseService.generatePassphrase()).thenReturn("time anything costume")
 
         mvc
             .get(GENERATE_PASSPHRASE_URL) {
                 param("passphrase", "client supplied content")
                 param("attemptedPassphrase", "client supplied content")
+                param("status", "generatePassphrase.email.accepted")
             }.andExpect {
+                view { name("generatePassphrase") }
                 model { attribute("passphrase", "time anything costume") }
                 content { string(not(containsString("client supplied content"))) }
             }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["sms", "email"])
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `accepted submissions render a separate success page`(channel: String) {
+        val recipient = if (channel == "sms") "02079460123" else "recipient@example.com"
+        mvc
+            .get(GENERATE_PASSPHRASE_URL) {
+                flashAttrs =
+                    mapOf(
+                        "attemptedPassphrase" to "time anything costume",
+                        "status" to "generatePassphrase.$channel.accepted",
+                        "recipient" to recipient,
+                    )
+            }.andExpect {
+                status { isOk() }
+                view { name("generatePassphraseSubmitted") }
+                model {
+                    attribute("passphrase", "time anything costume")
+                    attribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
+                    attributeDoesNotExist("smsFormModel", "emailFormModel")
+                }
+                content {
+                    string(containsString("govuk-notification-banner--success"))
+                    string(containsString("has been submitted to $recipient."))
+                    string(containsString("Ask the landlord to read the passphrase back when it arrives."))
+                    string(not(containsString("offensive or inappropriate")))
+                    string(not(containsString("role=\"status\"")))
+                    string(not(containsString("passphrase-letter-guidance")))
+                }
+            }
+
+        verifyNoInteractions(passphraseService, smsNotificationService, emailNotificationService)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["sms.failed", "sms.unknown", "email.failed", "email.unknown"])
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `failed or uncertain submissions do not render a success page`(outcome: String) {
+        mvc
+            .get(GENERATE_PASSPHRASE_URL) {
+                flashAttrs =
+                    mapOf(
+                        "attemptedPassphrase" to "time anything costume",
+                        "status" to "generatePassphrase.$outcome",
+                    )
+            }.andExpect {
+                status { isOk() }
+                view { name("generatePassphrase") }
+                model { attribute("passphrase", "time anything costume") }
+                content {
+                    string(containsString("role=\"status\""))
+                    string(not(containsString("govuk-notification-banner--success")))
+                }
+            }
+
+        verifyNoInteractions(passphraseService, smsNotificationService, emailNotificationService)
     }
 
     @Test

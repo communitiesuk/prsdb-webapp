@@ -2,6 +2,9 @@ heading: New passphrase
 passphrase:
   label: The passphrase is
   review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.
+  readBack: Ask the landlord to read the passphrase back when it arrives.
+successBanner:
+  title: Success
 letter:
   heading: Use this passphrase in a letter
   body: >
@@ -19,7 +22,7 @@ email:
       missing: Enter an email address
       invalid: Enter a valid email address
   send: Send email
-  accepted: The email has been submitted to {0,,recipient}. Ask the landlord to read the passphrase back when it arrives.
+  accepted: The email has been submitted to {0,,recipient}.
   failed: The email could not be sent. Generate a new passphrase before trying again.
   unknown: We could not confirm whether the email was sent. You may need to send again.
 sms:
@@ -31,6 +34,6 @@ sms:
       missing: Enter a telephone number
       invalid: Enter a valid telephone number
   send: Send text message
-  accepted: The text message has been submitted to {0,,recipient}. Ask the landlord to read the passphrase back when it arrives.
+  accepted: The text message has been submitted to {0,,recipient}.
   failed: The text message could not be sent. Generate a new passphrase before trying again.
   unknown: We could not confirm whether the text message was sent. You may need to send again.

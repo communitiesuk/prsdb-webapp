@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
@@ -16,6 +17,8 @@ class GeneratePassphrasePage(
     val sendEmailButton = Button.byText(page, "Send email")
     val sendSmsButton = Button.byText(page, "Send text message")
     val notificationStatus = page.locator("[role='status']")
+    val successBanner = NotificationBanner(page)
+    val readBackGuidance = page.locator("#passphrase-read-back")
     val letterGuidance = page.locator("#passphrase-letter-guidance")
     val passphrase: String
         get() = page.locator("#passphrase-preview strong").textContent()
