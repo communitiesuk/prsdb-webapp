@@ -481,21 +481,23 @@ rentAmount:
     other: For example, 650.50
   error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
 licensingType:
-  fieldSetHeading: Select the type of licence you have for your property
-  fieldSetHint: Select which type of property licence applies to this property
+  fieldSetHeading: Which licence does this property have?
+  fieldSetHint: Select one
   radios:
     error:
-      missing: Select the type of licensing for the property
+      missing: Select this property’s licence, or select ‘This property does not need a licence’
     option:
       selectiveLicence:
         label: Selective licence
-        hint: Some local councils require this licence for any privately rented homes in specific areas.
+        hint: Some councils require this in specific areas
       hmoMandatory:
         label: HMO mandatory licence
-        hint: A House in Multiple Occupation (HMO) must have a licence if it’s occupied by 5 or more people who form more than 1 household.
+        pageLabel: House in Multiple Occupation (HMO) mandatory licence
+        hint: For HMOs with 5 or more tenants who form more than 1 household
       hmoAdditional:
         label: HMO additional licence
-        hint: Some local councils require a licence for smaller HMOs that are not covered by the mandatory licensing licence.
+        pageLabel: House in Multiple Occupation (HMO) additional licence
+        hint: For smaller HMOs, required by only some councils
       noLicensing:
         label: This property does not need a licence
 licenceNumber:
@@ -663,8 +665,6 @@ update:
       fieldSetHeading: Update your monthly rent
     other:
       fieldSetHeading: Update your monthly rent
-  licensingType:
-    fieldSetHeading: Update the type of licensing you have for your property
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers

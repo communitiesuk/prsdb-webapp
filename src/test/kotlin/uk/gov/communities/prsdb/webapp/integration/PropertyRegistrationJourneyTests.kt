@@ -877,7 +877,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             // Licensing type - render page
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
+            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
             assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
             licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
             val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
@@ -1259,7 +1259,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             // Licensing type - render page
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
+            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
             assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
             // fill in and submit
             licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -2329,7 +2329,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
             whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
+            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
             licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
             val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
