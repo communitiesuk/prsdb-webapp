@@ -463,7 +463,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(3, detailsPage.freeholderCards.size)
             val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
             assertEquals(setOf("First Freeholder", "Second Freeholder", "Unknown freeholder"), cards.keys)
+            assertThat(cards.getValue("First Freeholder").summaryList).containsText("Email address")
             assertThat(cards.getValue("First Freeholder").summaryList).containsText("FirstFreeholder@example.com")
+            assertEquals(0, cards.getValue("First Freeholder").bodyText.count())
             assertThat(cards.getValue("Second Freeholder").summaryList).hasCount(0)
             assertThat(cards.getValue("Second Freeholder").bodyText).hasText(
                 "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
@@ -473,6 +475,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "You told us there was another freeholder, but you cannot currently provide their details. " +
                     "Return and add these details when you can.",
             )
+            assertEquals(0, cards.getValue("Unknown freeholder").bodyText.locator("strong").count())
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
 
         @ParameterizedTest

@@ -4,15 +4,9 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.EnumSource
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
@@ -26,72 +20,6 @@ import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @Nested
-    inner class FreeholderPropertyRecord : IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData("data-local.sql") {
-        @Autowired
-        private lateinit var jdbcTemplate: JdbcTemplate
-
-        @ParameterizedTest
-        @CsvSource(
-            "NONE, false",
-            "LEASEHOLD_ONLY, false",
-            "JOINT_TENANTS, true",
-            "TENANTS_IN_COMMON, true",
-            "SHARE_OF_JOINT_TENANTS, true",
-            "SHARE_OF_TENANTS_IN_COMMON, true",
-        )
-        fun `the property record displays the appropriate freeholders and their contact details`(
-            ownershipType: OwnershipType,
-            joint: Boolean,
-        ) {
-            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 54", ownershipType.ordinal)
-
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
-            detailsPage.tabs.goToPeopleResponsible()
-
-            assertThat(detailsPage.freeholderSection).isVisible()
-            assertThat(detailsPage.freeholderSection.locator("h3"))
-                .hasText(if (joint) "Joint freeholders" else "Freeholders")
-            assertThat(detailsPage.freeholderUpdateLink.locator)
-                .hasText(if (joint) "Add, change or remove joint freeholders" else "Add, change or remove freeholders")
-            assertThat(detailsPage.freeholderUpdateLink.locator)
-                .hasAttribute("href", "#")
-
-            assertEquals(3, detailsPage.freeholderCards.size)
-            val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
-            assertEquals(setOf("Jordan Joint", "Casey Joint", "Unknown freeholder"), cards.keys)
-            assertThat(cards.getValue("Jordan Joint").summaryList).containsText("Email address")
-            assertThat(cards.getValue("Jordan Joint").summaryList).containsText("joint.freeholder@example.com")
-            assertThat(cards.getValue("Casey Joint").summaryList).hasCount(0)
-            assertThat(cards.getValue("Casey Joint").bodyText).hasText(
-                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
-            )
-            assertThat(cards.getValue("Casey Joint").bodyText.locator("strong")).hasText("postal address")
-            assertEquals(0, cards.getValue("Jordan Joint").bodyText.count())
-            val unknownFreeholderCard = cards.getValue("Unknown freeholder")
-            assertThat(unknownFreeholderCard.bodyText).hasText(
-                "You told us there was another freeholder, but you cannot currently provide their details. " +
-                    "Return and add these details when you can.",
-            )
-            assertEquals(0, unknownFreeholderCard.bodyText.locator("strong").count())
-            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            value = OwnershipType::class,
-            names = ["SOLE_FREEHOLD", "COMMONHOLD", "SHARE_OF_SOLE_FREEHOLD", "SHARE_OF_COMMONHOLD"],
-        )
-        fun `the property record hides freeholders for sole ownership and commonhold`(ownershipType: OwnershipType) {
-            jdbcTemplate.update("UPDATE property_ownership SET ownership_type = ? WHERE id = 54", ownershipType.ordinal)
-
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
-            detailsPage.tabs.goToPeopleResponsible()
-
-            assertThat(detailsPage.freeholderSection).hasCount(0)
-        }
-    }
-
     @Nested
     inner class ExpiredEicPropertyRecord :
         NestedIntegrationTestWithImmutableData(
